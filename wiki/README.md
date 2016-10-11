@@ -13,6 +13,8 @@ Pipeline for automated:
 		a. Full brain
 		b. Sections
 
+	4)
+
 
 (c) Maged Goubran, 
     mgoubran@stanford.edu
