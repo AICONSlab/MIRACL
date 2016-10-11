@@ -1,0 +1,59 @@
+MIRACL v. 0.5
+______________
+
+
+Only CLARITY data:
+
+ 
+- ANTS
+- c3d
+- Fiji
+- Python
+
+Fiji plugins
+
+- 3D ImageJ suite
+
+- Mathematical Morphology  
+
+Python libraries 
+
+- argparse, nibabel, cv2, numpy, scipy, seaborn, Tkinter  
+ 
+
+Installing dependencies:
+
+- Compiled versions of ants and c3d for linux x86 bit are included in the package
+
+- Fiji 
+
+- Python
+
+______________
+
+
+if study has MRI/CT data also need
+
+- FSL
+- Freesurfer
+- NiftyReg
+
+
+Installing dependencies:
+
+______________
+
+
+if study has DTI data also need
+
+- mrtrix 
+
+
+
+Installing dependencies:
+
+
+______________
+
+
+

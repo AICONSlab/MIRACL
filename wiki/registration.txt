@@ -1,0 +1,175 @@
+MIRACL v. 1.0
+______________
+
+
+1) Register MRI to Allen
+_________________________
+
+
+	-> Run: miracl_reg_mri-allen.sh -p <project name> -g <group> -m <mouse #> -v <in or ex vivo>
+
+	Example: miracl_reg_mri-allen.sh -p stroke_study -g stroke -m 17 -v in
+
+
+	Description:
+
+		Registers structural MRI nifti data to Allen atlas 
+
+
+	Arguments:	
+
+		p. Project name (equivalent to name in init/project_<name>.txt)
+
+		g. Group (example: stroke or control)
+
+		m. Mouse number 
+
+		v. 'in'-vivo or 'ex'-vivo
+
+
+			Looks for <inv_or_exv>_mri.nii.gz in <mouse #>/<inv_or_exv>_MRI/struct and stroke_mask.nii.gz (segmentation) if stroke mouse
+
+
+	Before running: 
+
+	***  Need to create link/copy of structural MRI image called inv_mri.nii.gz or exv_mri.nii.gz & place it in: <mouse #>/<inv_or_exv>_MRI/struct
+
+		example : mouse05/inv_MRI/struct/inv_mri.nii.gz 
+
+		Dcm to Nii conversion is done using the "io/convertDCMtoNII.sh" script
+
+
+	* If stroke study & mouse, then the segmented stroke mask should be under the "<inv_or_exv>_MRI/struct" dir too as "stroke_mask.nii.gz"
+
+
+	- Need to have folder structure setups as in init/README.txt
+
+	- Need to have miracl environment setup (ran init/setup_miracl.sh) 
+
+			
+	Dependencies:
+
+		ANTS
+		FSL
+		NiftyReg
+		Freesurfer
+		c3d
+
+	________________________________________________
+	________________________________________________
+
+
+
+
+2) Register CT to Allen
+_________________________
+
+
+	-> Run: miracl_reg_ct-allen.sh -p <project name> -g <group> -m <mouse #> -v <in or ex vivo>
+
+	Example: miracl_reg_ct-allen.sh -p stroke_study -g stroke -m 17 -v ex
+
+
+	Description:
+
+		Registers structural CT nifti data to Allen atlas 
+
+
+	Arguments:	
+
+		p. Project name (equivalent to name in init/project_<name>.txt)
+
+		g. Group (example: stroke or control)
+
+		m. Mouse number 
+
+		v. 'in'-vivo or 'ex'-vivo
+
+
+			Looks for <inv_or_exv>_CT.nii.gz in <mouse #>/<inv_or_exv>_CT and stroke_mask.nii.gz (segmentation) if stroke mouse
+
+	Before running: 
+
+	***  Need to create link/copy of CT image called inv_CT.nii.gz or exv_CT.nii.gz & place it in: <mouse #>/<inv_or_exv>_CT
+
+		example : mouse05/exv_CT/exv_CT.nii.gz 
+
+		Dcm to Nii conversion is done using the "io/convertDCMtoNII.sh" script	
+
+
+		* If stroke study & mouse, then the segmented CT stroke mask from should be under the "<inv_or_exv>_CT" dir too as "stroke_mask.nii.gz"
+
+
+	- Need to have folder structure setups as in init/README.txt
+
+	- Need to have miracl environment setup (ran init/setup_miracl.sh) 
+
+			
+	Dependencies:
+
+		ANTS
+		FSL
+		NiftyReg
+		Freesurfer
+		c3d
+
+
+	________________________________________________
+	________________________________________________
+
+
+
+
+3) Register whole brain CLARITY to Allen
+___________________________________________
+
+
+	-> Run: miracl_reg_clar-allen.sh -p <project name> -g <group> -m <mouse #> 
+
+	Example: miracl_reg_clar-allen.sh -p stroke_study -g stroke -m 17 
+
+
+	Description:
+
+		Registers CLARITY nifti data to Allen atlas using reference channel microscopy data
+
+
+	Arguments:
+
+		p. Project name (equivalent to name in init/project_<name>.txt)
+
+		g. Group (example: stroke or control)
+
+		m. Mouse number 
+
+			Looks for <grp><#>_05down_Refchan.nii.gz & <grp><#>_03down_EYFPchan.nii.gz in <mouse #>/CLARITY
+
+
+	Before running: 
+
+	***  Need to create 5x downsampled Ref channel data & 3x Thy1 channel data & place them in <mouse #>/CLARITY
+
+		Example: stroke01_05down_Refchan.nii.gz & stroke01_03down_Thy1chan.nii.gz in mouse01/CLARITY
+
+	    Tiff to nii conversion is done using the "io/convertTIFFtoNII.py" script
+
+	- Need to have folder structure setups as in init/README.txt
+
+	- Need to have miracl environment setup (ran init/setup_miracl.sh) before running script
+
+
+	Dependencies:
+
+		ANTS
+		FSL	
+		Freesurfer
+		c3d
+	
+
+	________________________________________________	
+	________________________________________________
+
+
+
+4) Register CLARITY sections to whole brain 
+____________________________________________

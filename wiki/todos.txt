@@ -1,0 +1,19 @@
+Reg
+
+Pipelines
+
+- Create nii from tiffs automatically for clarity to allen reg
+	. Have variable instead of Thy1 
+
+MRI:
+
+- 
+- make stroke mask optional argument
+
+
+
+Seg
+
+
+
+Stats

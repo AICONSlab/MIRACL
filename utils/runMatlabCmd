@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 function_name arg1 arg2 ..."
+  exit 0
+fi
+
+matfunc=$1
+
+
+if [ "$#" -gt 1 ]
+then 
+ shift 1
+ arglist=$1
+fi
+
+for i in `seq 2 $#`
+do
+ shift 1
+ arglist="${arglist},$1"
+done
+
+
+
+echo Running: matlab "$matfunc($arglist)"
+echo "addpath(genpath('$MIAL_TOOLS_DIR/matlab')); $matfunc($arglist)" | matlab -nosplash -nodesktop
