@@ -31,7 +31,7 @@ Steps to setup/run MIRACL:
 
 1) Setup path
 
-	-> Run <miracl dir>/init/setup_miracl.sh from inside the 'init' dir
+	-> Run <miracl dir>/init/setup_miracl.sh 
 
 	<miracl dir> is where you placed the pipeline
 

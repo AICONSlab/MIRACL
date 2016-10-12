@@ -14,20 +14,20 @@ function usage()
     
     cat <<usage
 
-	1) Registers CLARITY Ref channel to Allen mouse brain atlas 
+	1) Registers CLARITY data (down-sampled images) to Allen mouse brain atlas 
 	2) Warps Allen annotations to the original high-res CLARITY space
-	3) Warps the EYFP channel (down 3x) to Allen space
+	3) Warps the higher-resolution CLARITY to Allen space
 
 
 	Usage: `basename $0`
 
-	A gui will open to choose your:
+	A GUI will open to choose your:
 
-		- < Input clarity nifti > : 5x down-sampled Reference channel data (or Thy1_EYFP if no Ref chan) 
+		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan) 
 
 		&
 
-		- < Higher resolution clarity nifti > : 3x down-sampled Thy1_EYFP channel data 
+		- < Higher resolution clarity nifti > : Thy1_EYFP channel data 
 
 
 	----------
@@ -35,13 +35,13 @@ function usage()
 	For command-line / scripting
 
 
-	Usage: `basename $0` -i <input_clarity_nifti> -r <higher_res_clarity_nifti> 
+	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <higher_res_clarity_nifti> 
 
 	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz 	
 
 		arguments (required):
 
-			i. Input clarity nifti 
+			i. Input down-sampled clarity nifti 
 
 			r. Higher resolution clarity nifti
 
@@ -173,10 +173,27 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "Please open the input clarity nifti (nii/nii.gz) file" inclar
+	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel (nii/nii.gz)" inclar
 
-	choose_file_gui "Please open the higher resolution nifti (nii/nii.gz) file" hresclar
+	choose_file_gui "Higher resolution Thy1 channel (nii/nii.gz)" hresclar
 
+	
+	# check required input arguments
+
+	if [ -z ${inclar} ];
+	then
+		usage
+		echo "ERROR: <input clarity nii> was not chosen"
+		exit 1
+	fi
+
+
+	if [ -z ${hresclar} ];
+	then
+		usage
+		echo "ERROR: <high-res clarity nii> was not chosen"
+		exit 1
+	fi
 
 fi
 

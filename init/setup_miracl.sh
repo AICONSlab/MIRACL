@@ -6,8 +6,9 @@
 printf "\n Setting up MIRACL PATH  \n"
 printf "\n Appending MIRACL HOME to ~/.bashrc \n" 
 
-miraclpath="$(dirname "$PWD")"
+initdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+miraclpath="$(dirname "$initdir")"
 
 echo "#--- MIRACL HOME ----" >> ~/.bashrc
 
@@ -26,6 +27,7 @@ for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 #---ANTS---
 
 export ANTSPATH=${MIRACL_HOME}/depends/ants
+export PATH=${MIRACL_HOME}/depends/ants:$PATH
 
 #---C3D---
 
