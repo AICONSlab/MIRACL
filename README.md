@@ -41,6 +41,8 @@ Steps to setup/run MIRACL:
 	
 	How to install python / required libraries
 	
+	sudo apt-get install python-tk
+	
 	install pip
 
 	How to install Fiji / required plugins
