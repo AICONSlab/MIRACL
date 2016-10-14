@@ -145,7 +145,7 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "Please open clarity dir (containing .tif files)" tifdir
+	choose_file_gui "Open clarity dir (with .tif files) by double clicking then OK" tifdir
 	
 	# check required input arguments
 

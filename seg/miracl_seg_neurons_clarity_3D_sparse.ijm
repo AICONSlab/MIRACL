@@ -49,7 +49,7 @@ if (convert==1) {
 
 	print("Converting input to 8-bit");
 
-	run("Image Sequence...", "open=&path starting=&skip increment=1 scale=100 file=tif sort convert"); 
+	run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert"); 
 
 } else {
 
