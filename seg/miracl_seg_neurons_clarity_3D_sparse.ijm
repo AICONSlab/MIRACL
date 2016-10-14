@@ -286,7 +286,7 @@ close();
 
 // Compute Marker controlled Watershed 
 
-outseg = path + "seg.tif";
+outseg = segpath + "seg.tif";
 
 // Collect Garbage
 call("java.lang.System.gc");
@@ -324,7 +324,7 @@ if (!File.exists(outseg)) {
 }
 
 // save log file 
-outlog = path + "log.txt";
+outlog = segpath + "log.txt";
 
 f = File.open(outlog); 
 content=getInfo("log");
