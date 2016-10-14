@@ -258,7 +258,7 @@ if (!File.exists(outfil)) {
 
 	print("Filtered Minimum img already exists .. skipping & openning it ");
 	
-	open(outmedthr);
+	open(outfil);
 
 }
 
