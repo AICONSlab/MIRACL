@@ -120,7 +120,7 @@ if (!File.exists(outenhance)) {
 	run("Enhance Contrast...", "saturated=0.5 normalize process_all use");
 		
 	// Save enhanced 
-	save(outback);
+	save(outenhance);
 
 } else {
 
