@@ -43,16 +43,34 @@ function usage()
 	
 	-----------------------------------
 
-help
-
-	exit 1
+usage
+getversion >&2
 
 }
 
 # Call help/usage function
 if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-help" ]]; then
-    help >&2
+    
+    usage >&2
+    exit 1
+
 fi
+
+#----------
+
+# check dependencies
+
+fijidir=`which c3d`
+
+if [[ -z "${fijidir// }" ]]; 
+then
+	printf "\n ERROR: Fiji not initialized .. please install it & rerun script \n"
+	exit 1
+else 
+	printf "\n Fiji path check: OK...\n" 	
+fi
+
+#------------
 
 grp=$1
 id=$2

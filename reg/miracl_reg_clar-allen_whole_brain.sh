@@ -45,6 +45,14 @@ function usage()
 
 			r. Higher resolution clarity nifti
 
+
+	----------		
+
+	Dependencies:
+	
+		- ANTS			
+		- c3d
+
 	-----------------------------------
 	
 	(c) Maged Goubran @ Stanford University, 2016
