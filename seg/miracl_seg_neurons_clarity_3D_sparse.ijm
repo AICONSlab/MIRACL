@@ -19,7 +19,9 @@
 
 // Get files path
 path = getArgument();
-print("Files path is:" +path);
+print("Files path is:" + path);
+
+segpath = path + "/../segmentation/" ;
 
 // Init Parameters:-
 
@@ -70,7 +72,7 @@ orgtitle = getTitle();
 
 // Substract Background
 
-outback = path + "norm.tif";
+outback = segpath + "norm.tif";
 
 // Collect Garbage
 call("java.lang.System.gc");
@@ -107,7 +109,7 @@ close();
 
 // Enhance Contrast
 
-outenhance = path + "backremov_enhance.tif";
+outenhance = segpath + "backremov_enhance.tif";
 
 if (!File.exists(outenhance)) {
 
@@ -139,7 +141,7 @@ rename("EnhanceStack");
 
 call("java.lang.System.gc");
 
-outmed = path + "backremov_enhance_median.tif";
+outmed = segpath + "backremov_enhance_median.tif";
 
 if (!File.exists(outmed)) {
 
@@ -182,7 +184,7 @@ rename("MedianImg");
 
 // Compute Local threshold 
 
-outlocthr = path + "median_locthr.tif";
+outlocthr = segpath + "median_locthr.tif";
 
 if (!File.exists(outlocthr)) {
 
@@ -215,7 +217,7 @@ rename("LocalThr");
 
 // Compute Minimum 
 
-outmin = path + "median_locthr_min.tif";
+outmin = segpath + "median_locthr_min.tif";
 
 if (!File.exists(outmin)) {
 
@@ -241,7 +243,7 @@ mintitle = getTitle();
 
 // Filter very large objects (like border artifacts)
 
-outfil = path + "min_filtered.tif"
+outfil = segpath + "min_filtered.tif";
 
 // Collect Garbage
 call("java.lang.System.gc");
