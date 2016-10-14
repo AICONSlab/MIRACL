@@ -50,8 +50,11 @@ function usage()
 
 	Dependencies:
 	
-		- ANTS			
+		- ANTs
+		https://github.com/stnava/ANTs			
+		
 		- c3d
+		https://sourceforge.net/projects/c3d
 
 	-----------------------------------
 	
@@ -60,8 +63,7 @@ function usage()
 	
 	-----------------------------------
 
-	registration based on ANTs
-	https://github.com/stnava/ANTs/
+	registration based on ANTs	
 
 	-----------------------------------
 

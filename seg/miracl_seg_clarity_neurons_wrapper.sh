@@ -36,6 +36,20 @@ function usage()
 
 			d. Input clarity directory (including .tif images of one channel)
 
+		----------		
+
+	Dependencies:
+	
+		- Fiji 
+
+		- Fiji Plugins:
+		
+		1) 3D Segmentation plugins (3D ImageJ suite) 	
+		http://imagejdocu.tudor.lu/doku.php?id=plugin:stacks:3d_ij_suite:start	
+
+		2) Mathematical Morphology plugins 
+		http://imagej.net/MorphoLibJ
+
 	-----------------------------------
 	
 	(c) Maged Goubran @ Stanford University, 2016
@@ -64,7 +78,7 @@ fijidir=`which c3d`
 
 if [[ -z "${fijidir// }" ]]; 
 then
-	printf "\n ERROR: Fiji not initialized .. please install it & rerun script \n"
+	printf "\n ERROR: Fiji not initialized .. please install it (& the required plugins) & rerun script \n"
 	exit 1
 else 
 	printf "\n Fiji path check: OK...\n" 	
@@ -72,135 +86,139 @@ fi
 
 #------------
 
-grp=$1
-id=$2
 
-projectdir=/data/clarity_project/mouse/stroke_study
+# GUI for CLARITY input imgs
 
-datadir=$projectdir/${grp}
-subjdir=$datadir/${id}
+function choose_file_gui()
+{
+	local openstr=$1
+	local _inpath=$2
 
-#macro=/data/clarity_project/scripts/seg/whole_brain_clarity_mouse_neurons_seg_3D.ijm
-macro=/data/clarity_project/scripts/seg/miracl_seg_neurons_3D_wb_clarity_cortical.ijm
-segdir=$subjdir/seg
-clardir=$subjdir/CLARITY
-tifdir=$clardir/tifs
-# fijidir=$clardir/segmentation
+	python ${MIRACL_HOME}/io/python_file_folder_gui.pyc -f folder -s "$openstr" 
+	
+	folderpath=`cat path.txt`
+	
+	eval ${_inpath}="'$folderpath'"
+
+	rm path.txt
+
+}
+
+
+# Select Mode : GUI or script
+
+if [[ "$#" -gt 1 ]]; then
+
+	printf "\n Running in script mode \n"
+
+	while getopts ":d:" opt; do
+    
+	    case "${opt}" in
+
+	        d)
+            	tifdir=${OPTARG}
+            	;;
+        	
+        	*)
+            	usage            	
+            	;;
+
+		esac
+	
+	done    	
+
+
+	# check required input arguments
+
+	if [ -z ${tifdir} ];
+	then
+		usage
+		echo "ERROR: < -d => input clarity directory> not specified"
+		exit 1
+	fi
+
+else
+
+	# call gui
+
+	printf "\n No inputs given ... running in GUI mode \n"
+
+	printf "\n Reading input data \n"
+
+	choose_file_gui "Please open clarity dir (containing .tif files)" tifdir
+	
+	# check required input arguments
+
+	if [ -z ${tifdir} ];
+	then
+		usage
+		echo "ERROR: <input clarity directory> was not chosen"
+		exit 1
+	fi
+
+fi
+
+
+# get time
+
+START=$(date +%s)
+
+# get macro
+macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_sparse.ijm
+
+segdir=${tifdir}/segmentation
 
 # make seg dir
-if [[ ! -d $segdir || ! -d $fijidir ]];then
+if [[ ! -d $segdir ]];then
 
 	printf "\n Creating Segmentation folder\n"
-	mkdir -p $segdir #$fijidir
+	mkdir -p $segdir 
 
 fi
 
-# split filters
+# # split filters -- later
 
-if [[ ! -d $tifdir/filter0 ]]; then
+# if [[ ! -d $tifdir/filter0 ]]; then
 	
-	mkdir $tifdir/filter0 $tifdir/filter1
-	mv $tifdir/*Filter0000* $tifdir/filter0/.
-	mv $tifdir/*Filter0001* $tifdir/filter1/.
+# 	mkdir $tifdir/filter0 $tifdir/filter1
+# 	mv $tifdir/*Filter0000* $tifdir/filter0/.
+# 	mv $tifdir/*Filter0001* $tifdir/filter1/.
 
-fi
-
+# fi
 
 # free up cached memory -- needs sudo permissions
-printf "\n Freeing up cached memory \n"
+# printf "\n Freeing up cached memory \n"
 
-echo "sync; echo 3 | sudo tee /proc/sys/vm/drop_caches"
+# echo "sync; echo 3 | sudo tee /proc/sys/vm/drop_caches"
 #sync; echo 3 | sudo tee /proc/sys/vm/drop_caches 1>/dev/null
 
+outseg=$tifdir/seg.mhd
+log=$tifdir/Fiji_seg_log.txt 
+outnii=$segdir/seg.nii.gz
 
-# Loop over stacks for memory efficiency
+if [[ ! -f $outseg ]]; then
 
-# stack size in tifs < 2 GB
-szstk=125;
-ntifs=`ls $tifdir/filter0/*.tif | wc -l`
-
-nstk=`printf "%.0f" $(echo "scale=2;$ntifs/$szstk" | bc)`
-# nstk=$(($nstk+1))
-
-for i in `seq 1 $nstk`; do
-	
-	stackdir=$tifdir/filter0/stack_${i}
-	mkdir -p $stackdir
-
-	echo "processing stack $i"
-
-	if [[ $i == 1 ]]; then
+	printf "\n Performing Segmentation using Fiji \n"
 			
-			aslice=`printf "%04d" 0`;
-			zslice=`printf "%04d" $(echo $szstk)`;
+	echo Fiji -macro $macro "${tifdir}" | tee $log 
+	Fiji -macro $macro "${tifdir}/" | tee $log
 
-		else
+	# convert to nii
+	printf "\n Converting MHD output to Nii \n"
+	c3d $outseg -o $outnii -type short
 
-			aslice=`printf "%04d" $(echo "($szstk*($i-1))+1" | bc)`;
-			zslice=`printf "%04d" $(echo "($szstk*$i)" | bc)`;
+	echo mv seg* Fiji_seg_log.txt segmentation/.
+	mv seg* Fiji_seg_log.txt segmentation/.
 
-	fi
+else
 
-	# move files 	
-	if [ "$(ls -A $stackdir)" ]; then 
+	echo "Segmentation already computed ... skipping"
 
-		echo "slices for stack $i already moved"
+fi
 
-	else		
+# get script timing 
+END=$(date +%s)
+DIFF=$((END-START))
+DIFF=$((DIFF/60))
 
-		echo "moving slices $aslice to $zslice into stack dir"	
-
-		for s in `seq ${aslice} ${zslice}`; do
-
-			s=`printf "%04d" $s`;
-
-			# echo ${s}
-
-			mv ${tifdir}/filter0/*${s}.ome.tif ${stackdir}/. 2>/dev/null
-
-		done
-
-	fi
-
-	path=$stackdir
-
-	outseg=$stackdir/seg.mhd
-	log=$segdir/Fiji_seg_log_stack_${i}.txt 
-
-	if [[ ! -f $outseg ]]; then
-
-		printf "\n Performing Segmentation using Fiji \n"
-		
-		echo Fiji -macro $macro "${path}" | tee $log 
-		Fiji -macro $macro "${path}/" | tee $log
-
-		outnii=$segdir/segmentation_lbl_s${i}.nii.gz
-
-		# convert to nii
-		printf "\n Converting TIF output to Nii \n"
-		c3d $outseg -o $outnii -type short
-
-		# # adjust header
-		# v=`mri_head -read $outnii | grep xsize | cut -d ' ' -f 4`
-		# mri_modify -zsize $v $outnii $outnii
-
-		sleep 5
-
-	else
-
-		echo "Segmentation already computed for stack $i.. processing next stack"
-
-	fi
-
-done
-
-# move tifs back
-mv $tifdir/filter0/stack_?/*Filter*.tif $tifdir/filter0/.  2>/dev/null
-mv $tifdir/filter0/stack_??/*Filter*.tif $tifdir/filter0/. 2>/dev/null
-
-combseg=$segdir/comb_seg_lbl.nii.gz
-
-# echo c3d $segdir/segmentation_lbl_s* -tile z -o $combseg -type short
-# c3d $segdir/segmentation_lbl_s* -tile z -o $combseg -type short
-
-echo "Segmentation done. Have a good day!"
+echo "Segmentation done in $DIFF minutes. Have a good day!"
