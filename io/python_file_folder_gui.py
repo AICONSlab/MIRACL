@@ -62,7 +62,7 @@ def openfolder(msg):
 	
 	# read Dir
 	Tk().withdraw()
-	dirname = tkFileDialog.askdirectory(initialdir="/",title='%s' % msg)
+	dirname = tkFileDialog.askdirectory(title='%s' % msg)
 
 	if len(dirname) > 0:
 	    print "\n Directory chosen for reading is: %s" % dirname
