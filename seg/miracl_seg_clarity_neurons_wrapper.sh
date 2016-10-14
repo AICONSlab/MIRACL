@@ -166,7 +166,8 @@ START=$(date +%s)
 # get macro
 macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_sparse.ijm
 
-segdir=${tifdir}/segmentation
+motherdir=$(dirname ${tifdir})
+segdir=${motherdir}/segmentation
 
 # make seg dir
 if [[ ! -d $segdir ]];then
@@ -208,7 +209,7 @@ if [[ ! -f $outseg ]]; then
 	c3d $outseg -o $outnii -type short
 
 	echo mv seg* Fiji_seg_log.txt segmentation/.
-	mv seg* Fiji_seg_log.txt segmentation/.
+	mv seg* Fiji_seg_log.txt $segdir/.
 
 else
 
