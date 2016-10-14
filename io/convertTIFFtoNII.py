@@ -52,62 +52,77 @@ vs = args.voxelsize
 cent = args.center
 outnii = args.outnii
 
-# Get file lis
-file_list=glob.glob("%s/*%s%01d*.tif" % (indir,chanp,chann))
+def converttiff2nii(indir,dr,chann,chanp,chan,vs,cent,ounii):
 
-#down ratio
-down=(1.0/int(dr))
+	# Get file lis
+	file_list=glob.glob("%s/*%s%01d*.tif" % (indir,chanp,chann))
 
-print "\n Converting Tiff images to NII \n"
+	#down ratio
+	down=(1.0/int(dr))
 
-# Par loop?!
-# For loop, Load an image,downsample, append into 3D
+	print "\n Converting Tiff images to NII \n"
 
-data = []
-for x in file_list:
-	m = cv2.imread(x,-1)	
-	mres = cv2.resize(m,(0,0),fx=down,fy=down,interpolation=cv2.INTER_CUBIC)
-	data.append(mres)
+	# Par loop?!
+	# For loop, Load an image,downsample, append into 3D
 
-# array type
-data_array = np.array(data,dtype='int16')    
+	data = []
+	for x in file_list:
+		m = cv2.imread(x,-1)	
+		mres = cv2.resize(m,(0,0),fx=down,fy=down,interpolation=cv2.INTER_CUBIC)
+		data.append(mres)
 
-# roll dimensions
-data_array = np.rollaxis(data_array,0,3)
+	# array type
+	data_array = np.array(data,dtype='int16')    
 
-# Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
+	# roll dimensions
+	data_array = np.rollaxis(data_array,0,3)
 
-orgres = 0.005 # 5 um 
+	# Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
 
-if args.voxelsize is None:
+	orgres = 0.005 # 5 um 
 
-	outvox = orgres * dr
-	vs = [outvox,outvox,orgres]
+	if args.voxelsize is None:
 
-if args.center is None:
+		outvox = orgres * dr
+		vs = [outvox,outvox,orgres]
 
-	cent = [5, 10, -4]
+	if args.center is None:
+
+		cent = [5, 10, -4]
 
 
-# Create nifti
-mat = np.eye(4)
-mat[0,3] = cent[0]
-mat[1,3] = cent[1]
-mat[2,3] = cent[2]
-nii = nib.Nifti1Image(data_array,mat)
+	# Create nifti
+	mat = np.eye(4)
+	mat[0,3] = cent[0]
+	mat[1,3] = cent[1]
+	mat[2,3] = cent[2]
+	nii = nib.Nifti1Image(data_array,mat)
 
-# nifti header info
-nii.header.set_data_dtype(np.int16)
-nii.header.set_zooms([vs[0],vs[1],vs[2]])
+	# nifti header info
+	nii.header.set_data_dtype(np.int16)
+	nii.header.set_zooms([vs[0],vs[1],vs[2]])
 
-# make out dir
-outdir='niftis'
+	# make out dir
+	outdir='niftis'
 
-if not os.path.exists(outdir):
-    os.makedirs(outdir)
+	if not os.path.exists(outdir):
+	    os.makedirs(outdir)
 
-# Save nifti
-niiname = '%s/%s_%02ddown_%schan.nii.gz' % (outdir,outnii,dr,chan)
-nib.save(nii,niiname)
+	# Save nifti
+	niiname = '%s/%s_%02ddown_%schan.nii.gz' % (outdir,outnii,dr,chan)
+	nib.save(nii,niiname)
 
-print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime)) 
+	print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime)) 
+
+
+def main():
+    
+    try:        	      
+		converttiff2nii()		
+		return 0
+
+    except:        
+    	return 1
+ 
+if __name__ == "__main__":
+    sys.exit(main())
