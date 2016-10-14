@@ -78,7 +78,7 @@ fi
 
 if [ -z ${ANTSPATH} ];
 then
-	printf "\n ERROR: ANTS not initialized .. please install it & run init/check_depend.sh \n"
+	printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"
 	exit 1
 else 
 	printf "\n ANTS path check: OK... \n" 
@@ -89,7 +89,7 @@ c3ddir=`which c3d`
 
 if [[ -z "${c3ddir// }" ]]; 
 then
-	printf "\n ERROR: C3D not initialized .. please install it & run init/check_depend.sh \n"
+	printf "\n ERROR: C3D not initialized .. please install it & rerun script \n"
 	exit 1
 else 
 	printf "\n C3D path check: OK...\n" 	

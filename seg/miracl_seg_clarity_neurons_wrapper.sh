@@ -1,20 +1,40 @@
 #!/bin/bash
 
+# get version
+function getversion()
+{
+	ver=`cat $MIRACL_HOME/init/version_num.txt`
+	printf "MIRACL pipeline v. $ver \n"
+}
+
+
 # help/usage function
-function help()
+function usage()
 {
     
-    cat <<help
+    cat <<usage
 
-   	CLARITY project / Mouse / Stroke study 
-
-	1) Segments neurons in clear mouse brain in 3D
+	1) Segments neurons in clear mouse brain of sparse stains in 3D
 
 	Runs a Fiji/ImageJ macro based on the 3D plugin (3D Fast Filters, 3D Spot Segmentations)
 	
-	Usage: `basename $0` <group (stroke or control)> <<mouse #> 
+	Usage: `basename $0` 
 
-	Example: `basename $0` stroke 17 
+	A GUI will open to choose your input clarity folder (with .tif files)
+
+	The folder should contain data from one channel 
+
+		----------
+
+	For command-line / scripting
+
+	Usage: `basename $0` -d <clarity dir> 
+
+	Example: `basename $0` -d my_clarity_tifs 
+
+		arguments (required):
+
+			d. Input clarity directory (including .tif images of one channel)
 
 	-----------------------------------
 	
@@ -30,7 +50,7 @@ help
 }
 
 # Call help/usage function
-if [[ $# -lt 2 || "$1" == "-h" || "$1" == "--help" || "$1" == "-help" ]]; then
+if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-help" ]]; then
     help >&2
 fi
 
