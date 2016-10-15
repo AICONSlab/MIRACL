@@ -203,10 +203,6 @@ if [[ ! -f $outseg ]]; then
 			
 	echo Fiji -macro $macro "${tifdir}" | tee $log 
 	Fiji -macro $macro "${tifdir}/" | tee $log
-
-	# convert to nii
-	printf "\n Converting MHD output to Nii \n"
-	c3d $outseg -o $outnii -type short
 		
 else
 
