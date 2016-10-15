@@ -207,10 +207,7 @@ if [[ ! -f $outseg ]]; then
 	# convert to nii
 	printf "\n Converting MHD output to Nii \n"
 	c3d $outseg -o $outnii -type short
-
-	echo mv seg* Fiji_seg_log.txt segmentation/.
-	mv seg* Fiji_seg_log.txt $segdir/.
-
+		
 else
 
 	echo "Segmentation already computed ... skipping"
