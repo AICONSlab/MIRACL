@@ -15,20 +15,12 @@ import multiprocessing
 import warnings 
 import os
 from datetime import datetime
+import tifffile as tiff
 
 startTime = datetime.now()
 
-# Usage & Input arguments
-if len(sys.argv) < 2:
-    sys.exit('Usage: %s <group> <mouse #>' % sys.argv[0])
-
-# Load Data
-projdir='/data/clarity_project/mouse/stroke_study'
-subjdir='%s/%s/%s' % (projdir,sys.argv[1],sys.argv[2])
-
 # load segmentation 
-segdir='%s/seg' % subjdir
-
+seg = tiff.imread("seg.tif") 
 # convert seg to uint8
 seg=np.uint16(seg)
 
@@ -42,6 +34,7 @@ print "\n Reading Allen atlas labels \n"
 lblnii=nib.load('%s/allen_gp-lbls_clar_ants_ort_cras.nii.gz' % regdir) 
 orglbl=lblnii.get_data()
 
+# why again (orient issue?)
 print " Upsampling labels to Clarity resolution \n"
 
 # upsample label

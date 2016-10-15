@@ -1,10 +1,5 @@
 Reg
 
-Pipelines
-
-- Create nii from tiffs automatically for clarity to allen reg
-	. Have variable instead of Thy1 
-
 MRI:
 
 - 
@@ -17,3 +12,13 @@ Seg
 
 
 Stats
+
+
+
+Later
+-----
+
+Pipelines
+
+- Create nii from tiffs automatically for clarity to allen reg
+	. Have variable instead of Thy1 

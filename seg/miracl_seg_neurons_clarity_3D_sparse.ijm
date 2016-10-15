@@ -312,7 +312,7 @@ if (!File.exists(outseg)) {
 	run("Make Binary", "method=Percentile background=Default calculate black");
 
 	// Save segmentation bin
-	save(path + "seg_bin.tif");
+	save(segpath + "seg_bin.tif");
 
 	// Save segmentation bin mhd
 	run("MHD/MHA ...", "save=" +segpath+ "seg_bin.mhd");
