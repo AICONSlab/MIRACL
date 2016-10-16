@@ -91,7 +91,7 @@ if not os.path.exists(outvox):
 
 	# convolve image with kernel
 	res = []
-	res = Parallel(n_jobs=ncpus)(delayed (vox)(segflt,i) for i in range(sx))
+	res = Parallel(n_jobs=int(ncpus))(delayed (vox)(segflt,i) for i in range(sx))
 
 	marray = np.asarray(res)
 
