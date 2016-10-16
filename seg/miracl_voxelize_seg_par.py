@@ -13,41 +13,42 @@ import os
 import argparse
 from datetime import datetime
 import nibabel as nib
-
-# ---------
-# Parameters
-
-radius = 5
-ncpus = 32 
-
-down = 5
+import multiprocessing
 
 # ---------
 # help fn
 
 def helpmsg(name=None): 
 
-    return '''mouse_par_voxelize_seg.py -g [group] -m [mouse id]
+    return '''mouse_par_voxelize_seg.py -s [binary segmentation tif]
 
 Voxelizes segmentation results into density maps with Allen atlas resolution
 
-example: mouse_single_corr_lbls.py -g stroke -m 01  
+example: mouse_single_corr_lbls.py -s seg_bin.tif  
         '''
 # ---------
-
 # Get input arguments
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 parser.add_argument('-s','--seg', type=str, help="binary segmentation tif", required=True)
 
 args = parser.parse_args()
-
 seg = args.seg
 
-startTime = datetime.now()
+# ---------
+# Parameters
+
+radius = 5
+down = 5
+cpuload = 0.8
 
 # ---------
 print "\n Creating voxelized maps from Clarity segmentations \n"
+
+startTime = datetime.now()
+
+cpus=multiprocessing.cpu_count()
+ncpus=cpuload*cpus # 80% of cores used
 
 # downsample ratio
 dr = 1.0/down
@@ -65,10 +66,7 @@ def vox(segflt,i):
     return circv/255 
 
 # ---------
-# Loop over stacks 
-
-iterlist = iter(stack_list)
-next(iterlist) # skip first stack
+# Vox seg
 
 outvox = 'voxelized_seg_bin.tif'  
 
