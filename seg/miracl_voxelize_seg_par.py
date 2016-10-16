@@ -14,6 +14,7 @@ import argparse
 from datetime import datetime
 import nibabel as nib
 import multiprocessing
+import sys
 
 # ---------
 # help fn
@@ -40,24 +41,23 @@ seg = args.seg
 
 radius = 5
 down = 5
+
 cpuload = 0.8
-
-# ---------
-print "\n Creating voxelized maps from Clarity segmentations \n"
-
-startTime = datetime.now()
-
-cpus=multiprocessing.cpu_count()
-ncpus=cpuload*cpus # 80% of cores used
-
-# downsample ratio
-dr = 1.0/down
+cpus = multiprocessing.cpu_count()
+ncpus = cpuload*cpus # 80% of cores used
 
 # ---------
 # Define convolution fn
 
-def vox(segflt,i):
-    
+def vox(segflt,kernel,dr,i):
+    '''
+    Convolves image with input kernel then 
+    downsamples using 5th order spline interpolation
+    '''
+
+    sys.stdout.write("\r processing slice %d ... " % i)
+	sys.stdout.flush()
+
     slf = segflt[i,:,:]
     
     cvmean = cv2.filter2D(slf,-1,kernel)
@@ -68,53 +68,92 @@ def vox(segflt,i):
 # ---------
 # Vox seg
 
-outvox = 'voxelized_seg_bin.tif'  
+def parcomputevox(seg,radius,ncpus,down):
+	'''
+	Setups up convolution kernel & computes
+	"Vox" fn in parallel
+	'''
 
-if not os.path.exists(outvox):	
+	# downsample ratio
+	dr = 1.0/down
 
-	print("Creating voxelized map ... ")
-	
-	# read data
-	segtif = tiff.imread("%s" % seg )  
-	segflt = segtif.astype('float32')
+	outvox = 'voxelized_seg_bin.tif'  
 
-	# ---------
-	# Setup kernel 
+	if not os.path.exists(outvox):	
 
-	kernel = np.zeros((2*radius+1, 2*radius+1))
-	y,x = np.ogrid[-radius:radius+1, -radius:radius+1]
-	mask = x**2 + y**2 <= radius**2
-	kernel[mask] = 1
+		print "\n Creating voxelized maps from Clarity segmentations \n"
+		
+		# read data
+		segtif = tiff.imread("%s" % seg )  
+		segflt = segtif.astype('float32')
 
-	# ---------
-	sx = segflt.shape[0]
+		# ---------
+		# Setup kernel 
 
-	# convolve image with kernel
-	res = []
-	res = Parallel(n_jobs=int(ncpus))(delayed (vox)(segflt,i) for i in range(sx))
+		kernel = np.zeros((2*radius+1, 2*radius+1))
+		y,x = np.ogrid[-radius:radius+1, -radius:radius+1]
+		mask = x**2 + y**2 <= radius**2
+		kernel[mask] = 1
 
-	marray = np.asarray(res)
+		# ---------
+		sx = segflt.shape[0]
 
-	# save stack 
-	tiff.imsave(outvox,marray)
+		print "\n Computing in parallel using %d cpus" % int(ncpus)
 
-else:
+		# convolve image with kernel
+		res = []
+		res = Parallel(n_jobs=int(ncpus))(delayed (vox)(segflt,i) for i in range(sx))
 
-	print ('Voxelized map already created')
+		marray = np.asarray(res)
+
+		# save stack 
+		tiff.imsave(outvox,marray)
+
+	else:
+
+		print ('Voxelized map already created')
+
+	return marray	
 
 # ---------
 # save to nifti
 
-outvoxnii = 'voxelized_seg_bin.nii.gz' 
+def savenvoxnii(marray):
+	'''
+	Saves voxelized tif output to nifti (nii.gz)
+	'''
 
-if not os.path.exists(outvoxnii):
+	outvoxnii = 'voxelized_seg_bin.nii.gz' 
 
-	mat = np.eye(4)
-	mat[0,0] = 0.0025
-	mat[1,1] = 0.025
-	mat[2,2] = 0.025
+	if not os.path.exists(outvoxnii):
 
-	img = nib.Nifti1Image(marray, mat)
-	nib.save(img, outvoxnii)
+		mat = np.eye(4)
+		mat[0,0] = 0.0025
+		mat[1,1] = 0.025
+		mat[2,2] = 0.025
 
-print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime)) 
+		img = nib.Nifti1Image(marray, mat)
+		nib.save(img, outvoxnii)
+
+# ---------
+# main fn
+
+def main():
+    
+    try:        	
+		
+    	startTime = datetime.now()
+
+    	marray = parcomputevox(seg,radius,ncpus,down)
+
+    	savenvoxnii(marray)
+
+		print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime)) 	
+
+		return 0
+
+    except:        
+    	return 1
+ 
+if __name__ == "__main__":
+    sys.exit(main())
