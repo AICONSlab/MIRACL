@@ -42,7 +42,6 @@ seg = args.seg
 
 radius = 5
 down = 5
-
 cpuload = 0.8
 cpus = multiprocessing.cpu_count()
 ncpus = int(cpuload*cpus) # 80% of cores used
