@@ -506,10 +506,14 @@ function warpallenlbls()
 	local ortintlbls=$8
 	local orttypelbls=$9
 	local ortlbls=${10}
+
+	# swap lbls
+	local swplbls=${11}
+	local tiflbls=${12}
 	
-	# Up lbls
-	local resclar=${11}
-	local reslbls=${12}
+	# # Up lbls
+	# local resclar=${11}
+	# local reslbls=${12}
 
 
 	# warp to registered clarity
@@ -519,19 +523,24 @@ function warpallenlbls()
 	# orient to org 
 	orientimg $wrplbls $orttaglbls $ortintlbls $orttypelbls $ortlbls
 
+	# swap dim (x=>y / y=>x)
+	ifdsntexistrun $swplbls "Swapping label dimenesions (x=>y / y=>x)" PermuteFlipImageOrientationAxes  3 $ortlbls $swplbls  1 0 2  0 0 0
+
+	# create tif lbls
+	ifdsntexistrun $tiflbls "Converting lbls to tif" c3d $swplbls -type $orttypelbls -o $tiflbls 
+
 	# upsample to img dimensions
 
-	# get img dim
-	alldim=`PrintHeader $resclar 2`
+	# # get img dim
+	# alldim=`PrintHeader $resclar 2`
 
-	x=${alldim%%x*}; x=$((x*10))
-	yz=${alldim#*x}; y=${yz%x*} ; y=$((y*10))
-	z=${alldim##*x}; z=$((z*10))
+	# x=${alldim%%x*}; x=$((x*10))
+	# yz=${alldim#*x}; y=${yz%x*} ; y=$((y*10))
+	# z=${alldim##*x}; z=$((z*10))
 
-	dim="${x}x${y}x${z}";
+	# dim="${x}x${y}x${z}";
 
-	ifdsntexistrun $reslbls "Upsampling labels to original CLARITY resolution" c3d $ortlbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
-	
+	# ifdsntexistrun $reslbls "Upsampling labels to original CLARITY resolution" c3d $ortlbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
 	# Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
 
@@ -716,7 +725,9 @@ function main()
 		# Out lbls
 		wrplbls=$regdir/allen_lbls_clar_ants.nii.gz
 		ortlbls=$regdir/allen_lbs_clar_ants_ort.nii.gz
-		reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
+		swplbls=$regdir/allen_lbs_clar_ants_swp.nii.gz
+		tiflbls=$regdir/allen_lbs_clar_ants.tif
+		# reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
 
 	else
 	
@@ -724,13 +735,17 @@ function main()
 		lblsname=${base%%.*};
 
 		wrplbls=$regdir/allen_${lblsname}_clar_ants.nii.gz
-		ortlbls=$regdir/allen_${lblsname}_clar_ants_ort.nii.gz	
-		reslbls=$regdirfinal/allen_${lblsname}_clar_ants.nii.gz
+		ortlbls=$regdir/allen_${lblsname}_clar_ants_ort.nii.gz
+		swplbls=$regdir/allen_${lblsname}_clar_ants_swp.nii.gz
+		tiflbls=$regdir/allen_${lblsname}_clar_ants.tif	
+		# reslbls=$regdirfinal/allen_${lblsname}_clar_ants.nii.gz
 
 	fi	
 
-	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
+	# upsample in Fiji now
+	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
+	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $swplbls $tiflbls
 
 	#---------------------------
 
