@@ -35,15 +35,20 @@ function usage()
 	For command-line / scripting
 
 
-	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <higher_res_clarity_nifti> 
+	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <higher_res_clarity_nifti> -l <allen labels to warp>
 
-	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz 	
+	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz -l grand-parent_lbls.nii.gz
 
 		arguments (required):
 
 			i. Input down-sampled clarity nifti 
 
 			r. Higher resolution clarity nifti
+
+		optional arguments:
+		
+			l. Allen labels to warp (default: annotations.nii.gz)
+				labels have to be in the "allen/annotations" folder
 
 
 	----------		
@@ -147,6 +152,10 @@ if [[ "$#" -gt 1 ]]; then
         	
         	r)
             	hresclar=${OPTARG}
+            	;;
+        	
+        	l)
+            	lbls=${OPTARG}
             	;;
 
         	*)
@@ -698,28 +707,29 @@ function main()
 	antswarp=$regdir/allen_clar_ants1Warp.nii.gz
 	antsaff=$regdir/allen_clar_ants0GenericAffine.mat
 
-
 	# If want to warp multi-level lbls
-	for lbltype in lbls; do #gp-lbls uncomment if needed
 	
-		if [[ "$lbltype" == "lbls" ]]; then
-			
-			lbls=$atlasdir/allen/annotations/annotations.nii.gz
-
-		elif [[ "$lbltype" == "gp-lbls" ]]; then
-			
-			lbls=$atlasdir/allen/annotations/grand-parent_lbls.nii.gz	
-		fi	
-
+	if [[ -z $lbls ]]; then
+		
+		lbls=$atlasdir/allen/annotations/annotations.nii.gz
+		
 		# Out lbls
-		wrplbls=$regdir/allen_${lbltype}_clar_ants.nii.gz
-		ortlbls=$regdir/allen_${lbltype}_clar_ants_ort.nii.gz
-		reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz	
+		wrplbls=$regdir/allen_lbls_clar_ants.nii.gz
+		ortlbls=$regdir/allen_lbs_clar_ants_ort.nii.gz
+		reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
 
+	else
+	
+		base=`basename $lbls`
+		lblsname=${base%%.*};
 
-		warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
+		wrplbls=$regdir/allen_${lblsname}_clar_ants.nii.gz
+		ortlbls=$regdir/allen_${lblsname}_clar_ants_ort.nii.gz	
+		reslbls=$regdirfinal/allen_${lblsname}_clar_ants.nii.gz
 
-	done
+	fi	
+
+	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
 
 	#---------------------------
