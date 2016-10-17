@@ -13,10 +13,6 @@
 // 
 // -----------------------------------
 
-// parms
-
-upratio = 10;
-
 // Get files path
 args = split(getArgument()," "); 
 
@@ -30,18 +26,13 @@ print("Allen labels file path is:" + lblspath);
 // read seg tif
 print ("Reading segmentation");
 open(segpath);
+width = getWidth();
 
 // read label image
 open(lblspath);
 
 // upsample labels
-width = getWidth();
-height = getHeight();
-
-width = width * upratio;
-height = height * upratio;
-
-run("Size...", "width=&width height=&height constrain average interpolation=Bilinear");
+run("Size...", "width=&width constrain average interpolation=Bilinear");
 
 rename("allen_lbls.tif");
 
