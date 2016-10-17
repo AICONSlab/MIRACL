@@ -186,31 +186,20 @@ START=$(date +%s)
 # get macro
 macro=${MIRACL_HOME}/seg/miracl_analyze_particles_clarity_3D.ijm
 
-motherdir=$(dirname ${tifdir})
-segdir=${motherdir}/segmentation
+motherdir=$(dirname ${seg})
 
-# make seg dir
-if [[ ! -d $segdir ]];then
+outxls=${motherdir}/clarity_features_allen_labels.xls
 
-	printf "\n Creating Segmentation folder\n"
-	mkdir -p $segdir 
+if [[ ! -f $outxls ]]; then
 
-fi
-
-outseg=$tifdir/seg.mhd
-log=$tifdir/Fiji_seg_log.txt 
-outnii=$segdir/seg.nii.gz
-
-if [[ ! -f $outseg ]]; then
-
-	printf "\n Performing Segmentation using Fiji \n"
+	printf "\n Performing feature extraction using Fiji \n"
 			
 	echo Fiji -macro "$seg $lbls"  | tee $log 
 	Fiji -macro $macro "$seg $lbls" | tee $log
 		
 else
 
-	echo "Segmentation already computed ... skipping"
+	echo "Feature extraction already computed ... skipping"
 
 fi
 
@@ -219,4 +208,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Segmentation done in $DIFF minutes. Have a good day!"
+echo "Feature extraction done in $DIFF minutes. Have a good day!"

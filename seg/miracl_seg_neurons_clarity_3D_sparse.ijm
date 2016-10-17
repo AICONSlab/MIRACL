@@ -324,7 +324,7 @@ if (!File.exists(outseg)) {
 }
 
 // save log file 
-outlog = segpath + "log.txt";
+outlog = segpath + "seg_log.txt";
 
 f = File.open(outlog); 
 content=getInfo("log");

@@ -66,7 +66,7 @@ print(newtable, "\\Headings:Label\tVolumeAvg\tVolumeStd\tVolumeMax\tVolumeMin\tS
 
 c=0;
 
-outxls = tablename+".xls";
+outxls = segpath + tablename + ".xls";
 
 if (!File.exists(outxls)) {
 
@@ -156,7 +156,7 @@ if (!File.exists(outxls)) {
 	saveAs("Text", outxls);
 
 	// save log file 
-	outlog = segpath + "log.txt";
+	outlog = segpath + "feat_extract_log.txt";
 
 	f = File.open(outlog); 
 	content=getInfo("log");
