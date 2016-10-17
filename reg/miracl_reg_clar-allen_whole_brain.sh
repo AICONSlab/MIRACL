@@ -47,9 +47,9 @@ function usage()
 
 		optional arguments:
 		
-			l. Allen labels to warp (default: annotations.nii.gz)
-				labels have to be in the "allen/annotations" folder
-
+			l. Allen labels to warp (default: annotations.nii.gz - which are at a resolution of 0.01mm/10um) 
+				could be at a different resolution or depth than default labels 
+				
 
 	----------		
 
@@ -711,7 +711,7 @@ function main()
 	
 	if [[ -z $lbls ]]; then
 		
-		lbls=$atlasdir/allen/annotations/annotations.nii.gz
+		lbls=$atlasdir/allen/annotations/res0.01/annotations.nii.gz
 		
 		# Out lbls
 		wrplbls=$regdir/allen_lbls_clar_ants.nii.gz
