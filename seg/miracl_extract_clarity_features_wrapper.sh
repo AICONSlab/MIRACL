@@ -14,27 +14,32 @@ function usage()
     
     cat <<usage
 
-	1) Segments neurons in clear mouse brain of sparse stains in 3D
+    1) Extracts features from segmented clarity data using 3D partcile analysis
+	2) summarizes the data per label (Allen atlas label)
 
 	Runs a Fiji/ImageJ macro 
 	
 	Usage: `basename $0` 
 
-	A GUI will open to choose your input clarity folder (with .tif files)
+	A GUI will open to choose your:
 
-	The folder should contain data from one channel 
+		- input clarity segmentation (seg.tif)
+
+		- input registered allen atlas labels in clarity space (allen_labels )
 
 		----------
 
 	For command-line / scripting
 
-	Usage: `basename $0` -d <clarity dir> 
+	Usage: `basename $0` -s <clarity seg> -l <allen atlas labels> 
 
-	Example: `basename $0` -d my_clarity_tifs 
+	Example: `basename $0` -s myclaritydata/segmentation/seg.tif -d myclaritydata/final/allen_labels  .tif
 
 		arguments (required):
 
-			d. Input clarity directory (including .tif images of one channel)
+			s. Input clarity segmentation (seg.tif)
+
+			l. Input registered allen atlas labels in clarity space (allen_labels )
 
 		----------		
 
@@ -43,11 +48,8 @@ function usage()
 		- Fiji 
 
 		- Fiji Plugins:
-		
-		1) 3D Segmentation plugins (3D ImageJ suite) 	
-		http://imagejdocu.tudor.lu/doku.php?id=plugin:stacks:3d_ij_suite:start	
 
-		2) Mathematical Morphology plugins 
+		Mathematical Morphology plugins 
 		http://imagej.net/MorphoLibJ
 
 	-----------------------------------
@@ -94,11 +96,11 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	python ${MIRACL_HOME}/io/python_file_folder_gui.pyc -f folder -s "$openstr" 
+	python ${MIRACL_HOME}/io/python_file_folder_gui.pyc -f file -s "$openstr" 
 	
-	folderpath=`cat path.txt`
+	filepath=`cat path.txt`
 	
-	eval ${_inpath}="'$folderpath'"
+	eval ${_inpath}="'$filepath'"
 
 	rm path.txt
 
@@ -111,14 +113,16 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":d:" opt; do
+	while getopts ":s:l:" opt; do
     
 	    case "${opt}" in
 
-	        d)
-            	tifdir=${OPTARG}
+	        s)
+            	seg=${OPTARG}
             	;;
-        	
+	        l)
+            	lbls=${OPTARG}
+            	;;        	
         	*)
             	usage            	
             	;;
@@ -130,10 +134,17 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z ${tifdir} ];
+	if [ -z ${seg} ];
 	then
 		usage
-		echo "ERROR: < -d => input clarity directory> not specified"
+		echo "ERROR: < -s => input clarity segmentation> not specified"
+		exit 1
+	fi
+
+	if [ -z ${lbls} ];
+	then
+		usage
+		echo "ERROR: < -l => input allen atlas labels> not specified"
 		exit 1
 	fi
 
@@ -145,14 +156,23 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "Open clarity dir (with .tif files) by double clicking then OK" tifdir
+	choose_file_gui "Please open the clarity segmentation (seg.tif)" seg
+
+	choose_file_gui "Please open the registered allen atlas labels" lbls
 	
 	# check required input arguments
 
-	if [ -z ${tifdir} ];
+	if [ -z ${seg} ];
 	then
 		usage
-		echo "ERROR: <input clarity directory> was not chosen"
+		echo "ERROR: < -s => input clarity segmentation> not specified"
+		exit 1
+	fi
+
+	if [ -z ${lbls} ];
+	then
+		usage
+		echo "ERROR: < -l => input allen atlas labels> not specified"
 		exit 1
 	fi
 
@@ -164,7 +184,7 @@ fi
 START=$(date +%s)
 
 # get macro
-macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_sparse.ijm
+macro=${MIRACL_HOME}/seg/miracl_analyze_particles_clarity_3D.ijm
 
 motherdir=$(dirname ${tifdir})
 segdir=${motherdir}/segmentation
@@ -177,22 +197,6 @@ if [[ ! -d $segdir ]];then
 
 fi
 
-# # split filters -- later
-
-# if [[ ! -d $tifdir/filter0 ]]; then
-	
-# 	mkdir $tifdir/filter0 $tifdir/filter1
-# 	mv $tifdir/*Filter0000* $tifdir/filter0/.
-# 	mv $tifdir/*Filter0001* $tifdir/filter1/.
-
-# fi
-
-# free up cached memory -- needs sudo permissions
-# printf "\n Freeing up cached memory \n"
-
-# echo "sync; echo 3 | sudo tee /proc/sys/vm/drop_caches"
-#sync; echo 3 | sudo tee /proc/sys/vm/drop_caches 1>/dev/null
-
 outseg=$tifdir/seg.mhd
 log=$tifdir/Fiji_seg_log.txt 
 outnii=$segdir/seg.nii.gz
@@ -201,8 +205,8 @@ if [[ ! -f $outseg ]]; then
 
 	printf "\n Performing Segmentation using Fiji \n"
 			
-	echo Fiji -macro $macro "${tifdir}" | tee $log 
-	Fiji -macro $macro "${tifdir}/" | tee $log
+	echo Fiji -macro "$seg $lbls"  | tee $log 
+	Fiji -macro $macro "$seg $lbls" | tee $log
 		
 else
 

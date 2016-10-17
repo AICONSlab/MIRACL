@@ -18,14 +18,21 @@
 upratio = 10;
 
 // Get files path
-path = getArgument();
-print("Files path is:" + path);
+args = split(getArgument()," "); 
+
+segpath = args[0];
+lblspath = args[1];
+
+print("Segmentation file path is:" + segpath);
+
+print("Allen labels file path is:" + lblspath);
 
 // read seg tif
-open( path + "seg.tif" )
+print ("Reading segmentation");
+open(segpath);
 
 // read label image
-open( path + "")
+open(lblspath);
 
 // upsample labels
 width = getWidth();
@@ -40,14 +47,14 @@ rename("allen_lbls.tif");
 
 selectWindow("allen_lbls.tif");
 
-getStatistics(area, mean, min, max, std)
+getStatistics(area, mean, min, max, std);
 labels=max;
 
 // get lbls histogram
 getHistogram(values,counts,max,1,max);
 
 // add to same table 
-name="Result-morpho"
+name="Result-morpho";
 nameOfStatTab="["+name+"]";
 table=nameOfStatTab;
 
@@ -59,7 +66,7 @@ print(newtable, "\\Headings:Label\tVolumeAvg\tVolumeStd\tVolumeMax\tVolumeMin\tS
 
 c=0;
 
-outxls = tablename+".xls"
+outxls = tablename+".xls";
 
 if (!File.exists(outxls)) {
 
@@ -158,7 +165,7 @@ if (!File.exists(outxls)) {
 
 } else {
 
-	print ("Features already computed .. skipping")
+	print ("Features already computed .. skipping");
 
 }
 
