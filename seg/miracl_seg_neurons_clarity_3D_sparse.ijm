@@ -319,7 +319,7 @@ if (!File.exists(outseg)) {
 
 } else {
 
-	print ("Segmentation already computed .. skipping stack")
+	print ("Segmentation already computed .. skipping")
 
 }
 
