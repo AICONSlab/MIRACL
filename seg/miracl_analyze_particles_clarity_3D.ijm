@@ -16,12 +16,13 @@
 // Get files path
 args = split(getArgument()," "); 
 
-segpath = args[0];
-lblspath = args[1];
+motherdir = args[0]
+segpath = args[1];
+lblspath = args[2];
 
-print("Segmentation file path is:" + segpath);
+print("Segmentation file path is: " + motherdir + "/" + segpath);
 
-print("Allen labels file path is:" + lblspath);
+print("Allen labels file path is: " + motherdir + "/" + lblspath);
 
 // read seg tif
 print ("Reading segmentation");
@@ -29,9 +30,11 @@ open(segpath);
 width = getWidth();
 
 // read label image
+print ("Reading Allen labels");
 open(lblspath);
 
 // upsample labels
+print ("Upsampling Allen labels to clarity dimensions");
 run("Size...", "width=&width constrain average interpolation=Bilinear");
 
 rename("allen_lbls.tif");

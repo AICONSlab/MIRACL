@@ -194,8 +194,8 @@ if [[ ! -f $outxls ]]; then
 
 	printf "\n Performing feature extraction using Fiji \n"
 			
-	echo Fiji -macro "$seg $lbls"  | tee $log 
-	Fiji -macro $macro "$seg $lbls" | tee $log
+	echo Fiji -macro "$motherdir $seg $lbls"  | tee $log 
+	Fiji -macro $macro "$motherdir $seg $lbls" | tee $log
 		
 else
 
