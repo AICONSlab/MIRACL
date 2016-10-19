@@ -28,6 +28,7 @@ print("Allen labels file path is: " + motherdir + "/" + lblspath);
 print ("Reading segmentation");
 open(segpath);
 width = getWidth();
+clarslices = nSlices;
 
 // read label image
 print ("Reading Allen labels");
@@ -35,7 +36,7 @@ open(lblspath);
 
 // upsample labels
 print ("Upsampling Allen labels to clarity dimensions");
-run("Size...", "width=&width constrain average interpolation=Bilinear");
+run("Size...", "width=&width depth=&clarslices constrain interpolation=None");
 
 rename("allen_lbls.tif");
 
@@ -56,11 +57,11 @@ table=nameOfStatTab;
 tablename = "clarity_features_allen_labels"; 
 newtable ="["+tablename+"]";
 run("New... ", "name="+newtable+" type=Table");
-print(newtable, "\\Headings:Label\tVolumeAvg\tVolumeStd\tVolumeMax\tVolumeMin\tSurfaceAreaAvg\tSurfaceAreaStd\tSurfaceAreaMax\tSurfaceAreaMin\tSphericityAvg\tSphericityStd.");	
+print(newtable, "\\Headings:Label\tNumNeurons\tVolumeAvg\tVolumeStd\tVolumeMax\tVolumeMin\tSurfaceAreaAvg\tSurfaceAreaStd\tSurfaceAreaMax\tSurfaceAreaMin\tSphericityAvg\tSphericityStd.");	
 
 c=0;
 
-outxls = segpath + tablename + ".xls";
+outxls = motherdir + tablename + ".xls";
 
 if (!File.exists(outxls)) {
 
@@ -130,7 +131,7 @@ if (!File.exists(outxls)) {
 			//saveAs("Results", "particle_analysis_lbl_"+l+".xls");
 		
 			// populate avg table 	
-			print(newtable,lbl+"\t"+volavg+"\t"+volstDev+"\t"+volmax+"\t"+volmin+"\t"+surfavg+"\t"+surfstDev+"\t"+surfmax+"\t"+surfmin+"\t"+sphereavg+"\t"+spherestDev); 
+			print(newtable,lbl+"\t"+volArray.length+"\t"+volavg+"\t"+volstDev+"\t"+volmax+"\t"+volmin+"\t"+surfavg+"\t"+surfstDev+"\t"+surfmax+"\t"+surfmin+"\t"+sphereavg+"\t"+spherestDev); 
 		
 			// close masked img
 			maskedstack = getImageID();
@@ -150,7 +151,7 @@ if (!File.exists(outxls)) {
 	saveAs("Text", outxls);
 
 	// save log file 
-	outlog = segpath + "feat_extract_log.txt";
+	outlog = motherdir + "feat_extract_log.txt";
 
 	f = File.open(outlog); 
 	content=getInfo("log");
