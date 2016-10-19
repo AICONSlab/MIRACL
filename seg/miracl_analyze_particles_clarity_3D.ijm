@@ -24,55 +24,66 @@ print("Segmentation file path is: " + motherdir + "/" + segpath);
 
 print("Allen labels file path is: " + motherdir + "/" + lblspath);
 
-// read seg tif
-print ("Reading segmentation");
-open(segpath);
-width = getWidth();
-clarslices = nSlices;
-
-// read label image
-print ("Reading Allen labels");
-open(lblspath);
-
-// upsample labels
-print ("Upsampling Allen labels to clarity dimensions");
-run("Size...", "width=&width depth=&clarslices constrain interpolation=None");
-
-rename("allen_lbls.tif");
-
-selectWindow("allen_lbls.tif");
-
-getStatistics(area, mean, min, max, std);
-labels=max;
-
-// get lbls histogram
-getHistogram(values,counts,max,1,max);
-
-// add to same table 
-name="Result-morpho";
-nameOfStatTab="["+name+"]";
-table=nameOfStatTab;
-
 // avg table name
 tablename = "clarity_features_allen_labels"; 
 newtable ="["+tablename+"]";
-run("New... ", "name="+newtable+" type=Table");
-print(newtable, "\\Headings:Label\tNumNeurons\tVolumeAvg\tVolumeStd\tVolumeMax\tVolumeMin\tSurfaceAreaAvg\tSurfaceAreaStd\tSurfaceAreaMax\tSurfaceAreaMin\tSphericityAvg\tSphericityStd.");	
 
-c=0;
-
-outxls = motherdir + tablename + ".xls";
+outxls = motherdir + "/" + tablename + ".xls";
 
 if (!File.exists(outxls)) {
+
+	// read seg tif
+	print ("Reading segmentation");
+	open(segpath);
+	rename("seg.tif"); // in case from other segmentation
+
+	segwidth = getWidth();
+	clarslices = nSlices;
+
+	// read label image
+	print ("Reading Allen labels");
+	open(lblspath);
+
+	lblwidth = getWidth();
+
+	rename("allen_lbls.tif");
+
+	selectWindow("allen_lbls.tif");
+
+	if ( segwidth > lblwidth ) {
+
+		// upsample labels
+		print ("Upsampling Allen labels to clarity dimensions");
+		run("Size...", "width=&segwidth depth=&clarslices constrain interpolation=None");
+
+	}
+
+	getStatistics(area, mean, min, max, std);
+	labels=max-1;
+
+	// get lbls histogram
+	getHistogram(values,counts,max,1,max);
+
+	// add to same table 
+	name="Result-morpho";
+	nameOfStatTab="["+name+"]";
+	table=nameOfStatTab;
+
+	run("New... ", "name="+newtable+" type=Table");
+	print(newtable, "\\Headings:Label\tNumNeurons\tNeuronalDensity\tVolumeAvg\tVolumeStd\tVolumeMax\tVolumeMin\tSurfaceAreaAvg\tSurfaceAreaStd\tSurfaceAreaMax\tSurfaceAreaMin\tSphericityAvg\tSphericityStd.");	
+
+	c=0;
 
 	// loop over labels
 	for (l = 1; l <= labels ; l++) {
 
+		numvox = counts[l];
+
 		// check if label exists	
-	   	if (counts[l] > 0) {
+	   	if ( numvox > 0) {
 
 			c=c+1; // counter
-
+			
 			lbl = l+1;
 	   		   	 
 		    print("processing label " + lbl);
@@ -130,8 +141,10 @@ if (!File.exists(outxls)) {
 			// save results
 			//saveAs("Results", "particle_analysis_lbl_"+l+".xls");
 		
+			density = volArray.length / numvox ;
+
 			// populate avg table 	
-			print(newtable,lbl+"\t"+volArray.length+"\t"+volavg+"\t"+volstDev+"\t"+volmax+"\t"+volmin+"\t"+surfavg+"\t"+surfstDev+"\t"+surfmax+"\t"+surfmin+"\t"+sphereavg+"\t"+spherestDev); 
+			print(newtable,lbl+"\t"+volArray.length+"\t"+density"\t"+volavg+"\t"+volstDev+"\t"+volmax+"\t"+volmin+"\t"+surfavg+"\t"+surfstDev+"\t"+surfmax+"\t"+surfmin+"\t"+sphereavg+"\t"+spherestDev); 
 		
 			// close masked img
 			maskedstack = getImageID();
@@ -151,7 +164,7 @@ if (!File.exists(outxls)) {
 	saveAs("Text", outxls);
 
 	// save log file 
-	outlog = motherdir + "feat_extract_log.txt";
+	outlog = motherdir + "/" + "feat_extract_log.txt";
 
 	f = File.open(outlog); 
 	content=getInfo("log");
