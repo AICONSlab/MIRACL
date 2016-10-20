@@ -54,8 +54,8 @@ if (!File.exists(outxls)) {
 	labels=max;
 
 	// get lbls stack histogram
-	nBins=max;
-	allcounts=newArray(15);
+	nBins=max+1;
+	allcounts=newArray(nBins);
 	
 	for (i=1; i<nBins; i++) {
 		
