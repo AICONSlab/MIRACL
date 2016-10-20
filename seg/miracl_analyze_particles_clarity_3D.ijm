@@ -51,7 +51,7 @@ if (!File.exists(outxls)) {
 	selectWindow("allen_lbls.tif");
 
 	Stack.getStatistics(area, mean, min, max, std);
-	labels=max-1;
+	labels=max;
 
 	// get lbls stack histogram
 	nBins=max;
