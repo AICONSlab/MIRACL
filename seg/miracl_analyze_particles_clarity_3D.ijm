@@ -50,6 +50,28 @@ if (!File.exists(outxls)) {
 
 	selectWindow("allen_lbls.tif");
 
+	Stack.getStatistics(area, mean, min, max, std);
+	labels=max-1;
+
+	// get lbls stack histogram
+	nBins=max;
+	allcounts=newArray(15);
+	
+	for (i=1; i<nBins; i++) {
+		
+		allcounts[i]=0;
+
+		for (slice=1; slice<=nSlices; slice++) {
+			
+			run("Set Slice...", "slice="+slice);
+			getHistogram(values,counts,nBins);
+			allcounts[i]+=counts[i];
+
+		}
+	}
+
+	//getHistogram(values,counts,max,1,max);
+
 	if ( segwidth > lblwidth ) {
 
 		// upsample labels
@@ -57,12 +79,6 @@ if (!File.exists(outxls)) {
 		run("Size...", "width=&segwidth depth=&clarslices constrain interpolation=None");
 
 	}
-
-	getStatistics(area, mean, min, max, std);
-	labels=max-1;
-
-	// get lbls histogram
-	getHistogram(values,counts,max,1,max);
 
 	// add to same table 
 	name="Result-morpho";
@@ -77,14 +93,14 @@ if (!File.exists(outxls)) {
 	// loop over labels
 	for (l = 1; l <= labels ; l++) {
 
-		numvox = counts[l];
+		numvox = allcounts[l];
 
 		// check if label exists	
 	   	if ( numvox > 0) {
 
 			c=c+1; // counter
 			
-			lbl = l+1;
+			lbl = l;
 	   		   	 
 		    print("processing label " + lbl);
 
@@ -141,10 +157,10 @@ if (!File.exists(outxls)) {
 			// save results
 			//saveAs("Results", "particle_analysis_lbl_"+l+".xls");
 		
-			density = volArray.length / numvox ;
+			density = (volArray.length / numvox) * 1000 ;
 
 			// populate avg table 	
-			print(newtable,lbl+"\t"+volArray.length+"\t"+density"\t"+volavg+"\t"+volstDev+"\t"+volmax+"\t"+volmin+"\t"+surfavg+"\t"+surfstDev+"\t"+surfmax+"\t"+surfmin+"\t"+sphereavg+"\t"+spherestDev); 
+			print(newtable,lbl+"\t"+volArray.length+"\t"+density+"\t"+volavg+"\t"+volstDev+"\t"+volmax+"\t"+volmin+"\t"+surfavg+"\t"+surfstDev+"\t"+surfmax+"\t"+surfmin+"\t"+sphereavg+"\t"+spherestDev); 
 		
 			// close masked img
 			maskedstack = getImageID();
