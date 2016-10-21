@@ -742,7 +742,7 @@ function main()
 
 	fi	
 
-	# upsample in Fiji now
+	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
 	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $swplbls $tiflbls
