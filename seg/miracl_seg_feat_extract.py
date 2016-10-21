@@ -62,7 +62,7 @@ def upsampleswplbls(seg,lbls):
 
             print('Upsampling labels to clarity resolution')
 
-            reslbls = sp.ndimage.zoom(lbls,(rx,rx,rz), order=0)
+            reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
 
             resx = reslbls.shape[1]    
 
