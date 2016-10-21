@@ -57,7 +57,7 @@ def upsampleswplbls(seg,lbls):
         
         else:
 
-            rx = float(segx) / lblsx
+            rx = float(segx) / lblsy
             rz = float(segz) / lblsz
 
             print('Upsampling labels to clarity resolution')
