@@ -72,7 +72,7 @@ def computearea(seg,lbls,l):
 
 def runalllblspar(seg,lbls,ncpus,alllbls):
                 
-    allprops = Parallel(n_jobs=ncpus,backend='threading')(delayed(computearea)(seg,lbls,l) for i,l in enumerate(alllbls))
+    allprops = Parallel(n_jobs=ncpus, backend='threading')(delayed(computearea)(seg,lbls,l) for i,l in enumerate(alllbls))
     allprops = np.asarray(allprops)
     allareas = allprops[:,0]
     allstdareas = allprops[:,1]
@@ -99,7 +99,7 @@ def main():
 
     startTime = datetime.now()
 
-    cpuload = 0.8
+    cpuload = 0.95
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload*cpus) # 80% of cores used
 
