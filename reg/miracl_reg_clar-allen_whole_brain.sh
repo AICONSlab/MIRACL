@@ -524,7 +524,7 @@ function warpallenlbls()
 	orientimg $wrplbls $orttaglbls $ortintlbls $orttypelbls $ortlbls
 
 	# swap dim (x=>y / y=>x)
-	ifdsntexistrun $swplbls "Swapping label dimenesions (x=>y / y=>x)" PermuteFlipImageOrientationAxes  3 $ortlbls $swplbls  1 0 2  0 0 0
+	ifdsntexistrun $swplbls "Swapping label dimenesions (x=>y / y=>x)" PermuteFlipImageOrientationAxes  3 $ortlbls $swplbls  1 0 2  1 0 0
 
 	# create tif lbls
 	ifdsntexistrun $tiflbls "Converting lbls to tif" c3d $swplbls -type $orttypelbls -o $tiflbls 
