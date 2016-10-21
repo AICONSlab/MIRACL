@@ -36,6 +36,44 @@ inseg = args.seg
 inlbls = args.lbl
 
 # ---------
+
+def upsampleswplbls(seg,lbls):
+
+    segx = seg.shape[0]
+    segz = seg.shape[2]
+
+    lblsx = lbls.shape[0]
+    lblsy = lbls.shape[1]
+    lblsz = lbls.shape[2]
+
+    if (segx != lblsx):
+
+        if (segx == lblsy) :
+
+            print ('Swaping x-y')
+
+            reslbls = np.swapaxes(reslbls,0,1)
+        
+        else:
+
+            rx = float(segx) / lblsx
+            rz = float(segz) / lblsz
+
+            print('Upsampling labels to clarity resolution')
+
+            reslbls = sp.ndimage.zoom(lbls,(rx,rx,rz), order=0)
+
+            resx = reslbls.shape[0]    
+
+            if (segx != regx):
+                
+                print ('Swaping x-y')
+
+                reslbls = np.swapaxes(reslbls,0,1)
+
+    return reslbls
+
+# ---------
 # Get region prop fn
 
 def computearea(seg,lbls,l):
@@ -115,8 +153,11 @@ def main():
     # get all lbls
     alllbls = getlblvals(lbls)
 
+    # upsample or swap if needed
+    reslbls = upsampleswplbls(seg,lbls)
+
     print ("Computing Feature extraction...")
-    [allareas,allstdareas,allmaxareas,allnums,alldens] = runalllblspar(seg,lbls,ncpus,alllbls)
+    [allareas,allstdareas,allmaxareas,allnums,alldens] = runalllblspar(seg,reslbls,ncpus,alllbls)
     
     print ('\n Exporting features to csv file')
 
