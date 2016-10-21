@@ -51,7 +51,6 @@ def upsampleswplbls(seg,lbls):
         if (segx == lblsy) :
 
             print ('Swaping x-y')
-
             reslbls = np.swapaxes(reslbls,0,1)
         
         else:
@@ -68,10 +67,13 @@ def upsampleswplbls(seg,lbls):
             if (segx != regx):
                 
                 print ('Swaping x-y')
-
                 reslbls = np.swapaxes(reslbls,0,1)
 
-    return reslbls
+    else:
+
+        reslbls = lbls
+
+    return reslbls 
 
 # ---------
 # Get region prop fn
