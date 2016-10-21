@@ -66,7 +66,7 @@ def upsampleswplbls(seg,lbls):
 
             resx = reslbls.shape[0]    
 
-            if (segx != regx):
+            if (segx != resx):
                 
                 print ('Swaping x-y')
                 reslbls = np.swapaxes(reslbls,0,1)
