@@ -88,7 +88,7 @@ def scriptlog(logname):
 def vox(segflt,kernel,dr,i):
 	'''
 	Convolves image with input kernel then 
-	downsamples using 5th order spline interpolation
+	downsamples using chosen interpolation
 	'''
 
 	# sys.stdout.write("\r processing slice %d ... " % i)
@@ -97,7 +97,7 @@ def vox(segflt,kernel,dr,i):
 	slf = segflt[i,:,:]
 
 	cvmean = cv2.filter2D(slf,-1,kernel)
-	circv = sp.ndimage.zoom(cvmean,dr,order=5)  
+	circv = sp.ndimage.zoom(cvmean,dr,order=1)  
 
 	return circv/255 
 
@@ -134,7 +134,7 @@ def parcomputevox(seg,radius,ncpus,down,outvox):
 
 	# convolve image with kernel
 	res = []
-	res = Parallel(n_jobs=ncpus)(delayed (vox)(segflt,kernel,dr,i) for i in range(sx))
+	res = Parallel(n_jobs=ncpus,backend='threading')(delayed (vox)(segflt,kernel,dr,i) for i in range(sx))
 
 	marray = np.asarray(res)
 
