@@ -57,7 +57,7 @@ def computearea(seg,lbls,l):
         stdarea = np.nanstd(areas)
         maxarea = np.nanmax(areas)
         cellnum = len(list(areas))
-        celldens = (float(cellnum) / numvox) * 1e9 # assuming 1um res
+        celldens = (float(cellnum) / numvox) * 1e3 # assuming 1um res
     else:
         avgarea = 0
         stdarea = 0
