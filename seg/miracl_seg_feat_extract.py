@@ -152,7 +152,9 @@ def main():
     # open lbls
     print ("Reading labels")
     lbls = tiff.imread(inlbls)
-    lbls = lbls.astype(np.uint16)
+
+    if (lbls.dtype == np.float64) or (lbls.dtype == np.float32) or (lbls.dtype == np.uint32):    
+        lbls = lbls.astype(np.uint16)
 
     # get all lbls
     alllbls = getlblvals(lbls)
