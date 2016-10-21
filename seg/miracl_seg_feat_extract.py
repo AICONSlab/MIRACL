@@ -5,6 +5,8 @@
 
 import pandas as pd
 import numpy as np
+import scipy as sp
+from scipy import ndimage
 from skimage.measure import regionprops
 import tifffile as tiff 
 from joblib import Parallel, delayed
