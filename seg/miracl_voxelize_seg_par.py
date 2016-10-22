@@ -88,7 +88,7 @@ def scriptlog(logname):
 def vox(segflt,kernel,dr,i):
 	'''
 	Convolves image with input kernel then 
-	downsamples using chosen interpolation
+	downsamples using 3rd order spline interpolation
 	'''
 
 	# sys.stdout.write("\r processing slice %d ... " % i)
@@ -97,7 +97,7 @@ def vox(segflt,kernel,dr,i):
 	slf = segflt[i,:,:]
 
 	cvmean = cv2.filter2D(slf,-1,kernel)
-	circv = sp.ndimage.zoom(cvmean,dr,order=1)  
+	circv = sp.ndimage.zoom(cvmean,dr,order=3)  
 
 	return circv/255 
 
