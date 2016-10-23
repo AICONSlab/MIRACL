@@ -88,7 +88,7 @@ def scriptlog(logname):
 def vox(segflt,kernel,dr,i):
 	'''
 	Convolves image with input kernel then 
-	downsamples using 3rd order spline interpolation
+	downsamples using 5th order spline interpolation
 	'''
 
 	# sys.stdout.write("\r processing slice %d ... " % i)
@@ -138,7 +138,7 @@ def parcomputevox(seg,radius,ncpus,down,outvox):
 
 	marray = np.asarray(res)
 
-	# down in z
+	# down in z with 5th order spline
 	dz = 0.1;
 	marray = sp.ndimage.zoom(marray,(dz,1,1), order=5)
 
