@@ -22,7 +22,7 @@ def helpmsg(name=None):
 
     return '''mouse_feat_extract.py -s [segmentation tif] -l [Labels]
 
-    Computes features of segmented image
+    Computes features of segmented image and summarizes them per label
 
     example: mouse_feat_extract.py -s seg.tif -l allen_annotations.tif
     '''
