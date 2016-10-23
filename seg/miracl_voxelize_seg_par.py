@@ -97,7 +97,7 @@ def vox(segflt,kernel,dr,i):
 	slf = segflt[i,:,:]
 
 	cvmean = cv2.filter2D(slf,-1,kernel)
-	circv = sp.ndimage.zoom(cvmean,dr,order=3)  
+	circv = sp.ndimage.zoom(cvmean,dr,order=5)  
 
 	return circv/255 
 
@@ -140,7 +140,7 @@ def parcomputevox(seg,radius,ncpus,down,outvox):
 
 	# down in z
 	dz = 0.1;
-	marray = sp.ndimage.zoom(marray,(dz,1,1), order=3)
+	marray = sp.ndimage.zoom(marray,(dz,1,1), order=5)
 
 	# save stack 
 	tiff.imsave(outvox,marray)
