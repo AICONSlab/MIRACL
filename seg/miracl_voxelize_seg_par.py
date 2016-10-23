@@ -28,6 +28,7 @@ def helpmsg(name=None):
 
 	example: mouse_single_corr_lbls.py -s seg_bin.tif  
 	'''
+	
 # ---------
 # Get input arguments
 
