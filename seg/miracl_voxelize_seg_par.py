@@ -17,23 +17,24 @@ import multiprocessing
 import sys
 import logging
 
+
 # ---------
 # help fn
 
-def helpmsg(name=None): 
-
-	return '''mouse_par_voxelize_seg.py -s [binary segmentation tif]
+def helpmsg(name=None):
+    return '''mouse_par_voxelize_seg.py -s [binary segmentation tif]
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
 	example: mouse_single_corr_lbls.py -s seg_bin.tif  
 	'''
-	
+
+
 # ---------
 # Get input arguments
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-s','--seg', type=str, help="binary segmentation tif", required=True)
+parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
 
 args = parser.parse_args()
 seg = args.seg
@@ -45,152 +46,156 @@ radius = 5
 down = 5
 cpuload = 0.95
 cpus = multiprocessing.cpu_count()
-ncpus = int(cpuload*cpus) # 95% of cores used
+ncpus = int(cpuload * cpus)  # 95% of cores used
+
 
 # ---------
 # Logging fn
 
 def scriptlog(logname):
-
-	class StreamToLogger(object):
-	   	"""
+    class StreamToLogger(object):
+        """
 	   Fake file-like stream object that redirects writes to a logger instance.
 	   """
-		def __init__(self, logger, log_level=logging.INFO):
-		    self.logger = logger
-		    self.log_level = log_level
-		    self.linebuf = ''
 
-		def write(self, buf):
-			for line in buf.rstrip().splitlines():
-					self.logger.log(self.log_level, line.rstrip())
-		
-		def flush(self):
-			pass
+        def __init__(self, logger, log_level=logging.INFO):
+            self.logger = logger
+            self.log_level = log_level
+            self.linebuf = ''
 
-	logging.basicConfig(
-	   level=logging.DEBUG,
-	   filename="%s" % logname, 
-	   format='%(asctime)s:%(message)s',
-	   filemode='w')
+        def write(self, buf):
+            for line in buf.rstrip().splitlines():
+                self.logger.log(self.log_level, line.rstrip())
 
-	stdout_logger = logging.getLogger('STDOUT')
-	handler = logging.StreamHandler()
-	stdout_logger.addHandler(handler)
-	sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
-	 
-	stderr_logger = logging.getLogger('STDERR')
-	stderr_logger.addHandler(handler)
-	sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
+        def flush(self):
+            pass
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="%s" % logname,
+        format='%(asctime)s:%(message)s',
+        filemode='w')
+
+    stdout_logger = logging.getLogger('STDOUT')
+    handler = logging.StreamHandler()
+    stdout_logger.addHandler(handler)
+    sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
+
+    stderr_logger = logging.getLogger('STDERR')
+    stderr_logger.addHandler(handler)
+    sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
+
 
 # ---------
 # Define convolution fn
 
-def vox(segflt,kernel,dr,i):
-	'''
+def vox(segflt, kernel, dr, i):
+    '''
 	Convolves image with input kernel then 
 	downsamples using 5th order spline interpolation
 	'''
 
-	# sys.stdout.write("\r processing slice %d ... " % i)
-	# sys.stdout.flush()
+    # sys.stdout.write("\r processing slice %d ... " % i)
+    # sys.stdout.flush()
 
-	slf = segflt[i,:,:]
+    slf = segflt[i, :, :]
 
-	cvmean = cv2.filter2D(slf,-1,kernel)
-	circv = sp.ndimage.zoom(cvmean,dr,order=5)  
+    cvmean = cv2.filter2D(slf, -1, kernel)
+    circv = sp.ndimage.zoom(cvmean, dr, order=5)
 
-	return circv/255 
+    return circv / 255
+
 
 # ---------
 # Vox seg
 
-def parcomputevox(seg,radius,ncpus,down,outvox):
-	'''
+def parcomputevox(seg, radius, ncpus, down, outvox):
+    '''
 	Setups up convolution kernel & computes
 	"Vox" fn in parallel
 	'''
 
-	# downsample ratio
-	dr = 1.0/down
+    # downsample ratio
+    dr = 1.0 / down
 
-	print "\n Creating voxelized maps from Clarity segmentations"
-	
-	# read data
-	segtif = tiff.imread("%s" % seg )  
-	segflt = segtif.astype('float32')
+    print "\n Creating voxelized maps from Clarity segmentations"
 
-	# ---------
-	# Setup kernel 
+    # read data
+    segtif = tiff.imread("%s" % seg)
+    segflt = segtif.astype('float32')
 
-	kernel = np.zeros((2*radius+1, 2*radius+1))
-	y,x = np.ogrid[-radius:radius+1, -radius:radius+1]
-	mask = x**2 + y**2 <= radius**2
-	kernel[mask] = 1
+    # ---------
+    # Setup kernel
 
-	# ---------
-	sx = segflt.shape[0]
+    kernel = np.zeros((2 * radius + 1, 2 * radius + 1))
+    y, x = np.ogrid[-radius:radius + 1, -radius:radius + 1]
+    mask = x ** 2 + y ** 2 <= radius ** 2
+    kernel[mask] = 1
 
-	print "\n Computing in parallel using %d cpus" % ncpus
+    # ---------
+    sx = segflt.shape[0]
 
-	# convolve image with kernel
-	res = []
-	res = Parallel(n_jobs=ncpus,backend='threading')(delayed (vox)(segflt,kernel,dr,i) for i in range(sx))
+    print "\n Computing in parallel using %d cpus" % ncpus
 
-	marray = np.asarray(res)
+    # convolve image with kernel
+    res = []
+    res = Parallel(n_jobs=ncpus, backend='threading')(delayed(vox)(segflt, kernel, dr, i) for i in range(sx))
 
-	# down in z with 5th order spline
-	dz = 0.1;
-	marray = sp.ndimage.zoom(marray,(dz,1,1), order=5)
+    marray = np.asarray(res)
 
-	# save stack 
-	tiff.imsave(outvox,marray)
+    # down in z with 5th order spline
+    dz = 0.1;
+    marray = sp.ndimage.zoom(marray, (dz, 1, 1), order=5)
 
-	return marray	
+    # save stack
+    tiff.imsave(outvox, marray)
+
+    return marray
+
 
 # ---------
 # save to nifti
 
 def savenvoxnii(marray):
-	'''
+    '''
 	Saves voxelized tif output to nifti (nii.gz)
 	'''
 
-	outvoxnii = 'voxelized_seg_bin.nii.gz' 
+    outvoxnii = 'voxelized_seg_bin.nii.gz'
 
-	if not os.path.exists(outvoxnii):
+    if not os.path.exists(outvoxnii):
+        mat = np.eye(4)
+        mat[0, 0] = 0.0025
+        mat[1, 1] = 0.025
+        mat[2, 2] = 0.025
 
-		mat = np.eye(4)
-		mat[0,0] = 0.0025
-		mat[1,1] = 0.025
-		mat[2,2] = 0.025
+        img = nib.Nifti1Image(marray, mat)
+        nib.save(img, outvoxnii)
 
-		img = nib.Nifti1Image(marray, mat)
-		nib.save(img, outvoxnii)
 
 # ---------
 # main fn
 
 def main():
+    scriptlog('voxelize.log')
 
-	scriptlog('voxelize.log')
+    startTime = datetime.now()
 
-	startTime = datetime.now()
+    outvox = 'voxelized_seg_bin.tif'
 
-	outvox = 'voxelized_seg_bin.tif'  
+    if not os.path.exists(outvox):
 
-	if not os.path.exists(outvox):	
+        marray = parcomputevox(seg, radius, ncpus, down, outvox)
 
-		marray = parcomputevox(seg,radius,ncpus,down,outvox)
+        savenvoxnii(marray)
 
-		savenvoxnii(marray)
+        print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
-		print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime)) 	
+    else:
 
-	else:
+        print ('\n Voxelized map already created')
 
-		print ('\n Voxelized map already created')
 
 if __name__ == "__main__":
-	# sys.exit(main())
-	main()
+    # sys.exit(main())
+    main()
