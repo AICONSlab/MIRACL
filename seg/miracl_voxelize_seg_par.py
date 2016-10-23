@@ -44,7 +44,7 @@ radius = 5
 down = 5
 cpuload = 0.95
 cpus = multiprocessing.cpu_count()
-ncpus = int(cpuload*cpus) # 80% of cores used
+ncpus = int(cpuload*cpus) # 95% of cores used
 
 # ---------
 # Logging fn
@@ -137,6 +137,10 @@ def parcomputevox(seg,radius,ncpus,down,outvox):
 	res = Parallel(n_jobs=ncpus,backend='threading')(delayed (vox)(segflt,kernel,dr,i) for i in range(sx))
 
 	marray = np.asarray(res)
+
+	# down in z
+	dz = 0.1;
+	marray = sp.ndimage.zoom(marray,(dz,1,1), order=3)
 
 	# save stack 
 	tiff.imsave(outvox,marray)
