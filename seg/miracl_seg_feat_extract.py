@@ -89,7 +89,7 @@ def computearea(seg,lbls,l):
 
     lbl = lbls == l
     numvox = np.sum(lbl)
-    mask = np.zeros((seg.shape),dtype=np.uint16)
+    mask = np.zeros(seg.shape, dtype=np.uint16)
     mask[lbl] = seg[lbl]
     
     if np.max(mask) > 0:
