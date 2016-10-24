@@ -178,16 +178,9 @@ def main():
 
     # nrows = allareas
 
-    propsdf = pd.DataFrame({'LabelID' : alllbls,
-                            'LabelAbrv': abrvs,
-                            'LabelName': names,
-                            'ParentID': parents,
-                            'IDPath': paths,
-                            'Count': allnums,
-                            'Density': alldens,
-                            'VolumeAvg': allareas,
-                            'VolumeStd': allstdareas,
-                            'VolumeMax': allmaxareas})
+    propsdf = pd.DataFrame(
+        dict(LabelID=alllbls, LabelAbrv=abrvs, LabelName=names, ParentID=parents, IDPath=paths, Count=allnums,
+             Density=alldens, VolumeAvg=allareas, VolumeStd=allstdareas, VolumeMax=allmaxareas))
 
     cols = ['LabelID','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
     propsdf = propsdf[cols]
