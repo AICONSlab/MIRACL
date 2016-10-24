@@ -172,7 +172,7 @@ def main():
     ids = lookup.id[alllbls]
 
     names = lookup.name.isin(ids)
-    abrvs = lookup.arbvs.isin(ids)
+    abrvs = lookup.acronym.isin(ids)
     parents = lookup.parent_structure_id.isin(ids)
     paths = lookup.structure_id_path.isin(ids)
 
@@ -188,7 +188,8 @@ def main():
     propscsv = 'clarity_segmentation_features.csv'    
     propsdf.to_csv(propscsv)
 
-    print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime)) 
+    print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))
+
 
 if __name__ == "__main__":    
     main()
