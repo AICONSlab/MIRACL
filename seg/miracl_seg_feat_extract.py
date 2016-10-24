@@ -53,7 +53,7 @@ def upsampleswplbls(seg,lbls):
         if (segx == lblsy) :
 
             print ('Swaping x-y')
-            reslbls = np.swapaxes(reslbls,1,2)
+            reslbls = np.swapaxes(lbls, 1, 2)
         
         else:
 
