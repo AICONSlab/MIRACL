@@ -183,9 +183,9 @@ def main():
                             'LabelName': names,
                             'ParentID': parents,
                             'IDPath': paths,
-                            'Count' : allnums,
-                            'Density' : alldens,                            
-                            'VolumeAvg' : allareas,
+                            'Count': allnums,
+                            'Density': alldens,
+                            'VolumeAvg': allareas,
                             'VolumeStd': allstdareas,
                             'VolumeMax': allmaxareas})
 
