@@ -129,7 +129,7 @@ def runalllblspar(seg,lbls,ncpus,alllbls):
 def getlblvals(lbls):
 
     flat = np.ndarray.flatten(lbls)
-    posflat = flat [flat > 0 ]
+    posflat = flat[flat > 0]
     counts = np.bincount(posflat)
 
     return np.nonzero(counts)[0]
@@ -167,11 +167,22 @@ def main():
     
     print ('\n Exporting features to csv file')
 
-    # lookup=pd.read_csv('/data/clarity_project/atlases/allen/annotations/allen_annot_lbls.csv')
+    lookup = pd.read_csv('/data/clarity_project/atlases/allen/annotations/allen_annot_lbls.csv')
 
-    nrows = allareas 
+    ids = lookup.id[alllbls]
+
+    names = lookup.name.isin(ids)
+    abrvs = lookup.arbvs.isin(ids)
+    parents = lookup.parent_structure_id.isin(ids)
+    paths = lookup.structure_id_path.isin(ids)
+
+    # nrows = allareas
 
     propsdf = pd.DataFrame({'LabelID' : alllbls,
+                            'LabelAbrv': abrvs,
+                            'LabelName': names,
+                            'ParentID': parents,
+                            'IDPath': paths,
                             'Count' : allnums,
                             'Density' : alldens,                            
                             'VolumeAvg' : allareas,
