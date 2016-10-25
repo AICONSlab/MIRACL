@@ -774,7 +774,7 @@ function main()
 	orthresclar=$regdir/hres_EYFP_ort.nii.gz
 	
 	# hres Allen
-	allenhres=$atlasdir/allen/allen_atlas_template_hres.nii.gz
+	allenhres=$atlasdir/aba/template/average_template_10um.nii.gz
 
 	# ants inv warp
 	antsinvwarp=$regdir/allen_clar_ants1InverseWarp.nii.gz
