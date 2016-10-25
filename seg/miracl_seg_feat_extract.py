@@ -13,6 +13,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 from datetime import datetime
 import sys
+import os
 import argparse
 
 # ---------
@@ -57,12 +58,14 @@ def upsampleswplbls(seg,lbls):
         
         else:
 
-            rx = float(segx) / lblsy
+            # rx = float(segx) / lblsy
+            rx = float(segx) / lblsx
             rz = float(segz) / lblsz
 
             print('Upsampling labels to clarity resolution')
 
-            reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
+            # reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
+            reslbls = sp.ndimage.zoom(lbls, (rz, rx, rx), order=0)
 
             resx = reslbls.shape[1]    
 
@@ -153,8 +156,8 @@ def main():
     print ("Reading labels")
     lbls = tiff.imread(inlbls)
 
-    if (lbls.dtype == np.float64) or (lbls.dtype == np.float32) or (lbls.dtype == np.uint32):    
-        lbls = lbls.astype(np.uint16)
+    if (lbls.dtype == np.float64) or (lbls.dtype == np.float32) or (lbls.dtype == np.int32):
+        lbls = lbls.astype(np.int16)
 
     # get all lbls
     alllbls = getlblvals(lbls)
@@ -167,7 +170,15 @@ def main():
     
     print ('\n Exporting features to csv file')
 
-    lookup = pd.read_csv('/data/clarity_project/atlases/allen/annotations/allen_annot_lbls.csv')
+    miracl_home = os.environ['MIRACL_HOME']
+
+    if np.max(alllbls) > 20000:
+
+        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_split.csv')
+
+    else:
+
+        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv')
 
     ids = lookup.id.isin(alllbls)
 
