@@ -720,28 +720,19 @@ function main()
 	
 	if [[ -z $lbls ]]; then
 		
-		lbls=$atlasdir/allen/annotations/res0.01/annotations.nii.gz
+		lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${res}um.nii.gz
+	fi
+
+	base=`basename $lbls`
+	lblsname=${base%%.*};
+
+	# Out lbls
+	wrplbls=$regdir/${lblsname}ants.nii.gz
+	ortlbls=$regdir/${lblsname}ants_ort.nii.gz
+	swplbls=$regdir/${lblsname}ants_swp.nii.gz
+	tiflbls=$regdir/${lblsname}ants.tif
+	# reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
 		
-		# Out lbls
-		wrplbls=$regdir/allen_lbls_clar_ants.nii.gz
-		ortlbls=$regdir/allen_lbs_clar_ants_ort.nii.gz
-		swplbls=$regdir/allen_lbs_clar_ants_swp.nii.gz
-		tiflbls=$regdir/allen_lbs_clar_ants.tif
-		# reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
-
-	else
-	
-		base=`basename $lbls`
-		lblsname=${base%%.*};
-
-		wrplbls=$regdir/allen_${lblsname}_clar_ants.nii.gz
-		ortlbls=$regdir/allen_${lblsname}_clar_ants_ort.nii.gz
-		swplbls=$regdir/allen_${lblsname}_clar_ants_swp.nii.gz
-		tiflbls=$regdir/allen_${lblsname}_clar_ants.tif	
-		# reslbls=$regdirfinal/allen_${lblsname}_clar_ants.nii.gz
-
-	fi	
-
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
