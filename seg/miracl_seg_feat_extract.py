@@ -170,15 +170,16 @@ def main():
     
     print ('\n Exporting features to csv file')
 
+
     miracl_home = os.environ['MIRACL_HOME']
 
     if np.max(alllbls) > 20000:
 
-        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_split.csv')
+        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     else:
 
-        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv')
+        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv' % miracl_home)
 
     # get attributes
     names = lookup.name[lookup.id.isin(alllbls)]
