@@ -169,7 +169,7 @@ def main():
 
     lookup = pd.read_csv('/data/clarity_project/atlases/allen/annotations/allen_annot_lbls.csv')
 
-    ids = lookup.id[alllbls]
+    ids = lookup.id.isin(alllbls)
 
     names = lookup.name.isin(ids)
     abrvs = lookup.acronym.isin(ids)
@@ -182,10 +182,10 @@ def main():
         dict(LabelID=alllbls, LabelAbrv=abrvs, LabelName=names, ParentID=parents, IDPath=paths, Count=allnums,
              Density=alldens, VolumeAvg=allareas, VolumeStd=allstdareas, VolumeMax=allmaxareas))
 
-    cols = ['LabelID','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
+    cols = ['LabelID','LabelAbrv','LabelName','ParentID','IDPath','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
     propsdf = propsdf[cols]
 
-    propscsv = 'clarity_segmentation_features.csv'    
+    propscsv = "clarity_segmentation_features.csv"
     propsdf.to_csv(propscsv)
 
     print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))

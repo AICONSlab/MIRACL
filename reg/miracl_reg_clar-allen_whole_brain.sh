@@ -662,7 +662,7 @@ function main()
 # 2a) initialize registration
 
 	# Allen atlas template
-	allenref=$atlasdir/allen/allen_atlas_template_res0.05_reg.nii.gz
+	allenref=$atlasdir/aba/template/average_template_25um.nii.gz
 
 	initform=$regdir/init_tform.mat 
 
