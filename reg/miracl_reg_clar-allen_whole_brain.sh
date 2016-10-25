@@ -753,10 +753,10 @@ function main()
 	lblsname=${base%%.*};
 
 	# Out lbls
-	wrplbls=$regdir/${lblsname}ants.nii.gz
-	ortlbls=$regdir/${lblsname}ants_ort.nii.gz
-	swplbls=$regdir/${lblsname}ants_swp.nii.gz
-	tiflbls=$regdir/${lblsname}ants.tif
+	wrplbls=$regdir/${lblsname}_ants.nii.gz
+	ortlbls=$regdir/${lblsname}_ants_ort.nii.gz
+	swplbls=$regdir/${lblsname}_ants_swp.nii.gz
+	tiflbls=$regdir/${lblsname}_ants.tif
 	# reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
 		
 	# upsample in python now
