@@ -47,15 +47,17 @@ function usage()
 
 		optional arguments:
 		
-			l. Allen labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
-				could be at a different depth than default labels 
-
-			h. accepted inputs are: <split> or <combined> 
-				Labels with hemisphere split (Left different than Right labels) or combined (L & R same labels)
-
-			v. accepted inputs are: 10, 25 or 50
-				Voxel size/Resolutin of labels in um 	
+			h. Labels with hemisphere split (Left different than Right labels) or combined (L & R same labels)
+				accepted inputs are: <split> or <combined>  (default: split)
 				
+
+			v. Voxel size/Resolutin of labels in um 
+				accepted inputs are: 10, 25 or 50  (default: 10)
+				
+			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
+				could be at a different depth than default labels 				
+
+				If l. is specified (h & v cannot be speficied)	
 
 	----------		
 
@@ -148,7 +150,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:" opt; do
+	while getopts ":i:r:l:h:v:" opt; do
     
 	    case "${opt}" in
 
@@ -164,6 +166,12 @@ if [[ "$#" -gt 1 ]]; then
             	lbls=${OPTARG}
             	;;
 
+        	h)
+            	hemi=${OPTARG}
+            	;;
+        	v)
+            	vox=${OPTARG}
+            	;;
         	*)
             	usage            	
             	;;
