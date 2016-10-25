@@ -47,8 +47,14 @@ function usage()
 
 		optional arguments:
 		
-			l. Allen labels to warp (default: annotations.nii.gz - which are at a resolution of 0.01mm/10um) 
-				could be at a different resolution or depth than default labels 
+			l. Allen labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
+				could be at a different depth than default labels 
+
+			h. accepted inputs are: <split> or <combined> 
+				Labels with hemisphere split (Left different than Right labels) or combined (L & R same labels)
+
+			v. accepted inputs are: 10, 25 or 50
+				Voxel size/Resolutin of labels in um 	
 				
 
 	----------		
