@@ -730,11 +730,23 @@ function main()
 	antswarp=$regdir/allen_clar_ants1Warp.nii.gz
 	antsaff=$regdir/allen_clar_ants0GenericAffine.mat
 
-	# If want to warp multi-level lbls
+	# If want to warp multi-res / hemi lbls
 	
 	if [[ -z $lbls ]]; then
 		
-		lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${res}um.nii.gz
+		if [[ -z $hemi ]]; then
+			
+			hemi=split
+
+		fi
+
+		if [[ -z $vox ]]; then
+			
+			vox=10
+
+		fi
+
+		lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 	fi
 
 	base=`basename $lbls`
