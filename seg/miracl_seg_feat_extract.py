@@ -180,12 +180,12 @@ def main():
 
         lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv')
 
-    ids = lookup.id.isin(alllbls)
+    # get attributes
+    names = lookup.name[lookup.id.isin(alllbls)]
+    abrvs = lookup.acronym[lookup.id.isin(alllbls)]
+    parents = lookup.parent_structure_id[lookup.id.isin(alllbls)]
+    paths = lookup.structure_id_path[lookup.id.isin(alllbls)]
 
-    names = lookup.name.isin(ids)
-    abrvs = lookup.acronym.isin(ids)
-    parents = lookup.parent_structure_id.isin(ids)
-    paths = lookup.structure_id_path.isin(ids)
 
     # nrows = allareas
 
