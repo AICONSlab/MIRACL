@@ -49,11 +49,11 @@ def upsampleswplbls(seg,lbls):
     lblsy = lbls.shape[2]
     lblsz = lbls.shape[0]
 
-    if (segx != lblsx):
+    if segx != lblsx:
 
-        if (segx == lblsy) :
+        if segx == lblsy:
 
-            print ('Swaping x-y')
+            print ('Swapping x-y')
             reslbls = np.swapaxes(lbls, 1, 2)
         
         else:
@@ -67,11 +67,10 @@ def upsampleswplbls(seg,lbls):
             # reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
             reslbls = sp.ndimage.zoom(lbls, (rz, rx, rx), order=0)
 
-            resx = reslbls.shape[1]    
+            resx = reslbls.shape[1]
 
-            if (segx != resx):
-                
-                print ('Swaping x-y')
+            if segx != resx:
+                print ('Swapping x-y')
                 reslbls = np.swapaxes(reslbls,1,2)
 
     else:
