@@ -765,8 +765,9 @@ function main()
 	ortlbls=$regdir/${lblsname}_ants_ort.nii.gz
 	swplbls=$regdir/${lblsname}_ants_swp.nii.gz
 	tiflbls=$regdir/${lblsname}_ants.tif
-	# reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
-		
+	reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
+	restif=$regdirfinal/allen_lbls_clar_ants.tif
+
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
