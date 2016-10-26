@@ -391,7 +391,8 @@ function orientimg()
 	local orttype=$4
 	local ortclar=$5
 
-	ifdsntexistrun $ortclar "Orienting CLARITY to standard orientation" c3d $betclar -orient $orttag -interpolation $ortint -type $orttype -o $ortclar
+	ifdsntexistrun $ortclar "Orienting CLARITY to standard orientation" \
+	c3d $betclar -orient $orttag -interpolation $ortint -type $orttype -o $ortclar
 
 }
 
@@ -452,7 +453,8 @@ function initclarallenreg()
 
 
 	# Init reg
-	ifdsntexistrun $initform "Initializing registration ..." antsAffineInitializer 3 $clarroi $allenref $initform $deg $radfrac $useprincax $localiter
+	ifdsntexistrun $initform "Initializing registration ..." \
+	 antsAffineInitializer 3 $clarroi $allenref $initform $deg $radfrac $useprincax $localiter
 
 
 	# Warp Allen
@@ -525,13 +527,15 @@ function warpallenlbls()
 	local swplbls=${11}
 	local tiflbls=${12}
 	
-	# # Up lbls
-	# local resclar=${11}
-	# local reslbls=${12}
+	# Up lbls
+    local hresclar=${13}
+    local reslbls=${14}
+    local restif=${15}
 
 
 	# warp to registered clarity
-	ifdsntexistrun $wrplbls "Applying ants deformation to Allen labels" antsApplyTransforms -r $smclar -i $lbls -n Multilabel -t $antswarp $antsaff $initform -o $wrplbls
+	ifdsntexistrun $wrplbls "Applying ants deformation to Allen labels" \
+	 antsApplyTransforms -r $smclar -i $lbls -n Multilabel -t $antswarp $antsaff $initform -o $wrplbls
 
 
 	# orient to org 
@@ -546,16 +550,20 @@ function warpallenlbls()
 	# upsample to img dimensions
 
 	# # get img dim
-	# alldim=`PrintHeader $resclar 2`
+	 alldim=`PrintHeader $hresclar 2`
 
-	# x=${alldim%%x*}; x=$((x*10))
-	# yz=${alldim#*x}; y=${yz%x*} ; y=$((y*10))
-	# z=${alldim##*x}; z=$((z*10))
+	 x=${alldim%%x*};
+	 yz=${alldim#*x}; y=${yz%x*} ;
+	 z=${alldim##*x};
 
-	# dim="${x}x${y}x${z}";
+	 dim="${x}x${y}x${z}";
 
-	# ifdsntexistrun $reslbls "Upsampling labels to original CLARITY resolution" c3d $ortlbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
+	 ifdsntexistrun $reslbls "Upsampling labels to CLARITY resolution" \
+	  c3d $swplbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
 	# Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
+
+    # create hres tif lbls
+	ifdsntexistrun $restif "Converting high res lbls to tif" c3d $reslbls -type $orttypelbls -o $restif
 
 
 }
@@ -762,7 +770,7 @@ function main()
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
-	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $swplbls $tiflbls
+	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $swplbls $tiflbls $hresclar $reslbls $restif
 
 	#---------------------------
 
