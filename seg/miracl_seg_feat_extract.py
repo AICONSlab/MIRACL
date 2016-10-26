@@ -196,7 +196,7 @@ def main():
     cols = ['LabelID','LabelAbrv','LabelName','ParentID','IDPath','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
     propsdf = propsdf[cols]
 
-    propscsv = "clarity_segmentation_features.csv"
+    propscsv = "clarity_segmentation_features_aba_labels.csv"
     propsdf.to_csv(propscsv)
 
     print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))

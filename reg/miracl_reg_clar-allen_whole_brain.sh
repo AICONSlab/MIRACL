@@ -599,7 +599,7 @@ function warphresclarallen()
 
 	# Apply warps
 	ifdsntexistrun $regorgclar "Applying ants deformation to high-res CLARITY" \
-	antsApplyTransforms -r $allenhres -i $orthresclar -n Bspline -t [$initform,1] [$antsaff,1] $antsinvwarp -o $regorgclar --float
+	antsApplyTransforms -r $allenhres -i $orthresclar -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o $regorgclar --float
 
 }
 
