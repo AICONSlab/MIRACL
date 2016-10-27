@@ -43,6 +43,7 @@ inlbls = args.lbl
 def upsampleswplbls(seg,lbls):
 
     segx = seg.shape[1]
+    segy = seg.shape[2]
     segz = seg.shape[0]
 
     lblsx = lbls.shape[1]
@@ -60,12 +61,13 @@ def upsampleswplbls(seg,lbls):
 
             # rx = float(segx) / lblsy
             rx = float(segx) / lblsx
+            ry = float(segy) / lblsy
             rz = float(segz) / lblsz
 
             print('Upsampling labels to clarity resolution')
 
             # reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
-            reslbls = sp.ndimage.zoom(lbls, (rz, rx, rx), order=0)
+            reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
 
             resx = reslbls.shape[1]
 
