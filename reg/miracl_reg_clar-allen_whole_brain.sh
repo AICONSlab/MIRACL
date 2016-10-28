@@ -533,7 +533,7 @@ function warpallenlbls()
     local restif=${16}
 
     # flip L-R for tif
-    ifdsntexistrun ${lbls} "Flipping label dimensions" PermuteFlipImageOrientationAxes  3 ${lbls} ${flplbls}  0 0 0  1 0 0
+    ifdsntexistrun ${flplbls} "Flipping label L-R for tif" PermuteFlipImageOrientationAxes  3 ${lbls} ${flplbls}  0 0 0  1 0 0
 
 	# warp to registered clarity
 	ifdsntexistrun $wrplbls "Applying ants deformation to Allen labels" \
