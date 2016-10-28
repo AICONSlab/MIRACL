@@ -104,11 +104,15 @@ def saveniiparents(parentdata, vx, outnii):
     mat[1, 1] = vx
     mat[2, 2] = vx
 
+    # orient nii
+    tform = nib.orientations.axcodes2ornt(('P', 'I', 'L'))
+    parentort = nib.orientations.apply_orientation(parentdata, tform)
+
     # Create nifti
-    nii = nib.Nifti1Image(parentdata, mat)
+    nii = nib.Nifti1Image(parentort, mat)
 
     # nifti header info
-    nii.header.set_data_dtype(np.float32)
+    nii.header.set_data_dtype(np.int32)
     nib.save(nii, outnii)
 
 
