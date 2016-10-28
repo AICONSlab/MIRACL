@@ -47,9 +47,8 @@ function usage()
 
 		optional arguments:
 		
-			h. Labels with hemisphere split (Left different than Right labels) or combined (L & R same labels)
+			m. Labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 				accepted inputs are: <split> or <combined>  (default: split)
-				
 
 			v. Voxel size/Resolutin of labels in um 
 				accepted inputs are: 10, 25 or 50  (default: 10)
@@ -150,7 +149,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:l:h:v:" opt; do
+	while getopts ":i:r:l:m:v:" opt; do
     
 	    case "${opt}" in
 
@@ -166,7 +165,7 @@ if [[ "$#" -gt 1 ]]; then
             	lbls=${OPTARG}
             	;;
 
-        	h)
+        	m)
             	hemi=${OPTARG}
             	;;
         	v)
