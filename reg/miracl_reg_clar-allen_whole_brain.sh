@@ -578,27 +578,27 @@ function warphresclarallen()
 {
 
 	# Ort clar
-	local hresclar=$1
-	local ortclartag=$2
-	local ortclarint=$3
-	local ortclartype=$4
-	local orthresclar=$5
+	hresclar=$1
+	ortclartag=$2
+	ortclarint=$3
+	ortclartype=$4
+	orthresclar=$5
 
 	# Reg to allen
-	local allenhres=$6
-	local initform=$7
-	local antsaff=$8	
-	local antsinvwarp=$9
+	allenhres=$6
+	initform=$7
+	antsaff=$8
+	antsinvwarp=$9
 	
-	local regorgclar=${10}
+	regorgclar=${10}
 
 
 	# Orient channel to std
-	orientimg $hresclar $ortclartag $ortclarint $ortclartype $orthresclar
+	orientimg ${hresclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
 
 	# Apply warps
 	ifdsntexistrun $regorgclar "Applying ants deformation to high-res CLARITY" \
-	antsApplyTransforms -r $allenhres -i $orthresclar -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o $regorgclar --float
+	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgclar} --float
 
 }
 
@@ -744,7 +744,12 @@ function main()
 		if [[ -z $hemi ]]; then
 			
 			hemi=split
+			lblsdir=${atlasdir}/aba/annotation/l-r_flp
 
+		fi
+
+		if [[ "${hemi}" -eq "combined" ]]; then
+		    lblsdir=${atlasdir}/aba/annotation
 		fi
 
 		if [[ -z $vox ]]; then
@@ -753,7 +758,7 @@ function main()
 
 		fi
 
-		lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+		lbls=${lblsdir}/annotation_hemi_${hemi}_${vox}um.nii.gz
 	fi
 
 	base=`basename $lbls`
@@ -779,19 +784,19 @@ function main()
 
 
 	# ort hres clar
-	orthresclar=$regdir/hres_EYFP_ort.nii.gz
+	orthresclar=${regdir}/hres_EYFP_ort.nii.gz
 	
 	# hres Allen
-	allenhres=$atlasdir/aba/template/average_template_10um.nii.gz
+	allenhres=${atlasdir}/aba/template/average_template_10um.nii.gz
 
 	# ants inv warp
-	antsinvwarp=$regdir/allen_clar_ants1InverseWarp.nii.gz
+	antsinvwarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz
 
 	# out warp hres clar
-	regorgclar=$regdirfinal/hresclar_allen_ants.nii.gz
+	regorgclar=${regdirfinal}/hresclar_allen_ants.nii.gz
 
 
-	warphresclarallen $hresclar ALS Cubic short $orthresclar $allenhres $initform $antsaff $antsinvwarp $regorgclar
+	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
 
 }
 
