@@ -537,7 +537,7 @@ function warpallenlbls()
 
 	# warp to registered clarity
 	ifdsntexistrun $wrplbls "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r $smclar -i $lbls -n Multilabel -t $antswarp ${antsaff} $initform -o $wrplbls
+	 antsApplyTransforms -r $smclar -i ${flplbls} -n Multilabel -t $antswarp ${antsaff} $initform -o $wrplbls
 
 	# orient to org 
 	orientimg $wrplbls $orttaglbls $ortintlbls $orttypelbls $ortlbls
