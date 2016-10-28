@@ -35,9 +35,9 @@ function usage()
 	For command-line / scripting
 
 
-	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <higher_res_clarity_nifti> -l <allen labels to warp>
+	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <higher_res_clarity_nifti>
 
-	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz -l grand-parent_lbls.nii.gz
+	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz
 
 		arguments (required):
 
@@ -56,7 +56,7 @@ function usage()
 			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
 				could be at a different depth than default labels 				
 
-				If l. is specified (h & v cannot be speficied)	
+				If l. is specified (m & v cannot be speficied)
 
 	----------		
 
