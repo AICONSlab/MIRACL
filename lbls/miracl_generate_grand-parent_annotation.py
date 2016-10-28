@@ -18,7 +18,7 @@ from datetime import datetime
 # help fn
 
 def helpmsg(name=None):
-    return '''mouse_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: split)] -v [voxel size in um: 10, 25 or 50 (default: 10)]
+    return '''mouse_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 10)]
 
     Computes features of segmented image and summarizes them per label
 
@@ -46,7 +46,7 @@ if args.pl is None:
     print("parent level not specified ... choosing default value of %d" % pl)
 
 if args.hemi is None:
-    hemi = "split"
+    hemi = "combined"
     print("hemisphere not specified ... choosing default value of %s" % hemi)
 
 if args.res is None:
