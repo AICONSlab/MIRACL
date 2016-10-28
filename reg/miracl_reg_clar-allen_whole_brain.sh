@@ -374,7 +374,7 @@ function maskimage()
 		
 	ifdsntexistrun $betclar "Removing CLARITY image outline artifacts" MultiplyImages 3 $biasclar $dilmask $betclar
 
-	c3d $betclar -type short $betclar
+	c3d $betclar -type short -o $betclar
 
 }
 
@@ -507,42 +507,40 @@ function warpallenlbls()
 	# In imgs
 	local smclar=$1
 	local lbls=$2
-	local flplbls=$3
 
 	# In tforms
-	local antswarp=$4
-	local antsaff=$5
-	local initform=$6
+	local antswarp=$3
+	local antsaff=$4
+	local initform=$5
 
 	# Out lbls
-	local wrplbls=$7
+	local wrplbls=$6
 	
 	# Ort pars
-	local orttaglbls=$8
-	local ortintlbls=$9
-	local orttypelbls=$10
-	local ortlbls=${11}
+	local orttaglbls=$7
+	local ortintlbls=$8
+	local orttypelbls=$9
+	local ortlbls=${10}
 
 	# swap lbls
-	local swplbls=${12}
-	local tiflbls=${13}
+	local swplbls=${11}
+	local tiflbls=${12}
 	
 	# Up lbls
-    local hresclar=${14}
-    local reslbls=${15}
-    local restif=${16}
+    local hresclar=${13}
+    local reslbls=${14}
+    local restif=${15}
 
-    # flip L-R for tif
-    ifdsntexistrun ${flplbls} "Flipping label L-R for tif" PermuteFlipImageOrientationAxes  3 ${lbls} ${flplbls}  0 0 0  1 0 0
 
 	# warp to registered clarity
 	ifdsntexistrun $wrplbls "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r $smclar -i ${flplbls} -n Multilabel -t $antswarp ${antsaff} $initform -o $wrplbls
+	 antsApplyTransforms -r $smclar -i $lbls -n Multilabel -t $antswarp $antsaff $initform -o $wrplbls
+
 
 	# orient to org 
 	orientimg $wrplbls $orttaglbls $ortintlbls $orttypelbls $ortlbls
 
-	# swap dims
+	# swap dim (x=>y / y=>x)
 	ifdsntexistrun $swplbls "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 $ortlbls $swplbls  1 0 2  0 0 0
 
 	# create tif lbls
@@ -762,7 +760,6 @@ function main()
 	lblsname=${base%%.*};
 
 	# Out lbls
-	flplbls=$regdir/${lblsname}_flp.nii.gz
 	wrplbls=$regdir/${lblsname}_ants.nii.gz
 	ortlbls=$regdir/${lblsname}_ants_ort.nii.gz
 	swplbls=$regdir/${lblsname}_ants_swp.nii.gz
@@ -773,7 +770,7 @@ function main()
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
-	warpallenlbls $smclar $lbls $flplbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $swplbls $tiflbls $hresclar $reslbls $restif
+	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls RPI NearestNeighbor short $ortlbls $swplbls $tiflbls $hresclar $reslbls $restif
 
 	#---------------------------
 
