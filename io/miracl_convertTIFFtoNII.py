@@ -100,15 +100,24 @@ if args.chann is None:
     print("# channels not specified ... choosing default value of %d" % chann)
 
 if args.chan is None:
-    chan = outnii = 'thy1_yfp'
+    chan = 'thy1_yfp'
     print("channel name not specified ... choosing default value of %s" % chan)
-
-if args.outnii is None:
-    outnii =
 
 # ---------
 
 def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
+    """
+    :param indir:
+    :param dr:
+    :param chann:
+    :param chan:
+    :param vs:
+    :param cent:
+    :param ot:
+    :param cp:
+    :return:
+    """
+
     outnii = ot
     chanp = cp
 
@@ -123,7 +132,6 @@ def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
 
     print "\n Converting Tiff images to NII \n"
 
-    # Par loop?!
     # For loop, Load an image,downsample, append into 3D
 
     data = []
@@ -167,7 +175,10 @@ def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
         os.makedirs(outdir)
 
     # Save nifti
-    niiname = '%s/%s_%02ddown_%schan.nii.gz' % (outdir, outnii, dr, chan)
+    if outnii is None:
+        niiname = '%s/%schan.nii.gz' % (outdir, chan)
+    else:
+        niiname = '%s/%s_%02ddown_%schan.nii.gz' % (outdir, outnii, dr, chan)
     nib.save(nii, niiname)
 
     print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
@@ -176,6 +187,9 @@ def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
 # ---------
 
 def main():
+    """
+    :rtype: nifti file
+    """
     converttiff2nii(indir, dr, chann, chan, vs, cent, ot=outnii, cp=chanp)
 
 
