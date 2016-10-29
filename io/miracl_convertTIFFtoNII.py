@@ -4,7 +4,6 @@
 # coding: utf-8
 
 import numpy as np
-import sys
 import nibabel as nib
 import cv2
 import glob
@@ -98,17 +97,26 @@ if args.dr is None:
 
 if args.chann is None:
     chann = 1
-    print("# channels not specified ... choosing default value of %s" % chann)
+    print("# channels not specified ... choosing default value of %d" % chann)
 
-if args.chanp is None:
-    res = 25
-    print("voxel size not specified ... choosing default value of %dum" % res)
+if args.chan is None:
+    chan = outnii = 'thy1_yfp'
+    print("channel name not specified ... choosing default value of %s" % chan)
+
+if args.outnii is None:
+    outnii =
 
 # ---------
 
-def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, outnii):
+def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
+    outnii = ot
+    chanp = cp
+
     # Get file lis
-    file_list = glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann))
+    if chanp is None:
+        file_list = glob.glob("%s/*.tif" % indir)
+    else:
+        file_list = glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann))
 
     # down ratio
     down = (1.0 / int(dr))
@@ -168,8 +176,7 @@ def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, outnii):
 # ---------
 
 def main():
-
-    converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, outnii)
+    converttiff2nii(indir, dr, chann, chan, vs, cent, ot=outnii, cp=chanp)
 
 
 if __name__ == "__main__":
