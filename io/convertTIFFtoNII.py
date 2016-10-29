@@ -127,7 +127,7 @@ def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, ounii):
         vs = [outvox, outvox, orgres]
 
     if args.center is None:
-        cent = [-5.7, -6.6, -4]
+        cent = [5.7, -6.6, -4]
 
     # Create nifti
     mat = np.eye(4)
