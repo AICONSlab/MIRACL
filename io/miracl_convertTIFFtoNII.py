@@ -21,8 +21,6 @@ def helpmsg(name=None):
 
 Converts Tiff images to Nifti 
 
-    Usage: convertTifftoNii.py
-
     A GUI will open to choose your:
 
         - < Input clarity tif dir > : images of only one channel
@@ -40,10 +38,10 @@ Example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2
         -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [chan prefix (string before channel number in file name). ex: C00 ]
         -ch [chan name (default: thy1_yfp)]
-        -vs [voxel size (default: 25um) ]
+        -vs [voxel size (default: 0.025 0.025 0.025) '25um' ]
         -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
-        example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.005  -c 5 10 -4
+        example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.025  -c 5.7 -6.6 -4
 
         '''
 

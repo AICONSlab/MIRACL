@@ -166,9 +166,9 @@ START=$(date +%s)
 # get macro
 macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_sparse.ijm
 
-motherdir=$(dirname ${tifdir})
-inputdir=$(basename ${tifdir})
-segdir=${motherdir}/${inputdir}_segmentation
+#motherdir=$(dirname ${tifdir})
+#inputdir=$(basename ${tifdir})
+segdir=${tifdir}/segmentation
 
 # make seg dir
 if [[ ! -d ${segdir} ]];then

@@ -21,7 +21,7 @@
 path = getArgument();
 print("Files path is:" + path);
 
-segpath = path + "/../segmentation/" ;
+segpath = path + "/segmentation/" ;
 
 // Init Parameters:-
 
