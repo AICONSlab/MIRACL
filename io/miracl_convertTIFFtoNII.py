@@ -12,6 +12,8 @@ import argparse
 import os
 from Tkinter import Tk
 import tkFileDialog
+import sys
+
 
 startTime = datetime.now()
 
@@ -29,16 +31,17 @@ Converts Tiff images to Nifti
 
     For command-line / scripting
 
-    Usage: convertTifftoNii.py -f [Tiff folder] -d [Downsample ratio] -o [out nii name]
+    Usage: convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
 
-Example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2
+Example: convertTifftoNii.py -f my_tifs -o stroke2
 
     Optional arguments:
 
+        -d  [Downsample ratio]
         -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [chan prefix (string before channel number in file name). ex: C00 ]
         -ch [chan name (default: thy1_yfp)]
-        -vs [voxel size (default: 0.025 0.025 0.025) '25um' ]
+        -vs [voxel size (default: 0.005*(1/d), 0.005*(1/d), 0.005 ]
         -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
         example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.025  -c 5.7 -6.6 -4
@@ -46,20 +49,7 @@ Example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2
         '''
 
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-
-parser.add_argument('-f', '--folder', type=str, help="Tiff folder")
-parser.add_argument('-d', '--down', type=int, help="Downsample ratio")
-parser.add_argument('-cn', '--channum', type=int, help="Channel number")
-parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
-parser.add_argument('-ch', '--channame', type=str, help="Channel name")
-parser.add_argument('-o', '--outnii', type=str, help="Out nii name")
-parser.add_argument('-vs', '--voxelsize', type=int, nargs='+', help="Out nii voxel sizes")
-parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
-
-args = parser.parse_args()
-
-if args is None:
+if len(sys.argv) == 1:
 
     print("Running in GUI mode")
 
@@ -68,42 +58,67 @@ if args is None:
 
 else:
 
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+
+    parser.add_argument('-f', '--folder', type=str, help="Tiff folder", required=True)
+    parser.add_argument('-d', '--down', type=int, help="Downsample ratio", required=True)
+    parser.add_argument('-cn', '--channum', type=int, help="Channel number")
+    parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
+    parser.add_argument('-ch', '--channame', type=str, help="Channel name")
+    parser.add_argument('-o', '--outnii', type=str, help="Out nii name", required=True)
+    parser.add_argument('-vs', '--voxelsize', type=int, nargs='+', help="Out nii voxel sizes")
+    parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
+
+    args = parser.parse_args()
+
     print("Running in script mode")
 
+    # check if pars given
+
+    assert isinstance(args.folder, str)
     indir = args.folder
-    assert isinstance(args.indir, str)
-    dr = args.down
-    assert isinstance(args.dr, int)
-    chann = args.channum
-    assert isinstance(args.chann, int)
-    chanp = args.chanprefix
-    assert isinstance(args.channame, str)
-    chan = args.channame
-    assert isinstance(args.chan, str)
-    vs = args.voxelsize
-    assert isinstance(args.vs, int)
-    cent = args.center
-    assert isinstance(args.cent, int)
-    outnii = args.outnii
+
     assert isinstance(args.outnii, str)
+    outnii = args.outnii
 
-# check if pars given
+    if args.down is None:
+        dr = 1
+        print("down sample ratio not specified ... choosing default value of %d" % dr)
+    else:
+        assert isinstance(args.down, int)
+        dr = args.down
 
-if args.dr is None:
-    dr = 1
-    print("down sample ratio not specified ... choosing default value of %d" % dr)
+    if args.channum is None:
+        chann = 1
+        print("# channels not specified ... choosing default value of %d" % chann)
+    else:
+        assert isinstance(args.channum, int)
+        chann = args.channum
 
-if args.chann is None:
-    chann = 1
-    print("# channels not specified ... choosing default value of %d" % chann)
+    if args.channame is None:
+        chan = 'thy1_yfp'
+        print("channel name not specified ... choosing default value of %s" % chan)
+    else:
+        assert isinstance(args.channame, str)
+        chan = args.channame
 
-if args.chan is None:
-    chan = 'thy1_yfp'
-    print("channel name not specified ... choosing default value of %s" % chan)
+    if args.voxelsize is None:
+        orgres = 0.005  # 5 um
+        outvox = orgres * dr
+        vs = [outvox, outvox, orgres]
+    else:
+        vs = args.voxelsize
+
+    if args.center is None:
+        cent = [5.7, -6.6, -4]
+    else:
+        cent = args.center
+
+    chanp = args.chanprefix if args.chanprefix is not None else None
 
 # ---------
 
-def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
+def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None):
     """
     :param indir:
     :param dr:
@@ -145,15 +160,6 @@ def converttiff2nii(indir, dr, chann, chan, vs, cent, ot=None, cp=None):
     data_array = np.rollaxis(data_array, 0, 3)
 
     # Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
-
-    orgres = 0.005  # 5 um
-
-    if args.voxelsize is None:
-        outvox = orgres * dr
-        vs = [outvox, outvox, orgres]
-
-    if args.center is None:
-        cent = [5.7, -6.6, -4]
 
     # Create nifti
     mat = np.eye(4)
