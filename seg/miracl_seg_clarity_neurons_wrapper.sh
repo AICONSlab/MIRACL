@@ -168,13 +168,13 @@ macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_sparse.ijm
 
 motherdir=$(dirname ${tifdir})
 inputdir=$(basename ${tifdir})
-segdir=${motherdir}/${inpudir}_segmentation
+segdir=${motherdir}/${inputdir}_segmentation
 
 # make seg dir
-if [[ ! -d $segdir ]];then
+if [[ ! -d ${segdir} ]];then
 
 	printf "\n Creating Segmentation folder\n"
-	mkdir -p $segdir 
+	mkdir -p ${segdir}
 
 fi
 
@@ -194,16 +194,16 @@ fi
 # echo "sync; echo 3 | sudo tee /proc/sys/vm/drop_caches"
 #sync; echo 3 | sudo tee /proc/sys/vm/drop_caches 1>/dev/null
 
-outseg=$tifdir/seg.mhd
-log=$tifdir/Fiji_seg_log.txt 
-outnii=$segdir/seg.nii.gz
+outseg=${tifdir}/seg.mhd
+log=${tifdir}/Fiji_seg_log.txt
+outnii=${segdir}/seg.nii.gz
 
-if [[ ! -f $outseg ]]; then
+if [[ ! -f ${outseg} ]]; then
 
 	printf "\n Performing Segmentation using Fiji \n"
 			
-	echo Fiji -macro $macro "${tifdir}" | tee $log 
-	Fiji -macro $macro "${tifdir}/" | tee $log
+	echo Fiji -macro $macro "${tifdir}" | tee ${log}
+	Fiji -macro $macro "${tifdir}/" | tee ${log}
 		
 else
 
