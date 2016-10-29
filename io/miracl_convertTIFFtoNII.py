@@ -37,11 +37,11 @@ Example: convertTifftoNii.py -f my_tifs -o stroke2
 
     Optional arguments:
 
-        -d  [Downsample ratio]
+        -d  [Downsample ratio (default: 3) ]
         -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [chan prefix (string before channel number in file name). ex: C00 ]
         -ch [chan name (default: thy1_yfp)]
-        -vs [voxel size (default: 0.005*(1/d), 0.005*(1/d), 0.005 ]
+        -vs [voxel size (default: 0.005*(1/d), 0.005*(1/d), 0.005 ] assuming 5um original resolution
         -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
         example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.025  -c 5.7 -6.6 -4
@@ -61,7 +61,7 @@ else:
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
     parser.add_argument('-f', '--folder', type=str, help="Tiff folder", required=True)
-    parser.add_argument('-d', '--down', type=int, help="Downsample ratio", required=True)
+    parser.add_argument('-d', '--down', type=int, help="Downsample ratio")
     parser.add_argument('-cn', '--channum', type=int, help="Channel number")
     parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
     parser.add_argument('-ch', '--channame', type=str, help="Channel name")
@@ -82,7 +82,7 @@ else:
     outnii = args.outnii
 
     if args.down is None:
-        dr = 1
+        dr = 3
         print("down sample ratio not specified ... choosing default value of %d" % dr)
     else:
         assert isinstance(args.down, int)
