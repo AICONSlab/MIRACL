@@ -741,14 +741,14 @@ function main()
 	
 	if [[ -z $lbls ]]; then
 
-#        if [[ ${hemi} -eq "combined" ]]; then
-#		    lblsdir=${atlasdir}/aba/annotation
-#		fi
+        if [[ ${hemi} -eq "combined" ]]; then
+		    lblsdir=${atlasdir}/aba/annotation
+		fi
 
 		if [[ -z $hemi ]]; then
 			
 			hemi=split
-#			lblsdir=${atlasdir}/aba/annotation/l-r_flp
+			lblsdir=${atlasdir}/aba/annotation/l-r_flp
 
 		fi
 
@@ -757,8 +757,9 @@ function main()
 			vox=10
 
 		fi
-        lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-#		lbls=${lblsdir}/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+		lbls=${lblsdir}/annotation_hemi_${hemi}_${vox}um.nii.gz
+
 	fi
 
 	base=`basename $lbls`

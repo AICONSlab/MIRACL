@@ -59,106 +59,106 @@ outnii = args.outnii
 # Logging fn
 
 def scriptlog(logname):
-	class StreamToLogger(object):
-		"""
+    class StreamToLogger(object):
+        """
        Fake file-like stream object that redirects writes to a logger instance.
        """
 
-		def __init__(self, logger, log_level=logging.INFO):
-			self.logger = logger
-			self.log_level = log_level
-			self.linebuf = ''
+        def __init__(self, logger, log_level=logging.INFO):
+            self.logger = logger
+            self.log_level = log_level
+            self.linebuf = ''
 
-		def write(self, buf):
-			for line in buf.rstrip().splitlines():
-				self.logger.log(self.log_level, line.rstrip())
+        def write(self, buf):
+            for line in buf.rstrip().splitlines():
+                self.logger.log(self.log_level, line.rstrip())
 
-		def flush(self):
-			pass
+        def flush(self):
+            pass
 
-	logging.basicConfig(
-		level=logging.DEBUG,
-		filename="%s" % logname,
-		format='%(asctime)s:%(message)s',
-		filemode='w')
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="%s" % logname,
+        format='%(asctime)s:%(message)s',
+        filemode='w')
 
-	stdout_logger = logging.getLogger('STDOUT')
-	handler = logging.StreamHandler()
-	stdout_logger.addHandler(handler)
-	sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
+    stdout_logger = logging.getLogger('STDOUT')
+    handler = logging.StreamHandler()
+    stdout_logger.addHandler(handler)
+    sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
 
-	stderr_logger = logging.getLogger('STDERR')
-	stderr_logger.addHandler(handler)
-	sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
+    stderr_logger = logging.getLogger('STDERR')
+    stderr_logger.addHandler(handler)
+    sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
 
 # ---------
 
 def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, ounii):
-	# Get file lis
-	file_list = glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann))
+    # Get file lis
+    file_list = glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann))
 
-	# down ratio
-	down = (1.0 / int(dr))
+    # down ratio
+    down = (1.0 / int(dr))
 
-	print "\n Converting Tiff images to NII \n"
+    print "\n Converting Tiff images to NII \n"
 
-	# Par loop?!
-	# For loop, Load an image,downsample, append into 3D
+    # Par loop?!
+    # For loop, Load an image,downsample, append into 3D
 
-	data = []
-	for x in file_list:
-		m = cv2.imread(x, -1)
-		mres = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_CUBIC)
-		data.append(mres)
+    data = []
+    for x in file_list:
+        m = cv2.imread(x, -1)
+        mres = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_CUBIC)
+        data.append(mres)
 
-	# array type
-	data_array = np.array(data, dtype='int16')
+    # array type
+    data_array = np.array(data, dtype='int16')
 
-	# roll dimensions
-	data_array = np.rollaxis(data_array, 0, 3)
+    # roll dimensions
+    data_array = np.rollaxis(data_array, 0, 3)
 
-	# Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
+    # Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
 
-	orgres = 0.005  # 5 um
+    orgres = 0.005  # 5 um
 
-	if args.voxelsize is None:
-		outvox = orgres * dr
-		vs = [outvox, outvox, orgres]
+    if args.voxelsize is None:
+        outvox = orgres * dr
+        vs = [outvox, outvox, orgres]
 
-	if args.center is None:
-		cent = [5, 10, -4]
+    if args.center is None:
+        cent = [-5.7, -6.6, -4]
 
-	# Create nifti
-	mat = np.eye(4)
-	mat[0, 3] = cent[0]
-	mat[1, 3] = cent[1]
-	mat[2, 3] = cent[2]
-	nii = nib.Nifti1Image(data_array, mat)
+    # Create nifti
+    mat = np.eye(4)
+    mat[0, 3] = cent[0]
+    mat[1, 3] = cent[1]
+    mat[2, 3] = cent[2]
+    nii = nib.Nifti1Image(data_array, mat)
 
-	# nifti header info
-	nii.header.set_data_dtype(np.int16)
-	nii.header.set_zooms([vs[0], vs[1], vs[2]])
+    # nifti header info
+    nii.header.set_data_dtype(np.int16)
+    nii.header.set_zooms([vs[0], vs[1], vs[2]])
 
-	# make out dir
-	outdir = 'niftis'
+    # make out dir
+    outdir = 'niftis'
 
-	if not os.path.exists(outdir):
-		os.makedirs(outdir)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 
-	# Save nifti
-	niiname = '%s/%s_%02ddown_%schan.nii.gz' % (outdir, outnii, dr, chan)
-	nib.save(nii, niiname)
+    # Save nifti
+    niiname = '%s/%s_%02ddown_%schan.nii.gz' % (outdir, outnii, dr, chan)
+    nib.save(nii, niiname)
 
-	print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
+    print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
 
 # ---------
 
 def main():
-	scriptlog('convertTif2Nii.log')
+    scriptlog('convertTif2Nii.log')
 
-	converttiff2nii()
+    converttiff2nii()
 
 
 if __name__ == "__main__":
