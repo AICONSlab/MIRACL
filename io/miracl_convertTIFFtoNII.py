@@ -11,49 +11,99 @@ import glob
 from datetime import datetime
 import argparse
 import os
+from Tkinter import Tk
+import tkFileDialog
 import logging
 
 startTime = datetime.now()
 
 
 def helpmsg(name=None):
-    return '''convertTifftoNii.py -f [Tiff folder] -d [Downsample ratio] -cn [chan #] -cp [chan prefix] - ch [chan name] -o [out nii name] 
+    return '''convertTifftoNii.py
 
 Converts Tiff images to Nifti 
 
-Example: convertTifftoNii.py -f my_tifs -d 3 -cn 1 -cp C00 -ch Thy1YFP -o stroke2  
+    Usage: convertTifftoNii.py
 
-	Optional arguments:	-vs [voxel size] -c [nii center]  
+    A GUI will open to choose your:
 
-		example: -vs 0.025 0.025 0.005  -c 5 10 -4  
+        - < Input clarity tif dir > : images of only one channel
 
-		if not set will default to values in example (corresponding to Allen atlas nii template - 25um res)			
+    ----------
+
+    For command-line / scripting
+
+    Usage: convertTifftoNii.py -f [Tiff folder] -d [Downsample ratio] -o [out nii name]
+
+Example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2
+
+    Optional arguments:
+
+        -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
+        -cp [chan prefix (string before channel number in file name). ex: C00 ]
+        -ch [chan name (default: thy1_yfp)]
+        -vs [voxel size (default: 25um) ]
+        -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
+
+        example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.005  -c 5 10 -4
 
         '''
 
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
-parser.add_argument('-f', '--folder', type=str, help="Tiff folder", required=True)
-parser.add_argument('-d', '--down', type=int, help="Downsample ratio", required=True)
-parser.add_argument('-cn', '--channum', type=int, help="Channel number", required=True)
-parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name", required=True)
-parser.add_argument('-ch', '--channame', type=str, help="Channel name", required=True)
-parser.add_argument('-o', '--outnii', type=str, help="Out nii name", required=True)
+parser.add_argument('-f', '--folder', type=str, help="Tiff folder")
+parser.add_argument('-d', '--down', type=int, help="Downsample ratio")
+parser.add_argument('-cn', '--channum', type=int, help="Channel number")
+parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
+parser.add_argument('-ch', '--channame', type=str, help="Channel name")
+parser.add_argument('-o', '--outnii', type=str, help="Out nii name")
 parser.add_argument('-vs', '--voxelsize', type=int, nargs='+', help="Out nii voxel sizes")
 parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
 
 args = parser.parse_args()
 
-indir = args.folder
-dr = args.down
-chann = args.channum
-chanp = args.chanprefix
-assert isinstance(args.channame, str)
-chan = args.channame
-vs = args.voxelsize
-cent = args.center
-outnii = args.outnii
+if args is None:
+
+    print("Running in GUI mode")
+
+    Tk().withdraw()
+    indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then OK')
+
+else:
+
+    print("Running in script mode")
+
+    indir = args.folder
+    assert isinstance(args.indir, str)
+    dr = args.down
+    assert isinstance(args.dr, int)
+    chann = args.channum
+    assert isinstance(args.chann, int)
+    chanp = args.chanprefix
+    assert isinstance(args.channame, str)
+    chan = args.channame
+    assert isinstance(args.chan, str)
+    vs = args.voxelsize
+    assert isinstance(args.vs, int)
+    cent = args.center
+    assert isinstance(args.cent, int)
+    outnii = args.outnii
+    assert isinstance(args.outnii, str)
+
+# check if pars given
+
+if args.dr is None:
+    dr = 1
+    print("down sample ratio not specified ... choosing default value of %d" % dr)
+
+if args.chann is None:
+    chann = 1
+    print("# channels not specified ... choosing default value of %s" % chann)
+
+if args.chanp is None:
+    res = 25
+    print("voxel size not specified ... choosing default value of %dum" % res)
 
 
 # ---------
@@ -95,7 +145,7 @@ def scriptlog(logname):
 
 # ---------
 
-def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, ounii):
+def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, outnii):
     # Get file lis
     file_list = glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann))
 
@@ -157,9 +207,10 @@ def converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, ounii):
 # ---------
 
 def main():
+
     scriptlog('convertTif2Nii.log')
 
-    converttiff2nii()
+    converttiff2nii(indir, dr, chann, chanp, chan, vs, cent, outnii)
 
 
 if __name__ == "__main__":

@@ -132,7 +132,7 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	python ${MIRACL_HOME}/io/python_file_folder_gui.pyc -f file -s "$openstr" 
+	${MIRACL_HOME}/io/python_file_folder_gui.py -f file -s "$openstr"
 	
 	filepath=`cat path.txt`
 	
