@@ -13,7 +13,7 @@ import os
 from Tkinter import Tk
 import tkFileDialog
 import sys
-
+import re
 
 startTime = datetime.now()
 
@@ -110,11 +110,24 @@ else:
         vs = args.voxelsize
 
     if args.center is None:
-        cent = [5.7, -6.6, -4]
+        # cent = [5.7, -6.6, -4]
+        cent = [11.4, 0, 0]
     else:
         cent = args.center
 
     chanp = args.chanprefix if args.chanprefix is not None else None
+
+# ---------
+
+# sort fn
+
+
+def numericalSort(value):
+    numbers = re.compile(r'(\d+)')
+    parts = numbers.split(value)
+    parts[1::2] = map(int, parts[1::2])
+    return parts
+
 
 # ---------
 
@@ -135,10 +148,12 @@ def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None
     chanp = cp
 
     # Get file lis
+
+    # sort files
     if chanp is None:
-        file_list = glob.glob("%s/*.tif" % indir)
+        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalSort)
     else:
-        file_list = glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann))
+        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
 
     # down ratio
     down = (1.0 / int(dr))
@@ -162,10 +177,12 @@ def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None
     # Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
 
     # Create nifti
-    mat = np.eye(4)
+    mat = np.eye(4) * outvox
     mat[0, 3] = cent[0]
     mat[1, 3] = cent[1]
     mat[2, 3] = cent[2]
+    mat[2, 2] = orgres
+    mat[3, 3] = 1
     nii = nib.Nifti1Image(data_array, mat)
 
     # nifti header info
