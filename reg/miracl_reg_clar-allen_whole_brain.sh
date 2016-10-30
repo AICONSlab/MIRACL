@@ -486,6 +486,9 @@ function regclarallen()
 	# Reg out
 	local antsallen=$8
 
+    # convert clarity into float32
+    c3d ${clarroi} -type float -o ${clarroi}
+
 	# Perform ANTs registration between CLARITY and Allen atlas
 
 	ifdsntexistrun $antsallen "Registering CLARITY data to allen atlas ... this will take a while" \
