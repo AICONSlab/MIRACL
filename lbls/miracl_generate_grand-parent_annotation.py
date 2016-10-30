@@ -3,13 +3,12 @@
 
 # coding: utf-8
 
-
 import numpy as np
-import scipy as sp
 import pandas as pd
 import nibabel as nib
 import re
 import argparse
+import os
 from os.path import basename
 from datetime import datetime
 
@@ -17,14 +16,13 @@ from datetime import datetime
 # ---------
 # help fn
 
-def helpmsg(name=None):
+def helpmsg():
     return '''mouse_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 10)]
 
     Computes features of segmented image and summarizes them per label
 
     example: mouse_feat_extract.py -p 3 -m split -v 10
     '''
-
 
 # ---------
 # Get input arguments
@@ -35,23 +33,30 @@ parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not",
 parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)
 
 args = parser.parse_args()
-pl = args.pl
-hemi = args.hemi
-res = args.res
 
 # check if pars given
 
 if args.pl is None:
     pl = 3
     print("parent level not specified ... choosing default value of %d" % pl)
+else:
+    assert isinstance(args.pl, int)
+    pl = args.pl
 
 if args.hemi is None:
     hemi = "combined"
     print("hemisphere not specified ... choosing default value of %s" % hemi)
+else:
+    assert isinstance(args.hemi, str)
+    hemi = args.hemi
 
 if args.res is None:
     res = 25
     print("voxel size not specified ... choosing default value of %dum" % res)
+else:
+    assert isinstance(args.res, int)
+    res = args.res
+
 
 # --- Init pars ---
 
@@ -76,7 +81,7 @@ def getlblparent(lbls, clarinfo, lbl, pl, lblsplit, maxannotlbl):
     path = clarinfo.structure_id_path[clarinfo.id == lbl]
 
     # remove /
-    numpath = re.sub('[/]', ' ', str(path))
+    numpath = re.sub("[/]", ' ', str(path))
 
     # get digits
     digpath = [int(s) for s in numpath.split() if s.isdigit()]
@@ -117,18 +122,19 @@ def saveniiparents(parentdata, vx, outnii):
 
 
 def main():
-
-    startTime = datetime.now()
+    starttime = datetime.now()
 
     # load annotations
     print("Reading ABA annotation with %s hemispheres and %d voxel size" % (hemi, res))
-    nii = '/Users/mgoubran/workspace/clarity_project/aba/annotation/annotation_hemi_%s_%dum.nii.gz' % (hemi, res)
+
+    miracl_home = os.environ['MIRACL_HOME']
+    nii = '%s/atlases/aba/annotation/annotation_hemi_%s_%dum.nii.gz' % (miracl_home, hemi, res)
     img = nib.load(nii)
     data = img.get_data()
 
     # load structure graph
     print("Reading ABA ontology structure_graph")
-    abastrctcsv = "/Users/mgoubran/workspace/clarity_project/aba/aba_mouse_structure_graph_hemi_combined.csv"
+    abastrctcsv = "%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv" % miracl_home
     abagraph = pd.read_csv(abastrctcsv)
 
     # get lbls
@@ -150,9 +156,7 @@ def main():
     outnii = '%s_parent-level_%s.nii.gz' % (orgname, pl)
     saveniiparents(parentdata, vx, outnii)
 
-    #orient
-
-    print ("\n Grand-parent labels generation done in %s ... Have a good day!\n" % (datetime.now() - startTime))
+    print ("\n Grand-parent labels generation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
 if __name__ == "__main__":
     main()
