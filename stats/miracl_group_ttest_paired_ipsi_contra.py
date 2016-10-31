@@ -226,6 +226,5 @@ for p,par in enumerate(pars):
 
 # ort out niftis
 for par in pars:
-
-    call(["c3d","%s/%s_wilcoxon_pval_gp-lbls.nii.gz" % (outdir,par),"-orient","ASL","-o","%s/%s_wilcoxon_pval_gp-lbls.nii.gz" % (outdir,par)])
-
+    call(["c3d", "%s/%s_wilcoxon_pval_gp-lbls.nii.gz" % (outdir, par), "-orient", "ASR", "-o",
+          "%s/%s_wilcoxon_pval_gp-lbls.nii.gz" % (outdir, par)])

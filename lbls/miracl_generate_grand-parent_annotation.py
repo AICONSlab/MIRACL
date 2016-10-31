@@ -11,7 +11,7 @@ import argparse
 import os
 from os.path import basename
 from datetime import datetime
-
+from subprocess import call
 
 # ---------
 # help fn
@@ -115,7 +115,7 @@ def saveniiparents(parentdata, vx, outnii):
     # parentort = nib.orientations.apply_orientation(parentdata, tform)
 
     # Create nifti
-    nii = nib.Nifti1Image(parentort, mat)
+    nii = nib.Nifti1Image(parentdata, mat)
 
     # nifti header info
     nii.header.set_data_dtype(np.int32)
@@ -157,7 +157,10 @@ def main():
     outnii = '%s_parent-level_%s.nii.gz' % (orgname, pl)
     saveniiparents(parentdata, vx, outnii)
 
+    call(["c3d", "%s" % outnii, "-orient", "ASR", "-o", "%s" % outnii])
+
     print ("\n Grand-parent labels generation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+
 
 if __name__ == "__main__":
     main()
