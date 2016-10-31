@@ -24,27 +24,22 @@ function usage()
 
 	A GUI will open to choose your:
 
-		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan) 
+		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
 
-		&
-
-		- < Higher resolution clarity nifti > : Thy1_EYFP channel data 
-
+		file name should have "down"
 
 	----------
 
 	For command-line / scripting
 
 
-	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <higher_res_clarity_nifti>
+	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <input_tif_dir>
 
-	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz
+	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r my_tif_dir
 
 		arguments (required):
 
-			i. Input down-sampled clarity nifti 
-
-			r. Higher resolution clarity nifti
+			i. Input down-sampled clarity nifti
 
 		optional arguments:
 		
@@ -159,7 +154,7 @@ if [[ "$#" -gt 1 ]]; then
             	;;
         	
         	r)
-            	hresclar=${OPTARG}
+            	indir=${OPTARG}
             	;;
         	
         	l)
@@ -191,7 +186,7 @@ if [[ "$#" -gt 1 ]]; then
 	fi
 
 
-	if [ -z ${hresclar} ];
+	if [ -z ${intifdir} ];
 	then
 		usage
 		echo "ERROR: < -r => high-res clarity nii> not specified"
@@ -221,7 +216,7 @@ else
 	fi
 
 
-	if [ -z ${hresclar} ];
+	if [ -z ${intifdir} ];
 	then
 		usage
 		echo "ERROR: <high-res clarity nii> was not chosen"
