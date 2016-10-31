@@ -104,14 +104,15 @@ def getlblparent(lbls, clarinfo, lbl, pl, lblsplit, maxannotlbl):
 def saveniiparents(parentdata, vx, outnii):
 
     # save parent data as nifti
-    mat = np.eye(4)
-    mat[0, 0] = vx
-    mat[1, 1] = vx
-    mat[2, 2] = vx
+    mat = np.eye(4) * vx
+    # mat[0, 0] = vx
+    # mat[1, 1] = vx
+    # mat[2, 2] = vx
+    mat[3, 3] = 1
 
     # orient nii
-    tform = nib.orientations.axcodes2ornt(('P', 'I', 'L'))
-    parentort = nib.orientations.apply_orientation(parentdata, tform)
+    # tform = nib.orientations.axcodes2ornt(('P', 'I', 'L'))
+    # parentort = nib.orientations.apply_orientation(parentdata, tform)
 
     # Create nifti
     nii = nib.Nifti1Image(parentort, mat)
