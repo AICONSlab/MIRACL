@@ -7,6 +7,7 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
+# TODO : use only one input image
 
 # help/usage function
 function usage()
@@ -530,7 +531,7 @@ function warpallenlbls()
 	local tiflbls=${12}
 	
 	# Up lbls
-    local hresclar=${13}
+    local inclar=${13}
     local reslbls=${14}
     local restif=${15}
 
@@ -551,18 +552,26 @@ function warpallenlbls()
 
 	# upsample to img dimensions
 
+    # TODO: get org file size
+
 	# # get img dim
-	 alldim=`PrintHeader $hresclar 2`
+#	 alldim=`PrintHeader $hresclar 2`
+#
+#	 x=${alldim%%x*};
+#	 yz=${alldim#*x}; y=${yz%x*} ;
+#	 z=${alldim##*x};
 
-	 x=${alldim%%x*};
-	 yz=${alldim#*x}; y=${yz%x*} ;
-	 z=${alldim##*x};
+    # get dims from hres tif
+    tif=
+    dims=`c3d ${tif} -info-full | grep Dimensions`
+    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
+    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
 
-	 dim="${x}x${y}x${z}";
+	dim="${x}x${y}x${z}";
 
-	 ifdsntexistrun $reslbls "Upsampling labels to CLARITY resolution" \
-	  c3d $swplbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
-	# Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
+	ifdsntexistrun $reslbls "Upsampling labels to CLARITY resolution" \
+	c3d $swplbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
+	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
 	ifdsntexistrun $restif "Converting high res lbls to tif" c3d $reslbls -type $orttypelbls -o $restif
@@ -570,11 +579,40 @@ function warpallenlbls()
 
 }
 
+#---------------------------
+
+# 4a) Warp input CLARITY to Allen Function
+
+function warpinclarallen()
+{
+
+	# Ort clar
+	inclar=$1
+	ortclartag=$2
+	ortclarint=$3
+	ortclartype=$4
+	orthresclar=$5
+
+	# Reg to allen
+	allenhres=$6
+	initform=$7
+	antsaff=$8
+	antsinvwarp=$9
+
+	regorgclar=${10}
+
+	# Orient channel to std
+	orientimg ${inclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
+
+	# Apply warps
+	ifdsntexistrun ${regorgclar} "Applying ants deformation to high-res CLARITY" \
+	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgclar} --float
+
+}
 
 #---------------------------
 
-
-# 4) Warp down 3x CLARITY (high res) to Allen Function
+# 4b) Warp down 3x CLARITY (high res) to Allen Function
 
 
 function warphresclarallen()
@@ -594,7 +632,6 @@ function warphresclarallen()
 	antsinvwarp=$9
 	
 	regorgclar=${10}
-
 
 	# Orient channel to std
 	orientimg ${hresclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
@@ -617,6 +654,8 @@ function main()
 {
 
 # 1) Process clarity
+
+# TODO: decrease thresh (cutting too much into image)
 
 	# resample to 0.05mm voxel 
 	resclar=$regdir/clar_res0.05.nii.gz
@@ -674,10 +713,10 @@ function main()
 	croptosmall $smclar 5 $clarroi	
 	
 
-	# make clarity link
+	# make clarity copy
 	clarlnk=$regdir/clar.nii.gz
 
-	if [[ ! -f $clarlnk ]]; then ln -s $smclar $clarlnk ; fi
+	if [[ ! -f $clarlnk ]]; then cp $smclar $clarlnk ; fi
 
 
 	#---------------------------
@@ -732,6 +771,7 @@ function main()
 
 	#---------------------------
 
+# TODO: warp allen labels to org size not down sampled
 
 # 3) Warp Allen labels to original CLARITY (down sampled 2x)
 
@@ -777,13 +817,15 @@ function main()
 
 	#---------------------------
 
+# TODO: warp low res clarity instead of high
 
-# 4) Warp down 3x CLARITY (high res) to Allen
+# 4) Warp input CLARITY to Allen
 
 
 	# ort hres clar
-	orthresclar=${regdir}/hres_EYFP_ort.nii.gz
-	
+#	orthresclar=${regdir}/hres_EYFP_ort.nii.gz
+	ortinclar=${regdir}/clar_ort.nii.gz
+
 	# hres Allen
 	allenhres=${atlasdir}/aba/template/average_template_10um.nii.gz
 
@@ -791,10 +833,12 @@ function main()
 	antsinvwarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz
 
 	# out warp hres clar
-	regorgclar=${regdirfinal}/hresclar_allen_ants.nii.gz
+#	regorgclar=${regdirfinal}/hresclar_allen_ants.nii.gz
+    regorgclar=${regdirfinal}/clar_allen_ants.nii.gz
 
 
-	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
+    warpinclarallen ${inclar} ALS Cubic short ${ortinclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
+#	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
 
 }
 
