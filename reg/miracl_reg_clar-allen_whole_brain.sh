@@ -486,8 +486,8 @@ function regclarallen()
 	# Reg out
 	local antsallen=$8
 
-    # convert clarity into float32
-    c3d ${clarroi} -type float -o ${clarroi}
+    # convert init allen into int
+    c3d ${initallen} -type float -o ${initallen}
 
 	# Perform ANTs registration between CLARITY and Allen atlas
 
@@ -719,7 +719,7 @@ function main()
 	# cross correlation radius
 	rad=2
 	# precision 
-	prec=f # float
+	prec=d # double precision (otherwise ITK error in some cases!)
 	# get num of threads 
 	thrds=`nproc`
 
@@ -744,14 +744,9 @@ function main()
 	
 	if [[ -z $lbls ]]; then
 
-#        if [[ ${hemi} -eq "combined" ]]; then
-#		    lblsdir=${atlasdir}/aba/annotation
-#		fi
-
 		if [[ -z $hemi ]]; then
 			
 			hemi=split
-#			lblsdir=${atlasdir}/aba/annotation/l-r_flp
 
 		fi
 
@@ -761,7 +756,7 @@ function main()
 
 		fi
         lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-#		lbls=${lblsdir}/annotation_hemi_${hemi}_${vox}um.nii.gz
+
 	fi
 
 	base=`basename $lbls`
