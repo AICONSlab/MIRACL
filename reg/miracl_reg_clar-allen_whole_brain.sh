@@ -487,7 +487,7 @@ function regclarallen()
 	local antsallen=$8
 
     # convert init allen into int
-    c3d ${initallen} -type float -o ${initallen}
+    c3d ${initallen} -type int -o ${initallen}
 
 	# Perform ANTs registration between CLARITY and Allen atlas
 
