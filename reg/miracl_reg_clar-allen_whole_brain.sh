@@ -540,7 +540,7 @@ function warpallenlbls()
 #    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
 #    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
 
-	dim="${xu}x${yu}x${z}";
+	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
 
 	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
 	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
@@ -578,7 +578,7 @@ function warpinclarallen()
 	orientimg ${inclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
 
 	# Apply warps
-	ifdsntexistrun ${regorgclar} "Applying ants deformation to high-res CLARITY" \
+	ifdsntexistrun ${regorgclar} "Applying ants deformation to input CLARITY" \
 	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgclar} --float
 
 }
