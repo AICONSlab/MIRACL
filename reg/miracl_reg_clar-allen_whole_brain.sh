@@ -533,7 +533,6 @@ function warpallenlbls()
 
     xu=$((${x}*${downfactor}));
     yu=$((${y}*${downfactor}));
-    zu=$((${z}*${downfactor}));
 
     # get dims from hres tif
 #    tif=
@@ -541,7 +540,7 @@ function warpallenlbls()
 #    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
 #    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
 
-	dim="${xu}x${yu}x${zu}";
+	dim="${xu}x${yu}x${z}";
 
 	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
 	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
