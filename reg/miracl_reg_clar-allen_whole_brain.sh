@@ -7,7 +7,6 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
-# TODO : use only one input image
 
 # help/usage function
 function usage()
@@ -511,22 +510,19 @@ function warpallenlbls()
 
 
 	# warp to registered clarity
-	ifdsntexistrun $wrplbls "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r $smclar -i $lbls -n Multilabel -t $antswarp $antsaff $initform -o $wrplbls
-
+	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
+	 antsApplyTransforms -r ${smclar} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
 
 	# orient to org 
-	orientimg $wrplbls $orttaglbls $ortintlbls $orttypelbls $ortlbls
+	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
 
 	# swap dim (x=>y / y=>x)
-	ifdsntexistrun $swplbls "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 $ortlbls $swplbls  1 0 2  0 0 0
+	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
 
 	# create tif lbls
-	ifdsntexistrun $tiflbls "Converting lbls to tif" c3d $swplbls -type $orttypelbls -o $tiflbls 
+	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
 
 	# upsample to img dimensions
-
-    # TODO: get org file size
 
 	# # get img dim
 	alldim=`PrintHeader ${inclar} 2`
@@ -548,12 +544,12 @@ function warpallenlbls()
 
 	dim="${xu}x${yu}x${zu}";
 
-	ifdsntexistrun $reslbls "Upsampling labels to CLARITY resolution" \
-	c3d $swplbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
+	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
+	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
-	ifdsntexistrun $restif "Converting high res lbls to tif" c3d $reslbls -type $orttypelbls -o $restif
+	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
 
 
 }
@@ -659,7 +655,7 @@ function main()
 	# Ero
 	eromask=$regdir/clar_res0.05_ero_mask.nii.gz
 
-	erode $thrclar 9 $eromask
+	erode $thrclar 6 $eromask
 
 
 	# Dil
@@ -750,7 +746,6 @@ function main()
 
 	#---------------------------
 
-# TODO: warp allen labels to org size not down sampled
 
 # 3) Warp Allen labels to original CLARITY (down sampled 2x)
 
@@ -782,21 +777,20 @@ function main()
 	lblsname=${base%%.*};
 
 	# Out lbls
-	wrplbls=$regdir/${lblsname}_ants.nii.gz
-	ortlbls=$regdir/${lblsname}_ants_ort.nii.gz
-	swplbls=$regdir/${lblsname}_ants_swp.nii.gz
-	tiflbls=$regdir/${lblsname}_ants.tif
-	reslbls=$regdirfinal/allen_lbls_clar_ants.nii.gz
-	restif=$regdirfinal/allen_lbls_clar_ants.tif
+	wrplbls=${regdir}/${lblsname}_ants.nii.gz
+	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
+	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
+	tiflbls=${regdir}/${lblsname}_ants.tif
+	reslbls=${regdirfinal}/allen_lbls_clar_ants.nii.gz
+	restif=${regdirfinal}/allen_lbls_clar_ants.tif
 
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
-	warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls RPI NearestNeighbor short $ortlbls $swplbls $tiflbls $hresclar $reslbls $restif
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif}
 
 	#---------------------------
 
-# TODO: warp low res clarity instead of high
 
 # 4) Warp input CLARITY to Allen
 
