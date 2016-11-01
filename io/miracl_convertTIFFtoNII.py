@@ -199,7 +199,7 @@ def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None
     if outnii is None:
         niiname = '%s/%schan.nii.gz' % (outdir, chan)
     else:
-        niiname = '%s/%s_%02d_down_%s_chan.nii.gz' % (outdir, outnii, dr, chan)
+        niiname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, dr, chan)
     nib.save(nii, niiname)
 
     print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))

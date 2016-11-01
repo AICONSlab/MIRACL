@@ -25,9 +25,8 @@ function usage()
 
 		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
 
-		file name should have "##_down" like "05_down" : meaning 5x downsampled [this should be accurate as it is used
-
-		for allen label upsampling to clarity] -> ex. stroke13_05_down_Ref_chan.nii.gz
+		file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
+        [this should be accurate as it is used for allen label upsampling to clarity]
 
 	----------
 
@@ -530,7 +529,7 @@ function warpallenlbls()
 	yz=${alldim#*x}; y=${yz%x*} ;
 	z=${alldim##*x};
 
-    downfactor=`echo ${inclar} | egrep -o "[0-9]{2}_down" | egrep -o "[0-9]{2}"`
+    downfactor=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
     xu=$((${x}*${downfactor}));
     yu=$((${y}*${downfactor}));
