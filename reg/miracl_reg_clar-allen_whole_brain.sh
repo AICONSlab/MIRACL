@@ -536,9 +536,9 @@ function warpallenlbls()
 
     downfactor=`echo ${inclar} | egrep -o "[0-9]{2}_down" | egrep -o "[0-9]{2}"`
 
-    xu=$((x*downfactor));
-    yu=$((y*downfactor));
-    zu=$((z*downfactor));
+    xu=$((${x}*${downfactor}));
+    yu=$((${y}*${downfactor}));
+    zu=$((${z}*${downfactor}));
 
     # get dims from hres tif
 #    tif=
@@ -659,7 +659,7 @@ function main()
 	# Ero
 	eromask=$regdir/clar_res0.05_ero_mask.nii.gz
 
-	erode $thrclar 12 $eromask
+	erode $thrclar 9 $eromask
 
 
 	# Dil
