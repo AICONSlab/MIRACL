@@ -82,7 +82,7 @@ else:
     outnii = args.outnii
 
     if args.down is None:
-        dr = 3
+        dr = 5
         print("down sample ratio not specified ... choosing default value of %d" % dr)
     else:
         assert isinstance(args.down, int)

@@ -26,31 +26,33 @@ function usage()
 
 		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
 
-		file name should have "down"
+		file name should have "##_down" like "05_down" : meaning 5x downsampled [this should be accurate as it is used
+
+		for allen label upsampling to clarity] -> ex. stroke13_05_down_Ref_chan.nii.gz
 
 	----------
 
 	For command-line / scripting
 
 
-	Usage: `basename $0` -i <input_down-sampled_clarity_nifti> -r <input_tif_dir>
+	Usage: `basename $0` -i <input_down-sampled_clarity_nifti>
 
-	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r my_tif_dir
+	Example: `basename $0` -i Reference_channel_05_down.nii.gz
 
 		arguments (required):
 
-			i. Input down-sampled clarity nifti
+			i. Input down-sampled clarity nifti (with "##_down" in file name: ex. stroke13_05_down_Ref_chan.nii.gz )
 
 		optional arguments:
 		
-			m. Labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
+			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 				accepted inputs are: <split> or <combined>  (default: split)
 
-			v. Voxel size/Resolutin of labels in um 
+			v. Labels voxel size/Resolutin of labels in um
 				accepted inputs are: 10, 25 or 50  (default: 10)
 				
 			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
-				could be at a different depth than default labels 				
+				input could be at a different depth than default labels
 
 				If l. is specified (m & v cannot be speficied)
 
@@ -145,16 +147,12 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:l:m:v:" opt; do
+	while getopts ":i:l:m:v:" opt; do
     
 	    case "${opt}" in
 
 	        i)
             	inclar=${OPTARG}
-            	;;
-        	
-        	r)
-            	indir=${OPTARG}
             	;;
         	
         	l)
@@ -181,15 +179,7 @@ if [[ "$#" -gt 1 ]]; then
 	if [ -z ${inclar} ];
 	then
 		usage
-		echo "ERROR: < -i => input clarity nii> not specified"
-		exit 1
-	fi
-
-
-	if [ -z ${intifdir} ];
-	then
-		usage
-		echo "ERROR: < -r => high-res clarity nii> not specified"
+		echo "ERROR: < -i => input down-sampled clarity nii> not specified"
 		exit 1
 	fi
 
@@ -203,23 +193,12 @@ else
 
 	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel (nii/nii.gz)" inclar
 
-	choose_file_gui "Higher resolution Thy1 channel (nii/nii.gz)" hresclar
-
-	
 	# check required input arguments
 
 	if [ -z ${inclar} ];
 	then
 		usage
 		echo "ERROR: <input clarity nii> was not chosen"
-		exit 1
-	fi
-
-
-	if [ -z ${intifdir} ];
-	then
-		usage
-		echo "ERROR: <high-res clarity nii> was not chosen"
 		exit 1
 	fi
 
@@ -550,19 +529,24 @@ function warpallenlbls()
     # TODO: get org file size
 
 	# # get img dim
-#	 alldim=`PrintHeader $hresclar 2`
-#
-#	 x=${alldim%%x*};
-#	 yz=${alldim#*x}; y=${yz%x*} ;
-#	 z=${alldim##*x};
+	alldim=`PrintHeader ${inclar} 2`
+    x=${alldim%%x*};
+	yz=${alldim#*x}; y=${yz%x*} ;
+	z=${alldim##*x};
+
+    downfactor=`echo ${inclar} | egrep -o "[0-9]{2}_down" | egrep -o "[0-9]{2}"`
+
+    xu=$((x*downfactor));
+    yu=$((y*downfactor));
+    zu=$((z*downfactor));
 
     # get dims from hres tif
-    tif=
-    dims=`c3d ${tif} -info-full | grep Dimensions`
-    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
-    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
+#    tif=
+#    dims=`c3d ${tif} -info-full | grep Dimensions`
+#    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
+#    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
 
-	dim="${x}x${y}x${z}";
+	dim="${xu}x${yu}x${zu}";
 
 	ifdsntexistrun $reslbls "Upsampling labels to CLARITY resolution" \
 	c3d $swplbls -resample $dim -interpolation $ortintlbls -type $orttypelbls -o $reslbls
