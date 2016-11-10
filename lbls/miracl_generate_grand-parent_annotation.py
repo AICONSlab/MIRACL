@@ -74,6 +74,7 @@ def getalllbls(data):
 
     return lbls
 
+# TODO: make sure works for split version!
 
 def getlblparent(lbls, clarinfo, lbl, pl, lblsplit, maxannotlbl):
 

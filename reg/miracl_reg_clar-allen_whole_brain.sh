@@ -507,7 +507,6 @@ function warpallenlbls()
     local reslbls=${14}
     local restif=${15}
 
-
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
 	 antsApplyTransforms -r ${smclar} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
@@ -542,12 +541,15 @@ function warpallenlbls()
 
 	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
 
-	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
+# TODO : warp labels again to high res (make empty image w same dims?)
+# TODO : remove this comment
+
+#	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
+#	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
-	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
+#	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
 
 
 }
@@ -628,69 +630,52 @@ function main()
 
 # 1) Process clarity
 
-# TODO: decrease thresh (cutting too much into image)
 
-	# resample to 0.05mm voxel 
-	resclar=$regdir/clar_res0.05.nii.gz
-
-	resampleclar $inclar 0.05 0 4 $resclar
-
+	# resample to 0.05mm voxel
+	resclar=${regdir}/clar_res0.05.nii.gz
+	resampleclar ${inclar} 0.05 0 4 ${resclar}
 
 	# N4 bias correct
-	biasclar=$regdir/clar_res0.05_bias.nii.gz
-
-	biasfieldcorr $resclar $biasclar
-
+	biasclar=${regdir}/clar_res0.05_bias.nii.gz
+	biasfieldcorr ${resclar} ${biasclar}
 
 	# Remove outline w erosion & dilation
-	
+
 	# Thr
-	thrclar=$regdir/clar_res0.05_bias_thr.nii.gz
+	thrclar=${regdir}/clar_res0.05_bias_thr.nii.gz
+	thresh ${biasclar} 2 50 0 1 ${thrclar}
 
-	thresh $biasclar 2 50 0 1 $thrclar
+	# Ero (remove any components attached to the brain)
+	eromask=${regdir}/clar_res0.05_ero_mask.nii.gz
+	erode ${thrclar} 3 ${eromask}
 
-
-	# Ero
-	eromask=$regdir/clar_res0.05_ero_mask.nii.gz
-
-	erode $thrclar 6 $eromask
-
+    # Get largest component
+    conncomp=${regdir}/clar_res0.05_ero_mask_comp.nii.gz
+    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
 
 	# Dil
-	dilmask=$regdir/clar_res0.05_dil_mask.nii.gz
-
-	dilate $eromask 9 $dilmask
-
+	dilmask=${regdir}/clar_res0.05_dil_mask.nii.gz
+	dilate ${conncomp} 3 ${dilmask}
 
 	# Mask
-	betclar=$regdir/clar_res0.05_bias_bet.nii.gz
-
-	maskimage $biasclar $dilmask $betclar
-
+	betclar=${regdir}/clar_res0.05_bias_bet.nii.gz
+	maskimage ${biasclar} ${dilmask} ${betclar}
 
 	# Orient
-	ortclar=$regdir/clar_res0.05_ort.nii.gz
-
-	orientimg $betclar ALS Cubic short $ortclar
-
+	ortclar=${regdir}/clar_res0.05_ort.nii.gz
+	orientimg ${betclar} ALS Cubic short ${ortclar}
 
 	# Smooth
-	smclar=$regdir/clar_res0.05_ort_sm.nii.gz
+	smclar=${regdir}/clar_res0.05_ort_sm.nii.gz
+	smoothimg ${ortclar} 1 ${smclar}
 
-	smoothimg $ortclar 1 $smclar
-
-	
 	# Crop to smallest roi
-	clarroi=$regdir/clar_res0.05_ort_sm_roi.nii.gz
-
-	croptosmall $smclar 5 $clarroi	
-	
+	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
+	croptosmall ${smclar} 5 ${clarroi}
 
 	# make clarity copy
-	clarlnk=$regdir/clar.nii.gz
-
-	if [[ ! -f $clarlnk ]]; then cp $smclar $clarlnk ; fi
-
+	clarlnk=${regdir}/clar.nii.gz
+	if [[ ! -f ${clarlnk} ]]; then cp ${smclar} ${clarlnk} ; fi
 
 	#---------------------------
 
@@ -784,6 +769,7 @@ function main()
 
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
+
 
 	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif}
 
