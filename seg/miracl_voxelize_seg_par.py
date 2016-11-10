@@ -89,6 +89,8 @@ def scriptlog(logname):
 # ---------
 # Define convolution fn
 
+# TODOhp: vox with regionprops
+
 def vox(segflt, kernel, dr, i):
     '''
 	Convolves image with input kernel then 

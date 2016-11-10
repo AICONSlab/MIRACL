@@ -1,21 +1,17 @@
+#!/usr/bin/env python
+# Maged Goubran @ 2016, mgoubran@stanford.edu
 
 # coding: utf-8
 
-# In[1]:
-
 import numpy as np
 import pandas as pd
-import cv2
-import nibabel as nb
-import urllib2
 from subprocess import call
-from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 import seaborn as sns
+import os
 import matplotlib.pyplot as plt
-get_ipython().magic(u'matplotlib inline')
 
+from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
-# In[2]:
 
 # input parameters 
 
@@ -25,30 +21,25 @@ num_out_lbl = 25
 # projection density threshold
 cutoff = 0.0025
 
-
-# In[5]:
-
-##---------------
-
-# Input options
-
 # max label value
-maxannot = 1145   
+maxannot = 13000  # ignore labels in millions (too small)!
 
-## major labels to exclude (ie root,grey,etc) @ depth 0 or 1
 # read ontology annotation csv
-annot_csv = pd.read_csv('/Users/mgoubran/workspace/clarity_Project/aba/aba_mouse_structure_graph_hemi_combined.csv')
 
-exclude = np.array(annot_csv[(annot_csv['depth']==0) | (annot_csv['depth']==1)].id)
-#exclude = np.array([8,315,567,688,695,997,2008,2315,2567,2688,2997,2315]) 
+miracl_home = os.environ['MIRACL_HOME']
+
+annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
 
 # read atlas annotations
-atlas_lbls = pd.read_fwf('/Users/mgoubran/workspace/clarity_Project/allen_atlas/annotations/res0.025/included_lbls/atlas_lbl_ids.txt')
+atlas_lbls = pd.read_fwf(
+    '/Users/mgoubran/workspace/clarity_Project/allen_atlas/annotations/res0.025/included_lbls/atlas_lbl_ids.txt')
+
+
+## major labels to exclude (ie root,grey,etc) @ depth 0 or 1
+exclude = np.array(annot_csv[(annot_csv['depth']==0) | (annot_csv['depth']==1)].id)
+
 
 ##---------------
-
-
-# In[6]:
 
 # Get 'histogram' of masked labels
 
@@ -145,6 +136,7 @@ def query_connect(uniq_lbls,projexps,cutoff):
         # get exp regions stats
         projection_df = mcc.get_structure_unionizes([exp_id], is_injection=False)
 
+        # TODOhp: check if need to use hemi 3 instead
         # get connected regions
         filter_exp = projection_df.loc[(projection_df['normalized_projection_volume'] > cutoff) & (projection_df['hemisphere_id'] != 3)]
 
@@ -452,18 +444,4 @@ group = (random.rand(50) * 3).astype('int')
 # lgn.circle(connections, labels=['group ' + str(x) for x in group], group=group)
 lgn.circle(connections, labels=alllbls_abrv, group = np.array(groups[0]),width=1000,height=1000)
 
-
-# In[31]:
-
-# nested groups 
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-
-
+# TODOlp: view by  nested groups

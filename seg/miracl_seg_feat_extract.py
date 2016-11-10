@@ -16,6 +16,9 @@ import sys
 import os
 import argparse
 
+
+# TODOhp: make sure works on full version
+
 # ---------
 # help fn
 

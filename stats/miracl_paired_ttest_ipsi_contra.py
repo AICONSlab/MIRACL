@@ -270,7 +270,7 @@ def main():
     print("\n Projecting stats onto atlas label and saving nifti file")
 
     miracl_home = os.environ['MIRACL_HOME']
-    atlas = '%s/atlases/aba/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
+    atlas = '%s/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
 
     projpvalonatlas(atlas,pars,ipsi,tt_pval,outdir)
 

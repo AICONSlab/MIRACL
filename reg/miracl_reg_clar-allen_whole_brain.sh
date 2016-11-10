@@ -541,8 +541,8 @@ function warpallenlbls()
 
 	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
 
-# TODO : warp labels again to high res (make empty image w same dims?)
-# TODO : remove this comment
+# TODOhp : warp labels again to high res (make empty image w same dims?)
+# TODOhp : remove this comment
 
 #	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
 #	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
@@ -683,7 +683,7 @@ function main()
 # 2a) initialize registration
 
 	# Allen atlas template
-	allenref=$atlasdir/aba/template/average_template_25um.nii.gz
+	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
 
 	initform=$regdir/init_tform.mat 
 
@@ -752,7 +752,7 @@ function main()
 			vox=10
 
 		fi
-        lbls=$atlasdir/aba/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+        lbls=$atlasdir/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 
 	fi
 
@@ -784,7 +784,7 @@ function main()
 	ortinclar=${regdir}/clar_ort.nii.gz
 
 	# hres Allen
-	allenhres=${atlasdir}/aba/template/average_template_10um.nii.gz
+	allenhres=${atlasdir}/ara/template/average_template_10um.nii.gz
 
 	# ants inv warp
 	antsinvwarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz

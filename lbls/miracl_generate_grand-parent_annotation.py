@@ -74,7 +74,8 @@ def getalllbls(data):
 
     return lbls
 
-# TODO: make sure works for split version!
+
+# TODOhp: make sure works for split version!
 
 def getlblparent(lbls, clarinfo, lbl, pl, lblsplit, maxannotlbl):
 
@@ -127,17 +128,17 @@ def main():
     starttime = datetime.now()
 
     # load annotations
-    print("Reading ABA annotation with %s hemispheres and %d voxel size" % (hemi, res))
+    print("Reading ARA annotation with %s hemispheres and %d voxel size" % (hemi, res))
 
     miracl_home = os.environ['MIRACL_HOME']
-    nii = '%s/atlases/aba/annotation/annotation_hemi_%s_%dum.nii.gz' % (miracl_home, hemi, res)
+    nii = '%s/atlases/ara/annotation/annotation_hemi_%s_%dum.nii.gz' % (miracl_home, hemi, res)
     img = nib.load(nii)
     data = img.get_data()
 
     # load structure graph
-    print("Reading ABA ontology structure_graph")
-    abastrctcsv = "%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv" % miracl_home
-    abagraph = pd.read_csv(abastrctcsv)
+    print("Reading ARA ontology structure_graph")
+    arastrctcsv = "%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv" % miracl_home
+    aragraph = pd.read_csv(arastrctcsv)
 
     # get lbls
     lbls = getalllbls(data)
@@ -149,7 +150,7 @@ def main():
 
     for l in range(len(lbls) - 1):
         lbl = lbls[l]
-        parent = getlblparent(lbls, abagraph, lbl, pl, lblsplit, maxannotlbl)
+        parent = getlblparent(lbls, aragraph, lbl, pl, lblsplit, maxannotlbl)
         # replace val
         parentdata[parentdata == lbl] = parent
 
