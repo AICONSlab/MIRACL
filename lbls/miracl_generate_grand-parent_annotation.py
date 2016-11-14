@@ -17,11 +17,11 @@ from subprocess import call
 # help fn
 
 def helpmsg():
-    return '''mouse_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
+    return '''miracl_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
 
     Computes features of segmented image and summarizes them per label
 
-    example: mouse_feat_extract.py -p 3 -m split -v 10
+    example: miracl_generate_grand-parent_annotation.py -p 3 -m split -v 10
     '''
 
 # ---------
