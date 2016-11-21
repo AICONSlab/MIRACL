@@ -381,6 +381,8 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
     ggp_parents = np.array(
         [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() for l, lbl in enumerate(alllbls)])
 
+    # TODOhp: validate connectogram .. & why 4?!
+
     for i in range(4):
         ggp_parents = [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() if (lbl != 997) else 997 for
                        l, lbl in enumerate(ggp_parents)]
@@ -469,23 +471,6 @@ def main():
     # combine with primary injections
     primar = np.reshape(uniq_lbls, [num_out_lbl, 1])
     conn_ids = np.hstack((primar, atlfilconn))
-
-    # allfil = np.hstack((uniq_lbls, atlas_lbls))
-
-    # print(allfil)
-
-    # filconn = [np.delete(all_connect_ids[t, :], np.where(np.in1d(all_connect_ids[t,:], allfil))) for t in range(len(all_connect_ids))]
-
-    # # exctract only num out lbls
-    # numfilconn = np.array([filconn[a][0:num_out_lbl] for a in range(len(filconn))])
-
-    # # combine with primary injections
-    # primar = np.reshape(uniq_lbls,[num_out_lbl,1])
-
-    # print (all_connect_ids.shape)
-    # # print (filconn.shape)
-    # print (numfilconn.shape)
-    # print (primar.shape)
 
     # ---------------        
 
