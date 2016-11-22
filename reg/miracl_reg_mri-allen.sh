@@ -274,31 +274,9 @@ function biasfieldcorr()
 	local unbiasmr=$1
 	local biasmr=$2	
 
-	ifdsntexistrun $biasmr "Bias-correcting MRI image with N4" N4BiasFieldCorrection -d 3 -i $resmr -s 2 -o $biasmr
+	ifdsntexistrun ${biasmr} "Bias-correcting MRI image with N4" N4BiasFieldCorrection -d 3 -i ${unbiasmr} -s 2 -o ${biasmr}
 
 }
-
-
-# resample to 0.05mm voxel size
-
-function resamplemr()
-{
-
-	local inmr=$1
-	local vox=$2
-	local ifspacing=$3
-	local interp=$4
-	local resmr=$5
-	
-	ifdsntexistrun $resmr "Resmapling MRI input" ResampleImage 3 $inmr $resmr ${vox}x${vox}x${vox} $ifspacing $interp
-
-	c3d $resmr -type short -o $resmr
-
-}
-
-
-
-
 
 # Remove outline w erosion & dilation
 
@@ -308,59 +286,105 @@ function thresh()
 {
 
 	local biasmr=$1
-	local p1=$2  
-	local p2=$3
-	local t1=$4
-	local t2=$5
-	local thrmr=$6	
+	local thr=$2
+	local thrmr=$3
 
-	ifdsntexistrun $thrmr "Thresholding MRI image" c3d $biasmr -threshold ${p1}% ${p2}% $t1 $t2 -o $thrmr	
+#	ifdsntexistrun $thrmr "Thresholding MRI image" c3d $biasmr -threshold ${p1}% ${p2}% $t1 $t2 -o $thrmr
+    ifdsntexistrun ${thrmr} "Thresholding MRI image" fslmaths $biasmr -thrP ${thr} ${thrmr}
 
 }
 
+# Crop to smallest roi
 
-# Ero
-
-function erode()
+function croptosmall()
 {
-	
+
 	local thrmr=$1
-	local erorad=$2
-	local eromask=$3	
+	local cropmr=$2
 
-	ifdsntexistrun $eromask "Eroding MRI mask" ImageMath 3 $eromask ME $thrmr $erorad
+    dims=`fslstats ${thrmr} -w`
+
+#	ifdsntexistrun ${cropmr} "Cropping MRI image to smallest ROI" c3d $smmr -trim ${trim}vox -type short -o $mrroi
+    ifdsntexistrun ${cropmr} "Cropping MRI image to smallest ROI" fslroi ${thrmr} ${cropmr} ${dims}
 
 }
 
+## Ero
+#
+#function erode()
+#{
+#
+#	local thrmr=$1
+#	local erorad=$2
+#	local eromask=$3
+#
+#	ifdsntexistrun $eromask "Eroding MRI mask" ImageMath 3 $eromask ME $thrmr $erorad
+#
+#}
+#
+#
+## Dil
+#
+#function dilate()
+#{
+#
+#	local eromask=$1
+#	local dilrad=$2
+#	local dilmask=$3
+#
+#	ifdsntexistrun $dilmask "Dilating MRI mask" ImageMath 3 $dilmask MD $eromask $dilrad
+#
+#}
 
-# Dil
+# change header * 10 dims
 
-function dilate()
+function mulheader()
 {
-	
-	local eromask=$1
-	local dilrad=$2
-	local dilmask=$3
 
-	ifdsntexistrun $dilmask "Dilating MRI mask" ImageMath 3 $dilmask MD $eromask $dilrad
+	local unhdmr=$1
+	local mulfac=$2
+	local hdmr=$3
+
+	dim1=`fslinfo ${unhdmr} | grep pixdim1`; x=${dim##*1 } ;
+	dim2=`fslinfo ${unhdmr} | grep pixdim2`; y=${dim##*2 } ;
+	dim3=`fslinfo ${unhdmr} | grep pixdim3`; z=${dim##*3 } ;
+
+    nx=`echo ${x}*${mulfac} | bc` ;
+    ny=`echo ${y}*${mulfac} | bc` ;
+    nz=`echo ${z}*${mulfac} | bc` ;
+
+    ifdsntexistrun ${hdmr} "Altering MRI header" c3d ${unhdmr} -spacing ${x}x${y}x${z}mm ${hdmr}
 
 }
 
+# skull strip
 
-# mask
-
-function maskimage()
+function skullstrip()
 {
-		
-	local biasmr=$1
-	local dilmask=$2
-	local betmr=$3
-		
-	ifdsntexistrun $betmr "Removing MRI image outline artifacts" MultiplyImages 3 $biasmr $dilmask $betmr
 
-	c3d $betmr -type short -o $betmr
+	local skullmr=$1
+	local betmr=$2
+
+    com=`fslstats ${skullmr} -C`
+
+    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c $com -f 0.3
 
 }
+
+## mask
+#
+#function maskimage()
+#{
+#
+#	local biasmr=$1
+#	local dilmask=$2
+#	local betmr=$3
+#
+#	ifdsntexistrun $betmr "Removing MRI image outline artifacts" MultiplyImages 3 $biasmr $dilmask $betmr
+#
+#	c3d $betmr -type short -o $betmr
+#
+#}
 
 
 # Orient 
@@ -368,97 +392,44 @@ function maskimage()
 function orientimg()
 {
 
-	local betmr=$1
+	local unortmr=$1
 	local orttag=$2
 	local ortint=$3
 	local orttype=$4
 	local ortmr=$5
 
-	ifdsntexistrun $ortmr "Orienting MRI to standard orientation" \
-	c3d $betmr -orient $orttag -interpolation $ortint -type $orttype -o $ortmr
+	ifdsntexistrun ${ortmr} "Orienting MRI to standard orientation" \
+	c3d ${unortmr} -orient ${orttag} -interpolation ${ortint} -type ${orttype} -o ${ortmr}
 
 }
 
 
-# Smooth image
-
-function smoothimg()
-{
-	
-	local ortmr=$1
-	local sigma=$2
-	local smmr=$3
-
-	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr 1 $smmr 0 1
-
-	c3d $smmr -type short -o $smmr
-
-}
-
-
-# Crop to smallest roi
-
-function croptosmall()
-{
-	
-	local smmr=$1
-	local trim=$2
-	local mrroi=$3
-
-	ifdsntexistrun $mrroi "Cropping MRI image to smallest ROI" c3d $smmr -trim ${trim}vox -type short -o $mrroi
-
-}
+## Smooth image
+#
+#function smoothimg()
+#{
+#
+#	local ortmr=$1
+#	local sigma=$2
+#	local smmr=$3
+#
+#	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr 1 $smmr 0 1
+#
+#	c3d $smmr -type short -o $smmr
+#
+#}
 
 
 #---------------------------
 
-
-# 2a) initialize registration Function
-
-function initmrallenreg()
-{
-
-	# Init imgs
-	mrroi=$1
-	allenref=$2
-
-	# Init tform
-	initform=$3
-
-	# Init parms
-	deg=$4
-	radfrac=$5
-	useprincax=$6
-	localiter=$7
-	
-	# Out imgs
-	initallen=$8
-
-
-	# Init reg
-	ifdsntexistrun $initform "Initializing registration ..." \
-	 antsAffineInitializer 3 $mrroi $allenref $initform $deg $radfrac $useprincax $localiter
-
-
-	# Warp Allen
-	ifdsntexistrun $initallen "initializing Allen template" antsApplyTransforms -i $allenref -r $smmr -t $initform -o $initallen
-
-
-}
-
-
-
-#---------------------------
-
-
-# 2b) Register to Allen atlas Function
+# 2) Register to Allen atlas Function
 
 function regmrallen()
 {
 
 	# Reg inputs
-	local mrroi=$1
-	local initallen=$2
+	local mrprereg=$1
+	local allen=$2
 
 	# Reg parms
 	local trans=$3	
@@ -476,7 +447,7 @@ function regmrallen()
 	# Perform ANTs registration between MRI and Allen atlas
 
 	ifdsntexistrun $antsallen "Registering MRI data to allen atlas ... this will take a while" \
-	antsRegistrationMIRACL.sh -d 3 -f $mrroi -m $initallen -o $regdir/allen_mr_ants -t $trans -p $prec -n $thrds -s $spldist -r $rad | tee $regdir/ants_reg.log
+	antsRegistrationMIRACL_MRI.sh -d 3 -f ${mrprereg} -m ${allen} -o ${regdir}/allen_mr_ants -t ${trans} -p ${prec} -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
 
 
 }
@@ -488,150 +459,82 @@ function regmrallen()
 # 3) Warp Allen labels to original MRI Function
 
 
-function warpallenlbls()
-{
-	
-	# In imgs
-	local smmr=$1
-	local lbls=$2
-
-	# In tforms
-	local antswarp=$3
-	local antsaff=$4
-	local initform=$5
-
-	# Out lbls
-	local wrplbls=$6
-	
-	# Ort pars
-	local orttaglbls=$7
-	local ortintlbls=$8
-	local orttypelbls=$9
-	local ortlbls=${10}
-
-	# swap lbls
-	local swplbls=${11}
-	local tiflbls=${12}
-	
-	# Up lbls
-    local inmr=${13}
-    local reslbls=${14}
-    local restif=${15}
-
-	# warp to registered MRI
-	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${smmr} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
-
-	# orient to org 
-	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
-
-	# swap dim (x=>y / y=>x)
-	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
-
-	# create tif lbls
-	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
-
-	# upsample to img dimensions
-
-	# # get img dim
-	alldim=`PrintHeader ${inmr} 2`
-    x=${alldim%%x*};
-	yz=${alldim#*x}; y=${yz%x*} ;
-	z=${alldim##*x};
-
-    downfactor=`echo ${inmr} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
-
-    xu=$((${x}*${downfactor}));
-    yu=$((${y}*${downfactor}));
-
-    # get dims from hres tif
-#    tif=
-#    dims=`c3d ${tif} -info-full | grep Dimensions`
-#    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
-#    alldim=`PrintHeader ${inmr} 2` ;  z=${alldim##*x};
-
-	dim="${yu}x${xu}x${z}"; # inmr diff orientation need to swap x/y
-
-# TODOhp : warp labels again to high res (make empty image w same dims?)
-# TODOhp : remove this comment
-
+#function warpallenlbls()
+#{
+#
+#	# In imgs
+#	local smmr=$1
+#	local lbls=$2
+#
+#	# In tforms
+#	local antswarp=$3
+#	local antsaff=$4
+#	local initform=$5
+#
+#	# Out lbls
+#	local wrplbls=$6
+#
+#	# Ort pars
+#	local orttaglbls=$7
+#	local ortintlbls=$8
+#	local orttypelbls=$9
+#	local ortlbls=${10}
+#
+#	# swap lbls
+#	local swplbls=${11}
+#	local tiflbls=${12}
+#
+#	# Up lbls
+#    local inmr=${13}
+#    local reslbls=${14}
+#    local restif=${15}
+#
+#	# warp to registered MRI
+#	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
+#	 antsApplyTransforms -r ${smmr} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+#
+#	# orient to org
+#	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+#
+#	# swap dim (x=>y / y=>x)
+#	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
+#
+#	# create tif lbls
+#	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
+#
+#	# upsample to img dimensions
+#
+#	# # get img dim
+#	alldim=`PrintHeader ${inmr} 2`
+#    x=${alldim%%x*};
+#	yz=${alldim#*x}; y=${yz%x*} ;
+#	z=${alldim##*x};
+#
+#    downfactor=`echo ${inmr} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
+#
+#    xu=$((${x}*${downfactor}));
+#    yu=$((${y}*${downfactor}));
+#
+#    # get dims from hres tif
+##    tif=
+##    dims=`c3d ${tif} -info-full | grep Dimensions`
+##    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
+##    alldim=`PrintHeader ${inmr} 2` ;  z=${alldim##*x};
+#
+#	dim="${yu}x${xu}x${z}"; # inmr diff orientation need to swap x/y
+#
 #	ifdsntexistrun ${reslbls} "Upsampling labels to MRI resolution" \
 #	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
-	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
-
-    # create hres tif lbls
+##	  Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
+#
+##     create hres tif lbls
 #	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
-
-
-}
-
-#---------------------------
-
-# 4a) Warp input MRI to Allen Function
-
-function warpinmrallen()
-{
-
-	# Ort mr
-	inmr=$1
-	ortmrtag=$2
-	ortmrint=$3
-	ortmrtype=$4
-	orthresmr=$5
-
-	# Reg to allen
-	allenhres=$6
-	initform=$7
-	antsaff=$8
-	antsinvwarp=$9
-
-	regorgmr=${10}
-
-	# Orient channel to std
-	orientimg ${inmr} ${ortmrtag} ${ortmrint} ${ortmrtype} ${orthresmr}
-
-	# Apply warps
-	ifdsntexistrun ${regorgmr} "Applying ants deformation to input MRI" \
-	antsApplyTransforms -r ${allenhres} -i ${orthresmr} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgmr} --float
-
-}
+#
+#
+#}
+#
 
 #---------------------------
-
-# 4b) Warp down 3x MRI (high res) to Allen Function
-
-
-function warphresmrallen()
-{
-
-	# Ort mr
-	hresmr=$1
-	ortmrtag=$2
-	ortmrint=$3
-	ortmrtype=$4
-	orthresmr=$5
-
-	# Reg to allen
-	allenhres=$6
-	initform=$7
-	antsaff=$8
-	antsinvwarp=$9
-	
-	regorgmr=${10}
-
-	# Orient channel to std
-	orientimg ${hresmr} ${ortmrtag} ${ortmrint} ${ortmrtype} ${orthresmr}
-
-	# Apply warps
-	ifdsntexistrun $regorgmr "Applying ants deformation to high-res MRI" \
-	antsApplyTransforms -r ${allenhres} -i ${orthresmr} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgmr} --float
-
-}
-
-
-#---------------------------
-#---------------------------
-
 
 
 # Build main function
@@ -641,81 +544,63 @@ function main()
 
 # 1) Process MRI
 
-
-	# resample to 0.05mm voxel
-	resmr=${regdir}/mr_res0.05.nii.gz
-	resamplemr ${inmr} 0.05 0 4 ${resmr}
-
 	# N4 bias correct
-	biasmr=${regdir}/mr_res0.05_bias.nii.gz
-	biasfieldcorr ${resmr} ${biasmr}
-
-	# Remove outline w erosion & dilation
+	biasmr=${regdir}/mr_bias.nii.gz
+	biasfieldcorr ${inmr} ${biasmr}
 
 	# Thr
-	thrmr=${regdir}/mr_res0.05_bias_thr.nii.gz
-	thresh ${biasmr} 2 50 0 1 ${thrmr}
+	thrmr=${regdir}/mr_bias_thr.nii.gz
+	thresh ${biasmr} 40 ${thrmr}
 
-	# Ero (remove any components attached to the brain)
-	eromask=${regdir}/mr_res0.05_ero_mask.nii.gz
-	erode ${thrmr} 3 ${eromask}
+    # Crop to smallest roi
+	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
+	croptosmall ${thrmr} ${mrroi}
 
-    # Get largest component
-    conncomp=${regdir}/mr_res0.05_ero_mask_comp.nii.gz
-    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
+    # Change header * 10 dims
+    hdmr=${regdir}/mr_bias_thr_roi_hd.nii.gz
+    mulheader ${mrroi} 10 ${hdmr}
 
-	# Dil
-	dilmask=${regdir}/mr_res0.05_dil_mask.nii.gz
-	dilate ${conncomp} 3 ${dilmask}
+    # Skull strip
+    betmr=${regdir}/mr_bet.nii.gz
+    skullstrip ${hdmr} ${betmr}
 
-	# Mask
-	betmr=${regdir}/mr_res0.05_bias_bet.nii.gz
-	maskimage ${biasmr} ${dilmask} ${betmr}
+#	# Ero (remove any components attached to the brain)
+#	eromask=${regdir}/mr_ero_mask.nii.gz
+#	erode ${thrmr} 3 ${eromask}
+#
+#    # Get largest component
+#    conncomp=${regdir}/mr_ero_mask_comp.nii.gz
+#    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
+#
+#	# Dil
+#	dilmask=${regdir}/mr_dil_mask.nii.gz
+#	dilate ${conncomp} 3 ${dilmask}
+#
+#	# Mask
+#	betmr=${regdir}/mr_bias_bet.nii.gz
+#	maskimage ${biasmr} ${dilmask} ${betmr}
+
+    # TODOlp: ask for certain orientation
 
 	# Orient
-	ortmr=${regdir}/mr_res0.05_ort.nii.gz
-	orientimg ${betmr} ALS Cubic short ${ortmr}
+	ortmr=${regdir}/mr_ort.nii.gz
+	orientimg ${betmr} RAI Cubic short ${ortmr}
 
-	# Smooth
-	smmr=${regdir}/mr_res0.05_ort_sm.nii.gz
-	smoothimg ${ortmr} 1 ${smmr}
+    # Update back header
+    orghdmr=${regdir}/mr_bias_thr_roi_hd.nii.gz
+    mulheader ${ortmr} 0.1 ${orghdmr}
 
-	# Crop to smallest roi
-	mrroi=${regdir}/mr_res0.05_ort_sm_roi.nii.gz
-	croptosmall ${smmr} 5 ${mrroi}
+#	# Smooth
+#	smmr=${regdir}/mr_ort_sm.nii.gz
+#	smoothimg ${ortmr} 1 ${smmr}
 
 	# make MRI copy
 	mrlnk=${regdir}/mr.nii.gz
-	if [[ ! -f ${mrlnk} ]]; then cp ${smmr} ${mrlnk} ; fi
+	if [[ ! -f ${mrlnk} ]]; then cp ${orghdmr} ${mrlnk} ; fi
 
 	#---------------------------
 
-
-# 2a) initialize registration
-
-	# Allen atlas template
-	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
-
-	initform=$regdir/init_tform.mat 
-
-	# Init parms
-
-	deg=2 # search increment in degrees 
-	radfrac=0.05 # arc around principal axis
-	useprincax=0 # rotation searched around principal axis
-	localiter=100 # num of iteration for optimization at search point
-
-	# Out Allen
-	initallen=$regdir/init_allen.nii.gz
-
-
-	initmrallenreg $mrroi $allenref $initform $deg $radfrac $useprincax $localiter $initallen
-
-
-	#---------------------------
-
-
-# 2b) Register to Allen atlas
+# 2) Register to Allen atlas
 	
 
 	# Parameters: 
@@ -725,17 +610,20 @@ function main()
 	# spline distance 26 
 	spldist=26
 	# cross correlation radius
-	rad=2
+	rad=8
 	# precision 
 	prec=d # double precision (otherwise ITK error in some cases!)
 	# get num of threads 
 	thrds=`nproc`
 
+    # Allen atlas template
+	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
+
 	# Out Allen
 	antsallen=$regdir/allen_mr_antsWarped.nii.gz
 
 
-	regmrallen $mrroi $initallen $trans $spldist $rad $prec $thrds $antsallen
+	regmrallen ${orghdmr} ${allenref} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
 
 
 	#---------------------------
@@ -744,71 +632,45 @@ function main()
 # 3) Warp Allen labels to original MRI (down sampled 2x)
 
 
-	# Tforms
-	antswarp=$regdir/allen_mr_ants1Warp.nii.gz
-	antsaff=$regdir/allen_mr_ants0GenericAffine.mat
-
-	# If want to warp multi-res / hemi lbls
-	
-	if [[ -z $lbls ]]; then
-
-		if [[ -z $hemi ]]; then
-			
-			hemi=split
-
-		fi
-
-		if [[ -z $vox ]]; then
-			
-			vox=10
-
-		fi
-        lbls=$atlasdir/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
-	fi
-
-	base=`basename $lbls`
-	lblsname=${base%%.*};
-
-	# Out lbls
-	wrplbls=${regdir}/${lblsname}_ants.nii.gz
-	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
-	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
-	tiflbls=${regdir}/${lblsname}_ants.tif
-	reslbls=${regdirfinal}/allen_lbls_mr_ants.nii.gz
-	restif=${regdirfinal}/allen_lbls_mr_ants.tif
-
-	# upsample in python now
-	# warpallenlbls $smmr $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resmr $reslbls
-
-
-	warpallenlbls ${smmr} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inmr} ${reslbls} ${restif}
-
-	#---------------------------
-
-
-# 4) Warp input MRI to Allen
-
-
-	# ort hres mr
-#	orthresmr=${regdir}/hres_EYFP_ort.nii.gz
-	ortinmr=${regdir}/mr_ort.nii.gz
-
-	# hres Allen
-	allenhres=${atlasdir}/ara/template/average_template_10um.nii.gz
-
-	# ants inv warp
-	antsinvwarp=${regdir}/allen_mr_ants1InverseWarp.nii.gz
-
-	# out warp hres mr
-#	regorgmr=${regdirfinal}/hresmr_allen_ants.nii.gz
-    regorgmr=${regdirfinal}/mr_allen_ants.nii.gz
-
-
-    warpinmrallen ${inmr} ALS Cubic short ${ortinmr} $allenhres $initform $antsaff $antsinvwarp $regorgmr
-#	warphresmrallen ${hresmr} ALS Cubic short ${orthresmr} $allenhres $initform $antsaff $antsinvwarp $regorgmr
-
-}
+#	# Tforms
+#	antswarp=$regdir/allen_mr_ants1Warp.nii.gz
+#	antsaff=$regdir/allen_mr_ants0GenericAffine.mat
+#
+#	# If want to warp multi-res / hemi lbls
+#
+#	if [[ -z $lbls ]]; then
+#
+#		if [[ -z $hemi ]]; then
+#
+#			hemi=split
+#
+#		fi
+#
+#		if [[ -z $vox ]]; then
+#
+#			vox=10
+#
+#		fi
+#        lbls=$atlasdir/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+#
+#	fi
+#
+#	base=`basename $lbls`
+#	lblsname=${base%%.*};
+#
+#	# Out lbls
+#	wrplbls=${regdir}/${lblsname}_ants.nii.gz
+#	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
+#	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
+#	tiflbls=${regdir}/${lblsname}_ants.tif
+#	reslbls=${regdirfinal}/allen_lbls_mr_ants.nii.gz
+#	restif=${regdirfinal}/allen_lbls_mr_ants.tif
+#
+#	# upsample in python now
+#	# warpallenlbls $smmr $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resmr $reslbls
+#
+#
+#	warpallenlbls ${smmr} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inmr} ${reslbls} ${restif}
 
 
 #--------------------
