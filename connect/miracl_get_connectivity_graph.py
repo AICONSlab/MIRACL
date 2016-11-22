@@ -487,6 +487,7 @@ def main():
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
 
 # TODOlp: view by  nested groups
+# TODOlp :  interactive heatmap with cursor (bookeh or lightning)
 
 # Call main function
 if __name__ == "__main__":
