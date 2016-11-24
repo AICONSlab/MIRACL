@@ -309,32 +309,6 @@ function croptosmall()
 
 }
 
-## Ero
-#
-#function erode()
-#{
-#
-#	local thrmr=$1
-#	local erorad=$2
-#	local eromask=$3
-#
-#	ifdsntexistrun $eromask "Eroding MRI mask" ImageMath 3 $eromask ME $thrmr $erorad
-#
-#}
-#
-#
-## Dil
-#
-#function dilate()
-#{
-#
-#	local eromask=$1
-#	local dilrad=$2
-#	local dilmask=$3
-#
-#	ifdsntexistrun $dilmask "Dilating MRI mask" ImageMath 3 $dilmask MD $eromask $dilrad
-#
-#}
 
 # change header * 10 dims
 
@@ -345,15 +319,15 @@ function mulheader()
 	local mulfac=$2
 	local hdmr=$3
 
-	dim1=`fslinfo ${unhdmr} | grep pixdim1`; x=${dim##*1 } ;
-	dim2=`fslinfo ${unhdmr} | grep pixdim2`; y=${dim##*2 } ;
-	dim3=`fslinfo ${unhdmr} | grep pixdim3`; z=${dim##*3 } ;
+	dim1=`fslinfo ${unhdmr} | grep pixdim1`; x=${dim1##*1 } ;
+	dim2=`fslinfo ${unhdmr} | grep pixdim2`; y=${dim2##*2 } ;
+	dim3=`fslinfo ${unhdmr} | grep pixdim3`; z=${dim3##*3 } ;
 
     nx=`echo ${x}*${mulfac} | bc` ;
     ny=`echo ${y}*${mulfac} | bc` ;
     nz=`echo ${z}*${mulfac} | bc` ;
 
-    ifdsntexistrun ${hdmr} "Altering MRI header" c3d ${unhdmr} -spacing ${x}x${y}x${z}mm ${hdmr}
+    ifdsntexistrun ${hdmr} "Altering MRI header" c3d ${unhdmr} -spacing ${nx}x${ny}x${nz}mm ${hdmr}
 
 }
 
@@ -370,21 +344,6 @@ function skullstrip()
     ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c $com -f 0.3
 
 }
-
-## mask
-#
-#function maskimage()
-#{
-#
-#	local biasmr=$1
-#	local dilmask=$2
-#	local betmr=$3
-#
-#	ifdsntexistrun $betmr "Removing MRI image outline artifacts" MultiplyImages 3 $biasmr $dilmask $betmr
-#
-#	c3d $betmr -type short -o $betmr
-#
-#}
 
 
 # Orient 
@@ -419,10 +378,44 @@ function orientimg()
 #
 #}
 
+#---------------------------
+
+# 2a) initialize registration Function
+
+function initclarallenreg()
+{
+
+	# Init imgs
+	mrlnk=$1
+	allenref=$2
+
+	# Init tform
+	initform=$3
+
+	# Init parms
+	deg=$4
+	radfrac=$5
+	useprincax=$6
+	localiter=$7
+
+	# Out imgs
+	initallen=$8
+
+
+	# Init reg
+	ifdsntexistrun ${initform} "Initializing registration ..." \
+	 antsAffineInitializer 3 ${mrlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter}
+
+
+	# Warp Allen
+	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r ${mrlnk} -t ${initform} -o ${initallen}
+
+
+}
 
 #---------------------------
 
-# 2) Register to Allen atlas Function
+# 2b) Register to Allen atlas Function
 
 function regmrallen()
 {
@@ -564,31 +557,15 @@ function main()
     betmr=${regdir}/mr_bet.nii.gz
     skullstrip ${hdmr} ${betmr}
 
-#	# Ero (remove any components attached to the brain)
-#	eromask=${regdir}/mr_ero_mask.nii.gz
-#	erode ${thrmr} 3 ${eromask}
-#
-#    # Get largest component
-#    conncomp=${regdir}/mr_ero_mask_comp.nii.gz
-#    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
-#
-#	# Dil
-#	dilmask=${regdir}/mr_dil_mask.nii.gz
-#	dilate ${conncomp} 3 ${dilmask}
-#
-#	# Mask
-#	betmr=${regdir}/mr_bias_bet.nii.gz
-#	maskimage ${biasmr} ${dilmask} ${betmr}
-
     # TODOlp: ask for certain orientation
 
 	# Orient
 	ortmr=${regdir}/mr_ort.nii.gz
-	orientimg ${betmr} RAI Cubic short ${ortmr}
+	orientimg ${betmr} RSA Cubic short ${ortmr}
 
     # Update back header
-    orghdmr=${regdir}/mr_bias_thr_roi_hd.nii.gz
-    mulheader ${ortmr} 0.1 ${orghdmr}
+    orghdmr=${regdir}/mr_bias_thr_roi_orghd.nii.gz
+    mulheader ${ortmr} "0.1" ${orghdmr}
 
 #	# Smooth
 #	smmr=${regdir}/mr_ort_sm.nii.gz
@@ -600,7 +577,29 @@ function main()
 
 	#---------------------------
 
-# 2) Register to Allen atlas
+# 2a) initialize registration
+
+	# Allen atlas template
+	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
+
+	initform=$regdir/init_tform.mat
+
+	# Init parms
+
+	deg=2 # search increment in degrees
+	radfrac=0.05 # arc around principal axis
+	useprincax=0 # rotation searched around principal axis
+	localiter=100 # num of iteration for optimization at search point
+
+	# Out Allen
+	initallen=$regdir/init_allen.nii.gz
+
+	initclarallenreg ${mrlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen}
+
+
+	#---------------------------
+
+# 2b) Register to Allen atlas
 	
 
 	# Parameters: 
@@ -615,9 +614,6 @@ function main()
 	prec=d # double precision (otherwise ITK error in some cases!)
 	# get num of threads 
 	thrds=`nproc`
-
-    # Allen atlas template
-	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
 
 	# Out Allen
 	antsallen=$regdir/allen_mr_antsWarped.nii.gz

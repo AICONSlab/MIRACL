@@ -378,7 +378,7 @@ function smoothimg()
 	local sigma=$2
 	local smclar=$3
 
-	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 0 1
+	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
 
 	c3d ${smclar} -type short -o $smclar
 
@@ -425,12 +425,12 @@ function initclarallenreg()
 
 
 	# Init reg
-	ifdsntexistrun $initform "Initializing registration ..." \
-	 antsAffineInitializer 3 $clarroi $allenref $initform $deg $radfrac $useprincax $localiter
+	ifdsntexistrun ${initform} "Initializing registration ..." \
+	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter}
 
 
 	# Warp Allen
-	ifdsntexistrun $initallen "initializing Allen template" antsApplyTransforms -i $allenref -r $smclar -t $initform -o $initallen
+	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r $clarroi -t ${initform} -o ${initallen}
 
 
 }
@@ -667,7 +667,7 @@ function main()
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_ort_sm.nii.gz
-	smoothimg ${ortclar} 0.2 ${smclar}
+	smoothimg ${ortclar} 1 ${smclar}
 
 	# Crop to smallest roi
 	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
