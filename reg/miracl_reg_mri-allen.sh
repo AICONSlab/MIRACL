@@ -561,7 +561,7 @@ function main()
 
 	# Orient
 	ortmr=${regdir}/mr_ort.nii.gz
-	orientimg ${betmr} RSA Cubic short ${ortmr}
+	orientimg ${betmr} RSP Cubic short ${ortmr}
 
     # Update back header
     orghdmr=${regdir}/mr_bias_thr_roi_orghd.nii.gz
@@ -619,7 +619,7 @@ function main()
 	antsallen=$regdir/allen_mr_antsWarped.nii.gz
 
 
-	regmrallen ${orghdmr} ${allenref} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
+	regmrallen ${orghdmr} ${initallen} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
 
 
 	#---------------------------
