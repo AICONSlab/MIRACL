@@ -672,6 +672,7 @@ function main()
 #
 #	warpallenlbls ${smmr} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inmr} ${reslbls} ${restif}
 
+}
 
 #--------------------
 

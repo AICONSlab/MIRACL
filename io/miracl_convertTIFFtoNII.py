@@ -18,6 +18,8 @@ import re
 startTime = datetime.now()
 
 
+# TODOhp: add resolution as input for voxel size
+
 def helpmsg(name=None):
     return '''convertTifftoNii.py
 

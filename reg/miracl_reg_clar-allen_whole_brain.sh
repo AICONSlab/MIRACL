@@ -378,9 +378,9 @@ function smoothimg()
 	local sigma=$2
 	local smclar=$3
 
-	ifdsntexistrun $smclar "Smoothing CLARITY image" SmoothImage 3 $ortclar 1 $smclar 0 1
+	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 0 1
 
-	c3d $smclar -type short -o $smclar
+	c3d ${smclar} -type short -o $smclar
 
 }
 
@@ -667,7 +667,7 @@ function main()
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_ort_sm.nii.gz
-	smoothimg ${ortclar} 1 ${smclar}
+	smoothimg ${ortclar} 0.2 ${smclar}
 
 	# Crop to smallest roi
 	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
