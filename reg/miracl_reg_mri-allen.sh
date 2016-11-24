@@ -8,7 +8,6 @@ function getversion()
 }
 
 # TODOHp: add stroke mask later
-# TODOlp: remove FSL/bet 
 
 # help/usage function
 function usage()
@@ -251,11 +250,11 @@ function ifdsntexistrun()
 	local outstr="$2"; 
 	local fun="${@:3}";  
 
-	if [[ ! -f $outfile ]]; then 
+	if [[ ! -f ${outfile} ]]; then
 
 		printf "\n $outstr \n"; 
 		echo "$fun"; 
-		eval "$fun"; 
+		eval "${fun}";
 
 	else  
 		
@@ -290,7 +289,7 @@ function thresh()
 	local thrmr=$3
 
 #	ifdsntexistrun $thrmr "Thresholding MRI image" c3d $biasmr -threshold ${p1}% ${p2}% $t1 $t2 -o $thrmr
-    ifdsntexistrun ${thrmr} "Thresholding MRI image" fslmaths $biasmr -thrP ${thr} ${thrmr}
+    ifdsntexistrun ${thrmr} "Thresholding MRI image" fslmaths ${biasmr} -thrP ${thr} ${thrmr}
 
 }
 
@@ -341,7 +340,7 @@ function skullstrip()
 
     com=`fslstats ${skullmr} -C`
 
-    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c $com -f 0.3
+    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f 0.3
 
 }
 
@@ -382,7 +381,7 @@ function orientimg()
 
 # 2a) initialize registration Function
 
-function initclarallenreg()
+function initmrallenreg()
 {
 
 	# Init imgs
@@ -439,7 +438,7 @@ function regmrallen()
 
 	# Perform ANTs registration between MRI and Allen atlas
 
-	ifdsntexistrun $antsallen "Registering MRI data to allen atlas ... this will take a while" \
+	ifdsntexistrun ${antsallen} "Registering MRI data to allen atlas ... this will take a while" \
 	antsRegistrationMIRACL_MRI.sh -d 3 -f ${mrprereg} -m ${allen} -o ${regdir}/allen_mr_ants -t ${trans} -p ${prec} -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
 
 
@@ -452,80 +451,59 @@ function regmrallen()
 # 3) Warp Allen labels to original MRI Function
 
 
-#function warpallenlbls()
-#{
-#
-#	# In imgs
-#	local smmr=$1
-#	local lbls=$2
-#
-#	# In tforms
-#	local antswarp=$3
-#	local antsaff=$4
+function warpallenlbls()
+{
+
+	# In imgs
+	local mrlnk=$1
+	local lbls=$2
+
+	# In tforms
+	local antswarp=$3
+	local antsaff=$4
 #	local initform=$5
-#
-#	# Out lbls
-#	local wrplbls=$6
-#
-#	# Ort pars
-#	local orttaglbls=$7
-#	local ortintlbls=$8
-#	local orttypelbls=$9
-#	local ortlbls=${10}
-#
-#	# swap lbls
-#	local swplbls=${11}
-#	local tiflbls=${12}
-#
-#	# Up lbls
-#    local inmr=${13}
-#    local reslbls=${14}
-#    local restif=${15}
-#
-#	# warp to registered MRI
-#	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-#	 antsApplyTransforms -r ${smmr} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
-#
-#	# orient to org
-#	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
-#
-#	# swap dim (x=>y / y=>x)
-#	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
-#
-#	# create tif lbls
-#	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
-#
-#	# upsample to img dimensions
-#
-#	# # get img dim
-#	alldim=`PrintHeader ${inmr} 2`
-#    x=${alldim%%x*};
-#	yz=${alldim#*x}; y=${yz%x*} ;
-#	z=${alldim##*x};
-#
-#    downfactor=`echo ${inmr} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
-#
-#    xu=$((${x}*${downfactor}));
-#    yu=$((${y}*${downfactor}));
-#
-#    # get dims from hres tif
-##    tif=
-##    dims=`c3d ${tif} -info-full | grep Dimensions`
-##    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
-##    alldim=`PrintHeader ${inmr} 2` ;  z=${alldim##*x};
-#
-#	dim="${yu}x${xu}x${z}"; # inmr diff orientation need to swap x/y
-#
-#	ifdsntexistrun ${reslbls} "Upsampling labels to MRI resolution" \
-#	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
-##	  Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
-#
-##     create hres tif lbls
-#	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
-#
-#
-#}
-#
+
+	# Out lbls
+	local wrplbls=$5
+
+	# warp to registered MRI
+	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
+	antsApplyTransforms -r ${mrlnk} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} -o ${wrplbls}
+#	 antsApplyTransforms -r ${mrlnk} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+
+}
+
+#---------------------------
+
+# 4) Warp MRI to Allen space Function
+
+function warpinmrallen()
+{
+
+	# Ort mr
+	inmr=$1
+	ortmrtag=$2
+	ortmrint=$3
+	ortmrtype=$4
+	orthresmr=$5
+
+	# Reg to allen
+	allenhres=$6
+	initform=$7
+	antsaff=$8
+	antsinvwarp=$9
+
+	regorgmr=${10}
+
+	# Orient channel to std
+	orientimg ${inmr} ${ortmrtag} ${ortmrint} ${ortmrtype} ${orthresmr}
+
+	# Apply warps
+	ifdsntexistrun ${regorgmr} "Applying ants deformation to input MRI" \
+	antsApplyTransforms -r ${allenhres} -i ${orthresmr} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgmr} --float
+
+}
+
 
 #---------------------------
 
@@ -580,22 +558,22 @@ function main()
 # 2a) initialize registration
 
 	# Allen atlas template
-	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
+	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
 
-	initform=$regdir/init_tform.mat
-
-	# Init parms
-
-	deg=2 # search increment in degrees
-	radfrac=0.05 # arc around principal axis
-	useprincax=0 # rotation searched around principal axis
-	localiter=100 # num of iteration for optimization at search point
-
-	# Out Allen
-	initallen=$regdir/init_allen.nii.gz
-
-	initclarallenreg ${mrlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen}
-
+#	initform=${regdir}/init_tform.mat
+#
+#	# Init parms
+#
+#	deg=2 # search increment in degrees
+#	radfrac=0.05 # arc around principal axis
+#	useprincax=0 # rotation searched around principal axis
+#	localiter=100 # num of iteration for optimization at search point
+#
+#	# Out Allen
+#	initallen=${regdir}/init_allen.nii.gz
+#
+#	initmrallenreg ${mrlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen}
+#
 
 	#---------------------------
 
@@ -616,57 +594,68 @@ function main()
 	thrds=`nproc`
 
 	# Out Allen
-	antsallen=$regdir/allen_mr_antsWarped.nii.gz
+	antsallen=${regdir}/allen_mr_antsWarped.nii.gz
 
-
-	regmrallen ${orghdmr} ${initallen} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
-
+#	regmrallen ${orghdmr} ${initallen} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
+    regmrallen ${mrlnk} ${allenref} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
 
 	#---------------------------
 
 
-# 3) Warp Allen labels to original MRI (down sampled 2x)
+# 3) Warp Allen labels to MRI
 
+    # If want to warp multi-res / hemi lbls
 
-#	# Tforms
-#	antswarp=$regdir/allen_mr_ants1Warp.nii.gz
-#	antsaff=$regdir/allen_mr_ants0GenericAffine.mat
+	if [[ -z ${lbls} ]]; then
+
+		if [[ -z ${hemi} ]]; then
+
+			hemi=split
+
+		fi
+
+		if [[ -z ${vox} ]]; then
+
+			vox=10
+
+		fi
+        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+	fi
+
+	# Tforms
+	antswarp=${regdir}/allen_mr_ants1Warp.nii.gz
+	antsaff=${regdir}/allen_mr_ants0GenericAffine.mat
+
+    base=`basename $lbls`
+	lblsname=${base%%.*};
+
+    # Out lbls
+	wrplbls=${regdirfinal}/${lblsname}_ants.nii.gz
+
+#	warpallenlbls ${mrlnk} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls}
+    warpallenlbls ${mrlnk} ${lbls} ${antswarp} ${antsaff} ${wrplbls}
+
+	#---------------------------
+
+# 4) Warp input MRI to Allen
+
+#	# ort hres mr
+#	ortinmr=${regdir}/org_mr_ort.nii.gz
 #
-#	# If want to warp multi-res / hemi lbls
+#	# hres Allen
+#	allenhres=${atlasdir}/ara/template/average_template_10um.nii.gz
 #
-#	if [[ -z $lbls ]]; then
+#	# ants inv warp
+#	antsinvwarp=${regdir}/allen_mr_ants1InverseWarp.nii.gz
 #
-#		if [[ -z $hemi ]]; then
+	# out warp hres mr
+    regmrallen=${regdirfinal}/mr_allen_ants.nii.gz
+    antsinvmr=${regdir}/allen_mr_antsInverseWarped.nii.gz
 #
-#			hemi=split
-#
-#		fi
-#
-#		if [[ -z $vox ]]; then
-#
-#			vox=10
-#
-#		fi
-#        lbls=$atlasdir/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-#
-#	fi
-#
-#	base=`basename $lbls`
-#	lblsname=${base%%.*};
-#
-#	# Out lbls
-#	wrplbls=${regdir}/${lblsname}_ants.nii.gz
-#	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
-#	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
-#	tiflbls=${regdir}/${lblsname}_ants.tif
-#	reslbls=${regdirfinal}/allen_lbls_mr_ants.nii.gz
-#	restif=${regdirfinal}/allen_lbls_mr_ants.tif
-#
-#	# upsample in python now
-#	# warpallenlbls $smmr $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resmr $reslbls
-#
-#
-#	warpallenlbls ${smmr} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inmr} ${reslbls} ${restif}
+#    warpinmrallen ${inmr} RSP Cubic short ${ortinmr} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgmr}
+
+    if [[ ! -f ${regmrallen} ]]; then cp ${antsinvmr} ${regmrallen} ; fi
 
 }
 

@@ -581,7 +581,7 @@ function warpinclarallen()
 
 	# Apply warps
 	ifdsntexistrun ${regorgclar} "Applying ants deformation to input CLARITY" \
-	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgclar} --float
+	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
 
 }
 
@@ -613,7 +613,7 @@ function warphresclarallen()
 
 	# Apply warps
 	ifdsntexistrun $regorgclar "Applying ants deformation to high-res CLARITY" \
-	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [${initform},1] [${antsaff},1] ${antsinvwarp} -o ${regorgclar} --float
+	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
 
 }
 
@@ -724,7 +724,7 @@ function main()
 	antsallen=$regdir/allen_clar_antsWarped.nii.gz
 
 
-	regclarallen $clarroi $initallen $trans $spldist $rad $prec $thrds $antsallen
+	regclarallen ${clarroi} $initallen $trans $spldist $rad $prec $thrds $antsallen
 
 
 	#---------------------------
