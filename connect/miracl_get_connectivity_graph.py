@@ -292,9 +292,10 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     # export projection map (lbls w norm proj volumes along tree)
 
     abrv_annot = np.array(export_connect_abv.ix[:, 1:num_out_lbl + 1])
+    abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
     plt.figure(figsize=(15, 15))
-    sns.set_context("paper", font_scale=0.8, rc={"lines.linewidth": 1.1})
+    sns.set_context("paper", font_scale=0.9, rc={"lines.linewidth": 1.1})
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
                 annot=abrv_annot, fmt="s")
