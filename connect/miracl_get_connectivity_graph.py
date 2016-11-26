@@ -33,7 +33,7 @@ def helpmsg():
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
     Quering from the Allen API requires an internet connection.
 
-    example: miracl_get_connectivity_graph.py -r my_roi_mask -n 15
+    example: miracl_get_connectivity_graph.py -r my_roi_mask -n 25
     '''
 
 
@@ -75,7 +75,7 @@ def initialize():
 
     miracl_home = '/Users/mgoubran/workspace/clarity_Project'
 
-    annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+    annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     # read atlas annotations
     atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_combined_10um_labels.txt' % miracl_home)
@@ -217,9 +217,11 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
         # get exp regions stats
         projection_df = mcc.get_structure_unionizes([exp_id], is_injection=False)
 
+        # Should probably do ipsi/contra
+
         # get connected regions
         filter_exp = projection_df.loc[
-            (projection_df['normalized_projection_volume'] > cutoff) & (projection_df['hemisphere_id'] == 3)]
+            (projection_df['normalized_projection_volume'] > cutoff) & (projection_df['hemisphere_id'] != 3)]
 
         # sort exp values by norm proj volume
         norm_proj = filter_exp.sort_values(['normalized_projection_volume'],
@@ -228,7 +230,7 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
         norm_proj_vol = norm_proj['normalized_projection_volume']
         all_norm_proj.append(norm_proj_vol)
 
-        # TODOhp: How to figure out which hemi 
+
         # distinguish label hemisphere
         orgid = np.array(norm_proj['structure_id'])
         hem = np.array(norm_proj['hemisphere_id'])
@@ -294,11 +296,12 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     abrv_annot = np.array(export_connect_abv.ix[:, 1:num_out_lbl + 1])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    plt.figure(figsize=(15, 15))
-    sns.set_context("paper", font_scale=0.9, rc={"lines.linewidth": 1.1})
+    plt.figure(figsize=(17, 17))
+    sns.set_context("paper", font_scale=0.8, rc={"lines.linewidth": 1})
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
-                annot=abrv_annot, fmt="s", linewidths=1)
+                annot=abrv_annot, fmt="s", linewidths=2)
+
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
     plt.savefig('projection_map_along_graph.png', dpi=300)
@@ -338,9 +341,13 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     heatmap[:-1, 0] = uniq_lbls
 
     # get target regions
+
     # mode across structures (most common)
     med = sp.stats.mode(conn_ids[:, 1:], axis=0, nan_policy='omit')[0]
     med = np.array(med)[0]
+    # only unique lbls
+    indexes = np.unique(med, return_index=True)[1]
+    med = [med[index] for index in sorted(indexes)]
 
     targ = med[0:num_out_lbl]
     heatmap[-1, 1:] = targ
@@ -357,11 +364,11 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     targ_abrv = targ.replace(dic)
     targ_abrv = np.array(targ_abrv[0])
 
-    plt.figure(figsize=(15, 15))
-    # sns.set_context("talk", font_scale=1.1, rc={"lines.linewidth": 1.1})
-    sns.set_context("paper", font_scale=1.3)
+    plt.figure(figsize=(17, 17))
+    sns.set_context("paper", font_scale=1.2)
     sns.heatmap(heatmap[:-1, 1:], yticklabels=names, xticklabels=targ_abrv,
-                cbar_kws={"label": "Normalized projection volume"}, vmax=15, cmap="GnBu", linewidths=1)
+                cbar_kws={"label": "Normalized projection volume"}, vmax=20, cmap="GnBu", linewidths=3)
+
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structures')
     plt.savefig('connectivity_matrix_heat_map.png', dpi=300)
@@ -403,7 +410,7 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
             connections[l + 1, t + 1] = val if val > 0 else 0
 
     # threshold connections
-    thr = 10
+    thr = 5
     connections[connections < thr] = 0
 
     # lbls abrv
@@ -415,11 +422,9 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
     ggp_parents = np.array(
         [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() for l, lbl in enumerate(alllbls)])
 
-    # TODOhp: validate connectogram .. & why 4?!
-
-    for i in range(4):
-        ggp_parents = [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() if (lbl != 997) else 997 for
-                       l, lbl in enumerate(ggp_parents)]
+    # for i in range(4):
+    #     ggp_parents = [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() if (lbl != 997) else 997 for
+    #                    l, lbl in enumerate(ggp_parents)]
 
     # make dic
     repl = np.unique(ggp_parents)
@@ -431,7 +436,9 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
     ggp_parents = pd.DataFrame(ggp_parents)
     groups = ggp_parents.replace(parents_dic)
 
-    c = lgn.circle(connections, labels=alllbls_abrv, group=np.array(groups[0]), width=1000, height=1000)
+    justconn = connections[1:, 1:]
+
+    c = lgn.circle(justconn, labels=alllbls_abrv, group=np.array(groups[0]), width=1000, height=1000)
 
     c.save_html('connectogram_grouped_by_parent_id.html', overwrite=True)
 
@@ -491,6 +498,8 @@ def main():
 
     # ---------------
 
+    print("Excluding major/larger labels (with depth < 7 and graph order <6)")
+
     # exclude primary injection if found as a target regions (mutually exclusive)
     filconn = [np.delete(all_connect_ids[t], np.where(np.in1d(all_connect_ids[t], uniq_lbls))) for t in
                range(len(all_connect_ids))]
@@ -516,7 +525,8 @@ def main():
 
 
 # TODOlp: view by  nested groups
-# TODOlp :  interactive heatmap with cursor (bookeh or lightning)
+# TODOlp : interactive heatmap with cursor (bookeh or lightning)
+# TODOlp : add weighting for connectogram & maybe interactive numbers/groups
 
 # Call main function
 if __name__ == "__main__":
