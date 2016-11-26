@@ -18,7 +18,9 @@ import argparse
 from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
 
-# TODOhp: multiple exps per label .. what to do?! look through and average?!!
+# TODOhp: make input either mask or labelid?!
+
+# TODOlp: multiple exps per label .. what to do?! look through and average?!!
 
 # ---------
 # help fn
@@ -59,14 +61,12 @@ def getinpars():
     return inmask, num_out_lbl
 
 
-# TODOhp: make input either mask or labelid?!
-
 def initialize():
     # type: () -> object
     # input parameters
 
     # projection density threshold
-    cutoff = 0.0025
+    cutoff = 0.001
 
     # max label value
     maxannot = 13000  # ignore labels in millions (too small)!
@@ -80,8 +80,8 @@ def initialize():
     # read atlas annotations
     atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_combined_10um_labels.txt' % miracl_home)
 
-    # major labels to exclude (ie root,grey,etc) @ depth < 7 or grap order < 6
-    exclude = np.array(annot_csv[(annot_csv['depth'] < 7) | (annot_csv['graph_order'] < 6)].id)
+    # major labels to exclude (ie root,grey,etc) @ depth < 5 or grap order < 6
+    exclude = np.array(annot_csv[(annot_csv['depth'] < 5) | (annot_csv['graph_order'] < 6)].id)
 
     return cutoff, maxannot, miracl_home, annot_csv, atlas_lbls, exclude
 
@@ -94,7 +94,7 @@ def gethist(miracl_home, inmask):
     """
 
     # read annot labels
-    print('Reading Allen Reference Atlas annoations')
+    print("\n Reading Allen Reference Atlas annoations")
     lbls_file = '%s/ara/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
     annot_lbls = nib.load(lbls_file)
     annot_lbls = annot_lbls.get_data()
@@ -109,7 +109,7 @@ def gethist(miracl_home, inmask):
         maskx = maskimg.shape[0]
         rat = anotx / maskx
 
-        print('Upsampling mask to annotation resolution')
+        print("\n Upsampling mask to annotation resolution")
         maskimg = sp.ndimage.zoom(maskimg, rat, order=0)
 
     # binarize
@@ -234,7 +234,7 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
         # distinguish label hemisphere
         orgid = np.array(norm_proj['structure_id'])
         hem = np.array(norm_proj['hemisphere_id'])
-        connect_ids = [orgid[i] + 20000 if hem[i] == 2 else orgid[i] for i in range(len(hem))]
+        connect_ids = [orgid[i] + 20000 if hem[i] == 1 else orgid[i] for i in range(len(hem))]
 
         # filter out labels to exclude
         excl_ids = np.in1d(connect_ids, exclude)
@@ -410,7 +410,7 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
             connections[l + 1, t + 1] = val if val > 0 else 0
 
     # threshold connections
-    thr = 5
+    thr = 1
     connections[connections < thr] = 0
 
     # lbls abrv
@@ -422,9 +422,12 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
     ggp_parents = np.array(
         [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() for l, lbl in enumerate(alllbls)])
 
-    # for i in range(4):
-    #     ggp_parents = [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() if (lbl != 997) else 997 for
-    #                    l, lbl in enumerate(ggp_parents)]
+    parent_grps = ggp_parents
+
+    for i in range(2):
+        parent_grps = np.array(
+            [annot_csv['parent_structure_id'][annot_csv['id'] == lbl].item() if (lbl != 997) else 997 for
+             l, lbl in enumerate(parent_grps)])
 
     # make dic
     repl = np.unique(ggp_parents)
@@ -435,10 +438,21 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
     # replace
     ggp_parents = pd.DataFrame(ggp_parents)
     groups = ggp_parents.replace(parents_dic)
+    groups = np.array(groups[0])
+
+    # make dic
+    repl2 = np.unique(parent_grps)
+    np.place(repl2, repl2 > 0, range(len(repl2)))
+    uniq_parents2 = np.unique(parent_grps)
+    parents_dic2 = dict(zip(uniq_parents2, repl2))
+
+    parent_grps = pd.DataFrame(parent_grps)
+    parent_groups = parent_grps.replace(parents_dic2)
+    parent_groups = np.array(parent_groups[0])
 
     justconn = connections[1:, 1:]
 
-    c = lgn.circle(justconn, labels=alllbls_abrv, group=np.array(groups[0]), width=1000, height=1000)
+    c = lgn.circle(justconn, labels=alllbls_abrv, group=[parent_groups, groups], width=1000, height=1000)
 
     c.save_html('connectogram_grouped_by_parent_id.html', overwrite=True)
 
@@ -449,12 +463,12 @@ def main():
     # initial pars & read inputs
     [inmask, num_out_lbl] = getinpars()
 
-    print('Reading input mask (ROI) and Allen annotations')
+    print("\n Reading input mask (ROI) and Allen annotations")
 
     [cutoff, maxannot, miracl_home, annot_csv, atlas_lbls, exclude] = initialize()
 
     # Get 'histogram' of masked labels
-    print('Getting histogram of included labels in mask & sorting by volume')
+    print("\n Getting histogram of included labels in mask & sorting by volume")
 
     masked_lbls = gethist(miracl_home, inmask)
 
@@ -470,21 +484,21 @@ def main():
     masked_lbls = masked_lbls[(masked_lbls > 0) & (masked_lbls < maxannot)]
 
     # Check if labels have injection exps
-    print('Checking if labels have injection experiments in the connectivity search')
+    print("\n Checking if labels have injection experiments in the connectivity search")
 
     inj_exps = check_inj_exp(masked_lbls, projexps)
 
     # get parent labels for ones w/out inj exp
-    print('Getting parent labels for labels without injection experiments')
+    print("\n Getting parent labels for labels without injection experiments")
 
     uniq_lbls = get_parentlbl(inj_exps, masked_lbls, annot_csv, exclude)
 
     # check all labels have inj exps
-    print('Checking that all parent labels have injection exps')
+    print("\n Checking that all parent labels have injection exps")
 
     inj_exps = check_inj_exp(uniq_lbls, projexps)
 
-    while (len(inj_exps) != sum(inj_exps)):
+    while len(inj_exps) != sum(inj_exps):
         uniq_lbls = get_parentlbl(inj_exps, uniq_lbls, annot_csv, exclude)
         inj_exps = check_inj_exp(uniq_lbls, projexps)
 
@@ -492,13 +506,13 @@ def main():
     uniq_lbls = uniq_lbls[0:num_out_lbl]
 
     # query structure connectivity from Allen API
-    print("Quering structural connectivity of injection labels in the Allen API & sorting by projection volume")
+    print("\n Quering structural connectivity of injection labels in the Allen API & sorting by projection volume")
 
     [all_connect_ids, all_norm_proj] = query_connect(uniq_lbls, projexps, cutoff, exclude, mcc)
 
     # ---------------
 
-    print("Excluding major/larger labels (with depth < 7 and graph order <6)")
+    print("\n Excluding larger 'parent' labels (with graph depth < 5 and graph order < 6)")
 
     # exclude primary injection if found as a target regions (mutually exclusive)
     filconn = [np.delete(all_connect_ids[t], np.where(np.in1d(all_connect_ids[t], uniq_lbls))) for t in
@@ -522,7 +536,6 @@ def main():
 
     # compute & save connectivity graph
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
-
 
 # TODOlp : interactive heatmap with cursor (bookeh or lightning)
 # TODOlp : add weighting for connectogram & maybe interactive numbers/groups
