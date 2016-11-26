@@ -224,12 +224,10 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
             (projection_df['normalized_projection_volume'] > cutoff) & (projection_df['hemisphere_id'] != 3)]
 
         # sort exp values by norm proj volume
-        norm_proj = filter_exp.sort_values(['normalized_projection_volume'],
-                                           ascending=False).ix[:,
+        norm_proj = filter_exp.sort_values(['normalized_projection_volume'], ascending=False).ix[:,
                     ['hemisphere_id', 'structure_id', 'normalized_projection_volume']]
-        norm_proj_vol = norm_proj['normalized_projection_volume']
+        norm_proj_vol = norm_proj["normalized_projection_volume"]
         all_norm_proj.append(norm_proj_vol)
-
 
         # distinguish label hemisphere
         orgid = np.array(norm_proj['structure_id'])
@@ -257,7 +255,7 @@ def saveconncsv(conn_ids, annot_csv):
     as a csv file with their ontology atlas ID number
     """
 
-    print('Computing & saving connected ids as a csv file')
+    print("\n Computing & saving connected ids as a csv file")
 
     # save as csv
     export_connect = pd.DataFrame(conn_ids)
@@ -285,7 +283,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     the projection data as a csv file
     """
 
-    print('Computing & saving projection map')
+    print("\n Computing & saving projection map")
 
     # setup projection map
     out_norm_proj = [all_norm_proj[i][1:num_out_lbl + 1] for i in range(num_out_lbl)]
@@ -321,7 +319,7 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     & their common target structures as png
     """
 
-    print('Computing & saving the connectivity matrix')
+    print("\n Computing & saving the connectivity matrix")
 
     # make square map
     eps = export_connect_abv.shape[1]
@@ -536,6 +534,7 @@ def main():
 
     # compute & save connectivity graph
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
+
 
 # TODOlp : interactive heatmap with cursor (bookeh or lightning)
 # TODOlp : add weighting for connectogram & maybe interactive numbers/groups
