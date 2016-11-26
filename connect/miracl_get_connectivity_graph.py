@@ -136,8 +136,8 @@ def gethist(miracl_home, inmask):
     # flip again (smaller to larger)
     # masked_lbls = masked_lbls[::-1]
 
-    print('Included Allen label ids in the input ROI are:')
-    print(masked_lbls)
+    # print('Included Allen label ids in the input ROI are:')
+    # print(masked_lbls)
 
     return masked_lbls
 
@@ -234,7 +234,7 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
         # distinguish label hemisphere
         orgid = np.array(norm_proj['structure_id'])
         hem = np.array(norm_proj['hemisphere_id'])
-        connect_ids = [orgid[i] + 20000 if hem[i] == 1 else orgid[i] for i in range(len(hem))]
+        connect_ids = [orgid[i] + 20000 if hem[i] == 2 else orgid[i] for i in range(len(hem))]
 
         # filter out labels to exclude
         excl_ids = np.in1d(connect_ids, exclude)
@@ -524,7 +524,6 @@ def main():
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
 
 
-# TODOlp: view by  nested groups
 # TODOlp : interactive heatmap with cursor (bookeh or lightning)
 # TODOlp : add weighting for connectogram & maybe interactive numbers/groups
 
