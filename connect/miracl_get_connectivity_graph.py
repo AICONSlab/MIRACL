@@ -17,6 +17,7 @@ import argparse
 
 from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
+
 # TODOhp: multiple exps per label .. what to do?! look through and average?!!
 
 # ---------
@@ -34,6 +35,7 @@ def helpmsg():
 
     example: miracl_get_connectivity_graph.py -r my_roi_mask -n 21
     '''
+
 
 # ---------
 # Get input arguments
@@ -79,7 +81,7 @@ def initialize():
     atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_combined_10um_labels.txt' % miracl_home)
 
     # major labels to exclude (ie root,grey,etc) @ depth < 7 or grap order < 6
-    exclude = np.array(annot_csv[(annot_csv['depth'] < 5) | (annot_csv['graph_order'] < 6)].id)
+    exclude = np.array(annot_csv[(annot_csv['depth'] < 7) | (annot_csv['graph_order'] < 6)].id)
 
     return cutoff, maxannot, miracl_home, annot_csv, atlas_lbls, exclude
 
@@ -253,7 +255,7 @@ def saveconncsv(conn_ids, num_out_lbl, annot_csv):
     as a csv file with their ontology atlas ID number
     """
 
-    print('Computing & saving connected ids as a csv file')    
+    print('Computing & saving connected ids as a csv file')
 
     # save as csv
     export_connect = pd.DataFrame(conn_ids)
@@ -281,7 +283,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     the projection data as a csv file
     """
 
-    print('Computing & saving projection map')    
+    print('Computing & saving projection map')
 
     # setup projection map
     out_norm_proj = [all_norm_proj[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
@@ -295,7 +297,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     sns.set_context("paper", font_scale=0.8, rc={"lines.linewidth": 1.1})
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
-                annot=abrv_annot, fmt=".1f")
+                annot=abrv_annot, fmt="s")
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
     plt.savefig('projection_map_along_graph.png', dpi=300)
@@ -304,22 +306,28 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     norm_proj_df = pd.DataFrame(out_norm_proj)
     norm_proj_df.to_csv('normalized_projection_volumes.csv', index=False)
 
-    return out_norm_proj, names
+    return names
 
 
 # ---------------
 # compute & save connectivity matrix
 
-def exportheatmap(num_out_lbl, conn_ids, out_norm_proj, dic, names):
+def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names):
     """ Generates & saves the heatmap (connectivity matrix) of primary structures 
     & their common target structures as png
     """
 
-    print('Computing & saving the connectivity matrix')    
+    print('Computing & saving the connectivity matrix')
+
+    conn_ids = [conn_ids[i][0:num_out_lbl * 3] for i in range(num_out_lbl)]
+    conn_ids = np.array(conn_ids)
+
+    out_norm_proj = [all_norm_proj[i][:num_out_lbl * 3] for i in range(num_out_lbl)]
+    out_norm_proj = np.array(out_norm_proj)
 
     # setup heat map
     heatmap = np.zeros((num_out_lbl + 1, num_out_lbl + 1))
-    heatmap[:-1, 0] = conn_ids[:, 0]
+    heatmap[:-1, 0] = uniq_lbls
 
     # get target regions
     # median across structures
@@ -438,7 +446,6 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
 # ---------------
 
 def main():
-
     # initial pars & read inputs
     [inmask, num_out_lbl] = getinpars()
 
@@ -450,7 +457,7 @@ def main():
     print('Getting histogram of included labels in mask & sorting by volume')
 
     masked_lbls = gethist(miracl_home, inmask)
-    
+
     # Setup Allen connect jason cache file
     mcc = MouseConnectivityCache(manifest_file='connectivity/manifest.json')
     # Load all injection experiments from Allen api
@@ -485,8 +492,8 @@ def main():
     uniq_lbls = uniq_lbls[0:num_out_lbl]
 
     # query structure connectivity from Allen API
-    print(
-    'Quering structural connectivity of injection labels in the Allen connectivity api & sorting by projection volume')
+    print("Quering structural connectivity of injection labels in the Allen connectivity api \
+    & sorting by projection volume")
 
     [all_connect_ids, all_norm_proj] = query_connect(uniq_lbls, projexps, cutoff, exclude, mcc)
 
@@ -507,13 +514,14 @@ def main():
     [export_connect_abv, dic] = saveconncsv(conn_ids, num_out_lbl, annot_csv)
 
     # compute & save proj map
-    [out_norm_proj, names] = exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv)
+    names = exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv)
 
     # compute & save connectivity matrix
-    [heatmap, targ] = exportheatmap(num_out_lbl, conn_ids, out_norm_proj, dic, names)
+    [heatmap, targ] = exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names)
 
     # compute & save connectivity graph
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
+
 
 # TODOlp: view by  nested groups
 # TODOlp :  interactive heatmap with cursor (bookeh or lightning)
