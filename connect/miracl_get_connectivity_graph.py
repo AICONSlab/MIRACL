@@ -33,7 +33,7 @@ def helpmsg():
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
     Quering from the Allen API requires an internet connection.
 
-    example: miracl_get_connectivity_graph.py -r my_roi_mask -n 21
+    example: miracl_get_connectivity_graph.py -r my_roi_mask -n 15
     '''
 
 
@@ -134,7 +134,7 @@ def gethist(miracl_home, inmask):
     masked_lbls = masked_lbls[1:numfull]  # & drop 0-background
 
     # flip again (smaller to larger)
-    masked_lbls = masked_lbls[::-1]
+    # masked_lbls = masked_lbls[::-1]
 
     print('Included Allen label ids in the input ROI are:')
     print(masked_lbls)
@@ -250,7 +250,7 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
 # ---------------
 # save connected ids & abreviations as csv 
 
-def saveconncsv(conn_ids, num_out_lbl, annot_csv):
+def saveconncsv(conn_ids, annot_csv):
     """ Saves connectivity ids (primary structures & targets)
     as a csv file with their ontology atlas ID number
     """
@@ -286,12 +286,12 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     print('Computing & saving projection map')
 
     # setup projection map
-    out_norm_proj = [all_norm_proj[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
+    out_norm_proj = [all_norm_proj[i][1:num_out_lbl + 1] for i in range(num_out_lbl)]
     names = np.array(export_connect_abv)[:, 0]
 
     # export projection map (lbls w norm proj volumes along tree)
 
-    abrv_annot = np.array(export_connect_abv.ix[:, :num_out_lbl + 1])
+    abrv_annot = np.array(export_connect_abv.ix[:, 1:num_out_lbl + 1])
 
     plt.figure(figsize=(15, 15))
     sns.set_context("paper", font_scale=0.8, rc={"lines.linewidth": 1.1})
@@ -319,10 +319,10 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names):
 
     print('Computing & saving the connectivity matrix')
 
-    conn_ids = [conn_ids[i][0:num_out_lbl * 3] for i in range(num_out_lbl)]
+    conn_ids = [conn_ids[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
     conn_ids = np.array(conn_ids)
 
-    out_norm_proj = [all_norm_proj[i][:num_out_lbl * 3] for i in range(num_out_lbl)]
+    out_norm_proj = [all_norm_proj[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
     out_norm_proj = np.array(out_norm_proj)
 
     # setup heat map
@@ -492,8 +492,7 @@ def main():
     uniq_lbls = uniq_lbls[0:num_out_lbl]
 
     # query structure connectivity from Allen API
-    print("Quering structural connectivity of injection labels in the Allen connectivity api \
-    & sorting by projection volume")
+    print("Quering structural connectivity of injection labels in the Allen API & sorting by projection volume")
 
     [all_connect_ids, all_norm_proj] = query_connect(uniq_lbls, projexps, cutoff, exclude, mcc)
 
@@ -511,7 +510,7 @@ def main():
     # ---------------        
 
     # save csv     
-    [export_connect_abv, dic] = saveconncsv(conn_ids, num_out_lbl, annot_csv)
+    [export_connect_abv, dic] = saveconncsv(conn_ids, annot_csv)
 
     # compute & save proj map
     names = exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv)
