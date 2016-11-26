@@ -200,7 +200,7 @@ def get_parentlbl(inj_exps, masked_lbls, annot_csv, exclude):
 # ---------------
 # Query Allen API
 
-def query_connect(uniq_lbls, projexps, cutoff, num_out_lbl, exclude, mcc):
+def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
     """ Queries the structural connectivity of
     labels inside mask & sorts found labels by normalized projection volume
     """
@@ -258,7 +258,7 @@ def saveconncsv(conn_ids, num_out_lbl, annot_csv):
     # save as csv
     export_connect = pd.DataFrame(conn_ids)
 
-    connect_cols = ['connect_lbl_%02d' % (i + 1) for i in range(num_out_lbl)]
+    connect_cols = ['connect_lbl_%02d' % (i + 1) for i in range(export_connect.shape[1] - 1)]
     all_cols = ['injection_lbl'] + connect_cols
 
     export_connect.columns = all_cols
@@ -289,11 +289,13 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
 
     # export projection map (lbls w norm proj volumes along tree)
 
+    abrv_annot = np.array(export_connect_abv.ix[:, :num_out_lbl + 1])
+
     plt.figure(figsize=(15, 15))
-    sns.set_context("paper", font_scale=1.3, rc={"lines.linewidth": 1.3})    
-    sns.heatmap(out_norm_proj, yticklabels=names,
+    sns.set_context("paper", font_scale=0.8, rc={"lines.linewidth": 1.1})
+    sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
-                annot=True, fmt=".1f")
+                annot=abrv_annot, fmt=".1f")
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
     plt.savefig('projection_map_along_graph.png', dpi=300)
@@ -486,7 +488,7 @@ def main():
     print(
     'Quering structural connectivity of injection labels in the Allen connectivity api & sorting by projection volume')
 
-    [all_connect_ids, all_norm_proj] = query_connect(uniq_lbls, projexps, cutoff, num_out_lbl, exclude, mcc)
+    [all_connect_ids, all_norm_proj] = query_connect(uniq_lbls, projexps, cutoff, exclude, mcc)
 
     # ---------------
 
