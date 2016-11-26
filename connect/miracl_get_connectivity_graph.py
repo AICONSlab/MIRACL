@@ -205,11 +205,8 @@ def query_connect(uniq_lbls, projexps, cutoff, num_out_lbl, exclude, mcc):
     labels inside mask & sorts found labels by normalized projection volume
     """
 
-    all_connect_ids = np.zeros([num_out_lbl, (num_out_lbl * 3) + 1])
-    all_connect_ids[:, 0] = uniq_lbls.T
-
-    all_norm_proj = np.zeros([num_out_lbl, (num_out_lbl * 3) + 1])
-    all_norm_proj[:, 0] = uniq_lbls.T
+    all_connect_ids = []
+    all_norm_proj = []
 
     for l, lbl in enumerate(uniq_lbls):
         # get exp num by searching injection struct
@@ -227,6 +224,7 @@ def query_connect(uniq_lbls, projexps, cutoff, num_out_lbl, exclude, mcc):
                                            ascending=False).ix[:,
                     ['hemisphere_id', 'structure_id', 'normalized_projection_volume']]
         norm_proj_vol = norm_proj['normalized_projection_volume']
+        all_norm_proj.append(norm_proj_vol)
 
         # TODOhp: How to figure out which hemi 
         # distinguish label hemisphere
@@ -237,11 +235,12 @@ def query_connect(uniq_lbls, projexps, cutoff, num_out_lbl, exclude, mcc):
         # filter out labels to exclude
         excl_ids = np.in1d(connect_ids, exclude)
         connect_ids_excl = np.delete(connect_ids, np.where(excl_ids == True))
+        all_connect_ids.append(connect_ids_excl)
 
         # extract n ids
-        all_connect_ids[l, 1:] = connect_ids_excl[0:(num_out_lbl * 3)]
-        # all_connect_ids = [uniq_lbls.T, connect_ids_excl]
-        all_norm_proj[l, 1:] = norm_proj_vol[0:(num_out_lbl * 3)]
+
+    all_connect_ids = np.array(all_connect_ids)
+    all_norm_proj = np.array(all_norm_proj)
 
     return all_connect_ids, all_norm_proj
 
@@ -285,7 +284,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     print('Computing & saving projection map')    
 
     # setup projection map
-    out_norm_proj = all_norm_proj[:, 1:num_out_lbl + 1]
+    out_norm_proj = [all_norm_proj[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
     names = np.array(export_connect_abv)[:, 0]
 
     # export projection map (lbls w norm proj volumes along tree)
@@ -491,18 +490,14 @@ def main():
 
     # ---------------
 
-    # exclude primary injection if found as a target regions (mutually exclusive) 
-    filconn = [np.delete(all_connect_ids[t, :], np.where(np.in1d(all_connect_ids[t, :], uniq_lbls))) for t in
+    # exclude primary injection if found as a target regions (mutually exclusive)
+    filconn = [np.delete(all_connect_ids[t], np.where(np.in1d(all_connect_ids[t], uniq_lbls))) for t in
                range(len(all_connect_ids))]
 
     # exclude labels not included in atlas annotations
     lblinatl = [np.in1d(filconn[i], atlas_lbls) for i in range(len(filconn))]
     atlfilconn = [np.delete(filconn[i], np.where(lblinatl == False)) for i in range(len(filconn))]
-    atlfilconn = np.array([atlfilconn[a][0:num_out_lbl] for a in range(len(atlfilconn))])
-
-    # combine with primary injections
-    primar = np.reshape(uniq_lbls, [num_out_lbl, 1])
-    conn_ids = np.hstack((primar, atlfilconn))
+    conn_ids = [np.hstack((uniq_lbls[i], atlfilconn[i])) for i in range(num_out_lbl)]
 
     # ---------------        
 
