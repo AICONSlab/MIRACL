@@ -298,7 +298,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     sns.set_context("paper", font_scale=0.9, rc={"lines.linewidth": 1.1})
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
-                annot=abrv_annot, fmt="s")
+                annot=abrv_annot, fmt="s", linewidths=1)
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
     plt.savefig('projection_map_along_graph.png', dpi=300)
@@ -313,15 +313,22 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
 # ---------------
 # compute & save connectivity matrix
 
-def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names):
+def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connect_abv, dic, names):
     """ Generates & saves the heatmap (connectivity matrix) of primary structures 
     & their common target structures as png
     """
 
     print('Computing & saving the connectivity matrix')
 
-    conn_ids = [conn_ids[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
-    conn_ids = np.array(conn_ids)
+    # make square map
+    eps = export_connect_abv.shape[1]
+
+    # conv to array
+    conn_ids = [np.array(conn_ids[i][0:eps], dtype=np.float) for i in range(num_out_lbl)]
+    # pad conn ids
+    conn_ids = [np.pad(conn_ids[i], (0, max(0, eps - len(conn_ids[i]))), 'constant', constant_values=(np.nan,)) for i
+                in range(num_out_lbl)]
+    conn_ids = np.array(conn_ids, dtype=np.float)
 
     out_norm_proj = [all_norm_proj[i][:num_out_lbl + 1] for i in range(num_out_lbl)]
     out_norm_proj = np.array(out_norm_proj)
@@ -331,26 +338,11 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names):
     heatmap[:-1, 0] = uniq_lbls
 
     # get target regions
-    # median across structures
-    med = np.unique(np.median(conn_ids[:, 1:], axis=0))
-    indexes = np.unique(conn_ids[:, 1], return_index=True)[1]
-    # 1st connected structures
-    first = [conn_ids[:, 1][ix] for ix in sorted(indexes)]
-    # combine boths
-    inter = np.intersect1d(med, first)
-    diff = num_out_lbl - len(med) + len(inter)
-    res = first[:diff]
-    targ = np.unique(np.hstack([res, med]))
+    # mode across structures (most common)
+    med = sp.stats.mode(conn_ids[:, 1:], axis=0, nan_policy='omit')[0]
+    med = np.array(med)[0]
 
-    if len(targ) < num_out_lbl:
-        # 1st connected structures
-        secindexes = np.unique(conn_ids[:, 2], return_index=True)[1]
-        sec = [conn_ids[:, 2][ix] for ix in sorted(secindexes)]
-        # combine boths
-        sec = np.delete(sec, np.intersect1d(targ, sec))
-        targ = np.unique(np.hstack([targ, sec]))
-
-    targ = targ[0:num_out_lbl]
+    targ = med[0:num_out_lbl]
     heatmap[-1, 1:] = targ
 
     # propagate heat map
@@ -358,8 +350,8 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names):
     for i in range(len(heatmap) - 1):
 
         for l, lbl in enumerate(targ):
-            heatmap[i, l + 1] = out_norm_proj[i, np.where(conn_ids[i, 1:] == lbl)] if np.sum(
-                conn_ids[i, 1:] == lbl) > 0 else 0
+            heatmap[i, l + 1] = out_norm_proj[i, np.where(conn_ids[i, 1:num_out_lbl] == lbl)] if np.sum(
+                conn_ids[i, 1:num_out_lbl] == lbl) > 0 else 0
 
     targ = pd.DataFrame(targ)
     targ_abrv = targ.replace(dic)
@@ -517,7 +509,7 @@ def main():
     names = exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv)
 
     # compute & save connectivity matrix
-    [heatmap, targ] = exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, dic, names)
+    [heatmap, targ] = exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connect_abv, dic, names)
 
     # compute & save connectivity graph
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
