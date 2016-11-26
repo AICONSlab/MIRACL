@@ -7,6 +7,9 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
+# TODOhp: ask for specific orientation or if flipped add variable
+
+# TODOlp: combine convert tif 2 nii & reg into one pipeline
 
 # help/usage function
 function usage()
@@ -541,8 +544,7 @@ function warpallenlbls()
 
 	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
 
-# TODOhp : warp labels again to high res (make empty image w same dims?)
-# TODOhp : remove this comment
+# TODOhp : warp labels again to high res (make empty image w same dims?) & remove this comment
 
 #	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
 #	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}

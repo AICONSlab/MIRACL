@@ -5,6 +5,8 @@
 
 import numpy as np
 import pandas as pd
+import scipy as sp
+from scipy import ndimage
 import seaborn as sns
 import nibabel as nib
 import os
@@ -76,8 +78,8 @@ def initialize():
     # read atlas annotations
     atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_combined_10um_labels.txt' % miracl_home)
 
-    # major labels to exclude (ie root,grey,etc) @ depth < 3 or grap order < 6
-    exclude = np.array(annot_csv[(annot_csv['depth'] < 3) | (annot_csv['graph_order'] < 6)].id)
+    # major labels to exclude (ie root,grey,etc) @ depth < 7 or grap order < 6
+    exclude = np.array(annot_csv[(annot_csv['depth'] < 5) | (annot_csv['graph_order'] < 6)].id)
 
     return cutoff, maxannot, miracl_home, annot_csv, atlas_lbls, exclude
 
@@ -90,6 +92,7 @@ def gethist(miracl_home, inmask):
     """
 
     # read annot labels
+    print('Reading Allen Reference Atlas annoations')
     lbls_file = '%s/ara/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
     annot_lbls = nib.load(lbls_file)
     annot_lbls = annot_lbls.get_data()
@@ -97,11 +100,39 @@ def gethist(miracl_home, inmask):
     # read input mask
     maskimg = nib.load(inmask)
     maskimg = maskimg.get_data()
+
+    # upsample if needed
+    if annot_lbls.shape != maskimg.shape:
+        anotx = annot_lbls.shape[0]
+        maskx = maskimg.shape[0]
+        rat = anotx / maskx
+
+        print('Upsampling mask to annotation resolution')
+        maskimg = sp.ndimage.zoom(maskimg, rat, order=0)
+
     # binarize
     mask = maskimg > 0
 
-    masked_lbls = np.unique(annot_lbls[mask])
-    masked_lbls = masked_lbls[masked_lbls > 0]
+    # get max
+    maxlbl = np.max(np.unique(annot_lbls[mask]))
+
+    # get hist
+    hist = ndimage.measurements.histogram(annot_lbls, 0, maxlbl, maxlbl, mask)
+
+    # sort by lbl     
+    sorthist = np.argsort(hist)
+
+    # flip (larger to smaller)
+    masked_lbls = sorthist[::-1]
+
+    # drop empty labels
+    fullhist = np.delete(hist, np.where(hist == 0))
+    numfull = len(fullhist) - 2
+
+    masked_lbls = masked_lbls[1:numfull]  # & drop 0-background
+
+    # flip again (smaller to larger)
+    masked_lbls = masked_lbls[::-1]
 
     print('Included Allen label ids in the input ROI are:')
     print(masked_lbls)
@@ -209,6 +240,7 @@ def query_connect(uniq_lbls, projexps, cutoff, num_out_lbl, exclude, mcc):
 
         # extract n ids
         all_connect_ids[l, 1:] = connect_ids_excl[0:(num_out_lbl * 3)]
+        # all_connect_ids = [uniq_lbls.T, connect_ids_excl]
         all_norm_proj[l, 1:] = norm_proj_vol[0:(num_out_lbl * 3)]
 
     return all_connect_ids, all_norm_proj
@@ -259,13 +291,13 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     # export projection map (lbls w norm proj volumes along tree)
 
     plt.figure(figsize=(15, 15))
-    sns.set_context("talk", font_scale=1.1, rc={"lines.linewidth": 1.1})    
+    sns.set_context("paper", font_scale=1.3, rc={"lines.linewidth": 1.3})    
     sns.heatmap(out_norm_proj, yticklabels=names,
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
                 annot=True, fmt=".1f")
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
-    plt.savefig('projection_map_along_graph.png', dpi=90)
+    plt.savefig('projection_map_along_graph.png', dpi=300)
 
     # export proj volumes
     norm_proj_df = pd.DataFrame(out_norm_proj)
@@ -325,12 +357,12 @@ def exportheatmap(num_out_lbl, conn_ids, out_norm_proj, dic, names):
 
     plt.figure(figsize=(15, 15))
     # sns.set_context("talk", font_scale=1.1, rc={"lines.linewidth": 1.1})
-    sns.set_context("talk", font_scale=1.1)
+    sns.set_context("paper", font_scale=1.3)
     sns.heatmap(heatmap[:-1, 1:], yticklabels=names, xticklabels=targ_abrv,
-                cbar_kws={"label": "Normalized projection volume"}, vmax=15, cmap="GnBu", linewidths=.1)
+                cbar_kws={"label": "Normalized projection volume"}, vmax=15, cmap="GnBu", linewidths=1)
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structures')
-    plt.savefig('connectivity_matrix_heat_map.png', dpi=90)
+    plt.savefig('connectivity_matrix_heat_map.png', dpi=300)
 
     return heatmap, targ
 
