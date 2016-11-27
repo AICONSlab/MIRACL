@@ -73,7 +73,7 @@ def initialize():
 
     # read ontology annotation csv
 
-    miracl_home = '/Users/mgoubran/workspace/clarity_Project'
+    miracl_home = os.environ['MIRACL_HOME']
 
     annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
@@ -294,11 +294,13 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     abrv_annot = np.array(export_connect_abv.ix[:, 1:num_out_lbl + 1])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    plt.figure(figsize=(num_out_lbl / 1.5, num_out_lbl / 1.5))
-    sns.set_context("talk", font_scale=0.9, rc={"lines.linewidth": 1})
+    plt.figure(figsize=(num_out_lbl, num_out_lbl))
+    sns.set_context("talk", font_scale=0.5)
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
-                annot=abrv_annot, fmt="s", linewidths=2)
+                annot=abrv_annot, fmt="s", linewidths=5)
+
+    plt.yticks(rotation=0)
 
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
@@ -369,7 +371,10 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     plt.figure(figsize=(num_out_lbl / 1.5, num_out_lbl / 1.5))
     sns.set_context("talk", font_scale=0.9)
     sns.heatmap(heatmap[:-1, 1:], yticklabels=names, xticklabels=targ_abrv,
-                cbar_kws={"label": "Normalized projection volume"}, vmax=5, cmap="GnBu", linewidths=2)
+                cbar_kws={"label": "Normalized projection volume"}, vmax=1, cmap="GnBu", linewidths=2)
+
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
 
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structures')
@@ -412,8 +417,8 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
             connections[l + 1, t + 1] = val if val > 0 else 0
 
     # threshold connections
-    # thr = 0.1
-    # connections[connections < thr] = 0
+    thr = 0.1
+    connections[connections < thr] = 0
 
     # lbls abrv
     alllbls_abrv = pd.DataFrame(alllbls)
