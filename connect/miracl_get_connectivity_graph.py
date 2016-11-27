@@ -81,7 +81,7 @@ def initialize():
     atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_split_10um_labels.txt' % miracl_home)
 
     # major labels to exclude (ie root,grey,etc) @ depth < 5 or grap order < 6
-    exclude = np.array(annot_csv[(annot_csv['depth'] < 5) | (annot_csv['graph_order'] < 6)].id)
+    exclude = np.array(annot_csv[(annot_csv["depth"] < 5) | (annot_csv["graph_order"] < 6)].id)
 
     return cutoff, maxannot, miracl_home, annot_csv, atlas_lbls, exclude
 
@@ -412,8 +412,8 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
             connections[l + 1, t + 1] = val if val > 0 else 0
 
     # threshold connections
-    thr = 0.1
-    connections[connections < thr] = 0
+    # thr = 0.1
+    # connections[connections < thr] = 0
 
     # lbls abrv
     alllbls_abrv = pd.DataFrame(alllbls)
@@ -516,6 +516,9 @@ def main():
 
     print("\n Excluding larger 'parent' labels (with graph depth < 5 and graph order < 6)")
 
+    # right injection sites
+    uniq_lbls += 20000
+
     # exclude primary injection if found as a target regions (mutually exclusive)
     filconn = [np.delete(all_connect_ids[t], np.where(np.in1d(all_connect_ids[t], uniq_lbls))) for t in
                range(len(all_connect_ids))]
@@ -523,9 +526,6 @@ def main():
     # exclude labels not included in atlas annotations
     lblinatl = [np.in1d(filconn[i], atlas_lbls) for i in range(len(filconn))]
     atlfilconn = [np.delete(filconn[i], np.where(lblinatl[i] == False)) for i in range(len(filconn))]
-
-    # right injection sites
-    uniq_lbls += 20000
 
     conn_ids = [np.hstack((uniq_lbls[i], atlfilconn[i])) for i in range(num_out_lbl)]
 
