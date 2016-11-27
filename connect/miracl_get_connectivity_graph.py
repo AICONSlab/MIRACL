@@ -294,8 +294,8 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     abrv_annot = np.array(export_connect_abv.ix[:, 1:num_out_lbl + 1])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    plt.figure(figsize=(17, 17))
-    sns.set_context("paper", font_scale=0.8, rc={"lines.linewidth": 1})
+    plt.figure(figsize=(15, 15))
+    sns.set_context("talk", font_scale=0.9, rc={"lines.linewidth": 1})
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
                 annot=abrv_annot, fmt="s", linewidths=2)
@@ -366,10 +366,10 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     targ_abrv = targ.replace(dic)
     targ_abrv = np.array(targ_abrv[0])
 
-    plt.figure(figsize=(17, 17))
-    sns.set_context("paper", font_scale=1.2)
+    plt.figure(figsize=(15, 15))
+    sns.set_context("talk", font_scale=0.9)
     sns.heatmap(heatmap[:-1, 1:], yticklabels=names, xticklabels=targ_abrv,
-                cbar_kws={"label": "Normalized projection volume"}, vmax=10, cmap="GnBu", linewidths=3)
+                cbar_kws={"label": "Normalized projection volume"}, vmax=5, cmap="GnBu", linewidths=2)
 
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structures')
