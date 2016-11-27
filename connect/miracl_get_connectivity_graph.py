@@ -250,7 +250,7 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
 # ---------------
 # save connected ids & abreviations as csv 
 
-def saveconncsv(conn_ids, annot_csv):
+def saveconncsv(conn_ids, annot_csv, num_out_lbl):
     """ Saves connectivity ids (primary structures & targets)
     as a csv file with their ontology atlas ID number
     """
@@ -264,13 +264,13 @@ def saveconncsv(conn_ids, annot_csv):
     all_cols = ['injection_lbl'] + connect_cols
 
     export_connect.columns = all_cols
-    export_connect.to_csv('connected_ids.csv', index=False)
+    export_connect.to_csv('connected_ids_%d_labels.csv' % num_out_lbl, index=False)
 
     # export acronynms
     dic = annot_csv.set_index('id')['acronym'].to_dict()
 
     export_connect_abv = export_connect.replace(dic)
-    export_connect_abv.to_csv('connected_abrvs.csv', index=False)
+    export_connect_abv.to_csv('connected_abrvs_%d_labels.csv' % num_out_lbl, index=False)
 
     return export_connect_abv, dic
 
@@ -294,7 +294,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
     abrv_annot = np.array(export_connect_abv.ix[:, 1:num_out_lbl + 1])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    plt.figure(figsize=(15, 15))
+    plt.figure(figsize=(num_out_lbl / 1.5, num_out_lbl / 1.5))
     sns.set_context("talk", font_scale=0.9, rc={"lines.linewidth": 1})
     sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, num_out_lbl + 1),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
@@ -302,11 +302,11 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
 
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structure order along connection graph')
-    plt.savefig('projection_map_along_graph.png', dpi=300)
+    plt.savefig('projection_map_along_graph_%d_labels.png' % num_out_lbl, dpi=300)
 
     # export proj volumes
     norm_proj_df = pd.DataFrame(out_norm_proj)
-    norm_proj_df.to_csv('normalized_projection_volumes.csv', index=False)
+    norm_proj_df.to_csv('normalized_projection_volumes_%d_labels.csv' % num_out_lbl, index=False)
 
     return names
 
@@ -366,14 +366,14 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     targ_abrv = targ.replace(dic)
     targ_abrv = np.array(targ_abrv[0])
 
-    plt.figure(figsize=(15, 15))
+    plt.figure(figsize=(num_out_lbl / 1.5, num_out_lbl / 1.5))
     sns.set_context("talk", font_scale=0.9)
     sns.heatmap(heatmap[:-1, 1:], yticklabels=names, xticklabels=targ_abrv,
                 cbar_kws={"label": "Normalized projection volume"}, vmax=5, cmap="GnBu", linewidths=2)
 
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structures')
-    plt.savefig('connectivity_matrix_heat_map.png', dpi=300)
+    plt.savefig('connectivity_matrix_heat_map_%d_labels.png' % num_out_lbl, dpi=300)
 
     return heatmap, targ
 
@@ -456,7 +456,7 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
 
     c = lgn.circle(justconn, labels=alllbls_abrv, group=[parent_groups, groups], width=1000, height=1000)
 
-    c.save_html('connectogram_grouped_by_parent_id.html', overwrite=True)
+    c.save_html('connectogram_grouped_by_parent_id_%d_labels.html' % num_out_lbl, overwrite=True)
 
 
 # ---------------
@@ -532,7 +532,7 @@ def main():
     # ---------------        
 
     # save csv     
-    [export_connect_abv, dic] = saveconncsv(conn_ids, annot_csv)
+    [export_connect_abv, dic] = saveconncsv(conn_ids, annot_csv, num_out_lbl)
 
     # compute & save proj map
     names = exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv)
