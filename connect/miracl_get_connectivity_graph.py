@@ -78,7 +78,7 @@ def initialize():
     annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     # read atlas annotations
-    atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_combined_10um_labels.txt' % miracl_home)
+    atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_split_10um_labels.txt' % miracl_home)
 
     # major labels to exclude (ie root,grey,etc) @ depth < 5 or grap order < 6
     exclude = np.array(annot_csv[(annot_csv['depth'] < 5) | (annot_csv['graph_order'] < 6)].id)
@@ -232,7 +232,7 @@ def query_connect(uniq_lbls, projexps, cutoff, exclude, mcc):
         # distinguish label hemisphere
         orgid = np.array(norm_proj['structure_id'])
         hem = np.array(norm_proj['hemisphere_id'])
-        connect_ids = [orgid[i] + 20000 if hem[i] == 1 else orgid[i] for i in range(len(hem))]
+        connect_ids = [orgid[i] + 20000 if hem[i] == 2 else orgid[i] for i in range(len(hem))]
 
         # filter out labels to exclude
         excl_ids = np.in1d(connect_ids, exclude)
@@ -340,14 +340,18 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
 
     # get target regions
 
-    # mode across structures (most common)
-    med = sp.stats.mode(conn_ids[:, 1:], axis=0, nan_policy='omit')[0]
-    med = np.array(med)[0]
-    # only unique lbls
-    indexes = np.unique(med, return_index=True)[1]
-    med = [med[index] for index in sorted(indexes)]
+    # get mode across structures (most common)
+    temp = np.zeros((num_out_lbl, eps - 1))
+    temp[:, :] = conn_ids[:, 1:]
+    targ = []
+    for i in range(num_out_lbl):
+        # mode in 2D
+        med = sp.stats.mode(temp, axis=None, nan_policy='omit')[0]
+        temp[temp == med] = np.nan
+        targ.append(med)
 
-    targ = med[0:num_out_lbl]
+    targ = [targ[i][0] for i in range(num_out_lbl)]
+
     heatmap[-1, 1:] = targ
 
     # propagate heat map
@@ -365,7 +369,7 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     plt.figure(figsize=(17, 17))
     sns.set_context("paper", font_scale=1.2)
     sns.heatmap(heatmap[:-1, 1:], yticklabels=names, xticklabels=targ_abrv,
-                cbar_kws={"label": "Normalized projection volume"}, vmax=20, cmap="GnBu", linewidths=3)
+                cbar_kws={"label": "Normalized projection volume"}, vmax=10, cmap="GnBu", linewidths=3)
 
     plt.ylabel('Primary injection structures in stroke region')
     plt.xlabel('Target structures')
@@ -381,7 +385,7 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
     """ Generates & saves the connectome graph of the connectiviy matrix
     """
 
-    print('Computing & saving the connectivity graph')
+    print("\n Computing & saving the interactive connectivity graph (connectogram) ")
 
     lgn = Lightning(ipython=True, local=True)
 
@@ -408,7 +412,7 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
             connections[l + 1, t + 1] = val if val > 0 else 0
 
     # threshold connections
-    thr = 1
+    thr = 0.1
     connections[connections < thr] = 0
 
     # lbls abrv
@@ -518,7 +522,11 @@ def main():
 
     # exclude labels not included in atlas annotations
     lblinatl = [np.in1d(filconn[i], atlas_lbls) for i in range(len(filconn))]
-    atlfilconn = [np.delete(filconn[i], np.where(lblinatl == False)) for i in range(len(filconn))]
+    atlfilconn = [np.delete(filconn[i], np.where(lblinatl[i] == False)) for i in range(len(filconn))]
+
+    # right injection sites
+    uniq_lbls += 20000
+
     conn_ids = [np.hstack((uniq_lbls[i], atlfilconn[i])) for i in range(num_out_lbl)]
 
     # ---------------        
