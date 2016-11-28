@@ -463,7 +463,6 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
 
     c.save_html('connectogram_grouped_by_parent_id_%d_labels.html' % num_out_lbl, overwrite=True)
 
-
 # ---------------
 
 def main():
@@ -550,7 +549,7 @@ def main():
 
 
 # TODOlp : interactive heatmap with cursor (bookeh or lightning)
-# TODOlp : add weighting for connectogram & maybe interactive numbers/groups
+# TODOlp : add weighting for connectogram & maybe interactive numbers/groups & force (another conn) graph
 
 # Call main function
 if __name__ == "__main__":

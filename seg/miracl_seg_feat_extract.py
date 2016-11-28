@@ -179,11 +179,11 @@ def main():
 
     if np.max(alllbls) > 20000:
 
-        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_split.csv' % miracl_home)
+        lookup = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     else:
 
-        lookup = pd.read_csv('%s/atlases/aba/aba_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+        lookup = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
 
     # get attributes
     names = lookup.name[lookup.id.isin(alllbls)]
@@ -201,7 +201,7 @@ def main():
     cols = ['LabelID','LabelAbrv','LabelName','ParentID','IDPath','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
     propsdf = propsdf[cols]
 
-    propscsv = "clarity_segmentation_features_aba_labels.csv"
+    propscsv = "clarity_segmentation_features_ara_labels.csv"
     propsdf.to_csv(propscsv)
 
     print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))
