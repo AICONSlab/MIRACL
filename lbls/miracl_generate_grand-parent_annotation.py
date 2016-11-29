@@ -12,6 +12,7 @@ import os
 from os.path import basename
 from datetime import datetime
 from subprocess import call
+import sys
 
 # ---------
 # help fn
@@ -107,9 +108,6 @@ def saveniiparents(parentdata, vx, outnii):
 
     # save parent data as nifti
     mat = np.eye(4) * vx
-    # mat[0, 0] = vx
-    # mat[1, 1] = vx
-    # mat[2, 2] = vx
     mat[3, 3] = 1
 
     # orient nii
@@ -149,7 +147,12 @@ def main():
     print("Computing parent labels at parent-level/generation %d" % pl)
 
     for l in range(len(lbls) - 1):
+
         lbl = lbls[l]
+
+        sys.stdout.write("\r processing label %d ... " % lbl)
+        sys.stdout.flush()
+
         parent = getlblparent(lbls, aragraph, lbl, pl, lblsplit, maxannotlbl)
         # replace val
         parentdata[parentdata == lbl] = parent
