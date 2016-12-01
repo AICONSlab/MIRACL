@@ -116,17 +116,13 @@ else:
         vx = 0.005  # 5 um
     else:
         vx = args.resx
-        vx /= 1000
-
-    outvox = vx * dr
+        vx /= float(1000)
 
     if args.resz is None:
         vz = 0.005  # 5 um
     else:
         vz = args.resz
-        vz /= 1000
-
-    vs = [outvox, outvox, vz]
+        vz /= float(1000)
 
     if args.center is None:
         # cent = [5.7, -6.6, -4]
@@ -150,7 +146,7 @@ def numericalSort(value):
 
 # ---------
 
-def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None):
+def converttiff2nii(indir, dr, chann, chan, vx=None, vz=None, cent=None, ot=None, cp=None):
     """
     :param indir:
     :param dr:
@@ -165,6 +161,9 @@ def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None
 
     outnii = ot
     chanp = cp
+
+    outvox = vx * dr
+    vs = [outvox, outvox, vz]
 
     # Get file lis
 
@@ -202,6 +201,7 @@ def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None
     mat[2, 3] = cent[2]
     mat[2, 2] = vz
     mat[3, 3] = 1
+
     nii = nib.Nifti1Image(data_array, mat)
 
     # nifti header info
@@ -230,7 +230,7 @@ def main():
     """
     :rtype: nifti file
     """
-    converttiff2nii(indir, dr, chann, chan, vs, cent, ot=outnii, cp=chanp)
+    converttiff2nii(indir, dr, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
 
 
 if __name__ == "__main__":
