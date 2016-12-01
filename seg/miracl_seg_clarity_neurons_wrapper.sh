@@ -28,13 +28,15 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -d <clarity dir> 
+	Usage: `basename $0` -d <clarity dir> -t <channel type: sparse or nuclear>
 
-	Example: `basename $0` -d my_clarity_tifs 
+	Example: `basename $0` -d my_clarity_tifs -t sparse
 
 		arguments (required):
 
 			d. Input clarity directory (including .tif images of one channel)
+
+			t. Channel type: sparse )like Thy1 YFP) [default] or nuclear (like PI)
 
 		----------		
 
@@ -111,12 +113,16 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":d:" opt; do
+	while getopts ":d:t:" opt; do
     
 	    case "${opt}" in
 
 	        d)
             	tifdir=${OPTARG}
+            	;;
+
+            t)
+            	type=${OPTARG}
             	;;
         	
         	*)
@@ -158,6 +164,13 @@ else
 
 fi
 
+
+if [ -z ${type} ];
+then
+    usage
+    echo "ERROR: < -d => input clarity directory> not specified"
+    exit 1
+fi
 
 # get time
 

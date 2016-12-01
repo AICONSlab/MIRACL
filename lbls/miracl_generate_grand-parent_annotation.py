@@ -76,9 +76,10 @@ def getalllbls(data):
     return lbls
 
 
-# TODOhp: make sure works for split version!
+# TODOhp: check diff with ipynb (code or files (csv,nii))?!
+# TODOhp: change cras after ouput to match Allen template
 
-def getlblparent(lbls, clarinfo, lbl, pl, lblsplit, maxannotlbl):
+def getlblparent(clarinfo, lbl, pl, lblsplit, maxannotlbl):
 
     # path id    
     path = clarinfo.structure_id_path[clarinfo.id == lbl]
@@ -98,8 +99,8 @@ def getlblparent(lbls, clarinfo, lbl, pl, lblsplit, maxannotlbl):
     else:
         parent = digpath[-pl]
 
-    if np.max(lbls) > lblsplit:
-        parent = parent + lblsplit if lbl > maxannotlbl else parent
+    # if np.max(lbls) > lblsplit:
+    parent = parent + lblsplit if lbl > maxannotlbl else parent
 
     return parent
 
@@ -142,7 +143,7 @@ def main():
     lbls = getalllbls(data)
 
     # loop over intensities
-    parentdata = data
+    parentdata = np.copy(data)
 
     print("Computing parent labels at parent-level/generation %d" % pl)
 
@@ -150,10 +151,11 @@ def main():
 
         lbl = lbls[l]
 
-        sys.stdout.write("\r processing label %d ... " % lbl)
+        parent = getlblparent(aragraph, lbl, pl, lblsplit, maxannotlbl)
+
+        sys.stdout.write("\r processing label: %d ... its grand-parent label: %d " % (lbl, parent))
         sys.stdout.flush()
 
-        parent = getlblparent(lbls, aragraph, lbl, pl, lblsplit, maxannotlbl)
         # replace val
         parentdata[parentdata == lbl] = parent
 
