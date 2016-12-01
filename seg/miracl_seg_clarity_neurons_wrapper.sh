@@ -36,6 +36,8 @@ function usage()
 
 			d. Input clarity directory (including .tif images of one channel)
 
+		Optional arguments:
+
 			t. Channel type: sparse )like Thy1 YFP) [default] or nuclear (like PI)
 
 		----------		
@@ -164,12 +166,10 @@ else
 
 fi
 
-
+# Default type to sparse
 if [ -z ${type} ];
 then
-    usage
-    echo "ERROR: < -d => input clarity directory> not specified"
-    exit 1
+    type=sparse
 fi
 
 # get time
@@ -177,7 +177,7 @@ fi
 START=$(date +%s)
 
 # get macro
-macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_sparse.ijm
+macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
 
 #motherdir=$(dirname ${tifdir})
 #inputdir=$(basename ${tifdir})
