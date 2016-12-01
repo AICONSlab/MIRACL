@@ -18,7 +18,7 @@ import re
 startTime = datetime.now()
 
 
-# TODOhp: add resolution as input for voxel size
+# TODOlp: check center output
 
 def helpmsg(name=None):
     return '''convertTifftoNii.py
@@ -42,8 +42,9 @@ Example: convertTifftoNii.py -f my_tifs -o stroke2
         -d  [Downsample ratio (default: 3) ]
         -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [chan prefix (string before channel number in file name). ex: C00 ]
-        -ch [chan name (default: thy1_yfp)]
-        -vs [voxel size (default: 0.005*(1/d), 0.005*(1/d), 0.005 ] assuming 5um original resolution
+        -ch [output chan name (default: thy1_yfp)]
+        -vx [original resolution in x-y plane (default: 0.005 -> 5um)]
+        -vz [original thickness (z-axis resolution / spacing between slices) (default: 0.005 -> 5um)]
         -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
         example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.025  -c 5.7 -6.6 -4
@@ -68,7 +69,8 @@ else:
     parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
     parser.add_argument('-ch', '--channame', type=str, help="Channel name")
     parser.add_argument('-o', '--outnii', type=str, help="Out nii name", required=True)
-    parser.add_argument('-vs', '--voxelsize', type=int, nargs='+', help="Out nii voxel sizes")
+    parser.add_argument('-vx', '--resx', type=int, nargs='+', help="Original x resolution")
+    parser.add_argument('-vx', '--resz', type=int, nargs='+', help="Original z resolution")
     parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
 
     args = parser.parse_args()
@@ -104,12 +106,19 @@ else:
         assert isinstance(args.channame, str)
         chan = args.channame
 
-    if args.voxelsize is None:
-        orgres = 0.005  # 5 um
-        outvox = orgres * dr
-        vs = [outvox, outvox, orgres]
+    if args.resx is None:
+        vx = 0.005  # 5 um
     else:
-        vs = args.voxelsize
+        vx = args.resx
+
+    outvox = vx * dr
+
+    if args.resz is None:
+        vz = 0.005  # 5 um
+    else:
+        vz = args.resz
+
+    vs = [outvox, outvox, vz]
 
     if args.center is None:
         # cent = [5.7, -6.6, -4]
@@ -183,7 +192,7 @@ def converttiff2nii(indir, dr, chann, chan, vs=None, cent=None, ot=None, cp=None
     mat[0, 3] = cent[0]
     mat[1, 3] = cent[1]
     mat[2, 3] = cent[2]
-    mat[2, 2] = orgres
+    mat[2, 2] = vz
     mat[3, 3] = 1
     nii = nib.Nifti1Image(data_array, mat)
 
