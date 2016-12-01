@@ -33,9 +33,15 @@ Converts Tiff images to Nifti
 
     For command-line / scripting
 
-    Usage: convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
+    Usage: miracl_convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
 
-Example: convertTifftoNii.py -f my_tifs -o stroke2
+Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
+
+    Arguments (required):
+
+        -f Input Clarity tif dir/folder
+
+        -o Output nii name (script will append downsample ratio and channel info to given name)
 
     Optional arguments:
 
@@ -43,11 +49,11 @@ Example: convertTifftoNii.py -f my_tifs -o stroke2
         -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [chan prefix (string before channel number in file name). ex: C00 ]
         -ch [output chan name (default: thy1_yfp)]
-        -vx [original resolution in x-y plane (default: 0.005 -> 5um)]
-        -vz [original thickness (z-axis resolution / spacing between slices) (default: 0.005 -> 5um)]
+        -vx [original resolution in x-y plane in um (default: 5)]
+        -vz [original thickness (z-axis resolution / spacing between slices) in um (default: 5)]
         -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
-        example: convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP  -vs 0.025 0.025 0.025  -c 5.7 -6.6 -4
+        example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
         '''
 
@@ -69,8 +75,8 @@ else:
     parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
     parser.add_argument('-ch', '--channame', type=str, help="Channel name")
     parser.add_argument('-o', '--outnii', type=str, help="Out nii name", required=True)
-    parser.add_argument('-vx', '--resx', type=int, nargs='+', help="Original x resolution")
-    parser.add_argument('-vx', '--resz', type=int, nargs='+', help="Original z resolution")
+    parser.add_argument('-vx', '--resx', type=int, help="Original x resolution")
+    parser.add_argument('-vz', '--resz', type=int, help="Original z resolution")
     parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
 
     args = parser.parse_args()
@@ -110,6 +116,7 @@ else:
         vx = 0.005  # 5 um
     else:
         vx = args.resx
+        vx /= 1000
 
     outvox = vx * dr
 
@@ -117,6 +124,7 @@ else:
         vz = 0.005  # 5 um
     else:
         vz = args.resz
+        vz /= 1000
 
     vs = [outvox, outvox, vz]
 
