@@ -75,8 +75,8 @@ else:
     parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
     parser.add_argument('-ch', '--channame', type=str, help="Channel name")
     parser.add_argument('-o', '--outnii', type=str, help="Out nii name", required=True)
-    parser.add_argument('-vx', '--resx', type=int, help="Original x resolution")
-    parser.add_argument('-vz', '--resz', type=int, help="Original z resolution")
+    parser.add_argument('-vx', '--resx', type=float, help="Original x resolution")
+    parser.add_argument('-vz', '--resz', type=float, help="Original z resolution")
     parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
 
     args = parser.parse_args()

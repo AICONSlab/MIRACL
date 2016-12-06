@@ -667,13 +667,18 @@ function main()
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
 	orientimg ${betclar} ALS Cubic short ${ortclar}
 
+    # TODOhp: orientation
+
+    # if A-P flipped (PLS) & if R-L -> ARS
+
+
 	# Smooth
 	smclar=${regdir}/clar_res0.05_ort_sm.nii.gz
 	smoothimg ${ortclar} 1 ${smclar}
 
 	# Crop to smallest roi
 	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
-	croptosmall ${smclar} 5 ${clarroi}
+#	croptosmall ${smclar} 5 ${clarroi}
 
 	# make clarity copy
 	clarlnk=${regdir}/clar.nii.gz
