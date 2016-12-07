@@ -7,7 +7,7 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
-# TODOHp: add stroke mask later
+# TODOlp: add stroke mask later
 
 
 # help/usage function
