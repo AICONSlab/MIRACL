@@ -9,6 +9,7 @@ function getversion()
 
 # TODOHp: add stroke mask later
 
+
 # help/usage function
 function usage()
 {
@@ -18,6 +19,7 @@ function usage()
 	1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
 	2) Warps Allen annotations to the MRI space
 
+    ** Input MRI nifti has to be in 'standard' orientation (correct anatomical labelling) **
 
 	Usage: `basename $0`
 
@@ -535,15 +537,14 @@ function main()
     betmr=${regdir}/mr_bet.nii.gz
     skullstrip ${hdmr} ${betmr}
 
-    # TODOlp: ask for certain orientation
-
 	# Orient
-	ortmr=${regdir}/mr_ort.nii.gz
-	orientimg ${betmr} RSP Cubic short ${ortmr}
+#	ortmr=${regdir}/mr_ort.nii.gz
+#	orientimg ${betmr} RSP Cubic short ${ortmr}
 
     # Update back header
     orghdmr=${regdir}/mr_bias_thr_roi_orghd.nii.gz
-    mulheader ${ortmr} "0.1" ${orghdmr}
+    mulheader ${betmr} "0.1" ${orghdmr}
+#    mulheader ${ortmr} "0.1" ${orghdmr}
 
 #	# Smooth
 #	smmr=${regdir}/mr_ort_sm.nii.gz
