@@ -62,7 +62,6 @@ function usage()
 
 		- FSL
 
-
 		- c3d
 		https://sourceforge.net/projects/c3d
 
@@ -364,20 +363,19 @@ function orientimg()
 }
 
 
-## Smooth image
-#
-#function smoothimg()
-#{
-#
-#	local ortmr=$1
-#	local sigma=$2
-#	local smmr=$3
-#
+# Smooth image
+
+function smoothimg()
+{
+
+	local ortmr=$1
+	local sigma=$2
+	local smmr=$3
+
 #	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr 1 $smmr 0 1
-#
-#	c3d $smmr -type short -o $smmr
-#
-#}
+    ifdsntexistrun $smmr "Smoothing MRI image" c3d $ortmr -smooth ${sigma}vox -type short $smmr
+
+}
 
 #---------------------------
 
@@ -526,15 +524,16 @@ function main()
 	thresh ${biasmr} 40 ${thrmr}
 
     # Crop to smallest roi
-	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
-	croptosmall ${thrmr} ${mrroi}
+#	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
+#	croptosmall ${thrmr} ${mrroi}
 
     # Change header * 10 dims
-    hdmr=${regdir}/mr_bias_thr_roi_hd.nii.gz
-    mulheader ${mrroi} 10 ${hdmr}
+    hdmr=${regdir}/mr_bias_thr_hd.nii.gz
+#    mulheader ${mrroi} 10 ${hdmr}
+    mulheader ${thrmr} 10 ${hdmr}
 
     # Skull strip
-    betmr=${regdir}/mr_bet.nii.gz
+    betmr=${regdir}/mr_bias_thr_bet.nii.gz
     skullstrip ${hdmr} ${betmr}
 
 	# Orient
@@ -542,17 +541,17 @@ function main()
 #	orientimg ${betmr} RSP Cubic short ${ortmr}
 
     # Update back header
-    orghdmr=${regdir}/mr_bias_thr_roi_orghd.nii.gz
+    orghdmr=${regdir}/mr_bias_thr_bet_orghd.nii.gz
     mulheader ${betmr} "0.1" ${orghdmr}
 #    mulheader ${ortmr} "0.1" ${orghdmr}
 
 #	# Smooth
-#	smmr=${regdir}/mr_ort_sm.nii.gz
-#	smoothimg ${ortmr} 1 ${smmr}
+	smmr=${regdir}/mr_bias_thr_bet_sm.nii.gz
+	smoothimg ${orghdmr} 0.5 ${smmr}
 
 	# make MRI copy
 	mrlnk=${regdir}/mr.nii.gz
-	if [[ ! -f ${mrlnk} ]]; then cp ${orghdmr} ${mrlnk} ; fi
+	if [[ ! -f ${mrlnk} ]]; then cp ${smmr} ${mrlnk} ; fi
 
 	#---------------------------
 
