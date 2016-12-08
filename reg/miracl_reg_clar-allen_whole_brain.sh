@@ -7,7 +7,6 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
-# TODOhp: ask for specific orientation or if flipped add variable
 
 # TODOlp: combine convert tif 2 nii & reg into one pipeline
 
@@ -21,6 +20,7 @@ function usage()
 	2) Warps Allen annotations to the original high-res CLARITY space
 	3) Warps the higher-resolution CLARITY to Allen space
 
+    ** Input CLARITY nifti has to be in 'standard' orientation (correct anatomical labelling) **
 
 	Usage: `basename $0`
 
@@ -664,20 +664,16 @@ function main()
 	maskimage ${biasclar} ${dilmask} ${betclar}
 
 	# Orient
-	ortclar=${regdir}/clar_res0.05_ort.nii.gz
-	orientimg ${betclar} ALS Cubic short ${ortclar}
-
-    # TODOhp: orientation
-
-    # if A-P flipped (PLS) & if R-L -> ARS
-
+#	ortclar=${regdir}/clar_res0.05_ort.nii.gz
+#	orientimg ${betclar} ALS Cubic short ${ortclar}
+    ## if A-P flipped (PLS) & if R-L -> ARS
 
 	# Smooth
-	smclar=${regdir}/clar_res0.05_ort_sm.nii.gz
-	smoothimg ${ortclar} 1 ${smclar}
+	smclar=${regdir}/clar_res0.05_sm.nii.gz
+	smoothimg ${betclar} 1 ${smclar}
 
 	# Crop to smallest roi
-	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
+#	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
 #	croptosmall ${smclar} 5 ${clarroi}
 
 	# make clarity copy
