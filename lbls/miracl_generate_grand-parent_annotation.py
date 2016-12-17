@@ -68,8 +68,7 @@ maxannotlbl = 13000  # > max lbl in ipsi
 
 
 def getalllbls(data):
-
-    # get unique lbls
+    # get unique lblsfsl
     lbls = np.unique(list(data))
     lbls = lbls[lbls > 0]  # discard negative lbls
 
@@ -77,7 +76,7 @@ def getalllbls(data):
 
 
 # TODOhp: check diff with ipynb (code or files (csv,nii))?!
-# TODOhp: change cras after ouput to match Allen template
+# TODOhp: change cras after ouput to match Allen template!!
 
 def getlblparent(clarinfo, lbl, pl, lblsplit, maxannotlbl):
 

@@ -22,6 +22,8 @@ from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
 # TODOlp: multiple exps per label .. what to do?! look through and average?!!
 
+# TODOhp: make connectivity json folder in miracl home (same for all scripts)
+
 # ---------
 # help fn
 

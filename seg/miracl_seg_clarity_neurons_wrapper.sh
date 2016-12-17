@@ -38,7 +38,7 @@ function usage()
 
 		Optional arguments:
 
-			t. Channel type: sparse )like Thy1 YFP) [default] or nuclear (like PI)
+			t. Channel type: sparse (like Thy1 YFP) [default] or nuclear (like PI)
 
 		----------		
 

@@ -373,7 +373,7 @@ function smoothimg()
 	local smmr=$3
 
 #	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr 1 $smmr 0 1
-    ifdsntexistrun $smmr "Smoothing MRI image" c3d $ortmr -smooth ${sigma}vox -type short $smmr
+    ifdsntexistrun $smmr "Smoothing MRI image" c3d $ortmr -smooth ${sigma}vox $smmr
 
 }
 
