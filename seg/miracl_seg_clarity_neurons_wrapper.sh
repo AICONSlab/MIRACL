@@ -170,6 +170,9 @@ fi
 if [ -z ${type} ];
 then
     type=sparse
+    segdir=${tifdir}/segmentation
+else
+    segdir=${tifdir}/segmentation_nuclear
 fi
 
 # get time
@@ -181,7 +184,7 @@ macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
 
 #motherdir=$(dirname ${tifdir})
 #inputdir=$(basename ${tifdir})
-segdir=${tifdir}/segmentation
+
 
 # make seg dir
 if [[ ! -d ${segdir} ]];then
