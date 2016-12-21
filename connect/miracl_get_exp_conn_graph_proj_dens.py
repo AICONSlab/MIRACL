@@ -3,13 +3,13 @@
 
 # coding: utf-8
 
+import argparse
+
+import matplotlib.pyplot as plt
+import nibabel as nib
 import numpy as np
 import pandas as pd
-import os
 import seaborn as sns
-import nibabel as nib
-import matplotlib.pyplot as plt
-import argparse
 import tifffile as tiff
 from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
@@ -128,32 +128,6 @@ def exlude_maj_lbls(in_lbls, exclude):
     out_lbls = np.delete(in_lbls, np.where(indx == True))
 
     return out_lbls
-
-
-# ---------------
-# get parent labels for ones w/out inj exp
-
-def get_parentlbl(inj_exps, masked_lbls, annot_csv, exclude):
-    """ gets parent labels for labels
-    without injection experiements in Allen atlas
-    """
-    masked_lbls_prt = masked_lbls
-
-    for i in range(inj_exps.shape[0]):
-        if inj_exps[i] == 0:
-            l = masked_lbls[i]
-            # get parent label
-            pid = annot_csv.parent_structure_id[annot_csv.id == l].values[0]
-            masked_lbls_prt[i] = pid
-
-    unq, ind = np.unique(masked_lbls_prt, return_index=True)
-    indsort = np.sort(ind)
-    uniq_lbls = masked_lbls_prt[indsort]
-
-    uniq_lbls = exlude_maj_lbls(uniq_lbls, exclude)
-
-    return uniq_lbls
-
 
 # ---------------
 # Query Allen API
@@ -282,7 +256,7 @@ def main():
     # Check if labels have injection exps
     print("\n Checking if labels have injection experiments in the connectivity search")
 
-    inj_exp = (projexps['structure-id'] == lbl).id.index[0]
+    inj_exp = (projexps['structure-id'] == lbl).index[0]
 
     while inj_exp is None:
         pid = annot_csv.parent_structure_id[annot_csv.id == lbl].values[0]
@@ -291,16 +265,18 @@ def main():
     # ---------------
 
     # Get projection density
-    print("\n Downloading projection density volume for ")
+    print("\n Downloading projection density volume for experiment %d of lbl %d " % (inj_exp, lbl))
     pd = getprojden(mcc, inj_exp)
 
     outpd = '%s_projection_density.nii.gz' % inj_exp
+    outtif = '%s_projectin_desnity.tif' % inj_exp
     # outind = '%s_injection_density.nii.gz' % experiment_id
     # outdm = '%s_binary_mask.nii.gz' % experiment_id
 
     vx = 0.025
 
     savenii(pd, vx, outpd)
+    savetiff(pd, outtif)
     # savenii(ind, vx, outind)
     # savenii(dm, vx, outdm)
 
