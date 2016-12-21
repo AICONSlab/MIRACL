@@ -256,20 +256,20 @@ def main():
     # Check if labels have injection exps
     print("\n Checking if labels have injection experiments in the connectivity search")
 
-    inj_exp = (projexps['structure-id'] == lbl).index[0]
+    inj_exp = projexps[projexps['structure-id'] == lbl].id.index[0]
 
     while inj_exp is None:
         pid = annot_csv.parent_structure_id[annot_csv.id == lbl].values[0]
-        inj_exp = (projexps['structure-id'] == pid).any()
+        inj_exp = projexps[projexps['structure-id'] == lbl].id.index[0]
 
     # ---------------
 
     # Get projection density
-    print("\n Downloading projection density volume for experiment %d of lbl %d " % (inj_exp, lbl))
+    print("\n Downloading projection density volume for experiment %d of lbl %d" % (inj_exp, lbl))
     pd = getprojden(mcc, inj_exp)
 
     outpd = '%s_projection_density.nii.gz' % inj_exp
-    outtif = '%s_projectin_desnity.tif' % inj_exp
+    outtif = '%s_projection_desnity.tif' % inj_exp
     # outind = '%s_injection_density.nii.gz' % experiment_id
     # outdm = '%s_binary_mask.nii.gz' % experiment_id
 
