@@ -25,7 +25,7 @@ def helpmsg():
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
 
-    Search is performed for experiemtns on wildtype mice
+    Search is performed for experiemtns on wildtype (C57BL/6J) mice
 
     example: miracl_get_exp_conn_graph_proj_den.py -l
     '''
@@ -37,13 +37,13 @@ def helpmsg():
 
 def getinpars():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-    parser.add_argument('-l', '--lbl', type=str, help="Input lbl", required=True)
+    parser.add_argument('-l', '--lbl', type=int, help="Input lbl", required=True)
 
     args = parser.parse_args()
 
     # check if pars given
 
-    assert isinstance(args.roi, str)
+    assert isinstance(args.lbl, int)
     lbl = args.lbl
 
     return lbl
@@ -64,7 +64,8 @@ def initialize():
 
     # read ontology annotation csv
 
-    miracl_home = os.environ['MIRACL_HOME']
+    # miracl_home = os.environ['MIRACL_HOME'] # TODOhp: need to uncomment
+    miracl_home = '~/workspace/clarity_Project/'
 
     annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
