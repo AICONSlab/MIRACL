@@ -18,6 +18,7 @@ import re
 startTime = datetime.now()
 
 
+# TODOlp: add check if dir exists (in name correct)
 # TODOlp: check center output
 
 def helpmsg(name=None):
