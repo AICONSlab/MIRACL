@@ -4,6 +4,9 @@
 # coding: utf-8
 
 import argparse
+import os
+import warnings
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -13,6 +16,7 @@ import seaborn as sns
 import tifffile as tiff
 from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
+warnings.filterwarnings("ignore")
 
 # ---------
 # help fn
@@ -64,8 +68,7 @@ def initialize():
 
     # read ontology annotation csv
 
-    # miracl_home = os.environ['MIRACL_HOME'] # TODOhp: need to uncomment
-    miracl_home = '~/workspace/clarity_Project/'
+    miracl_home = os.environ['MIRACL_HOME']
 
     annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
@@ -219,7 +222,7 @@ def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp):
     abrv_annot = np.array(export_connect_abv.T.ix[:n])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    plt.figure(figsize=(n, 1.5))
+    # plt.figure(figsize=(n, 1.5))
     sns.set_context("talk", font_scale=0.75)
     sns.heatmap(out_norm_proj.T,
                 cbar_kws={"label": "Normalized projection volume"},
@@ -239,6 +242,8 @@ def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp):
 # ---------------
 
 def main():
+    starttime = datetime.now()
+
     # initial pars & read inputs
     lbl = getinpars()
 
@@ -271,6 +276,7 @@ def main():
     projd = getprojden(mcc, inj_exp)
 
     lbl_abrv = annot_csv[annot_csv['id'] == lbl]['acronym'].values[0]
+    lbl_abrv = lbl_abrv[1:]  # drop 1st char
 
     outpd = '%s_exp%s_projection_density.nii.gz' % (lbl_abrv, inj_exp)
     outtif = '%s_exp%s_projection_desnity.tif' % (lbl_abrv, inj_exp)
@@ -297,6 +303,9 @@ def main():
 
     # compute & save proj map
     exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp)
+
+    print (
+    "\n Downloading connectivity graph & projection map done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
 
 # Call main function
