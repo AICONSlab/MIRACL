@@ -82,7 +82,7 @@ def initialize():
 
 def getprojden(mcc, exp_id):
     # projection density: number of projecting pixels / voxel volume
-    pd, pd_info = mcc.get_projection_density(exp_id)
+    projd, pd_info = mcc.get_projection_density(exp_id)
 
     # injection density: number of projecting pixels in injection site / voxel volume
     # ind, ind_info = mcc.get_injection_density(exp_id)
@@ -94,7 +94,7 @@ def getprojden(mcc, exp_id):
     # binary mask indicating which voxels contain valid data
     # dm, dm_info = mcc.get_data_mask(exp_id)
 
-    return pd
+    return projd
 
 
 # ---------------
@@ -212,7 +212,7 @@ def exportprojmap(all_norm_proj, export_connect_abv):
     print("\n Computing & saving projection map")
 
     # export projection map (lbls w norm proj volumes along tree)
-    out_norm_proj = [all_norm_proj[i][1:34] for i in range(34)]
+    out_norm_proj = all_norm_proj[:35]
     names = np.array(export_connect_abv)[:35, 0]
 
     abrv_annot = np.array(export_connect_abv.ix[:35])
@@ -269,7 +269,7 @@ def main():
 
     # Get projection density
     print("\n Downloading projection density volume for experiment %d of lbl %d" % (inj_exp, lbl))
-    pd = getprojden(mcc, inj_exp)
+    projd = getprojden(mcc, inj_exp)
 
     outpd = '%s_projection_density.nii.gz' % inj_exp
     outtif = '%s_projection_desnity.tif' % inj_exp
@@ -278,8 +278,8 @@ def main():
 
     vx = 0.025
 
-    savenii(pd, vx, outpd)
-    savetiff(pd, outtif)
+    savenii(projd, vx, outpd)
+    savetiff(projd, outtif)
     # savenii(ind, vx, outind)
     # savenii(dm, vx, outdm)
 
