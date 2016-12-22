@@ -212,28 +212,27 @@ def exportprojmap(all_norm_proj, export_connect_abv):
     print("\n Computing & saving projection map")
 
     # export projection map (lbls w norm proj volumes along tree)
-    out_norm_proj = all_norm_proj[:35]
-    names = np.array(export_connect_abv)[:35, 0]
 
-    abrv_annot = np.array(export_connect_abv.ix[:35])
+    n = 35
+
+    out_norm_proj = all_norm_proj.T[:n]
+    abrv_annot = np.array(export_connect_abv.T.ix[:n])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    n = len(abrv_annot)
-
-    plt.figure(figsize=(35, 5))
-    sns.set_context("talk", font_scale=0.5)
-    sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, n),
-                cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
-                annot=abrv_annot, fmt="s", linewidths=5)
+    plt.figure(figsize=(n, 1.5))
+    sns.set_context("talk", font_scale=0.75)
+    sns.heatmap(out_norm_proj.T,
+                cbar_kws={"label": "Normalized projection volume"},
+                annot=abrv_annot.T, fmt="s")
 
     plt.yticks(rotation=0)
 
-    plt.ylabel('Primary injection structures in stroke region')
+    plt.ylabel('Primary injection structure')
     plt.xlabel('Target structure order along connection graph')
     plt.savefig('projection_map_along_graph.png', dpi=300)
 
     # export proj volumes
-    norm_proj_df = pd.DataFrame(all_norm_proj)
+    norm_proj_df = pd.DataFrame(out_norm_proj)
     norm_proj_df.to_csv('normalized_projection_volumes.csv', index=False)
 
 
