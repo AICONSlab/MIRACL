@@ -27,7 +27,7 @@ from scipy import ndimage
 # help fn
 
 def helpmsg():
-    return '''miracl_get_connectivity_graph.py -r [input Region Of Interest] -n [number of labels]
+    return '''miracl_get_ROI_connectivity_graph.py -r [input Region Of Interest] -n [number of labels]
 
     Finds the largest N Allen labels in the Region of Interest and extracts its N closely connected regions
     (targets sorted by normalized projection volume) from the Allen Connectivity atlas.
@@ -36,7 +36,7 @@ def helpmsg():
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
     Quering from the Allen API requires an internet connection.
 
-    example: miracl_get_connectivity_graph.py -r my_roi_mask -n 25
+    example: miracl_get_ROI_connectivity_graph.py -r my_roi_mask -n 25
     '''
 
 
@@ -303,7 +303,7 @@ def exportprojmap(all_norm_proj, num_out_lbl, export_connect_abv):
 
     plt.yticks(rotation=0)
 
-    plt.ylabel('Primary injection structures in stroke region')
+    plt.ylabel('Primary injection structures in region of interest')
     plt.xlabel('Target structure order along connection graph')
     plt.savefig('projection_map_along_graph_%d_labels.png' % num_out_lbl, dpi=300)
 
@@ -377,7 +377,7 @@ def exportheatmap(num_out_lbl, conn_ids, all_norm_proj, uniq_lbls, export_connec
     plt.xticks(rotation=45)
     plt.yticks(rotation=0)
 
-    plt.ylabel('Primary injection structures in stroke region')
+    plt.ylabel('Primary injection structures in region of interest')
     plt.xlabel('Target structures')
     plt.savefig('connectivity_matrix_heat_map_%d_labels.png' % num_out_lbl, dpi=300)
 
