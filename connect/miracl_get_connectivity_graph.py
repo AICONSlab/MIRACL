@@ -3,19 +3,18 @@
 
 # coding: utf-8
 
+import argparse
+import os
+
+import matplotlib.pyplot as plt
+import nibabel as nib
 import numpy as np
 import pandas as pd
 import scipy as sp
-from scipy import ndimage
 import seaborn as sns
-import nibabel as nib
-import os
-import matplotlib.pyplot as plt
-from lightning import Lightning
-from numpy import random
-import argparse
-
 from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
+from lightning import Lightning
+from scipy import ndimage
 
 
 # TODOhp: make input either mask or labelid?!
@@ -486,6 +485,8 @@ def main():
     all_experiments = mcc.get_experiments(dataframe=True)
     # Filter to only wild-type strain
     projexps = all_experiments[all_experiments['strain'] == "C57BL/6J"]
+    # no transgenic mice
+    projexps = projexps[projexps['transgenic-line'] == ""]
 
     # excluding background/negatives
     masked_lbls = exlude_maj_lbls(masked_lbls, exclude)

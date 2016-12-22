@@ -212,16 +212,17 @@ def exportprojmap(all_norm_proj, export_connect_abv):
     print("\n Computing & saving projection map")
 
     # export projection map (lbls w norm proj volumes along tree)
-    names = np.array(export_connect_abv)[:, 0]
+    out_norm_proj = [all_norm_proj[i][1:34] for i in range(34)]
+    names = np.array(export_connect_abv)[:35, 0]
 
-    abrv_annot = np.array(export_connect_abv)
+    abrv_annot = np.array(export_connect_abv.ix[:35])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
     n = len(abrv_annot)
 
-    plt.figure(figsize=(len(abrv_annot), 5))
+    plt.figure(figsize=(35, 5))
     sns.set_context("talk", font_scale=0.5)
-    sns.heatmap(all_norm_proj, yticklabels=names, xticklabels=range(1, n),
+    sns.heatmap(out_norm_proj, yticklabels=names, xticklabels=range(1, n),
                 cbar_kws={"label": "Normalized projection volume", "orientation": "horizontal"},
                 annot=abrv_annot, fmt="s", linewidths=5)
 
@@ -250,6 +251,8 @@ def main():
     all_experiments = mcc.get_experiments(dataframe=True)
     # Filter to only wild-type strain
     projexps = all_experiments[all_experiments['strain'] == "C57BL/6J"]
+    # no transgenic mice
+    projexps = projexps[projexps['transgenic-line'] == ""]
 
     # ---------------
 
@@ -303,4 +306,4 @@ if __name__ == "__main__":
     # TODOs
 
     # TODOlp: use label abrv too
-    # TODOlp: add paremeter for choosing different type of mice
+    # TODOlp: add paremeter for choosing different stain or transgenic line of mice
