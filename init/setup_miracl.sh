@@ -20,6 +20,10 @@ cat <<\EOF >> ~/.bashrc
 
 for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 
+#--- Allen alias ----
+
+export allen=${MIRACL_HOME}/ara/template/average_template_25um.nii.gz
+
 #--------------------
 
 #--- MIRACL dependecies ----
