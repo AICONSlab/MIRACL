@@ -176,7 +176,7 @@ def query_connect(exp_id, cutoff, exclude, mcc):
 # ---------------
 # save connected ids & abreviations as csv
 
-def saveconncsv(conn_ids, annot_csv):
+def saveconncsv(conn_ids, annot_csv, lbl_abrv, inj_exp):
     """ Saves connectivity ids (primary structures & targets)
     as a csv file with their ontology atlas ID number
     """
@@ -190,13 +190,13 @@ def saveconncsv(conn_ids, annot_csv):
     all_cols = ['injection_lbl'] + connect_cols
 
     export_connect.columns = all_cols
-    export_connect.to_csv('connected_ids.csv', index=False)
+    export_connect.to_csv('%s_exp%s_connected_ids.csv' % (lbl_abrv, inj_exp), index=False)
 
     # export acronynms
     dic = annot_csv.set_index('id')['acronym'].to_dict()
 
     export_connect_abv = export_connect.replace(dic)
-    export_connect_abv.to_csv('connected_abrvs.csv', index=False)
+    export_connect_abv.to_csv('%s_exp%s_connected_abrvs.csv' % (lbl_abrv, inj_exp), index=False)
 
     return export_connect_abv
 
@@ -204,7 +204,7 @@ def saveconncsv(conn_ids, annot_csv):
 # ---------------
 # compute & save projection map
 
-def exportprojmap(all_norm_proj, export_connect_abv):
+def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp):
     """ Generates & saves the projection map of primary structures as png, and
     the projection data as a csv file
     """
@@ -229,11 +229,11 @@ def exportprojmap(all_norm_proj, export_connect_abv):
 
     plt.ylabel('Primary injection structure')
     plt.xlabel('Target structure order along connection graph')
-    plt.savefig('projection_map_along_graph.png', dpi=300)
+    plt.savefig('%s_exp%s_projection_map_along_graph.png' % (lbl_abrv, inj_exp), dpi=300)
 
     # export proj volumes
-    norm_proj_df = pd.DataFrame(out_norm_proj)
-    norm_proj_df.to_csv('normalized_projection_volumes.csv', index=False)
+    # norm_proj_df = pd.DataFrame(out_norm_proj)
+    # norm_proj_df.to_csv('normalized_projection_volumes.csv', index=False)
 
 
 # ---------------
@@ -262,7 +262,7 @@ def main():
 
     while inj_exp is None:
         pid = annot_csv.parent_structure_id[annot_csv.id == lbl].values[0]
-        inj_exp = projexps[projexps['structure-id'] == lbl].id.index[0]
+        inj_exp = projexps[projexps['structure-id'] == pid].id.index[0]
 
     # ---------------
 
@@ -270,8 +270,10 @@ def main():
     print("\n Downloading projection density volume for experiment %d of lbl %d" % (inj_exp, lbl))
     projd = getprojden(mcc, inj_exp)
 
-    outpd = '%s_projection_density.nii.gz' % inj_exp
-    outtif = '%s_projection_desnity.tif' % inj_exp
+    lbl_abrv = annot_csv[annot_csv['id'] == lbl]['acronym'].values[0]
+
+    outpd = '%s_exp%s_projection_density.nii.gz' % (lbl_abrv, inj_exp)
+    outtif = '%s_exp%s_projection_desnity.tif' % (lbl_abrv, inj_exp)
     # outind = '%s_injection_density.nii.gz' % experiment_id
     # outdm = '%s_binary_mask.nii.gz' % experiment_id
 
@@ -291,10 +293,10 @@ def main():
     [all_connect_ids, all_norm_proj] = query_connect(inj_exp, cutoff, exclude, mcc)
 
     # save csv
-    export_connect_abv = saveconncsv(all_connect_ids, annot_csv)
+    export_connect_abv = saveconncsv(all_connect_ids, annot_csv, lbl_abrv, inj_exp)
 
     # compute & save proj map
-    exportprojmap(all_norm_proj, export_connect_abv)
+    exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp)
 
 
 # Call main function
