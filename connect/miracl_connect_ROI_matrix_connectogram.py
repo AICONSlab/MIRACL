@@ -17,12 +17,6 @@ from lightning import Lightning
 from scipy import ndimage
 
 
-# TODOhp: make input either mask or labelid?!
-
-# TODOlp: multiple exps per label .. what to do?! look through and average?!!
-
-# TODOhp: make connectivity json folder in miracl home (same for all scripts)
-
 # ---------
 # help fn
 
@@ -480,7 +474,8 @@ def main():
     masked_lbls = gethist(miracl_home, inmask)
 
     # Setup Allen connect jason cache file
-    mcc = MouseConnectivityCache(manifest_file='connectivity/manifest.json')
+    mcc = MouseConnectivityCache(
+        manifest_file='%s/connect/connectivity_exps/mouse_connectivity_manifest.json' % miracl_home)
     # Load all injection experiments from Allen api
     all_experiments = mcc.get_experiments(dataframe=True)
     # Filter to only wild-type strain
@@ -550,10 +545,13 @@ def main():
     # compute & save connectivity graph
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
 
-
-# TODOlp : interactive heatmap with cursor (bookeh or lightning)
-# TODOlp : add weighting for connectogram & maybe interactive numbers/groups & force (another conn) graph
-
 # Call main function
 if __name__ == "__main__":
     main()
+
+    # TODOs:
+    # TODOhp: make input either mask or labelid?!
+
+    # TODOlp: multiple exps per label .. what to do?! look through and average?!!
+    # TODOlp : interactive heatmap with cursor (bookeh or lightning)
+    # TODOlp : add weighting for connectogram & maybe interactive numbers/groups & force (another conn) graph

@@ -249,7 +249,8 @@ def main():
 
     [cutoff, miracl_home, annot_csv, exclude] = initialize()
 
-    mcc = MouseConnectivityCache(manifest_file='connectivity/mouse_connectivity_manifest.json')
+    mcc = MouseConnectivityCache(
+        manifest_file='%s/connect/connectivity_exps/mouse_connectivity_manifest.json' % miracl_home)
 
     # Load all injection experiments from Allen api
     all_experiments = mcc.get_experiments(dataframe=True)
@@ -312,8 +313,8 @@ def main():
 if __name__ == "__main__":
     main()
 
-    # ------
-    # TODOs
+# ------
+# TODOs
 
-    # TODOlp: use label abrv too
-    # TODOlp: add paremeter for choosing different stain or transgenic line of mice
+# TODOlp: use label abrv too
+# TODOlp: add paremeter for choosing different stain or transgenic line of mice
