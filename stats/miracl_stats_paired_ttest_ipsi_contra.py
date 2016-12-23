@@ -3,21 +3,22 @@
 
 # coding: utf-8
 
-import numpy as np
-import scipy.stats as stats
-import pandas as pd
-from subprocess import call
-import nibabel as nib
-import os
 import argparse
 import glob
+import os
+from subprocess import call
+
+import nibabel as nib
+import numpy as np
+import pandas as pd
+import scipy.stats as stats
+
 
 ### Inputs #########
 
 
-def helpmsg(name=None): 
-
-    return '''miracl_paired_ttest_ipsi_contra.py -d [ folder with feature extraction csv files]
+def helpmsg(name=None):
+    return '''miracl_stats_paired_ttest_ipsi_contra.py -d [ folder with feature extraction csv files]
 
 Computes paired_ttest test between both hemispheres for all labels across mice
 
@@ -25,7 +26,7 @@ Looks for feature exraction csv files within input directory
 
 Ouputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
 
-example: miracl_paired_ttest_ipsi_contra.py -d feat_extract_csv
+example: miracl_stats_paired_ttest_ipsi_contra.py -d feat_extract_csv
 
         '''
 

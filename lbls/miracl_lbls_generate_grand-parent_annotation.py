@@ -3,26 +3,28 @@
 
 # coding: utf-8
 
-import numpy as np
-import pandas as pd
-import nibabel as nib
-import re
 import argparse
 import os
-from os.path import basename
-from datetime import datetime
-from subprocess import call
+import re
 import sys
+from datetime import datetime
+from os.path import basename
+from subprocess import call
+
+import nibabel as nib
+import numpy as np
+import pandas as pd
+
 
 # ---------
 # help fn
 
 def helpmsg():
-    return '''miracl_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
+    return '''miracl_lbls_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
 
     Computes features of segmented image and summarizes them per label
 
-    example: miracl_generate_grand-parent_annotation.py -p 3 -m split -v 10
+    example: miracl_lbls_generate_grand-parent_annotation.py -p 3 -m split -v 10
     '''
 
 # ---------
