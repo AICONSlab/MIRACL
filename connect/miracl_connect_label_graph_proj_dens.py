@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 
 
 def helpmsg():
-    return '''miracl_get_exp_conn_graph_proj_den.py -l [lbl id]
+    return '''miracl_get_exp_conn_graph_proj_den.py -l [label id]
 
     Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
@@ -41,7 +41,7 @@ def helpmsg():
 
 def getinpars():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-    parser.add_argument('-l', '--lbl', type=int, help="Input lbl", required=True)
+    parser.add_argument('-l', '--lbl', type=int, help="Input label id", required=True)
 
     args = parser.parse_args()
 
@@ -70,7 +70,7 @@ def initialize():
 
     miracl_home = os.environ['MIRACL_HOME']
 
-    annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+    annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     # read atlas annotations
     # atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_split_10um_labels.txt' % miracl_home)
@@ -312,6 +312,7 @@ def main():
 # Call main function
 if __name__ == "__main__":
     main()
+
 
 # ------
 # TODOs

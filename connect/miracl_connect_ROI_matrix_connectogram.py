@@ -70,10 +70,10 @@ def initialize():
 
     miracl_home = os.environ['MIRACL_HOME']
 
-    annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+    annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     # read atlas annotations
-    atlas_lbls = np.loadtxt('%s/ara/annotation/annotation_hemi_split_10um_labels.txt' % miracl_home)
+    atlas_lbls = np.loadtxt('%s/atlases/ara/annotation/annotation_hemi_split_10um_labels.txt' % miracl_home)
 
     # major labels to exclude (ie root,grey,etc) @ depth < 5 or grap order < 6
     exclude = np.array(annot_csv[(annot_csv["depth"] < 5) | (annot_csv["graph_order"] < 6)].id)
@@ -90,7 +90,7 @@ def gethist(miracl_home, inmask):
 
     # read annot labels
     print("\n Reading Allen Reference Atlas annoations")
-    lbls_file = '%s/ara/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
+    lbls_file = '%s/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
     annot_lbls = nib.load(lbls_file)
     annot_lbls = annot_lbls.get_data()
 
@@ -545,13 +545,15 @@ def main():
     # compute & save connectivity graph
     createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic)
 
+
 # Call main function
 if __name__ == "__main__":
     main()
 
-    # TODOs:
-    # TODOhp: make input either mask or labelid?!
+# ------
+# TODOs:
+# TODOhp: make input either mask or labelid?!
 
-    # TODOlp: multiple exps per label .. what to do?! look through and average?!!
-    # TODOlp : interactive heatmap with cursor (bookeh or lightning)
-    # TODOlp : add weighting for connectogram & maybe interactive numbers/groups & force (another conn) graph
+# TODOlp: multiple exps per label .. what to do?! look through and average?!!
+# TODOlp : interactive heatmap with cursor (bookeh or lightning)
+# TODOlp : add weighting for connectogram & maybe interactive numbers/groups & force (another conn) graph
