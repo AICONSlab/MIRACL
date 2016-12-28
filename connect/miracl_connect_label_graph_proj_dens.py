@@ -222,7 +222,7 @@ def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp):
     abrv_annot = np.array(export_connect_abv.T.ix[:n])
     abrv_annot = pd.DataFrame(abrv_annot).replace(np.nan, ' ', regex=True)
 
-    # plt.figure(figsize=(n, 1.5))
+    plt.figure(figsize=(n, 3))
     sns.set_context("talk", font_scale=0.75)
     sns.heatmap(out_norm_proj.T,
                 cbar_kws={"label": "Normalized projection volume"},
