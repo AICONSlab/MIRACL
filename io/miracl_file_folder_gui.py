@@ -3,11 +3,11 @@
 
 # coding: utf-8
 
-from Tkinter import Tk
-import tkFileDialog
-from tkFileDialog import askopenfilename
 import argparse
 import sys
+import tkFileDialog
+from Tkinter import Tk
+from tkFileDialog import askopenfilename
 
 
 ### Inputs #########

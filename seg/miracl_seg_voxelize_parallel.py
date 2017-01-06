@@ -3,19 +3,20 @@
 
 # coding: utf-8
 
+import argparse
+import logging
+import multiprocessing
+import os
+import sys
+from datetime import datetime
+
+import cv2
+import nibabel as nib
 import numpy as np
 import scipy as sp
-from scipy import ndimage
 import tifffile as tiff
-import cv2
 from joblib import Parallel, delayed
-import os
-import argparse
-from datetime import datetime
-import nibabel as nib
-import multiprocessing
-import sys
-import logging
+from scipy import ndimage
 
 
 # ---------
