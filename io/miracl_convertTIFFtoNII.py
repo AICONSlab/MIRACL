@@ -21,6 +21,7 @@ startTime = datetime.now()
 
 # TODOlp: add check if dir exists (in name correct)
 # TODOlp: check center output
+# TODOlp: GUI with options to enter
 
 def helpmsg(name=None):
     return '''convertTifftoNii.py
@@ -67,6 +68,15 @@ if len(sys.argv) == 1:
     Tk().withdraw()
     indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then OK')
 
+    outnii = 'clarity'
+    d = 5
+    chann = 1
+    chan = 'eyfp'
+    vx = 0.005
+    vz = 0.005
+    cent = [11.4, 0, 0]
+    chanp = None
+
 else:
 
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
@@ -90,52 +100,51 @@ else:
     assert isinstance(args.folder, str)
     indir = args.folder
 
-if args.outnii is None:
-    outnii = 'clarity'
-else:
-    assert isinstance(args.outnii, str)
-    outnii = args.outnii
+    if args.outnii is None:
+        outnii = 'clarity'
+    else:
+        assert isinstance(args.outnii, str)
+        outnii = args.outnii
 
-if args.down is None:
-    d = 5
-    print("down sample ratio not specified ... choosing default value of %d" % d)
-else:
-    assert isinstance(args.down, int)
-    d = args.down
+    if args.down is None:
+        d = 5
+        print("down sample ratio not specified ... choosing default value of %d" % d)
+    else:
+        assert isinstance(args.down, int)
+        d = args.down
 
-if args.channum is None:
-    chann = 1
-    print("channel # not specified ... choosing default value of %d" % chann)
-else:
-    assert isinstance(args.channum, int)
-    chann = args.channum
+    if args.channum is None:
+        chann = 1
+        print("channel # not specified ... choosing default value of %d" % chann)
+    else:
+        assert isinstance(args.channum, int)
+        chann = args.channum
 
-if args.channame is None:
-    chan = 'thy1_yfp'
-    print("channel name not specified ... choosing default value of %s" % chan)
-else:
-    assert isinstance(args.channame, str)
-    chan = args.channame
+    if args.channame is None:
+        chan = 'eyfp'
+        print("channel name not specified ... choosing default value of %s" % chan)
+    else:
+        assert isinstance(args.channame, str)
+        chan = args.channame
 
-if args.resx is None:
-    vx = 0.005  # 5 um
-else:
-    vx = args.resx
-    vx /= float(1000)
+    if args.resx is None:
+        vx = 0.005  # 5 um
+    else:
+        vx = args.resx
+        vx /= float(1000)
 
-if args.resz is None:
-    vz = 0.005  # 5 um
-else:
-    vz = args.resz
-    vz /= float(1000)
+    if args.resz is None:
+        vz = 0.005  # 5 um
+    else:
+        vz = args.resz
+        vz /= float(1000)
 
-if args.center is None:
-    # cent = [5.7, -6.6, -4]
-    cent = [11.4, 0, 0]
-else:
-    cent = args.center
+    if args.center is None:
+        cent = [11.4, 0, 0]
+    else:
+        cent = args.center
 
-chanp = args.chanprefix if args.chanprefix is not None else None
+    chanp = args.chanprefix if args.chanprefix is not None else None
 
 
 # ---------
@@ -155,7 +164,7 @@ def numericalSort(value):
 def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None, cp=None):
     """
     :param indir:
-    :param dr:
+    :param d:
     :param chann:
     :param chan:
     :param vs:
@@ -224,7 +233,7 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
     if outnii is None:
         niiname = '%s/%schan.nii.gz' % (outdir, chan)
     else:
-        niiname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, dr, chan)
+        niiname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, d, chan)
     nib.save(nii, niiname)
 
     print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
@@ -237,7 +246,6 @@ def main():
     :rtype: nifti file
     """
     converttiff2nii(indir, d, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
-
 
 if __name__ == "__main__":
     main()
