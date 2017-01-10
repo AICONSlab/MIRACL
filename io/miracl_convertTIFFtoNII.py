@@ -90,15 +90,18 @@ else:
     assert isinstance(args.folder, str)
     indir = args.folder
 
+if args.outnii is None:
+    outnii = 'clarity'
+else:
     assert isinstance(args.outnii, str)
     outnii = args.outnii
 
 if args.down is None:
-    dr = 5
-    print("down sample ratio not specified ... choosing default value of %d" % dr)
+    d = 5
+    print("down sample ratio not specified ... choosing default value of %d" % d)
 else:
     assert isinstance(args.down, int)
-    dr = args.down
+    d = args.down
 
 if args.channum is None:
     chann = 1
@@ -149,7 +152,7 @@ def numericalSort(value):
 
 # ---------
 
-def converttiff2nii(indir, dr, chann, chan, vx=None, vz=None, cent=None, ot=None, cp=None):
+def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None, cp=None):
     """
     :param indir:
     :param dr:
@@ -165,7 +168,7 @@ def converttiff2nii(indir, dr, chann, chan, vx=None, vz=None, cent=None, ot=None
     outnii = ot
     chanp = cp
 
-    outvox = vx * dr
+    outvox = vx * d
     vs = [outvox, outvox, vz]
 
     # Get file lis
@@ -177,7 +180,7 @@ def converttiff2nii(indir, dr, chann, chan, vx=None, vz=None, cent=None, ot=None
         file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
 
     # down ratio
-    down = (1.0 / int(dr))
+    down = (1.0 / int(d))
 
     print "\n Converting Tiff images to NII \n"
 
@@ -233,7 +236,7 @@ def main():
     """
     :rtype: nifti file
     """
-    converttiff2nii(indir, dr, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
+    converttiff2nii(indir, d, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
 
 
 if __name__ == "__main__":
