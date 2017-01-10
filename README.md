@@ -18,8 +18,6 @@ Pipeline for automated:
 
 (c) Maged Goubran, 
     mgoubran@stanford.edu
-    Christoph Leuze,
-    cleuze@stanford.edu
 
 @ Stanford University, 2016
 

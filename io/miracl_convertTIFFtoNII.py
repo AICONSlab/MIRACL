@@ -3,17 +3,18 @@
 
 # coding: utf-8
 
-import numpy as np
-import nibabel as nib
-import cv2
-import glob
-from datetime import datetime
 import argparse
+import glob
 import os
-from Tkinter import Tk
-import tkFileDialog
-import sys
 import re
+import sys
+import tkFileDialog
+from Tkinter import Tk
+from datetime import datetime
+
+import cv2
+import nibabel as nib
+import numpy as np
 
 startTime = datetime.now()
 
@@ -92,46 +93,47 @@ else:
     assert isinstance(args.outnii, str)
     outnii = args.outnii
 
-    if args.down is None:
-        dr = 5
-        print("down sample ratio not specified ... choosing default value of %d" % dr)
-    else:
-        assert isinstance(args.down, int)
-        dr = args.down
+if args.down is None:
+    dr = 5
+    print("down sample ratio not specified ... choosing default value of %d" % dr)
+else:
+    assert isinstance(args.down, int)
+    dr = args.down
 
-    if args.channum is None:
-        chann = 1
-        print("channel # not specified ... choosing default value of %d" % chann)
-    else:
-        assert isinstance(args.channum, int)
-        chann = args.channum
+if args.channum is None:
+    chann = 1
+    print("channel # not specified ... choosing default value of %d" % chann)
+else:
+    assert isinstance(args.channum, int)
+    chann = args.channum
 
-    if args.channame is None:
-        chan = 'thy1_yfp'
-        print("channel name not specified ... choosing default value of %s" % chan)
-    else:
-        assert isinstance(args.channame, str)
-        chan = args.channame
+if args.channame is None:
+    chan = 'thy1_yfp'
+    print("channel name not specified ... choosing default value of %s" % chan)
+else:
+    assert isinstance(args.channame, str)
+    chan = args.channame
 
-    if args.resx is None:
-        vx = 0.005  # 5 um
-    else:
-        vx = args.resx
-        vx /= float(1000)
+if args.resx is None:
+    vx = 0.005  # 5 um
+else:
+    vx = args.resx
+    vx /= float(1000)
 
-    if args.resz is None:
-        vz = 0.005  # 5 um
-    else:
-        vz = args.resz
-        vz /= float(1000)
+if args.resz is None:
+    vz = 0.005  # 5 um
+else:
+    vz = args.resz
+    vz /= float(1000)
 
-    if args.center is None:
-        # cent = [5.7, -6.6, -4]
-        cent = [11.4, 0, 0]
-    else:
-        cent = args.center
+if args.center is None:
+    # cent = [5.7, -6.6, -4]
+    cent = [11.4, 0, 0]
+else:
+    cent = args.center
 
-    chanp = args.chanprefix if args.chanprefix is not None else None
+chanp = args.chanprefix if args.chanprefix is not None else None
+
 
 # ---------
 
