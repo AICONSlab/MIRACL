@@ -48,10 +48,10 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
 
     Optional arguments:
 
-        -d  [Downsample ratio (default: 3) ]
+        -d  [Downsample ratio (default: 5) ]
         -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [chan prefix (string before channel number in file name). ex: C00 ]
-        -ch [output chan name (default: thy1_yfp)]
+        -ch [output chan name (default: eyfp)]
         -vx [original resolution in x-y plane in um (default: 5)]
         -vz [original thickness (z-axis resolution / spacing between slices) in um (default: 5)]
         -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
