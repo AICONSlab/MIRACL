@@ -218,8 +218,8 @@ def main():
 
     propsdf = propsdf.replace({'LabelName': name_dic})
     propsdf = propsdf.replace({'LabelAbrv': abrv_dic})
-    propsdf = propsdf.replace({'ParentID': parents_dic})
     propsdf = propsdf.replace({'IDPath': paths_dic})
+    propsdf['ParentID'] = propsdf.ParentID.map(parents_dic)
 
     cols = ['LabelID','LabelAbrv','LabelName','ParentID','IDPath','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
     propsdf = propsdf[cols]
