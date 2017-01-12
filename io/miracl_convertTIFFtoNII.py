@@ -19,6 +19,7 @@ import numpy as np
 startTime = datetime.now()
 
 
+# TODOlp: another script for very large files [COLM] with one or multiple stacks
 # TODOlp: add check if dir exists (in name correct)
 # TODOlp: check center output
 # TODOlp: GUI with options to enter
@@ -48,13 +49,13 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
 
     Optional arguments:
 
-        -d  [Downsample ratio (default: 5) ]
-        -cn [chan # for extracting single channel from multiple channel data (default: 1) ]
-        -cp [chan prefix (string before channel number in file name). ex: C00 ]
-        -ch [output chan name (default: eyfp)]
-        -vx [original resolution in x-y plane in um (default: 5)]
-        -vz [original thickness (z-axis resolution / spacing between slices) in um (default: 5)]
-        -c  [nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
+        -d  [ Downsample ratio (default: 5) ]
+        -cn [ chan # for extracting single channel from multiple channel data (default: 1) ]
+        -cp [ chan prefix (string before channel number in file name). ex: C00 ]
+        -ch [ output chan name (default: eyfp) ]
+        -vx [ original resolution in x-y plane in um (default: 5) ]
+        -vz [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
+        -c  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
         example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
@@ -120,6 +121,11 @@ else:
         assert isinstance(args.channum, int)
         chann = args.channum
 
+        if args.chanprefix is None:
+            sys.exit('-cp (channel prefix) not specified ')
+
+        chanp = args.chanprefix if args.chanprefix is not None else None
+
     if args.channame is None:
         chan = 'eyfp'
         print("channel name not specified ... choosing default value of %s" % chan)
@@ -143,8 +149,6 @@ else:
         cent = [11.4, 0, 0]
     else:
         cent = args.center
-
-    chanp = args.chanprefix if args.chanprefix is not None else None
 
 
 # ---------

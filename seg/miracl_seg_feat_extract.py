@@ -3,18 +3,19 @@
 
 # coding: utf-8
 
-import pandas as pd
+import argparse
+import multiprocessing
+import os
+import sys
+from datetime import datetime
+
 import numpy as np
+import pandas as pd
 import scipy as sp
+import tifffile as tiff
+from joblib import Parallel, delayed
 from scipy import ndimage
 from skimage.measure import regionprops
-import tifffile as tiff 
-from joblib import Parallel, delayed
-import multiprocessing
-from datetime import datetime
-import sys
-import os
-import argparse
 
 
 # TODOhp: make sure works on full version
@@ -179,24 +180,46 @@ def main():
 
     if np.max(alllbls) > 20000:
 
-        lookup = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+        graph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
 
     else:
 
-        lookup = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+        graph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
 
     # get attributes
-    names = lookup.name[lookup.id.isin(alllbls)]
-    abrvs = lookup.acronym[lookup.id.isin(alllbls)]
-    parents = lookup.parent_structure_id[lookup.id.isin(alllbls)]
-    paths = lookup.structure_id_path[lookup.id.isin(alllbls)]
-
+    # names = graph.name[graph.id.isin(alllbls)]
+    # abrvs = graph.acronym[graph.id.isin(alllbls)]
+    # parents = graph.parent_structure_id[graph.id.isin(alllbls)]
+    # paths = graph.structure_id_path[graph.id.isin(alllbls)]
 
     # nrows = allareas
 
+    # propsdf = pd.DataFrame(
+    #     dict(LabelID=alllbls, LabelAbrv=abrvs, LabelName=names, ParentID=parents, IDPath=paths, Count=allnums,
+    #          Density=alldens, VolumeAvg=allareas, VolumeStd=allstdareas, VolumeMax=allmaxareas))
+
+    # Filter labels not included
+
     propsdf = pd.DataFrame(
-        dict(LabelID=alllbls, LabelAbrv=abrvs, LabelName=names, ParentID=parents, IDPath=paths, Count=allnums,
-             Density=alldens, VolumeAvg=allareas, VolumeStd=allstdareas, VolumeMax=allmaxareas))
+        dict(LabelID=alllbls, Count=allnums, Density=alldens, VolumeAvg=allareas, VolumeStd=allstdareas,
+             VolumeMax=allmaxareas))
+    propsdf = propsdf[propsdf.LabelID.isin(graph.id)]
+
+    # make dicts
+    name_dic = dict(zip(graph.id, graph.name))
+    abrv_dic = dict(zip(graph.id, graph.acronym))
+    parents_dic = dict(zip(graph.id, graph.parent_structure_id))
+    paths_dic = dict(zip(graph.id, graph.structure_id_path))
+
+    propsdf['LabelName'] = propsdf.LabelID
+    propsdf['LabelAbrv'] = propsdf.LabelID
+    propsdf['ParentID'] = propsdf.LabelID
+    propsdf['IDPath'] = propsdf.LabelID
+
+    propsdf = propsdf.replace({'LabelName': name_dic})
+    propsdf = propsdf.replace({'LabelAbrv': abrv_dic})
+    propsdf = propsdf.replace({'ParentID': parents_dic})
+    propsdf = propsdf.replace({'IDPath': paths_dic})
 
     cols = ['LabelID','LabelAbrv','LabelName','ParentID','IDPath','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
     propsdf = propsdf[cols]
