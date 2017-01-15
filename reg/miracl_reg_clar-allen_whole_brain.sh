@@ -45,6 +45,9 @@ function usage()
 			i. Input down-sampled clarity nifti (with "##_down" in file name: ex. stroke13_05_down_Ref_chan.nii.gz )
 
 		optional arguments:
+
+		    o. Orient code (default: ALS)
+		        to orient nifti from original orientation to "standard/Allen" orientation
 		
 			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 				accepted inputs are: <split> or <combined>  (default: split)
@@ -148,14 +151,18 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:l:m:v:" opt; do
+	while getopts ":i:o:l:m:v:" opt; do
     
 	    case "${opt}" in
 
 	        i)
             	inclar=${OPTARG}
             	;;
-        	
+
+            o)
+            	ort=${OPTARG}
+            	;;
+
         	l)
             	lbls=${OPTARG}
             	;;
@@ -662,13 +669,18 @@ function main()
 	maskimage ${biasclar} ${dilmask} ${betclar}
 
 	# Orient
-#	ortclar=${regdir}/clar_res0.05_ort.nii.gz
-#	orientimg ${betclar} ALS Cubic short ${ortclar}
+	ortclar=${regdir}/clar_res0.05_ort.nii.gz
+
+	if [[ -z ${ort} ]]; then
+	    ort=ALS
+	fi
     ## if A-P flipped (PLS) & if R-L -> ARS
+
+	orientimg ${betclar} ${ort} Cubic short ${ortclar}
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
-	smoothimg ${betclar} 1 ${smclar}
+	smoothimg ${ortclar} 1 ${smclar}
 
 	# Crop to smallest roi
 #	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
