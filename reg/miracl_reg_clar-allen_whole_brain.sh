@@ -524,35 +524,33 @@ function warpallenlbls()
 	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
 
 	# upsample to img dimensions
+    df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
-	# # get img dim
-	alldim=`PrintHeader ${inclar} 2`
-    x=${alldim%%x*};
-	yz=${alldim#*x}; y=${yz%x*} ;
-	z=${alldim##*x};
-
-    downfactor=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
-
-    xu=$((${x}*${downfactor}));
-    yu=$((${y}*${downfactor}));
-
-    # get dims from hres tif
-#    tif=
-#    dims=`c3d ${tif} -info-full | grep Dimensions`
-#    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
-#    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
-
-	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
-
-# TODOhp : warp labels again to high res (make empty image w same dims?) & remove this comment
-
-#	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-#	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
+	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
+	c3d ${swplbls} -resample ${df}00x${df}00x100% -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
-#	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
+	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
 
+    # Create empty image as ref instead of upsamling is slow!!!
+
+        # # get img dim
+    #	alldim=`PrintHeader ${inclar} 2`
+    #    x=${alldim%%x*};
+    #	yz=${alldim#*x}; y=${yz%x*} ;
+    #	z=${alldim##*x};
+
+    #    xu=$((${x}*${downfactor}));
+    #    yu=$((${y}*${downfactor}));
+
+        # get dims from hres tif
+    #    tif=
+    #    dims=`c3d ${tif} -info-full | grep Dimensions`
+    #    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
+    #    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
+
+    #	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
 
 }
 
