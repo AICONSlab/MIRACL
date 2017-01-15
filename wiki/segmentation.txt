@@ -1,0 +1,76 @@
+MIRACL v. 0.5
+______________
+
+
+1) Segment CLARITY 3D
+___________________________________________
+
+miracl_seg_clarity_neurons_wrapper.sh
+
+	Usage: miracl_seg_clarity_neurons_wrapper.sh
+
+	A GUI will open to choose your input clarity folder (with .tif files)
+
+	The folder should contain data from one channel
+
+		----------
+
+	For command-line / scripting
+
+	Usage: miracl_seg_clarity_neurons_wrapper.sh -d <clarity dir> -t <channel type: sparse or nuclear>
+
+	Example: miracl_seg_clarity_neurons_wrapper.sh -d my_clarity_tifs -t sparse
+
+		arguments (required):
+
+			d. Input clarity directory (including .tif images of one channel)
+
+		Optional arguments:
+
+			t. Channel type: sparse (like Thy1 YFP) [default] or nuclear (like PI)
+
+		----------
+
+	Dependencies:
+
+		- Fiji
+
+		- Fiji Plugins:
+
+		1) 3D Segmentation plugins (3D ImageJ suite)
+		http://imagejdocu.tudor.lu/doku.php?id=plugin:stacks:3d_ij_suite:start
+
+		2) Mathematical Morphology plugins
+		http://imagej.net/MorphoLibJ
+
+
+	________________________________________________
+	________________________________________________
+
+
+2) Voxelize segmentation results
+_________________________
+
+
+
+
+	________________________________________________
+	________________________________________________
+
+
+
+3) Compute segmenation features
+_________________________
+
+
+
+
+
+
+
+
+	________________________________________________
+	________________________________________________
+
+
+

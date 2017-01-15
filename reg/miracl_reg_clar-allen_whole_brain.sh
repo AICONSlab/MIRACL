@@ -20,8 +20,6 @@ function usage()
 	2) Warps Allen annotations to the original high-res CLARITY space
 	3) Warps the higher-resolution CLARITY to Allen space
 
-    ** Input CLARITY nifti has to be in 'standard' orientation (correct anatomical labelling) **
-
 	Usage: `basename $0`
 
 	A GUI will open to choose your:

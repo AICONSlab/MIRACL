@@ -19,8 +19,6 @@ function usage()
 	1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
 	2) Warps Allen annotations to the MRI space
 
-    ** Input MRI nifti has to be in 'standard' orientation (correct anatomical labelling) **
-
 	Usage: `basename $0`
 
 	A GUI will open to choose your:

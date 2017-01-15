@@ -1,60 +1,45 @@
-MIRACL v. 1.0
+MIRACL v. 0.5
 
 -------------------
-CONVERSION
+CONNECTIVITY (CONNECT)
+
+- miracl_connect_label_graph_proj_dens.py
+
+- miracl_coonect_ROI_matrix_connectogram.py
+
+-------------------
+CONVERSION / GUI (IO)
 
 
 
 -------------------
-REGISTRATION
-
+REGISTRATION (REG)
 
 - miracl_reg_clar-allen_whole_brain.sh
 
-
-	1) Registers CLARITY Ref channel to Allen mouse brain atlas 
+	1) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
 	2) Warps Allen annotations to the original high-res CLARITY space
-	3) Warps the EYFP channel (down 3x) to Allen space
-
-
-	Usage: `basename $0`
-
-	A gui will open to choose your:
-
-		- < Input clarity nifti > : 5x down-sampled Reference channel data (or Thy1_EYFP if no Ref chan) 
-
-		&
-
-		- < Higher resolution clarity nifti > : 3x down-sampled Thy1_EYFP channel data 
-
-
-	----------
-
-	For command-line / scripting
-
-
-	Usage: `basename $0` -i <input_clarity_nifti> -r <higher_res_clarity_nifti> 
-
-	Example: `basename $0` -i Reference_channel_5x_downsampled.nii.gz -r Thy1_channel_3x_downsampled.nii.gz 	
-
-		arguments (required):
-
-			i. Input clarity nifti 
-
-			r. Higher resolution clarity nifti
-
-
-
+	3) Warps the higher-resolution CLARITY to Allen space
 
 
 - miracl_reg_mri-allen.sh
 
-
-
------------------------------------	
-
-
-
+    1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
+	2) Warps Allen annotations to the MRI space
 
 -------------------
-SEGMENTATION
+SEGMENTATION (SEG)
+
+- miracl_seg_clarity_neurons_wrapper.sh
+
+	1) Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
+
+
+- miracl_seg_feat_extract.py
+
+    1) Computes features of segmented image and summarizes them per label
+
+
+- miracl_seg_voxelize_parallel.py
+
+    1)

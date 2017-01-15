@@ -14,7 +14,7 @@ function usage()
     
     cat <<usage
 
-	1) Segments neurons in clear mouse brain of sparse stains in 3D
+	1) Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
 
 	Runs a Fiji/ImageJ macro 
 	
