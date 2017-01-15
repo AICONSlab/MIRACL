@@ -41,6 +41,9 @@ function usage()
 			i. Input MRI nifti
 
 		optional arguments:
+
+            o. Orient code (default: RSP)
+		        to orient nifti from original orientation to "standard/Allen" orientation
 		
 			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 				accepted inputs are: <split> or <combined>  (default: split)
@@ -153,14 +156,18 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:l:m:v:" opt; do
+	while getopts ":i:o:l:m:v:" opt; do
     
 	    case "${opt}" in
 
 	        i)
             	inmr=${OPTARG}
             	;;
-        	
+
+            o)
+            	ort=${OPTARG}
+            	;;
+
         	l)
             	lbls=${OPTARG}
             	;;
@@ -537,12 +544,17 @@ function main()
     skullstrip ${hdmr} ${betmr}
 
 	# Orient
-#	ortmr=${regdir}/mr_ort.nii.gz
-#	orientimg ${betmr} RSP Cubic short ${ortmr}
+	ortmr=${regdir}/mr_ort.nii.gz
+
+    if [[ -z ${ort} ]]; then
+	    ort=RSP
+	fi
+
+	orientimg ${betmr} ${ort} Cubic short ${ortmr}
 
     # Update back header
     orghdmr=${regdir}/mr_bias_thr_bet_orghd.nii.gz
-    mulheader ${betmr} "0.1" ${orghdmr}
+    mulheader ${ortmr} "0.1" ${orghdmr}
 #    mulheader ${ortmr} "0.1" ${orghdmr}
 
 #	# Smooth
