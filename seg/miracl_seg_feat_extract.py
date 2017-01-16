@@ -18,18 +18,29 @@ from scipy import ndimage
 from skimage.measure import regionprops
 
 
-# TODOhp: make sure works on full version
-
 # ---------
 # help fn
 
-def helpmsg(name=None): 
-
-    return '''mouse_feat_extract.py -s [segmentation tif] -l [Labels]
+def helpmsg(name=None):
+    return '''Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels]
 
     Computes features of segmented image and summarizes them per label
 
     example: mouse_feat_extract.py -s seg.tif -l allen_annotations.tif
+
+        arguments (required):
+
+        s. Segmentation (or voxelized segmentation) tif file
+
+        l. Allen labels used to summarize features
+
+
+	Dependencies:
+
+	    Python 2.7
+	    used modules:
+	        argparse, numpy, scipy, skimage, pandas, tifffile, joblib, multiprocessing, os, sys, datetime
+
     '''
 # ---------
 # Get input arguments

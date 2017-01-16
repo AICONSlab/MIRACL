@@ -23,11 +23,23 @@ from scipy import ndimage
 # help fn
 
 def helpmsg(name=None):
-    return '''mouse_par_voxelize_seg.py -s [binary segmentation tif]
+    return '''Usage: mouse_par_voxelize_seg.py -s [binary segmentation tif]
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: mouse_single_corr_lbls.py -s seg_bin.tif  
+	example: mouse_single_corr_lbls.py -s seg_bin.tif
+
+        arguments (required):
+
+        s. Binary segmentation tif file
+
+
+	Dependencies:
+
+	    Python 2.7
+	    used modules:
+	        argparse, numpy, scipy, logging, cv2, nibabel, tifffile, joblib, multiprocessing, os, sys, datetime
+
 	'''
 
 
@@ -201,3 +213,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # TODOlp: add GUI
