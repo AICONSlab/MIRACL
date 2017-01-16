@@ -6,8 +6,12 @@ CONNECTIVITY (CONNECT)
 
 - miracl_connect_label_graph_proj_dens.py
 
+    1) Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
+    2) Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
+
 
 - miracl_coonect_ROI_matrix_connectogram.py
+
 
 
 -------------------

@@ -21,7 +21,7 @@ from scipy import ndimage
 # help fn
 
 def helpmsg():
-    return '''miracl_connect_ROI_matrix_connectogram.py -r [input Region Of Interest] -n [number of labels]
+    return '''Usage: miracl_connect_ROI_matrix_connectogram.py -r [input Region Of Interest] -n [number of labels]
 
     Finds the largest N Allen labels in the Region of Interest and extracts its N closely connected regions
     (targets sorted by normalized projection volume) from the Allen Connectivity atlas.
@@ -30,7 +30,23 @@ def helpmsg():
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
     Quering from the Allen API requires an internet connection.
 
-    example: miracl_connect_ROI_matrix_connectogram.py -r my_roi_mask -n 25
+    example: miracl_connect_ROI_matrix_connectogram.py -r my_roi_mask -n 15
+
+       arguments (required):
+
+        r. Input chosen region of interest (ROI) in Allen space
+
+        n. Output number of primary injection sites (also number of targer regions)
+            Limited by size of ROI (number of labels it contains)
+
+
+    Dependencies:
+
+	    Python 2.7
+	    used modules:
+            argparse, numpy, scipy, seaborn, pandas, matplotlib, os, sys, datetime, allensdk, nibabel, lightning
+
+
     '''
 
 
@@ -552,6 +568,7 @@ if __name__ == "__main__":
 
 # ------
 # TODOs:
+# TODOhp: output max number instead of argument
 # TODOhp: make input either mask or labelid?!
 
 # TODOlp: multiple exps per label .. what to do?! look through and average?!!
