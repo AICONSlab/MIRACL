@@ -8,6 +8,7 @@ ________________________
 CONNECTIVITY (CONNECT)
 ----------------------
 
+
 - miracl_connect_label_graph_proj_dens.py
 
     [ Get experiment project density & connectivity matrix for Allen label ]
@@ -24,10 +25,12 @@ CONNECTIVITY (CONNECT)
     (targets sorted by normalized projection volume) from the Allen Connectivity atlas.
     2) Outputs a connectivity matrix of the primary injected sites (labels) & their most common targets.
 
+
 ________________________
 
 CONVERSION / GUI (IO)
 ---------------------
+
 
 - convertTifftoNii.py
 
@@ -43,6 +46,13 @@ CONVERSION / GUI (IO)
      1) Uses user input to generate orientation code for orientation input data to "standard/Allen" orientation
 
 
+- miracl_convertDCMtoNII.sh
+
+    [ Convert dicom data to nifti ]
+
+    1) Converts dicoms in sub-directories to nii & renames sub-directories with sequence name
+
+
 ________________________
 
 LABELS (LBLS)
@@ -54,6 +64,7 @@ ________________________
 
 REGISTRATION (REG)
 ------------------
+
 
 - miracl_reg_clar-allen_whole_brain.sh
 
@@ -76,6 +87,7 @@ ________________________
 
 SEGMENTATION (SEG)
 ------------------
+
 
 - miracl_seg_clarity_neurons_wrapper.sh
 

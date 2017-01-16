@@ -15,7 +15,7 @@ function usage()
 
     cat <<usage
 
-    Converts dicoms in sub-directories to nii
+    Converts dicoms in sub-directories to nii & renames sub-directories with sequence name
 
     Usage: `basename $0` -p < parent dir >
 
