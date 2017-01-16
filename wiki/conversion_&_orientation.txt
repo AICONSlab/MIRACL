@@ -55,6 +55,7 @@ convertTifftoNii.py
 	________________________________________________
 
 
+
 2)  Create orient code for data
 _______________________________
 
@@ -80,6 +81,33 @@ miracl_set_orient_gui.py
     Then exit GUI.
 
     The orientation code will be set based on the user entries and will be outputed in a text file (ort2std.txt) inside the dir.
+
+
+	________________________________________________
+	________________________________________________
+
+
+
+3)  Convert dicom (dcm) to nifti (nii)
+______________________________________
+
+
+miracl_convertDCMtoNII.sh
+
+
+    Converts dicoms in sub-directories to nii
+
+    Usage: `basename $0` -p < parent dir >
+
+        arguments (required):
+
+        -p parent directory containing sub-directories with different sequences (with dcm files)
+
+    ----------
+
+	Dependencies:
+
+	    - mri_convert & mri_probedicom (from FREESURFER)
 
 
 	________________________________________________

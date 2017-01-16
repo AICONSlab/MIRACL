@@ -15,7 +15,7 @@ function usage()
 
     Workflow (wrapper) combining multiple MIRACL functions:
 
-    1) Sets orientation of input data using a GUI
+    1) Sets orientation of input data using a GUI (if orient code not given)
     2) Converts TIFF to NII
 	3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
 	4) Warps Allen annotations to the original high-res CLARITY space
@@ -23,10 +23,9 @@ function usage()
 
     Executes:
 
-        io/miracl_set_orient_gui.py
+        io/miracl_set_orient_gui.py (if orient code not given)
         io/miracl_convertTIFFtoNII.py
         reg/miracl_reg_clar-allen_whole_brain.sh
-
 
 
 
@@ -71,3 +70,4 @@ fi
 
 
 #----------
+

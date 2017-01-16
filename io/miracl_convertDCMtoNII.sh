@@ -1,17 +1,105 @@
 #!/bin/bash
 # Maged Goubran, mgoubran@stanford.edu
 
-if [ "$#" -lt "1" ]
-then
- echo "Converts dicoms in sub-directories to nii"
- echo ""
- echo "Usage: $0 <Subject directory>"
- echo ""
+# get version
+function getversion()
+{
+	ver=`cat $MIRACL_HOME/init/version_num.txt`
+	printf "MIRACL pipeline v. $ver \n"
+}
 
- exit 0
+
+# help/usage function
+function usage()
+{
+
+    cat <<usage
+
+    Converts dicoms in sub-directories to nii
+
+    Usage: `basename $0` -p < parent dir >
+
+        arguments (required):
+
+        -p parent directory containing sub-directories with different sequences (with dcm files)
+
+    ----------
+
+	Dependencies:
+
+	    - mri_convert & mri_probedicom (from FREESURFER)
+
+    -----------------------------------
+
+	(c) Maged Goubran @ Stanford University, 2016
+	mgoubran@stanford.edu
+
+    -----------------------------------
+
+usage
+getversion >&2
+
+}
+
+# Call help/usage function
+if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-help" ]]; then
+
+    usage >&2
+    exit 1
+
 fi
 
-motherdir=$1
+
+#----------
+
+# check dependencies
+
+convdir=`which mri_convert`
+
+if [ -z ${convdir} ];
+then
+	printf "\n ERROR: mri_convert not initialized .. please install it from FREESURFER & rerun script \n"
+	exit 1
+else
+	printf "\n mri_convert path check: OK... \n"
+fi
+
+probedir=`which mri_probedicom`
+
+if [ -z ${probedir} ];
+then
+	printf "\n ERROR: mri_probedicom not initialized .. please install it from FREESURFER & rerun script \n"
+	exit 1
+else
+	printf "\n mri_probedicom path check: OK... \n"
+fi
+
+#-------
+
+while getopts ":p:" opt; do
+
+    case "${opt}" in
+
+        p)
+            motherdir=${OPTARG}
+            ;;
+
+        *)
+            usage
+            ;;
+
+    esac
+
+done
+
+if [ -z ${motherdir} ];
+then
+    usage
+    echo "ERROR: < -p => input parent directory > not specified"
+    exit 1
+fi
+
+#------
 
 pushd $motherdir
 
