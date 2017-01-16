@@ -1,6 +1,7 @@
 MIRACL ALL COMMANDS WIKI
 ________________________
 
+** for a more detailed description & input parameters please check the respective wiki **
 
 ________________________
 
@@ -30,7 +31,16 @@ CONVERSION / GUI (IO)
 
 - convertTifftoNii.py
 
+    [ Convert TIF to NII files (& downsample if wanted) ]
 
+    1) Converts tif files to nifti files while choosing a downsample factor, voxel spacing, channel info
+
+
+- miracl_set_orient_gui.py
+
+     [ Create orient code for data with GUI ]
+
+     1) Uses user input to generate orientation code for orientation input data to "standard/Allen" orientation
 
 
 ________________________
@@ -78,13 +88,23 @@ SEGMENTATION (SEG)
 
     [ Voxelize segmentation results ]
 
-    1) Voxelizes segmentation results into density maps with Allen atlas resolution
+    1) Voxelizes full-resolution segmentation results into density maps with Allen atlas resolution
 
 
 - miracl_seg_feat_extract.py
 
     [ Compute segmenation features ]
 
-    1) Computes features of segmented image and summarizes them per label
+    1) Computes features of segmented image and summarizes them per label for input labels
 
 
+________________________
+
+STATISTICS (STATS)
+------------------
+
+
+________________________
+
+WORKFLOWS (FLOW)
+------------------

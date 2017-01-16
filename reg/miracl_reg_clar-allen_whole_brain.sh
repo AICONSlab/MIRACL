@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # get version
 function getversion()
@@ -7,8 +7,6 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
-
-# TODOlp: combine convert tif 2 nii & reg into one pipeline
 
 # help/usage function
 function usage()
@@ -823,3 +821,5 @@ DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
 echo "Registration and Allen label warping done in $DIFF minutes. Have a good day!"
+
+# TODOs
