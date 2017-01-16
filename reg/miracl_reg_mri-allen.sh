@@ -378,7 +378,7 @@ function orientimg()
 
 # Smooth image
 
-function smoothimg()
+function smoothimg()π
 {
 
 	local ortmr=$1

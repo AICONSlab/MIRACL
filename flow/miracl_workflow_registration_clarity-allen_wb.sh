@@ -38,7 +38,7 @@ function usage()
 
     Usage: `basename $0` -f [Tiff folder]
 
-    Example: `basename $0` -f my_tifs -conv "-d 5" -reg "-o ARS -m combined -v 25"
+    Example: `basename $0` -f my_tifs -n "-d 5" -r "-o ARS -m combined -v 25"
 
         arguments (required):
 
@@ -46,7 +46,7 @@ function usage()
 
         optional arguments (don't forget the quotes):
 
-            conversion to nii (invoked by -conv):
+            conversion to nii (invoked by -n " "):
 
             d.  [ Downsample ratio (default: 5) ]
             cn. [ chan # for extracting single channel from multiple channel data (default: 1) ]
@@ -56,7 +56,7 @@ function usage()
             vz. [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
             c.  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
-            Registration (invoked by -reg):
+            Registration (invoked by -r " "):
 
             o. Orient code (default: ALS)
             to orient nifti from original orientation to "standard/Allen" orientation
@@ -109,7 +109,7 @@ if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-help" ]]; then
 fi
 
 
-#----------
+#----------------------
 
 # check dependencies
 
@@ -142,7 +142,7 @@ else
 fi
 
 
-#----------
+#----------------------
 
 # get time
 
@@ -167,76 +167,11 @@ fi
 exec > >(tee -i ${regdir}/workflow_reg_clar_allen.log)
 exec 2>&1
 
+#---------------------------
+#---------------------------
 
-#---------------------------
-#---------------------------
 
 # Select Mode : GUI or script
-
-#if [[ "$#" -gt 1 ]]; then
-#
-#	printf "\n Running in script mode \n"
-#
-#    printf "\n Reading input parameters \n"
-#
-#	while getopts ":f:o:l:m:v:" opt; do
-#
-#	    case "${opt}" in
-#
-#            f)
-#            	indir=${OPTARG}
-#            	;;
-#
-#            o)
-#            	ort=${OPTARG}
-#            	;;
-#
-#            d)
-#            	dr=${OPTARG}
-#            	;;
-#
-#        	cn)
-#            	cn=${OPTARG}
-#            	;;
-#
-#            cp)
-#            	cp=${OPTARG}
-#            	;;
-#
-#            ch)
-#            	ch=${OPTARG}
-#            	;;
-#
-#        	vx)
-#            	vx=${OPTARG}
-#            	;;
-#
-#	        vz)
-#            	vz=${OPTARG}
-#            	;;
-#
-#	        c)
-#            	c=${OPTARG}
-#            	;;
-#
-#        	l)
-#            	lbls=${OPTARG}
-#            	;;
-#
-#        	m)
-#            	hemi=${OPTARG}
-#            	;;
-#        	v)
-#            	vox=${OPTARG}
-#            	;;
-#        	*)
-#            	usage
-#            	;;
-#
-#		esac
-#
-#	done
-
 
 if [[ "$#" -gt 1 ]]; then
 
@@ -244,24 +179,24 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Reading input parameters \n"
 
-	while getopts ":f:o:l:m:v:" opt; do
+	while getopts ":f:o:n:r:" opt; do
 
 	    case "${opt}" in
 
             f)
-            	indir=${OPTARG}
+            	indir="${OPTARG}"
             	;;
 
             o)
-            	ort=${OPTARG}
+            	ort="${OPTARG}"
             	;;
 
-            conv)
-            	conv=${OPTARG}
+            n)
+            	convopts="${OPTARG}"
             	;;
 
-        	reg)
-            	reg=${OPTARG}
+        	r)
+            	regopts="${OPTARG}"
             	;;
 
         	*)
@@ -288,7 +223,8 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
-    if [ -z ${conv} ];
+
+    if [ -z "${convopts}" ];
 	then
 
         echo miracl_convertTIFFtoNII.py -f ${indir}
@@ -296,8 +232,8 @@ if [[ "$#" -gt 1 ]]; then
 
     else
 
-        echo miracl_convertTIFFtoNII.py -f ${indir} "${conv}"
-        miracl_convertTIFFtoNII.py -f ${indir} "${conv}"
+        echo miracl_convertTIFFtoNII.py -f ${indir} "${convopts}"
+        miracl_convertTIFFtoNII.py -f ${indir} "${convopts}"
 
     fi
 
@@ -310,7 +246,7 @@ if [[ "$#" -gt 1 ]]; then
     # last file made in niftis folder
     nii=`ls -r niftis | tail -n 1`
 
-    if [ -z ${reg} ];
+    if [ -z "${regopts}" ];
 	then
 
         echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
@@ -318,8 +254,8 @@ if [[ "$#" -gt 1 ]]; then
 
     else
 
-        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${reg}"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${reg}"
+        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}"
+        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}"
 
     fi
 
