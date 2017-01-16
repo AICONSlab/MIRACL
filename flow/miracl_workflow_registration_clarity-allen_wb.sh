@@ -36,9 +36,9 @@ function usage()
 
 	For command-line / scripting
 
-    Usage: `basename $0` -f [Tiff folder]  -o [out nii name]
+    Usage: `basename $0` -f [Tiff folder]
 
-    Example: `basename $0` -f my_tifs -o stroke2 -conv "-d 5" -reg "-ort ARS -m combined -v 25"
+    Example: `basename $0` -f my_tifs -conv "-d 5" -reg "-o ARS -m combined -v 25"
 
         arguments (required):
 
@@ -58,8 +58,8 @@ function usage()
 
             Registration (invoked by -reg):
 
-                o. Orient code (default: ALS)
-                to orient nifti from original orientation to "standard/Allen" orientation
+            o. Orient code (default: ALS)
+            to orient nifti from original orientation to "standard/Allen" orientation
 
             m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>  (default: split)
