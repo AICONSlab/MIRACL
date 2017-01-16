@@ -290,7 +290,7 @@ ortstr = ''.join(ort)
 # -------------------------------
 
 with open("ort2std.txt", "w") as myfile:
-    myfile.write(ortstr)
+    myfile.write("tifdir=%s \n ortcode=%s \n" % (indir, ortstr))
 
     # main fn
 
