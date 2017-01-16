@@ -1,51 +1,64 @@
-MIRACL v. 0.5
-______________
+MIRACL LABELS WIKI
+__________________
 
 
-1) Register whole brain CLARITY to Allen
+1) Multi-resolution atlases from Allen labels
 ___________________________________________
 
 
-miracl_reg_clar-allen_whole_brain.sh
+- miracl_lbls_generate_grand-parent_annotation.py
+
+    Usage: miracl_lbls_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
+
+    Generate multi-resolution atlases from Allen labels
+
+    example: miracl_lbls_generate_grand-parent_annotation.py -p 3 -m combined -v 10
+
+	----------
+
+	Dependencies:
+
+		- Python 2.7
+		used modules: argparse, pandas, numpy, re, os, sys, nibabel, subprocess
 
 
-	Usage: miracl_reg_clar-allen_whole_brain.sh
+	________________________________________________
+	________________________________________________
+
+
+
+2) Warp Allen labels to CLARITY
+_______________________________
+
+
+miracl_lbls_warp_to_clar_space.sh
+
+	1) Warps Allen annotations to the original high-res CLARITY space
+
+	Usage: miracl_lbls_warp_to_clar_space.sh
 
 	A GUI will open to choose your:
 
-		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
+		- < Input clarity registration folder >
 
-		file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
-        [this should be accurate as it is used for allen label upsampling to clarity]
+		- < Labels to warp>
 
 	----------
 
 	For command-line / scripting
 
+	Usage: miracl_lbls_warp_to_clar_space.sh -i <input_down-sampled_clarity_nifti>
 
-	Usage: miracl_reg_clar-allen_whole_brain.sh -i <input_down-sampled_clarity_nifti>
-
-	Example: miracl_reg_clar-allen_whole_brain.sh -i Reference_channel_05_down.nii.gz
+	Example: miracl_lbls_warp_to_clar_space.sh -i Reference_channel_05_down.nii.gz
 
 		arguments (required):
 
-			i. Input down-sampled clarity nifti (with "##_down" in file name: ex. stroke13_05_down_Ref_chan.nii.gz )
+			r. Input clarity registration dir
+
+			l. input Allen Labels to warp (in Allen space)
 
 		optional arguments:
 
-		    o. Orient code (default: ALS)
-		        to orient nifti from original orientation to "standard/Allen" orientation
-
-			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: split)
-
-			v. Labels voxel size/Resolutin of labels in um
-				accepted inputs are: 10, 25 or 50  (default: 10)
-
-			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
-				input could be at a different depth than default labels
-
-				If l. is specified (m & v cannot be speficied)
 
 	----------
 
@@ -62,47 +75,39 @@ miracl_reg_clar-allen_whole_brain.sh
 	________________________________________________
 
 
-2) Register MRI to Allen
-_________________________
+
+3) Warp Allen labels to MRI
+___________________________
 
 
-miracl_reg_mri-allen.sh
+miracl_lbls_warp_to_mri_space.sh
 
+	1) Warps Allen annotations to the MRI space
 
-	Usage: miracl_reg_mri-allen.sh
+	Usage: miracl_lbls_warp_to_mri_space.sh
 
 	A GUI will open to choose your:
 
-		- < Input MRI nifti > : Preferably T2-weighted
+		- < Input MRI registration folder >
+
+		- < Labels to warp>
 
 	----------
 
 	For command-line / scripting
 
+	Usage: miracl_lbls_warp_to_mri_space.sh -i <input_down-sampled_MRI_nifti>
 
-	Usage: miracl_reg_mri-allen.sh -i <invivo_or_exvivo> mri
-
-	Example: miracl_reg_mri-allen.sh -i inv_mri.nii.gz
+	Example: miracl_lbls_warp_to_mri_space.sh -i Reference_channel_05_down.nii.gz
 
 		arguments (required):
 
-			i. Input MRI nifti
+			r. Input MRI registration dir
+
+			l. input Allen Labels to warp (in Allen space)
 
 		optional arguments:
 
-            o. Orient code (default: RSP)
-		        to orient nifti from original orientation to "standard/Allen" orientation
-
-			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: split)
-
-			v. Labels voxel size/Resolutin of labels in um
-				accepted inputs are: 10, 25 or 50  (default: 10)
-
-			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
-				input could be at a different depth than default labels
-
-				If l. is specified (m & v cannot be speficied)
 
 	----------
 
@@ -111,24 +116,9 @@ miracl_reg_mri-allen.sh
 		- ANTs
 		https://github.com/stnava/ANTs
 
-		- FSL
-
 		- c3d
 		https://sourceforge.net/projects/c3d
 
-
 	________________________________________________
 	________________________________________________
 
-
-3) Register CT to Allen
-_________________________
-
-
-	-> Run: miracl_reg_ct-allen.sh -p <project name> -g <group> -m <mouse #> -v <in or ex vivo>
-
-	________________________________________________
-	________________________________________________
-
-4) Register CLARITY sections to whole brain 
-____________________________________________

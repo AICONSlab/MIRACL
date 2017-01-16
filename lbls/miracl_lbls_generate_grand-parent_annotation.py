@@ -20,11 +20,12 @@ import pandas as pd
 # help fn
 
 def helpmsg():
-    return '''miracl_lbls_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
+    return '''Usage: miracl_lbls_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
 
-    Computes features of segmented image and summarizes them per label
+    Generate multi-resolution atlases from Allen labels
 
-    example: miracl_lbls_generate_grand-parent_annotation.py -p 3 -m split -v 10
+    example: miracl_lbls_generate_grand-parent_annotation.py -p 3 -m combined -v 10
+
     '''
 
 # ---------

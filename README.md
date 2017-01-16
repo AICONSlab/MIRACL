@@ -2,26 +2,22 @@ MIRACL README
 ______________
 
 MIRACL (Multi-modal Image Registration and Atlasing via Clarity-based Light-microscopy)
-is a general-purpose pipeline for automated:
+is a general-purpose, open-source pipeline for automated:
 
-	1) Registration of mice clarity data to Allen atlas
-		a. Full brain
-		b. Sections
+	1) Registration of mice clarity data to the Allen reference atlas
 
-	2) Segmentation of mice clarity data in 3D
-	    a. Sparse staining
-	    b. Nuclear staining
+	2) Segmentation & feature extraction of mice clarity data in 3D (Sparse & nuclear staining)
 
-	3) Registration of mice MRI/CT data to Allen atlas
-		a. Full brain
-		b. Sections
+	3) Registration of mice multimodal imaging data (MRI & CT, in-vivo & ex-vivo) to Allen reference atlas
 
-	4) Connectivity analysis
-	    a. Region of Interests
-	    b. Specific Labels
+	4) Label or region specific connectivity analysis based on the Allen connectivity atlas
 
-	5) Atlas generation & Labels
-	    a.
+    5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY &
+      Allen connectivity atlas
+
+    6) Statistical analysis of CLARITY & Imaging data
+
+	7) Atlas generation & Label manipulation
 
 
 (c) Maged Goubran, 
@@ -32,7 +28,7 @@ is a general-purpose pipeline for automated:
 ____________________________
 
 
-Steps to setup/run MIRACL on Linux machine:
+Steps to setup/run MIRACL on a Linux machine:
 
 
 1) Setup path
@@ -44,17 +40,12 @@ Steps to setup/run MIRACL on Linux machine:
 
 2) Install / Check dependencies
 
-	
-	How to install python / required libraries
-	
-	sudo apt-get install python-tk
-	
-	install pip
+    - ANTS (compiled version included in package)
+    - c3d (compiled version included in package)
+    - Fiji
+    - Python
 
-	How to install Fiji / required plugins
-
-
-	For detailed instructions on how to install of dependencies please check dependencies.txt
+	For detailed instructions on how to install different dependencies please check wiki/dependencies.txt
 
     For the visualization of nifti files and labels we recommand "ITKSNAP":
     http://www.itksnap.org/pmwiki/pmwiki.php?n=Downloads.SNAP3

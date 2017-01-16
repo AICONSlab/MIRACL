@@ -1,7 +1,7 @@
 MIRACL ALL COMMANDS WIKI
 ________________________
 
-** for a more detailed description & input parameters please check the respective wiki **
+** for a more detailed description & input parameters please check the respective wiki of each module **
 
 ________________________
 
@@ -13,17 +13,17 @@ CONNECTIVITY (CONNECT)
 
     [ Get experiment project density & connectivity matrix for Allen label ]
 
-    1) Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
-    2) Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
+    Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
+    Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
 
 
 - miracl_coonect_ROI_matrix_connectogram.py
 
     [ Get experiment connectivity matrix, projection & connectogram for ROI in Allen space ]
 
-    1) Finds the largest N Allen labels in the Region of Interest and extracts its N closely connected regions
+    Finds the largest N Allen labels in the Region of Interest and extracts its N closely connected regions
     (targets sorted by normalized projection volume) from the Allen Connectivity atlas.
-    2) Outputs a connectivity matrix of the primary injected sites (labels) & their most common targets.
+    Outputs a connectivity matrix of the primary injected sites (labels) & their most common targets.
 
 
 ________________________
@@ -34,23 +34,17 @@ CONVERSION / GUI (IO)
 
 - convertTifftoNii.py
 
-    [ Convert TIF to NII files (& downsample if wanted) ]
-
-    1) Converts tif files to nifti files while choosing a downsample factor, voxel spacing, channel info
+    Converts tif files to nifti files while choosing a downsample factor, voxel spacing, channel info
 
 
 - miracl_set_orient_gui.py
 
-     [ Create orient code for data with GUI ]
-
-     1) Uses user input to generate orientation code for orientation input data to "standard/Allen" orientation
+     Uses user input (from a GUI) to generate an orientation code for orientation input data to "standard/Allen" orientation
 
 
 - miracl_convertDCMtoNII.sh
 
-    [ Convert dicom data to nifti ]
-
-    1) Converts dicoms in sub-directories to nii & renames sub-directories with sequence name
+    Converts dicoms in sub-directories to nii & renames sub-directories with sequence name
 
 
 ________________________
@@ -58,6 +52,20 @@ ________________________
 LABELS (LBLS)
 --------------
 
+
+- miracl_lbls_generate_grand-parent_annotation.py
+
+    Generate multi-resolution atlases from Allen labels
+
+
+- miracl_lbls_warp_to_clar_space.sh
+
+    Warps Allen annotations to the original high-res CLARITY space
+
+
+- miracl_lbls_warp_to_mri_space.sh
+
+    Warps Allen annotations to the MRI space
 
 
 ________________________
@@ -70,17 +78,17 @@ REGISTRATION (REG)
 
     [ Register whole brain CLARITY to Allen ]
 
-	1) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
-	2) Warps Allen annotations to the original high-res CLARITY space
-	3) Warps the higher-resolution CLARITY to Allen space
+	Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
+	Warps Allen annotations to the original high-res CLARITY space
+	Warps the higher-resolution CLARITY to Allen space
 
 
 - miracl_reg_mri-allen.sh
 
     [ Register MRI to Allen ]
 
-    1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
-	2) Warps Allen annotations to the MRI space
+    Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
+	Warps Allen annotations to the MRI space
 
 
 ________________________
@@ -91,23 +99,17 @@ SEGMENTATION (SEG)
 
 - miracl_seg_clarity_neurons_wrapper.sh
 
-    [ Segment CLARITY 3D ]
-
-	1) Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
+    Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
 
 
 - miracl_seg_voxelize_parallel.py
 
-    [ Voxelize segmentation results ]
-
-    1) Voxelizes full-resolution segmentation results into density maps with Allen atlas resolution
+    Voxelizes full-resolution segmentation results into density maps with Allen atlas resolution
 
 
 - miracl_seg_feat_extract.py
 
-    [ Compute segmenation features ]
-
-    1) Computes features of segmented image and summarizes them per label for input labels
+    Computes segmentation features and summarizes them per label for input labels
 
 
 ________________________
@@ -116,7 +118,14 @@ STATISTICS (STATS)
 ------------------
 
 
+- miracl_stats_paired_ttest_ipsi_contra.py
+
+    Computes paired_ttest test between both hemispheres for all labels across mice
+
+
 ________________________
 
 WORKFLOWS (FLOW)
 ------------------
+
+-

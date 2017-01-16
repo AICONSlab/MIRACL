@@ -1,10 +1,10 @@
-MIRACL v. 0.5
-______________
+MIRACL DEPENDENCIES
+___________________
 
+Depending on the type of your data, please check bellow
 
 Only CLARITY data:
 
- 
 - ANTS
 - c3d
 - Fiji
@@ -18,7 +18,7 @@ Fiji plugins
 
 Python libraries 
 
-- argparse, nibabel, cv2, numpy, scipy, seaborn, Tkinter  
+- argparse, nibabel, cv2, numpy, scipy, seaborn, Tkinter, tifflib, joblib, multiprocessing, sklearn,
  
 
 Installing dependencies:
@@ -32,12 +32,11 @@ Installing dependencies:
 ______________
 
 
-if study has MRI/CT data also need
+if study has MRI/CT (structural) data also need
 
 - FSL
 - Freesurfer
 - NiftyReg
-
 
 Installing dependencies:
 
@@ -47,8 +46,6 @@ ______________
 if study has DTI data also need
 
 - mrtrix 
-
-
 
 Installing dependencies:
 

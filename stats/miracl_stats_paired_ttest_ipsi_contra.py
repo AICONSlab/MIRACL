@@ -18,7 +18,7 @@ import scipy.stats as stats
 
 
 def helpmsg(name=None):
-    return '''miracl_stats_paired_ttest_ipsi_contra.py -d [ folder with feature extraction csv files]
+    return '''Usage: miracl_stats_paired_ttest_ipsi_contra.py -d [ folder with feature extraction csv files]
 
 Computes paired_ttest test between both hemispheres for all labels across mice
 
