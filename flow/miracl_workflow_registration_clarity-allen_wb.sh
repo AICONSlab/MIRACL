@@ -233,7 +233,7 @@ if [[ "$#" -gt 1 ]]; then
     else
 
         echo miracl_convertTIFFtoNII.py -f ${indir} "${convopts}"
-        miracl_convertTIFFtoNII.py -f ${indir} "${convopts}"
+        miracl_convertTIFFtoNII.py -f ${indir} ${convopts}
 
     fi
 
@@ -255,7 +255,7 @@ if [[ "$#" -gt 1 ]]; then
     else
 
         echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}"
+        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
 
     fi
 
