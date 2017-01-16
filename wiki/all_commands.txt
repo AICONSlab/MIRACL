@@ -3,9 +3,12 @@ MIRACL v. 0.5
 -------------------
 CONNECTIVITY (CONNECT)
 
+
 - miracl_connect_label_graph_proj_dens.py
 
+
 - miracl_coonect_ROI_matrix_connectogram.py
+
 
 -------------------
 CONVERSION / GUI (IO)
@@ -14,6 +17,7 @@ CONVERSION / GUI (IO)
 
 -------------------
 REGISTRATION (REG)
+
 
 - miracl_reg_clar-allen_whole_brain.sh
 
@@ -27,12 +31,19 @@ REGISTRATION (REG)
     1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
 	2) Warps Allen annotations to the MRI space
 
+
 -------------------
 SEGMENTATION (SEG)
+
 
 - miracl_seg_clarity_neurons_wrapper.sh
 
 	1) Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
+
+
+- miracl_seg_voxelize_parallel.py
+
+    1) Voxelizes segmentation results into density maps with Allen atlas resolution
 
 
 - miracl_seg_feat_extract.py
@@ -40,6 +51,3 @@ SEGMENTATION (SEG)
     1) Computes features of segmented image and summarizes them per label
 
 
-- miracl_seg_voxelize_parallel.py
-
-    1)

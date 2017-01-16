@@ -6,57 +6,6 @@ ______________
 ___________________________________________
 
 
-miracl_reg_clar-allen_whole_brain.sh
-
-
-	Usage: miracl_reg_clar-allen_whole_brain.sh
-
-	A GUI will open to choose your:
-
-		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
-
-		file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
-        [this should be accurate as it is used for allen label upsampling to clarity]
-
-	----------
-
-	For command-line / scripting
-
-
-	Usage: miracl_reg_clar-allen_whole_brain.sh -i <input_down-sampled_clarity_nifti>
-
-	Example: miracl_reg_clar-allen_whole_brain.sh -i Reference_channel_05_down.nii.gz
-
-		arguments (required):
-
-			i. Input down-sampled clarity nifti (with "##_down" in file name: ex. stroke13_05_down_Ref_chan.nii.gz )
-
-		optional arguments:
-
-		    o. Orient code (default: ALS)
-		        to orient nifti from original orientation to "standard/Allen" orientation
-
-			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: split)
-
-			v. Labels voxel size/Resolutin of labels in um
-				accepted inputs are: 10, 25 or 50  (default: 10)
-
-			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
-				input could be at a different depth than default labels
-
-				If l. is specified (m & v cannot be speficied)
-
-	----------
-
-	Dependencies:
-
-		- ANTs
-		https://github.com/stnava/ANTs
-
-		- c3d
-		https://sourceforge.net/projects/c3d
-
 
 	________________________________________________
 	________________________________________________

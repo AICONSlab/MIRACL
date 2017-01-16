@@ -23,7 +23,7 @@ warnings.filterwarnings("ignore")
 
 
 def helpmsg():
-    return '''miracl_get_exp_conn_graph_proj_den.py -l [label id]
+    return '''Usage: miracl_get_exp_conn_graph_proj_den.py -l [label id]
 
     Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
@@ -32,6 +32,19 @@ def helpmsg():
     Search is performed for experiemtns on wildtype (C57BL/6J) mice
 
     example: miracl_get_exp_conn_graph_proj_den.py -l
+
+    arguments (required):
+
+        l. Allen atlas label id
+
+
+    Dependencies:
+
+	    Python 2.7
+	    used modules:
+            argparse, numpy, scipy, seaborn, pandas, tifffile, warnings, matplotlib, os, sys, datetime, allensdk
+
+
     '''
 
 
