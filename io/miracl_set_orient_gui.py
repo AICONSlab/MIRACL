@@ -294,7 +294,10 @@ with open("ort2std.txt", "w") as myfile:
 
     # main fn
 
-    # TODOlps
 
-    # setup for other than coronal
-    # reformat code w fns n main fn
+# TODOlps
+
+# Add help fn
+# setup for other than coronal
+# reformat code w fns n main fn
+# Setup for multiple channels

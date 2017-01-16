@@ -1,5 +1,5 @@
-MIRACL v. 0.5
-______________
+MIRACL SEGMENTATION WIKI
+________________________
 
 
 1) Segment CLARITY 3D

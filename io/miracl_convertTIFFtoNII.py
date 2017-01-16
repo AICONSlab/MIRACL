@@ -19,13 +19,8 @@ import numpy as np
 startTime = datetime.now()
 
 
-# TODOlp: another script for very large files [COLM] with one or multiple stacks
-# TODOlp: add check if dir exists (in name correct)
-# TODOlp: check center output
-# TODOlp: GUI with options to enter
-
 def helpmsg(name=None):
-    return '''convertTifftoNii.py
+    return '''Usage: convertTifftoNii.py
 
 Converts Tiff images to Nifti 
 
@@ -58,6 +53,14 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
         -c  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
         example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+
+
+    Dependencies:
+
+	    Python 2.7
+	    used modules:
+            argparse, numpy, scipy, cv2, pandas, tifffile, Tkinter, tkFileDialog, glob, re, os, sys, datetime
+
 
         '''
 
@@ -253,3 +256,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    # TODOs:
+
+    # TODOlp: another script for very large files [COLM] with one or multiple stacks
+    # TODOlp: add check if dir exists (in name correct)
+    # TODOlp: check center output
+    # TODOlp: GUI with options to enter
