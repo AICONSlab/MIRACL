@@ -1,9 +1,6 @@
 MIRACL ALL COMMANDS WIKI
 ________________________
 
-** for a more detailed description & input parameters please check the respective wiki of each module **
-
-________________________
 
 CONNECTIVITY (CONNECT)
 ----------------------
@@ -128,4 +125,17 @@ ________________________
 WORKFLOWS (FLOW)
 ------------------
 
--
+- miracl_workflow_registration_clarity-allen_wb.sh
+
+    [ Workflow (wrapper) combining multiple MIRACL functions ]
+
+    Sets orientation of input data using a GUI
+    Converts TIFF to NII
+    Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
+    Warps Allen annotations to the original high-res CLARITY space
+    Warps the higher-resolution CLARITY to Allen space
+
+
+________________________
+
+** for a more detailed description & input parameters please check the respective wiki of each module **
