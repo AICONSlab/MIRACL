@@ -117,19 +117,21 @@ def rightbutton():
 
 # -------------------------------
 
-print('\n Reading images and automatically adjusting contrast')
+print('\n Reading images and automatically adjusting contrast \n')
 
 n = len(flist)
-ind = int(n / 2.0)
+
+global index
+index = int(n / 2.0)
 
 f = Figure(figsize=(8, 8), dpi=100, facecolor='royalblue', edgecolor='white', linewidth=2)
 a = f.add_subplot(111)
-img = cv2.imread(flist[ind], 0)
+img = cv2.imread(flist[index], 0)
 clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(8, 8))
 cl = clahe.apply(img)
 a.imshow(cl, 'gray')
 a.axis('off')
-a.set_title(os.path.basename(flist[ind]), color='white', y=1.05, fontsize=10)
+a.set_title(os.path.basename(flist[index]), color='white', y=1.05, fontsize=10)
 
 # a tk.DrawingArea
 canvas = FigureCanvasTkAgg(f, master=root)
@@ -141,9 +143,6 @@ toolbar.grid(row=8, column=1, padx=4, pady=4, sticky="e")
 
 canvas._tkcanvas.grid(row=5, column=1, sticky="w")
 canvas._tkcanvas.configure(background='black', highlightcolor='black', highlightbackground='black')
-
-global index
-index = 0
 
 
 def on_key_event(event):
@@ -301,3 +300,4 @@ with open("ort2std.txt", "w") as myfile:
 # setup for other than coronal
 # reformat code w fns n main fn
 # Setup for multiple channels
+    # scroll bar

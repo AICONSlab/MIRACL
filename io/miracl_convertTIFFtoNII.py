@@ -40,10 +40,9 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
 
         -f Input Clarity tif dir/folder
 
-        -o Output nii name (script will append downsample ratio and channel info to given name)
-
     Optional arguments:
 
+        -o Output nii name (script will append downsample ratio and channel info to given name)
         -d  [ Downsample ratio (default: 5) ]
         -cn [ chan # for extracting single channel from multiple channel data (default: 1) ]
         -cp [ chan prefix (string before channel number in file name). ex: C00 ]
@@ -90,7 +89,7 @@ else:
     parser.add_argument('-cn', '--channum', type=int, help="Channel number")
     parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
     parser.add_argument('-ch', '--channame', type=str, help="Channel name")
-    parser.add_argument('-o', '--outnii', type=str, help="Out nii name", required=True)
+    parser.add_argument('-o', '--outnii', type=str, help="Out nii name")
     parser.add_argument('-vx', '--resx', type=float, help="Original x resolution")
     parser.add_argument('-vz', '--resz', type=float, help="Original z resolution")
     parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")

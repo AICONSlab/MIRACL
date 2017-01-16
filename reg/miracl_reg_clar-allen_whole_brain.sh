@@ -95,6 +95,14 @@ fi
 
 # check dependencies
 
+if [ -z ${MIRACL_HOME} ];
+then
+
+    printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh & rerun script \n"
+	exit 1
+
+fi
+
 
 if [ -z ${ANTSPATH} ];
 then

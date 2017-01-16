@@ -1,5 +1,5 @@
 #!/bin/bash
-# Maged Goubran, mgoubran@stanford.edu
+
 
 # get version
 function getversion()
