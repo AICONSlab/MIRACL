@@ -5,6 +5,7 @@ ______________
 1) Get experiment project density & connectivity matrix for Allen label
 ___________________________________________
 
+
     Usage: miracl_get_exp_conn_graph_proj_den.py -l [label id]
 
     Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
@@ -34,6 +35,30 @@ ___________________________________________
 _________________________
 
 
+    Usage: miracl_connect_ROI_matrix_connectogram.py -r [input Region Of Interest] -n [number of labels]
+
+    Finds the largest N Allen labels in the Region of Interest and extracts its N closely connected regions
+    (targets sorted by normalized projection volume) from the Allen Connectivity atlas.
+    Outputs a connectivity matrix of the primary injected sites (labels) & their most common targets.
+    Labels and targets are mutually exclusive (a primary injections is not chosen a target & vice versa).
+    If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
+    Quering from the Allen API requires an internet connection.
+
+    example: miracl_connect_ROI_matrix_connectogram.py -r my_roi_mask -n 15
+
+       arguments (required):
+
+        r. Input chosen region of interest (ROI) in Allen space
+
+        n. Output number of primary injection sites (also number of targer regions)
+            Limited by size of ROI (number of labels it contains)
+
+
+    Dependencies:
+
+	    Python 2.7
+	    used modules:
+            argparse, numpy, scipy, seaborn, pandas, matplotlib, os, sys, datetime, allensdk, nibabel, lightning
 
 
 	________________________________________________

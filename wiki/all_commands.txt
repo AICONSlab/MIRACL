@@ -6,13 +6,19 @@ CONNECTIVITY (CONNECT)
 
 - miracl_connect_label_graph_proj_dens.py
 
+[ Get experiment project density & connectivity matrix for Allen label ]
+
     1) Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
     2) Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
 
 
 - miracl_coonect_ROI_matrix_connectogram.py
 
+[ Get experiment connectivity matrix, projection & connectogram for ROI in Allen space ]
 
+    1) Finds the largest N Allen labels in the Region of Interest and extracts its N closely connected regions
+    (targets sorted by normalized projection volume) from the Allen Connectivity atlas.
+    2) Outputs a connectivity matrix of the primary injected sites (labels) & their most common targets.
 
 -------------------
 CONVERSION / GUI (IO)
@@ -24,6 +30,8 @@ REGISTRATION (REG)
 
 
 - miracl_reg_clar-allen_whole_brain.sh
+
+[
 
 	1) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
 	2) Warps Allen annotations to the original high-res CLARITY space
