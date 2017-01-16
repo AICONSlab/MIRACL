@@ -64,13 +64,13 @@ function usage()
             m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>  (default: split)
 
-			v. Labels voxel size/Resolutin of labels in um
-				accepted inputs are: 10, 25 or 50  (default: 10)
+            v. Labels voxel size/Resolutin of labels in um
+                accepted inputs are: 10, 25 or 50  (default: 10)
 
-			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
-				input could be at a different depth than default labels
+            l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
+                input could be at a different depth than default labels
 
-				If l. is specified (m & v cannot be speficied)
+                If l. is specified (m & v cannot be speficied)
 
 	----------
 
@@ -296,8 +296,8 @@ if [[ "$#" -gt 1 ]]; then
 
     else
 
-        echo miracl_convertTIFFtoNII.py -f ${indir} ${conv}
-        miracl_convertTIFFtoNII.py -f ${indir} ${conv}
+        echo miracl_convertTIFFtoNII.py -f ${indir} "${conv}"
+        miracl_convertTIFFtoNII.py -f ${indir} "${conv}"
 
     fi
 
@@ -313,13 +313,13 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z ${reg} ];
 	then
 
-        echo miracl_reg_clar-allen_whole_brain.sh -i ${nii}
-        miracl_reg_clar-allen_whole_brain.sh -i ${nii}
+        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
 
     else
 
-        echo miracl_reg_clar-allen_whole_brain.sh -i ${nii} ${reg}
-        miracl_reg_clar-allen_whole_brain.sh -i ${nii} ${reg}
+        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${reg}"
+        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${reg}"
 
     fi
 
@@ -362,8 +362,8 @@ else
     # last file made in niftis folder
     nii=`ls -r niftis | tail -n 1`
 
-    echo miracl_reg_clar-allen_whole_brain.sh -i ${nii}
-    miracl_reg_clar-allen_whole_brain.sh -i ${nii}
+    echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+    miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
 
 
 fi

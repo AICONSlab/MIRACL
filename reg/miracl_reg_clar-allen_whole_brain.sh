@@ -139,7 +139,7 @@ function choose_file_gui()
 	local _inpath=$2
 
 	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr"
-	
+
 	filepath=`cat path.txt`
 	
 	eval ${_inpath}="'$filepath'"
@@ -715,7 +715,7 @@ function main()
 	initallen=$regdir/init_allen.nii.gz
 
 
-	initclarallenreg $clarroi $allenref $initform $deg $radfrac $useprincax $localiter $initallen
+	initclarallenreg $clarlnk $allenref $initform $deg $radfrac $useprincax $localiter $initallen
 
 
 	#---------------------------

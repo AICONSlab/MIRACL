@@ -126,7 +126,7 @@ else:
         if args.chanprefix is None:
             sys.exit('-cp (channel prefix) not specified ')
 
-        chanp = args.chanprefix if args.chanprefix is not None else None
+    chanp = args.chanprefix if args.chanprefix is not None else None
 
     if args.channame is None:
         chan = 'eyfp'
