@@ -38,14 +38,11 @@ function usage()
 
     Usage: `basename $0` -f [Tiff folder]  -o [out nii name]
 
-    Example: `basename $0` -f my_tifs -o stroke2 -conv '-d 5' -reg '-m combined -v 25'
+    Example: `basename $0` -f my_tifs -o stroke2 -conv "-d 5" -reg "-ort ARS -m combined -v 25"
 
         arguments (required):
 
             f. Input Clarity tif dir/folder
-
-            o. Orient code
-                to orient nifti from original orientation to "standard/Allen" orientation
 
         optional arguments (don't forget the quotes):
 
@@ -60,6 +57,9 @@ function usage()
             c.  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
             Registration (invoked by -reg):
+
+                o. Orient code (default: ALS)
+                to orient nifti from original orientation to "standard/Allen" orientation
 
             m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>  (default: split)
@@ -283,13 +283,6 @@ if [[ "$#" -gt 1 ]]; then
 	fi
 
 
-	if [ -z ${ort} ];
-	then
-		usage
-		echo "ERROR: < -o => input orient code for data> not specified"
-		exit 1
-	fi
-
     #---------------------------
     # Call conversion to nii
 
@@ -298,17 +291,40 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z ${conv} ];
 	then
 
+        echo miracl_convertTIFFtoNII.py -f ${indir}
         miracl_convertTIFFtoNII.py -f ${indir}
 
+    else
+
+        echo miracl_convertTIFFtoNII.py -f ${indir} ${conv}
+        miracl_convertTIFFtoNII.py -f ${indir} ${conv}
+
     fi
+
 
     #---------------------------
     # Call registration
 
+    printf "\n Running CLARITY registration to Allen with the following command: \n"
 
+    # last file made in niftis folder
+    nii=`ls -r niftis | tail -n 1`
 
-#---------------------------
-#---------------------------
+    if [ -z ${reg} ];
+	then
+
+        echo miracl_reg_clar-allen_whole_brain.sh -i ${nii}
+        miracl_reg_clar-allen_whole_brain.sh -i ${nii}
+
+    else
+
+        echo miracl_reg_clar-allen_whole_brain.sh -i ${nii} ${reg}
+        miracl_reg_clar-allen_whole_brain.sh -i ${nii} ${reg}
+
+    fi
+
+    #---------------------------
+    #---------------------------
 
 
 else
@@ -317,18 +333,38 @@ else
 
 	printf "\n No inputs given ... running in GUI mode \n"
 
-	printf "\n Reading input data \n"
 
-	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel (nii/nii.gz)" inclar
+    #---------------------------
+    # Call set orient GUI
 
-	# check required input arguments
+    printf "\n Running Set orient with the following command: \n"
 
-	if [ -z ${inclar} ];
-	then
-		usage
-		echo "ERROR: <input clarity nii> was not chosen"
-		exit 1
-	fi
+    echo miracl_set_orient_gui.py
+    miracl_set_orient_gui.py
+
+
+    #---------------------------
+    # Call conversion to nii
+
+    printf "\n Running Tiff to Nii conversion with the following command: \n"
+
+    indir=`cat ort2std.txt | grep tifdir | cut -d = -f 2`
+
+    echo miracl_convertTIFFtoNII.py -f ${indir}
+    miracl_convertTIFFtoNII.py -f ${indir}
+
+
+    #---------------------------
+    # Call registration
+
+    printf "\n Running CLARITY registration to Allen with the following command: \n"
+
+    # last file made in niftis folder
+    nii=`ls -r niftis | tail -n 1`
+
+    echo miracl_reg_clar-allen_whole_brain.sh -i ${nii}
+    miracl_reg_clar-allen_whole_brain.sh -i ${nii}
+
 
 fi
 
