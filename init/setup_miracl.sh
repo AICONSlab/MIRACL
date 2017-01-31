@@ -20,10 +20,6 @@ cat <<\EOF >> ~/.bashrc
 
 for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 
-#--- Allen alias ----
-
-export allen=${MIRACL_HOME}/ara/template/average_template_25um.nii.gz
-
 #--------------------
 
 #--- MIRACL dependecies ----
@@ -40,6 +36,17 @@ export PATH=${MIRACL_HOME}/depends/c3d/bin:$PATH
 source ${MIRACL_HOME}/depends/c3d/share/bashcomp.sh
 
 #--------------------
+
+#--- Allen atlas alias ----
+
+export allen10=${MIRACL_HOME}/ara/template/average_template_10um.nii.gz
+export allen25=${MIRACL_HOME}/ara/template/average_template_25um.nii.gz
+export allen50=${MIRACL_HOME}/ara/template/average_template_50um.nii.gz
+
+export lbls10=${MIRACL_HOME}/ara/annotation/annotation_hemi_combined_10um.nii.gz
+export lbls25=${MIRACL_HOME}/ara/annotation/annotation_hemi_combined_25um.nii.gz
+export lbls50=${MIRACL_HOME}/ara/annotation/annotation_hemi_combined_50um.nii.gz
+
 
 EOF
 

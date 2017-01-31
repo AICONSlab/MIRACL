@@ -569,8 +569,8 @@ if __name__ == "__main__":
 # ------
 # TODOs:
 # TODOhp: output max number instead of argument
-# TODOhp: make input either mask or labelid?!
 
+# TODOlp: add remove children option
 # TODOlp: multiple exps per label .. what to do?! look through and average?!!
 # TODOlp : interactive heatmap with cursor (bookeh or lightning)
 # TODOlp : add weighting for connectogram & maybe interactive numbers/groups & force (another conn) graph

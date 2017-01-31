@@ -25,6 +25,8 @@ is a general-purpose, open-source pipeline for automated:
 
 @ Stanford University, 2016
 
+All Rights Reserved. 
+
 ____________________________
 
 
@@ -42,13 +44,20 @@ Steps to setup/run MIRACL on a Linux machine:
 
     - ANTS (compiled version included in package)
     - c3d (compiled version included in package)
-    - Fiji
-    - Python
+    - Fiji/ImageJ
+    - Python 2.7
 
 	For detailed instructions on how to install different dependencies please check wiki/dependencies.txt
 
+    _________________
+
     For the visualization of nifti files and labels we recommand "ITKSNAP":
     http://www.itksnap.org/pmwiki/pmwiki.php?n=Downloads.SNAP3
+
+    &
+
+    the nifti plugin for Fiji/ImageJ
+    https://imagej.nih.gov/ij/plugins/nifti.html
 
 
 You should be good to go!
