@@ -163,7 +163,7 @@ def main():
     saveniiparents(parentdata, vx, outnii)
 
     # orient
-    call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "int", "-o", "%s" % outnii])
+    call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
 
     # set origin
     # aratemplate = "%s/atlases/ara/template/average_template_50um.nii.gz" % miracl_home

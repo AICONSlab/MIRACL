@@ -4,6 +4,10 @@ atlases/
 
 # Depends #
 -----------
+data/
+
+# Depends #
+-----------
 depends/
 
 # Compiled source #
@@ -36,8 +40,8 @@ depends/
 
 # OS generated files #
 ######################
-*.DS_Store
-*.DS_Store?
+*/*.DS_Store
+*/*.DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
