@@ -77,7 +77,6 @@ def getalllbls(data):
 
     return lbls
 
-# TODOhp: change cras after ouput to match Allen template!!
 
 def getlblparent(clarinfo, lbls, pl, parentdata, lblsplit, maxannotlbl):
     for l in range(len(lbls)):
