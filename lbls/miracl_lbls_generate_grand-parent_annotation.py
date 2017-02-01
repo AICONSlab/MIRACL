@@ -149,7 +149,7 @@ def main():
 
     print("Computing parent labels at parent-level/generation %d" % pl)
 
-    for l in range(len(lbls) - 1):
+    for l in range(len(lbls)):
 
         lbl = lbls[l]
 
