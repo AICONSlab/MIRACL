@@ -77,34 +77,41 @@ def getalllbls(data):
 
     return lbls
 
-
-# TODOhp: check diff with ipynb (code or files (csv,nii))?!
 # TODOhp: change cras after ouput to match Allen template!!
 
-def getlblparent(clarinfo, lbl, pl, lblsplit, maxannotlbl):
+def getlblparent(clarinfo, lbls, pl, parentdata, lblsplit, maxannotlbl):
+    for l in range(len(lbls)):
 
-    # path id    
-    path = clarinfo.structure_id_path[clarinfo.id == lbl]
+        lbl = lbls[l]
 
-    # remove /
-    numpath = re.sub("[/]", ' ', str(path))
+        # path id
+        path = clarinfo.structure_id_path[clarinfo.id == lbl]
 
-    # get digits
-    digpath = [int(s) for s in numpath.split() if s.isdigit()]
-    digpath = digpath[1:]  # drop 1st index
+        # remove /
+        numpath = re.sub("[/]", ' ', str(path))
 
-    # get parent
-    if len(path) == 0:
-        parent = lbl
-    elif len(digpath) < pl:
-        parent = digpath[0]
-    else:
-        parent = digpath[-pl]
+        # get digits
+        digpath = [int(s) for s in numpath.split() if s.isdigit()]
+        digpath = digpath[1:]  # drop 1st index
 
-    # if np.max(lbls) > lblsplit:
-    parent = parent + lblsplit if lbl > maxannotlbl else parent
+        # get parent
+        if len(path) == 0:
+            parent = lbl
+        elif len(digpath) < pl:
+            parent = digpath[0]
+        else:
+            parent = digpath[-pl]
 
-    return parent
+        # if np.max(lbls) > lblsplit:
+        parent = parent + lblsplit if lbl > maxannotlbl else parent
+
+        sys.stdout.write("\r processing label: %d ... its grand-parent label: %d " % (lbl, parent))
+        sys.stdout.flush()
+
+        # replace val
+        parentdata[parentdata == lbl] = parent
+
+    return parentdata
 
 
 def saveniiparents(parentdata, vx, outnii):
@@ -138,7 +145,7 @@ def main():
 
     # load structure graph
     print("Reading ARA ontology structure_graph")
-    arastrctcsv = "%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv" % miracl_home
+    arastrctcsv = "%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv" % miracl_home
     aragraph = pd.read_csv(arastrctcsv)
 
     # get lbls
@@ -149,24 +156,26 @@ def main():
 
     print("Computing parent labels at parent-level/generation %d" % pl)
 
-    for l in range(len(lbls)):
-
-        lbl = lbls[l]
-
-        parent = getlblparent(aragraph, lbl, pl, lblsplit, maxannotlbl)
-
-        sys.stdout.write("\r processing label: %d ... its grand-parent label: %d " % (lbl, parent))
-        sys.stdout.flush()
-
-        # replace val
-        parentdata[parentdata == lbl] = parent
+    parentdata = getlblparent(aragraph, lbls, pl, parentdata, lblsplit, maxannotlbl)
 
     vx = img.header.get_zooms()[0]
     orgname = basename(nii).split('.')[0]
     outnii = '%s_parent-level_%s.nii.gz' % (orgname, pl)
     saveniiparents(parentdata, vx, outnii)
 
+    # orient
     call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "int", "-o", "%s" % outnii])
+
+    # set origin
+    # aratemplate = "%s/atlases/ara/template/average_template_50um.nii.gz" % miracl_home
+    # aranii = nib.load('%s' % aratemplate)
+    #
+    # sform = aranii.get_sform()
+    # qx = sform[0,3]
+    # qy = sform[1,3]
+    # qz = sform[2,3]
+    #
+    # call(["c3d", "%s" % outnii, "-origin", "%fx%fx%fmm" %(qx,qy,qz), "-o", "%s" % outnii])
 
     print ("\n Grand-parent labels generation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
