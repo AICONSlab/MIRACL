@@ -35,7 +35,7 @@ Steps to setup/run MIRACL on a Linux machine:
 
 1) Setup path
 
-	-> Run <miracl dir>/init/setup_miracl.sh 
+	-> Run <miracl dir>/setup_miracl.sh 
 
 	<miracl dir> is where you placed the pipeline
 

@@ -38,7 +38,7 @@ function usage()
 
     Usage: `basename $0` -f [Tiff folder]
 
-    Example: `basename $0` -f my_tifs -n "-d 5" -r "-o ARS -m combined -v 25"
+    Example: `basename $0` -f my_tifs -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 
         arguments (required):
 
