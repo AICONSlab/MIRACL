@@ -173,8 +173,8 @@ def main():
     # qx = sform[0,3]
     # qy = sform[1,3]
     # qz = sform[2,3]
-    #
-    # call(["c3d", "%s" % outnii, "-origin", "%fx%fx%fmm" %(qx,qy,qz), "-o", "%s" % outnii])
+
+    call(["c3d", "%s" % outnii, "-origin", "-11.4x0x0mm", "-o", "%s" % outnii])
 
     print ("\n Grand-parent labels generation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
