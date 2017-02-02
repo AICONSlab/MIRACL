@@ -529,16 +529,16 @@ function warpallenlbls()
 	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
 
 	# swap dim (x=>y / y=>x)
-#	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
+	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  1 0 0
 
 	# create tif lbls
-	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${ortlbls} -type ${orttypelbls} -o ${tiflbls}
+	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
 
 	# upsample to img dimensions
     df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
 	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-	c3d ${ortlbls} -resample ${df}00x${df}00x${df}00% -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
+	c3d ${swpbls} -resample ${df}00x${df}00x${df}00% -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
