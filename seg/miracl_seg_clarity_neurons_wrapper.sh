@@ -40,7 +40,18 @@ function usage()
 
 			t. Channel type: sparse (like Thy1 YFP) [default] or nuclear (like PI)
 
-		----------		
+		----------
+
+    Main outputs:
+
+        segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
+
+        segmentation/seg_bin.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
+
+
+        Results can be openned in Fiji for visualization
+
+        ----------
 
 	Dependencies:
 	

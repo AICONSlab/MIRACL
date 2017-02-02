@@ -14,7 +14,7 @@ CONNECTIVITY (CONNECT)
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
 
 
-- miracl_coonect_ROI_matrix_connectogram.py
+- miracl_connect_ROI_matrix_connectogram.py
 
     [ Get experiment connectivity matrix, projection & connectogram for ROI in Allen space ]
 

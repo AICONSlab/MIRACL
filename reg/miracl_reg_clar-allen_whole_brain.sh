@@ -56,7 +56,39 @@ function usage()
 
 				If l. is specified (m & v cannot be speficied)
 
-	----------		
+	----------
+
+	Main Ouputs
+
+
+		reg_final/clar_allen_ants.nii.gz: Clarity data in Allen reference space
+
+		reg_final/allen_lbls_clar_ants.nii.gz: Allen lables registered to downsampled Clarity
+
+        reg_final/allen_lbls_clar_ants.tif: Allen lables registered to original Clarity
+
+
+        To visualize clarity data in Allen space (from command line):
+
+        itksnap -g $allen10 -o reg_final/clar_allen_ants.nii.gz -s $lbls10 -l $snaplut
+
+        from GUI:
+
+        $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz (Main Image)
+
+        $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz (Segmentation)
+
+        $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt (Label Descriptions)
+
+
+
+        To visualize Allen labels in downsampled clarity data space (from command line):
+
+        itksnap -g
+
+
+
+    ----------
 
 	Dependencies:
 	
@@ -700,9 +732,9 @@ function main()
 # 2a) initialize registration
 
 	# Allen atlas template
-	allenref=$atlasdir/ara/template/average_template_25um.nii.gz
+    allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
 
-	initform=$regdir/init_tform.mat 
+	initform=${regdir}/init_tform.mat
 
 	# Init parms
 
@@ -712,10 +744,10 @@ function main()
 	localiter=100 # num of iteration for optimization at search point
 
 	# Out Allen
-	initallen=$regdir/init_allen.nii.gz
+	initallen=${regdir}/init_allen.nii.gz
 
 
-	initclarallenreg $clarlnk $allenref $initform $deg $radfrac $useprincax $localiter $initallen
+	initclarallenreg ${clarlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen}
 
 
 	#---------------------------
@@ -738,10 +770,10 @@ function main()
 	thrds=`nproc`
 
 	# Out Allen
-	antsallen=$regdir/allen_clar_antsWarped.nii.gz
+	antsallen=${regdir}/allen_clar_antsWarped.nii.gz
 
 
-	regclarallen ${clarroi} $initallen $trans $spldist $rad $prec $thrds $antsallen
+	regclarallen ${clarroi} ${initallen} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
 
 
 	#---------------------------
@@ -751,29 +783,30 @@ function main()
 
 
 	# Tforms
-	antswarp=$regdir/allen_clar_ants1Warp.nii.gz
-	antsaff=$regdir/allen_clar_ants0GenericAffine.mat
+	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
+	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
 
 	# If want to warp multi-res / hemi lbls
 	
-	if [[ -z $lbls ]]; then
+	if [[ -z ${lbls} ]]; then
 
-		if [[ -z $hemi ]]; then
+		if [[ -z ${hemi} ]]; then
 			
 			hemi=split
 
 		fi
 
-		if [[ -z $vox ]]; then
+		if [[ -z ${vox} ]]; then
 			
 			vox=10
 
 		fi
-        lbls=$atlasdir/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 
 	fi
 
-	base=`basename $lbls`
+	base=`basename ${lbls}`
 	lblsname=${base%%.*};
 
 	# Out lbls
