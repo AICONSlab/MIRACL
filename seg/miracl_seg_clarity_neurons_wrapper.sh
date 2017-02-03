@@ -24,6 +24,7 @@ function usage()
 
 	The folder should contain data from one channel 
 
+
 		----------
 
 	For command-line / scripting
@@ -40,6 +41,7 @@ function usage()
 
 			t. Channel type: sparse (like Thy1 YFP) [default] or nuclear (like PI)
 
+
 		----------
 
     Main outputs:
@@ -50,6 +52,7 @@ function usage()
 
 
         Results can be openned in Fiji for visualization
+
 
         ----------
 

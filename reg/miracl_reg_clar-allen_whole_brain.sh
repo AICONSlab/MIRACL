@@ -27,6 +27,7 @@ function usage()
 		file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
         [this should be accurate as it is used for allen label upsampling to clarity]
 
+
 	----------
 
 	For command-line / scripting
@@ -34,7 +35,7 @@ function usage()
 
 	Usage: `basename $0` -i <input_down-sampled_clarity_nifti>
 
-	Example: `basename $0` -i Reference_channel_05_down.nii.gz
+	Example: `basename $0` -i Reference_channel_05_down.nii.gz -o ARS -m combined -v 25
 
 		arguments (required):
 
@@ -56,6 +57,7 @@ function usage()
 
 				If l. is specified (m & v cannot be speficied)
 
+
 	----------
 
 	Main Ouputs
@@ -63,35 +65,39 @@ function usage()
 
 		reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
 
-		reg_final/: Allen lables registered to downsampled Clarity
+        reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
 
-        reg_final/: Allen lables registered to original Clarity
+		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen lables registered to downsampled Clarity
 
-
-        To visualize clarity data in Allen space (from command line):
-
-        itksnap -g $allen10 -o reg_final/clar_allen_ants.nii.gz -s $lbls10 -l $snaplut
-
-        from GUI:
-
-        $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz (Main Image)
-
-        $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz (Segmentation)
-
-        $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt (Label Descriptions)
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen lables registered to original Clarity
 
 
+        - To visualize clarity data in Allen space - assuming chosen v/vox 10um
+            from command line:
 
-        To visualize Allen labels in downsampled clarity data space (from command line):
+                itksnap -g $allen10 -o reg_final/clar_allen_space.nii.gz -s $lbls10 -l $snaplut
 
-        itksnap -g
+            from GUI:
 
+                $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz ->  (Main Image)
+
+                $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
+
+                $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
+
+
+        - To visualize Allen labels in downsampled clarity data space (from command line):
+
+            itksnap -g clar_downsample_res(vox)um.nii.gz -s reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz
+
+
+        - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
 
 
     ----------
 
 	Dependencies:
-	
+
 		- ANTs
 		https://github.com/stnava/ANTs			
 		
