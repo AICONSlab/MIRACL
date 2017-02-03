@@ -608,7 +608,6 @@ function warpallenlbls()
 
     ox=$(($y*$df)) ;
     oy=$(($x*$df)) ;
-    oz=$(($z*$df))
 
 #	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
 #	ResampleImage 3 ${swplbls} ${reslbls} ${ox}x${oy}x${oz} 1 1
@@ -616,7 +615,7 @@ function warpallenlbls()
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
-	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${oz}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
+	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
 
 
 }
