@@ -61,11 +61,11 @@ function usage()
 	Main Ouputs
 
 
-		reg_final/clar_allen_ants.nii.gz: Clarity data in Allen reference space
+		reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
 
-		reg_final/allen_lbls_clar_ants.nii.gz: Allen lables registered to downsampled Clarity
+		reg_final/: Allen lables registered to downsampled Clarity
 
-        reg_final/allen_lbls_clar_ants.tif: Allen lables registered to original Clarity
+        reg_final/: Allen lables registered to original Clarity
 
 
         To visualize clarity data in Allen space (from command line):
@@ -596,16 +596,16 @@ function warpallenlbls()
     yz=${alldim#*x} ; y=${yz%x*} ;
     z=${alldim##*x} ;
 
-    swpdim=`PrintHeader ${swplbls} 2`
-    sx=${swpdim%%x*} ;
-    syz=${swpdim#*x} ; sy=${syz%x*} ;
+#    swpdim=`PrintHeader ${swplbls} 2`
+#    sx=${swpdim%%x*} ;
+#    syz=${swpdim#*x} ; sy=${syz%x*} ;
 
-    ox=$(($y*$df)) ; dx=$(($ox/$sx)) ;
-    oy=$(($x*$df)) ; dy=$(($oy/$sy)) ;
+    ox=$(($y*$df)) ; # dx=$(($ox/$sx)) ;
+    oy=$(($x*$df)) ; # dy=$(($oy/$sy)) ;
     oz=$(($z*$df))
 
 	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-	ResampleImage 3 ${swplbls} ${reslbls} ${dx}x${dy}x${oz} 1 1
+	ResampleImage 3 ${swplbls} ${reslbls} ${ox}x${oy}x${oz} 1 1
 
 #	c3d ${swplbls} -resample ${df}00x${df}00x${df}00% -interpolation ${ortintlbls} -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
@@ -873,7 +873,7 @@ function main()
 
 	# out warp hres clar
 #	regorgclar=${regdirfinal}/hresclar_allen_ants.nii.gz
-    regorgclar=${regdirfinal}/clar_allen_ants.nii.gz
+    regorgclar=${regdirfinal}/clar_allen_space.nii.gz
 
 
     warpinclarallen ${inclar} ALS Cubic short ${ortinclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
