@@ -553,9 +553,30 @@ function warpallenlbls()
     local reslbls=${14}
     local restif=${15}
 
+    # Blank
+#    local blank=${16}
+#    local blankres=${17}
+
+    # Vox
+    local vox=${16}
+
+    # Res clar
+    local smclarres=${17}
+
+#     # Create empty image as ref
+#    ifdsntexistrun ${blank} "Creating reference image" CreateImage 3 ${swplbls} ${blank} 0
+#
+#    ifdsntexistrun ${blankres} "Usampling reference image" ResampleImage 3 ${blank} ${blankres} ${vres}x${vres}x${vres} 0 1
+
+    # Upsample ref
+    vres=`python -c "print $vox/1000.0"`
+
+    # res clar in
+    ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
+
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${smclar} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+	 antsApplyTransforms -r ${smclarres} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
 
 	# orient to org 
 	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
@@ -569,20 +590,29 @@ function warpallenlbls()
 	# upsample to img dimensions
     df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
+     # get img dim
+    alldim=`PrintHeader ${inclar} 2`
+    x=${alldim%%x*} ;
+    yz=${alldim#*x} ; y=${yz%x*} ;
+    z=${alldim##*x} ;
+
+    swpdim=`PrintHeader ${swplbls} 2`
+    sx=${swpdim%%x*} ;
+    syz=${swpdim#*x} ; sy=${syz%x*} ;
+
+    ox=$(($y*$df)) ; dx=$(($ox/$sx)) ;
+    oy=$(($x*$df)) ; dy=$(($oy/$sy)) ;
+    oz=$(($z*$df))
+
 	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-	c3d ${swplbls} -resample ${df}00x${df}00x${df}00% -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
+	ResampleImage 3 ${swplbls} ${reslbls} ${dx}x${dy}x${oz} 1 1
+
+#	c3d ${swplbls} -resample ${df}00x${df}00x${df}00% -interpolation ${ortintlbls} -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
 	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
 
-    # Create empty image as ref instead of upsamling is slow!!!
-
-        # # get img dim
-    #	alldim=`PrintHeader ${inclar} 2`
-    #    x=${alldim%%x*};
-    #	yz=${alldim#*x}; y=${yz%x*} ;
-    #	z=${alldim##*x};
 
     #    xu=$((${x}*${downfactor}));
     #    yu=$((${y}*${downfactor}));
@@ -810,17 +840,19 @@ function main()
 	lblsname=${base%%.*};
 
 	# Out lbls
-	wrplbls=${regdir}/${lblsname}_ants.nii.gz
+	wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
 	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
 	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
 	tiflbls=${regdir}/${lblsname}_ants.tif
-	reslbls=${regdirfinal}/allen_lbls_clar_ants.nii.gz
-	restif=${regdirfinal}/allen_lbls_clar_ants.tif
+	reslbls=${regdirfinal}/${lblsname}_clar.nii.gz
+	restif=${regdirfinal}/${lblsname}_clar.tif
+
+	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
 
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif}
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
 
 
 	#---------------------------
