@@ -267,9 +267,9 @@ elif PTVar.get() == 1:
 # if SRVar.get() == 1:
 # elif IRVar.get() == 1:
 if RRVar.get() == 1:
-    ort[1] = 'R'
-elif LRVar.get() == 1:
     ort[1] = 'L'
+elif LRVar.get() == 1:
+    ort[1] = 'R'
 # elif ARVar.get() == 1:
 # elif PRVar.get() == 1:
 
@@ -280,8 +280,8 @@ if SLVar.get() == 1:
 elif ILVar.get() == 1:
     ort[2] = 'S'
 
-# our data (coronal) norm ALS
-# if A-P flipped (PLS) & if R-L -> ARS
+# our data (coronal) norm ARS
+# if A-P flipped (PRS) & if R-L -> ALS
 # desired ort ASR 
 
 ortstr = ''.join(ort)

@@ -7,6 +7,7 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
+
 # help/usage function
 function usage()
 {

@@ -315,7 +315,7 @@ function resampleclar()
 	local interp=$4
 	local resclar=$5
 	
-	ifdsntexistrun $resclar "Resmapling CLARITY input" ResampleImage 3 $inclar $resclar ${vox}x${vox}x${vox} $ifspacing $interp
+	ifdsntexistrun $resclar "Resmapling CLARITY input" ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
 	c3d $resclar -type short -o $resclar
 
@@ -330,7 +330,7 @@ function biasfieldcorr()
 	local resclar=$1
 	local biasclar=$2	
 
-	ifdsntexistrun $biasclar "Bias-correcting CLARITY image with N4" N4BiasFieldCorrection -d 3 -i $resclar -s 2 -o $biasclar
+	ifdsntexistrun ${biasclar} "Bias-correcting CLARITY image with N4" N4BiasFieldCorrection -d 3 -i ${resclar} -s 2 -o ${biasclar}
 
 }
 
@@ -542,26 +542,26 @@ function warpallenlbls()
 	local orttaglbls=$7
 	local ortintlbls=$8
 	local orttypelbls=$9
-	local ortlbls=${10}
+	local ortlbls=$10
 
 	# swap lbls
-	local swplbls=${11}
-	local tiflbls=${12}
+	local swplbls=$11
+	local tiflbls=$12
 	
 	# Up lbls
-    local inclar=${13}
-    local reslbls=${14}
-    local restif=${15}
+    local inclar=$13
+    local reslbls=$14
+    local restif=$15
 
     # Blank
-#    local blank=${16}
+#    local blank=$16
 #    local blankres=${17}
 
     # Vox
-    local vox=${16}
+    local vox=$16
 
     # Res clar
-    local smclarres=${17}
+    local smclarres=$17
 
 #     # Create empty image as ref
 #    ifdsntexistrun ${blank} "Creating reference image" CreateImage 3 ${swplbls} ${blank} 0
@@ -582,7 +582,7 @@ function warpallenlbls()
 	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
 
 	# swap dim (x=>y / y=>x)
-	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  1 0 0
+	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
 
 	# create tif lbls
 	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
@@ -600,30 +600,18 @@ function warpallenlbls()
 #    sx=${swpdim%%x*} ;
 #    syz=${swpdim#*x} ; sy=${syz%x*} ;
 
-    ox=$(($y*$df)) ; # dx=$(($ox/$sx)) ;
-    oy=$(($x*$df)) ; # dy=$(($oy/$sy)) ;
+    ox=$(($y*$df)) ;
+    oy=$(($x*$df)) ;
     oz=$(($z*$df))
 
-	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-	ResampleImage 3 ${swplbls} ${reslbls} ${ox}x${oy}x${oz} 1 1
-
+#	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
+#	ResampleImage 3 ${swplbls} ${reslbls} ${ox}x${oy}x${oz} 1 1
 #	c3d ${swplbls} -resample ${df}00x${df}00x${df}00% -interpolation ${ortintlbls} -type ${orttypelbls} -o ${reslbls}
 	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
 
     # create hres tif lbls
-	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
+	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${oz}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
 
-
-    #    xu=$((${x}*${downfactor}));
-    #    yu=$((${y}*${downfactor}));
-
-        # get dims from hres tif
-    #    tif=
-    #    dims=`c3d ${tif} -info-full | grep Dimensions`
-    #    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
-    #    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
-
-    #	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
 
 }
 
@@ -647,7 +635,7 @@ function warpinclarallen()
 	antsaff=$8
 	antsinvwarp=$9
 
-	regorgclar=${10}
+	regorgclar=$10
 
 	# Orient channel to std
 	orientimg ${inclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
@@ -679,7 +667,7 @@ function warphresclarallen()
 	antsaff=$8
 	antsinvwarp=$9
 	
-	regorgclar=${10}
+	regorgclar=$10
 
 	# Orient channel to std
 	orientimg ${hresclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
