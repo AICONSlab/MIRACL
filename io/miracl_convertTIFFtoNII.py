@@ -49,7 +49,7 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
         -ch [ output chan name (default: eyfp) ]
         -vx [ original resolution in x-y plane in um (default: 5) ]
         -vz [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
-        -c  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
+        -c  [ nii center (default: 0,0,0 ) corresponding to Allen atlas nii template ]
 
         example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
@@ -148,7 +148,7 @@ else:
         vz /= float(1000)
 
     if args.center is None:
-        cent = [11.4, 0, 0]
+        cent = [0, 0, 0]
     else:
         cent = args.center
 
@@ -261,5 +261,4 @@ if __name__ == "__main__":
 
     # TODOlp: another script for very large files [COLM] with one or multiple stacks
     # TODOlp: add check if dir exists (in name correct)
-    # TODOlp: check center output
     # TODOlp: GUI with options to enter

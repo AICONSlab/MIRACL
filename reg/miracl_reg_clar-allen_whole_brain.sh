@@ -585,7 +585,7 @@ function warpallenlbls()
 	 antsApplyTransforms -r ${smclarres} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
 
     # flip axis for split labels
-    PermuteFlipImageOrientationAxes 3 ${wrplbls} ${wrplbls}  0 1 2  1 0 0
+    PermuteFlipImageOrientationAxes 3 ${wrplbls} ${wrplbls}  0 1 2  0 1 0
 
 	# orient to org 
 	ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
