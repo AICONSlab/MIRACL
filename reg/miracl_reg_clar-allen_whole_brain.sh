@@ -79,7 +79,7 @@ function usage()
 
             from GUI:
 
-                $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz ->  (Main Image)
+                $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Main Image)
 
                 $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
 
@@ -266,10 +266,10 @@ regdirfinal=$PWD/reg_final
 regdir=$PWD/clar_allen_reg
 
 
-if [[ ! -d $regdir ]]; then
+if [[ ! -d ${regdir} ]]; then
 
 	printf "\n Creating registration folder\n"
-	mkdir -p $regdirfinal $regdir
+	mkdir -p ${regdirfinal} ${regdir}
 
 fi
 
@@ -295,7 +295,7 @@ function ifdsntexistrun()
 	local outstr="$2"; 
 	local fun="${@:3}";  
 
-	if [[ ! -f $outfile ]]; then 
+	if [[ ! -f ${outfile} ]]; then
 
 		printf "\n $outstr \n"; 
 		echo "$fun"; 
@@ -321,9 +321,9 @@ function resampleclar()
 	local interp=$4
 	local resclar=$5
 	
-	ifdsntexistrun $resclar "Resmapling CLARITY input" ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
+	ifdsntexistrun ${resclar} "Resmapling CLARITY input" ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
-	c3d $resclar -type short -o $resclar
+	c3d ${resclar} -type short -o ${resclar}
 
 }
 
@@ -355,7 +355,7 @@ function thresh()
 	local t2=$5
 	local thrclar=$6	
 
-	ifdsntexistrun $thrclar "Thresholding CLARITY image" c3d $biasclar -threshold ${p1}% ${p2}% $t1 $t2 -o $thrclar	
+	ifdsntexistrun ${thrclar} "Thresholding CLARITY image" c3d ${biasclar} -threshold ${p1}% ${p2}% ${t1} ${t2} -o ${thrclar}
 
 }
 
@@ -369,7 +369,7 @@ function erode()
 	local erorad=$2
 	local eromask=$3	
 
-	ifdsntexistrun $eromask "Eroding CLARITY mask" ImageMath 3 $eromask ME $thrclar $erorad
+	ifdsntexistrun ${eromask} "Eroding CLARITY mask" ImageMath 3 ${eromask} ME ${thrclar} ${erorad}
 
 }
 
@@ -383,7 +383,7 @@ function dilate()
 	local dilrad=$2
 	local dilmask=$3
 
-	ifdsntexistrun $dilmask "Dilating CLARITY mask" ImageMath 3 $dilmask MD $eromask $dilrad
+	ifdsntexistrun ${dilmask} "Dilating CLARITY mask" ImageMath 3 ${dilmask} MD ${eromask} ${dilrad}
 
 }
 
@@ -397,9 +397,9 @@ function maskimage()
 	local dilmask=$2
 	local betclar=$3
 		
-	ifdsntexistrun $betclar "Removing CLARITY image outline artifacts" MultiplyImages 3 $biasclar $dilmask $betclar
+	ifdsntexistrun ${betclar} "Removing CLARITY image outline artifacts" MultiplyImages 3 ${biasclar} ${dilmask} ${betclar}
 
-	c3d $betclar -type short -o $betclar
+	c3d ${betclar} -type short -o ${betclar}
 
 }
 
@@ -415,8 +415,8 @@ function orientimg()
 	local orttype=$4
 	local ortclar=$5
 
-	ifdsntexistrun $ortclar "Orienting CLARITY to standard orientation" \
-	c3d $betclar -orient $orttag -interpolation $ortint -type $orttype -o $ortclar
+	ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+	c3d ${betclar} -orient ${orttag} -interpolation ${ortint} -type ${orttype} -o ${ortclar}
 
 }
 
@@ -432,7 +432,7 @@ function smoothimg()
 
 	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
 
-	c3d ${smclar} -type short -o $smclar
+	c3d ${smclar} -type short -o ${smclar}
 
 }
 
@@ -446,7 +446,7 @@ function croptosmall()
 	local trim=$2
 	local clarroi=$3
 
-	ifdsntexistrun $clarroi "Cropping CLARITY image to smallest ROI" c3d $smclar -trim ${trim}vox -type short -o $clarroi
+	ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" c3d ${smclar} -trim ${trim}vox -type short -o ${clarroi}
 
 }
 
@@ -482,7 +482,7 @@ function initclarallenreg()
 
 
 	# Warp Allen
-	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r $clarroi -t ${initform} -o ${initallen}
+	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
 
 
 }
@@ -516,8 +516,8 @@ function regclarallen()
 
 	# Perform ANTs registration between CLARITY and Allen atlas
 
-	ifdsntexistrun $antsallen "Registering CLARITY data to allen atlas ... this will take a while" \
-	antsRegistrationMIRACL.sh -d 3 -f $clarroi -m $initallen -o $regdir/allen_clar_ants -t $trans -p $prec -n $thrds -s $spldist -r $rad | tee $regdir/ants_reg.log
+	ifdsntexistrun ${antsallen} "Registering CLARITY data to allen atlas ... this will take a while" \
+	antsRegistrationMIRACL.sh -d 3 -f ${clarroi} -m ${initallen} -o ${regdir}/allen_clar_ants -t ${trans} -p ${prec} -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
 
 
 }
@@ -548,26 +548,26 @@ function warpallenlbls()
 	local orttaglbls=$7
 	local ortintlbls=$8
 	local orttypelbls=$9
-	local ortlbls=$10
+	local ortlbls=${10}
 
 	# swap lbls
-	local swplbls=$11
-	local tiflbls=$12
+	local swplbls=${11}
+	local tiflbls=${12}
 	
 	# Up lbls
-    local inclar=$13
-    local reslbls=$14
-    local restif=$15
+    local inclar=${13}
+    local reslbls=${14}
+    local restif=${15}
 
     # Blank
 #    local blank=$16
 #    local blankres=${17}
 
     # Vox
-    local vox=$16
+    local vox=${16}
 
     # Res clar
-    local smclarres=$17
+    local smclarres=${17}
 
 #     # Create empty image as ref
 #    ifdsntexistrun ${blank} "Creating reference image" CreateImage 3 ${swplbls} ${blank} 0
@@ -575,7 +575,7 @@ function warpallenlbls()
 #    ifdsntexistrun ${blankres} "Usampling reference image" ResampleImage 3 ${blank} ${blankres} ${vres}x${vres}x${vres} 0 1
 
     # Upsample ref
-    vres=`python -c "print $vox/1000.0"`
+    vres=`python -c "print ${vox}/1000.0"`
 
     # res clar in
     ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
@@ -584,8 +584,11 @@ function warpallenlbls()
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
 	 antsApplyTransforms -r ${smclarres} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
 
+    # flip axis for split labels
+    PermuteFlipImageOrientationAxes 3 ${wrplbls} ${wrplbls}  0 1 2  1 0 0
+
 	# orient to org 
-	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+	ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
 
 	# swap dim (x=>y / y=>x)
 	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
@@ -641,7 +644,7 @@ function warpinclarallen()
 	antsaff=$8
 	antsinvwarp=$9
 
-	regorgclar=$10
+	regorgclar=${10}
 
 	# Orient channel to std
 	orientimg ${inclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
@@ -673,13 +676,13 @@ function warphresclarallen()
 	antsaff=$8
 	antsinvwarp=$9
 	
-	regorgclar=$10
+	regorgclar=${10}
 
 	# Orient channel to std
 	orientimg ${hresclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
 
 	# Apply warps
-	ifdsntexistrun $regorgclar "Applying ants deformation to high-res CLARITY" \
+	ifdsntexistrun ${regorgclar} "Applying ants deformation to high-res CLARITY" \
 	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
 
 }
@@ -870,7 +873,7 @@ function main()
     regorgclar=${regdirfinal}/clar_allen_space.nii.gz
 
 
-    warpinclarallen ${inclar} ALS Cubic short ${ortinclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
+    warpinclarallen ${inclar} ALS Cubic short ${ortinclar} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
 #	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
 
 }

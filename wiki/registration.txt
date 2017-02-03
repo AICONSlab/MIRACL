@@ -70,7 +70,7 @@ miracl_reg_clar-allen_whole_brain.sh
 
             from GUI:
 
-                $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz ->  (Main Image)
+                $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Main Image)
 
                 $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
 
