@@ -92,15 +92,15 @@ function usage()
         - To visualize clarity data in Allen space - assuming chosen v/vox 10um
             from command line:
 
-                itksnap -g $allen10 -o reg_final/clar_allen_space.nii.gz -s $lbls10 -l $snaplut
+                itksnap -g \$allen10 -o reg_final/clar_allen_space.nii.gz -s \$lbls10 -l \$snaplut
 
             from GUI:
 
-                $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz ->  (Main Image)
+                \$allen10 = \$MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz ->  (Main Image)
 
-                $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
+                \$lbls10 = \$MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
 
-                $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
+                \$snaplut = \$MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
 
 
         - To visualize Allen labels in downsampled clarity data space (from command line):

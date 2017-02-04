@@ -33,11 +33,23 @@ ____________________________
 Steps to setup/run MIRACL on a Linux machine:
 
 
-1) Setup path
+1) Setup user path
 
 	-> Run <miracl dir>/user_setup_miracl.sh 
 
 	<miracl dir> is where you placed the pipeline
+
+    
+    This script will setup your environment with the following aliases:
+    
+    $MIRACL_HOME = localtion of pipeline and its dependencies
+    
+    Allen reference atlas files (with resolutions 10, 25 & 50 um):
+    
+    $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Template/Atlas Image)
+    $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Annoation/Segmentation)
+    
+    $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
 
 
 2) Install / Check dependencies
