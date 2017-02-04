@@ -49,7 +49,7 @@ Steps to setup/run MIRACL on a Linux machine:
     $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Template/Atlas Image)
     $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Annoation/Segmentation)
     
-    $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
+    $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (ITKsnap Label Descriptions)
 
 
 2) Install / Check dependencies
@@ -98,6 +98,12 @@ The workflow (flow) module combines multiple functions for ease of use to prefor
     miracl_workflow_registration_clarity-allen_wb.sh -> performs registration of whole-brain clarity data to ARA
      
     miracl_workflow_segmentation_clarity.sh -> performs segmentation of full resolution clarity data 
+
+
+Atlases contains templates, annotations, histology and ontology graph info (csv/jason) of the Allen reference atlas (ARA)
+
+
+Data contains test data with example inputs and ouputs for the registration and segmentation moduels
 
 
 for a detailed description & input parameters please check the respective wiki of each module 
