@@ -6,9 +6,9 @@
 printf "\n Setting up MIRACL PATH  \n"
 printf "\n Appending MIRACL HOME to ~/.bashrc \n" 
 
-initdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+miraclpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-miraclpath="$(dirname "$initdir")"
+#miraclpath="$(dirname "$initdir")"
 
 echo "#--- MIRACL HOME ----" >> ~/.bashrc
 
