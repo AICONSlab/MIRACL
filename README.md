@@ -100,7 +100,7 @@ The workflow (flow) module combines multiple functions for ease of use to prefor
     miracl_workflow_segmentation_clarity.sh -> performs segmentation of full resolution clarity data 
 
 
-Atlases contains templates, annotations, histology and ontology graph info (csv/jason) of the Allen reference atlas (ARA)
+Atlases contains templates, annotations, histology, ontology graph info & LUT/label description of the Allen reference atlas (ARA)
 
 
 Data contains test data with example inputs and ouputs for the registration and segmentation moduels
