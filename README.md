@@ -44,7 +44,7 @@ Steps to setup/run MIRACL on a Linux machine:
     
     $MIRACL_HOME = localtion of pipeline and its dependencies
     
-    Allen reference atlas files (with resolutions 10, 25 & 50 um):
+    Allen reference atlas (ara) files (with resolutions 10, 25 & 50 um):
     
     $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Template/Atlas Image)
     $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Annoation/Segmentation)
@@ -70,6 +70,37 @@ Steps to setup/run MIRACL on a Linux machine:
 
     the nifti plugin for Fiji/ImageJ
     https://imagej.nih.gov/ij/plugins/nifti.html
+
+
+____________________________
+
+
+The pipeline is combined of different "Modules" depending on their functionality
+
+Functions for each module are grouped together:
+  
+   connect -> Connectivity
+
+   io -> Input/Ouput (conversion/orientation)
+    
+   reg -> Registration
+    
+   seg -> Segmentation
+    
+   lbls -> Labels
+    
+   stats -> Statistics
+
+
+The workflow (flow) module combines multiple functions for ease of use to preform a desired task
+     
+    for example: 
+    miracl_workflow_registration_clarity-allen_wb.sh -> performs registration of whole-brain clarity data to ARA
+     
+    miracl_workflow_segmentation_clarity.sh -> performs segmentation of full resolution clarity data 
+
+
+for a detailed description & input parameters please check the respective wiki of each module 
 
 
 You should be good to go!
