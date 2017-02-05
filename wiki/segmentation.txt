@@ -65,15 +65,16 @@ miracl_seg_clarity_neurons_wrapper.sh
 2) Voxelize segmentation results
 _________________________
 
-    Usage: mouse_par_voxelize_seg.py -s [binary segmentation tif]
 
-	Voxelizes segmentation results into density maps with Allen atlas resolution
+    Usage: mouse_seg_voxelize_parallel.py -s [segmentation tif]
 
-	example: mouse_single_corr_lbls.py -s seg_bin.tif
+        Voxelizes segmentation results into density maps with Allen atlas resolution
 
-			arguments (required):
+        example: mouse_seg_voxelize_parallel.py -s seg.tif
 
-			s. Binary segmentation tif file
+            arguments (required):
+
+            s. Segmentation tif file
 
 
 	Dependencies:
@@ -94,15 +95,17 @@ _________________________
 
     Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels]
 
-    Computes features of segmented image and summarizes them per label
+        Computes features of segmented image and summarizes them per label
 
-    example: mouse_feat_extract.py -s seg.tif -l allen_annotations.tif
+        example: mouse_feat_extract.py -s segmentation/voxelized_seg.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
 
-        arguments (required):
+            arguments (required):
 
-        s. Segmentation (or voxelized segmentation) tif file
+            s. Voxelized segmentation tif file
 
-        l. Allen labels used to summarize features
+            l. Allen labels (registered to clarity) used to summarize features
+
+                    reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
 
 
     Dependencies:

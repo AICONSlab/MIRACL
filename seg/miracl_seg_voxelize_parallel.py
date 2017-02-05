@@ -26,22 +26,26 @@ from scipy import ndimage
 # help fn
 
 def helpmsg(name=None):
-    return '''Usage: mouse_par_voxelize_seg.py -s [binary segmentation tif]
+    return '''Usage: mouse_seg_voxelize_parallel.py -s [segmentation tif]
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: mouse_single_corr_lbls.py -s seg_bin.tif
+	example: mouse_seg_voxelize_parallel.py -s seg.tif
 
         arguments (required):
 
-        s. Binary segmentation tif file
+        s. Segmentation tif file
 
+    -----
+
+    Main Outputs
+
+        voxelized_seg.(tif/nii)
+        voxelized_seg_bin.(tif/nii)
 
 	Dependencies:
 
 	    Python 2.7
-	    used modules:
-	        argparse, numpy, scipy, logging, cv2, nibabel, tifffile, joblib, multiprocessing, os, sys, datetime
 
 	'''
 
@@ -134,7 +138,9 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
     # downsample ratio
     dr = 1.0 / down
 
-    print "\n Creating voxelized maps from Clarity segmentations"
+    filename = os.path.basename(seg)
+
+    print "\n Creating voxelized maps from Clarity segmentations for %s" % filename
 
     # read data
     segtif = tiff.imread("%s" % seg)
@@ -172,12 +178,10 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 # ---------
 # save to nifti
 
-def savenvoxnii(marray):
+def savenvoxnii(marray, outvoxnii):
     '''
 	Saves voxelized tif output to nifti (nii.gz)
 	'''
-
-    outvoxnii = 'voxelized_seg_bin.nii.gz'
 
     if not os.path.exists(outvoxnii):
         mat = np.eye(4)
@@ -197,20 +201,35 @@ def main():
 
     startTime = datetime.now()
 
-    outvox = 'voxelized_seg_bin.tif'
+    outvox = 'voxelized_seg.tif'
+    outvoxnii = 'voxelized_seg.nii.gz'
 
     if not os.path.exists(outvox):
 
         marray = parcomputevox(seg, radius, ncpus, down, outvox)
 
-        savenvoxnii(marray)
+        savenvoxnii(marray, outvoxnii)
+
+    else:
+
+        print ('\n Voxelized map already created')
+
+    segbin = seg.replace("seg", "seg_bin")
+
+    outvoxbin = 'voxelized_seg_bin.tif'
+    outvoxniibin = 'voxelized_seg_bin.nii.gz'
+
+    if not os.path.exists(outvox):
+
+        marraybin = parcomputevox(segbin, radius, ncpus, down, outvoxbin)
+
+        savenvoxnii(marraybin, outvoxniibin)
 
         print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
     else:
 
         print ('\n Voxelized map already created')
-
 
 if __name__ == "__main__":
     main()

@@ -24,7 +24,7 @@ Computes paired_ttest test between both hemispheres for all labels across mice
 
 Looks for feature exraction csv files within input directory
 
-Ouputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
+Outputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
 
 example: miracl_stats_paired_ttest_ipsi_contra.py -d feat_extract_csv
 

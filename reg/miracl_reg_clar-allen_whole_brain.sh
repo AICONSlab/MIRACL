@@ -60,7 +60,7 @@ function usage()
 
 	----------
 
-	Main Ouputs
+	Main Outputs
 
 
 		reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space

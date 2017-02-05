@@ -37,13 +37,16 @@ def helpmsg(name=None):
 
                 reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
 
+    ------
+
+    Main Outputs
+
+
 
 
 	Dependencies:
 
 	    Python 2.7
-	    used modules:
-	        argparse, numpy, scipy, skimage, pandas, tifffile, joblib, multiprocessing, os, sys, datetime
 
     '''
 # ---------
