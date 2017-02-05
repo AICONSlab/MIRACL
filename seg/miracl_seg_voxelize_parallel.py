@@ -181,7 +181,7 @@ def savenvoxnii(marray):
 
     if not os.path.exists(outvoxnii):
         mat = np.eye(4)
-        mat[0, 0] = 0.025
+        mat[0, 0] = 0.05
         mat[1, 1] = 0.025
         mat[2, 2] = 0.025
 

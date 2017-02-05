@@ -94,16 +94,19 @@ Functions for each module are grouped together:
 
 The workflow (flow) module combines multiple functions for ease of use to preform a desired task
      
-    for example: 
-    miracl_workflow_registration_clarity-allen_wb.sh -> performs registration of whole-brain clarity data to ARA
-     
-    miracl_workflow_segmentation_clarity.sh -> performs segmentation of full resolution clarity data 
+    for example, for a standard reg/seg analysis a user would run: 
+    
+    1) miracl_workflow_registration_clarity-allen_wb.sh -> to perform registration of whole-brain clarity data to ARA
+    
+     then
+    
+    2) miracl_workflow_segmentation_clarity.sh -> to perform segmentation & feature extraction of full resolution clarity data 
 
 
-Atlases contains templates, annotations, histology, ontology graph info & LUT/label description of the Allen reference atlas (ARA)
+The "Atlases" folder contains templates, annotations, histology, ontology graph info & LUT/label description of the Allen reference atlas (ARA)
 
 
-Data contains test data with example inputs and ouputs for the registration and segmentation moduels
+The "Data" folder contains test data with example inputs and ouputs for the registration and segmentation moduels
 
 
 for a detailed description & input parameters please check the respective wiki of each module 

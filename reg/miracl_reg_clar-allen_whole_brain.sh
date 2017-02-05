@@ -69,7 +69,9 @@ function usage()
 
 		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen lables registered to downsampled Clarity
 
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen lables registered to original Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen lables registered to oriented Clarity
+
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif : Allen lables registered to original (full-resolution) Clarity
 
 
         - To visualize clarity data in Allen space - assuming chosen v/vox 10um
@@ -836,7 +838,7 @@ function main()
 	wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
 	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
 	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
-	tiflbls=${regdir}/${lblsname}_ants.tif
+	tiflbls=${regdirfinal}/${lblsname}_clar_vox.tif
 	reslbls=${regdirfinal}/${lblsname}_clar.nii.gz
 	restif=${regdirfinal}/${lblsname}_clar.tif
 

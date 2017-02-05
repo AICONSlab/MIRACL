@@ -4,6 +4,7 @@
 # coding: utf-8
 
 import argparse
+import logging
 import multiprocessing
 import os
 import sys
@@ -26,14 +27,15 @@ def helpmsg(name=None):
 
     Computes features of segmented image and summarizes them per label
 
-    example: mouse_feat_extract.py -s seg.tif -l allen_annotations.tif
+    example: mouse_feat_extract.py -s segmentation/voxelized_seg.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
 
         arguments (required):
 
-        s. Segmentation (or preferably voxelized segmentation) tif file
+        s. Voxelized segmentation tif file
 
         l. Allen labels (registered to clarity) used to summarize features
 
+                reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
 
 
 
@@ -54,6 +56,44 @@ parser.add_argument('-l','--lbl', type=str, help="label annotations", required=T
 args = parser.parse_args()
 inseg = args.seg
 inlbls = args.lbl
+
+
+# ---------
+# Logging fn
+
+def scriptlog(logname):
+    class StreamToLogger(object):
+        """
+	   Fake file-like stream object that redirects writes to a logger instance.
+	   """
+
+        def __init__(self, logger, log_level=logging.INFO):
+            self.logger = logger
+            self.log_level = log_level
+            self.linebuf = ''
+
+        def write(self, buf):
+            for line in buf.rstrip().splitlines():
+                self.logger.log(self.log_level, line.rstrip())
+
+        def flush(self):
+            pass
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="%s" % logname,
+        format='%(asctime)s:%(message)s',
+        filemode='w')
+
+    stdout_logger = logging.getLogger('STDOUT')
+    handler = logging.StreamHandler()
+    stdout_logger.addHandler(handler)
+    sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
+
+    stderr_logger = logging.getLogger('STDERR')
+    stderr_logger.addHandler(handler)
+    sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
+
 
 # ---------
 
@@ -172,6 +212,7 @@ def getlblvals(lbls):
 # main fn
 
 def main():
+    scriptlog('feat_extract.log')
 
     startTime = datetime.now()
 

@@ -5,6 +5,7 @@
 
 import argparse
 import glob
+import logging
 import os
 import re
 import sys
@@ -154,6 +155,43 @@ else:
 
 
 # ---------
+# Logging fn
+
+def scriptlog(logname):
+    class StreamToLogger(object):
+        """
+       Fake file-like stream object that redirects writes to a logger instance.
+       """
+
+        def __init__(self, logger, log_level=logging.INFO):
+            self.logger = logger
+            self.log_level = log_level
+            self.linebuf = ''
+
+        def write(self, buf):
+            for line in buf.rstrip().splitlines():
+                self.logger.log(self.log_level, line.rstrip())
+
+        def flush(self):
+            pass
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        filename="%s" % logname,
+        format='%(asctime)s:%(message)s',
+        filemode='w')
+
+    stdout_logger = logging.getLogger('STDOUT')
+    handler = logging.StreamHandler()
+    stdout_logger.addHandler(handler)
+    sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
+
+    stderr_logger = logging.getLogger('STDERR')
+    stderr_logger.addHandler(handler)
+    sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
+
+
+# ---------
 
 # sort fn
 
@@ -248,6 +286,8 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
 # ---------
 
 def main():
+    scriptlog('tif2nii.log')
+
     """
     :rtype: nifti file
     """
