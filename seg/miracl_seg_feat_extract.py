@@ -41,8 +41,9 @@ def helpmsg(name=None):
 
     Main Outputs
 
+        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA lables)
 
-
+    ------
 
 	Dependencies:
 

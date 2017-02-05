@@ -40,8 +40,10 @@ def helpmsg(name=None):
 
     Main Outputs
 
-        voxelized_seg.(tif/nii)
-        voxelized_seg_bin.(tif/nii)
+        voxelized_seg.(tif/nii)  (segmnetation results voxelized to ARA resolution)
+        voxelized_seg_bin.(tif/nii) (binarized version)
+
+    -----
 
 	Dependencies:
 

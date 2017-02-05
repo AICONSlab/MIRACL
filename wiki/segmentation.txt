@@ -32,7 +32,8 @@ miracl_seg_clarity_neurons_wrapper.sh
 
         ----------
 
-    Main outputs:
+    Main Outputs
+
 
         segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd)  : segmentation image with all labels (cells)
 
@@ -76,6 +77,14 @@ _________________________
 
             s. Segmentation tif file
 
+    -----
+
+    Main Outputs
+
+        voxelized_seg.(tif/nii)
+        voxelized_seg_bin.(tif/nii)
+
+    -----
 
 	Dependencies:
 
@@ -107,6 +116,14 @@ _________________________
 
                     reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
 
+
+    ------
+
+    Main Outputs
+
+        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA lables)
+
+    ------
 
     Dependencies:
 

@@ -29,22 +29,26 @@ function usage()
 
 	For command-line / scripting
 
+
 	Usage: `basename $0` -d <clarity dir> -t <channel type: sparse or nuclear>
 
-	Example: `basename $0` -d my_clarity_tifs -t sparse
+	Example: `basename $0` -d my_clarity_tifs -t sparse -p Filter0001
 
 		arguments (required):
 
-			d. Input clarity directory (including .tif images of one channel)
+			d. Input clarity directory (including .tif images)
 
 		Optional arguments:
 
 			t. Channel type: sparse (like Thy1 YFP) [default] or nuclear (like PI)
 
+			p. Channel prefix & number if multiple channels (like Filter0001)
+
 
 		----------
 
-    Main outputs:
+    Main Outputs
+
 
         segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
 
@@ -129,7 +133,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":d:t:" opt; do
+	while getopts ":d:t:p:" opt; do
     
 	    case "${opt}" in
 
@@ -139,6 +143,10 @@ if [[ "$#" -gt 1 ]]; then
 
             t)
             	type=${OPTARG}
+            	;;
+
+            p)
+            	prefix=${OPTARG}
             	;;
         	
         	*)
@@ -231,10 +239,19 @@ outnii=${segdir}/seg.nii.gz
 if [[ ! -f ${outseg} ]]; then
 
 	printf "\n Performing Segmentation using Fiji \n"
-			
-	echo Fiji -macro $macro "${tifdir}" | tee ${log}
-	Fiji -macro $macro "${tifdir}/" | tee ${log}
-		
+
+    if [[ -z ${prefix} ]] ; then
+
+        echo Fiji -macro $macro "${tifdir}" | tee ${log}
+	    Fiji -macro $macro "${tifdir}/" | tee ${log}
+
+    else
+
+        echo Fiji -macro $macro "${tifdir} ${prefix}" | tee ${log}
+	    Fiji -macro $macro "${tifdir} ${prefix}" | tee ${log}
+
+    fi
+
 else
 
 	echo "Segmentation already computed ... skipping"

@@ -18,7 +18,12 @@
 // -----------------------------------
 
 // Get files path
-path = getArgument();
+//path = getArgument();
+
+args = split(getArgument()," ");
+path = args[0];
+fstr = args[1];
+
 print("Files path is:" + path);
 
 segpath = path + "/segmentation_nuclear/" ;
@@ -51,13 +56,29 @@ if (convert==1) {
 
 	print("Converting input to 8-bit");
 
-	run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert");
+    if (lengthOf(fstr)==0) {
+
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert");
+
+    } else {
+
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
+
+    }
 
 } else {
 
 	print("Keeping input type unchanged");
 
-	run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort");
+    if (lengthOf(fstr)==0) {
+
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort");
+
+    } else {
+
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
+
+    }
 
 }
 
@@ -313,7 +334,7 @@ if (!File.exists(outseg)) {
 
 	// Save segmentation bin
 	save(segpath + "seg_bin_nuclear.tif");
-
+π
 	// Save segmentation bin mhd
 	run("MHD/MHA ...", "save=" +segpath+ "seg_bin_nuclear.mhd");
 
