@@ -212,7 +212,7 @@ if [[ "$#" -gt 1 ]]; then
     #---------------------------
     # Call seg
 
-    printf "\n Running  with the following command: \n"
+    printf "\n Running segmentation with the following command: \n"
 
 
     if [ -z "${segopts}" ];
@@ -236,7 +236,6 @@ if [[ "$#" -gt 1 ]]; then
     echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
     miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
 
-    fi
 
     #---------------------------
     # Call feature extraction
@@ -246,13 +245,13 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${extopts}" ];
 	then
 
-        echo miracl_reg_clar-allen_whole_brain.sh -s
-        miracl_reg_clar-allen_whole_brain.sh -i
+        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
     else
 
-        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${extopts}"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${extopts}
+        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
+        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
 
     fi
 
@@ -266,37 +265,29 @@ else
 
 	printf "\n No inputs given ... running in GUI mode \n"
 
-
     #---------------------------
     # Call set orient GUI
 
-    printf "\n Running Set orient with the following command: \n"
+    printf "\n Running segmentation with the following command: \n"
 
-    echo miracl_set_orient_gui.py
-    miracl_set_orient_gui.py
-
+    echo miracl_seg_clarity_neurons_wrapper.sh
+    miracl_seg_clarity_neurons_wrapper.sh
 
     #---------------------------
     # Call conversion to nii
 
-    printf "\n Running Tiff to Nii conversion with the following command: \n"
+    printf "\n Running voxelize segmentation with the following command: \n"
 
-    indir=`cat ort2std.txt | grep tifdir | cut -d = -f 2`
-
-    echo miracl_convertTIFFtoNII.py -f ${indir}
-    miracl_convertTIFFtoNII.py -f ${indir}
-
+    echo miracl_seg_voxelize_parallel.py -s segmentation_sparse/seg_sparse.tif
+    miracl_seg_voxelize_parallel.py -s segmentation_sparse/seg_sparse.tif
 
     #---------------------------
     # Call registration
 
-    printf "\n Running CLARITY registration to Allen with the following command: \n"
+    printf "\n Running feature extraction with the following command: \n"
 
-    # last file made in niftis folder
-    nii=`ls -r niftis | tail -n 1`
-
-    echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
-    miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+    echo miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+    miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
 
 fi

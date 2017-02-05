@@ -50,9 +50,9 @@ function usage()
     Main Outputs
 
 
-        segmentation/seg_sparse.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
+        segmentation_sparse/seg_sparse.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
 
-        segmentation/seg_bin_sparse.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
+        segmentation_sparse/seg_bin_sparse.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
 
         Results can be openned in Fiji for visualization
