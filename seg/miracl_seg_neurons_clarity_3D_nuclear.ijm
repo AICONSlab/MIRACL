@@ -22,7 +22,12 @@
 
 args = split(getArgument()," ");
 path = args[0];
-fstr = args[1];
+
+if (lengthOf(args)>1) {
+
+    fstr = args[1];
+
+}
 
 print("Files path is:" + path);
 
@@ -56,13 +61,13 @@ if (convert==1) {
 
 	print("Converting input to 8-bit");
 
-    if (lengthOf(fstr)==0) {
+    if (lengthOf(args)>1) {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert");
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
 
     } else {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert");
 
     }
 
@@ -70,13 +75,13 @@ if (convert==1) {
 
 	print("Keeping input type unchanged");
 
-    if (lengthOf(fstr)==0) {
+    if  (lengthOf(args)>1)  {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort");
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
 
     } else {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
+        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort");
 
     }
 
