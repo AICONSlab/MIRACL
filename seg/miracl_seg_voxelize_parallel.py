@@ -8,7 +8,10 @@ import logging
 import multiprocessing
 import os
 import sys
+import warnings
 from datetime import datetime
+
+warnings.simplefilter("ignore", UserWarning)
 
 import cv2
 import nibabel as nib
@@ -102,8 +105,6 @@ def scriptlog(logname):
 # ---------
 # Define convolution fn
 
-# TODOhp: vox with regionprops
-
 def vox(segflt, kernel, dr, i):
     '''
 	Convolves image with input kernel then 
@@ -180,7 +181,7 @@ def savenvoxnii(marray):
 
     if not os.path.exists(outvoxnii):
         mat = np.eye(4)
-        mat[0, 0] = 0.05
+        mat[0, 0] = 0.025
         mat[1, 1] = 0.025
         mat[2, 2] = 0.025
 
@@ -214,4 +215,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-    # TODOlp: add GUI
+# TODOs
+
+# TODOhp: vox with regionprops
+# TODOlp: add GUI

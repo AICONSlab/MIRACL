@@ -30,9 +30,11 @@ def helpmsg(name=None):
 
         arguments (required):
 
-        s. Segmentation (or voxelized segmentation) tif file
+        s. Segmentation (or preferably voxelized segmentation) tif file
 
-        l. Allen labels used to summarize features
+        l. Allen labels (registered to clarity) used to summarize features
+
+
 
 
 	Dependencies:
@@ -92,7 +94,20 @@ def upsampleswplbls(seg,lbls):
 
     else:
 
-        reslbls = lbls
+        if segz != lblsz:
+
+            rx = float(segx) / lblsx
+            ry = float(segy) / lblsy
+            rz = float(segz) / lblsz
+
+            print('Upsampling labels to clarity resolution')
+
+            # reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
+            reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
+
+        else:
+
+            reslbls = lbls
 
     return reslbls 
 
