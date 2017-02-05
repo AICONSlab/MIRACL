@@ -31,7 +31,7 @@ function usage()
     Usage: `basename $0`
 
         A GUI will open to set data orientation
-        For the "miracl_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
+        For "miracl_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
 
 
     ----------

@@ -30,17 +30,17 @@ function usage()
 	For command-line / scripting
 
 
-	Usage: `basename $0` -d <clarity dir> -t <channel type: sparse or nuclear>
+	Usage: `basename $0` -f <clarity folder> -t <channel type: sparse or nuclear>
 
-	Example: `basename $0` -d my_clarity_tifs -t sparse -p Filter0001
+	Example: `basename $0` -f my_clarity_tifs -t sparse -p Filter0001
 
 		arguments (required):
 
-			d. Input clarity directory (including .tif images)
+			f. Input clarity folder/directory (including .tif images)
+
+			t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
 
 		Optional arguments:
-
-			t. Channel type: sparse (like Thy1 YFP) [default] or nuclear (like PI)
 
 			p. Channel prefix & number if multiple channels (like Filter0001)
 
@@ -50,9 +50,9 @@ function usage()
     Main Outputs
 
 
-        segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
+        segmentation/seg_sparse.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
 
-        segmentation/seg_bin.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
+        segmentation/seg_bin_sparse.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
 
         Results can be openned in Fiji for visualization
@@ -133,11 +133,11 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":d:t:p:" opt; do
+	while getopts ":f:t:p:" opt; do
     
 	    case "${opt}" in
 
-	        d)
+	        f)
             	tifdir=${OPTARG}
             	;;
 
@@ -192,10 +192,11 @@ fi
 if [ -z ${type} ];
 then
     type=sparse
-    segdir=${tifdir}/segmentation
-else
-    segdir=${tifdir}/segmentation_nuclear
+
 fi
+
+segdir=${tifdir}/segmentation_${type}
+
 
 # get time
 
@@ -232,9 +233,9 @@ fi
 # echo "sync; echo 3 | sudo tee /proc/sys/vm/drop_caches"
 #sync; echo 3 | sudo tee /proc/sys/vm/drop_caches 1>/dev/null
 
-outseg=${tifdir}/seg.mhd
-log=${tifdir}/Fiji_seg_log.txt
-outnii=${segdir}/seg.nii.gz
+outseg=${tifdir}/seg_${type}.mhd
+log=${tifdir}/Fiji_seg_${type}_log.txt
+outnii=${segdir}/seg_${type}.nii.gz
 
 if [[ ! -f ${outseg} ]]; then
 

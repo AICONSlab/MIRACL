@@ -27,7 +27,7 @@ def helpmsg(name=None):
 
     Computes features of segmented image and summarizes them per label
 
-    example: mouse_feat_extract.py -s segmentation/voxelized_seg.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+    example: mouse_feat_extract.py -s segmentation/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
 
         arguments (required):
 

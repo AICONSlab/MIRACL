@@ -52,7 +52,7 @@ convert = 1;
 // Get files list
 list = getFileList(path);
 num = list.length;
-print("Sequence contains " +num+ " images");
+print("Sequence contains " +num+ " images in total");
 
 // Open stack
 print("--Reading stack");
@@ -62,6 +62,8 @@ if (convert==1) {
 	print("Converting input to 8-bit");
 
     if (lengthOf(args)>1) {
+
+        print("Reading all files with " +fstr+ " in filename")
 
         run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
 
@@ -76,6 +78,8 @@ if (convert==1) {
 	print("Keeping input type unchanged");
 
     if  (lengthOf(args)>1)  {
+
+        print("Reading all files with " +fstr+ " in filename")
 
         run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
 

@@ -30,7 +30,7 @@ def helpmsg(name=None):
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: mouse_seg_voxelize_parallel.py -s seg.tif
+	example: mouse_seg_voxelize_parallel.py -s seg_sparse.tif
 
         arguments (required):
 
@@ -40,8 +40,8 @@ def helpmsg(name=None):
 
     Main Outputs
 
-        voxelized_seg.(tif/nii)  (segmnetation results voxelized to ARA resolution)
-        voxelized_seg_bin.(tif/nii) (binarized version)
+        voxelized_seg_sparse.(tif/nii) or nuclear (segmnetation results voxelized to ARA resolution)
+        voxelized_seg_bin_sparse.(tif/nii) (binarized version)
 
     -----
 
@@ -203,8 +203,14 @@ def main():
 
     startTime = datetime.now()
 
-    outvox = 'voxelized_seg.tif'
-    outvoxnii = 'voxelized_seg.nii.gz'
+    base = os.path.basename(seg)
+
+    fstr = os.path.splitext(base)
+
+    type = fstr[0].split("_")[1]
+
+    outvox = 'voxelized_seg_%s.tif' % type
+    outvoxnii = 'voxelized_seg_%s.nii.gz' % type
 
     if not os.path.exists(outvox):
 
@@ -218,8 +224,8 @@ def main():
 
     segbin = seg.replace("seg", "seg_bin")
 
-    outvoxbin = 'voxelized_seg_bin.tif'
-    outvoxniibin = 'voxelized_seg_bin.nii.gz'
+    outvoxbin = 'voxelized_seg_bin_%s.tif' % type
+    outvoxniibin = 'voxelized_seg_bin_%s.nii.gz' % type
 
     if not os.path.exists(outvox):
 

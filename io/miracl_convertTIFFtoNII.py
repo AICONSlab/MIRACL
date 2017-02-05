@@ -39,7 +39,7 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
 
     Arguments (required):
 
-        -f Input Clarity tif dir/folder
+        -f Input Clarity tif folder/dir
 
     Optional arguments:
 

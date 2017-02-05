@@ -31,7 +31,7 @@ if (lengthOf(args)>1) {
 
 print("Files path is:" + path);
 
-segpath = path + "/segmentation/" ;
+segpath = path + "/segmentation_sparse/" ;
 
 // Init Parameters:-
 
@@ -52,7 +52,7 @@ convert = 1;
 // Get files list
 list = getFileList(path);
 num = list.length;
-print("Sequence contains " +num+ " images");
+print("Sequence contains " +num+ " images in total");
 
 // Open stack
 print("--Reading stack");
@@ -62,6 +62,8 @@ if (convert==1) {
 	print("Converting input to 8-bit");
 
     if (lengthOf(args)>1) {
+
+        print("Reading all files with " +fstr+ " in filename")
 
         run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
 
@@ -76,6 +78,8 @@ if (convert==1) {
 	print("Keeping input type unchanged");
 
     if  (lengthOf(args)>1)  {
+
+        print("Reading all files with " +fstr+ " in filename")
 
         run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
 
@@ -312,7 +316,7 @@ close();
 
 // Compute Marker controlled Watershed 
 
-outseg = segpath + "seg.tif";
+outseg = segpath + "seg_sparse.tif";
 
 // Collect Garbage
 call("java.lang.System.gc");
@@ -330,7 +334,7 @@ if (!File.exists(outseg)) {
 	save(outseg);
 
 	// Save segmentation mhd
-	run("MHD/MHA ...", "save=" +segpath+ "seg.mhd");
+	run("MHD/MHA ...", "save=" +segpath+ "seg_sparse.mhd");
 
 	print("-- Computing binary segmentation");
 
@@ -338,10 +342,10 @@ if (!File.exists(outseg)) {
 	run("Make Binary", "method=Percentile background=Default calculate black");
 
 	// Save segmentation bin
-	save(segpath + "seg_bin.tif");
+	save(segpath + "seg_bin_sparse.tif");
 
 	// Save segmentation bin mhd
-	run("MHD/MHA ...", "save=" +segpath+ "seg_bin.mhd");
+	run("MHD/MHA ...", "save=" +segpath+ "seg_bin_sparse.mhd");
 
 } else {
 
@@ -350,7 +354,7 @@ if (!File.exists(outseg)) {
 }
 
 // save log file 
-outlog = segpath + "seg_log.txt";
+outlog = segpath + "seg_sparse_log.txt";
 
 f = File.open(outlog); 
 content=getInfo("log");
