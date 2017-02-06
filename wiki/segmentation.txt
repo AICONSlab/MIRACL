@@ -23,7 +23,7 @@ miracl_seg_clarity_neurons_wrapper.sh
 
 		arguments (required):
 
-			d. Input clarity directory (including .tif images of one channel)
+			d. Input clarity directory (including .tif images of one channel) [folder name without spaces]
 
             t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
 

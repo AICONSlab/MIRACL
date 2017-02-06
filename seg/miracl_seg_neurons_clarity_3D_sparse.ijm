@@ -63,7 +63,7 @@ if (convert==1) {
 
     if (lengthOf(args)>1) {
 
-        print("Reading all files with " +fstr+ " in filename")
+        print("Reading all files with " +fstr+ " in filename");
 
         run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
 
@@ -79,7 +79,7 @@ if (convert==1) {
 
     if  (lengthOf(args)>1)  {
 
-        print("Reading all files with " +fstr+ " in filename")
+        print("Reading all files with " +fstr+ " in filename");
 
         run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
 

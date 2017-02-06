@@ -37,7 +37,7 @@ miracl_workflow_registration_clarity-allen_wb.sh
 
         arguments (required):
 
-            f. Input Clarity tif dir/folder
+            f. Input Clarity tif folder/dir
 
         optional arguments (don't forget the quotes):
 
@@ -160,7 +160,7 @@ miracl_workflow_segmentation_clarity.sh
 
         arguments (required):
 
-            f. Input Clarity tif dir/folder
+            f. Input Clarity tif folder/dir [folder name without spaces]
 
             t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
 

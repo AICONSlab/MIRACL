@@ -45,7 +45,7 @@ function usage()
 
         arguments (required):
 
-            f. Input Clarity tif dir/folder
+            f. Input Clarity tif folder/dir [folder name without spaces]
 
             t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
 
