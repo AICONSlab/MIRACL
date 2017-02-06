@@ -60,9 +60,6 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
     Dependencies:
 
 	    Python 2.7
-	    used modules:
-            argparse, numpy, scipy, cv2, pandas, tifffile, Tkinter, tkFileDialog, glob, re, os, sys, datetime
-
 
         '''
 
@@ -105,6 +102,8 @@ else:
 
     assert isinstance(args.folder, str)
     indir = args.folder
+    if not os.path.exists(indir):
+        sys.exit('%s does not exist ... please check ')
 
     if args.outnii is None:
         outnii = 'clarity'

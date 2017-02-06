@@ -65,7 +65,7 @@ def helpmsg(name=None):
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 parser.add_argument('-s', '--seg', type=str, help="segmentation tif", required=True)
 parser.add_argument('-l', '--lbl', type=str, help="label annotations", required=True)
-parser.add_argument('-m', '--mask', type=str, help="ROI mask", required=True)
+parser.add_argument('-m', '--mask', type=str, help="ROI mask")
 
 args = parser.parse_args()
 inseg = args.seg

@@ -203,14 +203,16 @@ def main():
 
     startTime = datetime.now()
 
+    segdir = os.path.dirname(seg)
+
     base = os.path.basename(seg)
 
     fstr = os.path.splitext(base)
 
     type = fstr[0].split("_")[1]
 
-    outvox = 'voxelized_seg_%s.tif' % type
-    outvoxnii = 'voxelized_seg_%s.nii.gz' % type
+    outvox = '%s/voxelized_seg_%s.tif' % (seg, type)
+    outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (seg, type)
 
     if not os.path.exists(outvox):
 
@@ -224,10 +226,10 @@ def main():
 
     segbin = seg.replace("seg", "seg_bin")
 
-    outvoxbin = 'voxelized_seg_bin_%s.tif' % type
-    outvoxniibin = 'voxelized_seg_bin_%s.nii.gz' % type
+    outvoxbin = '%s/voxelized_seg_bin_%s.tif' % (seg, type)
+    outvoxniibin = '%s/voxelized_seg_bin_%s.nii.gz' % (seg, type)
 
-    if not os.path.exists(outvox):
+    if not os.path.exists(outvoxbin):
 
         marraybin = parcomputevox(segbin, radius, ncpus, down, outvoxbin)
 
