@@ -23,19 +23,23 @@ function usage()
 
 		- < Labels to warp>
 
+    Looks for ort2std.txt in directory where script is run
+
 	----------
 
 	For command-line / scripting
 
-	Usage: `basename $0` -r [ clarity registration dir ] -l [ labels in allen space to warp ]
+	Usage: `basename $0` -r [ clarity registration dir ] -l [ labels in allen space to warp ] -o [ orient file ]
 
-	Example: `basename $0` -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz
+	Example: `basename $0` -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz -o ort2std.txt
 
 		arguments (required):
 
 			r. Input clarity registration dir
 
 			l. input Allen Labels to warp (in Allen space)
+
+			o. file with orientation to standard code
 
 	----------		
 
@@ -133,16 +137,22 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:l:" opt; do
+	while getopts ":r:l:o:" opt; do
     
 	    case "${opt}" in
 
 	        r)
             	regdir=${OPTARG}
             	;;
+
         	l)
             	lbls=${OPTARG}
             	;;
+
+            o)
+            	ortfile=${OPTARG}
+            	;;
+
         	*)
             	usage            	
             	;;
@@ -360,8 +370,47 @@ function main()
 
 	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
 
+    ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
+    # setting lbl ort
+    o=${ort:0:1}
+    r=${ort:1:1}
+    t=${ort:2:2}
+
+    ol=${r}
+
+    if [ ${o} == "A" ]; then
+        rl="P"
+    elif [ ${o} == "P" ]; then
+        rl="A"
+    elif [ ${o} == "R" ]; then
+        rl="L"
+    elif [ ${o} == "L" ]; then
+        rl="R"
+    elif [ ${o} == "S" ]; then
+        rl="I"
+    elif [ ${o} == "I" ]; then
+        rl="S"
+    fi
+
+    if [ ${t} == "A" ]; then
+        tl="P"
+    elif [ ${t} == "P" ]; then
+        tl="A"
+    elif [ ${t} == "R" ]; then
+        tl="L"
+    elif [ ${t} == "L" ]; then
+        tl="R"
+    elif [ ${t} == "S" ]; then
+        tl="I"
+    elif [ ${t} == "I" ]; then
+        tl="S"
+    fi
+
+    ortlbl="$ol$rl$tl"
+
+
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${ortlbl} NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
 
 
 }
