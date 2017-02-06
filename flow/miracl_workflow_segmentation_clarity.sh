@@ -217,6 +217,10 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running segmentation with the following command: \n"
 
+    if [ -z "${type}" ];
+	then
+        type=sparse
+    fi
 
     if [ -z "${segopts}" ];
 	then
@@ -272,6 +276,11 @@ else
     # Call set orient GUI
 
     printf "\n Running segmentation with the following command: \n"
+
+    if [ -z "${type}" ];
+	then
+        type=sparse
+    fi
 
     echo miracl_seg_clarity_neurons_wrapper.sh
     miracl_seg_clarity_neurons_wrapper.sh

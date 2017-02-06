@@ -193,16 +193,15 @@ fi
 
 START=$(date +%s)
 
-# get macro
-macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
-
-
 # Default type to sparse
 if [ -z ${type} ];
 then
     type=sparse
 
 fi
+
+# get macro
+macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
 
 segdir="${tifdir}"/segmentation_${type}
 
