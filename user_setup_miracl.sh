@@ -16,6 +16,7 @@ printf "\nexport MIRACL_HOME=`echo $miraclpath`\n" >> ~/.bashrc
 
 cat <<\EOF >> ~/.bashrc
 
+
 #--- MIRACL path ----
 
 for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
