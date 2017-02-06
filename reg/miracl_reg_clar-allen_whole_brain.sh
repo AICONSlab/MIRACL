@@ -733,9 +733,9 @@ function main()
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
 
 	if [[ -z ${ort} ]]; then
-	    ort=ALS
+	    ort=ARS
 	fi
-    ## if A-P flipped (PLS) & if R-L -> ARS
+    ## if A-P flipped (PLS) & if R-L -> ALS
 
 	orientimg ${betclar} ${ort} Cubic short ${ortclar}
 
@@ -871,7 +871,7 @@ function main()
     regorgclar=${regdirfinal}/clar_allen_space.nii.gz
 
 
-    warpinclarallen ${inclar} ALS Cubic short ${ortinclar} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
+    warpinclarallen ${inclar} ${ort} Cubic short ${ortinclar} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
 #	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
 
 }
