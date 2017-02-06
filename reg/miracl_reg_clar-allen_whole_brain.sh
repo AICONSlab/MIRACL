@@ -866,6 +866,7 @@ function main()
         rl="I"
     elif [ ${o} == "I" ]; then
         rl="S"
+    fi
 
     if [ ${t} == "A" ]; then
         tl="P"
@@ -879,6 +880,7 @@ function main()
         tl="I"
     elif [ ${t} == "I" ]; then
         tl="S"
+    fi
 
     ortlbl="$ol$rl$tl"
 
