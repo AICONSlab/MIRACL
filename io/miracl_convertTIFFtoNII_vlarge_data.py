@@ -9,6 +9,7 @@ import logging
 import multiprocessing
 import os
 import re
+import subprocess
 import sys
 import tkFileDialog
 from Tkinter import Tk
@@ -17,7 +18,6 @@ from datetime import datetime
 import cv2
 import nibabel as nib
 import numpy as np
-from joblib import Parallel, delayed
 
 startTime = datetime.now()
 
@@ -207,7 +207,7 @@ def numericalSort(value):
 
 # ---------
 
-def converttiff2nii(d, i, x, vx=None, vz=None, cent=None, ot=None):
+def converttiff2nii(d, i, x, outdir, vx=None, vz=None, cent=None, ot=None):
     """
     """
 
@@ -219,11 +219,8 @@ def converttiff2nii(d, i, x, vx=None, vz=None, cent=None, ot=None):
     # down ratio
     down = (1.0 / int(d))
 
-    print "\n Converting Tiff images to NII \n"
-
-    # For loop, Load an image,downsample, append into 3D
-
-    # data = []
+    sys.stdout.write("\r processing slice %d ... " % i)
+    sys.stdout.flush()
 
     m = cv2.imread(x, -1)
     mres = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_CUBIC)
@@ -233,7 +230,7 @@ def converttiff2nii(d, i, x, vx=None, vz=None, cent=None, ot=None):
     data_array = np.array(mres, dtype='int16')
 
     # roll dimensions
-    data_array = np.rollaxis(data_array, 0, 3)
+    # data_array = np.rollaxis(data_array, 0, 3)
 
     # Voxel size & center default values (corresponding to Allen atlas nii template - 25um res)
 
@@ -249,13 +246,7 @@ def converttiff2nii(d, i, x, vx=None, vz=None, cent=None, ot=None):
 
     # nifti header info
     nii.header.set_data_dtype(np.int16)
-    nii.header.set_zooms([vs[0], vs[1], vs[2]])
-
-    # make out dir
-    outdir = 'niftis/slices'
-
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
+    nii.header.set_zooms([vs[0], vs[1]])
 
     # Save nifti
     if outnii is None:
@@ -268,7 +259,7 @@ def converttiff2nii(d, i, x, vx=None, vz=None, cent=None, ot=None):
 # ---------
 
 def main():
-    scriptlog('tif2nii.log')
+    # scriptlog('tif2nii.log')
 
     """
     :rtype: nifti file
@@ -278,9 +269,7 @@ def main():
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)
 
-    # converttiff2nii(indir, d, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
-
-    # Get file lis
+    # Get file list
 
     # sort files
     if chanp is None:
@@ -288,8 +277,32 @@ def main():
     else:
         file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
 
-    Parallel(n_jobs=ncpus, backend='threading')(
-        delayed(converttiff2nii(d, i, x, vx, vz, cent, ot=outnii) for i, x in enumerate(file_list)))
+    # make out dir
+    outdir = 'niftis/slices'
+
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    print "\n Converting Tiff images to NII \n"
+
+    for i, x in enumerate(file_list):
+        converttiff2nii(d, i, x, outdir, vx, vz, cent, ot=outnii)
+
+    # Parallel(n_jobs=ncpus)(
+    #     delayed(converttiff2nii(d, i, x, vx, vz, cent, ot=outnii) for i, x in enumerate(file_list)))
+
+    stackdir = 'niftis'
+
+    if outnii is None:
+        stackname = '%s/%schannii.gz' % (stackdir, chan)
+    else:
+        stackname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (stackdir, outnii, d, chan)
+
+    # stack slices
+
+    subprocess.Popen('c3d %s/*.nii.gz -tile z -o %s' % (outdir, stackname), shell=True,
+                     stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE)
 
     print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
@@ -299,3 +312,4 @@ if __name__ == "__main__":
 
 
 # TODOs
+    # TODOlp: test joblib
