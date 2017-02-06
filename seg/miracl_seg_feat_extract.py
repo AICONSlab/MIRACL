@@ -23,11 +23,11 @@ from skimage.measure import regionprops
 # help fn
 
 def helpmsg(name=None):
-    return '''Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels]
+    return '''Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels] -m [ binary ROI mask ]
 
     Computes features of segmented image and summarizes them per label
 
-    example: mouse_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+    example: mouse_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif -m mask.tif
 
         arguments (required):
 
@@ -36,6 +36,13 @@ def helpmsg(name=None):
         l. Allen labels (registered to clarity) used to summarize features
 
                 reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
+
+        optional arguments:
+
+        m. Mask to choose a region of interest (ROI) to analyze (binary image, 0 value outside ROI)
+
+                Will extract features from allen labels within ROI
+                Should be in clarity space
 
     ------
 
@@ -50,12 +57,15 @@ def helpmsg(name=None):
 	    Python 2.7
 
     '''
+
+
 # ---------
 # Get input arguments
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-s','--seg', type=str, help="segmentation tif", required=True)
-parser.add_argument('-l','--lbl', type=str, help="label annotations", required=True)
+parser.add_argument('-s', '--seg', type=str, help="segmentation tif", required=True)
+parser.add_argument('-l', '--lbl', type=str, help="label annotations", required=True)
+parser.add_argument('-m', '--mask', type=str, help="ROI mask", required=True)
 
 args = parser.parse_args()
 inseg = args.seg
@@ -101,8 +111,7 @@ def scriptlog(logname):
 
 # ---------
 
-def upsampleswplbls(seg,lbls):
-
+def upsampleswplbls(seg, lbls):
     segx = seg.shape[1]
     segy = seg.shape[2]
     segz = seg.shape[0]
@@ -117,7 +126,7 @@ def upsampleswplbls(seg,lbls):
 
             print ('Swapping x-y')
             reslbls = np.swapaxes(lbls, 1, 2)
-        
+
         else:
 
             # rx = float(segx) / lblsy
@@ -134,7 +143,7 @@ def upsampleswplbls(seg,lbls):
 
             if segx != resx:
                 print ('Swapping x-y')
-                reslbls = np.swapaxes(reslbls,1,2)
+                reslbls = np.swapaxes(reslbls, 1, 2)
 
     else:
 
@@ -153,13 +162,13 @@ def upsampleswplbls(seg,lbls):
 
             reslbls = lbls
 
-    return reslbls 
+    return reslbls
+
 
 # ---------
 # Get region prop fn
 
-def computearea(seg,lbls,l):
-
+def computearea(seg, lbls, l):
     sys.stdout.write("\r processing label %d ... " % l)
     sys.stdout.flush()
 
@@ -169,48 +178,50 @@ def computearea(seg,lbls,l):
     numvox = np.sum(lbl)
     mask = np.zeros(seg.shape, dtype=np.uint16)
     mask[lbl] = seg[lbl]
-    
+
     if np.max(mask) > 0:
-        areas = ( prop.area for prop in regionprops(mask) )
+        areas = (prop.area for prop in regionprops(mask))
         areas = np.array(list(areas))
         avgarea = np.nanmean(areas)
         stdarea = np.nanstd(areas)
         maxarea = np.nanmax(areas)
         cellnum = len(list(areas))
-        celldens = (float(cellnum) / numvox) * 1e3 # assuming 1um res
+        celldens = (float(cellnum) / numvox) * 1e3  # assuming 1um res
     else:
         avgarea = 0
         stdarea = 0
         maxarea = 0
         cellnum = 0
         celldens = 0
-    
-    return avgarea,stdarea,maxarea,cellnum,celldens
+
+    return avgarea, stdarea, maxarea, cellnum, celldens
+
 
 # ---------
 # Run feat extract for all lbls
 
-def runalllblspar(seg,lbls,ncpus,alllbls):
-                
-    allprops = Parallel(n_jobs=ncpus, backend='threading')(delayed(computearea)(seg,lbls,l) for i,l in enumerate(alllbls))
+def runalllblspar(seg, lbls, ncpus, alllbls):
+    allprops = Parallel(n_jobs=ncpus, backend='threading')(
+        delayed(computearea)(seg, lbls, l) for i, l in enumerate(alllbls))
     allprops = np.asarray(allprops)
-    allareas = allprops[:,0]
-    allstdareas = allprops[:,1]
-    allmaxareas = allprops[:,2]
-    allnums = allprops[:,3]
-    alldens = allprops[:,4]
-    
-    return allareas,allstdareas,allmaxareas,allnums,alldens
+    allareas = allprops[:, 0]
+    allstdareas = allprops[:, 1]
+    allmaxareas = allprops[:, 2]
+    allnums = allprops[:, 3]
+    alldens = allprops[:, 4]
+
+    return allareas, allstdareas, allmaxareas, allnums, alldens
+
 
 # ---------
 
 def getlblvals(lbls):
-
     flat = np.ndarray.flatten(lbls)
     posflat = flat[flat > 0]
     counts = np.bincount(posflat)
 
     return np.nonzero(counts)[0]
+
 
 # ---------
 # main fn
@@ -222,11 +233,11 @@ def main():
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
-    ncpus = int(cpuload*cpus) # 80% of cores used
+    ncpus = int(cpuload * cpus)  # 80% of cores used
 
     # open seg
     print ("Reading segmetation")
-    seg  = tiff.imread(inseg)
+    seg = tiff.imread(inseg)
 
     # open lbls
     print ("Reading labels")
@@ -235,17 +246,33 @@ def main():
     if (lbls.dtype == np.float64) or (lbls.dtype == np.float32) or (lbls.dtype == np.int32):
         lbls = lbls.astype(np.int16)
 
-    # get all lbls
-    alllbls = getlblvals(lbls)
+    # check mask
+    if args.mask is None:
 
-    # upsample or swap if needed
-    reslbls = upsampleswplbls(seg,lbls)
+        # get all lbls
+        alllbls = getlblvals(lbls)
+
+        # upsample or swap if needed
+        reslbls = upsampleswplbls(seg, lbls)
+
+    else:
+
+        inmas = args.mask
+        maslbls = np.copy(lbls)
+
+        maslbls[inmas == 0] = 0
+
+        # get all lbls
+        alllbls = getlblvals(maslbls)
+
+        # upsample or swap if needed
+        reslbls = upsampleswplbls(seg, maslbls)
+
 
     print ("Computing Feature extraction...")
-    [allareas,allstdareas,allmaxareas,allnums,alldens] = runalllblspar(seg,reslbls,ncpus,alllbls)
-    
-    print ('\n Exporting features to csv file')
+    [allareas, allstdareas, allmaxareas, allnums, alldens] = runalllblspar(seg, reslbls, ncpus, alllbls)
 
+    print ('\n Exporting features to csv file')
 
     miracl_home = os.environ['MIRACL_HOME']
 
@@ -292,7 +319,8 @@ def main():
     propsdf = propsdf.replace({'IDPath': paths_dic})
     propsdf['ParentID'] = propsdf.ParentID.map(parents_dic)
 
-    cols = ['LabelID','LabelAbrv','LabelName','ParentID','IDPath','Count','Density','VolumeAvg','VolumeStd','VolumeMax']
+    cols = ['LabelID', 'LabelAbrv', 'LabelName', 'ParentID', 'IDPath', 'Count', 'Density', 'VolumeAvg', 'VolumeStd',
+            'VolumeMax']
     propsdf = propsdf[cols]
 
     propscsv = "clarity_segmentation_features_ara_labels.csv"
@@ -301,5 +329,5 @@ def main():
     print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     main()

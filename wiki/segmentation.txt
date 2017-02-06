@@ -104,11 +104,11 @@ _________________________
 _________________________
 
 
-    Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels]
+    Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels] -m [ binary ROI mask ]
 
         Computes features of segmented image and summarizes them per label
 
-        example: mouse_feat_extract.py -s segmentation/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+        example: mouse_feat_extract.py -s segmentation/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif -m mask.tif
 
             arguments (required):
 
@@ -117,6 +117,13 @@ _________________________
             l. Allen labels (registered to clarity) used to summarize features
 
                     reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
+
+            optional arguments:
+
+            m. Mask to choose a region of interest (ROI) to analyze (binary image, 0 value outside ROI)
+
+                    Will extract features from allen labels within ROI
+                    Should be in clarity space
 
 
     ------
