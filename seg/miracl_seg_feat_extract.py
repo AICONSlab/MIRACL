@@ -227,7 +227,7 @@ def getlblvals(lbls):
 # main fn
 
 def main():
-    scriptlog('feat_extract.log')
+    # scriptlog('feat_extract.log')
 
     startTime = datetime.now()
 

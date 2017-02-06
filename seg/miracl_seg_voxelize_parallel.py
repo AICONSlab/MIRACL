@@ -224,7 +224,8 @@ def main():
 
         print ('\n Voxelized map already created')
 
-    segbin = seg.replace("seg", "seg_bin")
+    segbasebin = base.replace("seg", "seg_bin")
+    segbin = segdir + "/" + segbasebin
 
     outvoxbin = '%s/voxelized_seg_bin_%s.tif' % (segdir, type)
     outvoxniibin = '%s/voxelized_seg_bin_%s.nii.gz' % (segdir, type)
