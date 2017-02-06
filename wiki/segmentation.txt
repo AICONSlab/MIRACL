@@ -19,7 +19,7 @@ miracl_seg_clarity_neurons_wrapper.sh
 
 	Usage: miracl_seg_clarity_neurons_wrapper.sh -d <clarity dir> -t <channel type: sparse or nuclear>
 
-	Example: miracl_seg_clarity_neurons_wrapper.sh -d my_clarity_tifs -t sparse
+	Example: miracl_seg_clarity_neurons_wrapper.sh -d my_clarity_tifs -t sparse -p Filter0001
 
 		arguments (required):
 

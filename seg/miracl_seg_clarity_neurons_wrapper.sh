@@ -138,7 +138,7 @@ if [[ "$#" -gt 1 ]]; then
 	    case "${opt}" in
 
 	        f)
-            	tifdir=${OPTARG}
+            	tifdir="${OPTARG}"
             	;;
 
             t)
@@ -160,7 +160,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z ${tifdir} ];
+	if [ -z "${tifdir}" ];
 	then
 		usage
 		echo "ERROR: < -d => input clarity directory> not specified"
@@ -179,7 +179,7 @@ else
 	
 	# check required input arguments
 
-	if [ -z ${tifdir} ];
+	if [ -z "${tifdir}" ];
 	then
 		usage
 		echo "ERROR: <input clarity directory> was not chosen"
@@ -187,15 +187,6 @@ else
 	fi
 
 fi
-
-# Default type to sparse
-if [ -z ${type} ];
-then
-    type=sparse
-
-fi
-
-segdir=${tifdir}/segmentation_${type}
 
 
 # get time
@@ -205,15 +196,24 @@ START=$(date +%s)
 # get macro
 macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
 
+
+# Default type to sparse
+if [ -z ${type} ];
+then
+    type=sparse
+
+fi
+
+segdir="${tifdir}"/segmentation_${type}
+
 #motherdir=$(dirname ${tifdir})
 #inputdir=$(basename ${tifdir})
 
-
 # make seg dir
-if [[ ! -d ${segdir} ]];then
+if [[ ! -d "${segdir}" ]];then
 
 	printf "\n Creating Segmentation folder\n"
-	mkdir -p ${segdir}
+	mkdir -p "${segdir}"
 
 fi
 
@@ -233,9 +233,9 @@ fi
 # echo "sync; echo 3 | sudo tee /proc/sys/vm/drop_caches"
 #sync; echo 3 | sudo tee /proc/sys/vm/drop_caches 1>/dev/null
 
-outseg=${tifdir}/seg_${type}.mhd
-log=${tifdir}/Fiji_seg_${type}_log.txt
-outnii=${segdir}/seg_${type}.nii.gz
+outseg="${tifdir}"/seg_${type}.mhd
+log="${tifdir}"/Fiji_seg_${type}_log.txt
+outnii="${segdir}"/seg_${type}.nii.gz
 
 if [[ ! -f ${outseg} ]]; then
 
@@ -243,13 +243,13 @@ if [[ ! -f ${outseg} ]]; then
 
     if [[ -z ${prefix} ]] ; then
 
-        echo Fiji -macro $macro "${tifdir}" | tee ${log}
-	    Fiji -macro $macro "${tifdir}/" | tee ${log}
+        echo Fiji -macro ${macro} "${tifdir}" | tee "${log}"
+	    Fiji -macro ${macro} "${tifdir}/" | tee "${log}"
 
     else
 
-        echo Fiji -macro $macro "${tifdir} ${prefix}" | tee ${log}
-	    Fiji -macro $macro "${tifdir} ${prefix}" | tee ${log}
+        echo Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
+	    Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
 
     fi
 

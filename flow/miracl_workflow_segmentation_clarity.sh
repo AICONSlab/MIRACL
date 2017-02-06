@@ -30,7 +30,10 @@ function usage()
     Usage: `basename $0`
 
         A GUI will open to choose folder with tif files for segmentation (folder must have one channel)
-        For "miracl_seg_feat_extract.py" the reg_final
+
+        Channel type is assumed to be sparse
+
+        For feature extraction the "reg_final/annotation_hemi_combined_(vox)um_clar_vox.tif" file must exist where the script is started
 
     ----------
 
@@ -38,7 +41,7 @@ function usage()
 
     Usage: `basename $0` -f [Tiff folder]
 
-    Example: `basename $0` -f my_tifs -t nuclear -s "-p C000" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
+    Example: `basename $0` -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
 
         arguments (required):
 
@@ -78,22 +81,22 @@ function usage()
 
     ----------
 
-	Dependencies:
+    Dependencies:
 
-		- ANTs
-		https://github.com/stnava/ANTs
+		- Fiji
 
-		- c3d
-		https://sourceforge.net/projects/c3d
+		- Fiji Plugins:
+
+		1) 3D Segmentation plugins (3D ImageJ suite)
+		http://imagejdocu.tudor.lu/doku.php?id=plugin:stacks:3d_ij_suite:start
+
+		2) Mathematical Morphology plugins
+		http://imagej.net/MorphoLibJ
 
 	-----------------------------------
 
 	(c) Maged Goubran @ Stanford University, 2016
 	mgoubran@stanford.edu
-
-	-----------------------------------
-
-	registration based on ANTs
 
 	-----------------------------------
 
@@ -201,7 +204,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z ${indir} ];
+	if [ -z "${indir}" ];
 	then
 		usage
 		echo "ERROR: < -f => input folder with clarity tifs> not specified"
@@ -218,13 +221,13 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${segopts}" ];
 	then
 
-        echo miracl_seg_clarity_neurons_wrapper.sh -f ${indir}
-        miracl_seg_clarity_neurons_wrapper.sh -f ${indir}
+        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
+        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
 
     else
 
-        echo miracl_convertTIFFtoNII.py -f ${indir} "${segopts}"
-        miracl_convertTIFFtoNII.py -f ${indir} ${segopts}
+        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" "${segopts}"
+        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" ${segopts}
 
     fi
 
@@ -233,8 +236,8 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
-    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
+    echo miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_${type}/seg_${type}.tif
+    miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_${type}/seg_${type}.tif
 
 
     #---------------------------
@@ -245,13 +248,13 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${extopts}" ];
 	then
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+        echo miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+        miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
     else
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
+        echo miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
+        miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
 
     fi
 
@@ -278,16 +281,16 @@ else
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s segmentation_sparse/seg_sparse.tif
-    miracl_seg_voxelize_parallel.py -s segmentation_sparse/seg_sparse.tif
+    echo miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_sparse/seg_sparse.tif
+    miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_sparse/seg_sparse.tif
 
     #---------------------------
     # Call registration
 
     printf "\n Running feature extraction with the following command: \n"
 
-    echo miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
-    miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+    echo miracl_seg_feat_extract.py -s "${indir}"/segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+    miracl_seg_feat_extract.py -s "${indir}"/segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
 
 fi
@@ -302,4 +305,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Conversion, Registration and Allen label warping done in $DIFF minutes. Have a good day!"
+echo "Segmentation, voxelization and feature extraction done in $DIFF minutes. Have a good day!"
