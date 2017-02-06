@@ -104,6 +104,9 @@ else:
     assert isinstance(args.folder, str)
     indir = args.folder
 
+    if not os.path.exists(indir):
+        sys.exit('%s does not exist ... please check path and rerun script' % indir)
+
     if args.outnii is None:
         outnii = 'clarity'
     else:
@@ -299,5 +302,4 @@ if __name__ == "__main__":
 
     # TODOs:
 
-    # TODOlp: add check if dir exists (in name correct)
     # TODOlp: GUI with options to enter
