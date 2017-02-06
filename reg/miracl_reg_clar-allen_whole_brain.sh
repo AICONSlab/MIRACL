@@ -847,7 +847,42 @@ function main()
 	# upsample in python now
 	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
 
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
+    # setting lbl ort
+    o=${ort:0:1}
+    r=${ort:1:1}
+    t=${ort:2:2}
+
+    ol=${r}
+
+    if [ ${o} == "A" ]; then
+        rl="P"
+    elif [ ${o} == "P" ]; then
+        rl="A"
+    elif [ ${o} == "R" ]; then
+        rl="L"
+    elif [ ${o} == "L" ]; then
+        rl="R"
+    elif [ ${o} == "S" ]; then
+        rl="I"
+    elif [ ${o} == "I" ]; then
+        rl="S"
+
+    if [ ${t} == "A" ]; then
+        tl="P"
+    elif [ ${t} == "P" ]; then
+        tl="A"
+    elif [ ${t} == "R" ]; then
+        tl="L"
+    elif [ ${t} == "L" ]; then
+        tl="R"
+    elif [ ${t} == "S" ]; then
+        tl="I"
+    elif [ ${t} == "I" ]; then
+        tl="S"
+
+    ortlbl="$ol$rl$tl"
+
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${ortlbl} NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
 
 
 	#---------------------------
