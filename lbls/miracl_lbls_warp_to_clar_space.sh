@@ -27,18 +27,15 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i <input_down-sampled_clarity_nifti>
+	Usage: `basename $0` -r [ clarity registration dir ] -l [ labels in allen space to warp ]
 
-	Example: `basename $0` -i Reference_channel_05_down.nii.gz
+	Example: `basename $0` -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz
 
 		arguments (required):
 
 			r. Input clarity registration dir
 
 			l. input Allen Labels to warp (in Allen space)
-
-		optional arguments:
-		
 
 	----------		
 
@@ -195,7 +192,7 @@ fi
 START=$(date +%s)
 
 # output log file of script
-exec > >(tee -i ${regdir}/clar_allen_script.log)
+exec > >(tee -i ${regdir}/clar_allen_lbls_warp_script.log)
 exec 2>&1
 
 #---------------------------
@@ -245,6 +242,7 @@ function orientimg()
 function warpallenlbls()
 {
 	
+
 	# In imgs
 	local smclar=$1
 	local lbls=$2
@@ -256,7 +254,7 @@ function warpallenlbls()
 
 	# Out lbls
 	local wrplbls=$6
-	
+
 	# Ort pars
 	local orttaglbls=$7
 	local ortintlbls=$8
@@ -266,18 +264,30 @@ function warpallenlbls()
 	# swap lbls
 	local swplbls=${11}
 	local tiflbls=${12}
-	
+
 	# Up lbls
     local inclar=${13}
     local reslbls=${14}
     local restif=${15}
 
+    # Vox
+    local vox=${16}
+
+    # Res clar
+    local smclarres=${17}
+
+    # Upsample ref
+    vres=`python -c "print ${vox}/1000.0"`
+
+    # res clar in
+    ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
+
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${smclar} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+	 antsApplyTransforms -r ${smclarres} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
 
-	# orient to org 
-	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+	# orient to org
+	ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
 
 	# swap dim (x=>y / y=>x)
 	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
@@ -286,34 +296,19 @@ function warpallenlbls()
 	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
 
 	# upsample to img dimensions
+    df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
-	# # get img dim
-	alldim=`PrintHeader ${inclar} 2`
-    x=${alldim%%x*};
-	yz=${alldim#*x}; y=${yz%x*} ;
-	z=${alldim##*x};
+     # get img dim
+    alldim=`PrintHeader ${inclar} 2`
+    x=${alldim%%x*} ;
+    yz=${alldim#*x} ; y=${yz%x*} ;
+    z=${alldim##*x} ;
 
-    downfactor=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
-
-    xu=$((${x}*${downfactor}));
-    yu=$((${y}*${downfactor}));
-
-    # get dims from hres tif
-#    tif=
-#    dims=`c3d ${tif} -info-full | grep Dimensions`
-#    nums=${dims##*[}; x=${nums%%,*}; xy=${nums%,*}; y=${xy##*,};
-#    alldim=`PrintHeader ${inclar} 2` ;  z=${alldim##*x};
-
-	dim="${yu}x${xu}x${z}"; # inclar diff orientation need to swap x/y
-
-# TODOhp : warp labels again to high res (make empty image w same dims?) & remove this comment
-
-#	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-#	c3d ${swplbls} -resample ${dim} -interpolation $ortintlbls -type ${orttypelbls} -o ${reslbls}
-	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
+    ox=$(($y*$df)) ;
+    oy=$(($x*$df)) ;
 
     # create hres tif lbls
-#	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${reslbls} -type ${orttypelbls} -o ${restif}
+	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
 
 }
 
@@ -325,22 +320,50 @@ function main()
 
 # 1) Warp Allen labels to original CLARITY
 
+    regdirfinal=$PWD/reg_final
+
+    if [[ ! -d ${regdirfinal} ]]; then
+
+        printf "\n Creating registration folder\n"
+        mkdir -p ${regdirfinal}
+
+    fi
+
 	# Tforms
-	antswarp=$regdir/allen_clar_ants1Warp.nii.gz
-	antsaff=$regdir/allen_clar_ants0GenericAffine.mat
+	initform=${regdir}/init_tform.mat
+	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
+	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
 
 	base=`basename $lbls`
 	lblsname=${base%%.*};
 
-	# Out lbls
-	wrplbls=${regdir}/${lblsname}_ants.nii.gz
+    # In files
+    smclar=${regdir}/clar.nii.gz
+
+    motherdir=$(dirname ${regdir})
+
+    # last file made in niftis folder
+    inclar=`ls -r ${motherdir}/niftis | tail -n 1`
+
+    # Out lbls
+	wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
 	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
 	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
-	tiflbls=${regdir}/${lblsname}_ants.tif
-	reslbls=${regdirfinal}/allen_lbls_clar_ants.nii.gz
-	restif=${regdirfinal}/allen_lbls_clar_ants.tif
+	tiflbls=${regdirfinal}/${lblsname}_clar_vox.tif
+	reslbls=${regdirfinal}/${lblsname}_clar.nii.gz
+	restif=${regdirfinal}/${lblsname}_clar.tif
 
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif}
+    lblsdim=`PrintHeader ${lbls} 1`
+    xlbl=${lblsdim%%x*}
+
+    vox=`python -c "print ${xlbl}*1000.0"`
+
+	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
+
+
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
+
+
 }
 
 #--------------------
