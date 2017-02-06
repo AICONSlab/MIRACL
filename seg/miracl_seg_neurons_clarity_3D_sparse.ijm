@@ -334,7 +334,7 @@ if (!File.exists(outseg)) {
 	save(outseg);
 
 	// Save segmentation mhd
-	run("MHD/MHA ...", "save=" +segpath+ "seg_sparse.mhd");
+	// run("MHD/MHA ...", "save=" +segpath+ "seg_sparse.mhd");
 
 	print("-- Computing binary segmentation");
 
@@ -345,7 +345,7 @@ if (!File.exists(outseg)) {
 	save(segpath + "seg_bin_sparse.tif");
 
 	// Save segmentation bin mhd
-	run("MHD/MHA ...", "save=" +segpath+ "seg_bin_sparse.mhd");
+	// run("MHD/MHA ...", "save=" +segpath+ "seg_bin_sparse.mhd");
 
 } else {
 
