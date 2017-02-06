@@ -243,12 +243,12 @@ if [[ ! -f ${outseg} ]]; then
     if [[ -z ${prefix} ]] ; then
 
         echo Fiji -macro ${macro} "${tifdir}" | tee "${log}"
-	    Fiji --ij2 --no-splash -macro ${macro} "${tifdir}/" | tee "${log}"
+	    Fiji -macro ${macro} "${tifdir}/" | tee "${log}"
 
     else
 
         echo Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
-	    Fiji --ij2 --no-splash -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
+	    Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
 
     fi
 

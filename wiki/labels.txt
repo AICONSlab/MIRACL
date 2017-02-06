@@ -43,13 +43,15 @@ miracl_lbls_warp_to_clar_space.sh
 
 		- < Labels to warp>
 
+        Looks for ort2std.txt in directory where script is run
+
 	----------
 
 	For command-line / scripting
 
-	Usage: miracl_lbls_warp_to_clar_space.sh -i <input_down-sampled_clarity_nifti>
+	Usage: `basename $0` -r [ clarity registration dir ] -l [ labels in allen space to warp ] -o [ orient file ]
 
-	Example: miracl_lbls_warp_to_clar_space.sh -i Reference_channel_05_down.nii.gz
+	Example: `basename $0` -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz -o ort2std.txt
 
 		arguments (required):
 
@@ -57,7 +59,7 @@ miracl_lbls_warp_to_clar_space.sh
 
 			l. input Allen Labels to warp (in Allen space)
 
-		optional arguments:
+			o. file with orientation to standard code
 
 
 	----------

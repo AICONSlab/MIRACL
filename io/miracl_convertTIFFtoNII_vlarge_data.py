@@ -6,6 +6,7 @@
 import argparse
 import glob
 import logging
+import multiprocessing
 import os
 import re
 import sys
@@ -16,6 +17,7 @@ from datetime import datetime
 import cv2
 import nibabel as nib
 import numpy as np
+from joblib import Parallel, delayed
 
 startTime = datetime.now()
 
@@ -205,32 +207,14 @@ def numericalSort(value):
 
 # ---------
 
-def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None, cp=None):
+def converttiff2nii(d, i, x, vx=None, vz=None, cent=None, ot=None):
     """
-    :param indir:
-    :param d:
-    :param chann:
-    :param chan:
-    :param vs:
-    :param cent:
-    :param ot:
-    :param cp:
-    :return:
     """
 
     outnii = ot
-    chanp = cp
 
     outvox = vx * d
     vs = [outvox, outvox, vz]
-
-    # Get file lis
-
-    # sort files
-    if chanp is None:
-        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalSort)
-    else:
-        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
 
     # down ratio
     down = (1.0 / int(d))
@@ -239,14 +223,14 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
 
     # For loop, Load an image,downsample, append into 3D
 
-    data = []
-    for x in file_list:
-        m = cv2.imread(x, -1)
-        mres = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_CUBIC)
-        data.append(mres)
+    # data = []
+
+    m = cv2.imread(x, -1)
+    mres = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_CUBIC)
+    # data.append(mres)
 
     # array type
-    data_array = np.array(data, dtype='int16')
+    data_array = np.array(mres, dtype='int16')
 
     # roll dimensions
     data_array = np.rollaxis(data_array, 0, 3)
@@ -268,19 +252,17 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
     nii.header.set_zooms([vs[0], vs[1], vs[2]])
 
     # make out dir
-    outdir = 'niftis'
+    outdir = 'niftis/slices'
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
     # Save nifti
     if outnii is None:
-        niiname = '%s/%schan.nii.gz' % (outdir, chan)
+        niiname = '%s/%schan_%04d.nii.gz' % (outdir, chan, i)
     else:
-        niiname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, d, chan)
+        niiname = '%s/%s_%02dx_down_%s_chan_%04d.nii.gz' % (outdir, outnii, d, chan, i)
     nib.save(nii, niiname)
-
-    print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
 
 # ---------
@@ -291,7 +273,26 @@ def main():
     """
     :rtype: nifti file
     """
-    converttiff2nii(indir, d, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
+
+    cpuload = 0.95
+    cpus = multiprocessing.cpu_count()
+    ncpus = int(cpuload * cpus)
+
+    # converttiff2nii(indir, d, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
+
+    # Get file lis
+
+    # sort files
+    if chanp is None:
+        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalSort)
+    else:
+        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
+
+    Parallel(n_jobs=ncpus, backend='threading')(
+        delayed(converttiff2nii(d, i, x, vx, vz, cent, ot=outnii) for i, x in enumerate(file_list)))
+
+    print ("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
+
 
 if __name__ == "__main__":
     main()
