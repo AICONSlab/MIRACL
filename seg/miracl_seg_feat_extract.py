@@ -323,7 +323,9 @@ def main():
             'VolumeMax']
     propsdf = propsdf[cols]
 
-    propscsv = "clarity_segmentation_features_ara_labels.csv"
+    segdir = os.path.dirname(inseg)
+
+    propscsv = "%s/clarity_segmentation_features_ara_labels.csv" % segdir
     propsdf.to_csv(propscsv)
 
     print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))

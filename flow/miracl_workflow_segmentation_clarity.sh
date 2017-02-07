@@ -240,8 +240,8 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_${type}/seg_${type}.tif
-    miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_${type}/seg_${type}.tif
+    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
+    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
 
 
     #---------------------------
@@ -252,13 +252,13 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${extopts}" ];
 	then
 
-        echo miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
-        miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
     else
 
-        echo miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
-        miracl_seg_feat_extract.py -s "${indir}"/segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
+        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
+        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
 
     fi
 
@@ -290,16 +290,16 @@ else
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_sparse/seg_sparse.tif
-    miracl_seg_voxelize_parallel.py -s "${indir}"/segmentation_sparse/seg_sparse.tif
+    echo miracl_seg_voxelize_parallel.py -s segmentation_sparse/seg_sparse.tif
+    miracl_seg_voxelize_parallel.py -s segmentation_sparse/seg_sparse.tif
 
     #---------------------------
     # Call registration
 
     printf "\n Running feature extraction with the following command: \n"
 
-    echo miracl_seg_feat_extract.py -s "${indir}"/segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
-    miracl_seg_feat_extract.py -s "${indir}"/segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+    echo miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+    miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
 
 fi

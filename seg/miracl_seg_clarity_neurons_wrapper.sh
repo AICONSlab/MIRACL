@@ -203,10 +203,10 @@ fi
 # get macro
 macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
 
-segdir="${tifdir}"/segmentation_${type}
-
-#motherdir=$(dirname ${tifdir})
+motherdir=$(dirname "${tifdir}")
 #inputdir=$(basename ${tifdir})
+
+segdir="${motherdir}"/segmentation_${type}
 
 # make seg dir
 if [[ ! -d "${segdir}" ]];then

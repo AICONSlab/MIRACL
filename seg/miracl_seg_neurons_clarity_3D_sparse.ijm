@@ -31,7 +31,7 @@ if (lengthOf(args)>1) {
 
 print("Files path is:" + path);
 
-segpath = path + "/segmentation_sparse/" ;
+segpath = path + "/../segmentation_sparse/" ;
 
 // Init Parameters:-
 
