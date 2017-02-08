@@ -323,7 +323,7 @@ def main():
             'VolumeMax']
     propsdf = propsdf[cols]
 
-    segdir = os.path.dirname(inseg)
+    segdir = os.path.dirname(os.path.realpath(seg))
 
     propscsv = "%s/clarity_segmentation_features_ara_labels.csv" % segdir
     propsdf.to_csv(propscsv)

@@ -203,7 +203,7 @@ def main():
 
     startTime = datetime.now()
 
-    segdir = os.path.dirname(seg)
+    segdir = os.path.dirname(os.path.realpath(seg))
 
     base = os.path.basename(seg)
 
