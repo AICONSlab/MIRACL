@@ -32,7 +32,7 @@ example: miracl_stats_paired_ttest_ipsi_contra.py -d feat_extract_csv
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
-parser.add_argument('-d','--dir', type=str, nargs='+', help="dir with csv files", required=True)
+parser.add_argument('-d', '--dir', type=str, help="dir with csv files", required=True)
 
 args = parser.parse_args()
 
@@ -41,13 +41,12 @@ dir = args.dir
 # -----------------
 # read csvs
 
-def readcsvs(indir):
+def readcsvs(indir, splitval=20000):
 
     file_list = glob.glob('%s/*.csv' % indir)
 
     # Prep df per mouse
     alldfs ={}
-
 
     for c, csv in enumerate(file_list):
         df = pd.read_csv(csv)
@@ -67,7 +66,7 @@ def readcsvs(indir):
 # -----------------
 # clean up fn
 
-def cleanuplbls(vals):
+def cleanuplbls(vals, splitval=20000):
 
     # get lbl intersec
     inter = set(vals[0].LabelAbrv)
@@ -93,7 +92,7 @@ def cleanuplbls(vals):
 
 # -----------------
 
-def computepairttest(vals,ipsi,pars):
+def computepairttest(vals, ipsi, pars, splitval=20000):
 
     # compute paired-ttest test on ipsi vs. contra
     ttsss = {}
@@ -131,7 +130,7 @@ def computepairttest(vals,ipsi,pars):
 
 # -----------------
 
-def savecsv(df,ipsi,tt_stat,tt_pval,outdir):
+def savecsv(df, ipsi, tt_stat, tt_pval, outdir, pars):
 
     # save output
     # get lbl demos
@@ -173,12 +172,12 @@ def savexlsx(savedf,outdir):
     outexcel = '%s/paired_ttest_text.xlsx' % outdir
 
     writer = pd.ExcelWriter(outexcel, engine='xlsxwriter')
-    newdf.ix[:,1:].to_excel(writer, index=False, sheet_name='paired_ttest')
+    savedf.ix[:, 1:].to_excel(writer, index=False, sheet_name='paired_ttest')
 
     workbook = writer.book
     worksheet = writer.sheets['paired_ttest']
 
-    number_rows = len(newdf.index)
+    number_rows = len(savedf.index)
 
     # Add a format. Green fill with dark green text.
     format1 = workbook.add_format({'bg_color': '#C6EFCE',
@@ -246,6 +245,8 @@ def main():
     # read csv
     print("\n Reading feature extraction csv files")
 
+    # splitval = 20000
+
     [vals, df] = readcsvs(dir)
 
     # clean-up labels (for intersections between mices & dropping ones w only one hemi)
@@ -261,7 +262,7 @@ def main():
 
     # save csv
     print("\n Saving stats as csv file")
-    savedf = savecsv(df,ipsi,tt_stat,tt_pval,outdir)
+    savedf = savecsv(df, ipsi, tt_stat, tt_pval, outdir, pars)
 
     # save xlsx
     print("\n Saving stats as xlsx file with significant p-values as green cells")
