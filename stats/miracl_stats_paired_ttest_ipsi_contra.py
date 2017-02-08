@@ -78,7 +78,7 @@ def cleanuplbls(vals, splitval=20000):
     for i in range(len(vals)):
         vals[i] = vals[i][vals[i].LabelAbrv.isin(inter)]
 
-    ids=vals[1].LabelID
+    ids = vals[0].LabelID
 
 
     # drop ipsi labels with no contra
@@ -223,7 +223,7 @@ def projpvalonatlas(atlas,pars,ipsi,tt_pval,outdir):
         mat[3,3] = 1
 
         newnii = nib.Nifti1Image(newimg,mat)
-        niiname = '%s/%s_paired_ttest_pval_gp-lbls.nii.gz' % (outdir,pars[p])
+        niiname = '%s/%s_paired_ttest_pval.nii.gz' % (outdir, pars[p])
         nib.save(newnii,niiname)
 
     # ort out niftis
