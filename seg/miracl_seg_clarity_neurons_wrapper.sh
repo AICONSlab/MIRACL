@@ -163,7 +163,7 @@ if [[ "$#" -gt 1 ]]; then
 	if [ -z "${tifdir}" ];
 	then
 		usage
-		echo "ERROR: < -d => input clarity directory> not specified"
+		echo "ERROR: < -f => input clarity directory> not specified"
 		exit 1
 	fi
 

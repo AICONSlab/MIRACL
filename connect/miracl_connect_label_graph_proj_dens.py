@@ -120,8 +120,14 @@ def savenii(inarr, vx, outnii):
     mat = np.eye(4) * vx
     mat[3, 3] = 1
 
+    inarr = np.rollaxis(inarr, 1)
+    inarr = np.swapaxes(inarr, 1, 2)
+
+    tform = nib.orientations.axcodes2ornt(('A', 'I', 'R'))
+    arrort = nib.orientations.apply_orientation(inarr, tform)
+
     # Create nifti
-    nii = nib.Nifti1Image(inarr, mat)
+    nii = nib.Nifti1Image(arrort, mat)
 
     # nifti header info
     nii.header.set_data_dtype(np.int32)
@@ -174,7 +180,7 @@ def query_connect(exp_id, cutoff, exclude, mcc):
     # distinguish label hemisphere
     orgid = np.array(norm_proj['structure_id'])
     hem = np.array(norm_proj['hemisphere_id'])
-    connect_ids = [orgid[i] + 20000 if hem[i] == 2 else orgid[i] for i in range(len(hem))]
+    connect_ids = [orgid[i] + 20000 if hem[i] == 1 else orgid[i] for i in range(len(hem))]
 
     # filter out labels to exclude
     excl_ids = np.in1d(connect_ids, exclude)
@@ -286,14 +292,15 @@ def main():
     # ---------------
 
     # Get projection density
-    print("\n Downloading projection density volume for experiment %d of lbl %d" % (inj_exp, lbl))
     projd = getprojden(mcc, inj_exp)
 
     lbl_abrv = annot_csv[annot_csv['id'] == lbl]['acronym'].values[0]
     lbl_abrv = lbl_abrv[1:]  # drop 1st char
 
+    print("\n Downloading projection density volume for experiment %d of lbl %d => %s" % (inj_exp, lbl, lbl_abrv))
+
     outpd = '%s_exp%s_projection_density.nii.gz' % (lbl_abrv, inj_exp)
-    outtif = '%s_exp%s_projection_desnity.tif' % (lbl_abrv, inj_exp)
+    outtif = '%s_exp%s_projection_density.tif' % (lbl_abrv, inj_exp)
     # outind = '%s_injection_density.nii.gz' % experiment_id
     # outdm = '%s_binary_mask.nii.gz' % experiment_id
 
@@ -301,6 +308,10 @@ def main():
 
     savenii(projd, vx, outpd)
     savetiff(projd, outtif)
+
+    # orient
+    # call(["c3d", "%s" % outpd, "-orient", "ASR", "-o", "%s" % outpd])
+
     # savenii(ind, vx, outind)
     # savenii(dm, vx, outdm)
 
@@ -318,8 +329,8 @@ def main():
     # compute & save proj map
     exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp)
 
-    print (
-    "\n Downloading connectivity graph & projection map done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+    print ("\n Downloading connectivity graph & projection map done in %s ... Have a good day!\n" % (
+    datetime.now() - starttime))
 
 
 # Call main function
