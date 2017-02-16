@@ -7,6 +7,7 @@ import argparse
 import os
 import warnings
 from datetime import datetime
+from subprocess import call
 
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -310,7 +311,7 @@ def main():
     savetiff(projd, outtif)
 
     # orient
-    # call(["c3d", "%s" % outpd, "-orient", "ASR", "-o", "%s" % outpd])
+    call(["c3d", "%s" % outpd, "-orient", "ASR", "-o", "%s" % outpd])
 
     # savenii(ind, vx, outind)
     # savenii(dm, vx, outdm)
