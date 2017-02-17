@@ -43,7 +43,7 @@ def helpmsg():
 
 	    Python 2.7
 	    used modules:
-            argparse, numpy, scipy, seaborn, pandas, tifffile, warnings, matplotlib, os, sys, datetime, allensdk
+            argparse, numpy, scipy, seaborn, pandas, tifffile, warnings, matplotlib, os, sys, datetime, allensdk, nibabel
 
 
     '''
