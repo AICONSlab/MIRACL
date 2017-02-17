@@ -42,7 +42,7 @@ miracl_seg_clarity_neurons_wrapper.sh
         segmentation/seg_bin_sparse.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
 
-        Results can be openned in Fiji for visualization
+        Results can be opened in Fiji for visualization
 
 
 		----------
@@ -83,7 +83,7 @@ _________________________
 
     Main Outputs
 
-        voxelized_seg_sparse.(tif/nii) or nuclear (segmnetation results voxelized to ARA resolution)
+        voxelized_seg_sparse.(tif/nii) or nuclear (segmentation results voxelized to ARA resolution)
         voxelized_seg_bin_sparse.(tif/nii) (binarized version)
 
     -----

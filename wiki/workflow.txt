@@ -59,13 +59,13 @@ miracl_workflow_registration_clarity-allen_wb.sh
             m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>  (default: split)
 
-            v. Labels voxel size/Resolutin of labels in um
+            v. Labels voxel size/Resolution of labels in um
                 accepted inputs are: 10, 25 or 50  (default: 10)
 
             l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
                 input could be at a different depth than default labels
 
-                If l. is specified (m & v cannot be speficied)
+                If l. is specified (m & v cannot be specified)
 
 
 	----------
@@ -77,9 +77,9 @@ miracl_workflow_registration_clarity-allen_wb.sh
 
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
 
-		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen lables registered to downsampled Clarity
+		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
 
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen lables registered to original Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen labels registered to original Clarity
 
 
         - To visualize clarity data in Allen space - assuming chosen v/vox 10um
@@ -185,13 +185,13 @@ miracl_workflow_segmentation_clarity.sh
         segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
         segmentation/seg_bin.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
-        voxelized_seg.(tif/nii)  (segmnetation results voxelized to ARA resolution)
+        voxelized_seg.(tif/nii)  (segmentation results voxelized to ARA resolution)
         voxelized_seg_bin.(tif/nii) (binarized version)
 
-        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA lables)
+        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)
 
 
-        Results can be openned in Fiji for visualization
+        Results can be opened in Fiji for visualization
 
 
     ----------

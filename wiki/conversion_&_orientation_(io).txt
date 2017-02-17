@@ -72,7 +72,7 @@ miracl_set_orient_gui.py
 
     A GUI will open on the middle slice of the data. User can input slice number to navigate to a certain slice.
 
-    Then the user need to set the Orientation (Axial, Saggital, Cornoal) of the image from a drop-down menu.
+    Then the user need to set the Orientation (Axial, Sagittal, Coronal) of the image from a drop-down menu.
 
     They will also need to set the Annotation (Superior, Anterior, Left ...) of the Top, Right sides.
 
@@ -80,7 +80,7 @@ miracl_set_orient_gui.py
 
     Then exit GUI.
 
-    The orientation code will be set based on the user entries and will be outputed in a text file (ort2std.txt) inside the dir.
+    The orientation code will be set based on the user entries and will be written to a text file (ort2std.txt) inside the dir.
 
 
 	________________________________________________
