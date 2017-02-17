@@ -70,13 +70,13 @@ function usage()
         segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
         segmentation/seg_bin.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
-        voxelized_seg.(tif/nii)  (segmnetation results voxelized to ARA resolution)
+        voxelized_seg.(tif/nii)  (segmentation results voxelized to ARA resolution)
         voxelized_seg_bin.(tif/nii) (binarized version)
 
-        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA lables)
+        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)
 
 
-        Results can be openned in Fiji for visualization
+        Results can be opened in Fiji for visualization
 
 
     ----------

@@ -63,7 +63,7 @@ Steps to setup/run MIRACL on a Linux machine:
 
     _________________
 
-    For the visualization of nifti files and labels we recommand "ITKSNAP":
+    For the visualization of nifti files and labels we recommend "ITKSNAP":
     http://www.itksnap.org/pmwiki/pmwiki.php?n=Downloads.SNAP3
 
     &
@@ -106,7 +106,7 @@ The workflow (flow) module combines multiple functions for ease of use to prefor
 The "Atlases" folder contains templates, annotations, histology, ontology graph info & LUT/label description of the Allen reference atlas (ARA)
 
 
-The "Data" folder contains test data with example inputs and outputs for the registration and segmentation moduels
+The "Data" folder contains test data with example inputs and outputs for the registration and segmentation modules
 
 
 for a detailed description & input parameters please check the respective wiki of each module 

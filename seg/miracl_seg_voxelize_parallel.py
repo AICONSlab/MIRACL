@@ -40,7 +40,7 @@ def helpmsg(name=None):
 
     Main Outputs
 
-        voxelized_seg_sparse.(tif/nii) or nuclear (segmnetation results voxelized to ARA resolution)
+        voxelized_seg_sparse.(tif/nii) or nuclear (segmentation results voxelized to ARA resolution)
         voxelized_seg_bin_sparse.(tif/nii) (binarized version)
 
     -----

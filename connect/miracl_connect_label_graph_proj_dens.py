@@ -26,11 +26,11 @@ warnings.filterwarnings("ignore")
 def helpmsg():
     return '''Usage: miracl_get_exp_conn_graph_proj_den.py -l [label id]
 
-    Query Allen connectivity API for injection experiments & finds the experiment with highest proj volume
+    Query Allen connectivity API for injection experiments & finds the experiment with highest projection volume
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
 
-    Search is performed for experiemtns on wildtype (C57BL/6J) mice
+    Search is performed for experiments on wildtype (C57BL/6J) mice
 
     example: miracl_get_exp_conn_graph_proj_den.py -l
 

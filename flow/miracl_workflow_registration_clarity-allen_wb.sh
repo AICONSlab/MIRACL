@@ -66,13 +66,13 @@ function usage()
             m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>  (default: split)
 
-            v. Labels voxel size/Resolutin of labels in um
+            v. Labels voxel size/Resolution of labels in um
                 accepted inputs are: 10, 25 or 50  (default: 10)
 
             l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
                 input could be at a different depth than default labels
 
-                If l. is specified (m & v cannot be speficied)
+                If l. is specified (m & v cannot be specified)
 
 
 	----------
@@ -84,11 +84,11 @@ function usage()
 
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
 
-		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen lables registered to downsampled Clarity
+		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
 
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen lables registered to oriented Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
 
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen lables registered to original (full-resolution) Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen labels registered to original (full-resolution) Clarity
 
 
         - To visualize clarity data in Allen space - assuming chosen v/vox 10um

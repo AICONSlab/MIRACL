@@ -22,7 +22,7 @@ def helpmsg(name=None):
 
 Computes paired_ttest test between both hemispheres for all labels across mice
 
-Looks for feature exraction csv files within input directory
+Looks for feature extraction csv files within input directory
 
 Outputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
 

@@ -2,14 +2,28 @@
   <dictionary name="mgoubran">
     <words>
       <w>argparse</w>
+      <w>autofluo</w>
+      <w>binarized</w>
+      <w>clar</w>
+      <w>downsample</w>
+      <w>downsampled</w>
+      <w>eyfp</w>
+      <w>github</w>
       <w>goubran</w>
       <w>helpmsg</w>
       <w>hemi</w>
+      <w>itksnap</w>
       <w>maged</w>
       <w>mgoubran</w>
       <w>miracl</w>
       <w>nifti</w>
+      <w>snaplabels</w>
+      <w>tifs</w>
       <w>voxel</w>
+      <w>voxelize</w>
+      <w>voxelized</w>
+      <w>voxelizes</w>
+      <w>wildtype</w>
     </words>
   </dictionary>
 </component>

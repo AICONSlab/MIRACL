@@ -7,8 +7,6 @@ function getversion()
 	printf "MIRACL pipeline v. $ver \n"
 }
 
-# TODOlp: add stroke mask later
-
 
 # help/usage function
 function usage()
@@ -46,13 +44,13 @@ function usage()
 			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 				accepted inputs are: <split> or <combined>  (default: split)
 
-			v. Labels voxel size/Resolutin of labels in um
+			v. Labels voxel size/Resolution of labels in um
 				accepted inputs are: 10, 25 or 50  (default: 10)
 				
 			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
 				input could be at a different depth than default labels
 
-				If l. is specified (m & v cannot be speficied)
+				If l. is specified (m & v cannot be specified)
 
 	----------		
 
@@ -689,3 +687,8 @@ DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
 echo "Registration and Allen label warping done in $DIFF minutes. Have a good day!"
+
+
+#--------------------
+# TODOs
+# TODOlp: add stroke mask later
