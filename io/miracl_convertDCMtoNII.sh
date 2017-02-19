@@ -136,7 +136,7 @@ nnii=`ls ${subdir}/*.nii* 2>/dev/null | wc -l`
 			mkdir -p dcm
 			mv *.dcm dcm/.
 
-            if [ -f ${base}.bv* ]; then
+            if [ -f "${base}".bvec ]; then
 
                 mv ${base}.bvec "${seq}".bvec
                 mv ${base}.bval "${seq}".bval
@@ -173,7 +173,7 @@ nnii=`ls ${subdir}/*.nii* 2>/dev/null | wc -l`
             mv ${filename2} "${seq}".nii
             gzip ${seq}.nii
 
-            if [ -f ${base2}.bv* ]; then
+            if [ -f "${base2}".bvec ]; then
 
                 mv ${base2}.bvec "${seq}".bvec
                 mv ${base2}.bval "${seq}".bval
