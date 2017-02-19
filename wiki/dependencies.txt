@@ -42,8 +42,7 @@ ______________
 if study has MRI/CT (structural) data also need
 
 - FSL
-- Freesurfer
-- NiftyReg
+- dcm2nii
 
 Installing dependencies:
 

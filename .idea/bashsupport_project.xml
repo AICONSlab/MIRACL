@@ -3,6 +3,7 @@
   <component name="BashSupportProjectSettings">
     <option name="globalVariables">
       <set>
+        <option value="MIRACL_HOME" />
         <option value="hresclar" />
         <option value="ortclartag" />
         <option value="regorgclar" />
