@@ -121,21 +121,31 @@ nnii=`ls ${subdir}/*.nii* 2>/dev/null | wc -l`
 #			sernum=`mri_probedicom --i ${dcm1} | grep SeriesNo | cut -d ' ' -f2`;
 
             dcm1=`ls -1d *.dcm | head -1`
-			seq=`c3d ${dcm1} -info-full | grep 103e | cut -d '=' -f 2`
+            seq=`c3d ${dcm1} -info-full | grep 103e | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | tr ' ' '_'`
 
-			sernum=`c3d ${dcm1} -info-full | grep "0020|0011" | cut -d '=' -f 2`
+			sernum=`c3d ${dcm1} -info-full | grep "0020|0011" | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'`
 
 			echo ${seq}
 #			mri_convert -i ${dcm1} -o ${seq}.nii.gz
-			dcm2nii -g N -x N -r N -d N -p N -e N -f Y *
+			dcm2nii -g N -x N -r N -d N -p N -e N -f Y -o . *
+            base=${dcm1%.*}
             filename="${dcm1%.*}.nii"
-            mv ${filename} ${seq}.nii
+
+            mv ${filename} "${seq}".nii
             gzip ${seq}.nii
 			mkdir -p dcm
 			mv *.dcm dcm/.
+
+            if [ -f ${base}.bv* ]; then
+
+                mv ${base}.bvec "${seq}".bvec
+                mv ${base}.bval "${seq}".bval
+
+            fi
+
 			popd
 
-			mv ${subdir} ${seq}_${sernum}
+			mv ${subdir} "${seq}"_"${sernum}"
 
 		elif [[ "$n2" -gt 2 ]]; then
 			
@@ -151,20 +161,28 @@ nnii=`ls ${subdir}/*.nii* 2>/dev/null | wc -l`
 #           sernum=`mri_probedicom --i $dcm2 | grep SeriesNo | cut -d ' ' -f2`;
 
             dcm2=`ls -1d dcm/*.dcm | head -1`
-			seq=`c3d ${dcm2} -info-full | grep 103e | cut -d '=' -f 2`
+            seq=`c3d ${dcm1} -info-full | grep 103e | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | tr ' ' '_'`
 
-            sernum=`c3d ${dcm2} -info-full | grep "0020|0011" | cut -d '=' -f 2`
+            sernum=`c3d ${dcm2} -info-full | grep "0020|0011" | cut -d '=' -f 2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'`
 
 			echo ${seq}
 #			mri_convert -i ${dcm2} -o ${seq}.nii.gz
-            dcm2nii -g N -x N -r N -d N -p N -e N -f Y *
+            dcm2nii -g N -x N -r N -d N -p N -e N -f Y -o . *
+            base2=${dcm2%.*}
             filename2="${dcm2%.*}.nii"
-            mv ${filename2} ${seq}.nii
+            mv ${filename2} "${seq}".nii
             gzip ${seq}.nii
+
+            if [ -f ${base2}.bv* ]; then
+
+                mv ${base2}.bvec "${seq}".bvec
+                mv ${base2}.bval "${seq}".bval
+
+            fi
 
 			popd
 
-			mv ${subdir} ${seq}_${sernum}
+			mv ${subdir} "${seq}"_"${sernum}"
 
 		else
 
