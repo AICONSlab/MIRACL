@@ -104,7 +104,7 @@ miracl_lbls_warp_to_mri_space.sh
 
 		arguments (required):
 
-			r. Input MRI registration dir
+			r. Input MRI registration dir ("mri_allen_reg")
 
 			l. input Allen Labels to warp (in Allen space)
 

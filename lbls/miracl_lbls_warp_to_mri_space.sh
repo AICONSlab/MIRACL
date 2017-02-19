@@ -33,7 +33,7 @@ function usage()
 
 		arguments (required):
 
-			r. Input MRI registration dir
+			r. Input MRI registration dir ("mri_allen_reg")
 
 			l. input Allen Labels to warp (in Allen space)
 
@@ -252,29 +252,28 @@ function warpallenlbls()
 	# In tforms
 	local antswarp=$3
 	local antsaff=$4
-	local initform=$5
 
 	# Out lbls
-	local wrplbls=$6
+	local wrplbls=$5
 	
 	# Ort pars
-	local orttaglbls=$7
-	local ortintlbls=$8
-	local orttypelbls=$9
-	local ortlbls=${10}
+	local orttaglbls=$6
+	local ortintlbls=$7
+	local orttypelbls=$8
+	local ortlbls=${09}
 
 	# swap lbls
-	local swplbls=${11}
-	local tiflbls=${12}
+	local swplbls=${10}
+	local tiflbls=${11}
 	
 	# Up lbls
-    local inclar=${13}
-    local reslbls=${14}
-    local restif=${15}
+    local inclar=${12}
+    local reslbls=${13}
+    local restif=${14}
 
 	# warp to registered MRI
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${smclar} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+	 antsApplyTransforms -r ${smclar} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff}  -o ${wrplbls}
 
 	# orient to org 
 #	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
@@ -290,11 +289,14 @@ function main()
 # 1) Warp Allen labels to original MRI
 
 	# Tforms
-	antswarp=$regdir/allen_clar_ants1Warp.nii.gz
-	antsaff=$regdir/allen_clar_ants0GenericAffine.mat
+	antswarp=$regdir/allen_mr_ants1Warp.nii.gz
+	antsaff=$regdir/allen_mr_ants0GenericAffine.mat
 
 	base=`basename $lbls`
 	lblsname=${base%%.*};
+
+	motherdir=`dirname ${regdir}`
+	regdirfinal=${motherdir}/reg_final
 
 	# Out lbls
 	wrplbls=${regdir}/${lblsname}_ants.nii.gz
@@ -304,7 +306,7 @@ function main()
 	reslbls=${regdirfinal}/allen_lbls_clar_ants.nii.gz
 	restif=${regdirfinal}/allen_lbls_clar_ants.tif
 
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif}
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${wrplbls} RPI NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif}
 }
 
 #--------------------
@@ -317,3 +319,11 @@ DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
 echo "Registration and Allen label warping done in $DIFF minutes. Have a good day!"
+
+
+#--------------------
+
+#TODOs
+
+# TODOhp: fix script
+# TODOlp: add scripts for warping MRI & CLAR in same space to Allen

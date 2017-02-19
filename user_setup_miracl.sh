@@ -23,7 +23,7 @@ for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 
 #--------------------
 
-#--- MIRACL dependecies ----
+#--- MIRACL dependencies ----
 
 #---ANTS---
 
@@ -47,6 +47,9 @@ export allen50=${MIRACL_HOME}/atlases/ara/template/average_template_50um.nii.gz
 export lbls10=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz
 export lbls25=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz
 export lbls50=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50um.nii.gz
+
+export gplbls25=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_25um_parent-level_3.nii.gz
+export gplbls50=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50um_parent-level_3.nii.gz
 
 export snaplut=${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt
 

@@ -10,11 +10,17 @@ Only CLARITY data:
 - Fiji
 - Python
 
-Fiji plugins
+Installing Fiji plugins
+
+Fiji > Help > Update
+
+Manage update sites > Add:
 
 - 3D ImageJ suite
+http://sites.imagej.net/Tboudier
 
-- Mathematical Morphology  
+- Mathematical Morphology (IJPB-plugins)
+http://sites.imagej.net/IJPB-plugins
 
 Python libraries 
 
@@ -25,7 +31,8 @@ Installing dependencies:
 
 - Compiled versions of ants and c3d for linux x86 bit are included in the package
 
-- Fiji 
+- Fiji
+
 
 - Python
 
