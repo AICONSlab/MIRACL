@@ -927,4 +927,6 @@ DIFF=$((DIFF/60))
 
 echo "Registration and Allen label warping done in $DIFF minutes. Have a good day!"
 
+
 # TODOs
+# TODOhp: maybe increase 0.05 in affine init (test)

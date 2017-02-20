@@ -7,10 +7,8 @@ import argparse
 import glob
 import logging
 import os
-import re
-import sys
 import tkFileDialog
-from Tkinter import Tk
+from Tkinter import *
 from datetime import datetime
 
 import cv2
@@ -65,97 +63,147 @@ Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
         '''
 
 
-if len(sys.argv) == 1:
+def parsefn(args):
+    if len(args) == 1:
 
-    print("Running in GUI mode")
+        print("Running in GUI mode")
 
-    Tk().withdraw()
-    indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then OK')
+        Tk().withdraw()
+        indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
 
-    outnii = 'clarity'
-    d = 5
-    chann = 1
-    chan = 'eyfp'
-    vx = 0.005
-    vz = 0.005
-    cent = [11.4, 0, 0]
-    chanp = None
+        if not indir:
+            sys.exit('input folder/directory not specified ... exiting')
 
-else:
+        if not os.path.exists(indir):
+            sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+        fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', 'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', 'center (def = 0,0,0)'
 
-    parser.add_argument('-f', '--folder', type=str, help="Tiff folder", required=True)
-    parser.add_argument('-d', '--down', type=int, help="Downsample ratio")
-    parser.add_argument('-cn', '--channum', type=int, help="Channel number")
-    parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
-    parser.add_argument('-ch', '--channame', type=str, help="Channel name")
-    parser.add_argument('-o', '--outnii', type=str, help="Out nii name")
-    parser.add_argument('-vx', '--resx', type=float, help="Original x resolution")
-    parser.add_argument('-vz', '--resz', type=float, help="Original z resolution")
-    parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
+        def fetch(entries):
+            for entry in entries:
+                field = entry[0]
+                text = entry[1].get()
+                print('%s: "%s"' % (field, text))
 
-    args = parser.parse_args()
+        def makeform(root, fields):
+            entries = []
+            values = []
+            for field in fields:
+                row = Frame(root)
+                lab = Label(row, width=25, text=field, anchor='w')
+                ent = Entry(row)
+                row.pack(side=TOP, fill=X, padx=5, pady=5)
+                lab.pack(side=LEFT)
+                ent.pack(side=RIGHT, expand=YES, fill=X)
+                entries.append((field, ent))
+                values.append(ent)
+            return entries, values
 
-    print("Running in script mode")
+        root = Tk()
+        root.title("Nii conversion options")
+        root.geometry("300x350")
+        [ents, vals] = makeform(root, fields)
+        root.bind('<Return>', (lambda event, e=ents: fetch(e)))
+        b1 = Button(root, text='Show',
+                    command=(lambda e=ents: fetch(e)))
+        b1.pack(side=LEFT, padx=5, pady=5)
+        b2 = Button(root, text='Done', command=root.quit)
+        b2.pack(side=RIGHT, padx=5, pady=5)
+        root.mainloop()
 
-    # check if pars given
+        outnii = 'clarity' if not vals[0].get() else vals[0].get()
 
-    assert isinstance(args.folder, str)
-    indir = args.folder
+        d = 5 if not vals[1].get() else int(vals[1].get())
 
-    if not os.path.exists(indir):
-        sys.exit('%s does not exist ... please check path and rerun script' % indir)
+        chann = 1 if not vals[2].get() else int(vals[2].get())
 
-    if args.outnii is None:
-        outnii = 'clarity'
+        chanp = None if not vals[3].get() else vals[3].get()
+
+        chan = 'eyfp' if not vals[4].get() else vals[4].get()
+
+        vx = 0.005 if not vals[5].get() else int(vals[5].get()) / float(1000)
+
+        vz = 0.005 if not vals[6].get() else int(vals[6].get()) / float(1000)
+
+        cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
+
+
     else:
-        assert isinstance(args.outnii, str)
-        outnii = args.outnii
 
-    if args.down is None:
-        d = 5
-        print("down sample ratio not specified ... choosing default value of %d" % d)
-    else:
-        assert isinstance(args.down, int)
-        d = args.down
+        parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
-    if args.channum is None:
-        chann = 1
-        print("channel # not specified ... choosing default value of %d" % chann)
-    else:
-        assert isinstance(args.channum, int)
-        chann = args.channum
+        parser.add_argument('-f', '--folder', type=str, help="Tiff folder", required=True)
+        parser.add_argument('-d', '--down', type=int, help="Downsample ratio")
+        parser.add_argument('-cn', '--channum', type=int, help="Channel number")
+        parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
+        parser.add_argument('-ch', '--channame', type=str, help="Channel name")
+        parser.add_argument('-o', '--outnii', type=str, help="Out nii name")
+        parser.add_argument('-vx', '--resx', type=float, help="Original x resolution")
+        parser.add_argument('-vz', '--resz', type=float, help="Original z resolution")
+        parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
 
-        if args.chanprefix is None:
-            sys.exit('-cp (channel prefix) not specified ')
+        args = parser.parse_args()
 
-    chanp = args.chanprefix if args.chanprefix is not None else None
+        print("Running in script mode")
 
-    if args.channame is None:
-        chan = 'eyfp'
-        print("channel name not specified ... choosing default value of %s" % chan)
-    else:
-        assert isinstance(args.channame, str)
-        chan = args.channame
+        # check if pars given
 
-    if args.resx is None:
-        vx = 0.005  # 5 um
-    else:
-        vx = args.resx
-        vx /= float(1000)
+        assert isinstance(args.folder, str)
+        indir = args.folder
 
-    if args.resz is None:
-        vz = 0.005  # 5 um
-    else:
-        vz = args.resz
-        vz /= float(1000)
+        if not os.path.exists(indir):
+            sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
-    if args.center is None:
-        cent = [0, 0, 0]
-    else:
-        cent = args.center
+        if args.outnii is None:
+            outnii = 'clarity'
+        else:
+            assert isinstance(args.outnii, str)
+            outnii = args.outnii
 
+        if args.down is None:
+            d = 5
+            print("down sample ratio not specified ... choosing default value of %d" % d)
+        else:
+            assert isinstance(args.down, int)
+            d = args.down
+
+        if args.channum is None:
+            chann = 1
+            print("channel # not specified ... choosing default value of %d" % chann)
+        else:
+            assert isinstance(args.channum, int)
+            chann = args.channum
+
+            if args.chanprefix is None:
+                sys.exit('-cp (channel prefix) not specified ')
+
+        chanp = args.chanprefix if args.chanprefix is not None else None
+
+        if args.channame is None:
+            chan = 'eyfp'
+            print("channel name not specified ... choosing default value of %s" % chan)
+        else:
+            assert isinstance(args.channame, str)
+            chan = args.channame
+
+        if args.resx is None:
+            vx = 0.005  # 5 um
+        else:
+            vx = args.resx
+            vx /= float(1000)
+
+        if args.resz is None:
+            vz = 0.005  # 5 um
+        else:
+            vz = args.resz
+            vz /= float(1000)
+
+        if args.center is None:
+            cent = [0, 0, 0]
+        else:
+            cent = args.center
+
+    return indir, outnii, d, chann, chanp, chan, vx, vz, cent
 
 # ---------
 # Logging fn
@@ -289,17 +337,19 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
 # ---------
 
 def main():
-    scriptlog('tif2nii.log')
-
     """
     :rtype: nifti file
     """
+    scriptlog('tif2nii.log')
+
+    args = sys.argv
+
+    [indir, outnii, d, chann, chanp, chan, vx, vz, cent] = parsefn(args)
+
     converttiff2nii(indir, d, chann, chan, vx, vz, cent, ot=outnii, cp=chanp)
 
 if __name__ == "__main__":
     main()
 
-
-    # TODOs:
-
-    # TODOlp: GUI with options to enter
+# ---------
+# TODOs:
