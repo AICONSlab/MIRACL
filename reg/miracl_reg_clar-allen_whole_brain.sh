@@ -480,8 +480,14 @@ function initclarallenreg()
 
 	# Init reg
 	ifdsntexistrun ${initform} "Initializing registration ..." \
-	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter}
+	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} &
 
+    # kill after 3 min (gcc issue)
+    pid=`echo $!`
+
+    sleep 180
+
+    kill ${pid}
 
 	# Warp Allen
 	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
