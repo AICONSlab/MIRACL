@@ -47,7 +47,7 @@ function usage()
 		        to orient nifti from original orientation to "standard/Allen" orientation
 		
 			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: split)
+				accepted inputs are: <split> or <combined>  (default: combined)
 
 			v. Labels voxel size/Resolution of labels in um
 				accepted inputs are: 10, 25 or 50  (default: 10)
@@ -763,10 +763,10 @@ function main()
 
 	# Init parms
 
-	deg=2 # search increment in degrees 
-	radfrac=0.05 # arc around principal axis
+	deg=1 # search increment in degrees
+	radfrac=1 # arc around principal axis
 	useprincax=0 # rotation searched around principal axis
-	localiter=100 # num of iteration for optimization at search point
+	localiter=500 # num of iteration for optimization at search point
 
 	# Out Allen
 	initallen=${regdir}/init_allen.nii.gz
@@ -817,7 +817,7 @@ function main()
 
 		if [[ -z ${hemi} ]]; then
 			
-			hemi=split
+			hemi=combined
 
 		fi
 
@@ -929,4 +929,4 @@ echo "Registration and Allen label warping done in $DIFF minutes. Have a good da
 
 
 # TODOs
-# TODOhp: maybe increase 0.05 in affine init (test)
+# TODOlp: add if already oriented

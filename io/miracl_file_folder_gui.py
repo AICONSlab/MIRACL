@@ -13,7 +13,7 @@ from tkFileDialog import askopenfilename
 ### Inputs #########
 
 def helpmsg(name=None):
-    return '''python_file_folder_gui -f [file/folder] -s string
+    return '''miracl_file_folder_gui -f [file/folder] -s string
 
 Opens gui to choose file / folder & shows input string as message
 

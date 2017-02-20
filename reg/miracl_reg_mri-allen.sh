@@ -691,4 +691,5 @@ echo "Registration and Allen label warping done in $DIFF minutes. Have a good da
 
 #--------------------
 # TODOs
+# TODOlp: add if already oriented
 # TODOlp: add stroke mask later
