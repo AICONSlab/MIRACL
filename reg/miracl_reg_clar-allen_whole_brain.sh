@@ -18,44 +18,38 @@ function usage()
 	2) Warps Allen annotations to the original high-res CLARITY space
 	3) Warps the higher-resolution CLARITY to Allen space
 
-	Usage: `basename $0`
-
-	A GUI will open to choose your:
-
-		- < Input down-sampled clarity nifti > : Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
-
-		file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
-        [this should be accurate as it is used for allen label upsampling to clarity]
-
-
-	----------
+	if no inputs are given function will run in GUI mode
 
 	For command-line / scripting
 
+	Usage: `basename $0` -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ]
 
-	Usage: `basename $0` -i <input_down-sampled_clarity_nifti>
+    Example: `basename $0` -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
 
-	Example: `basename $0` -i Reference_channel_05_down.nii.gz -o ARS -m combined -v 25
+    arguments (required):
 
-		arguments (required):
+		i.  input down-sampled clarity nii
+		    Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
 
-			i. Input down-sampled clarity nifti (with "##_down" in file name: ex. stroke13_05_down_Ref_chan.nii.gz )
+		    file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
+            [this should be accurate as it is used for allen label upsampling to clarity]
 
-		optional arguments:
+    optional arguments:
 
-		    o. Orient code (default: ALS)
-		        to orient nifti from original orientation to "standard/Allen" orientation
+        o.  orient code (default: ALS)
+            to orient nifti from original orientation to "standard/Allen" orientation
 		
-			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: combined)
+        m.  hemisphere mirror (default: combined)
+            warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
+			accepted inputs are: <split> or <combined>
 
-			v. Labels voxel size/Resolution of labels in um
-				accepted inputs are: 10, 25 or 50  (default: 10)
+        v.  labels voxel size/Resolution in um (default: 10)
+			accepted inputs are: 10, 25 or 50
 				
-			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
-				input could be at a different depth than default labels
+        l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
+			input labels could be at a different depth than default labels
 
-				If l. is specified (m & v cannot be specified)
+			If l. is specified (m & v cannot be specified)
 
 
 	----------
@@ -67,7 +61,7 @@ function usage()
 
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
 
-		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen lables registered to downsampled Clarity
+		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
 
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
 
@@ -256,7 +250,7 @@ else
 
 
 	# options gui 
-	opts=$(./miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" -hf "`usage`")
 
 	# populate array
 	arr=()

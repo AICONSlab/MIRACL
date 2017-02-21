@@ -17,40 +17,36 @@ function usage()
 	1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
 	2) Warps Allen annotations to the MRI space
 
-	Usage: `basename $0`
-
-	A GUI will open to choose your:
-
-		- < Input MRI nifti > : Preferably T2-weighted
-
-	----------
+	if no inputs are given function will run in GUI mode
 
 	For command-line / scripting
 
+	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ]
 
-	Usage: `basename $0` -i <invivo_or_exvivo> mri
+    Example: `basename $0` -i inv_mri.nii.gz -o RSP -m combined -v 25
 
-	Example: `basename $0` -i inv_mri.nii.gz
+    arguments (required):
 
-		arguments (required):
+		i.  input MRI nii
+            Preferably T2-weighted
 
-			i. Input MRI nifti
+    optional arguments:
 
-		optional arguments:
+        o.  orient code (default: RSP)
+            to orient nifti from original orientation to "standard/Allen" orientation
 
-            o. Orient code (default: RSP)
-		        to orient nifti from original orientation to "standard/Allen" orientation
-		
-			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: split)
+        m.  hemisphere mirror (default: combined)
+            warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
+			accepted inputs are: <split> or <combined>
 
-			v. Labels voxel size/Resolution of labels in um
-				accepted inputs are: 10, 25 or 50  (default: 10)
-				
-			l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um) 
-				input could be at a different depth than default labels
+        v.  labels voxel size/Resolution in um (default: 10)
+			accepted inputs are: 10, 25 or 50
 
-				If l. is specified (m & v cannot be specified)
+        l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
+			input labels could be at a different depth than default labels
+
+			If l. is specified (m & v cannot be specified)
+
 
 	----------		
 
@@ -218,6 +214,28 @@ else
 		echo "ERROR: <input MRI nii> was not chosen"
 		exit 1
 	fi
+
+
+	# options gui
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = RSP)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+	ort=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen orient code: $ort \n"
+
+	hemi=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen hemi: $hemi \n"
+
+	v=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen vox (um): $v \n"
 
 fi
 
@@ -626,7 +644,7 @@ function main()
 
 		if [[ -z ${hemi} ]]; then
 
-			hemi=split
+			hemi=combined
 
 		fi
 
