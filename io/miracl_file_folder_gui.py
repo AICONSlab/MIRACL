@@ -17,12 +17,9 @@ def helpmsg(name=None):
 
 Opens gui to choose file / folder & shows input string as message
 
-exmaple: python_file_folder_gui -f file -s "Please open your picture"
+example: python_file_folder_gui -f file -s "Please open your picture"
 
-Please add these lines after calling script in a bash script:
-
-guipath =`cat path.txt`
-rm path.txt 
+File/Folder path will be printed in output
 '''
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
@@ -48,8 +45,8 @@ def openfile(msg):
     else:
         print "No file was chosen!"
 
-    with open("path.txt", "w") as myfile:
-        myfile.write(filename)
+        # with open("path.txt", "w") as myfile:
+        #     myfile.write(filename)
 
 
 def openfolder(msg):
@@ -66,8 +63,8 @@ def openfolder(msg):
     else:
         print "No folder was chosen!"
 
-    with open("path.txt", "w") as myfile:
-        myfile.write(dirname)
+        # with open("path.txt", "w") as myfile:
+        #     myfile.write(dirname)
 
 
 def main():

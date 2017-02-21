@@ -191,13 +191,15 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr"
+	filepath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr")
 
-	filepath=`cat path.txt`
+    filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+#	filepath=`cat path.txt`
 	
 	eval ${_inpath}="'$filepath'"
 
-	rm path.txt
+#	rm path.txt
 
 }
 
@@ -257,6 +259,8 @@ else
 	printf "\n Reading input data \n"
 
 	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel (nii/nii.gz)" inclar
+
+    printf "\n Input file path: ${inclar} \n"
 
 	# check required input arguments
 

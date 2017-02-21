@@ -158,13 +158,15 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr"
-	
-	filepath=`cat path.txt`
+    filepath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr")
+
+	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+#	filepath=`cat path.txt`
 	
 	eval ${_inpath}="'$filepath'"
 
-	rm path.txt
+#	rm path.txt
 
 }
 
@@ -224,6 +226,8 @@ else
 	printf "\n Reading input data \n"
 
 	choose_file_gui "In-vivo or Ex-vivo MRI (nii/nii.gz)" inmr
+
+    printf "\n Input file path: ${inmr} \n"
 
 	# check required input arguments
 

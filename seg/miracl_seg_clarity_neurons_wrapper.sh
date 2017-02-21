@@ -116,13 +116,15 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr"
-	
-	folderpath=`cat path.txt`
+    folderpath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr")
+
+	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+#	folderpath=`cat path.txt`
 	
 	eval ${_inpath}="'$folderpath'"
 
-	rm path.txt
+#	rm path.txt
 
 }
 
