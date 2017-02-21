@@ -4,7 +4,7 @@
 function getversion()
 {
 	ver=`cat $MIRACL_HOME/version_num.txt`
-	printf "MIRACL pipeline v. $ver \n"
+	printf "\n MIRACL pipeline v. $ver \n"
 }
 
 
@@ -253,6 +253,29 @@ else
 		echo "ERROR: <input clarity nii> was not chosen"
 		exit 1
 	fi
+
+
+	# options gui 
+	opts=$(./miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+	ort=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen orient code: $ort \n"
+
+	hemi=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen hemi: $hemi \n"
+
+	v=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen vox (um): $v \n"
+
 
 fi
 

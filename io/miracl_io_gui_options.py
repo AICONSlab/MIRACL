@@ -4,7 +4,7 @@ import argparse
 from Tkinter import *
 
 
-### Inputs #########
+# Inputs #########
 
 def helpmsg(name=None):
     return '''miracl_io_gui_options.py -t title -f fields [separated by space] -hf helpfun

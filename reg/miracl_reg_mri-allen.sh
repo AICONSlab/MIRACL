@@ -4,7 +4,7 @@
 function getversion()
 {
 	ver=`cat $MIRACL_HOME/version_num.txt`
-	printf "MIRACL pipeline v. $ver \n"
+	printf "\n MIRACL pipeline v. $ver \n"
 }
 
 
