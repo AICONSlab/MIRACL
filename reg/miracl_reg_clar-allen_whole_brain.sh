@@ -160,6 +160,25 @@ fi
 
 #----------
 
+# make reg dir
+
+regdirfinal=$PWD/reg_final
+regdir=$PWD/clar_allen_reg
+
+
+if [[ ! -d ${regdir} ]]; then
+
+	printf "\n Creating registration folder\n"
+	mkdir -p ${regdirfinal} ${regdir}
+
+fi
+
+# output log file of script
+
+exec > >(tee -i ${regdir}/clar_allen_script.log)
+exec 2>&1
+
+
 # Init atlas dir
 
 atlasdir=${MIRACL_HOME}/atlases
@@ -266,9 +285,9 @@ else
 
 	printf "\n Chosen hemi: $hemi \n"
 
-	v=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-	printf "\n Chosen vox (um): $v \n"
+	printf "\n Chosen vox (um): $vox \n"
 
 
 fi
@@ -277,25 +296,6 @@ fi
 # get time
 
 START=$(date +%s)
-
-
-# make reg dir
-
-regdirfinal=$PWD/reg_final
-regdir=$PWD/clar_allen_reg
-
-
-if [[ ! -d ${regdir} ]]; then
-
-	printf "\n Creating registration folder\n"
-	mkdir -p ${regdirfinal} ${regdir}
-
-fi
-
-# output log file of script
-
-exec > >(tee -i ${regdir}/clar_allen_script.log)
-exec 2>&1
 
 
 #---------------------------
