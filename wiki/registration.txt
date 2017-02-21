@@ -38,7 +38,7 @@ miracl_reg_clar-allen_whole_brain.sh
 		        to orient nifti from original orientation to "standard/Allen" orientation
 
 			m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-				accepted inputs are: <split> or <combined>  (default: split)
+				accepted inputs are: <split> or <combined>  (default: combined)
 
 			v. Labels voxel size/Resolution of labels in um
 				accepted inputs are: 10, 25 or 50  (default: 10)

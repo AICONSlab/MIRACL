@@ -19,7 +19,7 @@ Opens gui to choose file / folder & shows input string as message
 
 exmaple: python_file_folder_gui -f file -s "Please open your picture"
 
-Please add after calling script in a bash script: 
+Please add these lines after calling script in a bash script:
 
 guipath =`cat path.txt`
 rm path.txt 
