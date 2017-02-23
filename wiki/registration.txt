@@ -38,6 +38,7 @@ miracl_reg_clar-allen_whole_brain.sh
 
 			If l. is specified (m & v cannot be specified)
 
+        ob  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
     ----------
 
@@ -125,6 +126,8 @@ miracl_reg_mri-allen.sh
 			input labels could be at a different depth than default labels
 
 			If l. is specified (m & v cannot be specified)
+
+        ob  Olfactory bulb included in brain, binary option (default: 0 -> not included)
 
 	----------
 

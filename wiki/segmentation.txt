@@ -100,7 +100,7 @@ _________________________
 
 
 
-3) Compute segmenation features
+3) Compute segmentation features
 _________________________
 
 

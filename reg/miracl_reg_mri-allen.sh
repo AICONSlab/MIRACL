@@ -47,6 +47,7 @@ function usage()
 
 			If l. is specified (m & v cannot be specified)
 
+        ob  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
 	----------		
 
@@ -177,7 +178,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:" opt; do
+	while getopts ":i:o:l:m:v:ob:" opt; do
     
 	    case "${opt}" in
 
@@ -199,6 +200,11 @@ if [[ "$#" -gt 1 ]]; then
         	v)
             	vox=${OPTARG}
             	;;
+
+            ob)
+            	ob=${OPTARG}
+            	;;
+
         	*)
             	usage            	
             	;;
@@ -596,8 +602,18 @@ function main()
 
 # 2a) initialize registration
 
-	# Allen atlas template
-	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
+    # Allen atlas template
+    if [[ -z ${ob} ]] ; then
+        ob=0
+    fi
+
+    if [[ "${ob}" == 0 ]]; then
+        allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
+
+    elif [[ "${ob}" == 1 ]]; then
+
+        allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
+    fi
 
 #	initform=${regdir}/init_tform.mat
 #

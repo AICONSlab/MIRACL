@@ -55,7 +55,7 @@ function usage()
         segmentation_sparse/seg_bin_sparse.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
 
-        Results can be openned in Fiji for visualization
+        Results can be opened in Fiji for visualization
 
 
         ----------
