@@ -38,7 +38,7 @@ function usage()
 
 			f. Input clarity folder/directory (including .tif images) [folder name without spaces]
 
-			t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
+			t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI) (default = sparse)
 
 		Optional arguments:
 
@@ -187,6 +187,23 @@ else
 		echo "ERROR: <input clarity directory> was not chosen"
 		exit 1
 	fi
+
+	# options gui
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" -f "seg type (def = sparse)" "channel prefix (ex = C001) "  -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+	type=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen seg type: $type \n"
+
+	prefix=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen channel prefix: $prefix \n"
 
 fi
 
