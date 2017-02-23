@@ -4,7 +4,7 @@
 function getversion()
 {
 	ver=`cat $MIRACL_HOME/version_num.txt`
-	printf "MIRACL pipeline v. $ver \n"
+	printf "\n MIRACL pipeline v. $ver \n"
 }
 
 
@@ -196,10 +196,10 @@ regdirfinal=$PWD/reg_final
 regdir=$PWD/clar_allen_reg
 
 
-if [[ ! -d $regdir ]]; then
+if [[ ! -d ${regdir} ]]; then
 
 	printf "\n Creating registration folder\n"
-	mkdir -p $regdirfinal $regdir
+	mkdir -p ${regdirfinal} ${regdir}
 
 fi
 
@@ -268,12 +268,12 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${convopts}" ];
 	then
 
-        echo miracl_convertTIFFtoNII.py -f ${indir}
+        printf "\n miracl_convertTIFFtoNII.py -f ${indir} \n"
         miracl_convertTIFFtoNII.py -f ${indir}
 
     else
 
-        echo miracl_convertTIFFtoNII.py -f ${indir} "${convopts}"
+        printf "\n miracl_convertTIFFtoNII.py -f ${indir} "${convopts}" \n"
         miracl_convertTIFFtoNII.py -f ${indir} ${convopts}
 
     fi
@@ -290,12 +290,12 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${regopts}" ];
 	then
 
-        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} \n"
         miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
 
     else
 
-        echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}"
+        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}" \n"
         miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
 
     fi
@@ -316,19 +316,14 @@ else
 
     printf "\n Running Set orient with the following command: \n"
 
-    echo miracl_set_orient_gui.py
+    printf "\n miracl_set_orient_gui.py \n"
     miracl_set_orient_gui.py
 
-
     #---------------------------
-    # Call conversion to nii
-
-    printf "\n Running Tiff to Nii conversion with the following command: \n"
-
-    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
+    # Get nii conv opts
 
 
-    # options gui
+    # options gui Nii conv
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Nii conversion options" -f "out nii (def = clarity)" "downsample ratio (def = 5)" \
 	 "channel #" "channel prefix" "channel name (def = eyfp)" "in-plane res (def = 5 um)" "z res (def = 5 um)" "center (def = 0 0 0)"  -hf "`usage`")
 
@@ -352,7 +347,7 @@ else
     printf "\n Chosen channel #: $chann \n"
 
     chanp=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    if [[ -z ${chanp} ]]; then chanp="*" ; fi   ##
+    if [[ -z ${chanp} ]]; then chanp=[None] ; fi   ##
     printf "\n Chosen channel prefix: $chanp \n"
 
     chan=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
@@ -371,22 +366,10 @@ else
     if [[ -z ${cent} ]]; then cent="0 0 0" ; fi
     printf "\n Chosen image center: $cent \n"
 
-
-    echo miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
-    miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
-
-
     #---------------------------
-    # Call registration
+    # Get reg opts
 
-    printf "\n Running CLARITY registration to Allen with the following command: \n"
-
-    # last file made in niftis folder
-    nii=`ls -r niftis | tail -n 1`
-
-    ort=`cat ort2std.txt | grep ortcode | cut -d '=' -f 2`
-
-	# options gui
+    # options gui for Reg
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
 
 	# populate array
@@ -409,7 +392,29 @@ else
     printf "\n Chosen ob: $ob \n"
 
 
-    echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob}
+    #---------------------------
+    # Call conversion to nii
+
+    printf "\n Running Tiff to Nii conversion with the following command: \n"
+
+    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
+
+
+    printf "\n miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+    miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+
+
+    #---------------------------
+    # Call registration
+
+    printf "\n Running CLARITY registration to Allen with the following command: \n"
+
+    # last file made in niftis folder
+    nii=`ls -r niftis | tail -n 1`
+
+    ort=`cat ort2std.txt | grep ortcode | cut -d '=' -f 2`
+
+    printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob} \n"
     miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob}
 
 
