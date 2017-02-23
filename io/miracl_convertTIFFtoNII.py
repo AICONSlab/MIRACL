@@ -69,7 +69,7 @@ def parsefn(args):
         print("Running in GUI mode")
 
         Tk().withdraw()
-        indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
+        indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "OK"')
 
         if not indir:
             sys.exit('input folder/directory not specified ... exiting')

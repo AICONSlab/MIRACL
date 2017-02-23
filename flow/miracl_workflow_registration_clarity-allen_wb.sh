@@ -325,10 +325,55 @@ else
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
-    indir=`cat ort2std.txt | grep tifdir | cut -d = -f 2`
+    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
 
-    echo miracl_convertTIFFtoNII.py -f ${indir}
-    miracl_convertTIFFtoNII.py -f ${indir}
+
+    # options gui
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Nii conversion options" -f "out nii (def = clarity)" "downsample ratio (def = 5)" \
+	 "channel #" "channel prefix" "channel name (def = eyfp)" "in-plane res (def = 5 um)" "z res (def = 5 um)" "center (def = 0 0 0)"  -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+
+    outnii=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${outnii} ]]; then outnii="clarity" ; fi
+    printf "\n Chosen out nii name: $outnii \n"
+
+    d=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${d} ]]; then d=5 ; fi
+    printf "\n Chosen downsample ratio: $d \n"
+
+    chann=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${chann} ]]; then chann=1 ; fi
+    printf "\n Chosen channel #: $chann \n"
+
+    chanp=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${chanp} ]]; then chanp="*" ; fi   ##
+    printf "\n Chosen channel prefix: $chanp \n"
+
+    chan=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${chan} ]]; then chan="eyfp" ; fi
+    printf "\n Chosen out channel name: $chan \n"
+
+    vx=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${vx} ]]; then vx=0.005 ; fi
+    printf "\n Chosen in-plane res: $vx \n"
+
+    vz=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${vz} ]]; then vz=0.005 ; fi
+    printf "\n Chosen thickness: $vz \n"
+
+    cent=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${cent} ]]; then cent="0 0 0" ; fi
+    printf "\n Chosen image center: $cent \n"
+
+
+    echo miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+    miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
 
 
     #---------------------------
@@ -339,8 +384,33 @@ else
     # last file made in niftis folder
     nii=`ls -r niftis | tail -n 1`
 
-    echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
-    miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+    ort=`cat ort2std.txt | grep ortcode | cut -d '=' -f 2`
+
+	# options gui
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+
+	hemi=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${hemi} ]]; then hemi="combined" ; fi
+	printf "\n Chosen hemi: $hemi \n"
+
+	vox=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${vox} ]]; then vox=10 ; fi
+	printf "\n Chosen vox (um): $vox \n"
+
+	ob=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${ob} ]]; then ob=0 ; fi
+    printf "\n Chosen ob: $ob \n"
+
+
+    echo miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob}
+    miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob}
 
 
 fi
