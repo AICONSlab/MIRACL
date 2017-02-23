@@ -279,7 +279,7 @@ else
 
 
 	# options gui 
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -299,6 +299,9 @@ else
 
 	printf "\n Chosen vox (um): $vox \n"
 
+	ob=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen ob: $ob \n"
 
 fi
 
@@ -799,7 +802,6 @@ function main()
         allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
 
     elif [[ "${ob}" == 1 ]]; then
-
         allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
     fi
 
