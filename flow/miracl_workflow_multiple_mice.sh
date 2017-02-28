@@ -88,7 +88,7 @@ while getopts ":st:sc:id:opt:nj:tj:" inopt; do
 
 		tj)
 
-        	n=${OPTARG}
+        	t=${OPTARG}
         	;;		        	
 
     	*)
@@ -104,13 +104,13 @@ done
 START=$(date +%s)
 
 # output log file of script
-exec > >(tee -i ${regdir}/warp_clar_allen_script.log)
+exec > >(tee -i flow_multiple_mice_script.log)
 exec 2>&1
 
 #---------------------------
 #---------------------------
 
-ts=$(($t*60));
+ts=$((${t}*60));
 
 # script to run
 run=${MIRACL_HOME}/${stype}/${script}
@@ -133,7 +133,7 @@ do
 
 			printf "\n $n || jobs submitted .. will sleep $t min before running other jobs \n"
 			
-			sleep $ts # secs
+			sleep ${ts} # secs
 
 			j=$(($j-$n))
 

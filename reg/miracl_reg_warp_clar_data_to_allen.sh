@@ -3,7 +3,7 @@
 # get version
 function getversion()
 {
-	ver=`cat $MIRACL_HOME/version_num.txt`
+	ver=`cat ${MIRACL_HOME}/version_num.txt`
 	printf "\n MIRACL pipeline v. $ver \n"
 }
 
@@ -113,7 +113,7 @@ function choose_folder_gui()
 	# eval ${_inpath}="'$filepath'"
 	# rm path.txt
 
-	folderpath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 	
 	eval ${_inpath}="'$folderpath'"
 
@@ -173,10 +173,17 @@ if [[ "$#" -gt 1 ]]; then
 		exit 1
 	fi
 
-    if [ -z ${lbls} ];
+    if [ -z ${inimg} ];
 	then
 		usage
-		echo "ERROR: < -i => input CLARITY image> not specified"
+		echo "ERROR: < -i => input CLARITY image to warp> not specified"
+		exit 1
+	fi
+
+    if [ -z ${ortfile} ];
+	then
+		usage
+		echo "ERROR: < -o=> ort file with code> not specified"
 		exit 1
 	fi
 
@@ -224,7 +231,7 @@ function ifdsntexistrun()
 	local outstr="$2"; 
 	local fun="${@:3}";  
 
-	if [[ ! -f $outfile ]]; then 
+	if [[ ! -f ${outfile} ]]; then
 
 		printf "\n $outstr \n"; 
 		echo "$fun"; 
@@ -250,8 +257,8 @@ function orientimg()
 	local orttype=$4
 	local ortclar=$5
 
-	ifdsntexistrun $ortclar "Orienting CLARITY to standard orientation" \
-	c3d $betclar -orient $orttag -interpolation $ortint -type $orttype -o $ortclar
+	ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+	c3d ${betclar} -orient ${orttag} -interpolation ${ortint} -type ${orttype} -o ${ortclar}
 
 }
 
@@ -313,7 +320,7 @@ function main()
 
     motherdir=$(dirname ${regdir})
 
-    base=`basename $inimg`
+    base=`basename ${inimg}`
 	clarname=${base%%.*};
 
 	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
@@ -322,7 +329,7 @@ function main()
 	ortlclar=${regdir}/${clarname}_ort.nii.gz
 	wrpclar=${regdirfinal}/${clarname}_allen_ants.nii.gz	
 
-	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
+#	smclarres=${regdirfinal}/clar_downsample_res??um.nii.gz
 
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 

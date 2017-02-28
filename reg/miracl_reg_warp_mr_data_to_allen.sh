@@ -3,7 +3,7 @@
 # get version
 function getversion()
 {
-	ver=`cat $MIRACL_HOME/version_num.txt`
+	ver=`cat ${MIRACL_HOME}/version_num.txt`
 	printf "\n MIRACL pipeline v. $ver \n"
 }
 
@@ -113,7 +113,7 @@ function choose_folder_gui()
 	# eval ${_inpath}="'$filepath'"
 	# rm path.txt
 
-	folderpath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 	
 	eval ${_inpath}="'$folderpath'"
 
@@ -173,10 +173,17 @@ if [[ "$#" -gt 1 ]]; then
 		exit 1
 	fi
 
-    if [ -z ${lbls} ];
+    if [ -z ${inimg} ];
 	then
 		usage
-		echo "ERROR: < -i => input MRI image> not specified"
+		echo "ERROR: < -i => input MRI image to warp> not specified"
+		exit 1
+	fi
+
+    if [ -z ${ortfile} ];
+	then
+		usage
+		echo "ERROR: < -o=> ort file with code> not specified"
 		exit 1
 	fi
 
@@ -224,11 +231,11 @@ function ifdsntexistrun()
 	local outstr="$2"; 
 	local fun="${@:3}";  
 
-	if [[ ! -f $outfile ]]; then 
+	if [[ ! -f ${outfile} ]]; then
 
 		printf "\n $outstr \n"; 
 		echo "$fun"; 
-		eval "$fun"; 
+		eval "${fun}";
 
 	else  
 		
@@ -250,8 +257,8 @@ function orientimg()
 	local orttype=$4
 	local ortmr=$5
 
-	ifdsntexistrun $ortmr "Orienting MRI to standard orientation" \
-	c3d $betmr -orient $orttag -interpolation $ortint -type $orttype -o $ortmr
+	ifdsntexistrun ${ortmr} "Orienting MRI to standard orientation" \
+	c3d ${betmr} -orient ${orttag} -interpolation ${ortint} -type ${orttype} -o ${ortmr}
 
 }
 
@@ -313,7 +320,7 @@ function main()
 
     motherdir=$(dirname ${regdir})
 
-    base=`basename $inimg`
+    base=`basename ${inimg}`
 	mrname=${base%%.*};
 
 	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
@@ -322,7 +329,7 @@ function main()
 	ortlmr=${regdir}/${mrname}_ort.nii.gz
 	wrpmr=${regdirfinal}/${mrname}_allen_ants.ii.gz	
 
-	smmrres=${regdirfinal}/mr_downsample_res${vox}um.nii.gz
+#	smmrres=${regdirfinal}/mr_downsample_res${vox}um.nii.gz
 
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
