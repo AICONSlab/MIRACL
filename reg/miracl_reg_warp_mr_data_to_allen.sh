@@ -13,7 +13,7 @@ function usage()
     
     cat <<usage
 
-	1) Warps Allen annotations to the MRI space
+	1) Warps MRI data from native space to Allen atlas
 
 	Usage: `basename $0`
 
@@ -21,21 +21,23 @@ function usage()
 
 		- < Input MRI registration folder >
 
-		- < Labels to warp>
+		- < MRI nii to warp >
+
+    	- < ort2std.txt > 
 
 	----------
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i <input_down-sampled_MRI_nifti>
+	Usage: `basename $0` -r [ MRI registration dir ] -i control03_05xdown_PIchan.nii.gz -o [ orient file ]
 
-	Example: `basename $0` -i Reference_channel_05_down.nii.gz
+	Example: `basename $0` -r mr_reg_allen -i inv_T2map.nii.gz -o ort2std.txt
 
 		arguments (required):
 
-			r. Input MRI registration dir ("mri_allen_reg")
+			r. Input MRI registration dir
 
-			l. input Allen Labels to warp (in Allen space)
+			i. input MRI nii to warp 
 
 			o. file with orientation to standard code
 
@@ -73,10 +75,8 @@ if [[ "$1" == "-h" || "$1" == "--help" || "$1" == "-help" ]]; then
 
 fi
 
-
 #----------
 # check dependencies
-
 
 if [ -z ${ANTSPATH} ];
 then
@@ -100,19 +100,22 @@ fi
 # Init atlas dir
 atlasdir=${MIRACL_HOME}/atlases
 
+
 # GUI for MRI input imgs
 function choose_folder_gui()
 {
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr"
+	folderpath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr")
 	
-	filepath=`cat path.txt`
-	
-	eval ${_inpath}="'$filepath'"
+	# filepath=`cat path.txt`	
+	# eval ${_inpath}="'$filepath'"
+	# rm path.txt
 
-	rm path.txt
+	folderpath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	
+	eval ${_inpath}="'$folderpath'"
 
 }
 
@@ -121,13 +124,15 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr"
+	filepath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr")
 
-	filepath=`cat path.txt`
+	# filepath=`cat path.txt`
+	# eval ${_inpath}="'$filepath'"
+	# rm path.txt
 
+	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	
 	eval ${_inpath}="'$filepath'"
-
-	rm path.txt
 
 }
 
@@ -136,7 +141,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:l:o:" opt; do
+	while getopts ":r:i:o:" opt; do
     
 	    case "${opt}" in
 
@@ -144,13 +149,14 @@ if [[ "$#" -gt 1 ]]; then
             	regdir=${OPTARG}
             	;;
 
-        	l)
-            	lbls=${OPTARG}
+        	i)
+            	inimg=${OPTARG}
             	;;
 
             o)
             	ortfile=${OPTARG}
             	;;
+
         	*)
             	usage            	
             	;;
@@ -170,20 +176,23 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z ${lbls} ];
 	then
 		usage
-		echo "ERROR: < -l => labels> not specified"
+		echo "ERROR: < -i => input MRI image> not specified"
 		exit 1
 	fi
 
 else
 
 	# call gui
+
 	printf "\n No inputs given ... running in GUI mode \n"
 
 	printf "\n Reading input data \n"
 
 	choose_folder_gui "MRI registration folder" regdir
 
-	choose_file_gui "Input labels to warp" lbls
+	choose_file_gui "Input MRI to warp" inimg
+
+	choose_file_gui "File with orientation code" ortfile
 
 	# check required input arguments
 	if [ -z ${regdir} ];
@@ -199,7 +208,7 @@ fi
 START=$(date +%s)
 
 # output log file of script
-exec > >(tee -i ${regdir}/mr_allen_lbls_warp_script.log)
+exec > >(tee -i ${regdir}/warp_mr_allen_script.log)
 exec 2>&1
 
 #---------------------------
@@ -229,8 +238,8 @@ function ifdsntexistrun()
 
 }
 
-#---------------------------
 
+#---------------------------
 # Orient
 function orientimg()
 {
@@ -249,30 +258,31 @@ function orientimg()
 function warpallenlbls()
 {
 	
+
 	# In imgs
-	local smmr=$1
-	local lbls=$2
+	local allenref=$1
+	local inimg=$2
 
 	# In tforms
 	local antswarp=$3
 	local antsaff=$4
+	# local initform=$5
 
 	# Out lbls
-	local wrplbls=$5
-	
+	local wrpmr=$5
+
 	# Ort pars
-	local orttaglbls=$6
-	local ortintlbls=$7
-	local orttypelbls=$8
-	local ortlbls=${9}
+	local orttagmr=$6
+	local ortintmr=$7
+	local orttypemr=$8
+	local ortmr=${9}
 
+    # orient to org
+	ifdsntexistrun ${ortmr} "Orienting Allen labels" orientimg ${wrpmr} ${orttagmr} ${ortintmr} ${orttypemr} ${ortmr}
 
-	# warp to registered MRI
-	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${smmr} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff}  -o ${wrplbls}
-
-	# orient to org 
-	orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+  	# warp to registered MRI
+	ifdsntexistrun ${wrpmr} "Applying ants deformation to Allen labels" \
+	 antsApplyTransforms -r ${allenref} -i ${ortmr} -n Multilabel -t ${antswarp} [ ${antsaff}, 1 ] -o ${wrpmr}
 
 }
 
@@ -284,63 +294,40 @@ function main()
 
 # 1) Warp Allen labels to original MRI
 
+    regdirfinal=$PWD/reg_final
+
+    if [[ ! -d ${regdirfinal} ]]; then
+
+        printf "\n Creating registration folder\n"
+        mkdir -p ${regdirfinal}
+
+    fi
+
+	# Tforms
+	# initform=${regdir}/init_tform.mat
+	antswarp=${regdir}/allen_mr_ants1InverseWarp.nii.gz
+	antsaff=${regdir}/allen_mr_ants0GenericAffine.mat
+
     # In files
     smmr=${regdir}/mr.nii.gz
 
-	# Tforms
-	antswarp=$regdir/allen_mr_ants1Warp.nii.gz
-	antsaff=$regdir/allen_mr_ants0GenericAffine.mat
+    motherdir=$(dirname ${regdir})
 
-	base=`basename $lbls`
-	lblsname=${base%%.*};
+    base=`basename $inimg`
+	mrname=${base%%.*};
 
-	motherdir=`dirname ${regdir}`
-	regdirfinal=${motherdir}/reg_final
+	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
 
-	# Out lbls
-	wrplbls=${regdir}/${lblsname}_ants.nii.gz
-	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
+    # Out img
+	ortlmr=${regdir}/${mrname}_ort.nii.gz
+	wrpmr=${regdirfinal}/${mrname}_allen_ants.ii.gz	
 
-	ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
+	smmrres=${regdirfinal}/mr_downsample_res${vox}um.nii.gz
 
-    # setting lbl ort
-    o=${ort:0:1}
-    r=${ort:1:1}
-    t=${ort:2:2}
+    ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
-    ol=${r}
+	warpallenlbls ${allenref} ${inimg} ${antswarp} ${antsaff} ${wrpmr} ${ort} NearestNeighbor short ${ortmr} 
 
-    if [ ${o} == "A" ]; then
-        rl="P"
-    elif [ ${o} == "P" ]; then
-        rl="A"
-    elif [ ${o} == "R" ]; then
-        rl="L"
-    elif [ ${o} == "L" ]; then
-        rl="R"
-    elif [ ${o} == "S" ]; then
-        rl="I"
-    elif [ ${o} == "I" ]; then
-        rl="S"
-    fi
-
-    if [ ${t} == "A" ]; then
-        tl="P"
-    elif [ ${t} == "P" ]; then
-        tl="A"
-    elif [ ${t} == "R" ]; then
-        tl="L"
-    elif [ ${t} == "L" ]; then
-        tl="R"
-    elif [ ${t} == "S" ]; then
-        tl="I"
-    elif [ ${t} == "I" ]; then
-        tl="S"
-    fi
-
-    ortlbl="$ol$rl$tl"
-
-	warpallenlbls ${smmr} ${lbls} ${antswarp} ${antsaff} ${wrplbls} ${ortlbl} NearestNeighbor short ${ortlbls}
 
 }
 
@@ -353,12 +340,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Allen labels warping done in $DIFF minutes. Have a good day!"
-
-
-#--------------------
-
-#TODOs
-
-# TODOhp: fix script
-# TODOlp: add scripts for warping MRI & mr in same space to Allen
+echo "Warping of MRI image to Allen space done in $DIFF minutes. Have a good day!"

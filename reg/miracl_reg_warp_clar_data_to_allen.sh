@@ -13,7 +13,7 @@ function usage()
     
     cat <<usage
 
-	1) Warps Allen annotations to the original high-res CLARITY space
+	1) Warps downsampled CLARITY data/channels from native space to Allen atlas
 
 	Usage: `basename $0`
 
@@ -21,23 +21,23 @@ function usage()
 
 		- < Input clarity registration folder >
 
-		- < Labels to warp>
+		- < downsampled CLARITY nii to warp >
 
-    Looks for ort2std.txt in directory where script is run
+		- < ort2std.txt > 
 
 	----------
 
 	For command-line / scripting
 
-	Usage: `basename $0` -r [ clarity registration dir ] -l [ labels in allen space to warp ] -o [ orient file ]
+	Usage: `basename $0` -r [ clarity registration dir ] -i control03_05xdown_PIchan.nii.gz -o [ orient file ]
 
-	Example: `basename $0` -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz -o ort2std.txt
+	Example: `basename $0` -r clar_reg_allen -i control03_05xdown_PIchan.nii.gz -o ort2std.txt
 
 		arguments (required):
 
 			r. Input clarity registration dir
 
-			l. input Allen Labels to warp (in Allen space)
+			i. input downsampled CLARITY nii to warp 
 
 			o. file with orientation to standard code
 
@@ -107,13 +107,15 @@ function choose_folder_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr"
+	folderpath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr")
 	
-	filepath=`cat path.txt`
-	
-	eval ${_inpath}="'$filepath'"
+	# filepath=`cat path.txt`
+	# eval ${_inpath}="'$filepath'"
+	# rm path.txt
 
-	rm path.txt
+	folderpath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	
+	eval ${_inpath}="'$folderpath'"
 
 }
 
@@ -122,13 +124,15 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr"
+	filepath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr")
 
-	filepath=`cat path.txt`
+	# filepath=`cat path.txt`
+	# eval ${_inpath}="'$filepath'"
+	# rm path.txt
 
+	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	
 	eval ${_inpath}="'$filepath'"
-
-	rm path.txt
 
 }
 
@@ -137,7 +141,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:l:o:" opt; do
+	while getopts ":r:i:o:" opt; do
     
 	    case "${opt}" in
 
@@ -145,8 +149,8 @@ if [[ "$#" -gt 1 ]]; then
             	regdir=${OPTARG}
             	;;
 
-        	l)
-            	lbls=${OPTARG}
+        	i)
+            	inimg=${OPTARG}
             	;;
 
             o)
@@ -172,7 +176,7 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z ${lbls} ];
 	then
 		usage
-		echo "ERROR: < -l => labels> not specified"
+		echo "ERROR: < -i => input CLARITY image> not specified"
 		exit 1
 	fi
 
@@ -186,7 +190,9 @@ else
 
 	choose_folder_gui "Clarity registration folder" regdir
 
-	choose_file_gui "Input labels to warp" lbls
+	choose_file_gui "Input downsampled CLARITY to warp" inimg
+
+	choose_file_gui "File with orientation code" ortfile
 
 	# check required input arguments
 	if [ -z ${regdir} ];
@@ -202,7 +208,7 @@ fi
 START=$(date +%s)
 
 # output log file of script
-exec > >(tee -i ${regdir}/clar_allen_lbls_warp_script.log)
+exec > >(tee -i ${regdir}/warp_clar_allen_script.log)
 exec 2>&1
 
 #---------------------------
@@ -254,8 +260,8 @@ function warpallenlbls()
 	
 
 	# In imgs
-	local smclar=$1
-	local lbls=$2
+	local allenref=$1
+	local inimg=$2
 
 	# In tforms
 	local antswarp=$3
@@ -263,62 +269,20 @@ function warpallenlbls()
 	local initform=$5
 
 	# Out lbls
-	local wrplbls=$6
+	local wrpclar=$6
 
 	# Ort pars
-	local orttaglbls=$7
-	local ortintlbls=$8
-	local orttypelbls=$9
-	local ortlbls=${10}
+	local orttagclar=$7
+	local ortintclar=$8
+	local orttypeclar=$9
+	local ortclar=${10}
 
-	# swap lbls
-	local swplbls=${11}
-	local tiflbls=${12}
+    # orient to org
+	ifdsntexistrun ${ortclar} "Orienting Allen labels" orientimg ${wrpclar} ${orttagclar} ${ortintclar} ${orttypeclar} ${ortclar}
 
-	# Up lbls
-    local inclar=${13}
-    local reslbls=${14}
-    local restif=${15}
-
-    # Vox
-    local vox=${16}
-
-    # Res clar
-    local smclarres=${17}
-
-    # Upsample ref
-    vres=`python -c "print ${vox}/1000.0"`
-
-    # res clar in
-    ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
-
-	# warp to registered clarity
-	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${smclarres} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
-
-	# orient to org
-	ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
-
-	# swap dim (x=>y / y=>x)
-	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
-
-	# create tif lbls
-	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
-
-	# upsample to img dimensions
-    df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
-
-     # get img dim
-    alldim=`PrintHeader ${inclar} 2`
-    x=${alldim%%x*} ;
-    yz=${alldim#*x} ; y=${yz%x*} ;
-    z=${alldim##*x} ;
-
-    ox=$(($y*$df)) ;
-    oy=$(($x*$df)) ;
-
-    # create hres tif lbls
-	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
+  	# warp to registered clarity
+	ifdsntexistrun ${wrpclar} "Applying ants deformation to Allen labels" \
+	 antsApplyTransforms -r ${allenref} -i ${ortclar} -n Multilabel -t ${antswarp} [ ${antsaff}, 1 ] [ ${initform}, 1 ] -o ${wrpclar}
 
 }
 
@@ -341,76 +305,28 @@ function main()
 
 	# Tforms
 	initform=${regdir}/init_tform.mat
-	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
+	antswarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz
 	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
-
-	base=`basename $lbls`
-	lblsname=${base%%.*};
 
     # In files
     smclar=${regdir}/clar.nii.gz
 
     motherdir=$(dirname ${regdir})
 
-    # last file made in niftis folder
-    inclar=`ls -r ${motherdir}/niftis | tail -n 1`
+    base=`basename $inimg`
+	clarname=${base%%.*};
 
-    # Out lbls
-	wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
-	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
-	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
-	tiflbls=${regdirfinal}/${lblsname}_clar_vox.tif
-	reslbls=${regdirfinal}/${lblsname}_clar.nii.gz
-	restif=${regdirfinal}/${lblsname}_clar.tif
+	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
 
-    lblsdim=`PrintHeader ${lbls} 1`
-    xlbl=${lblsdim%%x*}
-
-    vox=`python -c "print ${xlbl}*1000.0"`
+    # Out img
+	ortlclar=${regdir}/${clarname}_ort.nii.gz
+	wrpclar=${regdirfinal}/${clarname}_allen_ants.nii.gz	
 
 	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
 
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
-    # setting lbl ort
-    o=${ort:0:1}
-    r=${ort:1:1}
-    t=${ort:2:2}
-
-    ol=${r}
-
-    if [ ${o} == "A" ]; then
-        rl="P"
-    elif [ ${o} == "P" ]; then
-        rl="A"
-    elif [ ${o} == "R" ]; then
-        rl="L"
-    elif [ ${o} == "L" ]; then
-        rl="R"
-    elif [ ${o} == "S" ]; then
-        rl="I"
-    elif [ ${o} == "I" ]; then
-        rl="S"
-    fi
-
-    if [ ${t} == "A" ]; then
-        tl="P"
-    elif [ ${t} == "P" ]; then
-        tl="A"
-    elif [ ${t} == "R" ]; then
-        tl="L"
-    elif [ ${t} == "L" ]; then
-        tl="R"
-    elif [ ${t} == "S" ]; then
-        tl="I"
-    elif [ ${t} == "I" ]; then
-        tl="S"
-    fi
-
-    ortlbl="$ol$rl$tl"
-
-
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${ortlbl} NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
+	warpallenlbls ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} NearestNeighbor short ${ortclar} 
 
 
 }
@@ -424,4 +340,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Allen labels warping done in $DIFF minutes. Have a good day!"
+echo "Warping of CLARITY image to Allen space done in $DIFF minutes. Have a good day!"

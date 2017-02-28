@@ -430,4 +430,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Conversion, Registration and Allen label warping done in $DIFF minutes. Have a good day!"
+echo "Conversion, Registration and Allen labels warping done in $DIFF minutes. Have a good day!"
