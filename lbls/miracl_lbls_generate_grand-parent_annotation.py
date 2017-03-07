@@ -20,7 +20,8 @@ import pandas as pd
 # help fn
 
 def helpmsg():
-    return '''Usage: miracl_lbls_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
+    return '''
+    miracl_lbls_generate_grand-parent_annotation.py -p [parent level (default: 3)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
 
     Generate multi-resolution atlases from Allen labels
 

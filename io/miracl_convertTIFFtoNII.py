@@ -19,9 +19,11 @@ startTime = datetime.now()
 
 
 def helpmsg(name=None):
-    return '''Usage: convertTifftoNii.py
+    return '''Usage:
 
-Converts Tiff images to Nifti 
+    convertTifftoNii.py
+
+    Converts Tiff images to Nifti
 
     A GUI will open to choose your:
 
@@ -33,34 +35,16 @@ Converts Tiff images to Nifti
 
     Usage: miracl_convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
 
-Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
-
-    Arguments (required):
-
-        -f Input Clarity tif folder/dir
-
-    Optional arguments:
-
-        -o Output nii name (script will append downsample ratio and channel info to given name)
-        -d  [ Downsample ratio (default: 5) ]
-        -cn [ chan # for extracting single channel from multiple channel data (default: 1) ]
-        -cp [ chan prefix (string before channel number in file name). ex: C00 ]
-        -ch [ output chan name (default: eyfp) ]
-        -vx [ original resolution in x-y plane in um (default: 5) ]
-        -vz [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
-        -c  [ nii center (default: 0,0,0 ) corresponding to Allen atlas nii template ]
-
-        example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
-
-
-    Dependencies:
-
-	    Python 2.7
-	    used modules:
-            argparse, numpy, scipy, cv2, pandas, tifffile, Tkinter, tkFileDialog, glob, re, os, sys, datetime
-
+    Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
         '''
+
+
+# Dependencies:
+#
+#     Python 2.7
+#     used modules:
+#         argparse, numpy, scipy, cv2, pandas, tifffile, Tkinter, tkFileDialog, glob, re, os, sys, datetime
 
 
 def parsefn(args):
@@ -132,15 +116,21 @@ def parsefn(args):
 
         parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
-        parser.add_argument('-f', '--folder', type=str, help="Tiff folder", required=True)
-        parser.add_argument('-d', '--down', type=int, help="Downsample ratio")
-        parser.add_argument('-cn', '--channum', type=int, help="Channel number")
-        parser.add_argument('-cp', '--chanprefix', type=str, help="Channel prefix in file name")
-        parser.add_argument('-ch', '--channame', type=str, help="Channel name")
-        parser.add_argument('-o', '--outnii', type=str, help="Out nii name")
-        parser.add_argument('-vx', '--resx', type=float, help="Original x resolution")
-        parser.add_argument('-vz', '--resz', type=float, help="Original z resolution")
-        parser.add_argument('-c', '--center', type=int, nargs='+', help="Out nii image center")
+        parser.add_argument('-f', '--folder', type=str, required=True, metavar='', help="Input Clarity tif folder/dir")
+        parser.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
+        parser.add_argument('-cn', '--channum', type=int, metavar='',
+                            help="Chan # for extracting single channel from multiple channel data (default: 1)")
+        parser.add_argument('-cp', '--chanprefix', type=str, metavar='',
+                            help="Chan prefix (string before channel number in file name). ex: C00")
+        parser.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
+        parser.add_argument('-o', '--outnii', type=str, metavar='',
+                            help="Output nii name (script will append downsample ratio and channel info to given name)")
+        parser.add_argument('-vx', '--resx', type=float, metavar='',
+                            help="Original resolution in x-y plane in um (default: 5)")
+        parser.add_argument('-vz', '--resz', type=float, metavar='',
+                            help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
+        parser.add_argument('-c', '--center', type=int, nargs='+', metavar='',
+                            help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
 
         args = parser.parse_args()
 

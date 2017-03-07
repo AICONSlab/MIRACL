@@ -526,7 +526,7 @@ def main():
     uniq_lbls = uniq_lbls[0:num_out_lbl]
 
     # query structure connectivity from Allen API
-    print("\n Quering structural connectivity of injection labels in the Allen API & sorting by projection volume")
+    print("\n Querying structural connectivity of injection labels in the Allen API & sorting by projection volume")
 
     [all_connect_ids, all_norm_proj] = query_connect(uniq_lbls, projexps, cutoff, exclude, mcc)
 
