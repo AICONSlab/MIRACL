@@ -18,7 +18,7 @@ import numpy as np
 startTime = datetime.now()
 
 
-def helpmsg(name=None):
+def helpmsg():
     return '''Usage:
 
     convertTifftoNii.py
@@ -61,7 +61,9 @@ def parsefn(args):
         if not os.path.exists(indir):
             sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
-        fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', 'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', 'center (def = 0,0,0)'
+        fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
+                 'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
+                 'center (def = 0,0,0)'
 
         def fetch(entries):
             for entry in entries:
@@ -111,10 +113,9 @@ def parsefn(args):
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
 
-
     else:
 
-        parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+        parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
         parser.add_argument('-f', '--folder', type=str, required=True, metavar='', help="Input Clarity tif folder/dir")
         parser.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
@@ -198,6 +199,7 @@ def parsefn(args):
 # ---------
 # Logging fn
 
+
 def scriptlog(logname):
     class StreamToLogger(object):
         """
@@ -237,7 +239,7 @@ def scriptlog(logname):
 # sort fn
 
 
-def numericalSort(value):
+def numericalsort(value):
     numbers = re.compile(r'(\d+)')
     parts = numbers.split(value)
     parts[1::2] = map(int, parts[1::2])
@@ -252,7 +254,8 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
     :param d:
     :param chann:
     :param chan:
-    :param vs:
+    :param vx:
+    :param vz:
     :param cent:
     :param ot:
     :param cp:
@@ -269,9 +272,9 @@ def converttiff2nii(indir, d, chann, chan, vx=None, vz=None, cent=None, ot=None,
 
     # sort files
     if chanp is None:
-        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalSort)
+        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalsort)
     else:
-        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
+        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalsort)
 
     # down ratio
     down = (1.0 / int(d))
