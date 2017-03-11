@@ -21,7 +21,7 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ]
+	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -bu [ olfactory bulb ] -sk [ skull strip ]
 
     Example: `basename $0` -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -47,7 +47,9 @@ function usage()
 
 			If l. is specified (m & v cannot be specified)
 
-        ob  olfactory bulb included in brain, binary option (default: 0 -> not included)
+        bu  olfactory bulb included in brain, binary option (default: 0 -> not included)
+
+        sk  skull strip or not, binary option (default: 1 -> skull-strip)
 
 	----------		
 
@@ -134,10 +136,10 @@ regdirfinal=$PWD/reg_final
 regdir=$PWD/mri_allen_reg
 
 
-if [[ ! -d $regdir ]]; then
+if [[ ! -d ${regdir} ]]; then
 
 	printf "\n Creating registration folder\n"
-	mkdir -p $regdirfinal $regdir
+	mkdir -p ${regdirfinal} ${regdir}
 
 fi
 
@@ -178,7 +180,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:ob:" opt; do
+	while getopts ":i:o:l:m:v:bu:sk:" opt; do
     
 	    case "${opt}" in
 
@@ -201,8 +203,12 @@ if [[ "$#" -gt 1 ]]; then
             	vox=${OPTARG}
             	;;
 
-            ob)
-            	ob=${OPTARG}
+            bu)
+            	bulb=${OPTARG}
+            	;;
+
+            sk)
+            	skull=${OPTARG}
             	;;
 
         	*)
@@ -246,7 +252,8 @@ else
 
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = RSP)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = RSP)" \
+	 "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "skull strip (def = 1)"  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -266,9 +273,13 @@ else
 
 	printf "\n Chosen vox (um): $vox \n"
 
-	ob=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	bulb=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen ob: $ob \n"
+    printf "\n Chosen olf bulb: $bulb \n"
+
+    skull=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen olf bulb: $skull \n"
 
 fi
 
@@ -371,7 +382,7 @@ function mulheader()
     ny=`echo ${y}*${mulfac} | bc` ;
     nz=`echo ${z}*${mulfac} | bc` ;
 
-    ifdsntexistrun ${hdmr} "Altering MRI header" c3d ${unhdmr} -spacing ${nx}x${ny}x${nz}mm ${hdmr}
+    ifdsntexistrun ${hdmr} "Altering MRI header" c3d ${unhdmr} -spacing ${nx}x${ny}x${nz}mm -o ${hdmr}
 
 }
 
@@ -385,7 +396,7 @@ function skullstrip()
 
     com=`fslstats ${skullmr} -C`
 
-    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f 0.3
+    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f 0.25
 
 }
 
@@ -417,7 +428,7 @@ function smoothimg()
 	local smmr=$3
 
 #	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr 1 $smmr 0 1
-    ifdsntexistrun $smmr "Smoothing MRI image" c3d $ortmr -smooth ${sigma}vox $smmr
+    ifdsntexistrun ${smmr} "Smoothing MRI image" c3d ${ortmr} -smooth ${sigma}vox -o ${smmr}
 
 }
 
@@ -567,36 +578,48 @@ function main()
 	thrmr=${regdir}/mr_bias_thr.nii.gz
 	thresh ${biasmr} 40 ${thrmr}
 
-    # Crop to smallest roi
-#	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
-#	croptosmall ${thrmr} ${mrroi}
-
-    # Change header * 10 dims
-    hdmr=${regdir}/mr_bias_thr_hd.nii.gz
-#    mulheader ${mrroi} 10 ${hdmr}
-    mulheader ${thrmr} 10 ${hdmr}
-
-    # Skull strip
-    betmr=${regdir}/mr_bias_thr_bet.nii.gz
-    skullstrip ${hdmr} ${betmr}
-
 	# Orient
-	ortmr=${regdir}/mr_ort.nii.gz
+	ortmr=${regdir}/mr_bias_thr_ort.nii.gz
 
     if [[ -z ${ort} ]]; then
 	    ort=RSP
 	fi
 
-	orientimg ${betmr} ${ort} Cubic short ${ortmr}
+	orientimg ${thrmr} ${ort} Cubic short ${ortmr}
 
-    # Update back header
-    orghdmr=${regdir}/mr_bias_thr_bet_orghd.nii.gz
-    mulheader ${ortmr} "0.1" ${orghdmr}
-#    mulheader ${ortmr} "0.1" ${orghdmr}
+    # Crop to smallest roi
+#	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
+#	croptosmall ${thrmr} ${mrroi}
 
-#	# Smooth
-	smmr=${regdir}/mr_bias_thr_bet_sm.nii.gz
-	smoothimg ${orghdmr} 0.5 ${smmr}
+    if [[ -z ${skull} ]]; then
+        skull=1
+    fi
+
+    if [[ "${skull}" == 1 ]]; then
+
+        # Change header * 10 dims
+        hdmr=${regdir}/mr_bias_thr_ort_hd.nii.gz
+        mulheader ${ortmr} 10 ${hdmr}
+
+        # Skull strip
+        betmr=${regdir}/mr_bias_thr_ort_bet.nii.gz
+        skullstrip ${hdmr} ${betmr}
+
+        # Update back header
+        orghdmr=${regdir}/mr_bias_thr_ort_bet_orghd.nii.gz
+        mulheader ${ortmr} "0.1" ${orghdmr}
+
+        # Smooth
+        smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
+        smoothimg ${orghdmr} 0.5 ${smmr}
+
+    else
+
+        # Smooth
+	    smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
+	    smoothimg ${ortmr} 0.5 ${smmr}
+
+    fi
 
 	# make MRI copy
 	mrlnk=${regdir}/mr.nii.gz
@@ -607,14 +630,14 @@ function main()
 # 2a) initialize registration
 
     # Allen atlas template
-    if [[ -z ${ob} ]] ; then
-        ob=0
+    if [[ -z ${bulb} ]] ; then
+        bulb=0
     fi
 
-    if [[ "${ob}" == 0 ]]; then
+    if [[ "${bulb}" == 0 ]]; then
         allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
 
-    elif [[ "${ob}" == 1 ]]; then
+    elif [[ "${bulb}" == 1 ]]; then
         allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
     fi
 
@@ -685,7 +708,7 @@ function main()
 	antswarp=${regdir}/allen_mr_ants1Warp.nii.gz
 	antsaff=${regdir}/allen_mr_ants0GenericAffine.mat
 
-    base=`basename $lbls`
+    base=`basename ${lbls}`
 	lblsname=${base%%.*};
 
     # Out lbls
