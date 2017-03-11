@@ -21,7 +21,7 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -bu [ olfactory bulb ] -sk [ skull strip ]
+	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ]
 
     Example: `basename $0` -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -47,9 +47,9 @@ function usage()
 
 			If l. is specified (m & v cannot be specified)
 
-        bu  olfactory bulb included in brain, binary option (default: 0 -> not included)
+        b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
-        sk  skull strip or not, binary option (default: 1 -> skull-strip)
+        s.  skull strip or not, binary option (default: 1 -> skull-strip)
 
 	----------		
 
@@ -180,7 +180,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:bu:sk:" opt; do
+	while getopts ":i:o:l:m:v:b:s:" opt; do
     
 	    case "${opt}" in
 
@@ -203,11 +203,11 @@ if [[ "$#" -gt 1 ]]; then
             	vox=${OPTARG}
             	;;
 
-            bu)
+            b)
             	bulb=${OPTARG}
             	;;
 
-            sk)
+            s)
             	skull=${OPTARG}
             	;;
 
