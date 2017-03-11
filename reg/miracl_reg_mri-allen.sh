@@ -51,6 +51,8 @@ function usage()
 
         s.  skull strip or not, binary option (default: 1 -> skull-strip)
 
+        n.  No orientation needed (image in "standard" orientation)
+
 	----------		
 
 	Dependencies:
@@ -180,7 +182,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:b:s:" opt; do
+	while getopts ":i:o:l:m:v:b:s:n:" opt; do
     
 	    case "${opt}" in
 
@@ -209,6 +211,10 @@ if [[ "$#" -gt 1 ]]; then
 
             s)
             	skull=${OPTARG}
+            	;;
+
+            n)
+            	noort=${OPTARG}
             	;;
 
         	*)
@@ -585,7 +591,19 @@ function main()
 	    ort=RSP
 	fi
 
-	orientimg ${thrmr} ${ort} Cubic short ${ortmr}
+    if [[ -z ${noort} ]]; then
+	    noort=0
+	fi
+
+    if [[ "${noort}" == 0 ]]; then
+
+	    orientimg ${thrmr} ${ort} Cubic short ${ortmr}
+
+    else
+
+        ortmr=${thrmr}
+
+    fi
 
     # Crop to smallest roi
 #	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
@@ -607,19 +625,17 @@ function main()
 
         # Update back header
         orghdmr=${regdir}/mr_bias_thr_ort_bet_orghd.nii.gz
-        mulheader ${ortmr} "0.1" ${orghdmr}
-
-        # Smooth
-        smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
-        smoothimg ${orghdmr} 0.5 ${smmr}
+        mulheader ${betmr} "0.1" ${orghdmr}
 
     else
 
-        # Smooth
-	    smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
-	    smoothimg ${ortmr} 0.5 ${smmr}
+        orghdmr=${ortmr}
 
     fi
+
+    # Smooth
+    smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
+    smoothimg ${orghdmr} 0.5 ${smmr}
 
 	# make MRI copy
 	mrlnk=${regdir}/mr.nii.gz
