@@ -9,7 +9,7 @@ ___________________________________________
 miracl_reg_clar-allen_whole_brain.sh
 
 
-	Usage: `basename $0` -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ]
+	Usage: `basename $0` -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
 
     Example: `basename $0` -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
 
@@ -38,7 +38,10 @@ miracl_reg_clar-allen_whole_brain.sh
 
 			If l. is specified (m & v cannot be specified)
 
-        ob  olfactory bulb included in brain, binary option (default: 0 -> not included)
+        s.  side, if only registering a hemisphere instead of whole brain
+            accepted inputs are: rh (right hemisphere) or lh (left)
+
+        b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
     ----------
 
@@ -101,7 +104,7 @@ _________________________
 miracl_reg_mri-allen.sh
 
 
-	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ]
+	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
     Example: `basename $0` -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -127,7 +130,12 @@ miracl_reg_mri-allen.sh
 
 			If l. is specified (m & v cannot be specified)
 
-        ob  Olfactory bulb included in brain, binary option (default: 0 -> not included)
+        b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
+
+        s.  skull strip or not, binary option (default: 1 -> skull-strip)
+
+        n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+
 
 	----------
 

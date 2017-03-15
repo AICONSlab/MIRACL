@@ -3,7 +3,7 @@
 # get version
 function getversion()
 {
-	ver=`cat $MIRACL_HOME/version_num.txt`
+	ver=`cat ${MIRACL_HOME}/version_num.txt`
 	printf "\n MIRACL pipeline v. $ver \n"
 }
 
@@ -22,7 +22,7 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ]
+	Usage: `basename $0` -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
 
     Example: `basename $0` -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
 
@@ -51,7 +51,10 @@ function usage()
 
 			If l. is specified (m & v cannot be specified)
 
-        ob  olfactory bulb included in brain, binary option (default: 0 -> not included)
+        s.  side, if only registering a hemisphere instead of whole brain
+            accepted inputs are: rh (right hemisphere) or lh (left)
+
+        b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
 
 	----------
@@ -212,7 +215,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:ob:" opt; do
+	while getopts ":i:o:l:m:v:s:b:" opt; do
     
 	    case "${opt}" in
 
@@ -231,12 +234,17 @@ if [[ "$#" -gt 1 ]]; then
         	m)
             	hemi=${OPTARG}
             	;;
+
         	v)
             	vox=${OPTARG}
             	;;
 
-            ob)
-            	ob=${OPTARG}
+            s)
+            	side=${OPTARG}
+            	;;
+
+            b)
+            	bulb=${OPTARG}
             	;;
         	*)
             	usage            	
@@ -255,6 +263,76 @@ if [[ "$#" -gt 1 ]]; then
 		echo "ERROR: < -i => input down-sampled clarity nii> not specified"
 		exit 1
 	fi
+
+
+    # set defaults and assert (check for input errors)
+
+    # orient code
+    if [[ -z ${ort} ]]; then
+	    ort=ARS
+	fi
+    ## if A-P flipped (PLS) & if R-L -> ALS
+
+    # If want to warp multi-res / hemi lbls
+	if [[ -z ${lbls} ]]; then
+
+		if [[ -z ${hemi} ]]; then
+
+			hemi=combined
+
+        else
+
+            if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
+
+                printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+                exit 1
+            fi
+
+		fi
+
+		if [[ -z ${vox} ]]; then
+
+			vox=10
+
+        else
+
+            if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
+
+                printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+                exit 1
+            fi
+
+		fi
+
+        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+	fi
+
+    # set side for hemisphere registration
+    if [[ -z ${side} ]] ; then
+        side=""
+    elif [[ "${side}" == "rh" ]]; then
+        side="_right"
+    elif [[ "${side}" == "lh" ]]; then
+        side="_left"
+    else
+        printf "ERROR: < -s => (side) > only takes as inputs: rh or lh"
+        exit 1
+    fi
+
+    # olfactory bulb
+	if [[ -z ${bulb} ]] ; then
+        bulb=0
+    else
+
+        if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
+
+        printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
+        exit 1
+
+        fi
+
+    fi
 
 else
 
@@ -279,7 +357,7 @@ else
 
 
 	# options gui 
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -293,16 +371,19 @@ else
 
 	hemi=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-	printf "\n Chosen hemi: $hemi \n"
+	printf "\n Chosen labels hemi option: $hemi \n"
 
 	vox=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen vox (um): $vox \n"
 
-	ob=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	bulb=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen ob: $ob \n"
+    printf "\n Chosen olfactory bulb option: $bulb \n"
 
+	side=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen side option: $side \n"
 
 fi
 
@@ -332,7 +413,7 @@ function ifdsntexistrun()
 
 		printf "\n $outstr \n"; 
 		echo "$fun"; 
-		eval "$fun"; 
+		eval "${fun}";
 
 	else  
 		
@@ -769,11 +850,6 @@ function main()
 	# Orient
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
 
-	if [[ -z ${ort} ]]; then
-	    ort=ARS
-	fi
-    ## if A-P flipped (PLS) & if R-L -> ALS
-
 	orientimg ${betclar} ${ort} Cubic short ${ortclar}
 
 	# Smooth
@@ -795,15 +871,12 @@ function main()
 
 	# Allen atlas template
 
-	if [[ -z ${ob} ]] ; then
-        ob=0
-    fi
+    if [[ "${bulb}" == 0 ]]; then
+        allenref=${atlasdir}/ara/template/average_template_25um_OBmasked${side}.nii.gz
 
-    if [[ "${ob}" == 0 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
+    elif [[ "${bulb}" == 1 ]]; then
+        allenref=${atlasdir}/ara/template/average_template_25um${side}.nii.gz
 
-    elif [[ "${ob}" == 1 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
     fi
 
 
@@ -858,26 +931,6 @@ function main()
 	# Tforms
 	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
 	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
-
-	# If want to warp multi-res / hemi lbls
-	
-	if [[ -z ${lbls} ]]; then
-
-		if [[ -z ${hemi} ]]; then
-			
-			hemi=combined
-
-		fi
-
-		if [[ -z ${vox} ]]; then
-			
-			vox=10
-
-		fi
-
-        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
-	fi
 
 	base=`basename ${lbls}`
 	lblsname=${base%%.*};
@@ -977,5 +1030,5 @@ echo "Registration and Allen labels warping done in $DIFF minutes. Have a good d
 
 
 # TODOs
-# TODOlp: add if already oriented
+# TODOlp: cp side atlases to servers
 # TODOlp: add settings file to read for pars

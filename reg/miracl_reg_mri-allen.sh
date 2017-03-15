@@ -21,7 +21,7 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ]
+	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
     Example: `basename $0` -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -51,7 +51,7 @@ function usage()
 
         s.  skull strip or not, binary option (default: 1 -> skull-strip)
 
-        n.  No orientation needed (image in "standard" orientation)
+        n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
 
 	----------		
 
@@ -235,6 +235,89 @@ if [[ "$#" -gt 1 ]]; then
 		exit 1
 	fi
 
+    # set defaults
+
+    # orient code
+    if [[ -z ${ort} ]]; then
+	    ort=RSP
+	fi
+
+    # If want to warp multi-res / hemi lbls
+
+	if [[ -z ${lbls} ]]; then
+
+		if [[ -z ${hemi} ]]; then
+
+			hemi=combined
+
+        else
+
+            if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
+
+                printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+                exit 1
+            fi
+
+		fi
+
+		if [[ -z ${vox} ]]; then
+
+			vox=10
+
+		else
+
+            if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
+
+                printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+                exit 1
+            fi
+
+		fi
+
+        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+	fi
+
+    # no orient
+    if [[ -z ${noort} ]]; then
+	    noort=0
+    else
+
+        if [ "${noort}" != 0 ] && [ "${noort}" != 1 ]; then
+
+        printf "ERROR: < -n = > (noort) > only takes as inputs: 0 or 1"
+        exit 1
+
+        fi
+	fi
+
+    # skull strip
+    if [[ -z ${skull} ]]; then
+        skull=1
+    else
+
+        if [ "${skull}" != 0 ] && [ "${skull}" != 1 ]; then
+
+        printf "ERROR: < -s = > (skull) > only takes as inputs: 0 or 1"
+        exit 1
+
+        fi
+
+    fi
+
+    # olfactory bulb
+    if [[ -z ${bulb} ]] ; then
+        bulb=0
+    else
+
+        if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
+
+        printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
+        exit 1
+
+        fi
+    fi
+
 else
 
 	# call gui
@@ -259,7 +342,7 @@ else
 
 	# options gui
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = RSP)" \
-	 "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "skull strip (def = 1)"  -hf "`usage`")
+	 "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "skull strip (def = 1)" "No orient (def = 0)"  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -273,7 +356,7 @@ else
 
 	hemi=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-	printf "\n Chosen hemi: $hemi \n"
+	printf "\n Chosen labels hemi option: $hemi \n"
 
 	vox=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -281,11 +364,15 @@ else
 
 	bulb=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen olf bulb: $bulb \n"
+    printf "\n Chosen olfactory bulb option: $bulb \n"
 
     skull=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen olf bulb: $skull \n"
+    printf "\n Chosen skull strip option: $skull \n"
+
+    noort=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen No orientation option: $noort \n"
 
 fi
 
@@ -587,14 +674,6 @@ function main()
 	# Orient
 	ortmr=${regdir}/mr_bias_thr_ort.nii.gz
 
-    if [[ -z ${ort} ]]; then
-	    ort=RSP
-	fi
-
-    if [[ -z ${noort} ]]; then
-	    noort=0
-	fi
-
     if [[ "${noort}" == 0 ]]; then
 
 	    orientimg ${thrmr} ${ort} Cubic short ${ortmr}
@@ -609,9 +688,6 @@ function main()
 #	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
 #	croptosmall ${thrmr} ${mrroi}
 
-    if [[ -z ${skull} ]]; then
-        skull=1
-    fi
 
     if [[ "${skull}" == 1 ]]; then
 
@@ -646,9 +722,6 @@ function main()
 # 2a) initialize registration
 
     # Allen atlas template
-    if [[ -z ${bulb} ]] ; then
-        bulb=0
-    fi
 
     if [[ "${bulb}" == 0 ]]; then
         allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
@@ -700,25 +773,6 @@ function main()
 
 
 # 3) Warp Allen labels to MRI
-
-    # If want to warp multi-res / hemi lbls
-
-	if [[ -z ${lbls} ]]; then
-
-		if [[ -z ${hemi} ]]; then
-
-			hemi=combined
-
-		fi
-
-		if [[ -z ${vox} ]]; then
-
-			vox=10
-
-		fi
-        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
-	fi
 
 	# Tforms
 	antswarp=${regdir}/allen_mr_ants1Warp.nii.gz
@@ -772,5 +826,5 @@ echo "Registration and Allen labels warping done in $DIFF minutes. Have a good d
 
 #--------------------
 # TODOs
-# TODOlp: add if already oriented
+
 # TODOlp: add stroke mask later

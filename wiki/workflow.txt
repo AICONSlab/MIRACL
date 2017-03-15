@@ -67,6 +67,11 @@ miracl_workflow_registration_clarity-allen_wb.sh
 
                 If l. is specified (m & v cannot be specified)
 
+            s.  side, if only registering a hemisphere instead of whole brain
+                accepted inputs are: rh (right hemisphere) or lh (left)
+
+            b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
+
 
 	----------
 
