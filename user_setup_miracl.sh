@@ -27,7 +27,7 @@ for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 
 #---ANTS---
 
-export ANTSPATH=${MIRACL_HOME}/depends/ants
+export ANTSPATH="${MIRACL_HOME}/depends/ants"
 export PATH=${MIRACL_HOME}/depends/ants:$PATH
 
 #---C3D---
@@ -40,18 +40,26 @@ source ${MIRACL_HOME}/depends/c3d/share/bashcomp.sh
 
 #--- Allen atlas alias ----
 
-export allen10=${MIRACL_HOME}/atlases/ara/template/average_template_10um.nii.gz
-export allen25=${MIRACL_HOME}/atlases/ara/template/average_template_25um.nii.gz
-export allen50=${MIRACL_HOME}/atlases/ara/template/average_template_50um.nii.gz
+export aradir="${MIRACL_HOME}/atlases/ara"
 
-export lbls10=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz
-export lbls25=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz
-export lbls50=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50um.nii.gz
+# Templates (atlas images)
+export allen10="${MIRACL_HOME}/atlases/ara/template/average_template_10um.nii.gz"
+export allen25="${MIRACL_HOME}/atlases/ara/template/average_template_25um.nii.gz"
+export allen50="${MIRACL_HOME}/atlases/ara/template/average_template_50um.nii.gz"
 
-export gplbls25=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_25um_parent-level_3.nii.gz
-export gplbls50=${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50um_parent-level_3.nii.gz
+# Annotations (labels)
+export lbls10="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz"
+export lbls25="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz"
+export lbls50="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50um.nii.gz"
 
-export snaplut=${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt
+# Grand-parents labels
+export gplbls25="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_25um_parent-level_3.nii.gz"
+export gplbls50="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50um_parent-level_3.nii.gz"
+
+# ITK-snap LUT
+export snaplut="${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt"
+# Freeview LUT
+export freelut="${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 
 #--------------------
 

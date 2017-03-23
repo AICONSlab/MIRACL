@@ -18,8 +18,7 @@ from datetime import datetime
 import cv2
 import nibabel as nib
 import numpy as np
-
-# from joblib import Parallel, delayed
+from joblib import Parallel, delayed
 
 startTime = datetime.now()
 
@@ -287,11 +286,13 @@ def main():
 
     print "\n Converting Tiff images to NII \n"
 
-    for i, x in enumerate(file_list):
-        converttiff2nii(d, i, x, outdir, vx, vz, cent, ot=outnii)
+    # for i, x in enumerate(file_list):
+    #     converttiff2nii(d, i, x, outdir, vx, vz, cent, ot=outnii)
 
-    # Parallel(n_jobs=ncpus)(
-    #     delayed(converttiff2nii(d, i, x, vx, vz, cent, ot=outnii) for i, x in enumerate(file_list)))
+    # run in parallel
+    Parallel(n_jobs=ncpus)(
+        delayed(converttiff2nii)(d, i, x, outdir, vx, vz, cent, ot=outnii) for i, x in enumerate(file_list))
+
 
     stackdir = 'niftis'
 
@@ -314,4 +315,3 @@ if __name__ == "__main__":
 
 
 # TODOs
-    # TODOlp: test joblib

@@ -1030,5 +1030,4 @@ echo "Registration and Allen labels warping done in $DIFF minutes. Have a good d
 
 
 # TODOs
-# TODOlp: cp side atlases to servers
 # TODOlp: add settings file to read for pars
