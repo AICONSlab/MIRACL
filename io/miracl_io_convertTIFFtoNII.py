@@ -10,6 +10,7 @@ import multiprocessing
 import os
 import tkFileDialog
 from Tkinter import *
+from argparse import RawTextHelpFormatter
 from datetime import datetime
 
 import cv2
@@ -18,23 +19,22 @@ import numpy as np
 from joblib import Parallel, delayed
 
 
-def helpmsg(name=None):
-    return '''Usage: miracl_io_convertTIFFtoNII.py
+def helpmsg():
+    return '''
 
 Converts Tiff images to Nifti 
 
     A GUI will open to choose your:
 
-        - < Input clarity tif dir > : images of only one channel
+        - < Input CLARITY TIFF dir >
 
     ----------
 
     For command-line / scripting
 
-    Usage: miracl_io_convertTIFFtoNII.py -f [Tiff folder]  -o [out nii name]
+    Usage: miracl_io_convertTIFFtoNII.py -f [Tiff folder]
 
     Example: miracl_io_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
-
 
         '''
 
@@ -43,7 +43,7 @@ Converts Tiff images to Nifti
 #
 #     Python 2.7
 #     used modules:
-#         argparse, numpy, scipy, cv2, pandas, tifffile, Tkinter, tkFileDialog,
+#         argparse, numpy, cv2, nibabel, Tkinter, tkFileDialog,
 #         glob, re, os, sys, datetime, joblib, multiprocessing
 
 
@@ -113,30 +113,41 @@ def parsefn(args):
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
 
-
     else:
 
-        parser = argparse.ArgumentParser(description='', usage=helpmsg())
+        # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
+        parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
+                                         usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
+                                               '-cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
+                                               '-vz [z res] -c [center]')
 
-        parser.add_argument('-f', '--folder', type=str, required=True, metavar='', help="Input Clarity tif folder/dir")
-        parser.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
-        parser.add_argument('-cn', '--channum', type=int, metavar='',
-                            help="Chan # for extracting single channel from multiple channel data (default: 1)")
-        parser.add_argument('-cp', '--chanprefix', type=str, metavar='',
-                            help="Chan prefix (string before channel number in file name). ex: C00")
-        parser.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
-        parser.add_argument('-o', '--outnii', type=str, metavar='',
-                            help="Output nii name (script will append downsample ratio and channel info to given name)")
-        parser.add_argument('-vx', '--resx', type=float, metavar='',
-                            help="Original resolution in x-y plane in um (default: 5)")
-        parser.add_argument('-vz', '--resz', type=float, metavar='',
+        required = parser.add_argument_group('required arguments')
+        required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
+                              help="Input CLARITY TIFF folder/dir")
+
+        optional = parser.add_argument_group('optional arguments')
+
+        optional.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
+        optional.add_argument('-cn', '--channum', type=int, metavar='',
+                              help="Chan # for extracting single channel from multiple channel data (default: 1)")
+        optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
+                              help="Chan prefix (string before channel number in file name). ex: C00")
+        optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
+        optional.add_argument('-o', '--outnii', type=str, metavar='',
+                              help="Output nii name (script will append downsample ratio & channel info to given name)")
+        optional.add_argument('-vx', '--resx', type=float, metavar='',
+                              help="Original resolution in x-y plane in um (default: 5)")
+        optional.add_argument('-vz', '--resz', type=float, metavar='',
                             help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
-        parser.add_argument('-c', '--center', type=int, nargs='+', metavar='',
-                            help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
+        optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
+                              help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
+        optional.add_argument('-i', '--interp')
+
+        optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
 
         args = parser.parse_args()
 
-        print("\n running in script mode \n")
+        print("\n running in script mode")
 
         # check if pars given
 
@@ -197,6 +208,7 @@ def parsefn(args):
 
     return indir, outnii, d, chann, chanp, chan, vx, vz, cent
 
+
 # ---------
 # Logging fn
 
@@ -239,7 +251,7 @@ def scriptlog(logname):
 # sort fn
 
 
-def numericalSort(value):
+def numericalsort(value):
     numbers = re.compile(r'(\d+)')
     parts = numbers.split(value)
     parts[1::2] = map(int, parts[1::2])
@@ -255,16 +267,15 @@ def converttiff2nii(d, i, x, newdata):
     # down ratio
     down = (1.0 / int(d))
 
-    sys.stdout.write("\r processing slice %d ... " % i)
+    sys.stdout.write("\r processing slice %d ..." % i)
     sys.stdout.flush()
 
     m = cv2.imread(x, -1)
-    newdata[i, :, :] = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_CUBIC)
+    newdata[i, :, :] = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_LINEAR)
     # data.append(mres)
 
 
 def savenii(newdata, d, outnii, vx=None, vz=None, cent=None):
-
     # array type
     # data_array = np.array(mres, dtype='int16')
 
@@ -298,10 +309,9 @@ def main():
     """
     :rtype: nifti file
     """
+    # scriptlog('tif2nii.log')
 
-    scriptlog('tif2nii.log')
-
-    startTime = datetime.now()
+    starttime = datetime.now()
 
     args = sys.argv
 
@@ -315,9 +325,9 @@ def main():
 
     # sort files
     if chanp is None:
-        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalSort)
+        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalsort)
     else:
-        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalSort)
+        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalsort)
 
     # make out dir
     outdir = 'niftis'
@@ -344,7 +354,7 @@ def main():
     #                  stderr=subprocess.PIPE)
 
     # save nii
-    print("\n saving nifti stack \n")
+    print("\n\n saving nifti stack")
 
     stackname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, d, chan)
 
@@ -353,7 +363,7 @@ def main():
     # clear tmp memmap
     os.remove(memap)
 
-    print("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - startTime))
+    print("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
 
 if __name__ == "__main__":
