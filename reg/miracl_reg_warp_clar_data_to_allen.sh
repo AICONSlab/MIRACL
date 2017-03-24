@@ -107,7 +107,7 @@ function choose_folder_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	folderpath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f folder -s "$openstr")
+	folderpath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f folder -s "$openstr")
 	
 	# filepath=`cat path.txt`
 	# eval ${_inpath}="'$filepath'"
@@ -124,7 +124,7 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-	filepath=$(${MIRACL_HOME}/io/miracl_file_folder_gui.py -f file -s "$openstr")
+	filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr")
 
 	# filepath=`cat path.txt`
 	# eval ${_inpath}="'$filepath'"

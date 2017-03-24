@@ -6,7 +6,7 @@ ____________________________________
 _____________________________________________________
 
 
-convertTifftoNii.py
+convertTIFFtoNII.py
 
 
     Usage: convertTifftoNii.py
@@ -21,9 +21,9 @@ convertTifftoNii.py
 
         For command-line / scripting
 
-        Usage: miracl_convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
+        Usage: miracl_io_convertTIFFtoNII.py -f [Tiff folder]  -o [out nii name]
 
-    Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
+    Example: miracl_io_convertTIFFtoNII.py -f my_tifs -o stroke2
 
         Arguments (required):
 
@@ -41,7 +41,7 @@ convertTifftoNii.py
             -vz [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
             -c  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
-            example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+            example: miracl_io_convertTIFFtoNII.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
 
         Dependencies:
@@ -60,10 +60,10 @@ convertTifftoNii.py
 _______________________________
 
 
-miracl_set_orient_gui.py
+miracl_io_set_orient_gui.py
 
 
-	Usage: miracl_set_orient_gui.py
+	Usage: miracl_io_set_orient_gui.py
 
 	A GUI will open to choose your:
 

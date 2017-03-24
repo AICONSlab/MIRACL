@@ -24,14 +24,14 @@ function usage()
 
     Executes:
 
-        io/miracl_set_orient_gui.py (if run in GUI mode)
-        io/miracl_convertTIFFtoNII.py
+        io/miracl_io_set_orient_gui.py (if run in GUI mode)
+        io/miracl_io_convertTIFFtoNII.py
         reg/miracl_reg_clar-allen_whole_brain.sh
 
     Usage: `basename $0`
 
         A GUI will open to set data orientation
-        For "miracl_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
+        For "miracl_io_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
 
 
     ----------
@@ -46,7 +46,7 @@ function usage()
 
             f. Input Clarity tif dir/folder
 
-        optional arguments (don't forget the quotes):
+        optional arguments (remember the quotes):
 
             conversion to nii (invoked by -n " "):
 
@@ -268,13 +268,13 @@ if [[ "$#" -gt 1 ]]; then
     if [ -z "${convopts}" ];
 	then
 
-        printf "\n miracl_convertTIFFtoNII.py -f ${indir} \n"
-        miracl_convertTIFFtoNII.py -f ${indir}
+        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} \n"
+        miracl_io_convertTIFFtoNII.py -f ${indir}
 
     else
 
-        printf "\n miracl_convertTIFFtoNII.py -f ${indir} "${convopts}" \n"
-        miracl_convertTIFFtoNII.py -f ${indir} ${convopts}
+        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} "${convopts}" \n"
+        miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
 
     fi
 
@@ -316,8 +316,8 @@ else
 
     printf "\n Running Set orient with the following command: \n"
 
-    printf "\n miracl_set_orient_gui.py \n"
-    miracl_set_orient_gui.py
+    printf "\n miracl_io_set_orient_gui.py \n"
+    miracl_io_set_orient_gui.py
 
     #---------------------------
     # Get nii conv opts
@@ -400,8 +400,8 @@ else
     indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
 
 
-    printf "\n miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
-    miracl_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+    printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+    miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
 
 
     #---------------------------

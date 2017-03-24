@@ -29,17 +29,17 @@ CONVERSION / GUI (IO)
 ---------------------
 
 
-- convertTifftoNii.py
+- miracl_io_convertTIFFtoNII.py
 
     Converts tif files to nifti files while choosing a downsample factor, voxel spacing, channel info
 
 
-- miracl_set_orient_gui.py
+- miracl_io_set_orient_gui.py
 
      Uses user input (from a GUI) to generate an orientation code for orientation input data to "standard/Allen" orientation
 
 
-- miracl_convertDCMtoNII.sh
+- miracl_io_convertDCMtoNII.sh
 
     Converts dicoms in sub-directories to nii & renames sub-directories with sequence name
 

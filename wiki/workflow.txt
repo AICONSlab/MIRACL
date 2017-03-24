@@ -18,14 +18,14 @@ miracl_workflow_registration_clarity-allen_wb.sh
 
     Executes:
 
-        io/miracl_set_orient_gui.py (if run in GUI mode)
-        io/miracl_convertTIFFtoNII.py
+        io/miracl_io_set_orient_gui.py (if run in GUI mode)
+        io/miracl_io_convertTIFFtoNII.py
         reg/miracl_reg_clar-allen_whole_brain.sh
 
     Usage: `basename $0`
 
         A GUI will open to set data orientation
-        For the "miracl_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
+        For the "miracl_io_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
 
     ----------
 
