@@ -48,6 +48,7 @@ Converts Tiff images to Nifti
 
 
 def parsefn(args):
+
     # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
@@ -289,7 +290,7 @@ def numericalsort(value):
 
 # ---------
 
-def converttiff2nii(d, i, x, newdata):
+def converttiff2nii(d, i, x, newdata, tifx):
     """
     """
 
@@ -300,7 +301,11 @@ def converttiff2nii(d, i, x, newdata):
     sys.stdout.flush()
 
     m = cv2.imread(x, -1)
-    newdata[i, :, :] = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=cv2.INTER_LINEAR)
+
+    # nearest neighbour for very large data sets
+    inter = cv2.INTER_CUBIC if tifx < 5000 else cv2.INTER_NEAREST
+
+    newdata[i, :, :] = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=inter)
     # data.append(mres)
 
 
@@ -369,12 +374,14 @@ def main():
 
     memap = '%s/tmp_array_memmap.map' % outdir
 
-    m = cv2.imread(file_list[0], -1)
+    tif = cv2.imread(file_list[0], -1)
+    tifx = tif.shape[0]
+    tify = tif.shape[1]
 
-    newdata = np.memmap(memap, dtype=float, shape=(len(file_list), m.shape[0] / d, m.shape[1] / d), mode='w+')
+    newdata = np.memmap(memap, dtype=float, shape=(len(file_list), tifx / d, tify / d), mode='w+')
 
     Parallel(n_jobs=ncpus)(
-        delayed(converttiff2nii)(d, i, x, newdata) for i, x in enumerate(file_list))
+        delayed(converttiff2nii)(d, i, x, newdata, tifx) for i, x in enumerate(file_list))
 
     # stack slices
 
