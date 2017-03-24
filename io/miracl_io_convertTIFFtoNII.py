@@ -52,8 +52,8 @@ def parsefn(args):
     # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
-                                           '-cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
-                                           '-vz [z res] -c [center]')
+                                           ' -cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
+                                           ' -vz [z res] -c [center]')
 
     required = parser.add_argument_group('required arguments')
     required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
@@ -75,10 +75,8 @@ def parsefn(args):
                           help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
     optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
                           help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
-    optional.add_argument('-i', '--interp')
 
-    optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
-
+    optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
 
     if len(args) == 1:
@@ -375,10 +373,13 @@ def main():
     memap = '%s/tmp_array_memmap.map' % outdir
 
     tif = cv2.imread(file_list[0], -1)
+
     tifx = tif.shape[0]
     tify = tif.shape[1]
+    tifxd = int(round(float(tifx) / d))
+    tifyd = int(round(float(tify) / d))
 
-    newdata = np.memmap(memap, dtype=float, shape=(len(file_list), tifx / d, tify / d), mode='w+')
+    newdata = np.memmap(memap, dtype=float, shape=(len(file_list), tifxd, tifyd), mode='w+')
 
     Parallel(n_jobs=ncpus)(
         delayed(converttiff2nii)(d, i, x, newdata, tifx) for i, x in enumerate(file_list))
