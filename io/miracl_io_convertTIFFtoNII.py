@@ -19,11 +19,9 @@ import nibabel as nib
 import numpy as np
 from joblib import Parallel, delayed
 
-startTime = datetime.now()
-
 
 def helpmsg(name=None):
-    return '''Usage: convertTifftoNii.py
+    return '''Usage: miracl_convertTifftoNii.py
 
 Converts Tiff images to Nifti 
 
@@ -35,31 +33,10 @@ Converts Tiff images to Nifti
 
     For command-line / scripting
 
-    Usage: miracl_convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
+    Usage: miracl_io_convertTifftoNii.py -f [Tiff folder]  -o [out nii name]
 
-Example: miracl_convertTifftoNii.py -f my_tifs -o stroke2
+    Example: miracl_io_convertTifftoNii.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
-    Arguments (required):
-
-        -f Input Clarity tif folder/dir
-
-    Optional arguments:
-
-        -o Output nii name (script will append downsample ratio and channel info to given name)
-        -d  [ Downsample ratio (default: 5) ]
-        -cn [ chan # for extracting single channel from multiple channel data (default: 1) ]
-        -cp [ chan prefix (string before channel number in file name). ex: C00 ]
-        -ch [ output chan name (default: eyfp) ]
-        -vx [ original resolution in x-y plane in um (default: 5) ]
-        -vz [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
-        -c  [ nii center (default: 0,0,0 ) corresponding to Allen atlas nii template ]
-
-        example: miracl_convertTifftoNii.py -f my_tifs -d 3 -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
-
-
-    Dependencies:
-
-	    Python 2.7
 
         '''
 
@@ -267,6 +244,8 @@ def main():
     """
     :rtype: nifti file
     """
+
+    startTime = datetime.now()
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
