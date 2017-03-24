@@ -48,6 +48,38 @@ Converts Tiff images to Nifti
 
 
 def parsefn(args):
+    # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
+    parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
+                                     usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
+                                           '-cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
+                                           '-vz [z res] -c [center]')
+
+    required = parser.add_argument_group('required arguments')
+    required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
+                          help="Input CLARITY TIFF folder/dir")
+
+    optional = parser.add_argument_group('optional arguments')
+
+    optional.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
+    optional.add_argument('-cn', '--channum', type=int, metavar='',
+                          help="Chan # for extracting single channel from multiple channel data (default: 1)")
+    optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
+                          help="Chan prefix (string before channel number in file name). ex: C00")
+    optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
+    optional.add_argument('-o', '--outnii', type=str, metavar='',
+                          help="Output nii name (script will append downsample ratio & channel info to given name)")
+    optional.add_argument('-vx', '--resx', type=float, metavar='',
+                          help="Original resolution in x-y plane in um (default: 5)")
+    optional.add_argument('-vz', '--resz', type=float, metavar='',
+                          help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
+    optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
+                          help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
+    optional.add_argument('-i', '--interp')
+
+    optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
+
+
+
     if len(args) == 1:
 
         print("Running in GUI mode")
@@ -71,30 +103,56 @@ def parsefn(args):
                 text = entry[1].get()
                 print('%s: "%s"' % (field, text))
 
+
         def makeform(root, fields):
             entries = []
             values = []
+
+            strlen = len(max(fields, key=len))
+            strw = int(strlen * 1.2)
+
             for field in fields:
                 row = Frame(root)
-                lab = Label(row, width=25, text=field, anchor='w')
+                lab = Label(row, width=strw, text=field, anchor='w')
                 ent = Entry(row)
                 row.pack(side=TOP, fill=X, padx=5, pady=5)
                 lab.pack(side=LEFT)
                 ent.pack(side=RIGHT, expand=YES, fill=X)
                 entries.append((field, ent))
                 values.append(ent)
-            return entries, values
 
+            return entries, values, strw
+
+        def helpwindown(root, helpfun):
+            window = Toplevel(root)
+            window.title("Help func")
+            T = Text(window, height=50, width=150)
+            T.pack()
+            T.insert(END, "%s" % helpfun)
+
+        # def main():
         root = Tk()
         root.title("Nii conversion options")
-        root.geometry("300x350")
-        [ents, vals] = makeform(root, fields)
+
+        [ents, vals, strw] = makeform(root, fields)
+
+        n = len(fields)
+        w = strw * 10
+        h = (n * 40) + 50
+        root.geometry("%dx%d" % (w, h))
+
         root.bind('<Return>', (lambda event, e=ents: fetch(e)))
-        b1 = Button(root, text='Show',
+
+        b1 = Button(root, text='Enter',
                     command=(lambda e=ents: fetch(e)))
         b1.pack(side=LEFT, padx=5, pady=5)
+
         b2 = Button(root, text='Done', command=root.quit)
         b2.pack(side=RIGHT, padx=5, pady=5)
+
+        b3 = Button(root, text="Help func", command=lambda: helpwindown(root, helpmsg()))
+        b3.pack(side=LEFT, padx=5, pady=5)
+
         root.mainloop()
 
         outnii = 'clarity' if not vals[0].get() else vals[0].get()
@@ -113,37 +171,8 @@ def parsefn(args):
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
 
+
     else:
-
-        # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
-        parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
-                                         usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
-                                               '-cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
-                                               '-vz [z res] -c [center]')
-
-        required = parser.add_argument_group('required arguments')
-        required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
-                              help="Input CLARITY TIFF folder/dir")
-
-        optional = parser.add_argument_group('optional arguments')
-
-        optional.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
-        optional.add_argument('-cn', '--channum', type=int, metavar='',
-                              help="Chan # for extracting single channel from multiple channel data (default: 1)")
-        optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
-                              help="Chan prefix (string before channel number in file name). ex: C00")
-        optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
-        optional.add_argument('-o', '--outnii', type=str, metavar='',
-                              help="Output nii name (script will append downsample ratio & channel info to given name)")
-        optional.add_argument('-vx', '--resx', type=float, metavar='',
-                              help="Original resolution in x-y plane in um (default: 5)")
-        optional.add_argument('-vz', '--resz', type=float, metavar='',
-                            help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
-        optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
-                              help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
-        optional.add_argument('-i', '--interp')
-
-        optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
 
         args = parser.parse_args()
 

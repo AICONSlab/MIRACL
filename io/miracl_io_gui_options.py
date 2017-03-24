@@ -73,7 +73,7 @@ def main():
 
     n = len(fields)
     w = strw * 10
-    h = (n * 30) + 40
+    h = (n * 40) + 50
     root.geometry("%dx%d" % (w, h))
 
     root.bind('<Return>', (lambda event, e=ents: fetch(e)))
