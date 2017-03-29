@@ -265,75 +265,6 @@ if [[ "$#" -gt 1 ]]; then
 	fi
 
 
-    # set defaults and assert (check for input errors)
-
-    # orient code
-    if [[ -z ${ort} ]]; then
-	    ort=ARS
-	fi
-    ## if A-P flipped (PLS) & if R-L -> ALS
-
-    # If want to warp multi-res / hemi lbls
-	if [[ -z ${lbls} ]]; then
-
-		if [[ -z ${hemi} ]]; then
-
-			hemi=combined
-
-        else
-
-            if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
-
-                printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
-                exit 1
-            fi
-
-		fi
-
-		if [[ -z ${vox} ]]; then
-
-			vox=10
-
-        else
-
-            if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
-
-                printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
-                exit 1
-            fi
-
-		fi
-
-        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
-	fi
-
-    # set side for hemisphere registration
-    if [[ -z ${side} ]] ; then
-        side=""
-    elif [[ "${side}" == "rh" ]]; then
-        side="_right"
-    elif [[ "${side}" == "lh" ]]; then
-        side="_left"
-    else
-        printf "ERROR: < -s => (side) > only takes as inputs: rh or lh"
-        exit 1
-    fi
-
-    # olfactory bulb
-	if [[ -z ${bulb} ]] ; then
-        bulb=0
-    else
-
-        if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
-
-        printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
-        exit 1
-
-        fi
-
-    fi
-
 else
 
 	# call gui
@@ -386,6 +317,80 @@ else
     printf "\n Chosen side option: $side \n"
 
 fi
+
+
+#---------------------------
+
+
+# set defaults and assert (check for input errors)
+
+# orient code
+if [[ -z ${ort} ]]; then
+    ort=ARS
+fi
+## if A-P flipped (PLS) & if R-L -> ALS
+
+# If want to warp multi-res / hemi lbls
+if [[ -z ${lbls} ]]; then
+
+    if [[ -z ${hemi} ]]; then
+
+        hemi=combined
+
+    else
+
+        if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
+
+            printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+            exit 1
+        fi
+
+    fi
+
+    if [[ -z ${vox} ]]; then
+
+        vox=10
+
+    else
+
+        if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
+
+            printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+            exit 1
+        fi
+
+    fi
+
+    lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+fi
+
+# set side for hemisphere registration
+if [[ -z ${side} ]] ; then
+    side=""
+elif [[ "${side}" == "rh" ]]; then
+    side="_right"
+elif [[ "${side}" == "lh" ]]; then
+    side="_left"
+else
+    printf "ERROR: < -s => (side) > only takes as inputs: rh or lh"
+    exit 1
+fi
+
+# olfactory bulb
+if [[ -z ${bulb} ]] ; then
+    bulb=0
+else
+
+    if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
+
+    printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
+    exit 1
+
+    fi
+
+fi
+
 
 
 # get time

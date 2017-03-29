@@ -235,88 +235,6 @@ if [[ "$#" -gt 1 ]]; then
 		exit 1
 	fi
 
-    # set defaults
-
-    # orient code
-    if [[ -z ${ort} ]]; then
-	    ort=RSP
-	fi
-
-    # If want to warp multi-res / hemi lbls
-
-	if [[ -z ${lbls} ]]; then
-
-		if [[ -z ${hemi} ]]; then
-
-			hemi=combined
-
-        else
-
-            if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
-
-                printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
-                exit 1
-            fi
-
-		fi
-
-		if [[ -z ${vox} ]]; then
-
-			vox=10
-
-		else
-
-            if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
-
-                printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
-                exit 1
-            fi
-
-		fi
-
-        lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
-	fi
-
-    # no orient
-    if [[ -z ${noort} ]]; then
-	    noort=0
-    else
-
-        if [ "${noort}" != 0 ] && [ "${noort}" != 1 ]; then
-
-        printf "ERROR: < -n = > (noort) > only takes as inputs: 0 or 1"
-        exit 1
-
-        fi
-	fi
-
-    # skull strip
-    if [[ -z ${skull} ]]; then
-        skull=1
-    else
-
-        if [ "${skull}" != 0 ] && [ "${skull}" != 1 ]; then
-
-        printf "ERROR: < -s = > (skull) > only takes as inputs: 0 or 1"
-        exit 1
-
-        fi
-
-    fi
-
-    # olfactory bulb
-    if [[ -z ${bulb} ]] ; then
-        bulb=0
-    else
-
-        if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
-
-        printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
-        exit 1
-
-        fi
-    fi
 
 else
 
@@ -377,10 +295,97 @@ else
 fi
 
 
+
+#---------------------------
+
+# set defaults and assert (check for input errors)
+
+
+# orient code
+if [[ -z ${ort} ]]; then
+    ort=RSP
+fi
+
+# If want to warp multi-res / hemi lbls
+
+if [[ -z ${lbls} ]]; then
+
+    if [[ -z ${hemi} ]]; then
+
+        hemi=combined
+
+    else
+
+        if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
+
+            printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+            exit 1
+        fi
+
+    fi
+
+    if [[ -z ${vox} ]]; then
+
+        vox=10
+
+    else
+
+        if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
+
+            printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+            exit 1
+        fi
+
+    fi
+
+    lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+
+fi
+
+# no orient
+if [[ -z ${noort} ]]; then
+    noort=0
+else
+
+    if [ "${noort}" != 0 ] && [ "${noort}" != 1 ]; then
+
+    printf "ERROR: < -n = > (noort) > only takes as inputs: 0 or 1"
+    exit 1
+
+    fi
+fi
+
+# skull strip
+if [[ -z ${skull} ]]; then
+    skull=1
+else
+
+    if [ "${skull}" != 0 ] && [ "${skull}" != 1 ]; then
+
+    printf "ERROR: < -s = > (skull) > only takes as inputs: 0 or 1"
+    exit 1
+
+    fi
+
+fi
+
+# olfactory bulb
+if [[ -z ${bulb} ]] ; then
+    bulb=0
+else
+
+    if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
+
+    printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
+    exit 1
+
+    fi
+fi
+
+
 # get time
 
 START=$(date +%s)
-
 
 
 #---------------------------

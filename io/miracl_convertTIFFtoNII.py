@@ -107,9 +107,9 @@ def parsefn(args):
 
         chan = 'eyfp' if not vals[4].get() else vals[4].get()
 
-        vx = 0.005 if not vals[5].get() else int(vals[5].get()) / float(1000)
+        vx = 0.005 if not vals[5].get() else int(vals[5].get() / float(1000))
 
-        vz = 0.005 if not vals[6].get() else int(vals[6].get()) / float(1000)
+        vz = 0.005 if not vals[6].get() else int(vals[6].get() / float(1000))
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
 

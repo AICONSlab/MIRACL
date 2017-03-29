@@ -120,7 +120,7 @@ if (!File.exists(outback)) {
 
 } else {
 
-	print("Background-less image already computed .. skipping & openning it ");
+	print("Background-less image already computed .. skipping & opening it ");
 
 	open(outback);
 
@@ -186,7 +186,7 @@ if (!File.exists(outmed)) {
 
 } else {
 
-	print("Median filtering already computed .. skipping & openning it ");
+	print("Median filtering already computed .. skipping & opening it ");
 
 	open(outmed);
 
@@ -231,7 +231,7 @@ if (!File.exists(outlocthr)) {
 
 } else {
 
-	print("Local Thresholded Median img already exists .. skipping & openning it ");
+	print("Local Thresholded Median img already exists .. skipping & opening it ");
 
 	open(outlocthr);
 
@@ -286,7 +286,7 @@ if (!File.exists(outfil)) {
 
 } else {
 
-	print("Filtered Minimum img already exists .. skipping & openning it ");
+	print("Filtered Minimum img already exists .. skipping & opening it ");
 
 	open(outfil);
 
