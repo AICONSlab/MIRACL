@@ -165,25 +165,6 @@ fi
 
 #----------
 
-# make reg dir
-
-regdirfinal=$PWD/reg_final
-regdir=$PWD/clar_allen_reg
-
-
-if [[ ! -d ${regdir} ]]; then
-
-	printf "\n Creating registration folder\n"
-	mkdir -p ${regdirfinal} ${regdir}
-
-fi
-
-# output log file of script
-
-exec > >(tee -i ${regdir}/clar_allen_script.log)
-exec 2>&1
-
-
 # Init atlas dir
 
 atlasdir=${MIRACL_HOME}/atlases
@@ -279,13 +260,12 @@ else
 
 	# check required input arguments
 
-	if [ -z ${inclar} ];
+	if [[ -z ${inclar} ]] || [[ "${inclar}" == "No file was chosen" ]];
 	then
 		usage
 		echo "ERROR: <input clarity nii> was not chosen"
 		exit 1
 	fi
-
 
 	# options gui 
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" -hf "`usage`")
@@ -317,6 +297,25 @@ else
     printf "\n Chosen side option: $side \n"
 
 fi
+
+
+# make reg dir
+
+regdirfinal=$PWD/reg_final
+regdir=$PWD/clar_allen_reg
+
+
+if [[ ! -d ${regdir} ]]; then
+
+    printf "\n Creating registration folder\n"
+    mkdir -p ${regdirfinal} ${regdir}
+
+fi
+
+# output log file of script
+
+exec > >(tee -i ${regdir}/clar_allen_script.log)
+exec 2>&1
 
 
 #---------------------------

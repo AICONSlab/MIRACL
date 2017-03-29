@@ -189,12 +189,6 @@ fi
 
 START=$(date +%s)
 
-
-# output log file of script
-
-exec > >(tee -i ${regdir}/workflow_reg_clar_allen.log)
-exec 2>&1
-
 #---------------------------
 #---------------------------
 
@@ -259,6 +253,11 @@ if [[ "$#" -gt 1 ]]; then
 
     fi
 
+    # output log file of script
+
+    exec > >(tee -i ${regdir}/workflow_reg_clar_allen.log)
+    exec 2>&1
+
 
     #---------------------------
     # Call conversion to nii
@@ -321,6 +320,17 @@ else
     miracl_io_set_orient_gui.py
 
 
+    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
+
+    # check required input arguments
+
+	if [ -z ${indir} ];
+	then
+		usage
+		echo "ERROR: input CLARITY dir not specified"
+		exit 1
+	fi
+
     # make reg dir
 
     regdirfinal=$PWD/reg_final
@@ -334,9 +344,10 @@ else
 
     fi
 
+    # output log file of script
 
-    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
-
+    exec > >(tee -i ${regdir}/workflow_reg_clar_allen.log)
+    exec 2>&1
 
     #---------------------------
     # Get nii conv opts

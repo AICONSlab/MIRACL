@@ -132,25 +132,6 @@ fi
 
 #----------
 
-# make reg dir
-
-regdirfinal=$PWD/reg_final
-regdir=$PWD/mri_allen_reg
-
-
-if [[ ! -d ${regdir} ]]; then
-
-	printf "\n Creating registration folder\n"
-	mkdir -p ${regdirfinal} ${regdir}
-
-fi
-
-# output log file of script
-
-exec > >(tee -i ${regdir}/mri_allen_script.log)
-exec 2>&1
-
-
 # Init atlas dir
 
 atlasdir=${MIRACL_HOME}/atlases
@@ -257,6 +238,14 @@ else
 		exit 1
 	fi
 
+    # check required input arguments
+
+	if [[ -z ${inmr} ]] || [[ "${inmr}" == "No file was chosen" ]];
+	then
+		usage
+		echo "ERROR: <input MRI nii> was not chosen"
+		exit 1
+	fi
 
 	# options gui
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = RSP)" \
@@ -294,6 +283,25 @@ else
 
 fi
 
+
+
+# make reg dir
+
+regdirfinal=$PWD/reg_final
+regdir=$PWD/mr_allen_reg
+
+
+if [[ ! -d ${regdir} ]]; then
+
+    printf "\n Creating registration folder\n"
+    mkdir -p ${regdirfinal} ${regdir}
+
+fi
+
+# output log file of script
+
+exec > >(tee -i ${regdir}/mri_allen_script.log)
+exec 2>&1
 
 
 #---------------------------

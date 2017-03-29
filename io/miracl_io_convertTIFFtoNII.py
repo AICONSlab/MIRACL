@@ -227,7 +227,6 @@ def parsefn(args):
         else:
             vz = args.resz
 
-
         if args.center is None:
             cent = [0, 0, 0]
         else:

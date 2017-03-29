@@ -43,7 +43,7 @@ def openfile(msg):
     if len(filename) > 0:
         print "\n File chosen for reading is: %s" % filename
     else:
-        print "No file was chosen!"
+        print "No file was chosen"
 
         # with open("path.txt", "w") as myfile:
         #     myfile.write(filename)
@@ -61,7 +61,7 @@ def openfolder(msg):
     if len(dirname) > 0:
         print "\n Directory chosen for reading is: %s" % dirname
     else:
-        print "No folder was chosen!"
+        print "No folder was chosen"
 
         # with open("path.txt", "w") as myfile:
         #     myfile.write(dirname)
