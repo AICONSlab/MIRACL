@@ -385,11 +385,11 @@ else
     printf "\n Chosen out channel name: $chan \n"
 
     vx=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    if [[ -z ${vx} ]]; then vx=0.005 ; fi
+    if [[ -z ${vx} ]]; then vx=5 ; fi
     printf "\n Chosen in-plane res: $vx \n"
 
     vz=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    if [[ -z ${vz} ]]; then vz=0.005 ; fi
+    if [[ -z ${vz} ]]; then vz=5 ; fi
     printf "\n Chosen thickness: $vz \n"
 
     cent=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
