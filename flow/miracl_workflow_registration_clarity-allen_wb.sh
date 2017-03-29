@@ -190,19 +190,6 @@ fi
 START=$(date +%s)
 
 
-# make reg dir
-
-regdirfinal=$PWD/reg_final
-regdir=$PWD/clar_allen_reg
-
-
-if [[ ! -d ${regdir} ]]; then
-
-	printf "\n Creating registration folder\n"
-	mkdir -p ${regdirfinal} ${regdir}
-
-fi
-
 # output log file of script
 
 exec > >(tee -i ${regdir}/workflow_reg_clar_allen.log)
@@ -257,6 +244,20 @@ if [[ "$#" -gt 1 ]]; then
 		echo "ERROR: < -f => input folder with clarity tifs> not specified"
 		exit 1
 	fi
+
+
+    # make reg dir
+
+    regdirfinal=$PWD/reg_final
+    regdir=$PWD/clar_allen_reg
+
+
+    if [[ ! -d ${regdir} ]]; then
+
+        printf "\n Creating registration folder\n"
+        mkdir -p ${regdirfinal} ${regdir}
+
+    fi
 
 
     #---------------------------
@@ -319,6 +320,24 @@ else
     printf "\n miracl_io_set_orient_gui.py \n"
     miracl_io_set_orient_gui.py
 
+
+    # make reg dir
+
+    regdirfinal=$PWD/reg_final
+    regdir=$PWD/clar_allen_reg
+
+
+    if [[ ! -d ${regdir} ]]; then
+
+        printf "\n Creating registration folder\n"
+        mkdir -p ${regdirfinal} ${regdir}
+
+    fi
+
+
+    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
+
+
     #---------------------------
     # Get nii conv opts
 
@@ -370,24 +389,24 @@ else
     # Get reg opts
 
     # options gui for Reg
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
+	regopts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
 
 	# populate array
-	arr=()
+	regarr=()
 	while read -r line; do
-	   arr+=("$line")
-	done <<< "$opts"
+	   regarr+=("$line")
+	done <<< "$regopts"
 
 
-	hemi=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	hemi=`echo "${regarr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${hemi} ]]; then hemi="combined" ; fi
 	printf "\n Chosen hemi: $hemi \n"
 
-	vox=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox=`echo "${regarr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${vox} ]]; then vox=10 ; fi
 	printf "\n Chosen vox (um): $vox \n"
 
-	ob=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	ob=`echo "${regarr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${ob} ]]; then ob=0 ; fi
     printf "\n Chosen ob: $ob \n"
 
@@ -396,8 +415,6 @@ else
     # Call conversion to nii
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
-
-    indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
 
 
     printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"

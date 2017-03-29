@@ -15,12 +15,17 @@ import tkFileDialog
 import tkMessageBox as messagebox
 import glob
 import os
-
+import sys
 import cv2
 
 root = Tk.Tk()
 root.withdraw()
 indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
+
+assert isinstance(indir, str)
+
+if not os.path.exists(indir):
+    sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
 flist = glob.glob('%s/*.tif' % indir)
 

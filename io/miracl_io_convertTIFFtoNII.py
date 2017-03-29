@@ -164,9 +164,9 @@ def parsefn(args):
 
         chan = 'eyfp' if not vals[4].get() else vals[4].get()
 
-        vx = 0.005 if not vals[5].get() else int(vals[5].get()) / float(1000)
+        vx = 5 if not vals[5].get() else int(vals[5].get())
 
-        vz = 0.005 if not vals[6].get() else int(vals[6].get()) / float(1000)
+        vz = 5 if not vals[6].get() else int(vals[6].get())
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
 
@@ -218,21 +218,24 @@ def parsefn(args):
             chan = args.channame
 
         if args.resx is None:
-            vx = 0.005  # 5 um
+            vx = 5
         else:
             vx = args.resx
-            vx /= float(1000)
 
         if args.resz is None:
-            vz = 0.005  # 5 um
+            vz = 5
         else:
             vz = args.resz
-            vz /= float(1000)
+
 
         if args.center is None:
             cent = [0, 0, 0]
         else:
             cent = args.center
+
+    # make res in um
+    vx /= float(1000)  # in um
+    vz /= float(1000)
 
     return indir, outnii, d, chann, chanp, chan, vx, vz, cent
 
