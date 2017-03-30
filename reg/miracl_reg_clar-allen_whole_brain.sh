@@ -73,6 +73,11 @@ function usage()
         reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif : Allen labels registered to original (full-resolution) Clarity
 
 
+        - To visualize Allen labels in downsampled clarity data space (from command line):
+
+            itksnap -g reg_final/clar_downsample_res(vox)um.nii.gz -s reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz -l \$snaplut
+
+
         - To visualize clarity data in Allen space - assuming chosen v/vox 10um
             from command line:
 
@@ -85,11 +90,6 @@ function usage()
                 \$lbls10 = \$MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
 
                 \$snaplut = \$MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
-
-
-        - To visualize Allen labels in downsampled clarity data space (from command line):
-
-            itksnap -g clar_downsample_res(vox)um.nii.gz -s reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz
 
 
         - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
