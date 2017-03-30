@@ -441,9 +441,10 @@ else
     nii=`ls -r niftis | tail -n 1`
 
     ort=`cat ort2std.txt | grep ortcode | cut -d '=' -f 2`
+    ort="${ort:0:3}"
 
-    printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob} \n"
-    miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -ob ${ob}
+    printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} \n"
+    miracl_reg_clar-allen_whole_brain.sh -i "niftis/"${nii}"" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}"
 
 
 fi

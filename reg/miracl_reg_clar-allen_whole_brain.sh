@@ -201,31 +201,31 @@ if [[ "$#" -gt 1 ]]; then
 	    case "${opt}" in
 
 	        i)
-            	inclar=${OPTARG}
+            	inclar="${OPTARG}"
             	;;
 
             o)
-            	ort=${OPTARG}
+            	ort="${OPTARG}"
             	;;
 
         	l)
-            	lbls=${OPTARG}
+            	lbls="${OPTARG}"
             	;;
 
         	m)
-            	hemi=${OPTARG}
+            	hemi="${OPTARG}"
             	;;
 
         	v)
-            	vox=${OPTARG}
+            	vox="${OPTARG}"
             	;;
 
             s)
-            	side=${OPTARG}
+            	side="${OPTARG}"
             	;;
 
             b)
-            	bulb=${OPTARG}
+            	bulb="${OPTARG}"
             	;;
         	*)
             	usage            	
@@ -854,7 +854,7 @@ function main()
 	# Orient
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
 
-	orientimg ${betclar} ${ort} Cubic short ${ortclar}
+	orientimg ${betclar} "${ort}" Cubic short ${ortclar}
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
