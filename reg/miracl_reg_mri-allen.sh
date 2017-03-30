@@ -51,6 +51,8 @@ function usage()
 
         s.  skull strip or not, binary option (default: 1 -> skull-strip)
 
+        f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
+
         n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
 
 	----------		
@@ -163,7 +165,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:b:s:n:" opt; do
+	while getopts ":i:o:l:m:v:b:s:f:n:" opt; do
     
 	    case "${opt}" in
 
@@ -192,6 +194,10 @@ if [[ "$#" -gt 1 ]]; then
 
             s)
             	skull=${OPTARG}
+            	;;
+
+            f)
+            	frac=${OPTARG}
             	;;
 
             n)
@@ -390,6 +396,10 @@ else
     fi
 fi
 
+# fractional intensity for skull-strip
+if [[ -z ${frac} ]] ; then
+    frac=0.3
+fi
 
 # get time
 
@@ -499,10 +509,11 @@ function skullstrip()
 
 	local skullmr=$1
 	local betmr=$2
+	local frac=$3
 
     com=`fslstats ${skullmr} -C`
 
-    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f 0.25
+    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f ${frac}
 
 }
 
@@ -698,19 +709,19 @@ function main()
     fi
 
     # Crop to smallest roi
-#	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
-#	croptosmall ${thrmr} ${mrroi}
+	mrroi=${regdir}/mr_bias_thr_roi.nii.gz
+	croptosmall ${ortmr} ${mrroi}
 
 
     if [[ "${skull}" == 1 ]]; then
 
         # Change header * 10 dims
         hdmr=${regdir}/mr_bias_thr_ort_hd.nii.gz
-        mulheader ${ortmr} 10 ${hdmr}
+        mulheader ${mrroi} 10 ${hdmr}
 
         # Skull strip
         betmr=${regdir}/mr_bias_thr_ort_bet.nii.gz
-        skullstrip ${hdmr} ${betmr}
+        skullstrip ${hdmr} ${betmr} ${frac}
 
         # Update back header
         orghdmr=${regdir}/mr_bias_thr_ort_bet_orghd.nii.gz
@@ -718,7 +729,7 @@ function main()
 
     else
 
-        orghdmr=${ortmr}
+        orghdmr=${mrroi}
 
     fi
 
