@@ -513,7 +513,8 @@ function skullstrip()
 
     com=`fslstats ${skullmr} -C`
 
-    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f ${frac}
+#    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f ${frac}
+    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -c ${com} -f ${frac} -R
 
 }
 
@@ -735,7 +736,7 @@ function main()
 
     # Smooth
     smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
-    smoothimg ${orghdmr} 0.5 ${smmr}
+    smoothimg ${orghdmr} 0.25 ${smmr}
 
 	# make MRI copy
 	mrlnk=${regdir}/mr.nii.gz
