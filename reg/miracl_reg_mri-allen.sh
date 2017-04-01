@@ -749,10 +749,10 @@ function main()
     # Allen atlas template
 
     if [[ "${bulb}" == 0 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
+        allenref=${atlasdir}/ara/template/average_template_50um_OBmasked.nii.gz
 
     elif [[ "${bulb}" == 1 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
+        allenref=${atlasdir}/ara/template/average_template_50um.nii.gz
     fi
 
 #	initform=${regdir}/init_tform.mat
