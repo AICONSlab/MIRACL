@@ -703,15 +703,13 @@ function warpallenlbls()
 
     # calculate res voxs from vres
      # get img dim
-    smdim=`PrintHeader ${smclar} 2`
-    xm=${smdim%%x*} ;
-    yzm=${smdim#*x} ; ym=${yzm%x*} ;
-    zm=${smdim##*x} ;
-
-
+#    smdim=`PrintHeader ${smclar} 2`
+#    xm=${smdim%%x*} ;
+#    yzm=${smdim#*x} ; ym=${yzm%x*} ;
+#    zm=${smdim##*x} ;
 
     # res clar in
-#    ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
+    ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
 
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
@@ -782,6 +780,8 @@ function warpinclarallen()
 	# Apply warps
 	ifdsntexistrun ${regorgclar} "Applying ants deformation to input CLARITY" \
 	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
+
+#	c3d ${regorgclar} -type short -o ${regorgclar}
 
 }
 
