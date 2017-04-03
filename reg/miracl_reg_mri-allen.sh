@@ -641,8 +641,8 @@ function warpallenlbls()
 
 	# warp to registered MRI
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-	antsApplyTransforms -r ${mrlnk} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} -o ${wrplbls}
-#	 antsApplyTransforms -r ${mrlnk} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+	antsApplyTransforms -d 3 -r ${mrlnk} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} -o ${wrplbls} --float
+
 
 }
 
