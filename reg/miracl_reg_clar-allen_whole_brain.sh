@@ -600,11 +600,12 @@ function initclarallenreg()
 	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
 
     # kill after 3 min (gcc issue)
-    pid=`echo $!`
+#    pid=`echo $!`
 
     sleep 180
 
-    kill -9 ${pid}
+#    kill -9 ${pid}
+    kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
 
 	# Warp Allen
 	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
@@ -781,8 +782,6 @@ function warpinclarallen()
 	# Apply warps
 	ifdsntexistrun ${regorgclar} "Applying ants deformation to input CLARITY" \
 	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
-
-#	c3d ${regorgclar} -type short -o ${regorgclar}
 
 }
 
