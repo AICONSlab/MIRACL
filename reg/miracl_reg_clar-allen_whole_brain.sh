@@ -548,7 +548,8 @@ function smoothimg()
 	local sigma=$2
 	local smclar=$3
 
-	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
+#	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
+    ifdsntexistrun ${smclar} "Smoothing CLARITY image" c3d ${ortclar} -smooth ${sigma}vox -o ${smclar}
 
 	c3d ${smclar} -type short -o ${smclar}
 
@@ -603,7 +604,7 @@ function initclarallenreg()
 
     sleep 180
 
-    kill ${pid}
+    kill -9 ${pid}
 
 	# Warp Allen
 	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
@@ -847,7 +848,7 @@ function main()
 
 	# Ero (remove any components attached to the brain)
 	eromask=${regdir}/clar_res0.05_ero_mask.nii.gz
-	erode ${thrclar} 3 ${eromask}
+	erode ${thrclar} 2 ${eromask}
 
     # Get largest component
     conncomp=${regdir}/clar_res0.05_ero_mask_comp.nii.gz
@@ -855,7 +856,7 @@ function main()
 
 	# Dil
 	dilmask=${regdir}/clar_res0.05_dil_mask.nii.gz
-	dilate ${conncomp} 3 ${dilmask}
+	dilate ${conncomp} 2 ${dilmask}
 
 	# Mask
 	betclar=${regdir}/clar_res0.05_bias_bet.nii.gz
@@ -868,7 +869,7 @@ function main()
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
-	smoothimg ${ortclar} 1 ${smclar}
+	smoothimg ${ortclar} 0.25 ${smclar}
 
 	# Crop to smallest roi
 #	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
