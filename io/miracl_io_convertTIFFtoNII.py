@@ -233,8 +233,8 @@ def parsefn(args):
             cent = args.center
 
     # make res in um
-    vx /= float(100)  # in um
-    vz /= float(100)
+    vx /= float(1000)  # in um
+    vz /= float(1000)
 
     return indir, outnii, d, chann, chanp, chan, vx, vz, cent
 
