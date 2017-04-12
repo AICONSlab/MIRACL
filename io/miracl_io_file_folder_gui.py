@@ -1,13 +1,12 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # Maged Goubran @ 2016, mgoubran@stanford.edu 
 
-# coding: utf-8
+# coding: utf-8 
 
 import argparse
 import sys
-import tkFileDialog
-from Tkinter import Tk
-from tkFileDialog import askopenfilename
+
+from PyQt4.QtGui import *
 
 
 ### Inputs #########
@@ -22,62 +21,52 @@ example: miracl_io_file_folder_gui -f file -s "Please open your picture"
 File/Folder path will be printed in output
 '''
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-f', '--filfol', type=str, help="file or folder", required=True)
-parser.add_argument('-s', '--string', type=str, help="string for message", required=True)
 
-args = parser.parse_args()
+def parseargs():
+    parser = argparse.ArgumentParser(description='pyqt gui', usage=helpmsg())
+    parser.add_argument('-f', '--filfol', type=str, help="file or folder", required=True)
+    parser.add_argument('-s', '--string', type=str, help="string for message", required=True)
 
-filfol = args.filfol
-msg = args.string
+    args = parser.parse_args()
+
+    filfol = args.filfol
+    msg = args.string
+
+    return filfol, msg
 
 
-def openfile(msg):
+def showDialog(self, filfol, msg):
     '''
-    Opens file with gui with tkinter
-    '''
-    # read file
-    Tk().withdraw()
-    filename = askopenfilename(title='%s' % msg)
-
-    if len(filename) > 0:
-        print "\n File chosen for reading is: %s" % filename
-    else:
-        print "No file was chosen"
-
-        # with open("path.txt", "w") as myfile:
-        #     myfile.write(filename)
-
-
-def openfolder(msg):
-    '''
-    Opens folder with gui with tkinter
+    Get file / folder with gui with QFileDialog
     '''
 
-    # read Dir
-    Tk().withdraw()
-    dirname = tkFileDialog.askdirectory(title='%s' % msg)
+    if (filfol == 'file'):
 
-    if len(dirname) > 0:
-        print "\n Directory chosen for reading is: %s" % dirname
-    else:
-        print "No folder was chosen"
+        filename = QFileDialog.getOpenFileName(self, "%s" % msg, "/")
 
-        # with open("path.txt", "w") as myfile:
-        #     myfile.write(dirname)
-
-
-def main():
-    try:
-        if (filfol == 'file'):
-            openfile(msg)
+        if len(filename) > 0:
+            print "\n File chosen for reading is: %s" % filename
         else:
-            openfolder(msg)
+            print "No file was chosen"
 
-        return 0
+    else:
 
-    except:
-        return 1
+        folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg))
+
+        if len(folder) > 0:
+            print "\n Folder chosen for reading is: %s" % folder
+        else:
+            print "No folder was chosen"
+	
+  
+def main():
+    [filfol, msg] = parseargs()
+
+    # Create an PyQT4 application object.
+    a = QApplication(sys.argv)
+    w = QWidget()
+
+    showDialog(w, filfol, msg)
 
 
 if __name__ == "__main__":
