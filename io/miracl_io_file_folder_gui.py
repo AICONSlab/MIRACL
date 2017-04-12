@@ -9,9 +9,10 @@ import sys
 from PyQt4.QtGui import *
 
 
-### Inputs #########
+# ---------
+# Inputs #
 
-def helpmsg(name=None):
+def helpmsg():
     return '''miracl_io_file_folder_gui -f [file/folder] -s string
 
 Opens gui to choose file / folder & shows input string as message
@@ -35,14 +36,14 @@ def parseargs():
     return filfol, msg
 
 
-def showDialog(self, filfol, msg):
-    '''
+def showdialog(self, filfol, msg):
+    """
     Get file / folder with gui with QFileDialog
-    '''
+    """
 
-    if (filfol == 'file'):
+    if filfol == 'file':
 
-        filename = QFileDialog.getOpenFileName(self, "%s" % msg, "/")
+        filename = QFileDialog.getOpenFileName(self, "%s" % msg, ".")
 
         if len(filename) > 0:
             print "\n File chosen for reading is: %s" % filename
@@ -51,22 +52,22 @@ def showDialog(self, filfol, msg):
 
     else:
 
-        folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg))
+        folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg, "."))
 
         if len(folder) > 0:
             print "\n Folder chosen for reading is: %s" % folder
         else:
             print "No folder was chosen"
-	
-  
+
+
 def main():
     [filfol, msg] = parseargs()
 
     # Create an PyQT4 application object.
-    a = QApplication(sys.argv)
+    QApplication(sys.argv)
     w = QWidget()
 
-    showDialog(w, filfol, msg)
+    showdialog(w, filfol, msg)
 
 
 if __name__ == "__main__":
