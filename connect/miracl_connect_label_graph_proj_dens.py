@@ -24,27 +24,26 @@ warnings.filterwarnings("ignore")
 
 
 def helpmsg():
-    return '''Usage: miracl_get_exp_conn_graph_proj_den.py -l [label id]
+    return '''Usage: miracl_get_exp_conn_graph_proj_den.py -l [label Abrv] -t [transgenic line (wild-type if empty)]
 
     Query Allen connectivity API for injection experiments & finds the experiment with highest projection volume
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
 
-    Search is performed for experiments on wildtype (C57BL/6J) mice
+    example: miracl_get_exp_conn_graph_proj_den.py -l DR -t Slc6a4-Cre_ET33
 
-    example: miracl_get_exp_conn_graph_proj_den.py -l
+    OR (for wild-type stain):
+
+    example: miracl_get_exp_conn_graph_proj_den.py -l DR
 
     arguments (required):
 
-        l. Allen atlas label id
+        l. Allen atlas label abbreviation or id
 
+    arguments (optional):
 
-    Dependencies:
-
-	    Python 2.7
-	    used modules:
-            argparse, numpy, scipy, seaborn, pandas, tifffile, warnings, matplotlib, os, sys, datetime, allensdk, nibabel
-
+        t. Transgenic Line
+            If not given search is performed for wild-type mice (C57BL/6J)
 
     '''
 
@@ -54,17 +53,19 @@ def helpmsg():
 
 
 def getinpars():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-    parser.add_argument('-l', '--lbl', type=int, help="Input label id", required=True)
+    parser = argparse.ArgumentParser(description='', usage=helpmsg())
+    parser.add_argument('-l', '--lbl', type=str, help="Input label abrv", required=True)
+    parser.add_argument('-t', '--trans', type=str, help="Transgenic line")
 
     args = parser.parse_args()
 
     # check if pars given
 
-    assert isinstance(args.lbl, int)
+    # assert isinstance(args.lbl, int)
     lbl = args.lbl
+    trans = args.trans
 
-    return lbl
+    return lbl, trans
 
 
 # ---------------
@@ -265,7 +266,7 @@ def main():
     starttime = datetime.now()
 
     # initial pars & read inputs
-    lbl = getinpars()
+    lbl, trans = getinpars()
 
     [cutoff, miracl_home, annot_csv, exclude] = initialize()
 
@@ -275,16 +276,29 @@ def main():
     # Load all injection experiments from Allen api
     all_experiments = mcc.get_experiments(dataframe=True)
     # Filter to only wild-type strain
-    projexps = all_experiments[all_experiments['strain'] == "C57BL/6J"]
-    # no transgenic mice
-    projexps = projexps[projexps['transgenic-line'] == ""]
+
+    if trans:
+
+        print("\n Searching for experiments with the %s mouse line" % trans)
+
+        projexps = all_experiments[all_experiments['transgenic-line'] == "%s" % trans]
+
+    else:
+
+        print("\n Searching for experiments with the wild-type (C57BL/6J) strain")
+
+        # wild-type
+        projexps = all_experiments[all_experiments['strain'] == "C57BL/6J"]
+
+        # no transgenic mice
+        projexps = projexps[projexps['transgenic-line'] == ""]
 
     # ---------------
 
     # Check if labels have injection exps
     print("\n Checking if labels have injection experiments in the connectivity search")
 
-    inj_exp = projexps[projexps['structure-id'] == lbl].id.index[0]
+    inj_exp = projexps[projexps['structure-abbrev'] == lbl].id.index[0]
 
     while inj_exp is None:
         pid = annot_csv.parent_structure_id[annot_csv.id == lbl].values[0]
@@ -295,13 +309,13 @@ def main():
     # Get projection density
     projd = getprojden(mcc, inj_exp)
 
-    lbl_abrv = annot_csv[annot_csv['id'] == lbl]['acronym'].values[0]
-    lbl_abrv = lbl_abrv[1:]  # drop 1st char
+    # lbl_abrv = annot_csv[annot_csv['id'] == lbl]['acronym'].values[0]
+    # lbl_abrv = lbl_abrv[1:]  # drop 1st char
 
-    print("\n Downloading projection density volume for experiment %d of lbl %d => %s" % (inj_exp, lbl, lbl_abrv))
+    print("\n Downloading projection density volume for experiment %d of lbl %s" % (inj_exp, lbl))
 
-    outpd = '%s_exp%s_projection_density.nii.gz' % (lbl_abrv, inj_exp)
-    outtif = '%s_exp%s_projection_density.tif' % (lbl_abrv, inj_exp)
+    outpd = '%s_exp%s_projection_density.nii.gz' % (lbl, inj_exp)
+    outtif = '%s_exp%s_projection_density.tif' % (lbl, inj_exp)
     # outind = '%s_injection_density.nii.gz' % experiment_id
     # outdm = '%s_binary_mask.nii.gz' % experiment_id
 
@@ -325,10 +339,10 @@ def main():
     [all_connect_ids, all_norm_proj] = query_connect(inj_exp, cutoff, exclude, mcc)
 
     # save csv
-    export_connect_abv = saveconncsv(all_connect_ids, annot_csv, lbl_abrv, inj_exp)
+    export_connect_abv = saveconncsv(all_connect_ids, annot_csv, lbl, inj_exp)
 
     # compute & save proj map
-    exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp)
+    exportprojmap(all_norm_proj, export_connect_abv, lbl, inj_exp)
 
     print ("\n Downloading connectivity graph & projection map done in %s ... Have a good day!\n" % (
     datetime.now() - starttime))
@@ -338,9 +352,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-
 # ------
 # TODOs
-
-# TODOlp: use label abrv too
-# TODOlp: add paremeter for choosing different stain or transgenic line of mice
