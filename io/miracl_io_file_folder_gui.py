@@ -64,7 +64,7 @@ def main():
     [filfol, msg] = parseargs()
 
     # Create an PyQT4 application object.
-    QApplication(sys.argv)
+    a = QApplication(sys.argv)
     w = QWidget()
 
     showdialog(w, filfol, msg)
