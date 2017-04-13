@@ -19,33 +19,48 @@ from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
 warnings.filterwarnings("ignore")
 
+
 # ---------
 # help fn
 
 
 def helpmsg():
-    return '''Usage: miracl_get_exp_conn_graph_proj_den.py -l [label Abrv] -t [transgenic line (wild-type if empty)]
+    return '''miracl_get_exp_conn_graph_proj_den.py -l [label Abrv] -t [transgenic line (wild-type if empty)] -p [projection metric (normalized projection volume or projection density) ]
 
     Query Allen connectivity API for injection experiments & finds the experiment with highest projection volume
     Outputs a connectivity graph of that experiment & its projection density images (as nii & tif)
     If a label has no injection experiments, the connectivity atlas is searched for experiments for its parent label.
 
-    example: miracl_get_exp_conn_graph_proj_den.py -l DR -t Slc6a4-Cre_ET33
+    Connectivity strength is ranked by the input projection metric and is thresholded over 0.001
 
-    OR (for wild-type stain):
+    example: miracl_get_exp_conn_graph_proj_den.py -l DR -t Slc6a4-Cre_ET33 -p "projection density"
+
+    OR (for wild-type stain and sorting by normalized projection volume):
 
     example: miracl_get_exp_conn_graph_proj_den.py -l DR
 
     arguments (required):
 
-        l. Allen atlas label abbreviation or id
+        l. Allen atlas label abbreviation
 
     arguments (optional):
 
         t. Transgenic Line
             If not given search is performed for wild-type mice (C57BL/6J)
 
+        p. Projection metric to sort connectivity
+            normalized projection volume (default)
+            or
+            projection density
+
     '''
+
+
+# Dependencies:
+#
+#     Python 2.7
+#     used modules:
+#         argparse, numpy, scipy, seaborn, pandas, matplotlib, os, sys, datetime, allensdk, nibabel, lightning
 
 
 # ---------
@@ -56,7 +71,7 @@ def getinpars():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-l', '--lbl', type=str, help="Input label abrv", required=True)
     parser.add_argument('-t', '--trans', type=str, help="Transgenic line")
-
+    parser.add_argument('-p', '--projmet', type=str, help="Projection metric")
     args = parser.parse_args()
 
     # check if pars given
@@ -64,8 +79,11 @@ def getinpars():
     # assert isinstance(args.lbl, int)
     lbl = args.lbl
     trans = args.trans
+    projmet = args.projmet
 
-    return lbl, trans
+    projmet = "normalized_projection_volume" if not projmet else projmet.replace(" ", "_")
+
+    return lbl, trans, projmet
 
 
 # ---------------
@@ -153,10 +171,11 @@ def exlude_maj_lbls(in_lbls, exclude):
 
     return out_lbls
 
+
 # ---------------
 # Query Allen API
 
-def query_connect(exp_id, cutoff, exclude, mcc):
+def query_connect(exp_id, cutoff, exclude, mcc, projmet):
     """ Queries the structural connectivity of
     labels inside mask & sorts found labels by normalized projection volume
     """
@@ -171,12 +190,12 @@ def query_connect(exp_id, cutoff, exclude, mcc):
 
     # get connected regions
     filter_exp = projection_df.loc[
-        (projection_df['normalized_projection_volume'] > cutoff) & (projection_df['hemisphere_id'] != 3)]
+        (projection_df["%s" % projmet] > cutoff) & (projection_df['hemisphere_id'] != 3)]
 
     # sort exp values by norm proj volume
-    norm_proj = filter_exp.sort_values(['normalized_projection_volume'], ascending=False).ix[:,
-                ['hemisphere_id', 'structure_id', 'normalized_projection_volume']]
-    norm_proj_vol = norm_proj["normalized_projection_volume"]
+    norm_proj = filter_exp.sort_values(["%s" % projmet], ascending=False).ix[:,
+                ['hemisphere_id', 'structure_id', '%s' % projmet]]
+    norm_proj_vol = norm_proj["%s" % projmet]
     all_norm_proj.append(norm_proj_vol)
 
     # distinguish label hemisphere
@@ -200,7 +219,7 @@ def query_connect(exp_id, cutoff, exclude, mcc):
 # ---------------
 # save connected ids & abreviations as csv
 
-def saveconncsv(conn_ids, annot_csv, lbl_abrv, inj_exp):
+def saveconncsv(conn_ids, annot_csv, lbl_abrv, inj_exp, projmet):
     """ Saves connectivity ids (primary structures & targets)
     as a csv file with their ontology atlas ID number
     """
@@ -214,13 +233,13 @@ def saveconncsv(conn_ids, annot_csv, lbl_abrv, inj_exp):
     all_cols = ['injection_lbl'] + connect_cols
 
     export_connect.columns = all_cols
-    export_connect.to_csv('%s_exp%s_connected_ids.csv' % (lbl_abrv, inj_exp), index=False)
+    export_connect.to_csv('%s_exp%s_connected_ids_sorted_by_%s.csv' % (lbl_abrv, inj_exp, projmet), index=False)
 
     # export acronynms
     dic = annot_csv.set_index('id')['acronym'].to_dict()
 
     export_connect_abv = export_connect.replace(dic)
-    export_connect_abv.to_csv('%s_exp%s_connected_abrvs.csv' % (lbl_abrv, inj_exp), index=False)
+    export_connect_abv.to_csv('%s_exp%s_connected_abrvs_sorted_by_%s.csv' % (lbl_abrv, inj_exp, projmet), index=False)
 
     return export_connect_abv
 
@@ -228,7 +247,7 @@ def saveconncsv(conn_ids, annot_csv, lbl_abrv, inj_exp):
 # ---------------
 # compute & save projection map
 
-def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp):
+def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp, projmet):
     """ Generates & saves the projection map of primary structures as png, and
     the projection data as a csv file
     """
@@ -246,7 +265,7 @@ def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp):
     plt.figure(figsize=(n, 3))
     sns.set_context("talk", font_scale=0.75)
     sns.heatmap(out_norm_proj.T,
-                cbar_kws={"label": "Normalized projection volume"},
+                cbar_kws={"label": "%s" % projmet},
                 annot=abrv_annot.T, fmt="s")
 
     plt.yticks(rotation=0)
@@ -266,7 +285,7 @@ def main():
     starttime = datetime.now()
 
     # initial pars & read inputs
-    lbl, trans = getinpars()
+    [lbl, trans, projmet] = getinpars()
 
     [cutoff, miracl_home, annot_csv, exclude] = initialize()
 
@@ -314,8 +333,8 @@ def main():
 
     print("\n Downloading projection density volume for experiment %d of lbl %s" % (inj_exp, lbl))
 
-    outpd = '%s_exp%s_projection_density.nii.gz' % (lbl, inj_exp)
-    outtif = '%s_exp%s_projection_density.tif' % (lbl, inj_exp)
+    outpd = '%s_exp%s_projection_density_image.nii.gz' % (lbl, inj_exp)
+    outtif = '%s_exp%s_projection_density_image.tif' % (lbl, inj_exp)
     # outind = '%s_injection_density.nii.gz' % experiment_id
     # outdm = '%s_binary_mask.nii.gz' % experiment_id
 
@@ -334,18 +353,18 @@ def main():
 
     # Get connectivity graph
     # query structure connectivity from Allen API
-    print("\n Quering structural connectivity of injection labels in the Allen API & sorting by projection volume")
+    print("\n Quering structural connectivity of injection labels in the Allen API & sorting by %s" % projmet)
 
-    [all_connect_ids, all_norm_proj] = query_connect(inj_exp, cutoff, exclude, mcc)
+    [all_connect_ids, all_norm_proj] = query_connect(inj_exp, cutoff, exclude, mcc, projmet)
 
     # save csv
-    export_connect_abv = saveconncsv(all_connect_ids, annot_csv, lbl, inj_exp)
+    export_connect_abv = saveconncsv(all_connect_ids, annot_csv, lbl, inj_exp, projmet)
 
     # compute & save proj map
-    exportprojmap(all_norm_proj, export_connect_abv, lbl, inj_exp)
+    exportprojmap(all_norm_proj, export_connect_abv, lbl, inj_exp, projmet)
 
     print ("\n Downloading connectivity graph & projection map done in %s ... Have a good day!\n" % (
-    datetime.now() - starttime))
+        datetime.now() - starttime))
 
 
 # Call main function

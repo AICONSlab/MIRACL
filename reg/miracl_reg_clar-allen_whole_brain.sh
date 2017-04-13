@@ -175,9 +175,10 @@ atlasdir=${MIRACL_HOME}/atlases
 function choose_file_gui()
 {
 	local openstr=$1
-	local _inpath=$2
+	local ftype=$2
+	local _inpath=$3
 
-	filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr")
+	filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
 
     filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -254,7 +255,7 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel (nii/nii.gz)" inclar
+	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel" "*.nii *.nii.gz" inclar
 
     printf "\n Input file path: ${inclar} \n"
 

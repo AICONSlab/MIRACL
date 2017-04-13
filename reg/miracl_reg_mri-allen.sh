@@ -144,9 +144,10 @@ atlasdir=${MIRACL_HOME}/atlases
 function choose_file_gui()
 {
 	local openstr=$1
-	local _inpath=$2
+	local ftype=$2
+	local _inpath=$3
 
-    filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr")
+    filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
 
 	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -231,7 +232,7 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "In-vivo or Ex-vivo MRI (nii/nii.gz)" inmr
+	choose_file_gui "In-vivo or Ex-vivo MRI" "*.nii *.nii.gz" inmr
 
     printf "\n Input file path: ${inmr} \n"
 

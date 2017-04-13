@@ -39,15 +39,14 @@ def helpmsg():
         n. Output number of primary injection sites (also number of targer regions)
             Limited by size of ROI (number of labels it contains)
 
-
-    Dependencies:
-
-	    Python 2.7
-	    used modules:
-            argparse, numpy, scipy, seaborn, pandas, matplotlib, os, sys, datetime, allensdk, nibabel, lightning
-
-
     '''
+
+
+# Dependencies:
+#
+#     Python 2.7
+#     used modules:
+#         argparse, numpy, scipy, seaborn, pandas, matplotlib, os, sys, datetime, allensdk, nibabel, lightning
 
 
 # ---------

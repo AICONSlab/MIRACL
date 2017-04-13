@@ -8,7 +8,6 @@ import glob
 import logging
 import multiprocessing
 import os
-import tkFileDialog
 from Tkinter import *
 from argparse import RawTextHelpFormatter
 from datetime import datetime
@@ -16,6 +15,7 @@ from datetime import datetime
 import cv2
 import nibabel as nib
 import numpy as np
+from PyQt4.QtGui import *
 from joblib import Parallel, delayed
 
 
@@ -45,6 +45,21 @@ Converts Tiff images to Nifti
 #     used modules:
 #         argparse, numpy, cv2, nibabel, Tkinter, tkFileDialog,
 #         glob, re, os, sys, datetime, joblib, multiprocessing
+
+
+def folderdialog(self, msg):
+    """
+    Get file / folder with gui with QFileDialog
+    """
+
+    folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg, "."))
+
+    if len(folder) > 0:
+        print "\n Folder chosen for reading is: %s" % folder
+    else:
+        print "No folder was chosen"
+
+    return folder
 
 
 def parsefn(args):
@@ -83,8 +98,12 @@ def parsefn(args):
 
         print("Running in GUI mode")
 
-        Tk().withdraw()
-        indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "OK"')
+        a = QApplication(sys.argv)
+        w = QWidget()
+
+        msg = "Open clarity dir (with .tif files)"
+
+        indir = folderdialog(w, msg)
 
         if not indir:
             sys.exit('input folder/directory not specified ... exiting')
