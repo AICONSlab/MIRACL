@@ -8,6 +8,7 @@ import glob
 import logging
 import multiprocessing
 import os
+import warnings
 from Tkinter import *
 from argparse import RawTextHelpFormatter
 from datetime import datetime
@@ -17,6 +18,9 @@ import nibabel as nib
 import numpy as np
 from PyQt4.QtGui import *
 from joblib import Parallel, delayed
+
+warnings.simplefilter("ignore", UserWarning)
+import scipy.ndimage
 
 
 def helpmsg():
@@ -47,7 +51,7 @@ Converts Tiff images to Nifti
 #         glob, re, os, sys, datetime, joblib, multiprocessing
 
 
-def folderdialog(self, msg):
+def folder_dialog(self, msg):
     """
     Get file / folder with gui with QFileDialog
     """
@@ -63,8 +67,8 @@ def folderdialog(self, msg):
 
 
 def parsefn(args):
-
-    # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
+    # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
+    # add_help=False)
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
                                            ' -cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
@@ -93,7 +97,6 @@ def parsefn(args):
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
-
     if len(args) == 1:
 
         print("Running in GUI mode")
@@ -103,7 +106,7 @@ def parsefn(args):
 
         msg = "Open clarity dir (with .tif files)"
 
-        indir = folderdialog(w, msg)
+        indir = folder_dialog(w, msg)
 
         if not indir:
             sys.exit('input folder/directory not specified ... exiting')
@@ -120,7 +123,6 @@ def parsefn(args):
                 field = entry[0]
                 text = entry[1].get()
                 print('%s: "%s"' % (field, text))
-
 
         def makeform(root, fields):
             entries = []
@@ -144,9 +146,9 @@ def parsefn(args):
         def helpwindown(root, helpfun):
             window = Toplevel(root)
             window.title("Help func")
-            T = Text(window, height=50, width=150)
-            T.pack()
-            T.insert(END, "%s" % helpfun)
+            t = Text(window, height=50, width=150)
+            t.pack()
+            t.insert(END, "%s" % helpfun)
 
         # def main():
         root = Tk()
@@ -183,12 +185,11 @@ def parsefn(args):
 
         chan = 'eyfp' if not vals[4].get() else vals[4].get()
 
-        vx = 5 if not vals[5].get() else int(vals[5].get())
+        vx = 5 if not vals[5].get() else float(vals[5].get())
 
-        vz = 5 if not vals[6].get() else int(vals[6].get())
+        vz = 5 if not vals[6].get() else float(vals[6].get())
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
-
 
     else:
 
@@ -212,7 +213,7 @@ def parsefn(args):
 
         if args.down is None:
             d = 5
-            print("\n down sample ratio not specified ... choosing default value of %d" % d)
+            print("\n down-sample ratio not specified ... choosing default value of %d" % d)
         else:
             assert isinstance(args.down, int)
             d = args.down
@@ -333,18 +334,28 @@ def savenii(newdata, d, outnii, vx=None, vz=None, cent=None):
     # data_array = np.array(mres, dtype='int16')
 
     outvox = vx * d
-    vs = [outvox, outvox, vz]
+    outz = vz * d
+    vs = [outvox, outvox, outz]
 
     # Create nifti
     mat = np.eye(4) * outvox
     mat[0, 3] = cent[0]
     mat[1, 3] = cent[1]
     mat[2, 3] = cent[2]
-    mat[2, 2] = vz
+    mat[2, 2] = outz
     mat[3, 3] = 1
 
     # roll dimensions
     data_array = np.rollaxis(newdata, 0, 3)
+
+    # downsample z dim
+
+    print("\n down-sampling in the z dimension")
+
+    sp_inter = 1 if data_array.shape[0] < 5000 else 0
+    down = (1.0 / int(d))
+    zoom = [1, 1, down]
+    data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)
 
     nii = nib.Nifti1Image(data_array, mat)
 

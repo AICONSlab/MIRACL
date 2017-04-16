@@ -15,10 +15,12 @@
       <w>helpmsg</w>
       <w>hemi</w>
       <w>itksnap</w>
+      <w>joblib</w>
       <w>lbls</w>
       <w>maged</w>
       <w>mgoubran</w>
       <w>miracl</w>
+      <w>nibabel</w>
       <w>nifti</w>
       <w>parallelization</w>
       <w>snaplabels</w>

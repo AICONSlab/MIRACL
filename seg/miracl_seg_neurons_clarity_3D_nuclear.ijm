@@ -36,7 +36,7 @@ segpath = path + "/../segmentation_nuclear/" ;
 // Init Parameters:-
 
 // num of CPUS
-ncpus = 40;
+ncpus = 20;
 // radius (px) for local maxima
 radpx = 1;
 radpz = 1;
