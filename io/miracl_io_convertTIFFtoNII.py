@@ -72,7 +72,7 @@ def parsefn(args):
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
                                            ' -cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
-                                           ' -vz [z res] -c [center]')
+                                           ' -vz [z res] -c [center] -dz [down-sample in z]')
 
     required = parser.add_argument_group('required arguments')
     required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
@@ -80,7 +80,7 @@ def parsefn(args):
 
     optional = parser.add_argument_group('optional arguments')
 
-    optional.add_argument('-d', '--down', type=int, metavar='', help="Downsample ratio (default: 5)")
+    optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
     optional.add_argument('-cn', '--channum', type=int, metavar='',
                           help="Chan # for extracting single channel from multiple channel data (default: 1)")
     optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
@@ -94,6 +94,8 @@ def parsefn(args):
                           help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
     optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
                           help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
+    optional.add_argument('-dz', '--downzdim', type=int, metavar='',
+                          help="Down-sample in z dimension, binary argument, (default: 1) => yes")
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -116,7 +118,7 @@ def parsefn(args):
 
         fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
-                 'center (def = 0,0,0)'
+                 'center (def = 0,0,0)', 'Downsample in z (def = 1)'
 
         def fetch(entries):
             for entry in entries:
@@ -191,6 +193,8 @@ def parsefn(args):
 
         cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
 
+        downz = 1 if not vals[8].get() else vals[8].get()
+
     else:
 
         args = parser.parse_args()
@@ -252,11 +256,16 @@ def parsefn(args):
         else:
             cent = args.center
 
+        if args.downzdim is None:
+            downz = 1
+        else:
+            downz = args.downzdim
+
     # make res in um
     vx /= float(1000)  # in um
     vz /= float(1000)
 
-    return indir, outnii, d, chann, chanp, chan, vx, vz, cent
+    return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz
 
 
 # ---------
@@ -329,12 +338,16 @@ def converttiff2nii(d, i, x, newdata, tifx):
     # data.append(mres)
 
 
-def savenii(newdata, d, outnii, vx=None, vz=None, cent=None):
+def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
     # array type
     # data_array = np.array(mres, dtype='int16')
 
     outvox = vx * d
-    outz = vz * d
+    if downz == 1:
+        outz = vz * d
+    else:
+        outz = vz
+
     vs = [outvox, outvox, outz]
 
     # Create nifti
@@ -350,18 +363,22 @@ def savenii(newdata, d, outnii, vx=None, vz=None, cent=None):
 
     # downsample z dim
 
-    print("\n down-sampling in the z dimension")
+    if downz == 1:
+        print("\n\n down-sampling in the z dimension")
 
-    sp_inter = 1 if data_array.shape[0] < 5000 else 0
-    down = (1.0 / int(d))
-    zoom = [1, 1, down]
-    data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)
+        sp_inter = 1 if data_array.shape[0] < 5000 else 0
+        down = (1.0 / int(d))
+        zoom = [1, 1, down]
+        data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)
 
     nii = nib.Nifti1Image(data_array, mat)
 
     # nifti header info
     nii.header.set_data_dtype(np.int16)
     nii.header.set_zooms([vs[0], vs[1], vs[2]])
+
+    # save nii
+    print("\n saving nifti stack")
 
     # Save nifti
     nib.save(nii, outnii)
@@ -379,7 +396,7 @@ def main():
 
     args = sys.argv
 
-    [indir, outnii, d, chann, chanp, chan, vx, vz, cent] = parsefn(args)
+    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz] = parsefn(args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
@@ -422,12 +439,9 @@ def main():
     #                  stdout=subprocess.PIPE,
     #                  stderr=subprocess.PIPE)
 
-    # save nii
-    print("\n\n saving nifti stack")
-
     stackname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, d, chan)
 
-    savenii(newdata, d, stackname, vx, vz, cent)
+    savenii(newdata, d, stackname, downz, vx, vz, cent)
 
     # clear tmp memmap
     os.remove(memap)
