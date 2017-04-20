@@ -442,7 +442,7 @@ function resampleclar()
 	
 	ifdsntexistrun ${resclar} "Resmapling CLARITY input" ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
-	c3d ${resclar} -type short -o ${resclar}
+	c3d ${resclar} -type ushort -o ${resclar}
 
 }
 
@@ -453,9 +453,10 @@ function biasfieldcorr()
 {
 	
 	local resclar=$1
-	local biasclar=$2	
+	local biasclar=$2
+	local mask=$3
 
-	ifdsntexistrun ${biasclar} "Bias-correcting CLARITY image with N4" N4BiasFieldCorrection -d 3 -i ${resclar} -s 2 -o ${biasclar}
+	ifdsntexistrun ${biasclar} "Bias-correcting CLARITY image with N4" N4BiasFieldCorrection -d 3 -i ${resclar} -s 2 -t [0.5,0.001,200] -x ${mask} -o ${biasclar}
 
 }
 
@@ -518,7 +519,7 @@ function maskimage()
 		
 	ifdsntexistrun ${betclar} "Removing CLARITY image outline artifacts" MultiplyImages 3 ${biasclar} ${dilmask} ${betclar}
 
-	c3d ${betclar} -type short -o ${betclar}
+#	c3d ${betclar} -type ushort -o ${betclar}
 
 }
 
@@ -552,7 +553,7 @@ function smoothimg()
 #	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
     ifdsntexistrun ${smclar} "Smoothing CLARITY image" c3d ${ortclar} -smooth ${sigma}vox -o ${smclar}
 
-	c3d ${smclar} -type short -o ${smclar}
+#	c3d ${smclar} -type ushort -o ${smclar}
 
 }
 
@@ -566,7 +567,7 @@ function croptosmall()
 	local trim=$2
 	local clarroi=$3
 
-	ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" c3d ${smclar} -trim ${trim}vox -type short -o ${clarroi}
+	ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" c3d ${smclar} -trim ${trim}vox -type ushort -o ${clarroi}
 
 }
 
@@ -836,36 +837,49 @@ function main()
 	resclar=${regdir}/clar_res0.05.nii.gz
 	resampleclar ${inclar} 0.05 0 4 ${resclar}
 
-	# N4 bias correct
-	biasclar=${regdir}/clar_res0.05_bias.nii.gz
-	biasfieldcorr ${resclar} ${biasclar}
-
-	# Remove outline w erosion & dilation
-
-	# Thr
-	thrclar=${regdir}/clar_res0.05_bias_thr.nii.gz
-	thresh ${biasclar} 2 50 0 1 ${thrclar}
-
-	# Ero (remove any components attached to the brain)
-	eromask=${regdir}/clar_res0.05_ero_mask.nii.gz
-	erode ${thrclar} 2 ${eromask}
-
-    # Get largest component
-    conncomp=${regdir}/clar_res0.05_ero_mask_comp.nii.gz
-    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
-
-	# Dil
-	dilmask=${regdir}/clar_res0.05_dil_mask.nii.gz
-	dilate ${conncomp} 2 ${dilmask}
+    # get brain mask (thresh & largest comp)
+    mask=${regdir}/brain_mask.nii.gz
+    c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
 
 	# Mask
-	betclar=${regdir}/clar_res0.05_bias_bet.nii.gz
-	maskimage ${biasclar} ${dilmask} ${betclar}
+	masclar=${regdir}/clar_res0.05_masked.nii.gz
+	maskimage ${resclar} ${mask} ${masclar}
+
+	# N4 bias correct
+	biasclar=${regdir}/clar_res0.05_bias.nii.gz
+	biasfieldcorr ${masclar} ${biasclar} ${mask}
+
+    # pad image
+    padclar=${regdir}/clar_res0.05_pad.nii.gz
+    c3d ${biasclar} -pad 5% 5% 0 -o ${padclar}
+
+	# old Remove outline w erosion & dilation
+
+#	# Thr
+#	thrclar=${regdir}/clar_res0.05_bias_thr.nii.gz
+#	thresh ${biasclar} 2 50 0 1 ${thrclar}
+#
+#	# Ero (remove any components attached to the brain)
+#	eromask=${regdir}/clar_res0.05_ero_mask.nii.gz
+#	erode ${thrclar} 2 ${eromask}
+#
+#    # Get largest component
+#    conncomp=${regdir}/clar_res0.05_ero_mask_comp.nii.gz
+#    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
+#
+#	# Dil
+#	dilmask=${regdir}/clar_res0.05_dil_mask.nii.gz
+#	dilate ${conncomp} 2 ${dilmask}
+
+	# Mask
+#	betclar=${regdir}/clar_res0.05_bias_bet.nii.gz
+#	maskimage ${biasclar} ${dilmask} ${betclar}
 
 	# Orient
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
 
-	orientimg ${betclar} "${ort}" Cubic short ${ortclar}
+	orientimg ${padclar} "${ort}" Cubic float ${ortclar}
+#	orientimg ${betclar} "${ort}" Cubic ushort ${ortclar}
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
@@ -1024,7 +1038,7 @@ function main()
     regorgclar=${regdirfinal}/clar_allen_space.nii.gz
 
 
-    warpinclarallen ${inclar} ${ort} Cubic short ${ortinclar} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
+    warpinclarallen ${inclar} ${ort} Cubic ushort ${ortinclar} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
 #	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
 
 }

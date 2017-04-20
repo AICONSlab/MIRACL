@@ -96,6 +96,8 @@ def parsefn(args):
                           help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
     optional.add_argument('-dz', '--downzdim', type=int, metavar='',
                           help="Down-sample in z dimension, binary argument, (default: 1) => yes")
+    optional.add_argument('-pd', '--prevdown', type=int, metavar='',
+                          help="Previous down-sample ratio, if already downs-sampled")
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -261,11 +263,16 @@ def parsefn(args):
         else:
             downz = args.downzdim
 
+        if args.prevdown is None:
+            pd = 1
+        else:
+            pd = args.prevdown
+
     # make res in um
     vx /= float(1000)  # in um
     vz /= float(1000)
 
-    return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz
+    return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
 
 
 # ---------
@@ -396,7 +403,7 @@ def main():
 
     args = sys.argv
 
-    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz] = parsefn(args)
+    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parsefn(args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
@@ -439,9 +446,15 @@ def main():
     #                  stdout=subprocess.PIPE,
     #                  stderr=subprocess.PIPE)
 
-    stackname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, d, chan)
+    # for prev down-sampled
+    nd = d * pd
 
-    savenii(newdata, d, stackname, downz, vx, vz, cent)
+    stackname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, nd, chan)
+
+    nvx = vx * pd
+    nvz = vz * pd
+
+    savenii(newdata, d, stackname, downz, nvx, nvz, cent)
 
     # clear tmp memmap
     os.remove(memap)
