@@ -56,6 +56,9 @@ function usage()
 
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
+        i.  additional step of intensity inhomogeneity correction for cases with drastic signal dropout,
+            binary option (default: 0 -> not performed)
+
 
 	----------
 
@@ -197,7 +200,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:s:b:" opt; do
+	while getopts ":i:o:l:m:v:s:b:i:" opt; do
     
 	    case "${opt}" in
 
@@ -227,6 +230,10 @@ if [[ "$#" -gt 1 ]]; then
 
             b)
             	bulb="${OPTARG}"
+            	;;
+
+            i)
+            	field="${OPTARG}"
             	;;
         	*)
             	usage            	
@@ -269,7 +276,7 @@ else
 	fi
 
 	# options gui 
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" "extra int correct (def = 0)" -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -296,6 +303,10 @@ else
 	side=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen side option: $side \n"
+
+    field=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen side option: $field \n"
 
 fi
 
@@ -446,7 +457,16 @@ function resampleclar()
 
 }
 
+# get brain mask (thresh & conn comp)
 
+function getbrainmask()
+{
+    local resclar=$1
+    local mask=$2
+
+    ifdsntexistrun ${mask} "Computing brain mask" c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
+
+}
 # N4 bias correct
 
 function biasfieldcorr()
@@ -460,6 +480,31 @@ function biasfieldcorr()
 
 }
 
+# Extra field correct
+
+function extrabiasfieldcorr()
+{
+
+	local biasclar=$1
+	local mask=$2
+
+    printf"\n Performing extra bias correction step\n"
+    c3d ${biasclar} -as B -thresh 60% 70% 1 0 ${mask} -times -push B -times -scale 5 -push B -add -o ${biasclar}
+
+
+}
+
+# Pad image
+
+function padimage()
+{
+
+    local biasclar=$1
+    local padclar=$2
+
+    ifdsntexistrun ${padclar} "Padding image with 5% of voxels" c3d ${biasclar} -pad 5% 5% 0 -o ${padclar}
+
+}
 
 # Remove outline w erosion & dilation
 
@@ -839,7 +884,7 @@ function main()
 
     # get brain mask (thresh & largest comp)
     mask=${regdir}/brain_mask.nii.gz
-    c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
+    getbrainmask ${resclar} ${mask}
 
 	# Mask
 	masclar=${regdir}/clar_res0.05_masked.nii.gz
@@ -849,9 +894,15 @@ function main()
 	biasclar=${regdir}/clar_res0.05_bias.nii.gz
 	biasfieldcorr ${masclar} ${biasclar} ${mask}
 
+    # if bias field too inhomogeneous
+#   verybiasclar=${regdir}/clar_res0.05_bias_wlowint.nii.gz
+    if [[ "${field}" == 1 ]]; then
+        extrabiasfieldcorr ${biasclar} ${mask}
+    fi
+
     # pad image
     padclar=${regdir}/clar_res0.05_pad.nii.gz
-    c3d ${biasclar} -pad 5% 5% 0 -o ${padclar}
+    padimage ${biasclar} ${padclar}
 
 	# old Remove outline w erosion & dilation
 
