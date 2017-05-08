@@ -28,11 +28,11 @@ function usage()
 
 
 	Usage: `basename $0` -i <down-sampled clarity nifti> -d <dog sigma> -g <gaussian sigma> -a <tracking angle threshold>
-	                     -b <brain mask> -s <seed>
+	                     -b <brain mask> -s <seed> -o <output dir>
 
-	Example: `basename $0` -i clarity_03x_down_virus_chan.nii.gz -d 1 -g 1 -a 25 -b brain_mask.nii.gz -s seed.nii.gz
+	Example: `basename $0` -i clarity_03x_down_virus_chan.nii.gz -d 0.5 -g 0.5 -a 25 -b brain_mask.nii.gz -s seed.nii.gz -o sta
 
-		arguments (required):
+		required arguments:
 
 			f. Input down-sampled clarity nifti (.nii/.nii.gz)
 
@@ -46,14 +46,16 @@ function usage()
 
 			s. Seed mask (.nii/.nii.gz)
 
+        optional arguments:
+
+			o. Out dir
+
 
 		----------
 
     Main Outputs
 
         fiber.trk => Fiber tracts
-
-
 
         ----------
 
@@ -64,9 +66,10 @@ function usage()
 		- Diffusion Toolkit
 
 	-----------------------------------
-	
+
 	(c) Qiyuan Tian @ Stanford University, 2016
 	qytian@stanford.edu
+
 
     (c) Maged Goubran @ Stanford University, 2016
 	mgoubran@stanford.edu
@@ -100,6 +103,16 @@ else
 	printf "\n Matlab path check: OK...\n"
 fi
 
+dtkdir=`which dti_tracker`
+
+if [[ -z "${dtkdir// }" ]];
+then
+	printf "\n ERROR: Diffusion Toolkit not initialized .. please install it & rerun script \n"
+	exit 1
+else
+	printf "\n Diffusion Toolkit path check: OK...\n"
+fi
+
 #------------
 
 
@@ -129,7 +142,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:b:a:s:d:g:" opt; do
+	while getopts ":i:b:a:s:d:g:o:" opt; do
     
 	    case "${opt}" in
 
@@ -155,6 +168,10 @@ if [[ "$#" -gt 1 ]]; then
 
             g)
             	gauss=${OPTARG}
+            	;;
+
+            o)
+            	outdir=${OPTARG}
             	;;
 
         	*)
@@ -257,9 +274,17 @@ fi
 
 START=$(date +%s)
 
+# run STA
+
+if [ -z "${outdir}" ];
+then
+    outdir=clarity_sta
+fi
+
 # run matlab command
+printf "\n Running Structure Tensor Analysis with the following command \n\n"
 
-
+runMatlabCmd sta_track "'${inclar}'" "${dog}" "${gauss}" "${angle}" "'${brainmask}'" "'${seed}'" "'${outdir}'"
 
 # get script timing 
 END=$(date +%s)
