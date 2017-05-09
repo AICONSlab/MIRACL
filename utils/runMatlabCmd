@@ -24,4 +24,4 @@ done
 
 
 echo Running: matlab "$matfunc($arglist)"
-echo "addpath(genpath('$MIAL_TOOLS_DIR/matlab')); $matfunc($arglist)" | matlab -nosplash -nodesktop
+echo "addpath(genpath('${MIRACL_HOME}/depends'),'${MIRACL_HOME}/sta','${MIRACL_HOME}/utils'); $matfunc($arglist)" | matlab -nosplash -nodesktop
