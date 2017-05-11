@@ -10,6 +10,7 @@ from PyQt4.QtGui import *
 
 
 class STAmenu(QtGui.QWidget):
+
     def __init__(self):
         # create GUI
         QtGui.QMainWindow.__init__(self)
@@ -62,7 +63,7 @@ class STAmenu(QtGui.QWidget):
         if clar:
             clarstr = "CLARITY nii: " + clar
             self.lbl.setText(clarstr)
-            print 'clarity path:', clar
+            print 'clarity path :%s' % str(clar).lstrip()
         else:
             self.lbl.setText('No file selected')
 
@@ -71,7 +72,7 @@ class STAmenu(QtGui.QWidget):
         if seed:
             seedstr = "Seed Mask: " + seed
             self.lbl2.setText(seedstr)
-            print 'seed path:', seed
+            print 'seed path :%s' % str(seed).lstrip()
         else:
             self.lbl2.setText('No file selected')
 
@@ -80,23 +81,25 @@ class STAmenu(QtGui.QWidget):
         if brainmask:
             brainstr = "Brain Mask: " + brainmask
             self.lbl3.setText(brainstr)
-            print 'brain path:', brainmask
+            print 'brain path :%s' % str(brainmask).lstrip()
         else:
             self.lbl3.setText('No file selected')
 
     def print_input(self):
 
-        dogin = self.dog.text()
-        gaussin = self.gauss.text()
-        anglein = self.angle.text()
+        dogin = str(self.dog.text())
+        gaussin = str(self.gauss.text())
+        anglein = str(self.angle.text())
 
-        print 'dog: ', dogin
-        print 'gauss: ', gaussin
-        print 'angle: ', anglein
+        print 'dog :%s' % dogin.lstrip()
+        print 'gauss :%s' % gaussin.lstrip()
+        print 'angle :%s' % anglein.lstrip()
 
+        app.quit()
 
 def main():
     # Create an PyQT4 application object.
+    global app
     app = QApplication(sys.argv)
     sta = STAmenu()
     sta.show()

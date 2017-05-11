@@ -182,51 +182,6 @@ if [[ "$#" -gt 1 ]]; then
 	
 	done    	
 
-
-	# check required input arguments
-
-	if [ -z "${inclar}" ];
-	then
-		usage
-		echo "ERROR: < -i => input clarity nifti> not specified"
-		exit 1
-	fi
-
-	if [ -z "${angle}" ];
-	then
-		usage
-		echo "ERROR: < -a => tracking angle> not specified"
-		exit 1
-	fi
-
-    if [ -z "${dog}" ];
-	then
-		usage
-		echo "ERROR: < -d => input dog sigma> not specified"
-		exit 1
-	fi
-
-    if [ -z "${brainmask}" ];
-	then
-		usage
-		echo "ERROR: < -b => input brain mask> not specified"
-		exit 1
-	fi
-
-    if [ -z "${seed}" ];
-	then
-		usage
-		echo "ERROR: < -s => input seed mask> not specified"
-		exit 1
-	fi
-
-    if [ -z "${gauss}" ];
-	then
-		usage
-		echo "ERROR: < -g => input gauss smoothing sigma> not specified"
-		exit 1
-	fi
-
 else
 
 	# call gui
@@ -235,19 +190,14 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "Open down-sampled clarity nifti" inclar
+	#choose_file_gui "Open down-sampled clarity nifti" inclar
 	
 	# check required input arguments
 
-	if [ -z "${inclar}" ];
-	then
-		usage
-		echo "ERROR: <input down-sampled clarity nii> was not chosen"
-		exit 1
-	fi
 
 	# options gui
-	opts=$(${MIRACL_HOME}/sta/miracl_sta_gui.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
+	#opts=$(${MIRACL_HOME}/sta/miracl_sta_gui.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
+	opts=$(${MIRACL_HOME}/sta/miracl_sta_gui.py)
 
 	# populate array
 	arr=()
@@ -279,6 +229,51 @@ else
 
     printf "\n Chosen tracking angle: $angle \n"
 
+
+fi
+
+# check required input arguments
+
+if [ -z "${inclar}" ];
+then
+    usage
+    echo "ERROR: < -i => input clarity nifti> not specified"
+    exit 1
+fi
+
+if [ -z "${angle}" ];
+then
+    usage
+    echo "ERROR: < -a => tracking angle> not specified"
+    exit 1
+fi
+
+if [ -z "${dog}" ];
+then
+    usage
+    echo "ERROR: < -d => input dog sigma> not specified"
+    exit 1
+fi
+
+if [ -z "${brainmask}" ];
+then
+    usage
+    echo "ERROR: < -b => input brain mask> not specified"
+    exit 1
+fi
+
+if [ -z "${seed}" ];
+then
+    usage
+    echo "ERROR: < -s => input seed mask> not specified"
+    exit 1
+fi
+
+if [ -z "${gauss}" ];
+then
+    usage
+    echo "ERROR: < -g => input gauss smoothing sigma> not specified"
+    exit 1
 fi
 
 
