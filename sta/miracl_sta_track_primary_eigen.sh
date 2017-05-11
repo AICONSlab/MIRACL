@@ -247,7 +247,7 @@ else
 	fi
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
+	opts=$(${MIRACL_HOME}/sta/sta_gui.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -263,7 +263,7 @@ else
 
     printf "\n Chosen guassian sigma: $gauss \n"
 
-    angle=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    angle=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen tracking angle: $angle \n"
 
