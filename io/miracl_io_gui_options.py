@@ -1,7 +1,13 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
+# Maged Goubran @ 2016, mgoubran@stanford.edu 
+
+# coding: utf-8 
 
 import argparse
-from Tkinter import *
+import sys
+
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import *
 
 
 # Inputs #########
@@ -18,82 +24,86 @@ Input options will be printed as output
 '''
 
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-t', '--title', type=str, help="gui title", required=True)
-parser.add_argument('-f', '--fields', type=str, nargs='+', help="fields for options", required=True)
-parser.add_argument('-hf', '--helpfun', type=str, help="help fun")
+def parseargs():
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+    parser.add_argument('-t', '--title', type=str, help="gui title", required=True)
+    parser.add_argument('-f', '--fields', type=str, nargs='+', help="fields for options", required=True)
+    parser.add_argument('-hf', '--helpfun', type=str, help="help fun")
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-title = args.title
-fields = args.fields
-helpfun = args.helpfun
+    title = args.title
+    fields = args.fields
+    helpfun = args.helpfun
 
-
-def fetch(entries):
-    for entry in entries:
-        field = entry[0]
-        text = entry[1].get()
-        print('%s: "%s"' % (field, text))
+    return title, fields, helpfun
 
 
-def makeform(root, fields):
-    entries = []
-    values = []
+def OptsMenu(title, fields, helpfun):
+    # create GUI
+    main = QtGui.QMainWindow()
 
-    strlen = len(max(fields, key=len))
-    strw = int(strlen * 1.2)
+    widget = QtGui.QWidget()
+    widget.setWindowTitle('%s' % title)
 
-    for field in fields:
-        row = Frame(root)
-        lab = Label(row, width=strw, text=field, anchor='w')
-        ent = Entry(row)
-        row.pack(side=TOP, fill=X, padx=5, pady=5)
-        lab.pack(side=LEFT)
-        ent.pack(side=RIGHT, expand=YES, fill=X)
-        entries.append((field, ent))
-        values.append(ent)
+    layout = QFormLayout()
+    layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
 
-    return entries, values, strw
+    linedits = {}
+
+    for f, field in enumerate(fields):
+        # Create inputs (line edts)
+        linedits["%s" % field] = QLineEdit()
+        linedits["%s" % field].setAlignment(QtCore.Qt.AlignRight)
+
+        # Layout for widgets        
+        layout.addRow("%s" % field, linedits["%s" % field])
+
+    # Create push button
+    helpbutton = QtGui.QPushButton('Help')
+    submit = QtGui.QPushButton('Submit')
+
+    layout.addRow(helpbutton, submit)
+    widget.setLayout(layout)
+
+    widget.connect(submit, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields))
+    widget.connect(helpbutton, QtCore.SIGNAL('clicked()'), lambda: print_help(main, helpfun))
+
+    return widget
 
 
-def helpwindown(root, helpfun):
-    window = Toplevel(root)
-    window.title("Help func")
-    T = Text(window, height=50, width=150)
-    T.pack()
-    T.insert(END, "%s" % helpfun)
+def print_input(linedits, fields):
+    for f, field in enumerate(fields):
+        print "%s :" % field, linedits["%s" % field].text()
 
+
+def print_help(main, helpfun):
+    helpwidget = QtGui.QDialog()
+    main.setCentralWidget(helpwidget)
+    helpwidget.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+    main.setWindowTitle('Help function')
+
+    helplayout = QVBoxLayout()
+    helplbl = QtGui.QLabel(helpfun)
+    helplayout.addWidget(helplbl)
+
+    helpwidget.setLayout(helplayout)
+
+    main.show()
+
+    QApplication.processEvents()
 
 def main():
-    root = Tk()
-    root.title('%s' % title)
+    [title, fields, helpfun] = parseargs()
 
-    [ents, vals, strw] = makeform(root, fields)
-
-    n = len(fields)
-    w = strw * 10
-    h = (n * 40) + 50
-    root.geometry("%dx%d" % (w, h))
-
-    root.bind('<Return>', (lambda event, e=ents: fetch(e)))
-
-    b1 = Button(root, text='Enter',
-                command=(lambda e=ents: fetch(e)))
-    b1.pack(side=LEFT, padx=5, pady=5)
-
-    b2 = Button(root, text='Done', command=root.quit)
-    b2.pack(side=RIGHT, padx=5, pady=5)
-
-    b3 = Button(root, text="Help func", command=lambda: helpwindown(root, helpfun))
-    b3.pack(side=LEFT, padx=5, pady=5)
-
-    root.mainloop()
-
-    # with open("opts.txt", "w") as myfile:
-    #    for o in range(len(fields)):
-    #       myfile.write("%s\n" % vals[o].get())
+    # Create an PyQT4 application object.
+    app = QApplication(sys.argv)
+    menu = OptsMenu(title, fields, helpfun)
+    menu.show()
+    app.exec_()
+    app.processEvents()
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())
