@@ -12,7 +12,7 @@ from PyQt4.QtGui import *
 
 # Inputs #########
 
-def helpmsg(name=None):
+def helpmsg():
     return '''miracl_io_gui_options.py -t title -f fields [separated by space] -hf helpfun
 
 Takes list of strings as options for entries for a gui options, and a gui title
@@ -39,7 +39,7 @@ def parseargs():
     return title, fields, helpfun
 
 
-def OptsMenu(title, fields, helpfun):
+def optsmenu(title, fields, helpfun):
     # create GUI
     main = QtGui.QMainWindow()
 
@@ -73,9 +73,12 @@ def OptsMenu(title, fields, helpfun):
 
 
 def print_input(linedits, fields):
-    for f, field in enumerate(fields):
-        print "%s :" % field, linedits["%s" % field].text()
 
+    for f, field in enumerate(fields):
+        text = str(linedits["%s" % field].text())
+        print "%s :%s" % (field, text.lstrip())
+
+    app.quit()
 
 def print_help(main, helpfun):
     helpwidget = QtGui.QDialog()
@@ -92,14 +95,17 @@ def print_help(main, helpfun):
 
     main.show()
 
-    QApplication.processEvents()
+    app.processEvents()
+
 
 def main():
+
     [title, fields, helpfun] = parseargs()
 
     # Create an PyQT4 application object.
+    global app
     app = QApplication(sys.argv)
-    menu = OptsMenu(title, fields, helpfun)
+    menu = optsmenu(title, fields, helpfun)
     menu.show()
     app.exec_()
     app.processEvents()
