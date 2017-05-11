@@ -87,9 +87,14 @@ def print_help(main, helpfun):
 
     main.setWindowTitle('Help function')
 
-    helplayout = QVBoxLayout()
     helplbl = QtGui.QLabel(helpfun)
-    helplayout.addWidget(helplbl)
+
+    scrollarea = QScrollArea()
+    scrollarea.setWidgetResizable(False)
+    scrollarea.setWidget(helplbl)
+
+    helplayout = QVBoxLayout()
+    helplayout.addWidget(scrollarea)
 
     helpwidget.setLayout(helplayout)
 
