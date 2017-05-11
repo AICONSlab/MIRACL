@@ -247,7 +247,7 @@ else
 	fi
 
 	# options gui
-	opts=$(${MIRACL_HOME}/sta/sta_gui.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
+	opts=$(${MIRACL_HOME}/sta/miracl_sta_gui.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -255,15 +255,27 @@ else
 	   arr+=("$line")
 	done <<< "$opts"
 
-	dog=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    inclar=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen CLARITY nii: $inclar \n"
+
+    seed=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen Seed mask: $seed \n"
+
+    brainmask=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen Brain mask: $brainmask \n"
+
+	dog=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen dog sigma: $dog \n"
 
-	gauss=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	gauss=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen guassian sigma: $gauss \n"
+    printf "\n Chosen gaussian sigma: $gauss \n"
 
-    angle=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    angle=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen tracking angle: $angle \n"
 

@@ -13,6 +13,9 @@ class STAmenu(QtGui.QWidget):
     def __init__(self):
         # create GUI
         QtGui.QMainWindow.__init__(self)
+        # check
+        super(STAmenu, self).__init__()
+
         self.setWindowTitle('STA analysis')
         # Set the window dimensions
         # self.resize(500,200)
