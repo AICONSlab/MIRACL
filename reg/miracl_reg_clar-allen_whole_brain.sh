@@ -56,7 +56,7 @@ function usage()
 
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
-        i.  additional step of intensity inhomogeneity correction for cases with drastic signal dropout,
+        e.  extra step of intensity inhomogeneity correction for cases with drastic signal dropout,
             binary option (default: 0 -> not performed)
 
 
@@ -200,7 +200,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:s:b:i:" opt; do
+	while getopts ":i:o:l:m:v:s:b:e:" opt; do
     
 	    case "${opt}" in
 
@@ -232,7 +232,7 @@ if [[ "$#" -gt 1 ]]; then
             	bulb="${OPTARG}"
             	;;
 
-            i)
+            e)
             	field="${OPTARG}"
             	;;
         	*)
@@ -489,7 +489,7 @@ function extrabiasfieldcorr()
 	local mask=$2
 
     printf"\n Performing extra bias correction step\n"
-    c3d ${biasclar} -as B -thresh 60% 70% 1 0 ${mask} -times -push B -times -scale 5 -push B -add -o ${biasclar}
+    c3d ${biasclar} -as B -thresh 65% 75% 1 0 ${mask} -times -push B -times -scale 5 -push B -add -o ${biasclar}
 
 
 }
@@ -502,7 +502,7 @@ function padimage()
     local biasclar=$1
     local padclar=$2
 
-    ifdsntexistrun ${padclar} "Padding image with 5% of voxels" c3d ${biasclar} -pad 5% 5% 0 -o ${padclar}
+    ifdsntexistrun ${padclar} "Padding image with 15% of voxels" c3d ${biasclar} -pad 15% 15% 0 -o ${padclar}
 
 }
 
