@@ -5,7 +5,6 @@
 
 import argparse
 import commands
-import glob
 import os
 import subprocess
 import sys
@@ -54,10 +53,11 @@ def parseinputs():
 
         miracl_home = os.environ['MIRACL_HOME']
 
-        indir = subprocess.check_output(
+        indirstr = subprocess.check_output(
             '%s/io/miracl_io_file_folder_gui.py -f %s -s %s' % (miracl_home, 'folder', '"Please open reg final dir"'),
             shell=True,
             stderr=subprocess.PIPE)
+        indir = indirstr.split(":")[1].lstrip()
 
         # args = parser.parse_args()
         viz = 'itk'
@@ -84,7 +84,7 @@ def parseinputs():
             viz = 'itk'
             print("\n software not specified ... choosing itkSNAP")
         else:
-            assert isinstance(args.outnii, str)
+            assert isinstance(args.viz, str)
             viz = args.viz
 
         if args.space is None:
@@ -116,9 +116,8 @@ def main():
             print("\n Viewing downsampled CLARITY volume with registered Allen labels using itkSNAP ...\n")
 
             subprocess.check_call(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s '
-                '%s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
-                    indir, indir),
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
+                indir, indir),
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
@@ -126,8 +125,9 @@ def main():
         else:
 
             # get res
-            name = str(glob.glob("%s/clar_downsample_res??um.nii.gz" % indir))
-            res = int(filter(str.isdigit, name))
+            # name = str(glob.glob("%s/clar_downsample_res??um.nii.gz" % indir))
+            # res = int(filter(str.isdigit, name))
+            res = 10
 
             print("\n Viewing registered CLARITY volume in Allen space with labels using itkSNAP ...\n")
 
@@ -150,9 +150,8 @@ def main():
             print("\n Viewing downsampled CLARITY volume with registered Allen labels using Freeview ...\n")
 
             subprocess.check_call(
-                'freeview %s/clar_downsample_res??um.nii.gz %s/annotation_hemi_combined_??um_clar_downsample.nii.g' % (
-                indir, indir),
-                shell=True,
+                'freeview %s/clar_downsample_res??um.nii.gz %s/annotation_hemi_combined_??um_clar_downsample.nii.gz'
+                % (indir, indir), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
@@ -161,7 +160,7 @@ def main():
             print("\n Viewing registered CLARITY volume in Allen space with labels using Freeview ...\n")
 
             subprocess.check_call(
-                'freeview %s/clar_allen_space.nii.gz $allen25 $lbls25' % (indir),
+                'freeview %s/clar_allen_space.nii.gz $allen25 $lbls25' % indir,
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
