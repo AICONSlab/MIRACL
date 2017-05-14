@@ -57,7 +57,7 @@ def parseinputs():
             '%s/io/miracl_io_file_folder_gui.py -f %s -s %s' % (miracl_home, 'folder', '"Please open reg final dir"'),
             shell=True,
             stderr=subprocess.PIPE)
-        indir = indirstr.split(":")[1].lstrip()
+        indir = indirstr.split(":")[1].lstrip().rstrip()
 
         # args = parser.parse_args()
         viz = 'itk'
@@ -117,8 +117,7 @@ def main():
 
             subprocess.check_call(
                 'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
-                indir, indir),
-                shell=True,
+                indir, indir), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
@@ -149,8 +148,11 @@ def main():
 
             print("\n Viewing downsampled CLARITY volume with registered Allen labels using Freeview ...\n")
 
+            # w lut not working
+            # 'freeview -v %s/clar_downsample_res??um.nii.gz -v %s/annotation_hemi_combined_??um_clar_downsample.nii.gz:lut=$freelut'
+
             subprocess.check_call(
-                'freeview %s/clar_downsample_res??um.nii.gz %s/annotation_hemi_combined_??um_clar_downsample.nii.gz'
+                'freeview -v %s/clar_downsample_res??um.nii.gz -v %s/annotation_hemi_combined_??um_clar_downsample.nii.gz'
                 % (indir, indir), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
@@ -160,7 +162,7 @@ def main():
             print("\n Viewing registered CLARITY volume in Allen space with labels using Freeview ...\n")
 
             subprocess.check_call(
-                'freeview %s/clar_allen_space.nii.gz $allen25 $lbls25' % indir,
+                'freeview -v %s/clar_allen_space.nii.gz -v $allen25 -v $lbls25' % indir,
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
