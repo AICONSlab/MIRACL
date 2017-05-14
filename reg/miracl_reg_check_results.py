@@ -5,6 +5,7 @@
 
 import argparse
 import commands
+import os
 import subprocess
 import sys
 
@@ -22,7 +23,7 @@ Converts Tiff images to Nifti
 
     For command-line / scripting
 
-    Usage: miracl_reg_check_results.py -f [reg final folder] -v [visualization software] -s [space (clarity or allen)]
+    Usage: miracl_reg_check_results.py -f [reg final folder] -v [visualization software] -s [reg space (clarity or allen)]
 
 Example: miracl_convertTifftoNii.py -f reg_final -v itk -s clarity
 
@@ -33,20 +34,20 @@ Example: miracl_convertTifftoNii.py -f reg_final -v itk -s clarity
     Optional arguments:
 
         -v Visualization software: itkSNAP 'itk' (default) or freeview 'free'
-        -s Space of results: clarity (default) or allen
-
-    Dependencies:
-
-	    Python 2.7
+        -s Registration Space of results: clarity (default) or allen
 
         '''
 
 
+# Dependencies:
+#
+#    Python 2.7, itksnap or freeview
+
 def parseinputs():
+
     if len(sys.argv) == 1:
 
         print("Running in GUI mode")
-
 
 
 
@@ -55,8 +56,8 @@ def parseinputs():
         parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
         parser.add_argument('-f', '--folder', type=str, help="reg final folder", required=True)
-        parser.add_argument('-v', '--viz', type=int, help="Visualization software")
-        parser.add_argument('-s', '--space', type=int, help="Space")
+        parser.add_argument('-v', '--viz', type=str, help="Visualization software")
+        parser.add_argument('-s', '--space', type=str, help="Registration Space")
 
         args = parser.parse_args()
 
@@ -78,8 +79,8 @@ def parseinputs():
             viz = args.viz
 
         if args.space is None:
-            space = clarity
-            print("\n down sample ratio not specified ... choosing clarity space")
+            space = 'clarity'
+            print("\n registration space not specified ... choosing clarity space")
         else:
             assert isinstance(args.space, str)
             space = args.space
@@ -90,6 +91,7 @@ def parseinputs():
 # ---------
 
 def main():
+
     [indir, viz, space] = parseinputs()
 
     if viz == "itk":
@@ -103,20 +105,23 @@ def main():
 
         if space == "clarity":
 
-            print("\n Viewing downsampled CLARITY volume with registered Allen labels\n")
+            print("\n Viewing downsampled CLARITY volume with registered Allen labels using itkSNAP ...\n")
 
-            subprocess.Popen(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % outdir,
+            subprocess.check_call(
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
+                indir, indir),
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
+
         else:
 
-            print("\n Viewing downsampled CLARITY volume with registered Allen labels\n")
+            print("\n Viewing registered CLARITY volume in Allen space with labels using itkSNAP ...\n")
 
-            subprocess.Popen(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % outdir,
+            subprocess.check_call(
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
+                indir, indir),
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
@@ -131,20 +136,22 @@ def main():
 
         if space == "clarity":
 
-            print("\n Viewing downsampled CLARITY volume with registered Allen labels\n")
+            print("\n Viewing downsampled CLARITY volume with registered Allen labels using Freeview ...\n")
 
-            subprocess.Popen(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % outdir,
+            subprocess.check_call(
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
+                indir, indir),
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
         else:
 
-            print("\n Viewing downsampled CLARITY volume with registered Allen labels\n")
+            print("\n Viewing registered CLARITY volume in Allen space with labels using Freeview ...\n")
 
-            subprocess.Popen(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % outdir,
+            subprocess.check_call(
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
+                indir, indir),
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
