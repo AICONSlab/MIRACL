@@ -197,7 +197,7 @@ else
 
 	# options gui
 	#opts=$(${MIRACL_HOME}/sta/miracl_sta_gui.py -t "STA options" -f "dog sigma" "guass sigma" "angle"  -hf "`usage`")
-	opts=$(${MIRACL_HOME}/sta/miracl_sta_gui.py)
+	opts=$(${MIRACL_HOME}/sta/sta_gui.py)
 
 	# populate array
 	arr=()

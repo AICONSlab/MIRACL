@@ -1,8 +1,11 @@
 <component name="ProjectDictionaryState">
   <dictionary name="mgoubran">
     <words>
+      <w>abrv</w>
+      <w>annot</w>
       <w>argparse</w>
       <w>autofluo</w>
+      <w>binarize</w>
       <w>binarized</w>
       <w>clar</w>
       <w>dicoms</w>
@@ -14,15 +17,24 @@
       <w>gplbls</w>
       <w>helpmsg</w>
       <w>hemi</w>
+      <w>inlbls</w>
+      <w>invol</w>
       <w>itksnap</w>
       <w>joblib</w>
+      <w>lblid</w>
       <w>lbls</w>
       <w>maged</w>
+      <w>masknii</w>
       <w>mgoubran</w>
       <w>miracl</w>
       <w>nibabel</w>
       <w>nifti</w>
+      <w>outlbl</w>
+      <w>outnii</w>
+      <w>outtxt</w>
       <w>parallelization</w>
+      <w>parseinputs</w>
+      <w>pathid</w>
       <w>snaplabels</w>
       <w>snaplut</w>
       <w>thresholded</w>
