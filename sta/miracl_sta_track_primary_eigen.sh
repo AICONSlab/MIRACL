@@ -27,18 +27,18 @@ function usage()
 	For command-line / scripting
 
 
-	Usage: `basename $0` -i <down-sampled clarity nifti> -d <dog sigma> -g <gaussian sigma> -a <tracking angle threshold>
+	Usage: `basename $0` -i <down-sampled clarity nifti> -g <dog sigma> -k <gaussian sigma> -a <tracking angle threshold>
 	                     -b <brain mask> -s <seed> -o <output dir>
 
-	Example: `basename $0` -i clarity_03x_down_virus_chan.nii.gz -d 0.5 -g 0.5 -a 25 -b brain_mask.nii.gz -s seed.nii.gz -o sta
+	Example: `basename $0` -i clarity_03x_down_virus_chan.nii.gz -g 0.5 -k 0.5 -a 25 -b brain_mask.nii.gz -s seed.nii.gz -o sta
 
 		required arguments:
 
 			f. Input down-sampled clarity nifti (.nii/.nii.gz)
 
-			d. Derivative of Gaussion (dog) sigma
+			g. Derivative of Gaussion (dog) sigma
 
-			g. Gaussian smoothing sigma
+			k. Gaussian smoothing sigma
 
 			a. Tracking angle threshold
 
@@ -142,7 +142,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:b:a:s:d:g:o:" opt; do
+	while getopts ":i:b:a:s:g:k:o:" opt; do
     
 	    case "${opt}" in
 
@@ -162,11 +162,11 @@ if [[ "$#" -gt 1 ]]; then
             	angle=${OPTARG}
             	;;
 
-            d)
+            g)
             	dog=${OPTARG}
             	;;
 
-            g)
+            k)
             	gauss=${OPTARG}
             	;;
 

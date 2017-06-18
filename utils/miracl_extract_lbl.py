@@ -55,12 +55,12 @@ def parseinputs():
     if not os.path.exists(inlbls):
         sys.exit('%s does not exist ... please check path and rerun script' % inlbls)
 
-    assert isinstance(args.lbls, str)
+    assert isinstance(args.outlbl, str)
     outlbl = args.outlbl
 
     if args.down is None:
         d = 1
-        print("\n down-sample ratio not specified ... preserving resolution" % d)
+        print("\n down-sample ratio not specified ... preserving resolution \n")
     else:
         assert isinstance(args.down, int)
         d = args.down
@@ -85,9 +85,13 @@ def main():
     annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
 
     # outlbl to lblid
-    lblid = annot_csv.id[annot_csv.acronym == "%s" % outlbl]
+    lblid = annot_csv.id[annot_csv.acronym == "%s" % outlbl].values[0]
 
     mask = inlblsdata.copy()
+
+    # print(mask.shape)
+    # print(lblid)
+
     mask[mask != lblid] = 0
     mask[mask > 0] = 1  # binarize
 

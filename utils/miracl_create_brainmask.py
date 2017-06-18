@@ -18,7 +18,7 @@ def helpmsg():
 
     Usage: miracl_create_brainmask.py -i [input volume] -o [output brain mask]
 
-Example: miracl_create_brainmask.py -i clarity_downsample_05x_virus_chan.nii.gz -o clarity_brain_mask.nii.gz -d 5
+Example: miracl_create_brainmask.py -i clarity_downsample_05x_virus_chan.nii.gz -o clarity_brain_mask.nii.gz
 
     Arguments (required):
 
@@ -26,7 +26,7 @@ Example: miracl_create_brainmask.py -i clarity_downsample_05x_virus_chan.nii.gz 
 
     Optional arguments:
 
-        -l Output brain mask
+        -o Output brain mask
 
         '''
 
@@ -70,7 +70,9 @@ def main():
     # create mask
     print("\n Creating brain mask for CLARITY volume ...\n")
 
-    subprocess.check_call("c3d %s -thresh 60% inf 1 0 -o %s" % (invol, outfile), shell=True,
+    thr = '60%'
+
+    subprocess.check_call("c3d %s -thresh %s inf 1 0 -o %s" % (invol, thr, outfile), shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 
