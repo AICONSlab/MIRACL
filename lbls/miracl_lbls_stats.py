@@ -30,7 +30,7 @@ Computes Allen label stats of input volume
 
     Usage: miracl_lbls_stats.py -i [input volume] -l [reg Allen labels]
 
-Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz
+Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv
 
     Arguments (required):
 
@@ -79,7 +79,7 @@ def parseinputs():
         lbls = args.lbls
 
         if not args.outfile:
-            outfile = 'labels_statistics.txt'
+            outfile = 'virus_signal_label_statistics.csv'
         else:
             assert isinstance(args.outfile, str)
             outfile = args.outfile
@@ -96,7 +96,7 @@ def main():
     # extract stats
     print("\n Extracting stats from input volume using registered labels ...\n")
 
-    subprocess.check_call('ImageMaths %s %s > %s' % (invol, lbls, outfile), shell=True,
+    subprocess.check_call('ImageMath %s %s > %s' % (invol, lbls, outfile), shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 
@@ -117,6 +117,10 @@ def main():
 
     outtxt['name'] = outtxt.LabelID
     outtxt['name'] = outtxt['name'].replace(name_dic)
+    outtxt['acronym'] = outtxt['acronym'].replace(acronym_dic)
+    outtxt['pathid'] = outtxt['pathid'].replace(pathid_dic)
+
+    outtxt.to_csv('%s' % outfile)
 
 
 if __name__ == "__main__":

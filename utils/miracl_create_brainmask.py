@@ -70,9 +70,13 @@ def main():
     # create mask
     print("\n Creating brain mask for CLARITY volume ...\n")
 
-    thr = '60%'
+    # thr = '60%'
 
-    subprocess.check_call("c3d %s -thresh %s inf 1 0 -o %s" % (invol, thr, outfile), shell=True,
+    subprocess.check_call("ThresholdImage 3 %s %s Otsu 5 " % (invol, outfile), shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
+
+    subprocess.check_call("c3d %s -binarize -o %s" % (outfile, outfile), shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 

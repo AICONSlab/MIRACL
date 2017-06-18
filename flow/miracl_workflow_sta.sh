@@ -40,10 +40,9 @@ function usage()
 
 	For command-line / scripting
 
-    Usage: `basename $0` -f [Tiff folder] -o [output nifti] -l [Allen seed label] -r [Reg final dir] -s [output sta dir] -c [output csv name] -d [ downsample ratio ]
+    Usage: `basename $0` -f [Tiff folder] -o [output nifti] -l [Allen seed label] -r [Reg final dir] -d [ downsample ratio ]
 
-    Example: `basename $0` -f my_tifs -o clarity_virus_05xdown.nii.gz -l PL -r clar_reg_final -s sta_dir -s sta_dir
-                            -c output_labels_info.csv -n "-d 5 -ch autofluo" -t "-g 0.5 -k 0.5 -a 25"
+    Example: `basename $0` -f my_tifs -o clarity_virus_05xdown.nii.gz -l PL -r clar_reg_final -n "-d 5 -ch autofluo" -t "-g 0.5 -k 0.5 -a 25"
 
         arguments (required):
 
@@ -54,10 +53,6 @@ function usage()
             l. Seed label abbreviation (from Allen atlas ontology)
 
             r. CLARITY final registration folder
-
-            s. Output sta dir
-
-            c. Output csv name
 
         optional arguments (do not forget the quotes):
 
@@ -182,7 +177,7 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Reading input parameters \n"
 
-	while getopts ":f:o:l:r:s:c:d:n:t:" opt; do
+	while getopts ":f:o:l:r:d:n:t:" opt; do
 
 	    case "${opt}" in
 
@@ -200,14 +195,6 @@ if [[ "$#" -gt 1 ]]; then
 
             r)
                 regdir="${OPTARG}"
-                ;;
-
-            s)
-                stadir="${OPTARG}"
-                ;;
-
-            c)
-                outcsv="${OPTARG}"
                 ;;
 
             d)
@@ -261,20 +248,6 @@ if [[ "$#" -gt 1 ]]; then
 		exit 1
 	fi
 
-	if [ -z "${stadir}" ];
-	then
-		usage
-		echo "ERROR: < -s => output sta dir> not specified"
-		exit 1
-	fi
-
-    if [ -z "${outcsv}" ];
-	then
-		usage
-		echo "ERROR: < -c => output csv> not specified"
-		exit 1
-	fi
-
     if [ -z "${down}" ];
 	then
 		down=5
@@ -286,7 +259,7 @@ if [[ "$#" -gt 1 ]]; then
     printf "\n Running conversion to nii with the following command: \n"
 
     printf "\n miracl_io_convertTifftoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1 \n"
-    miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1
+    #miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1
 
     #---------------------------
     # Call extract lbl
@@ -296,7 +269,7 @@ if [[ "$#" -gt 1 ]]; then
     reglbls=`echo ${regdir}/*_clar_downsample.nii.gz`
 
     printf "\n miracl_extract_lbl.py -i ${reglbls} -l ${lbl} \n"
-    miracl_extract_lbl.py -i ${reglbls} -l ${lbl}
+    #miracl_extract_lbl.py -i ${reglbls} -l ${lbl}
 
     #---------------------------
     # Call create brain mask
@@ -306,7 +279,7 @@ if [[ "$#" -gt 1 ]]; then
     niifile=`echo niftis/${nii}*.nii.gz`
 
     printf "\n miracl_create_brainmask.py -i ${niifile} \n"
-    miracl_create_brainmask.py -i ${niifile}
+    #miracl_create_brainmask.py -i ${niifile}
 
     #---------------------------
     # Call STA
@@ -314,7 +287,7 @@ if [[ "$#" -gt 1 ]]; then
     printf "\n Running STA with the following command: \n"
 
     printf "\n miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts} \n"
-    miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts}
+    #miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts}
 
     #---------------------------
     # Call lbl stats

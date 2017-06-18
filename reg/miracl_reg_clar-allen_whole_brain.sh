@@ -464,7 +464,10 @@ function getbrainmask()
     local resclar=$1
     local mask=$2
 
-    ifdsntexistrun ${mask} "Computing brain mask" c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
+    #ifdsntexistrun ${mask} "Computing brain mask" c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
+    ifdsntexistrun ${mask} "Computing brain mask" ThresholdImage 3 ${resclar} ${mask} Otsu 5
+
+    c3d ${mask} -binarize -o ${mask}
 
 }
 # N4 bias correct
