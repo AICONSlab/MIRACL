@@ -19,7 +19,7 @@ function usage()
     1) Converts Tiff stack to nii (& down-sample)
     2) Uses registered labels to create seed mask & creates brain mask
 	3) Run STA analysis
-    4) Computes viral signal per registered labels
+    #4) Computes viral signal per registered labels
 
     Executes:
 
@@ -27,7 +27,7 @@ function usage()
         utils/miracl_extract_lbl.py
         utils/miracl_create_brainmask.py
         sta/miracl_sta_track_primary_eigen.py
-        lbls/miracl_lbls_stats.py
+        #lbls/miracl_lbls_stats.py
 
 
     Usage: `basename $0`
@@ -259,7 +259,7 @@ if [[ "$#" -gt 1 ]]; then
     printf "\n Running conversion to nii with the following command: \n"
 
     printf "\n miracl_io_convertTifftoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1 \n"
-    #miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1
+    miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1
 
     #---------------------------
     # Call extract lbl
@@ -268,8 +268,8 @@ if [[ "$#" -gt 1 ]]; then
 
     reglbls=`echo ${regdir}/*_clar_downsample.nii.gz`
 
-    printf "\n miracl_extract_lbl.py -i ${reglbls} -l ${lbl} \n"
-    #miracl_extract_lbl.py -i ${reglbls} -l ${lbl}
+    printf "\n miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl} \n"
+    miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl}
 
     #---------------------------
     # Call create brain mask
@@ -278,8 +278,8 @@ if [[ "$#" -gt 1 ]]; then
 
     niifile=`echo niftis/${nii}*.nii.gz`
 
-    printf "\n miracl_create_brainmask.py -i ${niifile} \n"
-    #miracl_create_brainmask.py -i ${niifile}
+    printf "\n miracl_utils_create_brainmask.py -i ${niifile} \n"
+    miracl_utils_create_brainmask.py -i ${niifile}
 
     #---------------------------
     # Call STA
@@ -287,15 +287,15 @@ if [[ "$#" -gt 1 ]]; then
     printf "\n Running STA with the following command: \n"
 
     printf "\n miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts} \n"
-    #miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts}
+    miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts}
 
     #---------------------------
     # Call lbl stats
 
-    printf "\n Running signal statistics extraction with the following command: \n"
+    #printf "\n Running signal statistics extraction with the following command: \n"
 
-    printf "\n miracl_lbls_stats.py -i ${niifile} -l ${reglbls} \n"
-    miracl_lbls_stats.py -i ${niifile} -l ${reglbls}
+    #printf "\n miracl_lbls_stats.py -i ${niifile} -l ${reglbls} \n"
+    #miracl_lbls_stats.py -i ${niifile} -l ${reglbls}
 
     #---------------------------
     #---------------------------

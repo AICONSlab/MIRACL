@@ -18,9 +18,9 @@ def helpmsg():
 
     Outputs nifti file with only chosen label
 
-    Usage: miracl_extract_lbl.py -i [input (registered) labels] -l [output label] -d [down-sample ratio]
+    Usage: miracl_utils_extract_lbl.py -i [input (registered) labels] -l [output label] -d [down-sample ratio]
 
-Example: miracl_extract_lbl.py -i clarity_registered_allen_labels.nii.gz -l PL -d 5
+Example: miracl_utils_extract_lbl.py -i clarity_registered_allen_labels.nii.gz -l PL -d 5
 
     Arguments (required):
 

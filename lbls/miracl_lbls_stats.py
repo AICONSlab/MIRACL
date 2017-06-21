@@ -94,9 +94,13 @@ def main():
     [invol, lbls, outfile] = parseinputs()
 
     # extract stats
-    print("\n Extracting stats from input volume using registered labels ...\n")
+    print("Extracting stats from input volume using registered labels ...\n")
 
-    subprocess.check_call('ImageMath %s %s > %s' % (invol, lbls, outfile), shell=True,
+    # subprocess.check_call('ImageIntensityStatistics 3 %s %s > %s' % (invol, lbls, outfile), shell=True,
+    #                       stdout=subprocess.PIPE,
+    #                       stderr=subprocess.PIPE)
+
+    subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 
@@ -111,14 +115,17 @@ def main():
     # Add label Name, Abrv, PathID
 
     # make dic
-    name_dic = annot_csv.set_index('id')['name'].to_dict()
-    acronym_dic = annot_csv.set_index('id')['acronym'].to_dict()
-    pathid_dic = annot_csv.set_index('id')['pathid'].to_dict()
+    name_dict = annot_csv.set_index('id')['name'].to_dict()
+    acronym_dict = annot_csv.set_index('id')['acronym'].to_dict()
+    pathid_dict = annot_csv.set_index('id')['structure_id_path'].to_dict()
+    parent_dict = annot_csv.set_index('id')['parent_structure_id'].to_dict()
 
     outtxt['name'] = outtxt.LabelID
-    outtxt['name'] = outtxt['name'].replace(name_dic)
-    outtxt['acronym'] = outtxt['acronym'].replace(acronym_dic)
-    outtxt['pathid'] = outtxt['pathid'].replace(pathid_dic)
+    outtxt['name'] = outtxt['name'].replace(name_dict)
+    outtxt['acronym'] = outtxt['acronym'].replace(acronym_dict)
+    outtxt['parent'] = outtxt['parent_structure_id'].replace(parent_dict)
+    outtxt['pathid'] = outtxt['pathid'].replace(pathid_dict)
+
 
     outtxt.to_csv('%s' % outfile)
 
