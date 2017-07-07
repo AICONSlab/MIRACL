@@ -66,9 +66,9 @@ def parseinputs():
 
         print("Running in GUI mode")
 
-        title = 'Label statistics'
-        vols = ['Input', 'labels']
-        fields = ['output file name', 'sort (def = Mean)']
+        title = 'Label Statistics'
+        vols = ['Input Volume', 'Registered Labels']
+        fields = ['Output file name', 'Sort (def = Mean)']
 
         app = QApplication(sys.argv)
         menu, linedits, labels = gui_opts.OptsMenu(title=title, vols=vols, fields=fields, helpfun=helpmsg())
@@ -77,20 +77,17 @@ def parseinputs():
         app.processEvents()
 
         volstr = labels[vols[0]].text()
-        invol = volstr.split(":")[1]
-        assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
+        invol = str(volstr.split(":")[1]).lstrip()
 
         lblsstr = labels[vols[1]].text()
-        lbls = lblsstr.split(":")[1]
-        assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
+        lbls = str(lblsstr.split(":")[1]).lstrip()
 
-        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else linedits[fields[0]].text()
-        assert isinstance(outfile, str)
-
-        sort = 'Mean' if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
-        assert isinstance(sort, str)
+        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+        sort = 'Mean' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
 
     else:
+
+        print("\n running in script mode \n")
 
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
@@ -107,6 +104,15 @@ def parseinputs():
         outfile = args.outfile
         sort = args.sort
 
+    # check if pars given
+
+    assert isinstance(invol, str)
+    assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
+    assert isinstance(lbls, str)
+    assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
+    assert isinstance(outfile, str)
+    assert isinstance(sort, str)
+
     return invol, lbls, outfile, sort
 
 
@@ -116,18 +122,6 @@ def main():
     # parse in args
 
     invol, lbls, outfile, sort = parseinputs()
-
-    print("\n running in script mode \n")
-
-    # check if pars given
-    assert isinstance(invol, str)
-    assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
-
-    assert isinstance(lbls, str)
-    assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
-
-    assert isinstance(outfile, str)
-    assert isinstance(sort, str)
 
     # extract stats
     print(" Extracting stats from input volume using registered labels ...\n")

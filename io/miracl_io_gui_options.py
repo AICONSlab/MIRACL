@@ -59,8 +59,6 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
     buttons = {}
     labels = {}
 
-    helper = lambda v: (lambda: get_fname(main, labels, vol))
-
     if vols:
 
         for v, vol in enumerate(vols):
@@ -110,7 +108,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
 def get_fname(main, labels, vol):
     vfile = QtGui.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
     if vfile:
-        vfilestr = "%s:" % vol + vfile
+        vfilestr = "%s: %s" % (vol, vfile)
         labels["%s" % vol].setText(vfilestr)
         print '%s path:' % vol, vfile
     else:
@@ -120,7 +118,7 @@ def get_fname(main, labels, vol):
 def get_dname(main, labels, dir):
     dfile = str(QFileDialog.getExistingDirectory(main, "Select %s" % dir, "."))
     if dfile:
-        dfilestr = "%s:" % dir + dfile
+        dfilestr = "%s: %s" % (dir, dfile)
         labels["%s" % dir].setText(dfilestr)
         print '%s path:' % dir, dfile
     else:
