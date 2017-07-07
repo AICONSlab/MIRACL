@@ -94,13 +94,17 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
 
     # Create push button
     helpbutton = QtGui.QPushButton('Help')
-    submit = QtGui.QPushButton('Submit')
+    enter = QtGui.QPushButton('Enter')
+    submit = QtGui.QPushButton('Run')
 
-    layout.addRow(helpbutton, submit)
+    layout.addRow(helpbutton, enter)
+    layout.addWidget(submit)
+
     widget.setLayout(layout)
 
-    widget.connect(submit, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields))
     widget.connect(helpbutton, QtCore.SIGNAL('clicked()'), lambda: print_help(main, helpfun))
+    widget.connect(enter, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields))
+    submit.clicked.connect(QtCore.QCoreApplication.instance().quit)
 
     return widget, linedits, labels
 
