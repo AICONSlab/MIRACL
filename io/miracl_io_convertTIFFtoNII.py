@@ -8,7 +8,6 @@ import glob
 import logging
 import multiprocessing
 import os
-import sys
 import warnings
 from Tkinter import *
 from argparse import RawTextHelpFormatter
@@ -163,8 +162,7 @@ def parsefn(args):
         assert isinstance(args.folder, str)
         indir = args.folder
 
-        if not os.path.exists(indir):
-            sys.exit('%s does not exist ... please check path and rerun script' % indir)
+        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
 
         if args.outnii is None:
             outnii = 'clarity'

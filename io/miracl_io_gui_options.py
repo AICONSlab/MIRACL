@@ -59,6 +59,8 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
     buttons = {}
     labels = {}
 
+    helper = lambda v: (lambda: get_fname(main, labels, vol))
+
     if vols:
 
         for v, vol in enumerate(vols):
@@ -69,7 +71,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
             # Layout for widgets
             layout.addRow(labels["%s" % vol], buttons["%s" % vol])
 
-            widget.connect(buttons["%s" % vol], QtCore.SIGNAL('clicked()'), lambda: get_fname(main, labels, vol))
+            widget.connect(buttons["%s" % vol], QtCore.SIGNAL('clicked()'), lambda xv=vol: get_fname(main, labels, xv))
 
     if dirs:
 
@@ -81,7 +83,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
             # Layout for widgets
             layout.addRow(labels["%s" % dir], buttons["%s" % dir])
 
-            widget.connect(buttons["%s" % dir], QtCore.SIGNAL('clicked()'), lambda: get_dname(main, labels, dir))
+            widget.connect(buttons["%s" % dir], QtCore.SIGNAL('clicked()'), lambda xd=dir: get_dname(main, labels, xd))
 
     for f, field in enumerate(fields):
 

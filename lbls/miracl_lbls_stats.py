@@ -10,7 +10,10 @@ import sys
 
 import numpy as np
 import pandas as pd
+from PyQt4.QtGui import QApplication
 
+sys.path.insert(0, '%s/io' % os.environ['MIRACL_HOME'])
+import miracl_io_gui_options as gui_opts
 
 # import commands
 
@@ -63,6 +66,30 @@ def parseinputs():
 
         print("Running in GUI mode")
 
+        title = 'Label statistics'
+        vols = ['Input', 'labels']
+        fields = ['output file name', 'sort (def = Mean)']
+
+        app = QApplication(sys.argv)
+        menu, linedits, labels = gui_opts.OptsMenu(title=title, vols=vols, fields=fields, helpfun=helpmsg())
+        menu.show()
+        app.exec_()
+        app.processEvents()
+
+        volstr = labels[vols[0]].text()
+        invol = volstr.split(":")[1]
+        assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
+
+        lblsstr = labels[vols[1]].text()
+        lbls = lblsstr.split(":")[1]
+        assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
+
+        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else linedits[fields[0]].text()
+        assert isinstance(outfile, str)
+
+        sort = 'Mean' if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
+        assert isinstance(sort, str)
+
     else:
 
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
@@ -71,11 +98,16 @@ def parseinputs():
         parser.add_argument('-l', '--lbls', type=str, help="Reg lbls", required=True)
         parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Mean')
         parser.add_argument('-o', '--outfile', type=str, help="Output file",
-                            default='virus_signal_label_statistics.csv')
+                            default='clarity_label_statistics.csv')
 
         args = parser.parse_args()
 
-    return args
+        invol = args.invol
+        lbls = args.lbls
+        outfile = args.outfile
+        sort = args.sort
+
+    return invol, lbls, outfile, sort
 
 
 # ---------
@@ -83,21 +115,19 @@ def parseinputs():
 def main():
     # parse in args
 
-    args = parseinputs()
+    invol, lbls, outfile, sort = parseinputs()
 
     print("\n running in script mode \n")
 
     # check if pars given
-    assert isinstance(args.invol, str)
-    invol = args.invol
+    assert isinstance(invol, str)
     assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
 
-    assert isinstance(args.lbls, str)
-    lbls = args.lbls
+    assert isinstance(lbls, str)
     assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
 
-    assert isinstance(args.outfile, str)
-    assert isinstance(args.sort, str)
+    assert isinstance(outfile, str)
+    assert isinstance(sort, str)
 
     # extract stats
     print(" Extracting stats from input volume using registered labels ...\n")
@@ -106,12 +136,12 @@ def main():
     #                       stdout=subprocess.PIPE,
     #                       stderr=subprocess.PIPE)
 
-    subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, args.outfile), shell=True,
+    subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
 
     # read fwf
-    outtxt = pd.read_fwf('%s' % args.outfile)
+    outtxt = pd.read_fwf('%s' % outfile)
 
     # read Allen ontology
     miracl_home = os.environ['MIRACL_HOME']
@@ -133,12 +163,12 @@ def main():
     outtxt['pathid'] = outtxt.LabelID.replace(pathid_dict)
 
     # sort data-frame
-    outtxt = outtxt.sort_values([args.sort], ascending=False)
+    outtxt = outtxt.sort_values([sort], ascending=False)
     # remove background
     outtxt = outtxt[outtxt['LabelID'] != 0]
 
     # re-oder columns with info then sorted column of choice
-    cols = ['LabelID', 'acronym', 'name', 'parent', args.sort]
+    cols = ['LabelID', 'acronym', 'name', 'parent', sort]
     dfcols = outtxt.columns.values
     allcols = np.hstack([cols, dfcols])
     _, idx = np.unique(allcols, return_index=True)
@@ -147,11 +177,12 @@ def main():
     outtxt = outtxt[columns]
 
     # save to csv
-    outtxt.to_csv('%s' % args.outfile, index=False)
+    outtxt.to_csv('%s' % outfile, index=False)
 
 
 if __name__ == "__main__":
     main()
 
-    # TODOlp
-    # copy tform if tolerance exceeds limit
+
+# TODOlp
+# copy tform if tolerance exceeds limit
