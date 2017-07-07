@@ -69,14 +69,14 @@ def readcsvs(indir, splitval=20000):
 def cleanuplbls(vals, splitval=20000):
 
     # get lbl intersec
-    inter = set(vals[0].LabelAbrv)
+    inter = set(vals[0].LabelID)
     for vallist in vals[0:]:
-        inter.intersection_update(vallist.LabelAbrv)
+        inter.intersection_update(vallist.LabelID)
 
 
     # use intersec only
     for i in range(len(vals)):
-        vals[i] = vals[i][vals[i].LabelAbrv.isin(inter)]
+        vals[i] = vals[i][vals[i].LabelID.isin(inter)]
 
     ids = vals[0].LabelID
 

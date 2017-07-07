@@ -13,7 +13,8 @@ from PyQt4.QtGui import *
 # Inputs #########
 
 def helpmsg(name=None):
-    return '''miracl_io_gui_options.py -t title -f fields [separated by space] -v [volumes to open] -hf helpfun
+    return '''miracl_io_gui_options.py -t title -f [ fields separated by space] -v [volumes to open] -d [dirs to open]
+    -hf helpfun
 
 Takes list of strings as options for entries for a gui options, and a gui title
 
@@ -29,6 +30,7 @@ def parseargs():
     parser.add_argument('-t', '--title', type=str, help="gui title", required=True)
     parser.add_argument('-f', '--fields', type=str, nargs='+', help="fields for options")
     parser.add_argument('-v', '--vols', type=str, nargs='+', help="volumes for reading")
+    parser.add_argument('-d', '--dirs', type=str, nargs='+', help="directories for reading")
     parser.add_argument('-hf', '--helpfun', type=str, help="help fun")
 
     args = parser.parse_args()
@@ -36,12 +38,13 @@ def parseargs():
     title = args.title
     fields = args.fields
     vols = args.vols
+    dirs = args.dirs
     helpfun = args.helpfun
 
-    return title, vols, fields, helpfun
+    return title, vols, dirs, fields, helpfun
 
 
-def OptsMenu(title, vols, fields, helpfun):
+def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
         
     # create GUI
     main = QtGui.QMainWindow()
@@ -56,15 +59,29 @@ def OptsMenu(title, vols, fields, helpfun):
     buttons = {}
     labels = {}
 
-    for v, vol in enumerate(vols):
-        # Create buttons for vols
-        labels["%s" % vol] = QtGui.QLabel('No file selected')
-        buttons["%s" % vol] = QtGui.QPushButton('Select %s' % vol)
+    if vols:
 
-        # Layout for widgets        
-        layout.addRow(labels["%s" % vol], buttons["%s" % vol])
+        for v, vol in enumerate(vols):
+            # Create buttons for vols
+            labels["%s" % vol] = QtGui.QLabel('No file selected')
+            buttons["%s" % vol] = QtGui.QPushButton('Select %s' % vol)
 
-        widget.connect(buttons["%s" % vol], QtCore.SIGNAL('clicked()'), lambda: get_fname(main, labels, vol))
+            # Layout for widgets
+            layout.addRow(labels["%s" % vol], buttons["%s" % vol])
+
+            widget.connect(buttons["%s" % vol], QtCore.SIGNAL('clicked()'), lambda: get_fname(main, labels, vol))
+
+    if dirs:
+
+        for d, dir in enumerate(dirs):
+            # Create buttons for vols
+            labels["%s" % dir] = QtGui.QLabel('No Dir selected')
+            buttons["%s" % dir] = QtGui.QPushButton('Select %s' % dir)
+
+            # Layout for widgets
+            layout.addRow(labels["%s" % dir], buttons["%s" % dir])
+
+            widget.connect(buttons["%s" % dir], QtCore.SIGNAL('clicked()'), lambda: get_dname(main, labels, dir))
 
     for f, field in enumerate(fields):
 
@@ -85,22 +102,33 @@ def OptsMenu(title, vols, fields, helpfun):
     widget.connect(submit, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields))
     widget.connect(helpbutton, QtCore.SIGNAL('clicked()'), lambda: print_help(main, helpfun))
 
-    return widget
+    return widget, linedits, labels
 
 
 def get_fname(main, labels, vol):
-    file = QtGui.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
-    if file:
-        filestr = "%s:" % vol + file
-        labels["%s" % vol].setText(filestr)
-        print '%s path:' % vol, file
+    vfile = QtGui.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
+    if vfile:
+        vfilestr = "%s:" % vol + vfile
+        labels["%s" % vol].setText(vfilestr)
+        print '%s path:' % vol, vfile
     else:
         labels["%s" % vol].setText('No file selected')
+
+
+def get_dname(main, labels, dir):
+    dfile = str(QFileDialog.getExistingDirectory(main, "Select %s" % dir, "."))
+    if dfile:
+        dfilestr = "%s:" % dir + dfile
+        labels["%s" % dir].setText(dfilestr)
+        print '%s path:' % dir, dfile
+    else:
+        labels["%s" % dir].setText('No Dir selected')
 
 
 def print_input(linedits, fields):
     for f, field in enumerate(fields):
         print "%s :" % field, linedits["%s" % field].text()
+
 
 def print_help(main, helpfun):
     helpwidget = QtGui.QDialog()
@@ -119,12 +147,13 @@ def print_help(main, helpfun):
 
     QApplication.processEvents()
 
+
 def main():
-    [title, vols, fields, helpfun] = parseargs()
+    [title, vols, dirs, fields, helpfun] = parseargs()
 
     # Create an PyQT4 application object.
     app = QApplication(sys.argv)
-    menu = OptsMenu(title, vols, fields, helpfun)
+    menu, linedits, labels = OptsMenu(title=title, vols=vols, dirs=dirs, fields=fields, helpfun=helpfun)
     menu.show()
     app.exec_()
     app.processEvents()

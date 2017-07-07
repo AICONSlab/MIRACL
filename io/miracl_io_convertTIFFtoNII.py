@@ -8,6 +8,7 @@ import glob
 import logging
 import multiprocessing
 import os
+import sys
 import warnings
 from Tkinter import *
 from argparse import RawTextHelpFormatter
@@ -16,11 +17,14 @@ from datetime import datetime
 import cv2
 import nibabel as nib
 import numpy as np
+import scipy.ndimage
 from PyQt4.QtGui import *
 from joblib import Parallel, delayed
 
+import miracl_io_gui_options as gui_opts
+
 warnings.simplefilter("ignore", UserWarning)
-import scipy.ndimage
+
 
 
 def helpmsg():
@@ -105,97 +109,48 @@ def parsefn(args):
 
         print("Running in GUI mode")
 
-        a = QApplication(sys.argv)
-        w = QWidget()
+        title = 'Tiff to Nii conversion'
+        dirs = ['Input tiff folder']
+        fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
+                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
+                  'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
+        # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
 
-        msg = "Open clarity dir (with .tif files)"
+        app = QApplication(sys.argv)
+        menu, linedits, labels = gui_opts.OptsMenu(title=title, dirs=dirs, fields=fields, helpfun=helpmsg())
+        menu.show()
+        app.exec_()
+        app.processEvents()
 
-        indir = folder_dialog(w, msg)
+        indirstr = labels[dirs[0]].text()
+        indir = indirstr.split(":")[1]
+        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
 
-        if not indir:
-            sys.exit('input folder/directory not specified ... exiting')
+        # Initialize default params
 
-        if not os.path.exists(indir):
-            sys.exit('%s does not exist ... please check path and rerun script' % indir)
+        outnii = 'clarity' if not linedits[fields[0]].text() else linedits[fields[0]].text()
+        assert isinstance(outnii, str)
 
-        fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
-                 'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
-                 'center (def = 0,0,0)', 'Downsample in z (def = 1)'
+        d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
+        assert isinstance(d, int)
 
-        def fetch(entries):
-            for entry in entries:
-                field = entry[0]
-                text = entry[1].get()
-                print('%s: "%s"' % (field, text))
+        chann = 1 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
+        assert isinstance(chann, int)
 
-        def makeform(root, fields):
-            entries = []
-            values = []
+        chanp = None if not linedits[fields[3]].text() else linedits[fields[3]].text()
 
-            strlen = len(max(fields, key=len))
-            strw = int(strlen * 1.2)
+        chan = 'eyfp' if not linedits[fields[4]].text() else linedits[fields[4]].text()
 
-            for field in fields:
-                row = Frame(root)
-                lab = Label(row, width=strw, text=field, anchor='w')
-                ent = Entry(row)
-                row.pack(side=TOP, fill=X, padx=5, pady=5)
-                lab.pack(side=LEFT)
-                ent.pack(side=RIGHT, expand=YES, fill=X)
-                entries.append((field, ent))
-                values.append(ent)
+        vx = 5 if not linedits[fields[5]].text() else float(linedits[fields[5]].text())
 
-            return entries, values, strw
+        vz = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
 
-        def helpwindown(root, helpfun):
-            window = Toplevel(root)
-            window.title("Help func")
-            t = Text(window, height=50, width=150)
-            t.pack()
-            t.insert(END, "%s" % helpfun)
+        cent = [0, 0, 0] if not linedits[fields[7]].text() else linedits[fields[7]].text()
 
-        # def main():
-        root = Tk()
-        root.title("Nii conversion options")
+        downz = 1 if not linedits[fields[8]].text() else linedits[fields[8]].text()
 
-        [ents, vals, strw] = makeform(root, fields)
+        pd = 1 if not linedits[fields[9]].text() else linedits[fields[9]].text()
 
-        n = len(fields)
-        w = strw * 10
-        h = (n * 40) + 50
-        root.geometry("%dx%d" % (w, h))
-
-        root.bind('<Return>', (lambda event, e=ents: fetch(e)))
-
-        b1 = Button(root, text='Enter',
-                    command=(lambda e=ents: fetch(e)))
-        b1.pack(side=LEFT, padx=5, pady=5)
-
-        b2 = Button(root, text='Done', command=root.quit)
-        b2.pack(side=RIGHT, padx=5, pady=5)
-
-        b3 = Button(root, text="Help func", command=lambda: helpwindown(root, helpmsg()))
-        b3.pack(side=LEFT, padx=5, pady=5)
-
-        root.mainloop()
-
-        outnii = 'clarity' if not vals[0].get() else vals[0].get()
-
-        d = 5 if not vals[1].get() else int(vals[1].get())
-
-        chann = 1 if not vals[2].get() else int(vals[2].get())
-
-        chanp = None if not vals[3].get() else vals[3].get()
-
-        chan = 'eyfp' if not vals[4].get() else vals[4].get()
-
-        vx = 5 if not vals[5].get() else float(vals[5].get())
-
-        vz = 5 if not vals[6].get() else float(vals[6].get())
-
-        cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
-
-        downz = 1 if not vals[8].get() else vals[8].get()
 
     else:
 
@@ -464,3 +419,102 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+    # Todos
+
+
+    # Old
+
+    # old Tkinter
+
+    # a = QApplication(sys.argv)
+    # w = QWidget()
+    #
+    # msg = "Open clarity dir (with .tif files)"
+    #
+    # indir = folder_dialog(w, msg)
+    #
+    # if not indir:
+    #     sys.exit('input folder/directory not specified ... exiting')
+    #
+    # if not os.path.exists(indir):
+    #     sys.exit('%s does not exist ... please check path and rerun script' % indir)
+    #
+    # fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
+    #          'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
+    #          'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)'
+    #
+    # def fetch(entries):
+    #     for entry in entries:
+    #         field = entry[0]
+    #         text = entry[1].get()
+    #         print('%s: "%s"' % (field, text))
+    #
+    # def makeform(root, fields):
+    #     entries = []
+    #     values = []
+    #
+    #     strlen = len(max(fields, key=len))
+    #     strw = int(strlen * 1.2)
+    #
+    #     for field in fields:
+    #         row = Frame(root)
+    #         lab = Label(row, width=strw, text=field, anchor='w')
+    #         ent = Entry(row)
+    #         row.pack(side=TOP, fill=X, padx=5, pady=5)
+    #         lab.pack(side=LEFT)
+    #         ent.pack(side=RIGHT, expand=YES, fill=X)
+    #         entries.append((field, ent))
+    #         values.append(ent)
+    #
+    #     return entries, values, strw
+    #
+    # def helpwindown(root, helpfun):
+    #     window = Toplevel(root)
+    #     window.title("Help func")
+    #     t = Text(window, height=50, width=150)
+    #     t.pack()
+    #     t.insert(END, "%s" % helpfun)
+    #
+    # # def main():
+    # root = Tk()
+    # root.title("Nii conversion options")
+    #
+    # [ents, vals, strw] = makeform(root, fields)
+    #
+    # n = len(fields)
+    # w = strw * 10
+    # h = (n * 40) + 50
+    # root.geometry("%dx%d" % (w, h))
+    #
+    # root.bind('<Return>', (lambda event, e=ents: fetch(e)))
+    #
+    # b1 = Button(root, text='Enter',
+    #             command=(lambda e=ents: fetch(e)))
+    # b1.pack(side=LEFT, padx=5, pady=5)
+    #
+    # b2 = Button(root, text='Done', command=root.quit)
+    # b2.pack(side=RIGHT, padx=5, pady=5)
+    #
+    # b3 = Button(root, text="Help func", command=lambda: helpwindown(root, helpmsg()))
+    # b3.pack(side=LEFT, padx=5, pady=5)
+    #
+    # root.mainloop()
+
+
+    # chann = 1 if not vals[2].get() else int(vals[2].get())
+    #
+    # chanp = None if not vals[3].get() else vals[3].get()
+    #
+    # chan = 'eyfp' if not vals[4].get() else vals[4].get()
+    #
+    # vx = 5 if not vals[5].get() else float(vals[5].get())
+    #
+    # vz = 5 if not vals[6].get() else float(vals[6].get())
+    #
+    # cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
+    #
+    # downz = 1 if not vals[8].get() else vals[8].get()
+    #
+    # pd = 1 if not vals[9].get() else vals[9].get()
