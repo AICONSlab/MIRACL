@@ -15,6 +15,7 @@ from PyQt4.QtGui import QApplication
 sys.path.insert(0, '%s/io' % os.environ['MIRACL_HOME'])
 import miracl_io_gui_options as gui_opts
 
+
 # import commands
 
 def helpmsg():
@@ -34,7 +35,8 @@ Computes Allen label stats of input volume
 
     Usage: miracl_lbls_stats.py -i [input volume] -l [reg Allen labels]
 
-Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv -s Count
+Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv
+        -s Count
 
     Arguments (required):
 

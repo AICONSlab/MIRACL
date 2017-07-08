@@ -12,7 +12,7 @@ from PyQt4.QtGui import *
 
 # Inputs #########
 
-def helpmsg(name=None):
+def helpmsg():
     return '''miracl_io_gui_options.py -t title -f [ fields separated by space] -v [volumes to open] -d [dirs to open]
     -hf helpfun
 
@@ -24,8 +24,8 @@ Input options will be printed as output
 
 '''
 
-def parseargs():
 
+def parseargs():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
     parser.add_argument('-t', '--title', type=str, help="gui title", required=True)
     parser.add_argument('-f', '--fields', type=str, nargs='+', help="fields for options")
@@ -45,12 +45,11 @@ def parseargs():
 
 
 def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
-        
     # create GUI
     main = QtGui.QMainWindow()
 
     widget = QtGui.QWidget()
-    widget.setWindowTitle('%s' % title)    
+    widget.setWindowTitle('%s' % title)
 
     layout = QFormLayout()
     layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -84,7 +83,6 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
             widget.connect(buttons["%s" % dir], QtCore.SIGNAL('clicked()'), lambda xd=dir: get_dname(main, labels, xd))
 
     for f, field in enumerate(fields):
-
         # Create inputs (line edts)
         linedits["%s" % field] = QLineEdit()
         linedits["%s" % field].setAlignment(QtCore.Qt.AlignRight)
@@ -112,9 +110,9 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
 def get_fname(main, labels, vol):
     vfile = QtGui.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
     if vfile:
-        vfilestr = "%s: %s" % (vol, vfile)
+        vfilestr = "%s : %s" % (vol, str(vfile).lstrip())
         labels["%s" % vol].setText(vfilestr)
-        print '%s path:' % vol, vfile
+        print '%s path: %s' % (vol, vfile)
     else:
         labels["%s" % vol].setText('No file selected')
 
@@ -122,16 +120,16 @@ def get_fname(main, labels, vol):
 def get_dname(main, labels, dir):
     dfile = str(QFileDialog.getExistingDirectory(main, "Select %s" % dir, "."))
     if dfile:
-        dfilestr = "%s: %s" % (dir, dfile)
+        dfilestr = "%s : %s" % (dir, dfile.lstrip())
         labels["%s" % dir].setText(dfilestr)
-        print '%s path:' % dir, dfile
+        print '%s path: %s' % (dir, dfile)
     else:
         labels["%s" % dir].setText('No Dir selected')
 
 
 def print_input(linedits, fields):
     for f, field in enumerate(fields):
-        print "%s :" % field, linedits["%s" % field].text()
+        print "%s :%s" % (field, str(linedits["%s" % field].text()).lstrip())
 
 
 def print_help(main, helpfun):
@@ -139,7 +137,7 @@ def print_help(main, helpfun):
     main.setCentralWidget(helpwidget)
     helpwidget.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-    main.setWindowTitle('Help function')    
+    main.setWindowTitle('Help function')
 
     helplayout = QVBoxLayout()
     helplbl = QtGui.QLabel(helpfun)
@@ -161,6 +159,7 @@ def main():
     menu.show()
     app.exec_()
     app.processEvents()
+
 
 if __name__ == "__main__":
     sys.exit(main())

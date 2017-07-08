@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Maged Goubran @ 2016, mgoubran@stanford.edu 
+# Maged Goubran @ 2017, mgoubran@stanford.edu
 
 # coding: utf-8
 
@@ -8,8 +8,9 @@ import glob
 import logging
 import multiprocessing
 import os
+import re
+import sys
 import warnings
-from Tkinter import *
 from argparse import RawTextHelpFormatter
 from datetime import datetime
 
@@ -23,7 +24,6 @@ from joblib import Parallel, delayed
 import miracl_io_gui_options as gui_opts
 
 warnings.simplefilter("ignore", UserWarning)
-
 
 
 def helpmsg():
@@ -68,7 +68,7 @@ Converts Tiff images to Nifti
 #
 #     Python 2.7
 #     used modules:
-#         argparse, numpy, cv2, nibabel, Tkinter, tkFileDialog,
+#         argparse, numpy, cv2, nibabel, pyqt4,
 #         glob, re, os, sys, datetime, joblib, multiprocessing
 
 
@@ -128,8 +128,8 @@ def parsefn(args):
 
         title = 'Tiff to Nii conversion'
         dirs = ['Input tiff folder']
-        fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
-                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
+        fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix',
+                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")',
                   'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
         # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
 
@@ -167,7 +167,6 @@ def parsefn(args):
         downz = 1 if not linedits[fields[8]].text() else int(linedits[fields[8]].text())
 
         pd = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
-
 
     else:
 
@@ -437,10 +436,7 @@ if __name__ == "__main__":
     main()
 
 
-
 # Todos
-
-
 
 
 # Old
