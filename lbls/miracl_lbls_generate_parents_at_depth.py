@@ -20,7 +20,8 @@ import pandas as pd
 
 def helpmsg():
     return '''
-    miracl_lbls_generate_parents_at_depth.py -d [depth (default: 6)] -m [hemisphere: split or combined (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)]
+    miracl_lbls_generate_parents_at_depth.py -d [depth] -m [hemisphere: split or combined
+    (default: combined)]  -v [voxel size in um: 10, 25 or 50 (default: 25)]
 
     Generate parents labels at specific depth from Allen labels
 
@@ -36,7 +37,7 @@ def helpmsg():
 
 def parseinput():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-    parser.add_argument('-d', '--depth', type=int, help="chosen depth", required=False)
+    parser.add_argument('-d', '--depth', type=int, help="chosen depth", required=True)
     parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not", required=False)
     parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)
 
@@ -72,7 +73,6 @@ def parseinput():
 
 lblsplit = 20000  # number added to contra side
 maxannotlbl = 13000  # > max lbl in ipsi
-
 
 # ------------
 
@@ -173,7 +173,7 @@ def main():
     pastparents = getpastlabelsdepth(aragraph, lbls, d, lblsplit, maxannotlbl)
 
     for pastlbl, pastparent in pastparents.iteritems():
-        replacechildren(img, parentdata, pastlbl, pastparent)
+        replacechildren(data, parentdata, pastlbl, pastparent)
 
     vx = img.header.get_zooms()[0]
     orgname = basename(nii).split('.')[0]
