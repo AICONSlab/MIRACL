@@ -33,7 +33,7 @@ Computes Allen label stats of input volume
 
     For command-line / scripting
 
-    Usage: miracl_lbls_stats.py -i [input volume] -l [reg Allen labels]
+    Usage: miracl_lbls_stats.py -i [input volume] -l [reg Allen labels] -o [ out csv ]
 
 Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv
         -s Count

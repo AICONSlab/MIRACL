@@ -19,13 +19,14 @@ import pandas as pd
 
 def helpmsg():
     return '''
-    miracl_lbls_get_gp_volumes.py -i [ input labels image ] -ln [ label names ] OR -la [ label acronyms ]
+    miracl_lbls_get_gp_volumes.py -i [ input labels image ] -ln [ label names ] OR -la [ label acronyms ] -o [ out csv ]
+    -s sort by size [ def: 0 -> no ]
 
     Extract volumes of labels of interest and their subdivisions from input label file (nii format)
 
-    example: miracl_lbls_get_gp_volumes.py -i registered_labels.nii.gz -ln Thalamus Striatum
+    example: miracl_lbls_get_gp_volumes.py -i registered_labels.nii.gz -ln Thalamus Striatum -o gp_volumes.csv
                 OR
-             miracl_lbls_get_gp_volumes.py -i registered_labels.nii.gz -la TH STR
+             miracl_lbls_get_gp_volumes.py -i registered_labels.nii.gz -la TH STR -o gp_volumes.csv
 
     '''
 
@@ -38,6 +39,9 @@ def parseinput():
     parser.add_argument('-i', '--img', type=str, help="Input labels", required=False)
     parser.add_argument('-ln', '--names', type=str, nargs='+', help="Label names", required=False)
     parser.add_argument('-la', '--acronyms', type=str, nargs='+', help="Label acronyms", required=False)
+    parser.add_argument('-s', '--sort', type=int, help="Sort by size", required=False, default=0)
+    parser.add_argument('-o', '--outfile', type=str, help="Output file",
+                        default='grand_parent_volumes.csv')
 
     args = parser.parse_args()
 
@@ -56,7 +60,11 @@ def parseinput():
 
     metric = 'acronym' if names is None else 'name'
 
-    return lbls, img, metric
+    outfile = args.outfile
+
+    s = args.sort
+
+    return lbls, img, metric, outfile, s
 
 
 def getalllbls(data):
@@ -98,7 +106,7 @@ def computevolumes(aragraph, dataflat, inlbl, imglbls, metric):
 def main():
     starttime = datetime.now()
 
-    inlbls, img, metric = parseinput()
+    inlbls, img, metric, outfile, s = parseinput()
 
     # load img
     print("Reading Input Labels")
@@ -125,9 +133,13 @@ def main():
         lblvols.append(vol)
 
     df = pd.DataFrame([inlbls, lblvols])
-    df = df.T.sort_values(1, ascending=False)
+    if s == 1:
+        df = df.T.sort_values(1, ascending=False)
+    else:
+        df = df.T
+
     df.columns = ['Labels', 'Volumes (# of voxels)']
-    df.to_csv('grand_parent_volumes.csv', index=False)
+    df.to_csv(outfile, index=False)
 
     print ("\n Parent labels volume computation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
