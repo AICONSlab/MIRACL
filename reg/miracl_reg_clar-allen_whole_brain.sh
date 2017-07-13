@@ -262,7 +262,20 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel" "*.nii *.nii.gz" inclar
+	#choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel" "*.nii *.nii.gz" inclar
+
+	# options gui 
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel "  \
+	-f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')"  \
+	  "olfactory bulb incl. (def = 0)" "side (def = None)" "extra int correct (def = 0)" -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+    inclar=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Input file path: ${inclar} \n"
 
@@ -275,38 +288,30 @@ else
 		exit 1
 	fi
 
-	# options gui 
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" "extra int correct (def = 0)" -hf "`usage`")
-
-	# populate array
-	arr=()
-	while read -r line; do
-	   arr+=("$line")
-	done <<< "$opts"
-
-	ort=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	ort=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen orient code: $ort \n"
 
-	hemi=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	hemi=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen labels hemi option: $hemi \n"
 
-	vox=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen vox (um): $vox \n"
 
-	bulb=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	bulb=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen olfactory bulb option: $bulb \n"
 
-	side=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	side=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen side option: $side \n"
 
-    field=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    field=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen side option: $field \n"
+    printf "\n Chosen extra intensity correct: $field \n"
+
 
 fi
 
