@@ -25,7 +25,6 @@ def helpmsg():
             miracl_lbls_get_graph_info.py -l CP
     '''
 
-
 def parseargs():
     parser = argparse.ArgumentParser(description='Get lbl info', usage=helpmsg())
     parser.add_argument('-l', '--lbl', help="input label", required=True)
@@ -45,9 +44,9 @@ def main():
     arastrctcsv = "%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv" % miracl_home
     aragraph = pd.read_csv(arastrctcsv)
 
-    if lbl is int:
+    if np.in1d(lbl, aragraph.id.values):
 
-        lblinfo = aragraph[aragraph.id == lbl]
+        lblinfo = aragraph[aragraph.id == int(lbl)]
 
     else:
         if np.in1d(lbl, aragraph.name.values):

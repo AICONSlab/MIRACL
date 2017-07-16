@@ -40,7 +40,7 @@ function usage()
 
     Usage: `basename $0` -f [Tiff folder] -o [output nifti] -l [Allen seed label] -r [Reg final dir] -d [ downsample ratio ]
 
-    Example: `basename $0` -f my_tifs -o clarity_virus_05xdown.nii.gz -l PL -r clar_reg_final -n "-d 5 -ch autofluo" -t "-g 0.5 -k 0.5 -a 25"
+    Example: `basename $0` -f my_tifs -o clarity_virus_05xdown.nii.gz -l PL -r clar_reg_final -n "-d 5 -ch AAV" -t "-g 0.5 -k 0.5 -a 25"
 
         arguments (required):
 
@@ -60,7 +60,7 @@ function usage()
 
                     cn. [ chan # for extracting single channel from multiple channel data (default: 1) ]
                     cp. [ chan prefix (string before channel number in file name). ex: C00 ]
-                    ch. [ output chan name (default: eyfp) ]
+                    ch. [ output chan name (default: AAV) ]
                     vx. [ original resolution in x-y plane in um (default: 5) ]
                     vz. [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
                     c.  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
@@ -274,7 +274,7 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running brain mask creation with the following command: \n"
 
-    niifile=`echo niftis/${nii}*.nii.gz`
+    niifile=`echo niftis/${nii}*.nii.gz | tail -n1`
 
     printf "\n miracl_utils_create_brainmask.py -i ${niifile} \n"
     miracl_utils_create_brainmask.py -i ${niifile}
@@ -408,7 +408,7 @@ else
 
     printf "\n Running brain mask creation with the following command: \n"
 
-    niifile=`echo niftis/${nii}*.nii.gz`
+    niifile=`echo niftis/${nii}*${chan}_chan.nii.gz | tail -n1`
 
     printf "\n miracl_utils_create_brainmask.py -i ${niifile} \n"
     miracl_utils_create_brainmask.py -i ${niifile}
@@ -439,4 +439,6 @@ echo "STA and signal analysis done in $DIFF minutes. Have a good day!"
 
 
 # TODOs
+# streamline after reg
+# add assert if nii and lbls are same size
 # check registered labels space and res
