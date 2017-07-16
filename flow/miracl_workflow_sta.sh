@@ -421,7 +421,7 @@ else
     printf "\n miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
                -dog ${dog} -gauss ${gauss} -angle ${angle} \n"
     miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts} \
-                                     -dog ${dog} -gauss ${gauss} -angle ${angle}
+                                     -g ${dog} -k ${gauss} -a ${angle}
 
 fi
 
