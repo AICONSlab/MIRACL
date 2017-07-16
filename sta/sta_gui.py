@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Maged Goubran @ 2016, mgoubran@stanford.edu 
+# Maged Goubran @ 2017, mgoubran@stanford.edu
 
 # coding: utf-8 
 
@@ -46,7 +46,7 @@ class STAmenu(QtGui.QWidget):
         self.layout.addRow(self.lbl, btn)
         self.layout.addRow(self.lbl2, btn2)
         self.layout.addRow(self.lbl3, btn3)
-        self.layout.addRow("Derivative of Gauss sigma", self.dog)
+        self.layout.addRow("Derivative of Gaussian sigma", self.dog)
         self.layout.addRow("Gaussian smoothing sigma", self.gauss)
         self.layout.addRow("Tracking angle threshold", self.angle)
         self.layout.addRow(run)

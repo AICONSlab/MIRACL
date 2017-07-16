@@ -301,85 +301,122 @@ if [[ "$#" -gt 1 ]]; then
     #---------------------------
 
 
-#else
-#
-#	# call gui
-#
-#	printf "\n No inputs given ... running in GUI mode \n"
-#
-#    # Get options
-#
+else
+
+	# call gui
+
+	printf "\n No inputs given ... running in GUI mode \n"
+
+    # Get options
 #    choose_folder_gui "Open clarity dir (with .tif files) by double clicking then OK" indir
-#
-#	# check required input arguments
-#
-#	if [ -z "${indir}" ];
-#	then
-#		usage
-#		echo "ERROR: <input clarity directory> was not chosen"
-#		exit 1
-#	fi
-#
-#	# options gui
-#	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" -f "seg type (def = sparse)" "channel prefix (ex = C001) "  -hf "`usage`")
-#
-#	# populate array
-#	arr=()
-#	while read -r line; do
-#	   arr+=("$line")
-#	done <<< "$opts"
-#
-#	type=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-#
-#	printf "\n Chosen seg type: $type \n"
-#
-#	prefix=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-#
-#    printf "\n Chosen channel prefix: $prefix \n"
-#
-#
-#    choose_file_gui "Open Allen labels (registered to clarity) used to summarize features" lbls
-#
-#
-#    if [ -z "${type}" ];
-#	then
-#        type=sparse
-#    fi
-#
-#    printf "\n Running segmentation with the following command: \n"
-#
-##    if [ -z "${prefix}" ];
-##	then
-##
-##
-##
-##    else
-##
-##
-##    fi
-#
-#
-#    #---------------------------
-#    # Call STA
-#
-#    printf "\n Running voxelize segmentation with the following command: \n"
-#
-#
-#
-#    #---------------------------
-#    # Call lbls stats
-#
-#    printf "\n Running feature extraction with the following command: \n"
-#
-##
-##    if [ -z "${lbls}" ];
-##	then
-##
-##
-##    else
-##
-##
-##    fi
+
+	# options gui
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "STA workflow"  \
+	        -d 'Input tiff folder' \
+	        -f 'Out nii name (def = clarity)' 'Seed label abbreviation' 'CLARITY final registration folder' \
+	           'Derivative of Gaussian (dog) sigma' 'Gaussian smoothing sigma' 'Tracking angle threshold' \
+ 	          'Downsample ratio (def = 5)'  'chan # (def = 1)' 'chan prefix' \
+              'Out chan name (def = eyfp)' 'Resolution (x,y) (def = 5 "um")' 'Thickness (z) (def = 5 "um")' \
+              'Downsample in z (def = 1)'  -hf "`usage`")
+
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
+
+	# check required input arguments
+
+    indir=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	if [ -z "${indir}" ];
+	then
+		usage
+		echo "ERROR: <input clarity directory> was not chosen"
+		exit 1
+	fi
+
+	printf "\n Chosen in dir: $indir \n"
+
+    nii=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen out nii name: $nii \n"
+
+    lbl=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen seed label: $lbl \n"
+
+    regdir=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen reg dir : $regdir \n"
+
+    dog=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen Derivative of Gaussian : $dog \n"
+
+    gauss=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen Gaussian smoothing sigma: $gauss \n"
+
+    angle=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen tracking angle threshold: $angle \n"
+
+    down=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen out nii name: $nii \n"
+
+    chann=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen channel num: $chann \n"
+
+    chanp=`echo "${arr[9]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen channel prefix: $chanp \n"
+
+    chan=`echo "${arr[10]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen chan name: $chan \n"
+
+    vx=`echo "${arr[11]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen vx: $vx \n"
+
+    vz=`echo "${arr[12]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen vz: $vz \n"
+
+    downz=`echo "${arr[13]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen down-samle in z: $downz \n"
+
+
+    #---------------------------
+    # Call conversion to nii
+
+    printf "\n Running conversion to nii with the following command: \n"
+
+    printf "\n miracl_io_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+            -chan ${chan} -chann ${chann} -chanp ${chanp} \n"
+    miracl_io_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+                                    -chan ${chan} -chann ${chann} -chanp ${chanp}
+
+    #---------------------------
+    # Call extract lbl
+
+    printf "\n Running label extraction with the following command: \n"
+
+    reglbls=`echo ${regdir}/*_clar_downsample.nii.gz`
+
+    printf "\n miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl} \n"
+    miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl}
+
+    #---------------------------
+    # Call create brain mask
+
+    printf "\n Running brain mask creation with the following command: \n"
+
+    niifile=`echo niftis/${nii}*.nii.gz`
+
+    printf "\n miracl_utils_create_brainmask.py -i ${niifile} \n"
+    miracl_utils_create_brainmask.py -i ${niifile}
+
+    #---------------------------
+    # Call STA
+
+    printf "\n Running STA with the following command: \n"
+
+    printf "\n miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
+               -dog ${dog} -gauss ${gauss} -angle ${angle} \n"
+    miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts} \
+                                     -dog ${dog} -gauss ${gauss} -angle ${angle}
 
 fi
 

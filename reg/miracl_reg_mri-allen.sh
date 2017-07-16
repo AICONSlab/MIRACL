@@ -232,18 +232,20 @@ else
 
 	printf "\n Reading input data \n"
 
-	choose_file_gui "In-vivo or Ex-vivo MRI" "*.nii *.nii.gz" inmr
+	#choose_file_gui "In-vivo or Ex-vivo MRI" "*.nii *.nii.gz" inmr
 
-    printf "\n Input file path: ${inmr} \n"
+	# options gui
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -v "In-vivo or Ex-vivo MRI" \
+	-f "Orient code (def = RSP)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')"  \
+	 "olfactory bulb incl. (def = 0)" "skull strip (def = 1)" "No orient (def = 0)"  -hf "`usage`")
 
-	# check required input arguments
+	# populate array
+	arr=()
+	while read -r line; do
+	   arr+=("$line")
+	done <<< "$opts"
 
-	if [ -z ${inmr} ];
-	then
-		usage
-		echo "ERROR: <input MRI nii> was not chosen"
-		exit 1
-	fi
+    inmr=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     # check required input arguments
 
@@ -254,37 +256,30 @@ else
 		exit 1
 	fi
 
-	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Orient code (def = RSP)" \
-	 "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "skull strip (def = 1)" "No orient (def = 0)"  -hf "`usage`")
+    printf "\n Input file path: ${inmr} \n"
 
-	# populate array
-	arr=()
-	while read -r line; do
-	   arr+=("$line")
-	done <<< "$opts"
 
-	ort=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	ort=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen orient code: $ort \n"
 
-	hemi=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	hemi=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen labels hemi option: $hemi \n"
 
-	vox=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen vox (um): $vox \n"
 
-	bulb=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	bulb=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen olfactory bulb option: $bulb \n"
 
-    skull=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    skull=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen skull strip option: $skull \n"
 
-    noort=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    noort=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen No orientation option: $noort \n"
 

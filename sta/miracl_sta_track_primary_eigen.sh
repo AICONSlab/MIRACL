@@ -36,7 +36,7 @@ function usage()
 
 			f. Input down-sampled clarity nifti (.nii/.nii.gz)
 
-			g. Derivative of Gaussion (dog) sigma
+			g. Derivative of Gaussian (dog) sigma
 
 			k. Gaussian smoothing sigma
 
