@@ -19,7 +19,6 @@ function usage()
     1) Converts Tiff stack to nii (& down-sample)
     2) Uses registered labels to create seed mask & creates brain mask
 	3) Run STA analysis
-    #4) Computes viral signal per registered labels
 
     Executes:
 
@@ -27,7 +26,6 @@ function usage()
         utils/miracl_extract_lbl.py
         utils/miracl_create_brainmask.py
         sta/miracl_sta_track_primary_eigen.py
-        #lbls/miracl_lbls_stats.py
 
 
     Usage: `basename $0`
@@ -312,11 +310,11 @@ else
 
 	# options gui
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "STA workflow"  \
-	        -d 'Input tiff folder' \
-	        -f 'Out nii name (def = clarity)' 'Seed label abbreviation' 'CLARITY final registration folder' \
+	        -d 'Input tiff folder' 'CLARITY final registration folder' \
+	        -f 'Out nii name (def = clarity)' 'Seed label abbreviation'  \
 	           'Derivative of Gaussian (dog) sigma' 'Gaussian smoothing sigma' 'Tracking angle threshold' \
  	          'Downsample ratio (def = 5)'  'chan # (def = 1)' 'chan prefix' \
-              'Out chan name (def = eyfp)' 'Resolution (x,y) (def = 5 "um")' 'Thickness (z) (def = 5 "um")' \
+              'Out chan name (def = AAV)' 'Resolution (x,y) (def = 5 "um")' 'Thickness (z) (def = 5 "um")' \
               'Downsample in z (def = 1)'  -hf "`usage`")
 
 	# populate array
@@ -338,14 +336,14 @@ else
 
 	printf "\n Chosen in dir: $indir \n"
 
-    nii=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    regdir=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen reg dir : $regdir \n"
+
+    nii=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen out nii name: $nii \n"
 
-    lbl=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    lbl=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen seed label: $lbl \n"
-
-    regdir=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    printf "\n Chosen reg dir : $regdir \n"
 
     dog=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen Derivative of Gaussian : $dog \n"
@@ -357,25 +355,32 @@ else
     printf "\n Chosen tracking angle threshold: $angle \n"
 
     down=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    printf "\n Chosen out nii name: $nii \n"
+    printf "\n Chosen out nii name: $down \n"
+    if [ -z "${down}" ]; then down=5; fi
 
     chann=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen channel num: $chann \n"
+    if [ -z "${chann}" ]; then chann=""; fi
 
     chanp=`echo "${arr[9]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen channel prefix: $chanp \n"
+    if [ -z "${chanp}" ]; then chanp=""; fi
 
     chan=`echo "${arr[10]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen chan name: $chan \n"
+    if [ -z "${chan}" ]; then chan="AAV"; fi
 
     vx=`echo "${arr[11]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen vx: $vx \n"
+    if [ -z "${vx}" ]; then vx=5; fi
 
     vz=`echo "${arr[12]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen vz: $vz \n"
+    if [ -z "${vz}" ]; then vz=5; fi
 
     downz=`echo "${arr[13]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen down-samle in z: $downz \n"
+    if [ -z "${downz}" ]; then downz=1; fi
 
 
     #---------------------------
@@ -384,9 +389,9 @@ else
     printf "\n Running conversion to nii with the following command: \n"
 
     printf "\n miracl_io_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-            -chan ${chan} -chann ${chann} -chanp ${chanp} \n"
+            -ch ${chan} -cn ${chann} -cp ${chanp} \n"
     miracl_io_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-                                    -chan ${chan} -chann ${chann} -chanp ${chanp}
+                                    -ch ${chan} -cn ${chann} -cp ${chanp}
 
     #---------------------------
     # Call extract lbl
