@@ -33,26 +33,7 @@ ____________________________
 Steps to setup/run MIRACL on a Linux / Mac OS X machine:
 
 
-1) Setup user path
-
-	-> Run <miracl dir>/user_setup.sh 
-
-	<miracl dir> is where you placed the pipeline
-
-    
-    This script will setup your environment (bashrc) with the following aliases:
-    
-    $MIRACL_HOME = localtion of pipeline and its dependencies
-    
-    Allen reference atlas (ara) files (with resolutions 10, 25 & 50 um):
-    
-    $allen10 = $MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Template/Atlas Image)
-    $lbls10 = $MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Annoation/Segmentation)
-    
-    $snaplut = $MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (ITKsnap Label Descriptions)
-
-
-2) Install / Check dependencies
+1) Install / Check dependencies
 
     -> install Python 2.7 (if you do not have it)  
     
@@ -74,6 +55,14 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
     
     - ANTS (compiled version included in package)
     - c3d (compiled version included in package)
+    
+    _________________
+    
+    For diffusion MRI data install:
+
+    -> MRtrix3
+   
+      http://www.mrtrix.org
                 
     _________________
 
@@ -86,6 +75,24 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
     https://imagej.nih.gov/ij/plugins/nifti.html
 
 
+2) Setup user path
+
+	-> Run <miracl dir>/user_setup.sh 
+
+	<miracl dir> is where you placed the pipeline
+
+    
+    This script will setup your environment (bashrc) with the following aliases:
+    
+    $MIRACL_HOME = localtion of pipeline and its dependencies
+    
+    Allen reference atlas (ara) files (with resolutions 10, 25 & 50 um):
+    
+    $allen10 -> Template/Atlas Image
+    $lbls10  -> Annoation/Segmentation    
+    $snaplut -> ITKsnap Label Descriptions
+    $freelut -> Freeview Label Descriptions
+    
 ____________________________
 
 
