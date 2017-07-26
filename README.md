@@ -47,8 +47,16 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
     
       https://pip.pypa.io/en/stable/installing
         
-    -> Run: pip install -e .   ( from inside [miracl dir] : where you placed the pipeline )
+    -> Run: 
+    
+        pip install -e .   
         
+      ( from inside [miracl dir] : where you placed the pipeline )
+    
+    -> install PyQt4 using anaconda, run:
+        
+        conda install pyqt=4
+            
     -> Fiji/ImageJ
     
       https://imagej.net/Fiji/Downloads
