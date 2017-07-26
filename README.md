@@ -47,7 +47,7 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
     
       https://pip.pypa.io/en/stable/installing
         
-    -> Run: pip install -e .   ( from inside <miracl dir> )
+    -> Run: pip install -e .   ( from inside [miracl dir] : where you placed the pipeline )
         
     -> Fiji/ImageJ
     
@@ -77,10 +77,7 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
 
 2) Setup user path
 
-	-> Run <miracl dir>/user_setup.sh 
-
-	<miracl dir> is where you placed the pipeline
-
+	-> Run user_setup.sh 
     
     This script will setup your environment (bashrc) with the following aliases:
     
