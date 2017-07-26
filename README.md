@@ -30,17 +30,17 @@ All Rights Reserved.
 ____________________________
 
 
-Steps to setup/run MIRACL on a Linux machine:
+Steps to setup/run MIRACL on a Linux / Mac OS X machine:
 
 
 1) Setup user path
 
-	-> Run <miracl dir>/user_setup_miracl.sh 
+	-> Run <miracl dir>/user_setup.sh 
 
 	<miracl dir> is where you placed the pipeline
 
     
-    This script will setup your environment with the following aliases:
+    This script will setup your environment (bashrc) with the following aliases:
     
     $MIRACL_HOME = localtion of pipeline and its dependencies
     
@@ -54,13 +54,27 @@ Steps to setup/run MIRACL on a Linux machine:
 
 2) Install / Check dependencies
 
+    -> install Python 2.7 (if you do not have it)  
+    
+      https://www.python.org/downloads/
+    
+      for the required packages we recommend using Anaconda for numpy, scipy, etc:
+        
+      https://www.continuum.io/downloads
+    
+    -> install pip (if you do not have it)
+    
+      https://pip.pypa.io/en/stable/installing
+        
+    -> Run: pip install -e .   ( from inside <miracl dir> )
+        
+    -> Fiji/ImageJ
+    
+      https://imagej.net/Fiji/Downloads
+    
     - ANTS (compiled version included in package)
     - c3d (compiled version included in package)
-    - Fiji/ImageJ
-    - Python 2.7
-
-	For detailed instructions on how to install different dependencies please check wiki/dependencies.txt
-
+                
     _________________
 
     For the visualization of nifti files and labels we recommend "ITKSNAP":
