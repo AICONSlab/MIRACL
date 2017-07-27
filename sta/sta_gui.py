@@ -46,9 +46,9 @@ class STAmenu(QtGui.QWidget):
         self.layout.addRow(self.lbl, btn)
         self.layout.addRow(self.lbl2, btn2)
         self.layout.addRow(self.lbl3, btn3)
-        self.layout.addRow("Derivative of Gaussian sigma", self.dog)
-        self.layout.addRow("Gaussian smoothing sigma", self.gauss)
-        self.layout.addRow("Tracking angle threshold", self.angle)
+        self.layout.addRow("Derivative of Gaussian sigma (ex: 1 or 0.5 1 1.5)", self.dog)
+        self.layout.addRow("Gaussian smoothing sigma (ex: 1 or 0.5 1 1.5)", self.gauss)
+        self.layout.addRow("Tracking angle threshold (ex: 25 or 25 35 45)", self.angle)
         self.layout.addRow(run)
         self.setLayout(self.layout)
 

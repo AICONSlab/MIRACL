@@ -32,9 +32,14 @@ function usage()
 
 	Example: `basename $0` -i clarity_03x_down_virus_chan.nii.gz -g 0.5 -k 0.5 -a 25 -b brain_mask.nii.gz -s seed.nii.gz -o sta
 
+    OR using multiple parameters:
+
+    `basename $0` -i clarity_03x_down_virus_chan.nii.gz -g 0.5,1.5 -k 0.5,2 -a 25,35 -b brain_mask.nii.gz -s seed.nii.gz -o sta
+
+
 		required arguments:
 
-			f. Input down-sampled clarity nifti (.nii/.nii.gz)
+			i. Input down-sampled clarity nifti (.nii/.nii.gz)
 
 			g. Derivative of Gaussian (dog) sigma
 
@@ -159,15 +164,21 @@ if [[ "$#" -gt 1 ]]; then
             	;;
 
             a)
-            	angle=${OPTARG}
+                set -f
+                IFS=,
+            	angles=($OPTARG)
             	;;
 
             g)
-            	dog=${OPTARG}
+                set -f
+                IFS=,
+            	dogs=($OPTARG)
             	;;
 
             k)
-            	gauss=${OPTARG}
+                set -f
+                IFS=,
+            	gausses=($OPTARG)
             	;;
 
             o)
@@ -217,17 +228,20 @@ else
 
 	printf "\n Chosen Brain mask: $brainmask \n"
 
-	dog=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	dogsin=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    dogs=($dogsin)
 
-	printf "\n Chosen dog sigma: $dog \n"
+	printf "\n Chosen dog sigma: $dogs \n"
 
-	gauss=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	gaussesin=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    gausses=($gaussesin)
 
-    printf "\n Chosen gaussian sigma: $gauss \n"
+    printf "\n Chosen gaussian sigma: $gausses \n"
 
-    angle=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    anglesin=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    angles=($anglesin)
 
-    printf "\n Chosen tracking angle: $angle \n"
+    printf "\n Chosen tracking angle: $angles \n"
 
 
 fi
@@ -241,14 +255,14 @@ then
     exit 1
 fi
 
-if [ -z "${angle}" ];
+if [ -z "${angles}" ];
 then
     usage
     echo "ERROR: < -a => tracking angle> not specified"
     exit 1
 fi
 
-if [ -z "${dog}" ];
+if [ -z "${dogs}" ];
 then
     usage
     echo "ERROR: < -d => input dog sigma> not specified"
@@ -269,7 +283,7 @@ then
     exit 1
 fi
 
-if [ -z "${gauss}" ];
+if [ -z "${gausses}" ];
 then
     usage
     echo "ERROR: < -g => input gauss smoothing sigma> not specified"
@@ -288,10 +302,20 @@ then
     outdir=clarity_sta
 fi
 
-# run matlab command
-printf "\n Running Structure Tensor Analysis with the following command \n\n"
+for angle in "${angles[@]}"; do
 
-runMatlabCmd sta_track "'${inclar}'" "${dog}" "${gauss}" "${angle}" "'${brainmask}'" "'${seed}'" "'${outdir}'"
+    for dog in "${dogs[@]}"; do
+
+        for gauss in "${gausses[@]}"; do
+
+            # run matlab command
+            printf "\n Running Structure Tensor Analysis with the following command \n\n"
+
+            runMatlabCmd sta_track "'${inclar}'" "${dog}" "${gauss}" "${angle}" "'${brainmask}'" "'${seed}'" "'${outdir}'"
+
+        done
+    done
+done
 
 # get script timing 
 END=$(date +%s)
