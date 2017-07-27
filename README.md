@@ -44,8 +44,6 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
       https://www.continuum.io/downloads
     
     -> install pip (if you do not have it)
-    
-      https://pip.pypa.io/en/stable/installing
         
     -> Run: 
     
