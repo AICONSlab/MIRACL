@@ -103,7 +103,7 @@ def parsefn(args):
 
     optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
     optional.add_argument('-cn', '--channum', type=int, metavar='',
-                          help="Chan # for extracting single channel from multiple channel data (default: 1)")
+                          help="Chan # for extracting single channel from multiple channel data (default: 0)")
     optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
                           help="Chan prefix (string before channel number in file name). ex: C00")
     optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
@@ -151,7 +151,7 @@ def parsefn(args):
         d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
         # assert isinstance(d, int), '-d not a integer'
 
-        chann = 1 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
+        chann = 0 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
         # assert isinstance(chann, int), '-chann not a integer'
 
         chanp = None if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
@@ -195,7 +195,7 @@ def parsefn(args):
             d = args.down
 
         if args.channum is None:
-            chann = 1
+            chann = 0
             print("\n channel # not specified ... choosing default value of %d" % chann)
         else:
             assert isinstance(args.channum, int)
