@@ -19,6 +19,8 @@ import scipy.ndimage
 import tifffile as tiff
 from joblib import Parallel, delayed
 
+import miracl_utils_endstatement as statement
+
 
 def helpmsg():
     return '''
@@ -251,8 +253,9 @@ def main():
         delayed(applycorr)(i, tif, outdir, biasres, down, mulpower)
         for i, tif in enumerate(file_list))
 
-    print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+    # print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
+    statement.main('Test', '%s' % (datetime.now() - starttime))
 
 if __name__ == "__main__":
     main()

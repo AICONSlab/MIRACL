@@ -13,6 +13,8 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, '%s/utils' % os.environ['MIRACL_HOME'])
+import miracl_utils_endstatement as endstatement
 
 # ---------
 # help fn
@@ -141,7 +143,9 @@ def main():
     df.columns = ['Labels', 'Volumes (# of voxels)']
     df.to_csv(outfile, index=False)
 
-    print ("\n Parent labels volume computation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+    # print ("\n Parent labels volume computation done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+
+    endstatement.main(task='Parent labels volume computation', timediff='%s' % (datetime.now() - starttime))
 
 
 if __name__ == "__main__":
