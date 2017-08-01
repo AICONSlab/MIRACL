@@ -7,6 +7,7 @@ import argparse
 import os
 import subprocess
 from argparse import RawTextHelpFormatter
+
 from datetime import datetime
 
 
@@ -64,7 +65,7 @@ def main(task=None, timediff=None):
     else:
         timeday = 'night'
 
-    print("\n Well done %s! %s done in %s ... Have a good %s!\n" % (user, task, timediff, timeday))
+    print("\n Good job %s! %s done in %s ... Have a good %s!\n" % (user, task, timediff, timeday))
 
 
 if __name__ == "__main__":
