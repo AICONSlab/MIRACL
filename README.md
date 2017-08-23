@@ -1,7 +1,7 @@
 MIRACL README
 ______________
 
-MIRACL (Multi-modal Image Registration and Atlasing via Clarity-based Light-microscopy)
+MIRACL (Multi-modal Image Registration And Connectivity anaLysis)
 is a general-purpose, open-source pipeline for automated:
 
 	1) Registration of mice clarity data to the Allen reference atlas
