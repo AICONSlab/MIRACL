@@ -29,7 +29,7 @@ def helpmsg():
 
     Creates a downsampled nifti from the tiff data
     Runs N4 'bias field' / intensity correction on the nifti
-    Upsamples the output bias field and applies it to the tiff data
+    Up-samples the output bias field and applies it to the tiff data
 
     Example: miracl_utils_int_corr_tiffs.py -f tiff_folder -o bias_corr_folder
         '''
@@ -65,7 +65,7 @@ def parseargs():
     optional.add_argument('-m', '--maskimg', type=int, metavar='', default=1,
                           help="Mask images before correction (default: %(default)s)")
     optional.add_argument('-d', '--down', type=int, metavar='', default=5,
-                          help="Downsample / shrink factor to run boias corr on downsampled data"
+                          help="Downsample / shrink factor to run bias corr on downsampled data"
                                "(default: %(default)s)")
     optional.add_argument('-n', '--noise', type=float, metavar='', default=0.005,
                           help="Noise parameter for histogram sharpening - deconvolution (default: %(default)s)")
@@ -101,7 +101,7 @@ def parseargs():
     assert isinstance(chann, int)
 
     chanp = args.chanprefix
-    assert isinstance(chanp, str)
+    #assert isinstance(chanp, str)
 
     chan = args.channame
     assert isinstance(chan, str)
@@ -143,10 +143,17 @@ def parseargs():
 def createnii(tifdir, down, chann, chanp, chan, outnii, vx, vz):
     print("\n converting TIFF images to NII")
 
-    subprocess.check_call(
-        'miracl_io_convertTIFFtoNII.py -f %s -d %s -cn %s -cp %s -ch %s -vx %s -vz %s -o %s'
-        % (tifdir, down, chann, chanp, chan, vx, vz, outnii),
-        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if chanp is None:
+        subprocess.check_call(
+            'miracl_io_convertTIFFtoNII.py -f %s -d %s -ch %s -vx %s -vz %s -o %s'
+            % (tifdir, down, chan, vx, vz, outnii),
+            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    else:
+        subprocess.check_call(
+            'miracl_io_convertTIFFtoNII.py -f %s -d %s -cn %s -cp %s -ch %s -vx %s -vz %s -o %s'
+            % (tifdir, down, chann, chanp, chan, vx, vz, outnii),
+            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
 def biascorrnii(nii, maskimg, hist, conv, niicorr, mask, field):
