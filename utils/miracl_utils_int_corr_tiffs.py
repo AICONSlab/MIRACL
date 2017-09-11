@@ -101,7 +101,7 @@ def parseargs():
     assert isinstance(chann, int)
 
     chanp = args.chanprefix
-    #assert isinstance(chanp, str)
+    # assert isinstance(chanp, str)
 
     chan = args.channame
     assert isinstance(chan, str)
@@ -205,6 +205,7 @@ def applycorr(i, tif, outdir, biasres, down, mulpower):
         array = biassliceres
 
     corrtif = tifimg / np.power(array, mulpower)
+    corrtif = corrtif.astype(tifimg.dtype)
 
     tifcorrfile = os.path.join(outdir, os.path.basename(tif))
 

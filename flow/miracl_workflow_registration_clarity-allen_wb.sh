@@ -373,11 +373,10 @@ else
     printf "\n Chosen downsample ratio: $d \n"
 
     chann=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    if [[ -z ${chann} ]]; then chann=1 ; fi
+    if [[ -z ${chann} ]]; then chann=0 ; fi
     printf "\n Chosen channel #: $chann \n"
 
     chanp=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    if [[ -z ${chanp} ]]; then chanp=[None] ; fi   ##
     printf "\n Chosen channel prefix: $chanp \n"
 
     chan=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
@@ -427,9 +426,17 @@ else
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
+    if [[ -z ${chanp} ]]; then
 
-    printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
-    miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+        miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+
+    else
+
+        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+        miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+
+    fi
 
 
     #---------------------------
