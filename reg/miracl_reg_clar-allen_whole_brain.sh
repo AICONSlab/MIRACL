@@ -56,6 +56,8 @@ function usage()
 
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
+        p.  If utils intensity correction already run, skip correction inside registration (default: 0)
+
         e.  extra step of intensity inhomogeneity correction for cases with drastic signal dropout,
             binary option (default: 0 -> not performed)
 
@@ -200,7 +202,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:s:b:e:" opt; do
+	while getopts ":i:o:l:m:v:s:b:e:p:" opt; do
     
 	    case "${opt}" in
 
@@ -235,6 +237,11 @@ if [[ "$#" -gt 1 ]]; then
             e)
             	field="${OPTARG}"
             	;;
+
+            p)
+                prebias="${OPTARG}"
+                ;;
+
         	*)
             	usage            	
             	;;
@@ -407,7 +414,10 @@ else
 
 fi
 
-
+# prebias
+if [[ -z ${prebias} ]] ; then
+    prebias=0
+fi
 
 # get time
 
@@ -467,12 +477,27 @@ function resampleclar()
 function getbrainmask()
 {
     local resclar=$1
-    local mask=$2
+    local sharp=$2
+    local median=$3
+    local brain=$4
+    local mask=$5
 
     #ifdsntexistrun ${mask} "Computing brain mask" c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
-    ifdsntexistrun ${mask} "Computing brain mask" ThresholdImage 3 ${resclar} ${mask} Otsu 5
+    #ifdsntexistrun ${mask} "Computing brain mask" ThresholdImage 3 ${resclar} ${mask} Otsu 5
 
-    c3d ${mask} -binarize -o ${mask}
+    # sharpen
+    ifdsntexistrun ${sharp} "Sharpening image" ImageMath 3 ${sharp} Sharpen ${resclar}
+
+    # smooth
+    ifdsntexistrun ${median} "Median Filtering" SmoothImage 3 ${sharp} 2 ${median} 1 1
+
+    # center of gravity
+    cog=`fslstats ${median} -C`
+
+    # bet
+    ifdsntexistrun ${mask} "Skull stripping" bet ${median} ${brain} -c ${cog} -R -r 25000 -m
+
+    #c3d ${mask} -binarize -o ${mask}
 
 }
 # N4 bias correct
@@ -892,20 +917,27 @@ function main()
 
     # get brain mask (thresh & largest comp)
     mask=${regdir}/brain_mask.nii.gz
-    getbrainmask ${resclar} ${mask}
+    brain=${regdir}/brain.nii.gz
+    sharp=${regdir}/clar_res0.05_sharp.nii.gz
+    median=${regdir}/clar_res0.05_median.nii.gz
+    getbrainmask ${resclar} ${sharp} ${median} ${brain} ${mask}
 
 	# Mask
 	masclar=${regdir}/clar_res0.05_masked.nii.gz
 	maskimage ${resclar} ${mask} ${masclar}
 
-	# N4 bias correct
-	biasclar=${regdir}/clar_res0.05_bias.nii.gz
-	biasfieldcorr ${masclar} ${biasclar} ${mask}
+    if [[ "${prebias}" == 1 ]]; then
+        biasclar=${masclar}
+    else
+        # N4 bias correct
+        biasclar=${regdir}/clar_res0.05_bias.nii.gz
+        biasfieldcorr ${masclar} ${biasclar} ${mask}
 
-    # if bias field too inhomogeneous
-#   verybiasclar=${regdir}/clar_res0.05_bias_wlowint.nii.gz
-    if [[ "${field}" == 1 ]]; then
-        extrabiasfieldcorr ${biasclar} ${mask}
+        # if bias field too inhomogeneous
+#       verybiasclar=${regdir}/clar_res0.05_bias_wlowint.nii.gz
+#        if [[ "${field}" == 1 ]]; then
+#            extrabiasfieldcorr ${biasclar} ${mask}
+#        fi
     fi
 
     # pad image

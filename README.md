@@ -46,11 +46,15 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
     -> install pip (if you do not have it)
         
     -> Run: 
-    
-        pip install -e .   
-        
+
       ( from inside [miracl dir] : where you placed the pipeline )
-    
+
+        mv io tmp
+
+        pip install -e .
+
+        mv tmp io
+
     -> install PyQt4 using anaconda, run:
         
         conda install pyqt=4
@@ -58,7 +62,11 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
     -> Fiji/ImageJ
     
       https://imagej.net/Fiji/Downloads
-    
+
+    -> FSL
+
+      https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation
+
     - ANTS (compiled version included in package)
     - c3d (compiled version included in package)
     
@@ -85,7 +93,8 @@ Steps to setup/run MIRACL on a Linux / Mac OS X machine:
 
 	-> Run user_setup.sh 
     
-    This script will setup your environment (bashrc) with the following aliases:
+    This script will setup your environment to add MIRACL functions to your path
+    (to call them from anywhere) & with the following aliases:
     
     $MIRACL_HOME = localtion of pipeline and its dependencies
     

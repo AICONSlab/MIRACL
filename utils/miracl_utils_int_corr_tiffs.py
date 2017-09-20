@@ -20,7 +20,7 @@ import tifffile as tiff
 from joblib import Parallel, delayed
 
 import miracl_utils_endstatement as statement
-
+#from skimage import exposure
 
 def helpmsg():
     return '''
@@ -31,13 +31,13 @@ def helpmsg():
     Runs N4 'bias field' / intensity correction on the nifti
     Up-samples the output bias field and applies it to the tiff data
 
-    Example: miracl_utils_int_corr_tiffs.py -f tiff_folder -o bias_corr_folder
+    Example: miracl_utils_int_corr_tiffs.py -f tiff_folder -od bias_corr_folder
         '''
 
 
 def parseargs():
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
-                                     usage='%(prog)s -f [input tiff folder] -o [ output folder ] -s [ shrink factor]'
+                                     usage='%(prog)s -f [input tiff folder] -o [ output folder ] -s [ shrink factor] '
                                            '-cn [ channel num ] -cp [ channel prefix ] -p [ power ]')
 
     required = parser.add_argument_group('required arguments')
@@ -71,7 +71,7 @@ def parseargs():
                           help="Noise parameter for histogram sharpening - deconvolution (default: %(default)s)")
     optional.add_argument('-b', '--bins', type=int, metavar='', default=200,
                           help="Histogram bins (default: %(default)s)")
-    optional.add_argument('-k', '--fwhm', type=float, metavar='', default=0.5,
+    optional.add_argument('-k', '--fwhm', type=float, metavar='', default=0.3,
                           help="FWHM for histogram sharpening - deconvolution (default: %(default)s)")
     optional.add_argument('-l', '--levels', type=int, metavar='', default=4,
                           help="Number of levels for convergence (default: %(default)s)")
@@ -79,7 +79,7 @@ def parseargs():
                           help="Number of iterations per level for convergence (default: %(default)s)")
     optional.add_argument('-t', '--thresh', type=int, metavar='', default=0,
                           help="Threshold per iteration for convergence (default: %(default)s)")
-    optional.add_argument('-p', '--mulpower', type=int, metavar='', default=1,
+    optional.add_argument('-p', '--mulpower', type=float, metavar='', default=1,
                           help="Use the bias field raised to a power of 'p' to enhance its effects"
                                "(default: %(default)s)")
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
@@ -134,7 +134,7 @@ def parseargs():
     assert isinstance(thresh, int)
 
     mulpower = args.mulpower
-    assert isinstance(mulpower, int)
+    assert isinstance(mulpower, float)
 
     return indir, outdir, maskimg, chann, chanp, down, fwhm, noise, bins, levels, iters, thresh, mulpower, outnii, \
            vx, vz, chan
@@ -189,22 +189,26 @@ def numericalsort(value):
     return parts
 
 
-def applycorr(i, tif, outdir, biasres, down, mulpower):
+def applycorr(i, tif, outdir, biasres, maskres, down, mulpower):
     sys.stdout.write("\r processing slice %d ..." % i)
     sys.stdout.flush()
 
     biasslice = biasres[:, :, i - 1]
     biassliceres = scipy.ndimage.interpolation.zoom(biasslice, down)
+    maskslice = maskres[:, :, i - 1]
+    masksliceres = scipy.ndimage.interpolation.zoom(maskslice, down, order=1)
 
     tifimg = tiff.imread(tif)
 
     if tifimg.shape != biassliceres.shape:
-        array = np.full(tifimg.shape, biassliceres.min(), np.float16)
+        array = np.full(tifimg.shape, biassliceres.min(), tifimg.dtype)
         array[0:biassliceres.shape[0], 0:biassliceres.shape[1]] = biassliceres
     else:
         array = biassliceres
 
-    corrtif = tifimg / np.power(array, mulpower)
+    corrtif = np.divide(tifimg, np.power(array, mulpower))
+    #corrtif = exposure.rescale_intensity(corrtif, out_range=tifimg.dtype.type)
+    corrtif[masksliceres == 0] = tifimg[masksliceres == 0]
     corrtif = corrtif.astype(tifimg.dtype)
 
     tifcorrfile = os.path.join(outdir, os.path.basename(tif))
@@ -240,10 +244,12 @@ def main():
 
     biascorrnii(niiname, maskimg, hist, conv, niicorr, mask, field)
 
-    # up-sample bias field
+    # up-sample bias field & mask
     biasnii = nib.load(field)
     bias = biasnii.get_data()
     biasres = scipy.ndimage.interpolation.zoom(bias, [1, 1, down])
+    maskimg = nib.load(mask).get_data()
+    maskres = scipy.ndimage.interpolation.zoom(maskimg, [1, 1, down], order=1)
 
     # sort files
     if chanp is None:
@@ -258,12 +264,12 @@ def main():
     print("\n Correcting TIFF images in parallel using %02d cpus" % ncpus)
 
     Parallel(n_jobs=ncpus)(
-        delayed(applycorr)(i, tif, outdir, biasres, down, mulpower)
+        delayed(applycorr)(i, tif, outdir, biasres, maskres, down, mulpower)
         for i, tif in enumerate(file_list))
 
     # print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
-    statement.main('Test', '%s' % (datetime.now() - starttime))
+    statement.main('Intensity correction', '%s' % (datetime.now() - starttime))
 
 if __name__ == "__main__":
     main()
