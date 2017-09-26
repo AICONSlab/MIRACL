@@ -1,0 +1,365 @@
+#! /usr/bin/env python
+# Maged Goubran @ 2017, mgoubran@stanford.edu 
+
+# coding: utf-8 
+
+import os
+import subprocess
+import sys
+
+from PyQt4 import QtGui, QtCore
+
+
+# from collections import defaultdict
+
+class HorzTabBarWidget(QtGui.QTabBar):
+    def __init__(self, parent=None, *args, **kwargs):
+        self.tabSize = QtCore.QSize(kwargs.pop('width', 100), kwargs.pop('height', 25))
+        QtGui.QTabBar.__init__(self, parent, *args, **kwargs)
+
+    def paintEvent(self, event):
+        painter = QtGui.QStylePainter(self)
+        option = QtGui.QStyleOptionTab()
+
+        for index in range(self.count()):
+            self.initStyleOption(option, index)
+            tabRect = self.tabRect(index)
+            tabRect.moveLeft(10)
+            painter.drawControl(QtGui.QStyle.CE_TabBarTabShape, option)
+            painter.drawText(tabRect, QtCore.Qt.AlignVCenter | \
+                             QtCore.Qt.TextDontClip,
+                             self.tabText(index))
+        painter.end()
+
+    def tabSizeHint(self, index):
+        return self.tabSize
+
+
+class HorzTabWidget(QtGui.QTabWidget):
+    def __init__(self, parent, *args):
+        QtGui.QTabWidget.__init__(self, parent, *args)
+        self.setTabBar(HorzTabBarWidget(self))
+
+
+# nestedict = lambda: defaultdict(nestedict)
+# treedict = nestedict()
+
+modules = ['Workflows', 'Conversion', 'Registration', 'Connectivity', 'STA', 'Labels', 'Segmentation', 'Statitstics',
+           'Utilities', 'Help']
+
+nestedict = {
+
+    'Workflows': {
+        'folder': 'flow',
+        'functions': {
+            0: {
+                'name': 'CLARITY-Allen Registration',
+                'script': 'miracl_workflow_registration_clarity-allen_wb.sh',
+                'helpmsg': 'Workflow (wrapper) combining multiple MIRACL functions for'
+                           '\nregistering CLARITY data to Allen Reference mouse brain atlas'
+            },
+            1: {
+                'name': 'CALRITY STA',
+                'script': 'miracl_workflow_sta.sh',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'CLARITY segmentation',
+                'script': 'miracl_workflow_segmentation_clarity.sh',
+                'helpmsg': 'bla2'
+            },
+            3: {
+                'name': 'Multiple mice',
+                'script': 'miracl_workflow_multiple_mice.sh',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'Conversion': {
+        'folder': 'io',
+        'functions': {
+            0: {
+                'name': 'Tiff to Nii',
+                'script': 'miracl_io_convertTIFFtoNII.py',
+                'helpmsg': 'bla'
+            },
+            1: {
+                'name': 'Dcm to Nii',
+                'script': 'miracl_io_convertDCMtoNII.sh',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'Set CLARITY orientation',
+                'script': 'miracl_io_set_orient_gui.py',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'Registration': {
+        'folder': 'reg',
+        'functions': {
+            0: {
+                'name': 'CLARITY-Allen',
+                'script': 'miracl_reg_clar-allen_whole_brain.sh',
+                'helpmsg': 'bla'
+            },
+            1: {
+                'name': 'MRI-Allen',
+                'script': 'miracl_reg_mri-allen.sh',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'Warp CLARITY to Allen',
+                'script': 'miracl_reg_warp_clar_data_to_allen.sh',
+                'helpmsg': 'bla2'
+            },
+            3: {
+                'name': 'Warp MRI to Allen',
+                'script': 'miracl_reg_warp_mr_data_to_allen.sh',
+                'helpmsg': 'bla2'
+            },
+            4: {
+                'name': 'Check registration results',
+                'script': 'miracl_reg_check_results.py',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'Connectivity': {
+        'folder': 'connect',
+        'functions': {
+            0: {
+                'name': 'Label projection density',
+                'script': 'miracl_connect_label_graph_proj_dens.py',
+                'helpmsg': 'bla'
+            },
+            1: {
+                'name': 'ROI connectogram',
+                'script': 'miracl_connect_ROI_matrix_connectogram.py',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'CSD tractography',
+                'script': 'miracl_connect_csd_tractography.sh',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'STA': {
+        'folder': 'sta',
+        'functions': {
+            0: {
+                'name': 'Trace primary fibers',
+                'script': 'miracl_sta_track_primary_eigen.sh',
+                'helpmsg': 'bla'
+            }
+        }
+    },
+
+    'Labels': {
+        'folder': 'lbls',
+        'functions': {
+            0: {
+                'name': 'Get labels statistics',
+                'script': 'miracl_lbls_stats.py',
+                'helpmsg': 'bla'
+            },
+            1: {
+                'name': 'Warp to CALRITY',
+                'script': 'miracl_lbls_warp_to_clar_space.sh',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'Warp to MRI',
+                'script': 'miracl_lbls_warp_to_mri_space.sh',
+                'helpmsg': 'bla2'
+            },
+            3: {
+                'name': 'Generate Grand-parent at certain depth',
+                'script': 'miracl_lbls_generate_parents_at_depth.py',
+                'helpmsg': 'bla2'
+            },
+            4: {
+                'name': 'Generate Grand-parent annotations',
+                'script': 'miracl_lbls_generate_grand-parent_annotation.py',
+                'helpmsg': 'bla2'
+            },
+            5: {
+                'name': 'Get Grand-parent volumes',
+                'script': 'miracl_lbls_get_gp_volumes.py',
+                'helpmsg': 'bla'
+            },
+            6: {
+                'name': 'Get label ontology graph info',
+                'script': 'miracl_lbls_get_graph_info.py',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'Segmentation': {
+        'folder': 'seg',
+        'functions': {
+            0: {
+                'name': '3D sparse segmentation',
+                'script': 'miracl_seg_neurons_clarity_3D_sparse.ijm',
+                'helpmsg': 'bla'
+            },
+            1: {
+                'name': '3D nuclear segmentation',
+                'script': 'miracl_seg_neurons_clarity_3D_nuclear.ijm',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'Feature extraction',
+                'script': 'miracl_seg_feat_extract.pyc',
+                'helpmsg': 'bla2'
+            },
+            3: {
+                'name': 'Voxelize segmentations',
+                'script': 'miracl_seg_voxelize_parallel.py',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'Statitstics': {
+        'folder': 'stats',
+        'functions': {
+            0: {
+                'name': 'Paired-ttest ipsi/contra hemispheres',
+                'script': 'miracl_stats_paired_ttest_ipsi_contra.py',
+                'helpmsg': 'bla'
+            }
+        }
+    },
+
+    'Utilities': {
+        'folder': 'utils',
+        'functions': {
+            0: {
+                'name': 'CLARITY intensity correction',
+                'script': 'miracl_utils_int_corr_tiffs.py',
+                'helpmsg': 'bla'
+            },
+            1: {
+                'name': 'Extract label from registration',
+                'script': 'miracl_utils_extract_lbl.py',
+                'helpmsg': 'bla2'
+            },
+            2: {
+                'name': 'Create brain mask',
+                'script': 'miracl_utils_create_brainmask.py',
+                'helpmsg': 'bla2'
+            }
+        }
+    },
+
+    'Help': {
+        'folder': 'wiki',
+        'functions': {
+            0: {
+                'name': 'Documentation',
+                'script': 'MIRACL_documentation.pdf',
+                'helpmsg': 'bla'
+            }
+        }
+    }
+
+}
+
+
+def funbutton(miracl_home, nestedictionary, module, btnnum):
+    funname = nestedictionary[module]['functions'][btnnum]['name']
+    btn = QtGui.QPushButton(funname)
+    btn.clicked.connect(lambda: runfunc(miracl_home, nestedictionary, module, btnnum))
+    btn.setToolTip(nestedict[module]['functions'][btnnum]['helpmsg'])
+
+    return btn
+
+
+def runfunc(miracl_home, nestedictionary, module, btnnum):
+    folder = nestedictionary[module]['folder']
+    script = nestedictionary[module]['functions'][btnnum]['script']
+
+    if folder == "wiki":
+        try:
+            subprocess.check_call('xdg-open %s/%s/%s' % (miracl_home, folder, script),
+                                  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except:
+            subprocess.check_call('open %s/%s/%s' % (miracl_home, folder, script),
+                                  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        subprocess.check_call('%s/%s/%s' % (miracl_home, folder, script),
+                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+
+def main():
+    app = QtGui.QApplication(sys.argv)
+
+    mainwidget = QtGui.QWidget()
+    mainwidget.resize(500, 725)
+
+    font = QtGui.QFont('Mono', 10, QtGui.QFont.Light)
+    mainwidget.setFont(font)
+
+    mainwidget.move(QtGui.QApplication.desktop().screen().rect().center() - mainwidget.rect().center())
+
+    miracl_home = os.environ['MIRACL_HOME']
+    with open('%s/version.txt' % miracl_home, 'r') as versfile:
+        vers = versfile.read()
+    mainwidget.setWindowTitle("MIRACL v. %s" % vers.rstrip())
+
+    p = mainwidget.palette()
+    p.setColor(mainwidget.backgroundRole(), QtCore.Qt.black)
+    mainwidget.setPalette(p)
+
+    vbox = QtGui.QVBoxLayout(mainwidget)
+
+    pic = QtGui.QLabel()
+    pixmap = QtGui.QPixmap("%s/icon.png" % miracl_home)
+    pixmaps = pixmap.scaled(300, 200)  # QtCore.Qt.KeepAspectRatio
+    pic.setPixmap(pixmaps)
+    pic.setAlignment(QtCore.Qt.AlignCenter)
+
+    vbox.addWidget(pic)
+
+    tabs = QtGui.QTabWidget()
+    tabs.setTabBar(HorzTabBarWidget(width=150, height=50))
+
+    for m, mod in enumerate(modules):
+
+        widget = QtGui.QWidget()
+        widget.layout = QtGui.QVBoxLayout()
+
+        for b in range(len(nestedict[mod]['functions'])):
+            btn = funbutton(miracl_home, nestedict, mod, b)
+            widget.layout.addWidget(btn)
+
+        widget.setLayout(widget.layout)
+
+        # widget background color
+
+        # pw = QtGui.QPalette()
+        # pw.setColor(QtGui.QPalette.Background, QtCore.Qt.darkBlue)
+        # widget.setPalette(pw)
+        # widget.setAutoFillBackground(True)
+
+        tabs.addTab(widget, mod)
+
+    tabs.setTabPosition(QtGui.QTabWidget.West)
+
+    vbox.addWidget(tabs)
+
+    mainwidget.setLayout(vbox)
+    mainwidget.show()
+
+    sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()

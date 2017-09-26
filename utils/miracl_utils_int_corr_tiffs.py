@@ -20,7 +20,9 @@ import tifffile as tiff
 from joblib import Parallel, delayed
 
 import miracl_utils_endstatement as statement
-#from skimage import exposure
+
+
+# from skimage import exposure
 
 def helpmsg():
     return '''
@@ -64,6 +66,8 @@ def parseargs():
                                "default)s) ")
     optional.add_argument('-m', '--maskimg', type=int, metavar='', default=1,
                           help="Mask images before correction (default: %(default)s)")
+    optional.add_argument('-s', '--segment', type=int, metavar='', default=0,
+                          help="Perform level-set seg using brain mask to get a dilated one (default: %(default)s)")
     optional.add_argument('-d', '--down', type=int, metavar='', default=5,
                           help="Downsample / shrink factor to run bias corr on downsampled data"
                                "(default: %(default)s)")
@@ -79,7 +83,7 @@ def parseargs():
                           help="Number of iterations per level for convergence (default: %(default)s)")
     optional.add_argument('-t', '--thresh', type=int, metavar='', default=0,
                           help="Threshold per iteration for convergence (default: %(default)s)")
-    optional.add_argument('-p', '--mulpower', type=float, metavar='', default=1,
+    optional.add_argument('-p', '--mulpower', type=float, metavar='', default=1.0,
                           help="Use the bias field raised to a power of 'p' to enhance its effects"
                                "(default: %(default)s)")
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
@@ -96,6 +100,9 @@ def parseargs():
 
     maskimg = args.maskimg
     assert isinstance(maskimg, int)
+
+    segment = args.segment
+    assert isinstance(segment, int)
 
     chann = args.channum
     assert isinstance(chann, int)
@@ -136,7 +143,7 @@ def parseargs():
     mulpower = args.mulpower
     assert isinstance(mulpower, float)
 
-    return indir, outdir, maskimg, chann, chanp, down, fwhm, noise, bins, levels, iters, thresh, mulpower, outnii, \
+    return indir, outdir, maskimg, segment, chann, chanp, down, fwhm, noise, bins, levels, iters, thresh, mulpower, outnii, \
            vx, vz, chan
 
 
@@ -156,18 +163,39 @@ def createnii(tifdir, down, chann, chanp, chan, outnii, vx, vz):
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
-def biascorrnii(nii, maskimg, hist, conv, niicorr, mask, field):
+def biascorrnii(nii, maskimg, segment, hist, conv, niicorr, mask, field):
     print("\n Performing intensity correction on downsampled nifti")
 
     if maskimg == 1:
 
         subprocess.check_call(
-            'ThresholdImage 3 %s %s Otsu 5' % (nii, mask),
+            'ThresholdImage 3 %s %s Otsu 6' % (nii, mask),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         subprocess.check_call(
             'c3d %s -binarize -type uchar -o %s' % (mask, mask),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        if segment == 1:
+
+            for i in range(3):
+
+                if i == 0:
+                    subprocess.check_call(
+                        'c3d %s -threshold 1 inf 1 0 -type uchar -o %s' % (mask, mask),
+                        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                else:
+                    subprocess.check_call(
+                        'c3d %s -threshold 0 inf 1 0 -type uchar -o %s' % (mask, mask),
+                        shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+                subprocess.check_call(
+                    'c3d %s %s -levelset-curvature 0.1 -levelset 10000 -o %s' % (nii, mask, mask),
+                    shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            subprocess.check_call(
+                'c3d %s -threshold 0 inf 1 0 -type uchar -o %s' % (mask, mask),
+                shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         subprocess.check_call(
             'N4BiasFieldCorrection -d 3 -i %s -t %s -c %s -x %s -o [%s, %s]'
@@ -177,7 +205,7 @@ def biascorrnii(nii, maskimg, hist, conv, niicorr, mask, field):
     else:
 
         subprocess.check_call(
-            'N4BiasFieldCorrection -d 2 -i %s -s 1 -t %s -s %s -o [%s, %s]'
+            'N4BiasFieldCorrection -d 3 -i %s -t %s -s %s -o [%s, %s]'
             % (nii, hist, conv, niicorr, field),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -207,8 +235,12 @@ def applycorr(i, tif, outdir, biasres, maskres, down, mulpower):
         array = biassliceres
 
     corrtif = np.divide(tifimg, np.power(array, mulpower))
-    #corrtif = exposure.rescale_intensity(corrtif, out_range=tifimg.dtype.type)
-    corrtif[masksliceres == 0] = tifimg[masksliceres == 0]
+    # corrtif = exposure.rescale_intensity(corrtif, out_range=tifimg.dtype.type)
+
+    # struct = scipy.ndimage.generate_binary_structure(2, 2)
+    # masksliceres = scipy.ndimage.morphology.binary_dilation(masksliceres, structure=struct, iterations=75)
+
+    corrtif[masksliceres == 0] = tifimg[masksliceres == 0] / 2
     corrtif = corrtif.astype(tifimg.dtype)
 
     tifcorrfile = os.path.join(outdir, os.path.basename(tif))
@@ -220,8 +252,8 @@ def main():
 
     starttime = datetime.now()
 
-    indir, outdir, maskimg, chann, chanp, down, fwhm, noise, bins, levels, iters, thresh, mulpower, outnii, vx, vz, \
-    chan = parseargs()
+    indir, outdir, maskimg, segment, chann, chanp, down, fwhm, noise, bins, levels, iters, thresh, mulpower, outnii, \
+    vx, vz, chan = parseargs()
 
     # make downsampled nii
     createnii(indir, down, chann, chanp, chan, outnii, vx, vz)
@@ -242,7 +274,7 @@ def main():
     field = os.path.join(niidir, '%s_biasfield.nii.gz' % corname)
     mask = os.path.join(niidir, '%s_mask.nii.gz' % corname)
 
-    biascorrnii(niiname, maskimg, hist, conv, niicorr, mask, field)
+    biascorrnii(niiname, maskimg, segment, hist, conv, niicorr, mask, field)
 
     # up-sample bias field & mask
     biasnii = nib.load(field)
