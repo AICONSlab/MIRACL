@@ -18,7 +18,7 @@ cat <<\EOF >> ~/.bashrc
 
 
 #--- MIRACL path ----
-
+export PATH=${MIRACL_HOME}:$PATH
 for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 
 #--------------------
@@ -26,20 +26,16 @@ for i in ${MIRACL_HOME}/* ; do export PATH=${i}:$PATH ; done
 #--- MIRACL dependencies ----
 
 #---ANTS---
-
 export ANTSPATH="${MIRACL_HOME}/depends/ants"
 export PATH=${MIRACL_HOME}/depends/ants:$PATH
 
 #---C3D---
-
 export PATH=${MIRACL_HOME}/depends/c3d/bin:$PATH
-
 source ${MIRACL_HOME}/depends/c3d/share/bashcomp.sh
 
 #--------------------
 
 #--- Allen atlas alias ----
-
 export aradir="${MIRACL_HOME}/atlases/ara"
 
 # Templates (atlas images)

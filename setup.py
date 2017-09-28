@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import os
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # get version from file
 version_file = open('version.txt')
@@ -37,7 +36,7 @@ setup(
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     install_requires=[
-        'opencv-python', 'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'multiprocessing',
+        'opencv-python', 'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'multiprocessing', 'joblib'
     ],
     keywords=[
         'neuroscience brain-atlas connectivity networks clarity mri neuroimaging allen-brain-atlas',
