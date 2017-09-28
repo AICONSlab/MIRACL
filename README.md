@@ -1,4 +1,8 @@
-MIRACL README
+
+<p align="center">
+  <img src="icon.png" alt="alt text" width="400" height="250"/>
+</p>
+
 ______________
 
 MIRACL (Multi-modal Image Registration And Connectivity anaLysis)
