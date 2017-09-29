@@ -9,7 +9,7 @@
  - [Singularity Container](install-singularity.md) to create a Singularity container (safe for HPC)
 
 A [PDF of our documentation](MIRACL_documentation.pdf) is also available. Or skip the words
-and go directly to our gallery](gallery.md).
+and go directly to our [gallery](gallery.md).
 
 ## About
 
