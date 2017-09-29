@@ -18,11 +18,6 @@ docker build -t mgoubran/miracl .
 
 (notice the `.` at the end)
 
-The image comes with the following:
-
- - system Python, version 2.7.6, and pip
- - 
-
   
 ### Using the image
 
