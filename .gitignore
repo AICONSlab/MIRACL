@@ -10,6 +10,10 @@ data/
 -----------
 depends/
 
+# Singularity #
+###############
+miracl.img
+
 # Compiled source #
 ###################
 *.com

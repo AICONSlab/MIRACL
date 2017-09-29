@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # get version from file
 version_file = open('version.txt')
@@ -12,7 +11,9 @@ setup(
     description='General-purpose pipeline for MRI / CLARITY brain & connectivity analysis',
     author='Maged Goubran',
     author_email='mgoubran@stanford.edu',
-    # packages=['miracl',],
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
     license='GNU GENERAL PUBLIC LICENSE v3',
     url='https://github.com/mgoubran/MIRACL',  # change later
     download_url='https://github.com/mgoubran/MIRACL',
@@ -36,8 +37,9 @@ setup(
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     install_requires=[
-        'opencv-python', 'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'multiprocessing', 'joblib'
+        'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'joblib'
     ],
+    entry_points = {'console_scripts': [ 'miracl=miracl.cli:main' ]},
     keywords=[
         'neuroscience brain-atlas connectivity networks clarity mri neuroimaging allen-brain-atlas',
         'mouse-atlases medical-imaging mouse biomedical image-processing image-registration image-segmentation',
