@@ -37,9 +37,11 @@ setup(
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     install_requires=[
-        'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'joblib'
+        'opencv-python', 'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'multiprocessing', 'joblib',
+        'matplotlib==2.1'
     ],
-    entry_points = {'console_scripts': [ 'miracl=miracl.cli:main' ]},
+    entry_points = {'console_scripts': [ 'miracl=miracl.cli:main' ],
+                    'gui_scripts': ['miracl=miracl.miraclGUI:main']},
     keywords=[
         'neuroscience brain-atlas connectivity networks clarity mri neuroimaging allen-brain-atlas',
         'mouse-atlases medical-imaging mouse biomedical image-processing image-registration image-segmentation',
