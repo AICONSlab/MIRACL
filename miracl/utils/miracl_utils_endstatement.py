@@ -5,7 +5,8 @@
 
 import argparse
 import os
-import subprocess
+import pwd
+import re
 from argparse import RawTextHelpFormatter
 
 from datetime import datetime
@@ -40,21 +41,28 @@ def main(task=None, timediff=None):
     if task is None or timediff is None:
         task, timediff = parseargs()
 
-    try:
-        fing = subprocess.Popen("finger $(whoami)",
-                                shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # try:
+    #     fing = subprocess.Popen("finger $(whoami)",
+    #                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #
+    #     string = fing.communicate()[0]
+    #     sub = string.split("Name: ", 1)[1]
+    #     user = sub.split(" ", 1)[0]
+    #
+    #     if user is None:
+    #         user = os.environ['USER']
+    #
+    # except:
+    #     user = os.environ['USER']
+    #     # user = subprocess.Popen('whoami',
+    #     #         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        string = fing.communicate()[0]
-        sub = string.split("Name: ", 1)[1]
-        user = sub.split(" ", 1)[0]
+    name = pwd.getpwuid(os.getuid())[4]
 
-        if user is None:
-            user = os.environ['USER']
-
-    except:
+    if re.search('[a-zA-Z]', name):
+        user = name.split(" ")[0]
+    else:
         user = os.environ['USER']
-        # user = subprocess.Popen('whoami',
-        #         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     if 6 < datetime.now().hour < 12:
         timeday = 'morning'

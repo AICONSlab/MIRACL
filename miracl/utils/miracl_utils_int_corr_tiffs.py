@@ -205,7 +205,7 @@ def biascorrnii(nii, maskimg, segment, hist, conv, niicorr, mask, field):
     else:
 
         subprocess.check_call(
-            'N4BiasFieldCorrection -d 3 -i %s -t %s -s %s -o [%s, %s]'
+            'N4BiasFieldCorrection -d 3 -i %s -t %s -c %s -o [%s, %s]'
             % (nii, hist, conv, niicorr, field),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -217,22 +217,28 @@ def numericalsort(value):
     return parts
 
 
-def applycorr(i, tif, outdir, biasres, maskres, down, mulpower):
+def applycorr(i, tif, outdir, biasres, down, mulpower, maskimg, maskres=None):
     sys.stdout.write("\r processing slice %d ..." % i)
     sys.stdout.flush()
 
     biasslice = biasres[:, :, i - 1]
     biassliceres = scipy.ndimage.interpolation.zoom(biasslice, down)
-    maskslice = maskres[:, :, i - 1]
-    masksliceres = scipy.ndimage.interpolation.zoom(maskslice, down, order=1)
+
+    if maskimg == 1:
+        maskslice = maskres[:, :, i - 1]
+        masksliceres = scipy.ndimage.interpolation.zoom(maskslice, down, order=1)
 
     tifimg = tiff.imread(tif)
 
     if tifimg.shape != biassliceres.shape:
         array = np.full(tifimg.shape, biassliceres.min(), tifimg.dtype)
         array[0:biassliceres.shape[0], 0:biassliceres.shape[1]] = biassliceres
+
+        maskarr = np.full(tifimg.shape, masksliceres.min(), masksliceres.dtype)
+        maskarr[0:masksliceres.shape[0], 0:masksliceres.shape[1]] = masksliceres
     else:
         array = biassliceres
+        maskarr = masksliceres
 
     corrtif = np.divide(tifimg, np.power(array, mulpower))
     # corrtif = exposure.rescale_intensity(corrtif, out_range=tifimg.dtype.type)
@@ -240,7 +246,9 @@ def applycorr(i, tif, outdir, biasres, maskres, down, mulpower):
     # struct = scipy.ndimage.generate_binary_structure(2, 2)
     # masksliceres = scipy.ndimage.morphology.binary_dilation(masksliceres, structure=struct, iterations=75)
 
-    corrtif[masksliceres == 0] = tifimg[masksliceres == 0] / 2
+    if maskimg == 1:
+        corrtif[maskarr == 0] = tifimg[maskarr == 0] / 2
+
     corrtif = corrtif.astype(tifimg.dtype)
 
     tifcorrfile = os.path.join(outdir, os.path.basename(tif))
@@ -280,8 +288,12 @@ def main():
     biasnii = nib.load(field)
     bias = biasnii.get_data()
     biasres = scipy.ndimage.interpolation.zoom(bias, [1, 1, down])
-    maskimg = nib.load(mask).get_data()
-    maskres = scipy.ndimage.interpolation.zoom(maskimg, [1, 1, down], order=1)
+
+    if maskimg == 1:
+        masknii = nib.load(mask).get_data()
+        maskres = scipy.ndimage.interpolation.zoom(masknii, [1, 1, down], order=1)
+    else:
+        maskres = None
 
     # sort files
     if chanp is None:
@@ -296,7 +308,7 @@ def main():
     print("\n Correcting TIFF images in parallel using %02d cpus" % ncpus)
 
     Parallel(n_jobs=ncpus)(
-        delayed(applycorr)(i, tif, outdir, biasres, maskres, down, mulpower)
+        delayed(applycorr)(i, tif, outdir, biasres, down, mulpower, maskimg, maskres)
         for i, tif in enumerate(file_list))
 
     # print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))

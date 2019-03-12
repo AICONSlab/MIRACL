@@ -19,7 +19,7 @@ function usage()
 
 	A GUI will open to choose your:
 
-		- < Input clarity registration folder >
+		- < Input clarity registration folder > (clar_allen_reg)
 
 		- < downsampled CLARITY nii to warp >
 
@@ -29,17 +29,25 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -r [ clarity registration dir ] -i control03_05xdown_PIchan.nii.gz -o [ orient file ]
+	Usage: `basename $0` -r [ clarity registration dir ] -i [ nifti file to warp ] -o [ orient file ] -s [ seg channel ]
 
 	Example: `basename $0` -r clar_reg_allen -i control03_05xdown_PIchan.nii.gz -o ort2std.txt
+
+	    OR
+
+	    `basename $0` -r clar_reg_allen -i voxelized_seg_virus.nii.gz -o ort2std.txt -s green
 
 		arguments (required):
 
 			r. Input clarity registration dir
 
-			i. input downsampled CLARITY nii to warp 
+			i. Input downsampled CLARITY nii to warp
 
-			o. file with orientation to standard code
+			o. File with orientation to standard code
+
+        arguments (optional):
+
+			s. Segmentation channel (ex. green) - required if voxelized seg is input
 
 	----------		
 
@@ -53,13 +61,9 @@ function usage()
 
 	-----------------------------------
 	
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 	
-	-----------------------------------
-
-	registration based on ANTs	
-
 	-----------------------------------
 
 usage
@@ -108,10 +112,6 @@ function choose_folder_gui()
 	local _inpath=$2
 
 	folderpath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f folder -s "$openstr")
-	
-	# filepath=`cat path.txt`
-	# eval ${_inpath}="'$filepath'"
-	# rm path.txt
 
 	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 	
@@ -126,10 +126,6 @@ function choose_file_gui()
 
 	filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr")
 
-	# filepath=`cat path.txt`
-	# eval ${_inpath}="'$filepath'"
-	# rm path.txt
-
 	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 	
 	eval ${_inpath}="'$filepath'"
@@ -141,8 +137,8 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:i:o:" opt; do
-    
+	while getopts ":r:i:o:s:" opt; do
+
 	    case "${opt}" in
 
 	        r)
@@ -155,6 +151,10 @@ if [[ "$#" -gt 1 ]]; then
 
             o)
             	ortfile=${OPTARG}
+            	;;
+
+            s)
+            	channel=${OPTARG}
             	;;
 
         	*)
@@ -247,22 +247,8 @@ function ifdsntexistrun()
 
 
 #---------------------------
-# Orient
-function orientimg()
-{
 
-	local betclar=$1
-	local orttag=$2
-	local ortint=$3
-	local orttype=$4
-	local ortclar=$5
-
-	ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
-	c3d ${betclar} -orient ${orttag} -interpolation ${ortint} -type ${orttype} -o ${ortclar}
-
-}
-
-function warpallenlbls()
+function warpclartoallen()
 {
 	
 
@@ -284,12 +270,66 @@ function warpallenlbls()
 	local orttypeclar=$9
 	local ortclar=${10}
 
-    # orient to org
-	ifdsntexistrun ${ortclar} "Orienting Allen labels" orientimg ${wrpclar} ${orttagclar} ${ortintclar} ${orttypeclar} ${ortclar}
+	# comb def
+	local init_allen=${11}
+	local comb_def=${12}
+
+	# org clar
+	local org_clar=${13}
+	local res_org_clar=${14}
+	local cp_clar=${15}
+
+	# seg chan
+	local res_vox=${16}
+	local swp_vox=${17}
+	local channel=${18}
+
+    # if warping seg
+    if [[ ! -z ${channel} ]]; then
+
+        ifdsntexistrun ${res_vox} "Resampling CLARITY to Allen resolution" \
+        ResampleImage 3 ${inimg} ${res_vox} 0.025x0.025x0.025 0
+
+        ifdsntexistrun ${swp_vox} "Orienting CLARITY to standard orientation" \
+        PermuteFlipImageOrientationAxes 3 ${res_vox} ${swp_vox}  1 2 0  0 0 0
+
+        # orient to org
+        ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+        c3d ${swp_vox} -binarize -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} \
+         -type ${orttypeclar} -o ${ortclar}
+
+    else
+        # orient to org
+        ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+	    c3d ${inimg} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} -type ${orttypeclar} -o ${ortclar}
+
+    fi
+
+    org_dim=`PrintHeader ${ortclar} 2`
+
+    ifdsntexistrun ${res_org_clar} "Resampling to original resolution" \
+    ResampleImage 3 ${org_clar} ${res_org_clar} ${org_dim} 1
+
+    #ConvertImagePixelType ${res_org_clar} ${res_org_clar} 3
+
+    ifdsntexistrun ${cp_clar} "Copying original transform" \
+    c3d ${res_org_clar} ${ortclar} -copy-transform -type ${orttypeclar} -o ${cp_clar}
+
+    # generate comb def
+    ifdsntexistrun ${comb_def} "Combining deformation fields and transformations" \
+    antsApplyTransforms -d 3 -r ${init_allen} -t ${antswarp} [ ${antsaff}, 1 ] -o [ ${comb_def}, 1 ]
 
   	# warp to registered clarity
-	ifdsntexistrun ${wrpclar} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${allenref} -i ${ortclar} -n Multilabel -t ${antswarp} [ ${antsaff}, 1 ] [ ${initform}, 1 ] -o ${wrpclar}
+
+  	if [[ -z ${channel} ]]; then
+        ifdsntexistrun ${wrpclar} "Applying ants deformations to CLARITY data" \
+        antsApplyTransforms -d 3 -r ${allenref} -i ${cp_clar} -n Bspline -t [ ${initform}, 1 ] ${comb_def} -o ${wrpclar}
+    else
+        ifdsntexistrun ${wrpclar} "Applying ants deformations to CLARITY data" \
+        antsApplyTransforms -d 3 -r ${allenref} -i ${cp_clar} -t [ ${initform}, 1 ] ${comb_def} -o ${wrpclar}
+
+        c3d ${wrpclar} -binarize -o ${wrpclar}
+    fi
 
 }
 
@@ -315,25 +355,44 @@ function main()
 	antswarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz
 	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
 
+    init_allen=${regdir}/init_allen.nii.gz
+    comb_def=${regdir}/clar_allen_comb_def.nii.gz
+
     # In files
-    smclar=${regdir}/clar.nii.gz
+    org_clar=${regdir}/clar.nii.gz
+
+    if [[ ! -z ${channel} ]]; then
+        res_org_clar=${regdir}/clar_res_org_seg.nii.gz
+        res_vos=${regdir}/vox_seg_${channel}_res.nii.gz
+        swp_vox=${regdir}/vox_seg_${channel}_swp.nii.gz
+    else
+        res_org_clar=${regdir}/clar_res_org.nii.gz
+    fi
 
     motherdir=$(dirname ${regdir})
 
     base=`basename ${inimg}`
 	clarname=${base%%.*};
 
-	allenref=${atlasdir}/ara/template/average_template_25um.nii.gz
+	allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
+
 
     # Out img
-	ortlclar=${regdir}/${clarname}_ort.nii.gz
-	wrpclar=${regdirfinal}/${clarname}_allen_ants.nii.gz	
+	ortclar=${regdir}/${clarname}_ort.nii.gz
+	cp_clar=${regdir}/${clarname}_ort_cp_org.nii.gz
+
+	if [[ ! -z ${channel} ]]; then
+	    wrpclar=${regdirfinal}/${clarname}_${channel}_channel_allen_space.nii.gz
+    else
+	    wrpclar=${regdirfinal}/${clarname}_allen_space.nii.gz
+    fi
 
 #	smclarres=${regdirfinal}/clar_downsample_res??um.nii.gz
 
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
-	warpallenlbls ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} NearestNeighbor short ${ortclar} 
+	warpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short \
+	 ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}
 
 
 }
@@ -347,4 +406,5 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Warping of CLARITY image to Allen space done in $DIFF minutes. Have a good day!"
+printf "\n Warping of CLARITY image to Allen space and generation of ${wrpclar} done in ${DIFF} minutes. \
+Have a good day! \n"

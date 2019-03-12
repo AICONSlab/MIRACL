@@ -14,7 +14,7 @@ function usage()
     
     cat <<usage
 
-	1) Performs Structure Tensor Analysis (STA)
+	1) Performs Structure Tensor Analysis (STA) on CLARITY viral tracing or stains
 
 	Runs Matlab scripts
 	

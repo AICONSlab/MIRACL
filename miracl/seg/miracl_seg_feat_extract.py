@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Maged Goubran @ 2016, mgoubran@stanford.edu 
+# Maged Goubran @ 2017, mgoubran@stanford.edu
 
 # coding: utf-8
 
@@ -23,15 +23,15 @@ from skimage.measure import regionprops
 # help fn
 
 def helpmsg(name=None):
-    return '''Usage: mouse_feat_extract.py -s [segmentation tif] -l [Labels] -m [ binary ROI mask ]
+    return '''Usage: miracl_seg_feat_extract.py -s [segmentation tif] -l [Labels] -m [ binary ROI mask ]
 
     Computes features of segmented image and summarizes them per label
 
-    example: mouse_feat_extract.py -s segmentation_sparse/voxelized_seg_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif -m mask.tif
+    example: miracl_seg_feat_extract.py -s segmentation_sparse/voxelized_seg_bin_sparse.tif -l reg_final/annotation_hemi_combined_25um_clar_vox.tif -m mask.tif
 
         arguments (required):
 
-        s. Voxelized segmentation tif file
+        s. Voxelized binarized segmentation tif file
 
         l. Allen labels (registered to clarity) used to summarize features
 
@@ -48,7 +48,7 @@ def helpmsg(name=None):
 
     Main Outputs
 
-        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA lables)
+        clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)
 
     ------
 
@@ -129,15 +129,23 @@ def upsampleswplbls(seg, lbls):
 
         else:
 
-            # rx = float(segx) / lblsy
+            if segx > lblsx:
+
+                print('Upsampling labels to clarity resolution')
+
+            else:
+
+                print('Downsampling labels to voxelized clarity resolution')
+
             rx = float(segx) / lblsx
             ry = float(segy) / lblsy
             rz = float(segz) / lblsz
 
-            print('Upsampling labels to clarity resolution')
-
-            # reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
             reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
+
+            print('Segmentation shape:', seg.shape)
+
+            print('Resampled labels shape:', reslbls.shape)
 
             resx = reslbls.shape[1]
 
@@ -149,13 +157,18 @@ def upsampleswplbls(seg, lbls):
 
         if segz != lblsz:
 
+            if segx > lblsx:
+
+                print('Upsampling labels to clarity resolution')
+
+            else:
+
+                print('Downsampling labels to voxelized clarity resolution')
+
             rx = float(segx) / lblsx
             ry = float(segy) / lblsy
             rz = float(segz) / lblsz
 
-            print('Upsampling labels to clarity resolution')
-
-            # reslbls = sp.ndimage.zoom(lbls,(rz,rx,rx), order=0)
             reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
 
         else:
@@ -227,7 +240,7 @@ def getlblvals(lbls):
 # main fn
 
 def main():
-    # scriptlog('feat_extract.log')
+    scriptlog('feature_extraction.log')
 
     startTime = datetime.now()
 
@@ -236,7 +249,7 @@ def main():
     ncpus = int(cpuload * cpus)  # 95% of cores used
 
     # open seg
-    print ("Reading segmetation")
+    print ("Reading segmentation")
     seg = tiff.imread(inseg)
 
     # open lbls

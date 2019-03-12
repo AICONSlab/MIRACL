@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Maged Goubran @ 2016, mgoubran@stanford.edu 
+# Maged Goubran @ Stanford 2018, mgoubran@stanford.edu
 
 # coding: utf-8
 
@@ -55,6 +55,10 @@ Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l reg
             Mean -> mean intensity values
             Count -> number of voxels
 
+        -m  Labels hemi (combined or split, default=combined)
+
+        -d  Labels depth (default no depth chosen, all labels)
+
         '''
 
     # Dependencies:
@@ -96,6 +100,8 @@ def parseinputs():
         parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
         parser.add_argument('-l', '--lbls', type=str, help="Reg lbls", required=True)
         parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Mean')
+        parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
+        parser.add_argument('-d', '--depth', type=int, help="Labels depth")
         parser.add_argument('-o', '--outfile', type=str, help="Output file",
                             default='clarity_label_statistics.csv')
 
@@ -105,6 +111,8 @@ def parseinputs():
         lbls = args.lbls
         outfile = args.outfile
         sort = args.sort
+        hemi = args.hemi if args.hemi is not None else "combined"
+        label_depth = args.depth if args.depth is not None else None
 
     # check if pars given
 
@@ -115,7 +123,76 @@ def parseinputs():
     assert isinstance(outfile, str)
     assert isinstance(sort, str)
 
-    return invol, lbls, outfile, sort
+    return invol, lbls, outfile, sort, hemi, label_depth
+
+
+# ---------
+
+def upsampleswplbls(seg, lbls):
+    segx = seg.shape[1]
+    segy = seg.shape[2]
+    segz = seg.shape[0]
+
+    lblsx = lbls.shape[1]
+    lblsy = lbls.shape[2]
+    lblsz = lbls.shape[0]
+
+    if segx != lblsx:
+
+        if segx == lblsy:
+
+            print ('Swapping x-y')
+            reslbls = np.swapaxes(lbls, 1, 2)
+
+        else:
+
+            if segx > lblsx:
+
+                print('Upsampling labels to clarity resolution')
+
+            else:
+
+                print('Downsampling labels to voxelized clarity resolution')
+
+            rx = float(segx) / lblsx
+            ry = float(segy) / lblsy
+            rz = float(segz) / lblsz
+
+            reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
+
+            print('Segmentation shape:', seg.shape)
+
+            print('Resampled labels shape:', reslbls.shape)
+
+            resx = reslbls.shape[1]
+
+            if segx != resx:
+                print ('Swapping x-y')
+                reslbls = np.swapaxes(reslbls, 1, 2)
+
+    else:
+
+        if segz != lblsz:
+
+            if segx > lblsx:
+
+                print('Upsampling labels to clarity resolution')
+
+            else:
+
+                print('Downsampling labels to voxelized clarity resolution')
+
+            rx = float(segx) / lblsx
+            ry = float(segy) / lblsy
+            rz = float(segz) / lblsz
+
+            reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
+
+        else:
+
+            reslbls = lbls
+
+    return reslbls
 
 
 # ---------
@@ -123,7 +200,7 @@ def parseinputs():
 def main():
     # parse in args
 
-    invol, lbls, outfile, sort = parseinputs()
+    invol, lbls, outfile, sort, hemi, label_depth = parseinputs()
 
     # extract stats
     print(" Extracting stats from input volume using registered labels ...\n")
@@ -137,12 +214,20 @@ def main():
                           stderr=subprocess.PIPE)
 
     # read fwf
-    outtxt = pd.read_fwf('%s' % outfile)
+    out_stats = pd.read_fwf('%s' % outfile)
 
     # read Allen ontology
     miracl_home = os.environ['MIRACL_HOME']
 
-    annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+    # combined or split labels
+    if hemi == "combined":
+        annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+    else:
+        annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+
+    # extract labels at certain depth only
+    if label_depth is not None:
+        annot_csv = annot_csv[annot_csv.depth == label_depth]
 
     # Add label Name, Abrv, PathID
 
@@ -153,27 +238,30 @@ def main():
     parent_dict = annot_csv.set_index('id')['parent_structure_id'].to_dict()
 
     # replace label info
-    outtxt['name'] = outtxt.LabelID.replace(name_dict)
-    outtxt['acronym'] = outtxt.LabelID.replace(acronym_dict)
-    outtxt['parent'] = outtxt.LabelID.replace(parent_dict)
-    outtxt['pathid'] = outtxt.LabelID.replace(pathid_dict)
+    out_stats['name'] = out_stats.LabelID.replace(name_dict)
+    out_stats['acronym'] = out_stats.LabelID.replace(acronym_dict)
+    out_stats['parent'] = out_stats.LabelID.replace(parent_dict)
+    out_stats['pathid'] = out_stats.LabelID.replace(pathid_dict)
 
     # sort data-frame
-    outtxt = outtxt.sort_values([sort], ascending=False)
+    out_stats = out_stats.sort_values([sort], ascending=False)
     # remove background
-    outtxt = outtxt[outtxt['LabelID'] != 0]
+    out_stats = out_stats[out_stats['LabelID'] != 0]
 
     # re-oder columns with info then sorted column of choice
     cols = ['LabelID', 'acronym', 'name', 'parent', sort]
-    dfcols = outtxt.columns.values
-    allcols = np.hstack([cols, dfcols])
-    _, idx = np.unique(allcols, return_index=True)
-    columns = allcols[np.sort(idx)]
+    df_cols = out_stats.columns.values
+    all_cols = np.hstack([cols, df_cols])
+    _, idx = np.unique(all_cols, return_index=True)
+    columns = all_cols[np.sort(idx)]
 
-    outtxt = outtxt[columns]
+    out_stats = out_stats[columns]
+
+    # remove labels not in allen graph (prob interp errors!)
+    out_stats = out_stats[~out_stats.name.apply(lambda x: np.isreal(x))]
 
     # save to csv
-    outtxt.to_csv('%s' % outfile, index=False)
+    out_stats.to_csv('%s' % outfile, index=False)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ function usage()
     
     cat <<usage
 
-	1) Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
+	1) Segments neurons in cleared mouse brain of virus, cFOS, sparse or nuclear stains in 3D
 
 	Runs a Fiji/ImageJ macro 
 	
@@ -30,15 +30,15 @@ function usage()
 	For command-line / scripting
 
 
-	Usage: `basename $0` -f <clarity folder> -t <channel type: sparse or nuclear>
+	Usage: `basename $0` -f <clarity folder> -t <channel type: virus or sparse or nuclear or cfos>
 
-	Example: `basename $0` -f my_clarity_tifs -t sparse -p Filter0001
+	Example: `basename $0` -f my_clarity_tifs -t virus -p Filter0001
 
 		arguments (required):
 
 			f. Input clarity folder/directory (including .tif images) [folder name without spaces]
 
-			t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI) (default = sparse)
+			t. Channel type: virus or cFOS or sparse (like Thy1 YFP) or nuclear (like PI)  (default = virus)
 
 		Optional arguments:
 
@@ -50,9 +50,9 @@ function usage()
     Main Outputs
 
 
-        segmentation_sparse/seg_sparse.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
+        segmentation_{type}/seg_{type}.tif (.mhd) : segmentation image with all labels (cells)
 
-        segmentation_sparse/seg_bin_sparse.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
+        segmentation_{type}/seg_bin_{type}.tif (.mhd) : binarized segmentation image
 
 
         Results can be opened in Fiji for visualization
@@ -189,7 +189,7 @@ else
 	fi
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" -f "seg type (def = sparse)" "channel prefix (ex = C001) "  -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" -f "seg type (def = virus)" "channel prefix (ex = C001) "  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -212,10 +212,10 @@ fi
 
 START=$(date +%s)
 
-# Default type to sparse
+# Default type to virus
 if [ -z ${type} ];
 then
-    type=sparse
+    type=virus
 
 fi
 
@@ -262,12 +262,12 @@ if [[ ! -f ${outseg} ]]; then
     if [[ -z ${prefix} ]] ; then
 
         echo Fiji -macro ${macro} "${tifdir}"
-	    Fiji -macro ${macro} "${tifdir}/" | tee "${log}"
+	    Fiji -macro ${macro} "${PWD}/${tifdir}/" | tee "${log}"
 
     else
 
         echo Fiji -macro ${macro} ""${tifdir}" ${prefix}"
-	    Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
+	    Fiji -macro ${macro} ""${PWD}/${tifdir}" ${prefix}" | tee "${log}"
 
     fi
 

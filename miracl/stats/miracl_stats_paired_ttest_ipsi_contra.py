@@ -22,7 +22,7 @@ def helpmsg(name=None):
 
 Computes paired_ttest test between both hemispheres for all labels across mice
 
-Looks for feature extraction csv files within input directory
+Looks for feature exraction csv files within input directory
 
 Outputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
 
@@ -69,14 +69,14 @@ def readcsvs(indir, splitval=20000):
 def cleanuplbls(vals, splitval=20000):
 
     # get lbl intersec
-    inter = set(vals[0].LabelID)
+    inter = set(vals[0].LabelAbrv)
     for vallist in vals[0:]:
-        inter.intersection_update(vallist.LabelID)
+        inter.intersection_update(vallist.LabelAbrv)
 
 
     # use intersec only
     for i in range(len(vals)):
-        vals[i] = vals[i][vals[i].LabelID.isin(inter)]
+        vals[i] = vals[i][vals[i].LabelAbrv.isin(inter)]
 
     ids = vals[0].LabelID
 

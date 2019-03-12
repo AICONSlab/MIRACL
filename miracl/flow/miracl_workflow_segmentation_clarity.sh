@@ -3,7 +3,7 @@
 # get version
 function getversion()
 {
-	ver=`cat $MIRACL_HOME/version.txt`
+	ver=`cat ${MIRACL_HOME}/version.txt`
 	printf "MIRACL pipeline v. $ver \n"
 }
 
@@ -16,9 +16,9 @@ function usage()
 
     Workflow (wrapper) combining multiple MIRACL functions:
 
-    1) Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D
+    1) Segments neurons in cleared mouse brain of virus, cFOS, sparse or nuclear stains in 3D
     2) Voxelizes segmentation results into density maps with Allen atlas resolution
-	3) Computes features of segmented image and summarizes them per label
+	3) Computes features of segmented image and summarizes them per registered labels
 
     Executes:
 
@@ -31,9 +31,7 @@ function usage()
 
         A GUI will open to choose folder with tif files for segmentation (folder must have one channel)
 
-        Channel type is assumed to be sparse
-
-        For feature extraction the "reg_final/annotation_hemi_combined_(vox)um_clar_vox.tif" file must exist where the script is started
+        For feature extraction the "reg_final/annotation_hemi_combined_(vox)um_clar_vox.tif" file must exist
 
     ----------
 
@@ -47,9 +45,11 @@ function usage()
 
             f. Input Clarity tif folder/dir [folder name without spaces]
 
-            t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
+            t. Channel type: virus or cFOS or sparse (like Thy1 YFP) or nuclear (like PI)
 
-        optional arguments (don't forget the quotes):
+            v. Registered labels voxel size (10, 25, or 50um)
+
+        optional arguments (do not forget the quotes):
 
             Segmentation (invoked by -s " "):
 
@@ -95,7 +95,7 @@ function usage()
 
 	-----------------------------------
 
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 
 	-----------------------------------
@@ -120,7 +120,7 @@ fi
 
 # check dependencies
 
-if [ -z ${MIRACL_HOME} ];
+if [[ -z ${MIRACL_HOME} ]];
 then
 
     printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh  & rerun script \n"
@@ -183,7 +183,7 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Reading input parameters \n"
 
-	while getopts ":f:t:s:e:" opt; do
+	while getopts ":f:t:s:e:v:" opt; do
 
 	    case "${opt}" in
 
@@ -203,6 +203,10 @@ if [[ "$#" -gt 1 ]]; then
             	extopts="${OPTARG}"
             	;;
 
+        	v)
+            	vox="${OPTARG}"
+            	;;
+
         	*)
             	usage
             	;;
@@ -214,7 +218,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z "${indir}" ];
+	if [[ -z "${indir}" ]];
 	then
 		usage
 		echo "ERROR: < -f => input folder with clarity tifs> not specified"
@@ -227,12 +231,12 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running segmentation with the following command: \n"
 
-    if [ -z "${type}" ];
+    if [[ -z "${type}" ]];
 	then
-        type=sparse
+        type=virus
     fi
 
-    if [ -z "${segopts}" ];
+    if [[ -z "${segopts}" ]];
 	then
 
         echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
@@ -250,8 +254,8 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
-    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
+    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
+    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
 
 
     #---------------------------
@@ -259,10 +263,10 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running feature extraction with the following command: \n"
 
-    if [ -z "${extopts}" ];
+    if [[ -z "${extopts}" ]];
 	then
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_25um_clar_vox.tif
+        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
         miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
     else
@@ -283,20 +287,13 @@ else
 	printf "\n No inputs given ... running in GUI mode \n"
 
     # Get options
-
-    choose_folder_gui "Open clarity dir (with .tif files) by double clicking then OK" indir
-
-	# check required input arguments
-
-	if [ -z "${indir}" ];
-	then
-		usage
-		echo "ERROR: <input clarity directory> was not chosen"
-		exit 1
-	fi
+    # choose_folder_gui "Open clarity dir (with .tif files) by double clicking then OK" indir
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" -f "seg type (def = sparse)" "channel prefix (ex = C001) "  -hf "`usage`")
+	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" \
+	     -d "Input tiff dir" \
+	     -v "Registered allen labels (..clar_vox.tif) in the reg_final dir" \
+	     -f "seg type [virus (def), cFOS, sparse or nuclear]" "channel prefix (ex = C001) " "labels voxel size" -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -304,26 +301,45 @@ else
 	   arr+=("$line")
 	done <<< "$opts"
 
-	type=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	# check required input arguments
+    indir=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-	printf "\n Chosen seg type: $type \n"
-
-	prefix=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-
-    printf "\n Chosen channel prefix: $prefix \n"
-
-
-    choose_file_gui "Open Allen labels (registered to clarity) used to summarize features" lbls
-
-
-    if [ -z "${type}" ];
+	if [[ -z "${indir}" ]];
 	then
-        type=sparse
+		usage
+		echo "ERROR: <input clarity directory> was not chosen"
+		exit 1
+	fi
+
+    printf "\n Chosen in dir: $indir \n"
+
+    lbls=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen registered labels: ${lbls} \n"
+
+	type=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen seg type: ${type} \n"
+
+	prefix=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen channel prefix: ${prefix} \n"
+
+	vox=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen voxel size: ${vox} \n"
+
+    # choose_file_gui "Open Allen labels (registered to clarity) used to summarize features" lbls
+
+
+    if [[ -z "${type}" ]];
+	then
+        type=virus
     fi
 
     printf "\n Running segmentation with the following command: \n"
 
-    if [ -z "${prefix}" ];
+    if [[ -z "${prefix}" ]];
 	then
 
         echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
@@ -331,8 +347,8 @@ else
 
     else
 
-        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" "${prefix}"
-        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" ${prefix}
+        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" -p "${prefix}"
+        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" -p ${prefix}
 
     fi
 
@@ -342,8 +358,8 @@ else
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
-    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif
+    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
+    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
 
 
     #---------------------------
@@ -352,7 +368,7 @@ else
     printf "\n Running feature extraction with the following command: \n"
 
 
-    if [ -z "${lbls}" ];
+    if [[ -z "${lbls}" ]];
 	then
 
         echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
@@ -360,8 +376,8 @@ else
 
     else
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l $lbls
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l $lbls
+        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l ${lbls}
+        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l ${lbls}
 
     fi
 
@@ -377,4 +393,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Segmentation, voxelization and feature extraction done in $DIFF minutes. Have a good day!"
+echo "Segmentation, voxelization and feature extraction done in ${DIFF} minutes. Have a good day!"

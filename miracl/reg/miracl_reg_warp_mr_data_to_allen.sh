@@ -288,8 +288,8 @@ function warpallenlbls()
 	ifdsntexistrun ${ortmr} "Orienting Allen labels" orientimg ${wrpmr} ${orttagmr} ${ortintmr} ${orttypemr} ${ortmr}
 
   	# warp to registered MRI
-	ifdsntexistrun ${wrpmr} "Applying ants deformation to Allen labels" \
-	 antsApplyTransforms -r ${allenref} -i ${ortmr} -n Multilabel -t ${antswarp} [ ${antsaff}, 1 ] -o ${wrpmr}
+	ifdsntexistrun ${wrpmr} "Applying ants deformation to MRI data" \
+	 antsApplyTransforms -r ${allenref} -i ${ortmr} -n Bspline -t ${antswarp} [ ${antsaff}, 1 ] -o ${wrpmr}
 
 }
 

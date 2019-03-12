@@ -13,7 +13,7 @@ import sys
 def helpmsg():
     return '''Usage: miracl_reg_check_results.py 
 
-checks registration results
+Checks registration results
 
     A GUI will open to choose your:
 

@@ -48,7 +48,7 @@ Converts Tiff images to Nifti
 
     optional arguments:
       -d , --down           Down-sample ratio (default: 5)
-      -cn , --channum       Chan # for extracting single channel from multiple channel data (default: 1)
+      -cn , --channum       Chan # for extracting single channel from multiple channel data (default: 0)
       -cp , --chanprefix    Chan prefix (string before channel number in file name). ex: C00
       -ch , --channame      Output chan name (default: eyfp)
       -o , --outnii         Output nii name (script will append downsample ratio & channel info to given name)
@@ -320,8 +320,10 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
     # data_array = np.array(mres, dtype='int16')
 
     outvox = vx * d
+    dz = d if vx <= vz else int(d * float(vx / vz))
+
     if downz == 1:
-        outz = vz * d
+        outz = vz * dz
     else:
         outz = vz
 
@@ -344,7 +346,7 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
         print("\n\n down-sampling in the z dimension")
 
         sp_inter = 1 if data_array.shape[0] < 5000 else 0
-        down = (1.0 / int(d))
+        down = (1.0 / int(dz))
         zoom = [1, 1, down]
         data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)
 
@@ -437,99 +439,3 @@ if __name__ == "__main__":
 
 
 # Todos
-
-
-# Old
-
-# old Tkinter
-
-# a = QApplication(sys.argv)
-# w = QWidget()
-#
-# msg = "Open clarity dir (with .tif files)"
-#
-# indir = folder_dialog(w, msg)
-#
-# if not indir:
-#     sys.exit('input folder/directory not specified ... exiting')
-#
-# if not os.path.exists(indir):
-#     sys.exit('%s does not exist ... please check path and rerun script' % indir)
-#
-# fields = 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix', \
-#          'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")', \
-#          'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)'
-#
-# def fetch(entries):
-#     for entry in entries:
-#         field = entry[0]
-#         text = entry[1].get()
-#         print('%s: "%s"' % (field, text))
-#
-# def makeform(root, fields):
-#     entries = []
-#     values = []
-#
-#     strlen = len(max(fields, key=len))
-#     strw = int(strlen * 1.2)
-#
-#     for field in fields:
-#         row = Frame(root)
-#         lab = Label(row, width=strw, text=field, anchor='w')
-#         ent = Entry(row)
-#         row.pack(side=TOP, fill=X, padx=5, pady=5)
-#         lab.pack(side=LEFT)
-#         ent.pack(side=RIGHT, expand=YES, fill=X)
-#         entries.append((field, ent))
-#         values.append(ent)
-#
-#     return entries, values, strw
-#
-# def helpwindown(root, helpfun):
-#     window = Toplevel(root)
-#     window.title("Help func")
-#     t = Text(window, height=50, width=150)
-#     t.pack()
-#     t.insert(END, "%s" % helpfun)
-#
-# # def main():
-# root = Tk()
-# root.title("Nii conversion options")
-#
-# [ents, vals, strw] = makeform(root, fields)
-#
-# n = len(fields)
-# w = strw * 10
-# h = (n * 40) + 50
-# root.geometry("%dx%d" % (w, h))
-#
-# root.bind('<Return>', (lambda event, e=ents: fetch(e)))
-#
-# b1 = Button(root, text='Enter',
-#             command=(lambda e=ents: fetch(e)))
-# b1.pack(side=LEFT, padx=5, pady=5)
-#
-# b2 = Button(root, text='Done', command=root.quit)
-# b2.pack(side=RIGHT, padx=5, pady=5)
-#
-# b3 = Button(root, text="Help func", command=lambda: helpwindown(root, helpmsg()))
-# b3.pack(side=LEFT, padx=5, pady=5)
-#
-# root.mainloop()
-
-
-# chann = 1 if not vals[2].get() else int(vals[2].get())
-#
-# chanp = None if not vals[3].get() else vals[3].get()
-#
-# chan = 'eyfp' if not vals[4].get() else vals[4].get()
-#
-# vx = 5 if not vals[5].get() else float(vals[5].get())
-#
-# vz = 5 if not vals[6].get() else float(vals[6].get())
-#
-# cent = [0, 0, 0] if not vals[7].get() else np.array(vals[7].get())
-#
-# downz = 1 if not vals[8].get() else vals[8].get()
-#
-# pd = 1 if not vals[9].get() else vals[9].get()

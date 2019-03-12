@@ -3,7 +3,7 @@
 // Macro for Fiji/ImageJ 
 // Segments neurons in cleared mouse brain of sparse stains (like Thy1) in 3D 
 // 
-// (c) Maged Goubran, mgoubran@stanford.edu, 2016
+// (c) Maged Goubran, mgoubran@stanford.edu, 2017
 //
 // based on plugins from:
 // 
@@ -59,17 +59,20 @@ print("--Reading stack");
 
 if (convert==1) {
 
+  	// don't scale images linearly
+  	run("Conversions...", " ");
+
 	print("Converting input to 8-bit");
 
     if (lengthOf(args)>1) {
 
         print("Reading all files with " +fstr+ " in filename");
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file="+fstr+" sort convert");
 
     } else {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file=tif sort convert");
 
     }
 
@@ -81,11 +84,11 @@ if (convert==1) {
 
         print("Reading all files with " +fstr+ " in filename");
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file="+fstr+" sort");
 
     } else {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file=tif sort");
 
     }
 
@@ -113,7 +116,7 @@ if (!File.exists(outback)) {
 	run("Duplicate...","duplicate");
 
 	print("-- Subtracting Background");
-	run("Subtract Background...", "rolling=50 sliding stack");	
+	run("Subtract Background...", "rolling=20 sliding stack");
 
 	// Save Normalized int
 	save(outback);
@@ -140,6 +143,9 @@ close();
 // Enhance Contrast
 
 outenhance = segpath + "backremov_enhance.tif";
+
+// Collect Garbage
+call("java.lang.System.gc");
 
 if (!File.exists(outenhance)) {
 
@@ -173,13 +179,16 @@ call("java.lang.System.gc");
 
 outmed = segpath + "backremov_enhance_median.tif";
 
+// Collect Garbage
+call("java.lang.System.gc");
+
 if (!File.exists(outmed)) {
 
 	print("-- Computing Median image");
 	print("using " +ncpus+ " CPUs for parallelization");
 
 	// Create median image
-	run("3D Fast Filters","filter=Median radius_x_pix=&radpx radius_y_pix=&radpx radius_z_pix=&radpz Nb_cpus=&ncpus");
+	run("3D Fast Filters","filter=Median radius_x_pix="+radpx+" radius_y_pix="+radpx+" radius_z_pix="+radpz+" Nb_cpus="+ncpus+"");
 
 	// Save Med
 	save(outmed);
@@ -212,36 +221,72 @@ rename("MedianImg");
 
 // -----------------------------------
 
-// Compute Local threshold 
+// Compute Global threshold
 
-outlocthr = segpath + "median_locthr.tif";
+outyen = segpath + "median_yen.tif";
 
-if (!File.exists(outlocthr)) {
+if (!File.exists(outyen)) {
 
 	// Duplicate image
 	run("Duplicate...","duplicate");
 
-	print("-- Computing Local Threshold");
+	print("-- Computing Yen Threshold");
 
-	run("Auto Local Threshold", "method=Phansalkar radius=15 parameter_1=0 parameter_2=0 white stack");
+  run("Auto Threshold", "method=Yen ignore_black white stack use_stack_histogram");
 
-	// Save LocThr 
-	save(outlocthr);
+	// Save Yen
+	save(outyen);
 
 
 } else {
 
-	print("Local Thresholded Median img already exists .. skipping & opening it ");
-	
-	open(outlocthr);
+	print("Yen Thresholded Median img already exists .. skipping & opening it ");
+
+	open(outyen);
 
 }
 
 
-locthrstack = getImageID();
-locthrtitle = getTitle();
+yenstack = getImageID();
+yentitle = getTitle();
 
-rename("LocalThr");
+rename("Yen");
+
+// -----------------------------------
+
+// Compute Local threshold 
+
+//outlocthr = segpath + "median_locthr.tif";
+//
+//// Collect Garbage
+//call("java.lang.System.gc");
+//
+//if (!File.exists(outlocthr)) {
+//
+//	// Duplicate image
+//	run("Duplicate...","duplicate");
+//
+//	print("-- Computing Local Threshold");
+//
+//	run("Auto Local Threshold", "method=Phansalkar radius=15 parameter_1=0 parameter_2=0 white stack");
+//
+//	// Save LocThr
+//	save(outlocthr);
+//
+//
+//} else {
+//
+//	print("Local Thresholded Median img already exists .. skipping & opening it ");
+//
+//	open(outlocthr);
+//
+//}
+//
+//
+//locthrstack = getImageID();
+//locthrtitle = getTitle();
+//
+//rename("LocalThr");
 
 // -----------------------------------
 
@@ -249,11 +294,14 @@ rename("LocalThr");
 
 outmin = segpath + "median_locthr_min.tif";
 
+// Collect Garbage
+call("java.lang.System.gc");
+
 if (!File.exists(outmin)) {
 
 	print("-- Computing Minimum");
 
-	run("3D Fast Filters","filter=Minimum radius_x_pix=&radpx radius_y_pix=&radpx radius_z_pix=&radpz Nb_cpus=ncpus");
+	run("3D Fast Filters","filter=Minimum radius_x_pix="+radpx+" radius_y_pix="+radpx+" radius_z_pix="+radpz+" Nb_cpus="+ncpus+"");
 
 	// Save min
 	save(outmin);
@@ -282,7 +330,7 @@ if (!File.exists(outfil)) {
 
 	print("-- Filtering very large objects");
 
-	run("3D Simple Segmentation", "low_threshold=128 min_size=0 max_size=&maxobjsz");
+	run("3D Simple Segmentation", "low_threshold=128 min_size=0 max_size="+maxobjsz+"");
 
 } else {
 
@@ -301,6 +349,7 @@ selectImage(backstack);
 close();
 
 // close enhance image
+//selectImage("EnhanceStack");
 selectImage(enhancestack);
 close();
 
@@ -325,7 +374,9 @@ if (!File.exists(outseg)) {
 
 	print("-- Computing Marker-controlled Watershed segmentation... This might take a while");
 
-	run("Marker-controlled Watershed", "input=MedianImg marker=Seg mask=LocalThr calculate use");
+	run("Marker-controlled Watershed", "input=MedianImg marker=Seg mask=Yen calculate use");
+
+	run("3D Simple Segmentation", "low_threshold=1 min_size=0 max_size="+maxobjsz+"");
 
 	// Duplicate image
 	run("Duplicate...","duplicate");

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Maged Goubran @ 2016, mgoubran@stanford.edu 
+# Maged Goubran @ Stanford 2017, mgoubran@stanford.edu 
 
 # coding: utf-8
 
@@ -20,7 +20,7 @@ import scipy as sp
 import tifffile as tiff
 from joblib import Parallel, delayed
 from scipy import ndimage
-
+from skimage.feature import peak_local_max
 
 # ---------
 # help fn
@@ -30,11 +30,16 @@ def helpmsg(name=None):
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: mouse_seg_voxelize_parallel.py -s seg_sparse.tif
+	example: mouse_seg_voxelize_parallel.py -s seg_sparse.tif -v 10 -d 5
 
         arguments (required):
 
         s. Segmentation tif file
+
+        optional arguments:
+
+        v. Voxel size (10, 25, 50um) (def = 10)
+        d. Down sample ratio (def = 2) - recommend 2 =< ratio =< 5
 
     -----
 
@@ -57,19 +62,22 @@ def helpmsg(name=None):
 
 parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
+parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
+parser.add_argument('-v', '--res', type=int, help="voxel size")
 
 args = parser.parse_args()
 seg = args.seg
 
+res = 10 if args.res is None else args.res
+down = 2 if args.down is None else args.down
+
 # ---------
 # Parameters
 
-radius = 5
-down = 5
+radius = 1
 cpuload = 0.95
 cpus = multiprocessing.cpu_count()
-ncpus = int(cpuload * cpus)  # 95% of cores used
-
+ncpus = int(cpuload * cpus)  # 95% of cores used2
 
 # ---------
 # Logging fn
@@ -111,21 +119,29 @@ def scriptlog(logname):
 # ---------
 # Define convolution fn
 
-def vox(segflt, kernel, dr, i):
+def vox(segflt, kernel, down, i, radius):
     '''
-	Convolves image with input kernel then 
-	downsamples using 5th order spline interpolation
+	Convolves image with input kernel then downsamples 
 	'''
 
     # sys.stdout.write("\r processing slice %d ... " % i)
     # sys.stdout.flush()
 
+    # downsample ratio
+    dr = 1.0 / down
+
     slf = segflt[i, :, :]
 
     cvmean = cv2.filter2D(slf, -1, kernel)
-    circv = sp.ndimage.zoom(cvmean, dr, order=5)
+    circv = sp.ndimage.zoom(cvmean, dr, order=0)
 
-    return circv / 255
+    distance = ndimage.distance_transform_edt(circv)
+    # local_maxi = peak_local_max(distance, indices=False, min_distance=dist, exclude_border=False, labels=circv)
+    local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((10, 10)), exclude_border=False,
+                                labels=circv)
+    conncomp = ndimage.label(local_maxi)[0]
+
+    return conncomp 
 
 
 # ---------
@@ -136,9 +152,6 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 	Setups up convolution kernel & computes
 	"Vox" fn in parallel
 	'''
-
-    # downsample ratio
-    dr = 1.0 / down
 
     filename = os.path.basename(seg)
 
@@ -163,13 +176,16 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 
     # convolve image with kernel
     res = []
-    res = Parallel(n_jobs=ncpus, backend='threading')(delayed(vox)(segflt, kernel, dr, i) for i in range(sx))
+    res = Parallel(n_jobs=ncpus, backend='threading')(delayed(vox)(segflt, kernel, down, i, radius) for i in range(sx))
 
     marray = np.asarray(res)
 
-    # down in z with 5th order spline
-    dz = 0.1;
-    marray = sp.ndimage.zoom(marray, (dz, 1, 1), order=5)
+    # downsample ratio
+    dr = 1.0 / down
+
+    # down in z 
+    # dz = 0.1;
+    marray = sp.ndimage.zoom(marray, (dr, 1, 1), order=0)
 
     # save stack
     tiff.imsave(outvox, marray)
@@ -180,16 +196,19 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 # ---------
 # save to nifti
 
-def savenvoxnii(marray, outvoxnii):
+def savenvoxnii(marray, outvoxnii, res):
     '''
 	Saves voxelized tif output to nifti (nii.gz)
 	'''
 
     if not os.path.exists(outvoxnii):
         mat = np.eye(4)
-        mat[0, 0] = 0.05
-        mat[1, 1] = 0.025
-        mat[2, 2] = 0.025
+
+        vx = 0.001 * res
+
+        mat[0, 0] = vx  # or vx/2
+        mat[1, 1] = vx
+        mat[2, 2] = vx
 
         img = nib.Nifti1Image(marray, mat)
         nib.save(img, outvoxnii)
@@ -199,7 +218,7 @@ def savenvoxnii(marray, outvoxnii):
 # main fn
 
 def main():
-    scriptlog('voxelize.log')
+    scriptlog('parallel_voxelization.log')
 
     startTime = datetime.now()
 
@@ -211,41 +230,41 @@ def main():
 
     type = fstr[0].split("_")[1]
 
-    outvox = '%s/voxelized_seg_%s.tif' % (segdir, type)
-    outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    # outvox = '%s/voxelized_seg_%s.tif' % (segdir, type)
+    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
 
-    if not os.path.exists(outvox):
+    # if not os.path.exists(outvox):
 
-        marray = parcomputevox(seg, radius, ncpus, down, outvox)
+    #     marray = parcomputevox(seg, radius, ncpus, down, outvox)
 
-        savenvoxnii(marray, outvoxnii)
+    #     savenvoxnii(marray, outvoxnii, res)
 
-    else:
+    #     print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
-        print ('\n Voxelized map already created')
+    # else:
+
+    #     print ('\n Voxelized map already created')
 
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
 
-    outvoxbin = '%s/voxelized_seg_bin_%s.tif' % (segdir, type)
-    outvoxniibin = '%s/voxelized_seg_bin_%s.nii.gz' % (segdir, type)
+    outvoxbin = '%s/voxelized_seg_%s.tif' % (segdir, type)
+    outvoxniibin = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
 
     if not os.path.exists(outvoxbin):
 
         marraybin = parcomputevox(segbin, radius, ncpus, down, outvoxbin)
 
-        savenvoxnii(marraybin, outvoxniibin)
+        savenvoxnii(marraybin, outvoxniibin, res)
 
         print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
     else:
 
-        print ('\n Voxelized map already created')
+        print ('\n Voxelized binarized map already created')
 
 if __name__ == "__main__":
     main()
 
 # TODOs
 
-# TODOhp: vox with regionprops
-# TODOlp: add GUI

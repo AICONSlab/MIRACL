@@ -54,13 +54,13 @@ function usage()
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
 
+        f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
+
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
-        p.  If utils intensity correction already run, skip correction inside registration (default: 0)
+        p.  if utils intensity correction already run, skip correction inside registration (default: 0)
 
-        e.  extra step of intensity inhomogeneity correction for cases with drastic signal dropout,
-            binary option (default: 0 -> not performed)
-
+        w.  warp high-res clarity to Allen space (default: 0)
 
 	----------
 
@@ -112,7 +112,7 @@ function usage()
 
 	-----------------------------------
 	
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 	
 	-----------------------------------
@@ -187,11 +187,7 @@ function choose_file_gui()
 
     filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-#	filepath=`cat path.txt`
-	
 	eval ${_inpath}="'$filepath'"
-
-#	rm path.txt
 
 }
 
@@ -202,7 +198,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:s:b:e:p:" opt; do
+	while getopts ":i:o:l:m:v:s:b:f:p:w:" opt; do
     
 	    case "${opt}" in
 
@@ -234,12 +230,16 @@ if [[ "$#" -gt 1 ]]; then
             	bulb="${OPTARG}"
             	;;
 
-            e)
-            	field="${OPTARG}"
+            f)
+            	savefig="${OPTARG}"
             	;;
 
             p)
                 prebias="${OPTARG}"
+                ;;
+
+            w)
+                warphres="${OPTARG}"
                 ;;
 
         	*)
@@ -414,10 +414,21 @@ else
 
 fi
 
-# prebias
+# pre-bias
 if [[ -z ${prebias} ]] ; then
     prebias=0
 fi
+
+# save mosaic
+if [[ -z ${savefig} ]] ; then
+    savefig=1
+fi
+
+# warp high-res clar
+if [[ -z ${warphres} ]] ; then
+    warphres=0
+fi
+
 
 # get time
 
@@ -466,7 +477,8 @@ function resampleclar()
 	local interp=$4
 	local resclar=$5
 	
-	ifdsntexistrun ${resclar} "Resmapling CLARITY input" ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
+	ifdsntexistrun ${resclar} "Resmapling CLARITY input" \
+	ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
 	c3d ${resclar} -type ushort -o ${resclar}
 
@@ -481,9 +493,11 @@ function getbrainmask()
     local median=$3
     local brain=$4
     local mask=$5
-
-    #ifdsntexistrun ${mask} "Computing brain mask" c3d ${resclar} -thresh 50% inf 1 0 -comp -thresh 1 1 1 0 ${mask}
-    #ifdsntexistrun ${mask} "Computing brain mask" ThresholdImage 3 ${resclar} ${mask} Otsu 5
+    local biasin=$6
+    local otsumaskthr=$7
+    local otsumask=$8
+    local otsucp=$9
+    local otsu=${10}
 
     # sharpen
     ifdsntexistrun ${sharp} "Sharpening image" ImageMath 3 ${sharp} Sharpen ${resclar}
@@ -491,13 +505,31 @@ function getbrainmask()
     # smooth
     ifdsntexistrun ${median} "Median Filtering" SmoothImage 3 ${sharp} 2 ${median} 1 1
 
+    # bias correct in
+    ifdsntexistrun ${biasin} "Bias correcting input" N3BiasFieldCorrection 3 ${median} ${biasin} 2
+#    ifdsntexistrun ${biasin} "Bias correcting input" N4BiasFieldCorrection -i ${median} -o ${biasin} -s 2
+
+    # Otsu threshold
+    ifdsntexistrun ${otsumaskthr} "Otsu thresholding" ThresholdImage 3 ${biasin} ${otsumaskthr} Otsu 6
+
+    # create mask
+#    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
+    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
+
+    # get masked
+#    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
+    ifdsntexistrun ${otsu} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsu} 1
+
+#    ifdsntexistrun ${otsu} "Copying transform" c3d ${median} ${otsucp} -copy-transform -o ${otsu}
+
     # center of gravity
-    cog=`fslstats ${median} -C`
+    cog=`fslstats ${otsu} -C`
 
     # bet
-    ifdsntexistrun ${mask} "Skull stripping" bet ${median} ${brain} -c ${cog} -R -r 25000 -m
+    ifdsntexistrun ${mask} "Skull stripping" bet ${otsu} ${brain} -c ${cog} -R -r 25000 -m
 
-    #c3d ${mask} -binarize -o ${mask}
+    c3d ${median} ${brain} -copy-transform -o ${brain}
+
 
 }
 # N4 bias correct
@@ -509,7 +541,11 @@ function biasfieldcorr()
 	local biasclar=$2
 	local mask=$3
 
-	ifdsntexistrun ${biasclar} "Bias-correcting CLARITY image with N4" N4BiasFieldCorrection -d 3 -i ${resclar} -s 2 -t [0.5,0.001,200] -x ${mask} -o ${biasclar}
+    # make sure same clar & mask occupy same space
+    c3d ${resclar} ${mask} -copy-transform -o ${mask}
+
+	ifdsntexistrun ${biasclar} "Bias-correcting CLARITY image with N4" \
+	N4BiasFieldCorrection -d 3 -i ${resclar} -s 2 -t [0.15,0.01,200] -x ${mask} -o ${biasclar}
 
 }
 
@@ -553,7 +589,8 @@ function thresh()
 	local t2=$5
 	local thrclar=$6	
 
-	ifdsntexistrun ${thrclar} "Thresholding CLARITY image" c3d ${biasclar} -threshold ${p1}% ${p2}% ${t1} ${t2} -o ${thrclar}
+	ifdsntexistrun ${thrclar} "Thresholding CLARITY image" \
+	c3d ${biasclar} -threshold ${p1}% ${p2}% ${t1} ${t2} -o ${thrclar}
 
 }
 
@@ -595,9 +632,8 @@ function maskimage()
 	local dilmask=$2
 	local betclar=$3
 		
-	ifdsntexistrun ${betclar} "Removing CLARITY image outline artifacts" MultiplyImages 3 ${biasclar} ${dilmask} ${betclar}
-
-#	c3d ${betclar} -type ushort -o ${betclar}
+	ifdsntexistrun ${betclar} "Removing CLARITY image outline artifacts" \
+	MultiplyImages 3 ${biasclar} ${dilmask} ${betclar}
 
 }
 
@@ -631,7 +667,6 @@ function smoothimg()
 #	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
     ifdsntexistrun ${smclar} "Smoothing CLARITY image" c3d ${ortclar} -smooth ${sigma}vox -o ${smclar}
 
-#	c3d ${smclar} -type ushort -o ${smclar}
 
 }
 
@@ -645,7 +680,8 @@ function croptosmall()
 	local trim=$2
 	local clarroi=$3
 
-	ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" c3d ${smclar} -trim ${trim}vox -type ushort -o ${clarroi}
+	ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" \
+	c3d ${smclar} -trim ${trim}vox -type ushort -o ${clarroi}
 
 }
 
@@ -680,15 +716,15 @@ function initclarallenreg()
 	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
 
     # kill after 3 min (gcc issue)
-#    pid=`echo $!`
+    if [ ! -f "${initallen}" ] ; then
+        sleep 180
 
-    sleep 180
-
-#    kill -9 ${pid}
-    kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
+        kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
+    fi
 
 	# Warp Allen
-	ifdsntexistrun ${initallen} "initializing Allen template" antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
+	ifdsntexistrun ${initallen} "initializing Allen template" \
+	 antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
 
 
 }
@@ -723,7 +759,8 @@ function regclarallen()
 	# Perform ANTs registration between CLARITY and Allen atlas
 
 	ifdsntexistrun ${antsallen} "Registering CLARITY data to allen atlas ... this will take a while" \
-	antsRegistrationMIRACL.sh -d 3 -f ${clarroi} -m ${initallen} -o ${regdir}/allen_clar_ants -t ${trans} -p ${prec} -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
+	antsRegistrationMIRACL.sh -d 3 -f ${clarroi} -m ${initallen} -o ${regdir}/allen_clar_ants -t ${trans} -p ${prec} \
+	 -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
 
 
 }
@@ -751,86 +788,104 @@ function warpallenlbls()
 	local wrplbls=$6
 	
 	# Ort pars
-	local orttaglbls=$7
-	local ortintlbls=$8
-	local orttypelbls=$9
-	local ortlbls=${10}
+	local ortlbls=$7
 
 	# swap lbls
-	local swplbls=${11}
-	local tiflbls=${12}
+	local swplbls=$8
+	local tiflbls=$9
 	
 	# Up lbls
-    local inclar=${13}
-    local reslbls=${14}
-    local restif=${15}
-
-    # Blank
-#    local blank=$16
-#    local blankres=${17}
+    local inclar=${10}
+    local reslbls=${11}
+    local restif=${12}
 
     # Vox
-    local vox=${16}
+    local vox=${13}
 
     # Res clar
-    local smclarres=${17}
+    local smclarres=${14}
 
-#     # Create empty image as ref
-#    ifdsntexistrun ${blank} "Creating reference image" CreateImage 3 ${swplbls} ${blank} 0
-#
-#    ifdsntexistrun ${blankres} "Usampling reference image" ResampleImage 3 ${blank} ${blankres} ${vres}x${vres}x${vres} 0 1
+    # lbls to org nii
+    local inclar=${15}
+    local orgortlbls=${16}
+    local lblsorgnii=${17}
+
+    local wrplblsorg=${18}
+    local unpadtif=${19}
 
     # Upsample ref
     vres=`python -c "print ${vox}/1000.0"`
 
-    # calculate res voxs from vres
-     # get img dim
-#    smdim=`PrintHeader ${smclar} 2`
-#    xm=${smdim%%x*} ;
-#    yzm=${smdim#*x} ; ym=${yzm%x*} ;
-#    zm=${smdim##*x} ;
-
     # res clar in
-    ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
+    ifdsntexistrun ${smclarres} "Usampling reference image" \
+     ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 0
+
+    # convert to ushort
+    ConvertImagePixelType ${smclarres} ${smclarres} 3
 
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-    antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls} --float
-# antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
+    antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} ${initform} \
+    -o ${wrplbls} --float
 
-	# orient to org 
-	ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+    # get org tag
+	ortmatrix=`PrintHeader ${inclar} 4 | tr 'x' ' '`
+
+	ifdsntexistrun ${ortlbls} "Orienting Allen labels" SetDirectionByMatrix ${wrplbls} ${ortlbls} ${ortmatrix}
 
 	# swap dim (x=>y / y=>x)
-	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
+	ifdsntexistrun ${swplbls} "Swapping label dimensions" \
+	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
 
-	# create tif lbls
-	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
+	ifdsntexistrun ${unpadtif} "Converting lbls to tif" \
+	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${unpadtif}  1 0 2  0 0 0
+
+    ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -10% -10% -o ${tiflbls}
 
 	# upsample to img dimensions
     df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
-     # get img dim
+    # get img dim
     alldim=`PrintHeader ${inclar} 2`
     x=${alldim%%x*} ;
     yz=${alldim#*x} ; y=${yz%x*} ;
     z=${alldim##*x} ;
 
-#    swpdim=`PrintHeader ${swplbls} 2`
-#    sx=${swpdim%%x*} ;
-#    syz=${swpdim#*x} ; sy=${syz%x*} ;
-
     ox=$(($y*$df)) ;
     oy=$(($x*$df)) ;
-
-#	ifdsntexistrun ${reslbls} "Upsampling labels to CLARITY resolution" \
-#	ResampleImage 3 ${swplbls} ${reslbls} ${ox}x${oy}x${oz} 1 1
-#	c3d ${swplbls} -resample ${df}00x${df}00x${df}00% -interpolation ${ortintlbls} -type ${orttypelbls} -o ${reslbls}
-	 # Can also resample with cubic (assuming 'fuzzy' lbls) or smooth resampled labels (c3d split) ... but > 700 lbls
+    oz=$(($z*$df)) ;
 
     # create hres tif lbls
-	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
+    ifdsntexistrun ${restif} "Converting high res lbls to tif" \
+     c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
 
+    # warp nifti to org space
+    orgspacing=`PrintHeader ${inclar} 1`
+
+    ifdsntexistrun ${wrplblsorg} "Resampling labels to original space" \
+    ResampleImage 3 ${wrplbls} ${wrplblsorg} ${orgspacing} 0 1
+
+    ifdsntexistrun ${orgortlbls} "Orienting Allen labels to original space" \
+    SetDirectionByMatrix ${wrplblsorg} ${orgortlbls} ${ortmatrix}
+
+    # extract region
+    lblsdim=`PrintHeader ${orgortlbls} 2`
+    lx=${lblsdim%%x*} ;
+    lyz=${lblsdim#*x} ; ly=${lyz%x*} ;
+    lz=${lblsdim##*x} ;
+
+    xd=$(($lx-$x))
+    yd=$(($ly-$y))
+    zd=$(($lz-$z))
+
+    xr=$(($xd/2))
+    yr=$(($yd/2))
+    zr=$(($zd/2))
+
+    ifdsntexistrun ${lblsorgnii} "Extracting labels to original size" \
+     c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} ${lblsorgnii}
+
+    c3d ${inclar} ${lblsorgnii} -copy-transform -o ${lblsorgnii}
 
 }
 
@@ -861,7 +916,9 @@ function warpinclarallen()
 
 	# Apply warps
 	ifdsntexistrun ${regorgclar} "Applying ants deformation to input CLARITY" \
-	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
+	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline \
+	-t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
+
 
 }
 
@@ -893,10 +950,41 @@ function warphresclarallen()
 
 	# Apply warps
 	ifdsntexistrun ${regorgclar} "Applying ants deformation to high-res CLARITY" \
-	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
+	antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline \
+	 -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
 
 }
 
+#---------------------------
+
+# 5) Create Tiled Mosaic
+
+function createtiledimg()
+{
+    local smclarres=$1
+    local clipped=$2
+    local wrplbls=$3
+    local rgb_lbls=$4
+    local lbl_mask=$5
+    local custom_lut=$6
+    local mosaic=$7
+
+    # clip clar intensities
+    ifdsntexistrun ${clipped} "Clipping CLARITY intensities" \
+    c3d ${smclarres} -stretch 2% 98% 0 255 -clip 0 255 -o ${clipped}
+
+    ifdsntexistrun ${lbl_mask} "Making labels mask" \
+    ThresholdImage 3 ${wrplbls} ${lbl_mask} 1 inf 1 0
+
+    # create rgb labels
+    ifdsntexistrun ${rgb_lbls} "Creating RGB labels" \
+    ConvertScalarImageToRGB 3 ${wrplbls} ${rgb_lbls} ${lbl_mask} custom ${custom_lut}
+
+    # create image
+    ifdsntexistrun ${mosaic} "Creating tiled mosaic image" \
+    CreateTiledMosaic -i ${clipped} -r ${rgb_lbls} -a 0.3 -o ${mosaic} -t -1x7 -f '0x1' -s [10,350,1000] -x ${lbl_mask}
+
+}
 
 #---------------------------
 #---------------------------
@@ -910,7 +998,6 @@ function main()
 
 # 1) Process clarity
 
-
 	# resample to 0.05mm voxel
 	resclar=${regdir}/clar_res0.05.nii.gz
 	resampleclar ${inclar} 0.05 0 4 ${resclar}
@@ -920,69 +1007,46 @@ function main()
     brain=${regdir}/brain.nii.gz
     sharp=${regdir}/clar_res0.05_sharp.nii.gz
     median=${regdir}/clar_res0.05_median.nii.gz
-    getbrainmask ${resclar} ${sharp} ${median} ${brain} ${mask}
+    biasin=${regdir}/clar_res0.05_median_bias.nii.gz
+    otsumaskthr=${regdir}/clar_res0.05_median_bias_otsu_mask_prethr.nii.gz
+    otsumask=${regdir}/clar_res0.05_median_bias_otsu_mask.nii.gz
+    otsucp=${regdir}/clar_res0.05_median_bias_otsu_precp.nii.gz
+    otsu=${regdir}/clar_res0.05_median_bias_otsu.nii.gz
+
+    if [[ ! -f "${otsu}" ]]; then
+        getbrainmask ${resclar} ${sharp} ${median} ${brain} ${mask} ${biasin} ${otsumaskthr} ${otsumask} ${otsucp} ${otsu}
+    fi
 
 	# Mask
 	masclar=${regdir}/clar_res0.05_masked.nii.gz
-	maskimage ${resclar} ${mask} ${masclar}
+	maskimage ${resclar} ${otsumask} ${masclar}
+#	maskimage ${resclar} ${mask} ${masclar}
 
     if [[ "${prebias}" == 1 ]]; then
         biasclar=${masclar}
     else
         # N4 bias correct
         biasclar=${regdir}/clar_res0.05_bias.nii.gz
-        biasfieldcorr ${masclar} ${biasclar} ${mask}
+        biasfieldcorr ${masclar} ${biasclar} ${otsumask}
 
-        # if bias field too inhomogeneous
-#       verybiasclar=${regdir}/clar_res0.05_bias_wlowint.nii.gz
-#        if [[ "${field}" == 1 ]]; then
-#            extrabiasfieldcorr ${biasclar} ${mask}
-#        fi
     fi
 
     # pad image
     padclar=${regdir}/clar_res0.05_pad.nii.gz
     padimage ${biasclar} ${padclar}
 
-	# old Remove outline w erosion & dilation
-
-#	# Thr
-#	thrclar=${regdir}/clar_res0.05_bias_thr.nii.gz
-#	thresh ${biasclar} 2 50 0 1 ${thrclar}
-#
-#	# Ero (remove any components attached to the brain)
-#	eromask=${regdir}/clar_res0.05_ero_mask.nii.gz
-#	erode ${thrclar} 2 ${eromask}
-#
-#    # Get largest component
-#    conncomp=${regdir}/clar_res0.05_ero_mask_comp.nii.gz
-#    c3d ${eromask} -comp -threshold 1 1 1 0 -o ${conncomp}
-#
-#	# Dil
-#	dilmask=${regdir}/clar_res0.05_dil_mask.nii.gz
-#	dilate ${conncomp} 2 ${dilmask}
-
-	# Mask
-#	betclar=${regdir}/clar_res0.05_bias_bet.nii.gz
-#	maskimage ${biasclar} ${dilmask} ${betclar}
-
 	# Orient
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
-
 	orientimg ${padclar} "${ort}" Cubic float ${ortclar}
-#	orientimg ${betclar} "${ort}" Cubic ushort ${ortclar}
 
 	# Smooth
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
 	smoothimg ${ortclar} 0.25 ${smclar}
 
-	# Crop to smallest roi
-#	clarroi=${regdir}/clar_res0.05_ort_sm_roi.nii.gz
-#	croptosmall ${smclar} 5 ${clarroi}
-
 	# make clarity copy
 	clarlnk=${regdir}/clar.nii.gz
-	if [[ ! -f ${clarlnk} ]]; then cp ${smclar} ${clarlnk} ; fi
+	if [[ ! -f "${clarlnk}" ]]; then cp ${smclar} ${clarlnk} ; fi
+
 
 	#---------------------------
 
@@ -1020,7 +1084,6 @@ function main()
 
 
 # 2b) Register to Allen atlas
-	
 
 	# Parameters: 
 
@@ -1047,7 +1110,6 @@ function main()
 
 # 3) Warp Allen labels to original CLARITY (down sampled 2x)
 
-
 	# Tforms
 	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
 	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
@@ -1061,51 +1123,18 @@ function main()
 	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
 	tiflbls=${regdirfinal}/${lblsname}_clar_vox.tif
 	reslbls=${regdirfinal}/${lblsname}_clar.nii.gz
+	unpadtif=${regdir}/${lblsname}_unpad_clar.tif
 	restif=${regdirfinal}/${lblsname}_clar.tif
 
 	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
 
-	# upsample in python now
-	# warpallenlbls $smclar $lbls $antswarp $antsaff $initform $wrplbls LPI NearestNeighbor short $ortlbls $resclar $reslbls
+    wrplblsorg=${regdir}/${lblsname}_ants_org.nii.gz
+    orgortlbls=${regdir}/${lblsname}_ants_org_ort.nii.gz
+    lblsorgnii=${regdirfinal}/${lblsname}_clar_space_downsample.nii.gz
 
-    # setting lbl ort
-    o=${ort:0:1}
-    r=${ort:1:1}
-    t=${ort:2:2}
-
-    ol=${r}
-
-    if [ ${o} == "A" ]; then
-        rl="P"
-    elif [ ${o} == "P" ]; then
-        rl="A"
-    elif [ ${o} == "R" ]; then
-        rl="L"
-    elif [ ${o} == "L" ]; then
-        rl="R"
-    elif [ ${o} == "S" ]; then
-        rl="I"
-    elif [ ${o} == "I" ]; then
-        rl="S"
-    fi
-
-    if [ ${t} == "A" ]; then
-        tl="P"
-    elif [ ${t} == "P" ]; then
-        tl="A"
-    elif [ ${t} == "R" ]; then
-        tl="L"
-    elif [ ${t} == "L" ]; then
-        tl="R"
-    elif [ ${t} == "S" ]; then
-        tl="I"
-    elif [ ${t} == "I" ]; then
-        tl="S"
-    fi
-
-    ortlbl="$ol$rl$tl"
-
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${ortlbl} NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} \
+	 ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} \
+	  ${smclarres} ${inclar} ${orgortlbls} ${lblsorgnii} ${wrplblsorg} ${unpadtif}
 
 
 	#---------------------------
@@ -1115,7 +1144,6 @@ function main()
 
 
 	# ort hres clar
-#	orthresclar=${regdir}/hres_EYFP_ort.nii.gz
 	ortinclar=${regdir}/clar_ort.nii.gz
 
 	# hres Allen
@@ -1125,18 +1153,32 @@ function main()
 	antsinvwarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz
 
 	# out warp hres clar
-#	regorgclar=${regdirfinal}/hresclar_allen_ants.nii.gz
     regorgclar=${regdirfinal}/clar_allen_space.nii.gz
 
+    if [[ "${warphres}" == 1 ]]; then
+        warpinclarallen ${inclar} ${ort} Cubic ushort ${ortinclar} ${allenhres} \
+         ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
+    fi
 
-    warpinclarallen ${inclar} ${ort} Cubic ushort ${ortinclar} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
-#	warphresclarallen ${hresclar} ALS Cubic short ${orthresclar} $allenhres $initform $antsaff $antsinvwarp $regorgclar
+    #---------------------------
+
+
+# 5) Create Tiled Mosaic
+
+    clipped=${regdir}/clar_downsample_res${vox}um_int_clipped.nii.gz
+    custom_lut=${atlasdir}/ara/ara_ants_lut.txt
+    rgb_lbls=${regdir}/${lblsname}_clar_downsample_rgb.nii.gz
+    lbl_mask=${regdir}/${lblsname}_clar_downsample_mask.nii.gz
+    mosaic=${regdirfinal}/allen_labels_to_clar_mosaic.png
+
+    if [[ "${savefig}" == 1 ]]; then
+        createtiledimg ${smclarres} ${clipped} ${wrplbls} ${rgb_lbls} ${lbl_mask} ${custom_lut} ${mosaic}
+    fi
 
 }
 
 
 #--------------------
-
 
 # call main function
 main
@@ -1146,7 +1188,7 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Registration and Allen labels warping done in $DIFF minutes. Have a good day!"
+miracl_utils_endstatement.py -f "Registration and Allen labels warping" -t "$DIFF minutes"
 
 
 # TODOs

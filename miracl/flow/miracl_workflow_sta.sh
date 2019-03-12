@@ -3,7 +3,7 @@
 # get version
 function getversion()
 {
-	ver=`cat $MIRACL_HOME/version.txt`
+	ver=`cat ${MIRACL_HOME}/version.txt`
 	printf "MIRACL pipeline v. $ver \n"
 }
 
@@ -23,9 +23,13 @@ function usage()
     Executes:
 
         io/miracl_io_convertTifftoNII.py
+        lbls/miracl_lbls_get_graph_info.py
+        lbls/miracl_lbls_generate_parents_at_depth.py
         utils/miracl_extract_lbl.py
-        utils/miracl_create_brainmask.py
+        utils/miracl_create_brain_mask.py
         sta/miracl_sta_track_primary_eigen.py
+        lbls/miracl_lbls_stats.py
+        sta/miracl_sta_gen_tract_density.py
 
 
     Usage: `basename $0`
@@ -38,9 +42,13 @@ function usage()
 
 	For command-line / scripting
 
-    Usage: `basename $0` -f [Tiff folder] -o [output nifti] -l [Allen seed label] -r [Reg final dir] -d [ downsample ratio ]
+    Usage: `basename $0` -f [Tiff folder] -o [output nifti] -l [Allen seed label] -m [ hemisphere ] -r [Reg final dir] -d [ downsample ratio ]
 
-    Example: `basename $0` -f my_tifs -o clarity_virus_05xdown.nii.gz -l PL -r clar_reg_final -n "-d 5 -ch AAV" -t "-g 0.5 -k 0.5 -a 25"
+    Example: `basename $0` -f my_tifs -o clarity_virus -l PL -m combined -r clar_reg_final -d 5 -c AAV g 0.5 -k 0.5 -a 25
+
+    Or for right PL:
+
+    Example: `basename $0` -f my_tifs -o clarity_virus -l RPL -m split -r clar_reg_final -d 5 -c AAV -g 0.5 -k 0.5 -a 25
 
         arguments (required):
 
@@ -52,30 +60,39 @@ function usage()
 
             r. CLARITY final registration folder
 
-        optional arguments (do not forget the quotes):
+            m. Labels hemi
+
+            g. [ Derivative of Gaussion (dog) sigma ]
+
+            k. [ Gaussian smoothing sigma ]
+
+            a. [ Tracking angle threshold ]
+
+
+        optional arguments:
 
             d. Downsample ratio (default: 5)
 
-            conversion (invoked by -n " "):                            
+            c. Output channel name
 
-                    cn. [ chan # for extracting single channel from multiple channel data (default: 1) ]
-                    cp. [ chan prefix (string before channel number in file name). ex: C00 ]
-                    ch. [ output chan name (default: AAV) ]
-                    vx. [ original resolution in x-y plane in um (default: 5) ]
-                    vz. [ original thickness (z-axis resolution / spacing between slices) in um (default: 5) ]
-                    c.  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
+            n. chan # for extracting single channel from multiple channel data (default: 0)
 
-            sta parameters (invoked by -t " "):
+            p. chan prefix (string before channel number in file name). ex: C00
 
-                    g. [ Derivative of Gaussion (dog) sigma ]
-			        k. [ Gaussian smoothing sigma ]
-			        a. [ Tracking angle threshold ]
-			    
+            x. original resolution in x-y plane in um (default: 5)
+
+            z. original thickness (z-axis resolution / spacing between slices) in um (default: 5)
+
+
 	----------
 
 	Main Outputs
 
+        tract file = clarity_sta_[label]_seed/dog[dog]_gauss[gauss]/filter_ang[angle].trk
 
+        virus stats csv = virus_signal_stats_depth_[depth].csv
+
+        streamline density stats csv = sta_streamlines_density_stats_depth_[depth].csv
 
     ----------
 
@@ -87,7 +104,7 @@ function usage()
 
 	-----------------------------------
 
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 
 	-----------------------------------
@@ -112,7 +129,7 @@ fi
 
 # check dependencies
 
-if [ -z ${MIRACL_HOME} ];
+if [[ -z ${MIRACL_HOME} ]];
 then
 
     printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh  & rerun script \n"
@@ -175,7 +192,7 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Reading input parameters \n"
 
-	while getopts ":f:o:l:r:d:n:t:" opt; do
+	while getopts ":f:o:l:r:d:n:m:g:k:a:c:n:p:x:z:" opt; do
 
 	    case "${opt}" in
 
@@ -203,8 +220,40 @@ if [[ "$#" -gt 1 ]]; then
             	convopts="${OPTARG}"
             	;;
 
-            t)
-            	staopts="${OPTARG}"
+            a)
+            	angle="${OPTARG}"
+            	;;
+
+            g)
+            	dog="${OPTARG}"
+            	;;
+
+            k)
+            	gauss="${OPTARG}"
+            	;;
+
+            m)
+            	hemi="${OPTARG}"
+            	;;
+
+            c)
+            	chan="${OPTARG}"
+            	;;
+
+            n)
+            	chann="${OPTARG}"
+            	;;
+
+            p)
+            	chanp="${OPTARG}"
+            	;;
+
+            x)
+            	vx="${OPTARG}"
+            	;;
+
+            z)
+            	vz="${OPTARG}"
             	;;
 
         	*)
@@ -218,82 +267,273 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z "${indir}" ];
+	if [[ -z "${indir}" ]];
 	then
 		usage
 		echo "ERROR: < -f => input folder with clarity tifs> not specified"
 		exit 1
 	fi
 
-    if [ -z "${nii}" ];
+    if [[ -z "${nii}" ]];
 	then
 		usage
 		echo "ERROR: < -o => output nii> not specified"
 		exit 1
 	fi
 
-	if [ -z "${lbl}" ];
+	if [[ -z "${lbl}" ]];
 	then
 		usage
 		echo "ERROR: < -l => input seed label> not specified"
 		exit 1
 	fi
 
-    if [ -z "${regdir}" ];
+    if [[ -z "${regdir}" ]];
 	then
 		usage
 		echo "ERROR: < -r => input reg dir> not specified"
 		exit 1
 	fi
 
-    if [ -z "${down}" ];
+    if [[ -z "${down}" ]];
 	then
 		down=5
 	fi
 
+    if [[ -z "${hemi}" ]];
+	then
+		hemi="combined"
+	fi
+
+    if [[ -z "${chan}" ]];
+	then
+		chan="virus"
+	fi
+
+    if [[ -z "${chann}" ]];
+	then
+		chann=0
+	fi
+
+    if [[ -z "${chanp}" ]];
+	then
+		chanp=""
+	fi
+
+    if [[ -z "${vx}" ]];
+	then
+		vx=5
+	fi
+
+    if [[ -z "${vz}" ]];
+	then
+		vz=5
+	fi
+
+
     #---------------------------
     # Call conversion to nii
 
-    printf "\n Running conversion to nii with the following command: \n"
+    down=`printf %02d ${down}`
 
-    printf "\n miracl_io_convertTifftoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1 \n"
-    miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts} -d ${down} -o ${nii} -dz 1
+    nii_file=niftis/${nii}_${down}x_down_${chan}_chan.nii.gz
+
+    if [[ ! -f ${nii_file} ]]; then
+
+        printf "\n Running conversion to nii with the following command: \n"
+
+        printf "\n miracl_io_convertTifftoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
+         -d ${down} -o ${nii} -dz 1 \n"
+        miracl_io_convertTIFFtoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
+         -d ${down} -o ${nii} -dz 1
+
+    else
+
+        printf "\n Nifti file already created for this channel\n"
+
+    fi
 
     #---------------------------
     # Call extract lbl
 
-    printf "\n Running label extraction with the following command: \n"
+    reg_lbls=${regdir}/annotation_hemi_${hemi}_??um_clar_space_downsample.nii.gz
+    #reg_lbls=`echo ${regdir}/annotation_hemi_${hemi}_??um_clar_space_downsample.nii.gz`
 
-    reglbls=`echo ${regdir}/*_clar_downsample.nii.gz`
+    if [[ "${hemi}" == "combined" ]]; then
 
-    printf "\n miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl} \n"
-    miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl}
+        # get chosen depth
+        depth=`miracl_lbls_get_graph_info.py -l ${lbl} | grep depth | tr -dc '0-9'`
+
+    else
+
+        clbl=${lbl:1:${#lbl}}
+        depth=`miracl_lbls_get_graph_info.py -l ${clbl} | grep depth | tr -dc '0-9'`
+
+    fi
+
+    deep_lbls=`echo annotation_hemi_${hemi}_??um_clar_space_downsample_depth_${depth}.nii.gz`
+    #deep_lbls=`echo *_depth_${depth}.nii.gz`
+    #free_lbls=annotation_hemi_${hemi}_clar_space_downsample_depth_${depth}_freeview.nii.gz
+
+    if [[ ! -f ${deep_lbls} ]]; then
+
+        printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
+
+        miracl_lbls_generate_parents_at_depth.py -l ${reg_lbls} -d ${depth}
+
+        c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
+
+    else
+
+        printf "\n Grand parent labels already created at this depth \n"
+
+    fi
+
+    lbl_mask=${lbl}_mask.nii.gz
+
+    if [[ ! -f ${lbl_mask} ]]; then
+
+        printf "\n Running label extraction with the following command: \n"
+
+        printf "\n miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
+
+    else
+
+        printf "\n Label mask already created \n"
+
+    fi
 
     #---------------------------
     # Call create brain mask
 
-    printf "\n Running brain mask creation with the following command: \n"
+    brain_mask=clarity_brain_mask.nii.gz
 
-    niifile=`echo niftis/${nii}*.nii.gz | tail -n1`
+    if [[ ! -f ${brain_mask} ]]; then
 
-    printf "\n miracl_utils_create_brainmask.py -i ${niifile} \n"
-    miracl_utils_create_brainmask.py -i ${niifile}
+        printf "\n Running brain mask creation with the following command: \n"
+
+        printf "\n miracl_utils_create_brain_mask.py -i ${nii_file} \n"
+        miracl_utils_create_brainmask.py -i ${nii_file}
+
+    else
+
+        printf "\n Brain mask already created \n"
+
+    fi
 
     #---------------------------
     # Call STA
 
-    printf "\n Running STA with the following command: \n"
+    out_dir=clarity_sta_${lbl}_seed
 
-    printf "\n miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts} \n"
-    miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts}
+    sta_dir=${out_dir}/dog${dog}gau${gauss}
+
+    if [[ ! -d ${sta_dir} ]]; then
+
+        printf "\n Running STA with the following command: \n"
+
+        printf "\n miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
+        -o ${out_dir} -g ${dog} -k ${gauss} -a ${angle} \n"
+        miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz -o ${out_dir} \
+        -g ${dog} -k ${gauss} -a ${angle}
+
+    else
+
+        printf "\n STA already run with the specified parameters \n "
+
+    fi
 
     #---------------------------
-    # Call lbl stats
 
-    #printf "\n Running signal statistics extraction with the following command: \n"
+    lbl_stats=virus_signal_stats_depth_${depth}.csv
 
-    #printf "\n miracl_lbls_stats.py -i ${niifile} -l ${reglbls} \n"
-    #miracl_lbls_stats.py -i ${niifile} -l ${reglbls}
+    if [[ ! -f ${lbl_stats} ]]; then
+
+        printf "\n Computing signal statistics with the following command: \n"
+
+        printf "\n miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max \n"
+        miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max
+
+    else
+
+        printf "\n Signal statistics already computed at this depth \n"
+
+    fi
+
+    #---------------------------
+
+    # gen tract density map
+    tracts=${sta_dir}/fiber_ang${angle}.trk
+    dens_map=${sta_dir}/sta_streamlines_density_map.nii.gz
+    dens_map_clar=${sta_dir}/sta_streamlines_density_map_clar_space.nii.gz
+    ga_vol=${sta_dir}/ga.nii.gz
+
+    if [[ ! -f ${dens_map_clar} ]]; then
+
+        printf "\n Generating tract density map with the following command: \n"
+
+        printf "\n miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
+        miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map}
+
+        echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+        c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+
+    else
+
+        printf "\n Tract density map already generated \n "
+
+    fi
+
+    #---------------------------
+
+    # gen label stats for density
+    dens_stats=${sta_dir}/sta_streamlines_density_stats_depth_${depth}.csv
+
+    if [[ ! -f ${dens_stats} ]]; then
+
+        printf "\n Computing tract density statistics with the following command: \n"
+
+        printf "\n miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+        miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+
+    else
+
+        printf "\n Tract density statistics already computed at this depth \n"
+
+    fi
+
+    # gen force graph for signal stats
+#    signal_graph=virus_signal_connectivity_graph_depth_${depth}.html
+#
+#    if [[ ! -f ${signal_graph} ]]; then
+#
+#        printf " \n Generating virus signal connectivity graph with the following command: \n "
+#
+#        printf "\n miracl_sta_create_force_graph.py -l ${lbl_stats} -m ${hemi} -o ${signal_graph} \n "
+#        miracl_sta_create_force_graph.py -l ${lbl_stats} -m ${hemi} -o ${signal_graph}
+#
+#    else
+#
+#        printf "\n Virus signal connectivity graph already computed at this depth \n"
+#
+#    fi
+#
+#    # gen force graph for tract density
+#    tract_graph=sta_streamlines_density_connectivity_graph_depth_${depth}.html
+#
+#    if [[ ! -f ${tract_graph} ]]; then
+#
+#        printf " \n Generating virus signal connectivity graph with the following command: \n "
+#
+#        printf "\n miracl_sta_create_force_graph.py -l ${dens_stats} -m ${hemi} -o ${tract_graph} \n "
+#        miracl_sta_create_force_graph.py -l ${dens_stats} -m ${hemi} -o ${tract_graph}
+#
+#    else
+#
+#        printf "\n Tract density connectivity graph already computed at this depth \n"
+#
+#    fi
 
     #---------------------------
     #---------------------------
@@ -310,12 +550,12 @@ else
 
 	# options gui
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "STA workflow"  \
-	        -d 'Input tiff folder' 'CLARITY final registration folder' \
-	        -f 'Out nii name (def = clarity)' 'Seed label abbreviation'  \
-	           'Derivative of Gaussian (dog) sigma' 'Gaussian smoothing sigma' 'Tracking angle threshold' \
- 	          'Downsample ratio (def = 5)'  'chan # (def = 1)' 'chan prefix' \
-              'Out chan name (def = AAV)' 'Resolution (x,y) (def = 5 "um")' 'Thickness (z) (def = 5 "um")' \
-              'Downsample in z (def = 1)'  -hf "`usage`")
+	        -d "Input tiff folder" "CLARITY final registration folder" \
+	        -f "Out nii name (def = clarity)" "Seed label abbreviation" "hemi (combined or split)" \
+	           "Derivative of Gaussian (dog) sigma" "Gaussian smoothing sigma" "Tracking angle threshold" \
+ 	          "Downsample ratio (def = 5)"  "chan # (def = 1)" "chan prefix" \
+              "Out chan name (def = AAV)" "Resolution (x,y) (def = 5 um)" "Thickness (z) (def = 5 um)" \
+              "Downsample in z (def = 1)"  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -327,7 +567,7 @@ else
 
     indir=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-	if [ -z "${indir}" ];
+	if [[ -z "${indir}" ]];
 	then
 		usage
 		echo "ERROR: <input clarity directory> was not chosen"
@@ -337,7 +577,7 @@ else
 	printf "\n Chosen in dir: $indir \n"
 
     regdir=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-    printf "\n Chosen reg dir : $regdir \n"
+    printf "\n Chosen reg dir: $regdir \n"
 
     nii=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen out nii name: $nii \n"
@@ -345,83 +585,207 @@ else
     lbl=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen seed label: $lbl \n"
 
-    dog=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    hemi=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    printf "\n Chosen label hemi: $hemi \n"
+
+    dog=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen Derivative of Gaussian : $dog \n"
 
-    gauss=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    gauss=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen Gaussian smoothing sigma: $gauss \n"
 
-    angle=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    angle=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen tracking angle threshold: $angle \n"
 
-    down=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    down=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen out nii name: $down \n"
-    if [ -z "${down}" ]; then down=5; fi
+    if [[ -z "${down}" ]]; then down=5; fi
 
-    chann=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chann=`echo "${arr[9]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen channel num: $chann \n"
-    if [ -z "${chann}" ]; then chann=""; fi
+    if [[ -z "${chann}" ]]; then chann=""; fi
 
-    chanp=`echo "${arr[9]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chanp=`echo "${arr[10]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen channel prefix: $chanp \n"
-    if [ -z "${chanp}" ]; then chanp=""; fi
+    if [[ -z "${chanp}" ]]; then chanp=""; fi
 
-    chan=`echo "${arr[10]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chan=`echo "${arr[11]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen chan name: $chan \n"
-    if [ -z "${chan}" ]; then chan="AAV"; fi
+    if [[ -z "${chan}" ]]; then chan="AAV"; fi
 
-    vx=`echo "${arr[11]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    vx=`echo "${arr[12]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen vx: $vx \n"
-    if [ -z "${vx}" ]; then vx=5; fi
+    if [[ -z "${vx}" ]]; then vx=5; fi
 
-    vz=`echo "${arr[12]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    vz=`echo "${arr[13]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen vz: $vz \n"
-    if [ -z "${vz}" ]; then vz=5; fi
+    if [[ -z "${vz}" ]]; then vz=5; fi
 
-    downz=`echo "${arr[13]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    downz=`echo "${arr[14]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen down-samle in z: $downz \n"
-    if [ -z "${downz}" ]; then downz=1; fi
+    if [[ -z "${downz}" ]]; then downz=1; fi
 
 
     #---------------------------
     # Call conversion to nii
 
-    printf "\n Running conversion to nii with the following command: \n"
+    nii_file=niftis/${nii}_${down}x_down_${chan}_chan.nii.gz
 
-    printf "\n miracl_io_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-            -ch ${chan} -cn ${chann} -cp ${chanp} \n"
-    miracl_io_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-                                    -ch ${chan} -cn ${chann} -cp ${chanp}
+    if [[ ! -f ${nii_file} ]]; then
+
+        printf "\n Running conversion to nii with the following command: \n"
+
+        printf "\n miracl_io_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+                -ch ${chan} -cn ${chann} -cp ${chanp} \n"
+        miracl_io_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+                                        -ch ${chan} -cn ${chann} -cp ${chanp}
+
+    else
+
+        printf "\n Nifti file already created for this channel\n"
+
+    fi
 
     #---------------------------
     # Call extract lbl
 
-    printf "\n Running label extraction with the following command: \n"
+    reg_lbls=${regdir}/annotation_hemi_${hemi}_??um_clar_space_downsample.nii.gz
 
-    reglbls=`echo ${regdir}/*_clar_downsample.nii.gz`
+    if [[ "${hemi}" == "combined" ]]; then
 
-    printf "\n miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl} \n"
-    miracl_utils_extract_lbl.py -i ${reglbls} -l ${lbl}
+        # get chosen depth
+        depth=`miracl_lbls_get_graph_info.py -l ${lbl} | grep depth | tr -dc '0-9'`
+
+    else
+
+        clbl=${lbl:1:${#lbl}}
+        depth=`miracl_lbls_get_graph_info.py -l ${clbl} | grep depth | tr -dc '0-9'`
+
+    fi
+
+    deep_lbls=annotation_hemi_${hemi}_??um_clar_space_downsample_depth_${depth}.nii.gz
+    #free_lbls=annotation_hemi_${hemi}_clar_space_downsample_depth_${depth}_freeview.nii.gz
+
+    if [[ ! -f ${deep_lbls} ]]; then
+
+        printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
+
+        miracl_lbls_generate_parents_at_depth.py -l ${reg_lbls} -d ${depth}
+
+        c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
+
+    else
+
+        printf "\n Grand parent labels already created at this depth \n"
+
+    fi
+
+    lbl_mask=${lbl}_mask.nii.gz
+
+    if [[ ! -f ${lbl_mask} ]]; then
+
+        printf "\n Running label extraction with the following command: \n"
+
+        printf "\n miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
+
+    else
+
+        printf "\n Label mask already created \n"
+
+    fi
 
     #---------------------------
     # Call create brain mask
 
-    printf "\n Running brain mask creation with the following command: \n"
+    brain_mask=clarity_brain_mask.nii.gz
 
-    niifile=`echo niftis/${nii}*${chan}_chan.nii.gz | tail -n1`
+    if [[ ! -f ${brain_mask} ]]; then
 
-    printf "\n miracl_utils_create_brainmask.py -i ${niifile} \n"
-    miracl_utils_create_brainmask.py -i ${niifile}
+        printf "\n Running brain mask creation with the following command: \n"
+
+        printf "\n miracl_utils_create_brain_mask.py -i ${nii_file} \n"
+        miracl_utils_create_brainmask.py -i ${nii_file}
+
+    else
+
+        printf "\n Brain mask already created \n"
+
+    fi
 
     #---------------------------
     # Call STA
 
+    out_dir=clarity_sta_${lbl}_seed
+
     printf "\n Running STA with the following command: \n"
 
-    printf "\n miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
-               -dog ${dog} -gauss ${gauss} -angle ${angle} \n"
-    miracl_sta_track_primary_eigen.sh -i ${niifile} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz ${staopts} \
-                                     -g ${dog} -k ${gauss} -a ${angle}
+    printf "\n miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
+               -dog ${dog} -gauss ${gauss} -angle ${angle} -o ${out_dir} \n"
+    miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
+                                     -g ${dog} -k ${gauss} -a ${angle} -o ${out_dir}
+
+    #---------------------------
+    # Call lbl stats
+
+    lbl_stats=virus_signal_stats_depth_${depth}.csv
+
+    if [[ ! -f ${lbl_stats} ]]; then
+
+        printf "\n Computing signal statistics with the following command: \n"
+
+        printf "\n miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max \n"
+        miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max
+
+    else
+
+        printf "\n Signal statistics already computed at this depth \n"
+
+    fi
+
+    #---------------------------
+
+    # gen tract density map
+    tracts=${sta_dir}/fiber_ang${angle}.trk
+    dens_map=${sta_dir}/sta_streamlines_density_map.nii.gz
+    dens_map_clar=${sta_dir}/sta_streamlines_density_map_clar_space.nii.gz
+    ga_vol=${sta_dir}/ga.nii.gz
+
+    if [[ ! -f ${dens_map_clar} ]]; then
+
+        printf "\n Generating tract density map with the following command: \n"
+
+        printf "\n miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
+        miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map}
+
+        echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+        c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+
+    else
+
+        printf "\n Tract density map already generated \n "
+
+    fi
+
+    #---------------------------
+
+    # gen label stats for density
+    dens_stats=${sta_dir}/sta_streamlines_density_stats_depth_${depth}.csv
+
+    if [[ ! -f ${dens_stats} ]]; then
+
+        printf "\n Computing tract density statistics with the following command: \n"
+
+        printf "\n miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+        miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+
+    else
+
+        printf "\n Tract density statistics already computed at this depth \n"
+
+    fi
+
+    #---------------------------
 
 fi
 

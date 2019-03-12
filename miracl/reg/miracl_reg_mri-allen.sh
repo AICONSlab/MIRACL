@@ -541,8 +541,8 @@ function smoothimg()
 	local sigma=$2
 	local smmr=$3
 
-#	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr 1 $smmr 0 1
-    ifdsntexistrun ${smmr} "Smoothing MRI image" c3d ${ortmr} -smooth ${sigma}vox -o ${smmr}
+	ifdsntexistrun $smmr "Smoothing MRI image" SmoothImage 3 $ortmr ${sigma} $smmr 0 1
+#    ifdsntexistrun ${smmr} "Smoothing MRI image" c3d ${ortmr} -smooth ${sigma}x${sigma}x${sigma}mm -o ${smmr}
 
 }
 
@@ -732,7 +732,8 @@ function main()
 
     # Smooth
     smmr=${regdir}/mr_bias_thr_ort_bet_sm.nii.gz
-    smoothimg ${orghdmr} 0.25 ${smmr}
+    smoothimg ${orghdmr} 1 ${smmr}
+#    smoothimg ${orghdmr} 0.25 ${smmr}
 
 	# make MRI copy
 	mrlnk=${regdir}/mr.nii.gz

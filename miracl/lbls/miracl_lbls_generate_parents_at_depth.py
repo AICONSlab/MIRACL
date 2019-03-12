@@ -21,13 +21,17 @@ import pandas as pd
 def helpmsg():
     return '''
     miracl_lbls_generate_parents_at_depth.py -d [depth] -m [hemisphere: split or combined
-    (default: combined)]  -v [voxel size in um: 10, 25 or 50 (default: 25)]
+    (default: combined)] -v [voxel size in um: 10, 25 or 50 (default: 25)] -l [input labels (default: Allen labels]
 
     Generate parents labels at specific depth from Allen labels
 
     Labels with higher depth are combined by their parent labels
 
     example: miracl_lbls_generate_parents_at_depth.py -d 6 -m combined -v 10
+
+    or
+
+    miracl_lbls_generate_parents_at_depth.py -l my_registered_labels.nii.gz -d 6
 
     '''
 
@@ -40,6 +44,7 @@ def parseinput():
     parser.add_argument('-d', '--depth', type=int, help="chosen depth", required=True)
     parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not", required=False)
     parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)
+    parser.add_argument('-l', '--inlbls', type=str, help="input labels", required=False)
 
     args = parser.parse_args()
 
@@ -52,21 +57,30 @@ def parseinput():
         assert isinstance(args.depth, int)
         d = args.depth
 
-    if args.hemi is None:
-        hemi = "combined"
-        print("hemisphere not specified ... choosing default value of %s" % hemi)
-    else:
-        assert isinstance(args.hemi, str)
-        hemi = args.hemi
+    if args.inlbls is None:
+        inlbls = "Allen"
+        print("input labels not specified ... choosing default Allen lbls")
 
-    if args.res is None:
-        res = 25
-        print("voxel size not specified ... choosing default value of %dum" % res)
-    else:
-        assert isinstance(args.res, int)
-        res = args.res
+        if args.hemi is None:
+            hemi = "combined"
+            print("hemisphere not specified ... choosing default value of %s" % hemi)
+        else:
+            assert isinstance(args.hemi, str)
+            hemi = args.hemi
 
-    return d, hemi, res
+        if args.res is None:
+            res = 25
+            print("voxel size not specified ... choosing default value of %dum" % res)
+        else:
+            assert isinstance(args.res, int)
+            res = args.res
+
+    else:
+        inlbls = args.inlbls
+        hemi = None
+        res = None
+
+    return d, inlbls, hemi, res
 
 
 # --- Init pars ---
@@ -147,13 +161,21 @@ def saveniiparents(parentdata, vx, outnii):
 def main():
     starttime = datetime.now()
 
-    d, hemi, res = parseinput()
-
-    # load annotations
-    print("Reading ARA annotation with %s hemispheres and %d voxel size" % (hemi, res))
+    d, inlbls, hemi, res = parseinput()
 
     miracl_home = os.environ['MIRACL_HOME']
-    nii = '%s/atlases/ara/annotation/annotation_hemi_%s_%dum.nii.gz' % (miracl_home, hemi, res)
+
+    if inlbls == "Allen":
+
+        # load annotations
+        print("Reading ARA annotation with %s hemispheres and %d voxel size" % (hemi, res))
+
+        nii = '%s/atlases/ara/annotation/annotation_hemi_%s_%dum.nii.gz' % (miracl_home, hemi, res)
+
+    else:
+        print("Reading input labels")
+        nii = inlbls
+
     img = nib.load(nii)
     data = img.get_data()
 
@@ -180,10 +202,11 @@ def main():
     outnii = '%s_depth_%s.nii.gz' % (orgname, d)
     saveniiparents(parentdata, vx, outnii)
 
-    # orient
-    call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
+    if inlbls == "Allen":
+        # orient
+        call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
 
-    call(["c3d", "%s" % outnii, "-origin", "-11.4x0x0mm", "-o", "%s" % outnii])
+        call(["c3d", "%s" % outnii, "-origin", "-11.4x0x0mm", "-o", "%s" % outnii])
 
     print ("\n Parent labels at depth done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 

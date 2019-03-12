@@ -13,7 +13,7 @@ function usage()
     
     cat <<usage
 
-    Performs CSD tractography and track density mapping for a seed region using mrtrix3
+    Performs CSD tractography and track density mapping for a seed region using MRtrix3
     
     1) Computes response function of the diffusion data
     2) Computes fiber orientation distribution (FOD) from the response function
@@ -38,7 +38,7 @@ Required arguments:
 
     s. Tractography seed
 
-    v. Tract density map voxel size
+    v. Tract density map voxel size (in mm)
 
     t. Output tract name
 
@@ -106,7 +106,7 @@ while getopts ":d:m:r:b:s:v:t:f:e:p:" opt; do
             track=${OPTARG}
             ;;
         f)
-            workdir=`pwd`/${OPTARG}
+            workdir=${OPTARG}
             ;;
         e)
             excludeseed=${OPTARG}

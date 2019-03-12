@@ -21,7 +21,7 @@ is a general-purpose, open-source pipeline for automated:
 (c) Maged Goubran, 
     mgoubran@stanford.edu
 
-@ Stanford University, 2016
+@ Stanford University, 2017
 
 All Rights Reserved. 
 

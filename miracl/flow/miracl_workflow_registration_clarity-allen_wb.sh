@@ -3,7 +3,7 @@
 # get version
 function getversion()
 {
-	ver=`cat $MIRACL_HOME/version.txt`
+	ver=`cat ${MIRACL_HOME}/version.txt`
 	printf "\n MIRACL pipeline v. $ver \n"
 }
 
@@ -74,6 +74,8 @@ function usage()
 
                 If l. is specified (m & v cannot be specified)
 
+            s.  side, if only registering a hemisphere instead of whole brain
+                accepted inputs are: rh (right hemisphere) or lh (left)
 
 	----------
 
@@ -154,7 +156,7 @@ fi
 
 # check dependencies
 
-if [ -z ${MIRACL_HOME} ];
+if [[ -z ${MIRACL_HOME} ]];
 then
 
     printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh  & rerun script \n"
@@ -163,7 +165,7 @@ then
 fi
 
 
-if [ -z ${ANTSPATH} ];
+if [[ -z ${ANTSPATH} ]];
 then
 	printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"
 	exit 1
@@ -232,7 +234,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z ${indir} ];
+	if [[ -z ${indir} ]];
 	then
 		usage
 		echo "ERROR: < -f => input folder with clarity tifs> not specified"
@@ -265,7 +267,7 @@ if [[ "$#" -gt 1 ]]; then
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
 
-    if [ -z "${convopts}" ];
+    if [[ -z "${convopts}" ]];
 	then
 
         printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} \n"
@@ -287,7 +289,7 @@ if [[ "$#" -gt 1 ]]; then
     # last file made in niftis folder
     nii=`ls -r niftis | tail -n 1`
 
-    if [ -z "${regopts}" ];
+    if [[ -z "${regopts}" ]];
 	then
 
         printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} \n"
@@ -324,7 +326,7 @@ else
 
     # check required input arguments
 
-	if [ -z ${indir} ];
+	if [[ -z ${indir} ]];
 	then
 		usage
 		echo "ERROR: input CLARITY dir not specified"
@@ -399,7 +401,8 @@ else
     # Get reg opts
 
     # options gui for Reg
-	regopts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" -hf "`usage`")
+	regopts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" \
+	        -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side [blank (def) / rh / lh]"  -hf "`usage`")
 
 	# populate array
 	regarr=()
@@ -410,15 +413,19 @@ else
 
 	hemi=`echo "${regarr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${hemi} ]]; then hemi="combined" ; fi
-	printf "\n Chosen hemi: $hemi \n"
+	printf "\n Chosen hemi: ${hemi} \n"
 
 	vox=`echo "${regarr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${vox} ]]; then vox=10 ; fi
-	printf "\n Chosen vox (um): $vox \n"
+	printf "\n Chosen vox (um): ${vox} \n"
 
 	ob=`echo "${regarr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${ob} ]]; then ob=0 ; fi
-    printf "\n Chosen ob: $ob \n"
+    printf "\n Chosen ob: ${ob} \n"
+
+	side=`echo "${regarr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    if [[ -z ${side} ]]; then side="" ; fi
+    printf "\n Chosen ob: ${side} \n"
 
 
     #---------------------------
@@ -450,8 +457,8 @@ else
     ort=`cat ort2std.txt | grep ortcode | cut -d '=' -f 2`
     ort="${ort:0:3}"
 
-    printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} \n"
-    miracl_reg_clar-allen_whole_brain.sh -i "niftis/"${nii}"" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}"
+    printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} \n"
+    miracl_reg_clar-allen_whole_brain.sh -i "niftis/"${nii}"" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}"
 
 
 fi
@@ -466,4 +473,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-printf "\n Conversion, Registration and Allen labels warping done in $DIFF minutes. Have a good day!"
+printf "\n Conversion, Registration and Allen labels warping done in ${DIFF} minutes. Have a good day!"

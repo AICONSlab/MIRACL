@@ -65,11 +65,11 @@ if (convert==1) {
 
         print("Reading all files with " +fstr+ " in filename");
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort convert");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file="+fstr+" sort convert");
 
     } else {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort convert");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file=tif sort convert");
 
     }
 
@@ -81,11 +81,11 @@ if (convert==1) {
 
         print("Reading all files with " +fstr+ " in filename");
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=&fstr sort");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file="+fstr+" sort");
 
     } else {
 
-        run("Image Sequence...", "open=&path starting=1 increment=1 scale=100 file=tif sort");
+        run("Image Sequence...", "open="+path+" starting=1 increment=1 scale=100 file=tif sort");
 
     }
 
@@ -141,6 +141,9 @@ close();
 
 outenhance = segpath + "backremov_enhance.tif";
 
+// Collect Garbage
+call("java.lang.System.gc");
+
 if (!File.exists(outenhance)) {
 
 	// Duplicate image
@@ -173,13 +176,16 @@ call("java.lang.System.gc");
 
 outmed = segpath + "backremov_enhance_median.tif";
 
+// Collect Garbage
+call("java.lang.System.gc");
+
 if (!File.exists(outmed)) {
 
 	print("-- Computing Median image");
 	print("using " +ncpus+ " CPUs for parallelization");
 
 	// Create median image
-	run("3D Fast Filters","filter=Median radius_x_pix=&radpx radius_y_pix=&radpx radius_z_pix=&radpz Nb_cpus=&ncpus");
+	run("3D Fast Filters","filter=Median radius_x_pix="+radpx+" radius_y_pix="+radpx+" radius_z_pix="+radpz+" Nb_cpus="+ncpus+"");
 
 	// Save Med
 	save(outmed);
@@ -216,6 +222,9 @@ rename("MedianImg");
 
 outlocthr = segpath + "median_locthr.tif";
 
+// Collect Garbage
+call("java.lang.System.gc");
+
 if (!File.exists(outlocthr)) {
 
 	// Duplicate image
@@ -237,7 +246,6 @@ if (!File.exists(outlocthr)) {
 
 }
 
-
 locthrstack = getImageID();
 locthrtitle = getTitle();
 
@@ -249,11 +257,14 @@ rename("LocalThr");
 
 outmin = segpath + "median_locthr_min.tif";
 
+// Collect Garbage
+call("java.lang.System.gc");
+
 if (!File.exists(outmin)) {
 
 	print("-- Computing Minimum");
 
-	run("3D Fast Filters","filter=Minimum radius_x_pix=&radpx radius_y_pix=&radpx radius_z_pix=&radpz Nb_cpus=ncpus");
+	run("3D Fast Filters","filter=Minimum radius_x_pix="+radpx+" radius_y_pix="+radpx+" radius_z_pix="+radpz+" Nb_cpus="+ncpus+"");
 
 	// Save min
 	save(outmin);
@@ -282,7 +293,7 @@ if (!File.exists(outfil)) {
 
 	print("-- Filtering very large objects");
 
-	run("3D Simple Segmentation", "low_threshold=128 min_size=0 max_size=&maxobjsz");
+	run("3D Simple Segmentation", "low_threshold=128 min_size=0 max_size="+maxobjsz+"");
 
 } else {
 
@@ -301,8 +312,8 @@ selectImage(backstack);
 close();
 
 // close enhance image
-//selectImage(enhancestack);
-//close();
+selectImage("EnhanceStack");
+close();
 
 // close min image
 selectImage(minstack);

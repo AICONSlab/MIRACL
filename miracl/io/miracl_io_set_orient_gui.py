@@ -249,45 +249,72 @@ root.mainloop()
 
 # Get orientation and annotations
 
+# Axial
 if AOVar.get() == 1:
-    ort = list('RAS')  # are these right?!
-elif SOVar.get() == 1:
     ort = list('ARS')
-elif COVar.get() == 1:
+
+    # get Top
+    if ATVar.get() == 1:
+        ort[0] = 'A'
+    elif PTVar.get() == 1:
+        ort[0] = 'P'
+
+    # get Right
+    if RRVar.get() == 1:
+        ort[1] = 'L'
+    elif LRVar.get() == 1:
+        ort[1] = 'R'
+
+    # get into page (left button)
+    if SLVar.get() == 1:
+        ort[2] = 'I'
+    elif ILVar.get() == 1:
+        ort[2] = 'S'
+
+# Sagittal
+elif SOVar.get() == 1:
     ort = list('ASR')
 
-# Get Top
+    # get Top
+    if ATVar.get() == 1:
+        ort[0] = 'A'
+    elif PTVar.get() == 1:
+        ort[0] = 'P'
 
-# if STVar.get() == 1:
-# elif ITVar.get() == 1:
-# elif RTVar.get() == 1:
-# elif LTVar.get() == 1:
-if ATVar.get() == 1:
-    ort[0] = 'A'
-elif PTVar.get() == 1:
-    ort[0] = 'P'
+    # get Right
+    if SRVar.get() == 1:
+        ort[1] = 'I'
+    elif IRVar.get() == 1:
+        ort[1] = 'S'
 
-# Get right
+    # get into page
+    if RLVar.get() == 1:
+        ort[2] = 'R'
+    elif LLVar.get() == 1:
+        ort[2] = 'L'
 
-# if SRVar.get() == 1:
-# elif IRVar.get() == 1:
-if RRVar.get() == 1:
-    ort[1] = 'L'
-elif LRVar.get() == 1:
-    ort[1] = 'R'
-# elif ARVar.get() == 1:
-# elif PRVar.get() == 1:
+# Coronal
+elif COVar.get() == 1:
+    ort = list('RAS')
 
-# get page
+    # get Top
+    if STVar.get() == 1:
+        ort[0] = 'R'
+    elif ITVar.get() == 1:
+        ort[0] = 'L'
 
-if SLVar.get() == 1:
-    ort[2] = 'I'
-elif ILVar.get() == 1:
-    ort[2] = 'S'
+    # get Right
+    if RRVar.get() == 1:
+        ort[1] = 'A'
+    elif LRVar.get() == 1:
+        ort[1] = 'P'
 
-# our data (coronal) norm ARS
-# if A-P flipped (PRS) & if R-L -> ALS
-# desired ort ASR 
+    # get into page
+    if ALVar.get() == 1:
+        ort[2] = 'S'
+    elif PLVar.get() == 1:
+        ort[2] = 'I'
+
 
 ortstr = ''.join(ort)
 
@@ -296,13 +323,6 @@ ortstr = ''.join(ort)
 with open("ort2std.txt", "w") as myfile:
     myfile.write("tifdir=%s \nortcode=%s \n" % (indir, ortstr))
 
-    # main fn
-
 
 # TODOlps
-
-# Add help fn
-# setup for other than coronal
-# reformat code w fns n main fn
-# Setup for multiple channels
-    # scroll bar
+# scroll bar
