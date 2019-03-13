@@ -13,7 +13,7 @@ RUN curl -LO http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
     rm Miniconda-latest-Linux-x86_64.sh
 ENV PATH=/opt/miniconda/bin:${PATH}
 
-RUN mkdir -p /code /data
+RUN mkdir -p /code/atlases /data
 WORKDIR /code
 ADD . /code
 
@@ -39,7 +39,7 @@ ENV PATH $ANTSPATH/bin:/opt/fiji/bin:${PATH}
 # Fiji Plugins
 WORKDIR /opt/fiji/plugins
 RUN wget https://github.com/ijpb/MorphoLibJ/releases/download/v1.4.0/MorphoLibJ_-1.4.0.jar && \
-    wget https://github.com/thorstenwagner/ij-shape-filter/releases/download/v.1.4.2/ij_shape_filter-1.4.2.jar
+    wget https://github.com/thorstenwagner/ij-shape-filter/releases/download/v.1.4.2/ij_shape_filter-1.4.2.jar && \
     wget https://sites.imagej.net/Tboudier/plugins/mcib3d-suite/mcib3d_plugins.jar-20190201145530 && \
     mv mcib3d_plugins.jar-20190201145530 mcib3d_plugins.jar
 
@@ -61,7 +61,12 @@ RUN python /code/setup.py install
 
 ###############################################################################
 #--- Allen atlas alias ----
-# NOTE to @mirabel - we need to put this somewhere to download with wget/curl
+
+WORKDIR /tmp
+RUN wget https://github.com/vsoch/MIRACLextra && \
+    cd MIRACLextra && \
+    mv ara /code/atlases/ara
+
 ENV aradir "${MIRACL_HOME}/atlases/ara"
 
 # Templates (atlas images)
@@ -84,4 +89,7 @@ ENV snaplut "${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt"
 ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 ################################################################################
 
+RUN chmod u+x /code/run.sh
+
+CMD ["/code/run.sh"]
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
