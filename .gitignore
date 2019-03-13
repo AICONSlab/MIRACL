@@ -6,10 +6,6 @@ atlases/
 -----------
 data/
 
-# Depends #
------------
-depends/
-
 # Singularity #
 ###############
 miracl.img
