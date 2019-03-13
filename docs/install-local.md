@@ -1,114 +1,148 @@
 # Local Install
 Steps to setup/run MIRACL on a Linux / Mac OS X machine:
 
-## Install / Check dependencies
+    git clone https://github.com/mgoubran/MIRACL.git miracl
 
-### Python
-[Install Python 2.7](https://www.python.org/downloads/) (if you do not have it)  
-For the required packages we recommend using [Anaconda](https://www.continuum.io/downloads) for numpy, scipy, etc.
-You should also install pip.
-  
-### Run
+(or download the zip file containg the repo and uncompress it), then:
 
-Then run        
-    -> Run: 
+    cd miracl
 
-      ( from inside [miracl dir] : where you placed the pipeline )
+To setup a virtual environment, download Anaconda for Python 2.7:
+https://www.anaconda.com/distribution/#download-section,
 
-        mv io tmp
+Then create the environment:
 
-        pip install -e .
+    conda create --name miracl python=2.7.11 pip
 
-        mv tmp io
+    source activate miracl
 
-    -> install PyQt4 using anaconda, run:
+install Dependencies
+
+    mv io tmp
+
+    pip install -e .
+
+    mv tmp io
+
+#### PyQT
+install PyQt4 using anaconda, run:
         
-        conda install pyqt=4
-            
-    -> Fiji/ImageJ
-    
-      https://imagej.net/Fiji/Downloads
+    conda install pyqt=4
 
-    -> FSL
+#### ANTS & c3d
 
-      https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation
+Place the **depends** folder inside **linux_depends** or **mac_depends** (based on your OS), found here:
 
-    - ANTS (compiled version included in package)
-    - c3d (compiled version included in package)
-    
-    _________________
-    
-    For diffusion MRI data install:
+https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
 
-    -> MRtrix3
-   
-      http://www.mrtrix.org
-                
-    _________________
+inside the **miracl** folder
 
-    For the visualization of nifti files and labels we recommend "ITKSNAP":
-    http://www.itksnap.org/pmwiki/pmwiki.php?n=Downloads.SNAP3
+    mv ~/Downloads/depends.zip miracl/.
+    cd miracl
+    unzip depends.zip
+    rm depends.zip
 
-    &
+This folder contains compiled versions of **ANTS** and **c3d** for Linux or Mac OS
 
-    the nifti plugin for Fiji/ImageJ
-    https://imagej.nih.gov/ij/plugins/nifti.html
+#### Allen atlases
+
+Place the **atlases** folder in the same link above inside the **miracl** folder
+
+    mv ~/Downloads/atlases.zip miracl/.
+    cd miracl
+    unzip atlases.zip
+    rm atlases.zip
+
+This folder contains the Allen atlas data needed for registration and connectivity analysis
+
+#### Fiji & FSL
+
+install Fiji & FSL:
+
+[Fiji/ImageJ](https://imagej.net/Fiji/Downloads)
+
+for Linux:
+
+    cd depends
+    wget https://downloads.imagej.net/fiji/latest/fiji-linux64.zip
+    unzip fiji-linux64.zip
+    rm fiji-linux64.zip
+
+install additional plugins by:
+
+going to Help -> Update and press "Manage update sites" button and
+
+choose or press "Add update site" button and add the following links there:
+
+    3D ImageJ Suite: http://sites.imagej.net/Tboudier/
+
+    MorphoLibJ: http://sites.imagej.net/IJPB-plugins/
+
+    Biomedgroup: https://sites.imagej.net/Biomedgroup/
 
 
-2) Setup user path
+[FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
 
-    -> Run user_setup.sh 
-    
-    This script will setup your environment to add MIRACL functions to your path
+    wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py
+    sudo python fslinstaller.py
+
+## Setup user path
+
+For Linux run:
+
+    ./user_setup.sh
+
+or for Mac run:
+
+    ./user_setup_mac.sh
+
+This script will setup your environment to add MIRACL functions to your path
     (to call them from anywhere) & with the following aliases:
-    
+
     $MIRACL_HOME = localtion of pipeline and its dependencies
-    
-    Allen reference atlas (ara) files (with resolutions 10, 25 & 50 um):
-    
+
+Allen reference atlas (ara) files (with resolutions 10, 25 & 50 um):
+
     $allen10 -> Template/Atlas Image
-    $lbls10  -> Annoation/Segmentation    
+    $lbls10  -> Annoation/Segmentation
     $snaplut -> ITKsnap Label Descriptions
     $freelut -> Freeview Label Descriptions
-    
+
+## Visualization
+
+For the visualization of nifti files and labels we recommend [ITKSNAP](http://www.itksnap.org/pmwiki/pmwiki.php?n=Downloads.SNAP3)
+
+or the [nifti plugin](https://imagej.nih.gov/ij/plugins/nifti.html) for Fiji/ImageJ
+
+
+## Diffusion Data
+
+If you have diffusion MRI data install:
+
+[MRtrix3](http://www.mrtrix.org)
+
+    sudo apt-get install git g++ python python-numpy libeigen3-dev zlib1g-dev libqt4-opengl-dev libgl1-mesa-dev libfftw3-dev libtiff5-dev
+    git clone https://github.com/MRtrix3/mrtrix3.git
+    cd mrtrix3
+    ./configure
+    ./build
+    ./set_path
+
+## Deactivate
+
+To end session
+
+    source deactivate
+
+## Update MIRACL
+
+To update the package
+
+    cd miracl
+    git pull
+
 ____________________________
 
 
-The pipeline is combined of different "Modules" depending on their functionality
-
-Functions for each module are grouped together:
-  
-   connect -> Connectivity
-
-   io -> Input/Output (conversion/orientation)
-    
-   reg -> Registration
-    
-   seg -> Segmentation
-    
-   lbls -> Labels
-    
-   stats -> Statistics
-
-
-The workflow (flow) module combines multiple functions for ease of use to preform a desired task
-     
-    for example, for a standard reg/seg analysis a user would run: 
-    
-    1) miracl_workflow_registration_clarity-allen_wb.sh -> to perform registration of whole-brain clarity data to ARA
-    
-     then
-    
-    2) miracl_workflow_segmentation_clarity.sh -> to perform segmentation & feature extraction of full resolution clarity data 
-
-
-The "Atlases" folder contains templates, annotations, histology, ontology graph info & LUT/label description of the Allen reference atlas (ARA)
-
-
-The "Data" folder contains test data with example inputs and outputs for the registration and segmentation modules
-
-
-for a detailed description & input parameters please check the respective wiki of each module 
-
-
 You should be good to go!
+
