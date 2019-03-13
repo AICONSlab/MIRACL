@@ -15,11 +15,11 @@ ENV PATH=/opt/miniconda/bin:${PATH}
 
 RUN mkdir -p /code/atlases /data
 WORKDIR /code
-ADD . /code
 
-RUN conda install -y numpy matplotlib joblib scipy pandas && \
+RUN apt install -y libhdf5-serial-dev && \
+    conda install -y numpy matplotlib joblib scipy pandas && \
     conda install -y -c conda-forge tifffile && \
-    conda install -y -c menpo opencv libhdf5-serial-dev
+    conda install -y -c menpo opencv
 
 # ANTS
 RUN mkdir -p /opt/ANTs && \
@@ -53,7 +53,7 @@ RUN conda install -y cython h5py && \
     conda install -y pyqt=4 && \
     conda install -y pandas=0.19.2
 
-WORKDIR /code
+ADD . /code
 RUN git clone https://github.com/sergivalverde/nifti_tools && \
     mv nifti_tools /code/depends/NIFTI_TOOLS
 ENV MIRACL_HOME=/code
@@ -63,7 +63,7 @@ RUN python /code/setup.py install
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN wget https://github.com/vsoch/MIRACLextra && \
+RUN git clone https://github.com/vsoch/MIRACLextra && \
     cd MIRACLextra && \
     mv ara /code/atlases/ara
 
