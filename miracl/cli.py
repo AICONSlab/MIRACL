@@ -44,6 +44,7 @@ def get_parser():
 
     return parser
 
+
 def main(args=None):
     """ main cli call"""
     if args is None:
