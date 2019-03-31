@@ -48,6 +48,10 @@ def get_parser():
         '-n',
         help=""
     )
+    parser_regclar.add_argument(
+        '-h',
+        help="help func"
+    )
 
     parser_regclar.set_defaults(func=run_reg_clar)
 
@@ -70,7 +74,6 @@ def get_parser():
     )
 
     parser_sta.set_defaults(func=run_sta)
-
 
     return parser
 
