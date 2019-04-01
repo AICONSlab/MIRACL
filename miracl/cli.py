@@ -29,7 +29,7 @@ def get_parser():
         'reg_clar',
         help="Wrapper for registering clarity data to allen Reference brain atlas"
     )
-    parser_flow.add_argument(
+    parser_flow.add_subparsers(
         'sta',
         help="Wrapper for structure tensor analysis (STA), uses registered labels to create"
     )
