@@ -5,8 +5,8 @@ import subprocess
 import logging
 from pathlib import Path
 
-# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# logger = logging.getLogger()
+logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logger = logging.getLogger()
 
 
 def run_reg_clar(parser, args):

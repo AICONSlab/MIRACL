@@ -6,7 +6,7 @@
 import os
 import subprocess
 import sys
-
+from pathlib import Path
 from PyQt4 import QtGui, QtCore
 
 
@@ -304,7 +304,9 @@ def main():
 
     mainwidget.move(QtGui.QApplication.desktop().screen().rect().center() - mainwidget.rect().center())
 
-    miracl_home = os.environ['MIRACL_HOME']
+    gui_cli = os.path.realpath(__file__)
+    miracl_home = Path(gui_cli).parents[1]
+
     with open('%s/version.txt' % miracl_home, 'r') as versfile:
         vers = versfile.read()
     mainwidget.setWindowTitle("MIRACL v. %s" % vers.rstrip())
