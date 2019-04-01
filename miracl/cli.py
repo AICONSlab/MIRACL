@@ -2,12 +2,12 @@ import sys
 import argparse
 import logging
 
-logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
+# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
+# logger = logging.getLogger()
 
 from miracl.flow import cli_flow
 
-#from miracl.reg import cli_reg
+# from miracl.reg import cli_reg
 
 # def run_reg(parser, args):
 #     cli_reg(args)

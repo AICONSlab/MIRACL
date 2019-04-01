@@ -5,14 +5,14 @@ import subprocess
 import logging
 from pathlib import Path
 
-logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
+# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
+# logger = logging.getLogger()
 
 
 def run_reg_clar(parser, args):
 
     flow_cli = os.path.realpath(__file__)
-    flow_dir = Path(flow_cli).parents[2]
+    flow_dir = Path(flow_cli).parents[1]
 
     subprocess.check_call('%s/miracl_workflow_registration_clarity-allen_wb.sh %s' % (flow_dir, args), shell=True,
                           stdout=subprocess.PIPE,
