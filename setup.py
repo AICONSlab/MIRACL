@@ -41,7 +41,7 @@ setup(
         'matplotlib==2.1'
     ],
     entry_points = {'console_scripts': [ 'miracl=miracl.cli:main' ],
-                    'gui_scripts': ['miracl=miracl.miraclGUI:main']},
+                    'gui_scripts': ['miraclGUI=miracl.miraclGUI:main']},
     keywords=[
         'neuroscience brain-atlas connectivity networks clarity mri neuroimaging allen-brain-atlas',
         'mouse-atlases medical-imaging mouse biomedical image-processing image-registration image-segmentation',
