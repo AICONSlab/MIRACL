@@ -25,18 +25,20 @@ def get_parser():
         'flow',
         help=""
     )
-    parser_flow.add_subparsers(
-        'reg_clar',
-        help="Wrapper for registering clarity data to allen Reference brain atlas"
-    )
-    parser_flow.add_subparsers(
-        'sta',
-        help="Wrapper for structure tensor analysis (STA), uses registered labels to create"
-    )
-    parser_flow.add_argument(
-        'seg',
-        help="Wrapper for segmentation, segments neurons in cleared mouse brain of sparse or nuclear"
-    )
+
+    # parser_flow.add_argument(
+    #     'reg_clar',
+    #     help="Wrapper for registering clarity data to allen Reference brain atlas"
+    # )
+
+    # parser_flow.add_subparsers(
+    #     'sta',
+    #     help="Wrapper for structure tensor analysis (STA), uses registered labels to create"
+    # )
+    # parser_flow.add_argument(
+    #     'seg',
+    #     help="Wrapper for segmentation, segments neurons in cleared mouse brain of sparse or nuclear"
+    # )
 
     parser_flow.set_defaults(func=run_flow)
 
