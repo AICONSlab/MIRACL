@@ -25,7 +25,7 @@ def get_parser():
         'flow',
         help=""
     )
-    parser_flow.add_argument(
+    parser_flow.add_subparsers(
         'reg_clar',
         help="Wrapper for registering clarity data to allen Reference brain atlas"
     )

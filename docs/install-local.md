@@ -18,11 +18,7 @@ Then create the environment:
 
 install Dependencies
 
-    mv io tmp
-
     pip install -e .
-
-    mv tmp io
 
 #### PyQT
 install PyQt4 using anaconda, run:
