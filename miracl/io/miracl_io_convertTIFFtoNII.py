@@ -87,7 +87,8 @@ def folder_dialog(self, msg):
     return folder
 
 
-def parsefn(args):
+# def parsefn(args):
+def parsefn():
     # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
     # add_help=False)
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
@@ -122,7 +123,7 @@ def parsefn(args):
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
-    if len(args) == 1:
+    if len(sys.argv) == 1:
 
         print("Running in GUI mode")
 

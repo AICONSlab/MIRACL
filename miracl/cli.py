@@ -16,12 +16,31 @@ from miracl.lbls import cli_lbls
 from miracl.sta import cli_sta
 
 
-def run_reg(parser, args):
-    cli_reg(args)
-
-
 def run_flow(parser, args):
     cli_flow.main(args)
+
+def run_reg(parser, args):
+    cli_reg.main(args)
+
+
+def run_seg(parser, args):
+    cli_seg.main(args)
+
+
+def run_io(parser, args):
+    cli_io.main(args)
+
+
+def run_connect(parser, args):
+    cli_connect.main(args)
+
+
+def run_lbls(parser, args):
+    cli_lbls.main(args)
+
+
+def run_sta(parser, args):
+    cli_sta.main(args)
 
 
 def get_parser():
@@ -54,7 +73,7 @@ def get_parser():
     parser_sta = subparsers.add_parser('sta', parents=[sta_parser], add_help=False,
                                        help="STA functions")
 
-    parser_seg.set_defaults(func=run_sta)
+    parser_sta.set_defaults(func=run_sta)
 
     # connect
     connect_parser = cli_connect.get_parser()
@@ -65,11 +84,17 @@ def get_parser():
 
     # io
     io_parser = cli_io.get_parser()
-    parser_io = subparsers.add_parser('io', parents=[seg_parser], add_help=False,
+    parser_io = subparsers.add_parser('io', parents=[io_parser], add_help=False,
                                       help="io functions")
 
     parser_io.set_defaults(func=run_io)
 
+    # lbls
+    lbls_parser = cli_lbls.get_parser()
+    parser_lbls = subparsers.add_parser('lbls', parents=[lbls_parser], add_help=False,
+                                      help="Label manipulation functions")
+
+    parser_lbls.set_defaults(func=run_lbls)
 
     return parser
 
