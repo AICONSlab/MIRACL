@@ -30,8 +30,7 @@ def get_parser():
 
     # tiff_nii
     tiff_nii_parser = miracl_io_convertTIFFtoNII.parsefn()
-    parser_tiff_nii = subparsers.add_parser('tiff_nii', parents=[tiff_nii_parser],
-                                            usage=miracl_io_convertTIFFtoNII.helpmsg,
+    parser_tiff_nii = subparsers.add_parser('tiff_nii', parents=[tiff_nii_parser], add_help=False,
                                             help="convert Tiff stacks to Nii")
     # parser_regclar.add_argument('-f', '--folder', nargs='+',
     #                             help="input registration folder")
@@ -43,9 +42,8 @@ def get_parser():
     parser_set_orient.set_defaults(func=run_set_orient)
 
     # gui_opts
-    gui_opts_parser = miracl_io_gui_options.parseargs()
-    parser_gui_opts = subparsers.add_parser('gui_opts', parents=[gui_opts_parser],
-                                            usage=miracl_io_convertTIFFtoNII.helpmsg,
+    gui_opts_parser = miracl_io_gui_options.parsefn()
+    parser_gui_opts = subparsers.add_parser('gui_opts', parents=[gui_opts_parser], add_help=False,
                                             help="GUI options")
     parser_gui_opts.set_defaults(func=run_gui_opts)
 

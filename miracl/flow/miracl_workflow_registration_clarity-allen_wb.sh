@@ -244,8 +244,8 @@ if [[ "$#" -gt 1 ]]; then
 
     # make reg dir
 
-    regdirfinal=$PWD/reg_final
-    regdir=$PWD/clar_allen_reg
+    regdirfinal=${PWD}/reg_final
+    regdir=${PWD}/clar_allen_reg
 
 
     if [[ ! -d ${regdir} ]]; then
@@ -266,20 +266,24 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
+    echo "${convopts}"
 
     if [[ -z "${convopts}" ]];
 	then
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir}
+        printf "\n miracl_io_convertTIFFtoNII.py -f "${indir}" \n"
+        # miracl_io_convertTIFFtoNII.py -f ${indir}
+        miracl io tiff_nii -f "${indir}"
 
     else
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} "${convopts}" \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
+        echo "\n miracl_io_convertTIFFtoNII.py -f "${indir}" "${convopts}" \n"
+        # miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
+        miracl io tiff_nii -f "${indir}" "${convopts}"
 
     fi
 
+    exit 1
 
     #---------------------------
     # Call registration
@@ -293,12 +297,14 @@ if [[ "$#" -gt 1 ]]; then
 	then
 
         printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} \n"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+        # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+        miracl reg clar_allen_wb -i niftis/${nii}
 
     else
 
         printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}" \n"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
+        # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
+        miracl reg clar_allen_wb -i niftis/${nii} ${regopts}
 
     fi
 

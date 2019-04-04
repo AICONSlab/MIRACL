@@ -87,7 +87,6 @@ def folder_dialog(self, msg):
     return folder
 
 
-# def parsefn(args):
 def parsefn():
     # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
     # add_help=False)
@@ -123,7 +122,15 @@ def parsefn():
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
-    if len(sys.argv) == 1:
+    return parser
+
+
+def parse_inputs(parser, args):
+
+    if isinstance(args, list):
+        args = parser.parse_args(args)
+
+    if len(args) == 1:
 
         print("Running in GUI mode")
 
@@ -287,7 +294,6 @@ def scriptlog(logname):
 
 # sort fn
 
-
 def numericalsort(value):
     numbers = re.compile(r'(\d+)')
     parts = numbers.split(value)
@@ -375,8 +381,9 @@ def main():
     starttime = datetime.now()
 
     args = sys.argv
+    parser = parsefn()
 
-    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parsefn(args)
+    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parse_inputs(parser, args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()

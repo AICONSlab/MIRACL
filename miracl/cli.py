@@ -105,10 +105,10 @@ def main(args=None):
         args = sys.argv[1:]
 
     # set miracl home
-    if os.environ['MIRACL_HOME'] is None:
-        cli_file = os.path.realpath(__file__)
-        miracl_dir = Path(cli_file).parents[0]
-        os.environ['MIRACL_HOME'] = miracl_dir
+    # if os.environ['MIRACL_HOME'] is None:
+    cli_file = os.path.realpath(__file__)
+    miracl_dir = Path(cli_file).parents[0]
+    os.environ['MIRACL_HOME'] = '%s' % miracl_dir
 
     parser = get_parser()
     args = parser.parse_args(args)
