@@ -18,7 +18,11 @@ Then create the environment:
 
 install Dependencies
 
+    mv io tmp
+
     pip install -e .
+
+    mv tmp io
 
 #### PyQT
 install PyQt4 using anaconda, run:
@@ -68,13 +72,11 @@ install additional plugins by:
 
 going to Help -> Update and press "Manage update sites" button and
 
-choose or press "Add update site" button and add the following links there:
+choose the following update sites there:
 
-    3D ImageJ Suite: http://sites.imagej.net/Tboudier/
-
-    MorphoLibJ: http://sites.imagej.net/IJPB-plugins/
-
-    Biomedgroup: https://sites.imagej.net/Biomedgroup/
+    3D ImageJ Suite: http://sites.imagej.net/Tboudier
+    Biomedgroup: https://sites.imagej.net/Biomedgroup
+    IJPB-plugins: http://sites.imagej.net/IJPB-plugins
 
 
 [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
