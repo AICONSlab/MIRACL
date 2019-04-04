@@ -142,37 +142,6 @@ exec > >(tee -i workflow_seg_clar.log)
 exec 2>&1
 
 #---------------------------
-#---------------------------
-
-function choose_folder_gui()
-{
-	local openstrfol=$1
-	local _inpathfol=$2
-
-    folderpath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f folder -s "$openstrfol")
-
-	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-
-#	folderpath=`cat path.txt`
-
-	eval ${_inpathfol}="'$folderpath'"
-
-#	rm path.txt
-
-}
-
-function choose_file_gui()
-{
-	local openstrfil=$1
-	local _inpathfil=$2
-
-    filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstrfil")
-
-	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-
-	eval ${_inpathfil}="'$filepath'"
-
-}
 
 
 # Select Mode : GUI or script
@@ -286,9 +255,6 @@ else
 
 	printf "\n No inputs given ... running in GUI mode \n"
 
-    # Get options
-    # choose_folder_gui "Open clarity dir (with .tif files) by double clicking then OK" indir
-
 	# options gui
 	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" \
 	     -d "Input tiff dir" \
@@ -302,7 +268,11 @@ else
 	done <<< "$opts"
 
 	# check required input arguments
-    indir=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	lbls="$(echo -e "${arr[0]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+
+    printf "\n Chosen registered labels: ${lbls} \n"
+
+    indir="$(echo -e "${arr[1]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
 
 	if [[ -z "${indir}" ]];
 	then
@@ -311,25 +281,20 @@ else
 		exit 1
 	fi
 
-    printf "\n Chosen in dir: $indir \n"
+    printf "\n Chosen in dir: ${indir} \n"
 
-    lbls=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-
-    printf "\n Chosen registered labels: ${lbls} \n"
-
-	type=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	type="$(echo -e "${arr[2]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
 
 	printf "\n Chosen seg type: ${type} \n"
 
-	prefix=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	prefix="$(echo -e "${arr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
 
     printf "\n Chosen channel prefix: ${prefix} \n"
 
-	vox=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox="$(echo -e "${arr[4]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+	# vox=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen voxel size: ${vox} \n"
-
-    # choose_file_gui "Open Allen labels (registered to clarity) used to summarize features" lbls
 
 
     if [[ -z "${type}" ]];

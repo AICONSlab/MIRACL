@@ -8,12 +8,17 @@ from pathlib import Path
 # logger = logging.getLogger()
 
 from miracl.flow import cli_flow
+from miracl.reg import cli_reg
+from miracl.seg import cli_seg
+from miracl.io import cli_io
+from miracl.connect import cli_connect
+from miracl.lbls import cli_lbls
+from miracl.sta import cli_sta
 
 
-# from miracl.reg import cli_reg
+def run_reg(parser, args):
+    cli_reg(args)
 
-# def run_reg(parser, args):
-#     cli_reg(args)
 
 def run_flow(parser, args):
     cli_flow.main(args)
@@ -28,23 +33,43 @@ def get_parser():
     parser_flow = subparsers.add_parser('flow', parents=[flow_parser], add_help=False,
                                         help="workflows to run")
 
-    # parser_flow.add_argument(
-    #    'reg_clar',
-    #    help="Wrapper for registering clarity data to allen Reference brain atlas"
-    # )
-
-    # parser_flow.add_subparsers(
-    #     'sta',
-    #     help="Wrapper for structure tensor analysis (STA), uses registered labels to create"
-    # )
-    # parser_flow.add_argument(
-    #     'seg',
-    #     help="Wrapper for segmentation, segments neurons in cleared mouse brain of sparse or nuclear"
-    # )
-
     parser_flow.set_defaults(func=run_flow)
 
-    #
+    # reg
+    reg_parser = cli_reg.get_parser()
+    parser_reg = subparsers.add_parser('reg', parents=[reg_parser], add_help=False,
+                                       help="registration functions")
+
+    parser_reg.set_defaults(func=run_reg)
+
+    # seg
+    seg_parser = cli_seg.get_parser()
+    parser_seg = subparsers.add_parser('seg', parents=[seg_parser], add_help=False,
+                                       help="segmentation functions")
+
+    parser_seg.set_defaults(func=run_seg)
+
+    # sta
+    sta_parser = cli_sta.get_parser()
+    parser_sta = subparsers.add_parser('sta', parents=[sta_parser], add_help=False,
+                                       help="STA functions")
+
+    parser_seg.set_defaults(func=run_sta)
+
+    # connect
+    connect_parser = cli_connect.get_parser()
+    parser_connect = subparsers.add_parser('connect', parents=[connect_parser], add_help=False,
+                                           help="connect functions")
+
+    parser_connect.set_defaults(func=run_connect)
+
+    # io
+    io_parser = cli_io.get_parser()
+    parser_io = subparsers.add_parser('io', parents=[seg_parser], add_help=False,
+                                      help="io functions")
+
+    parser_io.set_defaults(func=run_io)
+
 
     return parser
 

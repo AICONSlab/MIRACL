@@ -235,15 +235,6 @@ if [[ ! -d "${segdir}" ]];then
 
 fi
 
-# # split filters -- later
-
-# if [[ ! -d $tifdir/filter0 ]]; then
-	
-# 	mkdir $tifdir/filter0 $tifdir/filter1
-# 	mv $tifdir/*Filter0000* $tifdir/filter0/.
-# 	mv $tifdir/*Filter0001* $tifdir/filter1/.
-
-# fi
 
 # free up cached memory -- needs sudo permissions
 # printf "\n Freeing up cached memory \n"
@@ -262,12 +253,14 @@ if [[ ! -f ${outseg} ]]; then
     if [[ -z ${prefix} ]] ; then
 
         echo Fiji -macro ${macro} "${tifdir}"
-	    Fiji -macro ${macro} "${PWD}/${tifdir}/" | tee "${log}"
+	    # Fiji -macro ${macro} "${PWD}/${tifdir}/" | tee "${log}"
+	    Fiji -macro ${macro} "${tifdir}/" | tee "${log}"
 
     else
 
         echo Fiji -macro ${macro} ""${tifdir}" ${prefix}"
-	    Fiji -macro ${macro} ""${PWD}/${tifdir}" ${prefix}" | tee "${log}"
+	    # Fiji -macro ${macro} ""${PWD}/${tifdir}" ${prefix}" | tee "${log}"
+	    Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
 
     fi
 
