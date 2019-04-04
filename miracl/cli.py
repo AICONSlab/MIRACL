@@ -1,11 +1,14 @@
+import os
 import sys
 import argparse
 import logging
+from pathlib import Path
 
-logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
+# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
+# logger = logging.getLogger()
 
 from miracl.flow import cli_flow
+
 
 # from miracl.reg import cli_reg
 
@@ -21,15 +24,14 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # flow
-    parser_flow = subparsers.add_parser(
-        'flow',
-        help=""
-    )
+    flow_parser = cli_flow.get_parser()
+    parser_flow = subparsers.add_parser('flow', parents=[flow_parser], add_help=False,
+                                        help="workflows to run")
 
-    parser_flow.add_argument(
-        'reg_clar',
-        help="Wrapper for registering clarity data to allen Reference brain atlas"
-    )
+    # parser_flow.add_argument(
+    #    'reg_clar',
+    #    help="Wrapper for registering clarity data to allen Reference brain atlas"
+    # )
 
     # parser_flow.add_subparsers(
     #     'sta',
@@ -51,6 +53,12 @@ def main(args=None):
     """ main cli call"""
     if args is None:
         args = sys.argv[1:]
+
+    # set miracl home
+    if os.environ['MIRACL_HOME'] is None:
+        cli_file = os.path.realpath(__file__)
+        miracl_dir = Path(cli_file).parents[0]
+        os.environ['MIRACL_HOME'] = miracl_dir
 
     parser = get_parser()
     args = parser.parse_args(args)

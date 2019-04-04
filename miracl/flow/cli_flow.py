@@ -5,26 +5,32 @@ import subprocess
 import logging
 from pathlib import Path
 
-logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger()
+# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
+# logger = logging.getLogger()
 
 
 def run_reg_clar(parser, args):
+    miracl_home = os.environ['MIRACL_HOME']
 
-    flow_cli = os.path.realpath(__file__)
-    flow_dir = Path(flow_cli).parents[1]
+    # flow_cli = os.path.realpath(__file__)
+    # flow_dir = Path(flow_cli).parents[0]
 
-    subprocess.check_call('%s/miracl_workflow_registration_clarity-allen_wb.sh %s' % (flow_dir, args), shell=True,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE)
+    args = vars(args)
+
+    bash_args = '-f "%s" -n "%s" -r "%s"' % (args['folder'][0], args['conv_opts'][0], args['reg_opts'][0])
+
+    subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
+                          shell=True,
+                          stderr=subprocess.STDOUT)
 
 
 def run_sta(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
 
+    args = vars(args)
+
     subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, args), shell=True,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE)
+                          stderr=subprocess.STDOUT)
 
 
 def get_parser():
@@ -32,53 +38,32 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # reg_clarity
-    parser_regclar = subparsers.add_parser(
-        'reg_clar',
-        help=""
-    )
-    parser_regclar.add_argument(
-        '-f',
-        help=""
-    )
-    parser_regclar.add_argument(
-        '-o',
-        help=""
-    )
-    parser_regclar.add_argument(
-        '-n',
-        help=""
-    )
-    parser_regclar.add_argument(
-        '-h',
-        help="help func"
-    )
+    parser_regclar = subparsers.add_parser('reg_clar', help="whole-brain clarity registration to Allen atlas")
+    parser_regclar.add_argument('-f', '--folder', nargs='+',
+                                 help="input registration folder")
+    parser_regclar.add_argument('-n', '--conv_opts', nargs='+', metavar='',
+                                 help="file conversion options")
+    parser_regclar.add_argument('-r', '--reg_opts', nargs='+', metavar='',
+                                 help="registration options")
+
 
     parser_regclar.set_defaults(func=run_reg_clar)
 
     # sta
-    parser_sta = subparsers.add_parser(
-        'sta',
-        help=""
-    )
-    parser_sta.add_argument(
-        '-f',
-        help=""
-    )
-    parser_sta.add_argument(
-        '-o',
-        help=""
-    )
-    parser_sta.add_argument(
-        '-l',
-        help=""
-    )
+    parser_sta = subparsers.add_parser('sta', help="")
+    parser_sta.add_argument('-f',
+                            help="")
+    parser_sta.add_argument('-o',
+                            help="")
+    parser_sta.add_argument('-n',
+                            help="")
 
     parser_sta.set_defaults(func=run_sta)
 
     return parser
 
 
-def main(args=sys.argv[2:]):
+def main(args=sys.argv[1:]):
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
