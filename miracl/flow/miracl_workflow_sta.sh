@@ -565,7 +565,7 @@ else
 
 	# check required input arguments
 
-    indir=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    indir="$(echo -e "${arr[0]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
 
 	if [[ -z "${indir}" ]];
 	then
@@ -576,52 +576,53 @@ else
 
 	printf "\n Chosen in dir: $indir \n"
 
-    regdir=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    regdir="$(echo -e "${arr[1]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    # regdir=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     printf "\n Chosen reg dir: $regdir \n"
 
-    nii=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    nii="$(echo -e "${arr[2]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen out nii name: $nii \n"
 
-    lbl=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    lbl="$(echo -e "${arr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen seed label: $lbl \n"
 
-    hemi=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    hemi="$(echo -e "${arr[4]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen label hemi: $hemi \n"
 
-    dog=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    dog="$(echo -e "${arr[5]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen Derivative of Gaussian : $dog \n"
 
-    gauss=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    gauss="$(echo -e "${arr[6]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen Gaussian smoothing sigma: $gauss \n"
 
-    angle=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    angle="$(echo -e "${arr[7]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen tracking angle threshold: $angle \n"
 
-    down=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    down="$(echo -e "${arr[8]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen out nii name: $down \n"
     if [[ -z "${down}" ]]; then down=5; fi
 
-    chann=`echo "${arr[9]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chann="$(echo -e "${arr[9]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen channel num: $chann \n"
     if [[ -z "${chann}" ]]; then chann=""; fi
 
-    chanp=`echo "${arr[10]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chanp="$(echo -e "${arr[10]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen channel prefix: $chanp \n"
     if [[ -z "${chanp}" ]]; then chanp=""; fi
 
-    chan=`echo "${arr[11]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chan="$(echo -e "${arr[11]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen chan name: $chan \n"
     if [[ -z "${chan}" ]]; then chan="AAV"; fi
 
-    vx=`echo "${arr[12]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    vx="$(echo -e "${arr[12]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen vx: $vx \n"
     if [[ -z "${vx}" ]]; then vx=5; fi
 
-    vz=`echo "${arr[13]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    vz="$(echo -e "${arr[13]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen vz: $vz \n"
     if [[ -z "${vz}" ]]; then vz=5; fi
 
-    downz=`echo "${arr[14]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    downz="$(echo -e "${arr[14]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen down-samle in z: $downz \n"
     if [[ -z "${downz}" ]]; then downz=1; fi
 

@@ -25,7 +25,7 @@ Input options will be printed as output
 '''
 
 
-def parseargs():
+def parsefn():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
     parser.add_argument('-t', '--title', type=str, help="gui title", required=True)
     parser.add_argument('-f', '--fields', type=str, nargs='+', help="fields for options")
@@ -33,7 +33,11 @@ def parseargs():
     parser.add_argument('-d', '--dirs', type=str, nargs='+', help="directories for reading")
     parser.add_argument('-hf', '--helpfun', type=str, help="help fun")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    args, unknown = parser.parse_known_args()
 
     title = args.title
     fields = args.fields
@@ -150,8 +154,10 @@ def print_help(main, helpfun):
     QApplication.processEvents()
 
 
-def main():
-    [title, vols, dirs, fields, helpfun] = parseargs()
+def main(args):
+    parser = parsefn()
+
+    [title, vols, dirs, fields, helpfun] = parsea_inputs(parser, args)
 
     # Create an PyQT4 application object.
     app = QApplication(sys.argv)
@@ -162,4 +168,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))

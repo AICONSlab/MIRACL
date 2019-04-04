@@ -244,8 +244,8 @@ if [[ "$#" -gt 1 ]]; then
 
     # make reg dir
 
-    regdirfinal=$PWD/reg_final
-    regdir=$PWD/clar_allen_reg
+    regdirfinal=${PWD}/reg_final
+    regdir=${PWD}/clar_allen_reg
 
 
     if [[ ! -d ${regdir} ]]; then
@@ -266,20 +266,20 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
-
     if [[ -z "${convopts}" ]];
 	then
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir}
+        printf "\n miracl_io_convertTIFFtoNII.py -f "${indir}" \n"
+        # miracl_io_convertTIFFtoNII.py -f ${indir}
+        miracl io tiff_nii -f "${indir}"
 
     else
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} "${convopts}" \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
+        printf "\n miracl_io_convertTIFFtoNII.py -f "${indir}" ${convopts} \n"
+        # miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
+        miracl io tiff_nii -f "${indir}" ${convopts}
 
     fi
-
 
     #---------------------------
     # Call registration
@@ -293,12 +293,14 @@ if [[ "$#" -gt 1 ]]; then
 	then
 
         printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} \n"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+        # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
+        miracl reg clar_allen_wb -i niftis/${nii}
 
     else
 
-        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}" \n"
-        miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
+        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts} \n"
+        # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
+        miracl reg clar_allen_wb -i niftis/${nii} ${regopts}
 
     fi
 
@@ -366,34 +368,35 @@ else
 	done <<< "$opts"
 
 
-    outnii=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    outnii="$(echo -e "${arr[0]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    # outnii=`echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
     if [[ -z ${outnii} ]]; then outnii="clarity" ; fi
     printf "\n Chosen out nii name: $outnii \n"
 
-    d=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    d="$(echo -e "${arr[1]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${d} ]]; then d=5 ; fi
     printf "\n Chosen downsample ratio: $d \n"
 
-    chann=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chann="$(echo -e "${arr[2]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${chann} ]]; then chann=0 ; fi
     printf "\n Chosen channel #: $chann \n"
 
-    chanp=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chanp="$(echo -e "${arr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     printf "\n Chosen channel prefix: $chanp \n"
 
-    chan=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    chan="$(echo -e "${arr[4]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${chan} ]]; then chan="eyfp" ; fi
     printf "\n Chosen out channel name: $chan \n"
 
-    vx=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    vx="$(echo -e "${arr[5]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${vx} ]]; then vx=5 ; fi
     printf "\n Chosen in-plane res: $vx \n"
 
-    vz=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    vz="$(echo -e "${arr[6]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${vz} ]]; then vz=5 ; fi
     printf "\n Chosen thickness: $vz \n"
 
-    cent=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    cent="$(echo -e "${arr[7]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${cent} ]]; then cent="0 0 0" ; fi
     printf "\n Chosen image center: $cent \n"
 
@@ -411,19 +414,19 @@ else
 	done <<< "$regopts"
 
 
-	hemi=`echo "${regarr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	hemi="$(echo -e "${regarr[0]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${hemi} ]]; then hemi="combined" ; fi
 	printf "\n Chosen hemi: ${hemi} \n"
 
-	vox=`echo "${regarr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox="$(echo -e "${regarr[1]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${vox} ]]; then vox=10 ; fi
 	printf "\n Chosen vox (um): ${vox} \n"
 
-	ob=`echo "${regarr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	ob="$(echo -e "${regarr[2]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${ob} ]]; then ob=0 ; fi
     printf "\n Chosen ob: ${ob} \n"
 
-	side=`echo "${regarr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	side="$(echo -e "${regarr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${side} ]]; then side="" ; fi
     printf "\n Chosen ob: ${side} \n"
 

@@ -87,7 +87,7 @@ def folder_dialog(self, msg):
     return folder
 
 
-def parsefn(args):
+def parsefn():
     # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
     # add_help=False)
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
@@ -122,7 +122,15 @@ def parsefn(args):
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
-    if len(args) == 1:
+    return parser
+
+
+def parse_inputs(parser, args):
+
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
+
+    if len(vars(args)) == 1:
 
         print("Running in GUI mode")
 
@@ -170,7 +178,7 @@ def parsefn(args):
 
     else:
 
-        args = parser.parse_args()
+        args, unknown = parser.parse_known_args()
 
         print("\n running in script mode")
 
@@ -286,7 +294,6 @@ def scriptlog(logname):
 
 # sort fn
 
-
 def numericalsort(value):
     numbers = re.compile(r'(\d+)')
     parts = numbers.split(value)
@@ -365,7 +372,7 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
 
 # ---------
 
-def main():
+def main(args):
     """
     :rtype: nifti file
     """
@@ -373,9 +380,9 @@ def main():
 
     starttime = datetime.now()
 
-    args = sys.argv
+    parser = parsefn()
 
-    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parsefn(args)
+    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parse_inputs(parser, args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
@@ -435,7 +442,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 
 
 # Todos
