@@ -12,7 +12,7 @@ jobs:
       - CONTAINER_NAME: "mgoubran/miracl"
     docker:
       - image: docker:18.06.3-ce-git
-    working_directory: /tmp/src/scif
+    working_directory: /tmp/src/MIRACLdev
     steps:
       - run:
           name: Install parallel gzip and python3
@@ -47,8 +47,8 @@ jobs:
               docker build \
                 --cache-from=${CONTAINER_NAME}:hw \
                 --rm=false \
-                -f /tmp/src/scif/Dockerfile.hello-world \
                 -t ${CONTAINER_NAME} \
+                -f /tmp/src/MIRACLdev/Dockerfile \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
@@ -86,7 +86,7 @@ workflows:
   build_without_publishing_job:
     jobs:
       - docker-publish/publish:
-          image: vanessa/scif
+          image: mgoubran/miracl
           deploy: false
           tag: latest
           filters:
