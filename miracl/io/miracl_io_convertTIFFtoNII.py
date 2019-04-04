@@ -128,9 +128,9 @@ def parsefn():
 def parse_inputs(parser, args):
 
     if isinstance(args, list):
-        args = parser.parse_args(args)
+        args, unknown = parser.parse_known_args()
 
-    if len(args) == 1:
+    if len(vars(args)) == 1:
 
         print("Running in GUI mode")
 
@@ -178,7 +178,7 @@ def parse_inputs(parser, args):
 
     else:
 
-        args = parser.parse_args()
+        args, unknown = parser.parse_known_args()
 
         print("\n running in script mode")
 
@@ -372,7 +372,7 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
 
 # ---------
 
-def main():
+def main(args):
     """
     :rtype: nifti file
     """
@@ -380,7 +380,6 @@ def main():
 
     starttime = datetime.now()
 
-    args = sys.argv
     parser = parsefn()
 
     [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parse_inputs(parser, args)
@@ -443,7 +442,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 
 
 # Todos

@@ -10,7 +10,7 @@ from miracl.io import miracl_io_convertTIFFtoNII, miracl_io_gui_options
 
 
 def run_tiff_nii(parser, args):
-    miracl_io_convertTIFFtoNII.main()
+    miracl_io_convertTIFFtoNII.main(args)
 
 
 def run_set_orient(parser):
@@ -21,7 +21,7 @@ def run_set_orient(parser):
 
 
 def run_gui_opts(parser, args):
-    miracl_io_gui_options.main()
+    miracl_io_gui_options.main(args)
 
 
 def get_parser():
@@ -31,9 +31,7 @@ def get_parser():
     # tiff_nii
     tiff_nii_parser = miracl_io_convertTIFFtoNII.parsefn()
     parser_tiff_nii = subparsers.add_parser('tiff_nii', parents=[tiff_nii_parser], add_help=False,
-                                            help="convert Tiff stacks to Nii")
-    # parser_regclar.add_argument('-f', '--folder', nargs='+',
-    #                             help="input registration folder")
+                                           help="convert Tiff stacks to Nii")
 
     parser_tiff_nii.set_defaults(func=run_tiff_nii)
 
@@ -50,11 +48,11 @@ def get_parser():
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args):
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[2:])

@@ -10,11 +10,11 @@ from pathlib import Path
 # logger = logging.getLogger()
 
 
-def run_clar_allen_wb(parser, args, miracl_home):
+def run_clar_allen_wb(parser, args):
+    miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    bash_args = '-i "%s" -o "%s" -m "%s" -v "%s"' % (args['in_nii'][0], args['ort'][0], args['hemi'][0],
-                                                     args['vox_res'][0])
+    bash_args = '-i %s -o %s -m %s -v %s' % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'])
 
     subprocess.check_call('%s/reg/miracl_reg_clar-allen_whole_brain.sh %s' % (miracl_home, bash_args),
                           shell=True,
@@ -23,11 +23,9 @@ def run_clar_allen_wb(parser, args, miracl_home):
 
 def run_mri_allen(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
     args = vars(args)
 
-    bash_args = '-i "%s" -o "%s" -m "%s" -v "%s"' % (args['in_nii'][0], args['ort'][0], args['hemi'][0],
-                                                     args['vox_res'][0])
+    bash_args = '-i %s -o %s -m %s -v %s' % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'])
 
     subprocess.check_call('%s/reg/miracl_reg_mri-allen.sh %s' % (miracl_home, bash_args), shell=True,
                           stderr=subprocess.STDOUT)
@@ -67,13 +65,11 @@ def get_parser():
     return parser
 
 
-def main(args=sys.argv[1:]):
-    miracl_home = os.environ['MIRACL_HOME']
-
+def main(args):
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[2:])

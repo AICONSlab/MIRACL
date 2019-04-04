@@ -266,8 +266,6 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running Tiff to Nii conversion with the following command: \n"
 
-    echo "${convopts}"
-
     if [[ -z "${convopts}" ]];
 	then
 
@@ -277,13 +275,11 @@ if [[ "$#" -gt 1 ]]; then
 
     else
 
-        echo "\n miracl_io_convertTIFFtoNII.py -f "${indir}" "${convopts}" \n"
+        printf "\n miracl_io_convertTIFFtoNII.py -f "${indir}" ${convopts} \n"
         # miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
-        miracl io tiff_nii -f "${indir}" "${convopts}"
+        miracl io tiff_nii -f "${indir}" ${convopts}
 
     fi
-
-    exit 1
 
     #---------------------------
     # Call registration
@@ -302,7 +298,7 @@ if [[ "$#" -gt 1 ]]; then
 
     else
 
-        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} "${regopts}" \n"
+        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts} \n"
         # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
         miracl reg clar_allen_wb -i niftis/${nii} ${regopts}
 

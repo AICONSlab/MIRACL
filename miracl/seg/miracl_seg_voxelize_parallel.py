@@ -65,7 +65,7 @@ parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", req
 parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
 parser.add_argument('-v', '--res', type=int, help="voxel size")
 
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 seg = args.seg
 
 res = 10 if args.res is None else args.res

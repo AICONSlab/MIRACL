@@ -12,13 +12,12 @@ from pathlib import Path
 
 def run_reg_clar(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
-    print "%s" % miracl_home
-
     args = vars(args)
 
     bash_args = '-f %s -n "%s" -r "%s"' % (args['folder'], args['conv_opts'][0], args['reg_opts'][0])
-    print "running CLARITY to Allen registration workflow with the following arguments: \n %s" % bash_args
+
+    print 'Running CLARITY to Allen registration workflow with the following arguments: \n ' \
+          "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args
 
     subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
                           shell=True,
@@ -27,7 +26,6 @@ def run_reg_clar(parser, args):
 
 def run_seg(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
     args = vars(args)
 
     bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
@@ -40,7 +38,6 @@ def run_seg(parser, args):
 
 def run_sta(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
     args = vars(args)
 
     subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, args), shell=True,
@@ -91,11 +88,11 @@ def get_parser():
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args):
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[2:])

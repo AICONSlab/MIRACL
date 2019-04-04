@@ -37,7 +37,7 @@ def parsefn():
 
 
 def parse_inputs(parser, args):
-    args = parser.parse_args(args)
+    args, unknown = parser.parse_known_args()
 
     title = args.title
     fields = args.fields
@@ -154,8 +154,7 @@ def print_help(main, helpfun):
     QApplication.processEvents()
 
 
-def main():
-    args = sys.argv
+def main(args):
     parser = parsefn()
 
     [title, vols, dirs, fields, helpfun] = parsea_inputs(parser, args)
@@ -169,4 +168,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))

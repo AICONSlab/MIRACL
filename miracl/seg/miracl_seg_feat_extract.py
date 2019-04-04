@@ -67,7 +67,7 @@ parser.add_argument('-s', '--seg', type=str, help="segmentation tif", required=T
 parser.add_argument('-l', '--lbl', type=str, help="label annotations", required=True)
 parser.add_argument('-m', '--mask', type=str, help="ROI mask")
 
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
 inseg = args.seg
 inlbls = args.lbl
 

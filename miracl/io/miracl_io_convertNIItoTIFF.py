@@ -119,7 +119,7 @@ def parsefn(args):
 
     else:
 
-        args = parser.parse_args()
+        args, unknown = parser.parse_known_args()
 
         print("\n running in script mode")
 
@@ -212,15 +212,13 @@ def scriptlog(logname):
 
 # ---------
 
-def main():
+def main(args):
     """
     :rtype: nifti file
     """
     # scriptlog('tif2nii.log')
 
     starttime = datetime.now()
-
-    args = sys.argv
 
     [input, outtiff, u, s] = parsefn(args)
 
@@ -237,7 +235,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
 
 
 # Todos
