@@ -287,7 +287,7 @@ function warpallenlbls()
     local smclarres=${17}
 
     # Upsample ref
-    vres=`python -c "print ${vox}/1000.0"`
+    vres=`python -c "print(${vox}/1000.0)"`
 
     # res clar in
     ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
@@ -366,7 +366,7 @@ function main()
     lblsdim=`PrintHeader ${lbls} 1`
     xlbl=${lblsdim%%x*}
 
-    vox=`python -c "print ${xlbl}*1000.0"`
+    vox=`python -c "print (${xlbl}*1000.0)"`
 
 	smclarres=${regdirfinal}/clar_downsample_res${vox}um.nii.gz
 

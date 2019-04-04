@@ -17,7 +17,7 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
-    conda install -y numpy matplotlib joblib scipy pandas && \
+    conda install -y numpy==1.15.4 matplotlib joblib scipy && \
     conda install -y -c conda-forge tifffile && \
     conda install -y -c menpo opencv
 
@@ -49,7 +49,8 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
 ENV PATH /opt/cd3/bin:${PATH}
 
 WORKDIR /code
-RUN conda install -y cython h5py && \
+RUN conda install -c conda-forge -y scikit-image=0.15 && \
+    conda install -y cython h5py && \
     conda install -y pyqt=4 && \
     conda install -y pandas=0.19.2
 

@@ -240,7 +240,7 @@ def main():
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     else:
-        print 'Experiment folder exists.. overwriting old experiment!'
+        print('Experiment folder exists.. overwriting old experiment!')
 
     # read csv
     print("\n Reading feature extraction csv files")

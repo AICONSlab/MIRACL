@@ -51,18 +51,18 @@ def showdialog(self, filfol, msg, ftypes):
             filename = QFileDialog.getOpenFileName(self, "%s" % msg, ".")
 
         if len(filename) > 0:
-            print "\n File chosen for reading is: %s" % filename
+            print("\n File chosen for reading is: %s" % filename)
         else:
-            print "No file was chosen"
+            print("No file was chosen")
 
     else:
 
         folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg, "."))
 
         if len(folder) > 0:
-            print "\n Folder chosen for reading is: %s" % folder
+            print("\n Folder chosen for reading is: %s" % folder)
         else:
-            print "No folder was chosen"
+            print("No folder was chosen")
 
 
 def main():

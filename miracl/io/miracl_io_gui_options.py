@@ -116,7 +116,7 @@ def get_fname(main, labels, vol):
     if vfile:
         vfilestr = "%s : %s" % (vol, str(vfile).lstrip())
         labels["%s" % vol].setText(vfilestr)
-        print '%s path: %s' % (vol, vfile)
+        print('%s path: %s' % (vol, vfile))
     else:
         labels["%s" % vol].setText('No file selected')
 
@@ -126,14 +126,14 @@ def get_dname(main, labels, dir):
     if dfile:
         dfilestr = "%s : %s" % (dir, dfile.lstrip())
         labels["%s" % dir].setText(dfilestr)
-        print '%s path: %s' % (dir, dfile)
+        print('%s path: %s' % (dir, dfile))
     else:
         labels["%s" % dir].setText('No Dir selected')
 
 
 def print_input(linedits, fields):
     for f, field in enumerate(fields):
-        print "%s :%s" % (field, str(linedits["%s" % field].text()).lstrip())
+        print("%s :%s" % (field, str(linedits["%s" % field].text()).lstrip()))
 
 
 def print_help(main, helpfun):

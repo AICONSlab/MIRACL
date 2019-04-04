@@ -814,7 +814,7 @@ function warpallenlbls()
     local unpadtif=${19}
 
     # Upsample ref
-    vres=`python -c "print ${vox}/1000.0"`
+    vres=`python -c "print (${vox}/1000.0)"`
 
     # res clar in
     ifdsntexistrun ${smclarres} "Usampling reference image" \

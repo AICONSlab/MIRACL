@@ -155,7 +155,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 
     filename = os.path.basename(seg)
 
-    print "\n Creating voxelized maps from Clarity segmentations for %s" % filename
+    print("\n Creating voxelized maps from Clarity segmentations for %s" % filename)
 
     # read data
     segtif = tiff.imread("%s" % seg)
@@ -172,7 +172,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
     # ---------
     sx = segflt.shape[0]
 
-    print "\n Computing in parallel using %d cpus" % ncpus
+    print("\n Computing in parallel using %d cpus" % ncpus)
 
     # convolve image with kernel
     res = []
