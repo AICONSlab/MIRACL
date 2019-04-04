@@ -1,0 +1,120 @@
+version: 2.1
+
+orbs:
+  # https://circleci.com/orbs/registry/orb/circleci/docker-publish
+  docker-publish: circleci/docker-publish@0.1.3
+
+jobs:
+
+  build:
+    environment:
+      - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+      - CONTAINER_NAME: "mgoubran/miracl"
+    docker:
+      - image: docker:18.06.3-ce-git
+    working_directory: /tmp/src/MIRACLdev
+    steps:
+      - run:
+          name: Install parallel gzip and python3
+          command: apk add --no-cache pigz python3
+      - restore_cache:
+          keys:
+            - docker-v1-{{ .Branch }}-{{ epoch }}
+            - docker-v1-{{ .Branch }}-
+            - docker-v1-master-
+            - docker-v1-
+          paths:
+            - /tmp/cache/container.tar.gz
+
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Load Docker image layer cache
+          no_output_timeout: 30m
+          command: |
+            docker info
+            set +o pipefail
+            if [ -f /tmp/cache/container.tar.gz ]; then
+              pigz -d --stdout /tmp/cache/container.tar.gz | docker load
+            fi
+            docker images
+      - run:
+          name: Build Docker images
+          no_output_timeout: 60m
+          command: |
+            # Build docker image
+            e=1 && for i in {1..5}; do
+              docker build \
+                --cache-from=${CONTAINER_NAME}:hw \
+                --rm=false \
+                -t ${CONTAINER_NAME} \
+                -f /tmp/src/MIRACLdev/Dockerfile \
+                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+      - run:
+          name: Docker save
+          no_output_timeout: 40m
+          command: |
+            echo "Saving ${CONTAINER_NAME} to container.tar.gz"
+            mkdir -p /tmp/cache
+            docker save ${CONTAINER_NAME} \
+              | pigz -2 -p 3 > /tmp/cache/container.tar.gz
+      - save_cache:
+         key: docker-v1-{{ .Branch }}-{{ epoch }}
+         paths:
+            - /tmp/cache/container.tar.gz
+      - run:
+          name: Run Tests
+          no_output_timeout: 2h
+          command: |
+             echo "Run tests here..."
+      - store_test_results:
+          path: /home/circleci/out/tests
+
+
+workflows:
+  build_and_test:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+  build_without_publishing_job:
+    jobs:
+      - docker-publish/publish:
+          image: mgoubran/miracl
+          deploy: false
+          tag: latest
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
+          after_build:
+            - run:
+                name: Preview Docker Tag for Build
+                command: |
+                   DOCKER_TAG=$(docker run mgoubran/miracl:latest cat /code/version.txt)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
+
+
+  # This workflow will deploy images on merge to master only
+  docker_with_lifecycle:
+    jobs:
+      - docker-publish/publish:
+          image: mgoubran/miracl
+          tag: latest
+          filters:
+            branches:
+             only: master
+          after_build:
+            - run:
+                name: Publish Docker Tag with MIRACL Version
+                command: |
+                   DOCKER_TAG=$(docker run mgoubran/miracl:latest cat /code/version.txt)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
+                   docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
