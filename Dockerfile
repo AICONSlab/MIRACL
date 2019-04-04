@@ -8,16 +8,19 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt install -y libsm6 libxext6 libfontconfig1 libxrender1
 
 # Install miniconda
-RUN curl -LO http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
-    bash Miniconda-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
-    rm Miniconda-latest-Linux-x86_64.sh
+#RUN curl -LO http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
+#    bash Miniconda-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
+#    rm Miniconda-latest-Linux-x86_64.sh
+RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
+    bash Miniconda2-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
+    rm Miniconda2-latest-Linux-x86_64.sh
 ENV PATH=/opt/miniconda/bin:${PATH}
 
 RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
-    conda install -y numpy==1.15.4 matplotlib joblib scipy && \
+    conda install -y numpy matplotlib joblib scipy && \
     conda install -y -c conda-forge tifffile && \
     conda install -y -c menpo opencv
 
@@ -53,12 +56,15 @@ RUN conda install -c conda-forge -y scikit-image=0.15 && \
     conda install -y cython h5py && \
     conda install -y pyqt=4 && \
     conda install -y pandas=0.19.2
+RUN conda install -y numpy>=0.15.4
 
 ADD . /code
 RUN git clone https://github.com/sergivalverde/nifti_tools && \
     mv nifti_tools /code/depends/NIFTI_TOOLS
 ENV MIRACL_HOME=/code
-RUN python /code/setup.py install
+RUN pip install scikit-image<=0.15.4 && \
+    pip install numpy==1.15.4 && \
+    python /code/setup.py install
 
 ###############################################################################
 #--- Allen atlas alias ----
