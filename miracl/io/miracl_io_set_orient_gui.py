@@ -17,6 +17,7 @@ import glob
 import os
 import sys
 import cv2
+import os
 
 root = Tk.Tk()
 root.withdraw()
@@ -27,7 +28,8 @@ assert isinstance(indir, str)
 if not os.path.exists(indir):
     sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
-flist = glob.glob('%s/*.tif' % indir)
+flist = glob.glob(os.path.join(indir, '*.tif*'))
+# flist = glob.glob('%s/*.tif' % indir)
 
 root.deiconify()
 root.configure(background='black')
