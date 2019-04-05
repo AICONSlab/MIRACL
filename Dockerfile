@@ -96,7 +96,4 @@ ENV snaplut "${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt"
 ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 ################################################################################
 
-RUN chmod u+x /code/run.sh
-
-CMD ["/code/run.sh"]
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
