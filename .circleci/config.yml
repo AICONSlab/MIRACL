@@ -43,6 +43,8 @@ jobs:
           no_output_timeout: 60m
           command: |
             # Build docker image
+            MIRACL_VERSION=$(cat /tmp/src/MIRACLdev/version.txt)
+            echo "miracl version is ${MIRACL_VERSION}"
             e=1 && for i in {1..5}; do
               docker build \
                 --cache-from=${CONTAINER_NAME}:hw \

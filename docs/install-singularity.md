@@ -19,7 +19,7 @@ $ sdev
 Once you have your node, you can then pull the container:
 
 ```bash
-$ singularity pull docker://vanessa/miracl:dev
+$ singularity pull docker://mgoubran/miracl:dev
 ```
 
 If you want to give it a custom name, you can do the following (and make sure you
@@ -27,7 +27,7 @@ are sitting in your $SCRATCH directory so you don't take up all the space in $HO
 
 ```
 $ cd $SCRATCH
-$ singularity build miracl.sif docker://vanessa/miracl:dev
+$ singularity build miracl.sif docker://mgoubran/miracl:dev
 ```
 
 
