@@ -80,9 +80,9 @@ def folder_dialog(self, msg):
     folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg, "."))
 
     if len(folder) > 0:
-        print "\n Folder chosen for reading is: %s" % folder
+        print("\n Folder chosen for reading is: %s" % folder)
     else:
-        print "No folder was chosen"
+        print("No folder was chosen")
 
     return folder
 
