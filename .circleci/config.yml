@@ -98,7 +98,7 @@ workflows:
             - run:
                 name: Preview Docker Tag for Build
                 command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/bash mgoubran/miracl:latest cat /code/version.txt)
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
 
@@ -115,6 +115,6 @@ workflows:
             - run:
                 name: Publish Docker Tag with MIRACL Version
                 command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/bash mgoubran/miracl:latest cat /code/version.txt)
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
