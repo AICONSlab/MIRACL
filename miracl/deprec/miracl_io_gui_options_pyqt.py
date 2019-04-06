@@ -75,7 +75,7 @@ def optsmenu(title, fields, helpfun):
 def print_input(linedits, fields):
     for f, field in enumerate(fields):
         text = str(linedits["%s" % field].text())
-        print "%s :%s" % (field, text.lstrip())
+        print("%s :%s" % (field, text.lstrip()))
 
     app.quit()
 

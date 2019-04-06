@@ -63,7 +63,7 @@ class STAmenu(QtGui.QWidget):
         if clar:
             clarstr = "CLARITY nii: " + clar
             self.lbl.setText(clarstr)
-            print 'clarity path :%s' % str(clar).lstrip()
+            print('clarity path :%s' % str(clar).lstrip())
         else:
             self.lbl.setText('No file selected')
 
@@ -72,7 +72,7 @@ class STAmenu(QtGui.QWidget):
         if seed:
             seedstr = "Seed Mask: " + seed
             self.lbl2.setText(seedstr)
-            print 'seed path :%s' % str(seed).lstrip()
+            print('seed path :%s' % str(seed).lstrip())
         else:
             self.lbl2.setText('No file selected')
 
@@ -81,7 +81,7 @@ class STAmenu(QtGui.QWidget):
         if brainmask:
             brainstr = "Brain Mask: " + brainmask
             self.lbl3.setText(brainstr)
-            print 'brain path :%s' % str(brainmask).lstrip()
+            print('brain path :%s' % str(brainmask).lstrip())
         else:
             self.lbl3.setText('No file selected')
 
@@ -91,9 +91,9 @@ class STAmenu(QtGui.QWidget):
         gaussin = str(self.gauss.text())
         anglein = str(self.angle.text())
 
-        print 'dog :%s' % dogin.lstrip()
-        print 'gauss :%s' % gaussin.lstrip()
-        print 'angle :%s' % anglein.lstrip()
+        print('dog :%s' % dogin.lstrip())
+        print('gauss :%s' % gaussin.lstrip())
+        print('angle :%s' % anglein.lstrip())
 
         app.quit()
 

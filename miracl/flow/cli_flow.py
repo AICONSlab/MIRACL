@@ -16,8 +16,8 @@ def run_reg_clar(parser, args):
 
     bash_args = '-f %s -n "%s" -r "%s"' % (args['folder'], args['conv_opts'][0], args['reg_opts'][0])
 
-    print 'Running CLARITY to Allen registration workflow with the following arguments: \n ' \
-          "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args
+    print('Running CLARITY to Allen registration workflow with the following arguments: \n ' \
+          "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args)
 
     subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
                           shell=True,
