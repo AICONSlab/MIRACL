@@ -40,6 +40,7 @@ ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 ################################################################################
 
 # Clean up extra numpy
-RUN rm -rf /opt/miniconda/lib/python2.7/site-packages/numpy-1.16.2-py2.7.egg-info
+RUN rm -rf /opt/miniconda/lib/python2.7/site-packages/numpy-1.16.2-py2.7.egg-info && \
+    rm -rf /opt/miniconda/pkgs/numpy*
 
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
