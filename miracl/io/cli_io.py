@@ -48,11 +48,11 @@ def get_parser():
     return parser
 
 
-def main(args):
+def main():
     parser = get_parser()
-    args = parser.parse_args(args)
+    args = parser.parse_args()
     args.func(parser, args)
 
 
 if __name__ == '__main__':
-    main(sys.argv[2:])
+    main()
