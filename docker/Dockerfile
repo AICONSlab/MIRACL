@@ -8,9 +8,6 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt install -y libsm6 libxext6 libfontconfig1 libxrender1
 
 # Install miniconda
-#RUN curl -LO http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh && \
-#    bash Miniconda-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
-#    rm Miniconda-latest-Linux-x86_64.sh
 RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
     bash Miniconda2-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
     rm Miniconda2-latest-Linux-x86_64.sh
@@ -20,9 +17,10 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
-    conda install -y numpy matplotlib joblib scipy && \
-    conda install -y -c conda-forge tifffile && \
-    conda install -y -c menpo opencv
+    pip install numpy==1.15.4 && \
+    pip install matplotlib joblib scipy && \
+    pip install tifffile && \
+    pip install menpo opencv-python
 
 # ANTS
 RUN mkdir -p /opt/ANTs && \
@@ -52,8 +50,8 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
 ENV PATH /opt/cd3/bin:${PATH}
 
 WORKDIR /code
-RUN conda install -c conda-forge -y scikit-image=0.15 && \
-    conda install -y cython h5py && \
-    conda install -y pyqt=4 && \
-    conda install -y pandas=0.19.2
-RUN conda install -y numpy>=0.15.4
+RUN pip install scikit-image==0.14.2 && \
+    pip install cython h5py && \
+    pip install pandas==0.19.2
+
+RUN conda install -y --no-update-dependencies pyqt=4

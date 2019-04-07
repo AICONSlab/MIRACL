@@ -5,9 +5,7 @@ ADD . /code
 RUN git clone https://github.com/sergivalverde/nifti_tools && \
     mv nifti_tools /code/depends/NIFTI_TOOLS
 ENV MIRACL_HOME=/code
-RUN pip install scikit-image<=0.15.4 && \
-    pip install numpy==1.15.4 && \
-    python /code/setup.py install
+RUN python /code/setup.py install
 
 ###############################################################################
 #--- Allen atlas alias ----
@@ -40,6 +38,6 @@ ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 ################################################################################
 
 # Clean up extra numpy
-RUN rm -rf /opt/miniconda/lib/python2.7/site-packages/numpy-1.16.2-py2.7.egg-info
+RUN  ls /opt/miniconda/lib/python2.7/site-packages/num*
 
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
