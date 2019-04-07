@@ -47,10 +47,10 @@ jobs:
             echo "miracl version is ${MIRACL_VERSION}"
             e=1 && for i in {1..5}; do
               docker build \
-                --cache-from=${CONTAINER_NAME}:hw \
                 --rm=false \
                 -t ${CONTAINER_NAME} \
                 -f /tmp/src/MIRACLdev/Dockerfile \
+                --no-cache \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
