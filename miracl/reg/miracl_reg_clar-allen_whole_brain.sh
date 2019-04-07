@@ -362,7 +362,7 @@ if [[ -z ${lbls} ]]; then
 
     else
 
-        if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
+        if [[ "${hemi}" != "combined" ]] && [[ "${hemi}" != "split" ]]; then
 
             printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
             exit 1
@@ -376,7 +376,7 @@ if [[ -z ${lbls} ]]; then
 
     else
 
-        if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
+        if [[ "${vox}" != 10 ]] && [[ "${vox}" != 25 ]] && [[ "${vox}" != 50 ]] ; then
 
             printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
             exit 1
@@ -405,7 +405,7 @@ if [[ -z ${bulb} ]] ; then
     bulb=0
 else
 
-    if [ "${bulb}" != 0 ] && [ "${bulb}" != 1 ]; then
+    if [[ "${bulb}" != 0 ]] && [[ "${bulb}" != 1 ]]; then
 
     printf "ERROR: < -b = > (bulb) > only takes as inputs: 0 or 1"
     exit 1

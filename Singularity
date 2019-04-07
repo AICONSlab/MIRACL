@@ -59,9 +59,9 @@ From: ubuntu:14.04
     conda install -y pandas=0.19.2
 
     # MRITrix
-    cd /opt
-    apt-get install -y libeigen3-dev zlib1g-dev libqt4-opengl-dev libgl1-mesa-dev libfftw3-dev libtiff5-dev
-    git clone https://github.com/MRtrix3/mrtrix3.git && cd mrtrix3 && ./configure
+    # cd /opt
+    # apt-get install -y libeigen3-dev zlib1g-dev libqt4-opengl-dev libgl1-mesa-dev libfftw3-dev libtiff5-dev
+    # git clone https://github.com/MRtrix3/mrtrix3.git && cd mrtrix3 && ./configure
 
     cd /code
     python /code/setup.py install
