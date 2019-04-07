@@ -3,7 +3,6 @@ import sys
 import argparse
 import subprocess
 import logging
-from pathlib import Path
 
 # logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
 # logger = logging.getLogger()
@@ -63,11 +62,11 @@ def get_parser():
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args):
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
