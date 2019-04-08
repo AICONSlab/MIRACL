@@ -10,6 +10,7 @@ from miracl.io import miracl_io_convertTIFFtoNII, miracl_io_gui_options
 
 
 def run_tiff_nii(parser, args):
+    print "bla"
     miracl_io_convertTIFFtoNII.main(args)
 
 

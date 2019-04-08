@@ -63,9 +63,9 @@ def get_parser():
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main():
     parser = get_parser()
-    args = parser.parse_args(args)
+    args = parser.parse_args()
     args.func(parser, args)
 
 

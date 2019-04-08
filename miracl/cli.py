@@ -17,30 +17,31 @@ from miracl.sta import cli_sta
 
 
 def run_flow(parser, args):
-    cli_flow.main(args)
+    cli_flow.main()
+
 
 def run_reg(parser, args):
-    cli_reg.main(args)
+    cli_reg.main()
 
 
 def run_seg(parser, args):
-    cli_seg.main(args)
+    cli_seg.main()
 
 
 def run_io(parser, args):
-    cli_io.main(args)
+    cli_io.main()
 
 
 def run_connect(parser, args):
-    cli_connect.main(args)
+    cli_connect.main()
 
 
 def run_lbls(parser, args):
-    cli_lbls.main(args)
+    cli_lbls.main()
 
 
 def run_sta(parser, args):
-    cli_sta.main(args)
+    cli_sta.main()
 
 
 def get_parser():
