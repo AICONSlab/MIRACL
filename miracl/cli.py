@@ -28,7 +28,7 @@ def run_seg(parser, args):
 
 
 def run_io(parser, args):
-    cli_io.main(args)
+    cli_io.main()
 
 
 def run_connect(parser, args):
