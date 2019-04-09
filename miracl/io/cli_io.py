@@ -32,7 +32,7 @@ def get_parser():
     # tiff_nii
     tiff_nii_parser = miracl_io_convertTIFFtoNII.parsefn()
     parser_tiff_nii = subparsers.add_parser('tiff_nii', parents=[tiff_nii_parser], add_help=False,
-                                           help="convert Tiff stacks to Nii")
+                                            help='convert Tiff stacks to Nii')
 
     parser_tiff_nii.set_defaults(func=run_tiff_nii)
 
@@ -49,9 +49,13 @@ def get_parser():
     return parser
 
 
-def main():
+def main(args=None):
+
+    if args is None:
+        args = sys.argv[2:]
+
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     args.func(parser, args)
 
 

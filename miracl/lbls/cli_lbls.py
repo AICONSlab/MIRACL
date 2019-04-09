@@ -3,7 +3,6 @@ import sys
 import argparse
 import subprocess
 import logging
-from pathlib import Path
 
 # logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
 # logger = logging.getLogger()
@@ -11,9 +10,6 @@ from pathlib import Path
 
 def run_reg_clar(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
-    # flow_cli = os.path.realpath(__file__)
-    # flow_dir = Path(flow_cli).parents[0]
 
     args = vars(args)
 

@@ -37,7 +37,8 @@ jobs:
           name: Run Tests
           no_output_timeout: 2h
           command: |
-             echo "Run tests here..."
+             echo "Runing tests:"
+             docker run -it mgoubran/miracl io tiff_nii -f /tmp/MIRACLextra/input -d 5
       - store_test_results:
           path: /home/circleci/out/tests
 

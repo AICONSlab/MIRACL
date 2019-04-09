@@ -63,9 +63,13 @@ def get_parser():
     return parser
 
 
-def main():
+def main(args=None):
+
+    if args is None:
+        args = sys.argv[2:]
+
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     args.func(parser, args)
 
 
