@@ -76,8 +76,8 @@ def get_parser():
 
     # sta
     parser_sta = subparsers.add_parser('sta', add_help=False, help="Structure Tensor Analysis (STA)")
-    parser_sta.add_argument('-f',
-                            help="")
+    parser_sta.add_argument('-f', '--folder', metavar='',
+                            help="input segmentation folder")
     parser_sta.add_argument('-o',
                             help="")
     parser_sta.add_argument('-n',
