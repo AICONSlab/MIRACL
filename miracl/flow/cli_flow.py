@@ -12,33 +12,48 @@ def run_reg_clar(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    bash_args = '-f %s -n "%s" -r "%s"' % (args['folder'], args['conv_opts'][0], args['reg_opts'][0])
+    if args['help']:
+        subprocess.Popen('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh -h' % miracl_home,
+                          shell=True)
+    else:
+        bash_args = '-f %s -n "%s" -r "%s"' % (args['folder'], args['conv_opts'][0], args['reg_opts'][0])
 
-    print('Running CLARITY to Allen registration workflow with the following arguments: \n ' \
-          "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args)
+        print('Running CLARITY to Allen registration workflow with the following arguments: \n' 
+              "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args)
 
-    subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
-                          shell=True,
-                          stderr=subprocess.STDOUT)
+        subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
+                              shell=True,
+                              stderr=subprocess.STDOUT)
 
 
 def run_seg(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
+    if args['help']:
+        subprocess.Popen('%s/flow/miracl_workflow_segmentation_clarity.sh -h' % miracl_home,
+                          shell=True)
+    else:
+        bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
                                                        args['seg_opts'][0], args['ext_opts'][0])
 
-    subprocess.check_call('%s/flow/miracl_workflow_segmentation_clarity.sh %s' % (miracl_home, bash_args),
-                          shell=True,
-                          stderr=subprocess.STDOUT)
+        subprocess.check_call('%s/flow/miracl_workflow_segmentation_clarity.sh %s' % (miracl_home, bash_args),
+                              shell=True,
+                              stderr=subprocess.STDOUT)
 
 
 def run_sta(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, args), shell=True,
+    if args['help']:
+        subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
+                          shell=True)
+    else:
+        bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
+                                                       args['seg_opts'][0], args['ext_opts'][0])
+
+        subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                           stderr=subprocess.STDOUT)
 
 
@@ -47,13 +62,15 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # reg_clarity
-    parser_regclar = subparsers.add_parser('reg_clar', help="whole-brain clarity registration to Allen atlas")
+    parser_regclar = subparsers.add_parser('reg_clar', add_help=False,
+                                           help="whole-brain clarity registration to Allen atlas")
     parser_regclar.add_argument('-f', '--folder', metavar='',
                                 help="input registration folder")
     parser_regclar.add_argument('-n', '--conv_opts', nargs='+', metavar='',
                                 help="file conversion options")
     parser_regclar.add_argument('-r', '--reg_opts', nargs='+', metavar='',
                                 help="registration options")
+    parser_regclar.add_argument('-h', '--help', action='store_true')
 
     parser_regclar.set_defaults(func=run_reg_clar)
 
@@ -65,6 +82,7 @@ def get_parser():
                             help="")
     parser_sta.add_argument('-n',
                             help="")
+    parser_regclar.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta)
 
@@ -80,6 +98,7 @@ def get_parser():
                             help="segmentation options")
     parser_seg.add_argument('-e', '--ext_opts', nargs='+', metavar='',
                             help="feature extraction options")
+    parser_regclar.add_argument('-h', '--help', action='store_true')
 
     parser_seg.set_defaults(func=run_seg)
 
