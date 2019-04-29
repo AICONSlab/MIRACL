@@ -21,7 +21,7 @@ def helpmsg():
 
     Performs intensity correction on CLARITY tiff data in parallel using N4
 
-    Example: miracl_utils_int_corr_tiffs_2D.py -f tiff_folder -o bias_corr_folder
+    Example: miracl_utilfn_int_corr_tiffs_2D.py -f tiff_folder -o bias_corr_folder
         '''
 
 

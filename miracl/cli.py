@@ -10,7 +10,7 @@ from pathlib import Path
 from miracl.flow import cli_flow
 from miracl.reg import cli_reg
 from miracl.seg import cli_seg
-from miracl.io import cli_io
+from miracl.conv import cli_conv
 from miracl.connect import cli_connect
 from miracl.lbls import cli_lbls
 from miracl.sta import cli_sta
@@ -29,7 +29,7 @@ def run_seg(parser, args):
 
 
 def run_io(parser, args):
-    cli_io.main()
+    cli_conv.main()
 
 
 def run_connect(parser, args):
@@ -83,10 +83,10 @@ def get_parser():
 
     parser_connect.set_defaults(func=run_connect)
 
-    # io
-    io_parser = cli_io.get_parser()
-    parser_io = subparsers.add_parser('io', parents=[io_parser], add_help=False,
-                                      help="io functions")
+    # conv
+    io_parser = cli_conv.get_parser()
+    parser_io = subparsers.add_parser('conv', parents=[io_parser], add_help=False,
+                                      help="conv functions")
 
     parser_io.set_defaults(func=run_io)
 

@@ -78,16 +78,16 @@ nestedict = {
     },
 
     'Conversion': {
-        'folder': 'io',
+        'folder': 'conv',
         'functions': {
             0: {
                 'name': 'Tiff to Nii',
-                'script': 'miracl_io_convertTIFFtoNII.py',
+                'script': 'miracl_conv_convertTIFFtoNII.py',
                 'helpmsg': 'Converts a Tiff stack images to Nifti format and down-sample if chosen'
             },
             1: {
                 'name': 'Dcm to Nii',
-                'script': 'miracl_io_convertDCMtoNII.sh',
+                'script': 'miracl_conv_convertDCMtoNII.sh',
                 'helpmsg': 'Converts dicoms in sub-directories to nii & renames sub-directories with sequence name'
             }
         }
@@ -234,21 +234,21 @@ nestedict = {
     },
 
     'Utilities': {
-        'folder': 'utils',
+        'folder': 'utilfn',
         'functions': {
             0: {
                 'name': 'CLARITY intensity correction',
-                'script': 'miracl_utils_int_corr_tiffs.py',
+                'script': 'miracl_utilfn_int_corr_tiffs.py',
                 'helpmsg': 'Performs intensity correction on CLARITY tiff data in parallel using N4'
             },
             1: {
                 'name': 'Extract label from registration',
-                'script': 'miracl_utils_extract_lbl.py',
+                'script': 'miracl_utilfn_extract_lbl.py',
                 'helpmsg': 'Outputs nifti file with only chosen label'
             },
             2: {
                 'name': 'Create brain mask',
-                'script': 'miracl_utils_create_brainmask.py',
+                'script': 'miracl_utilfn_create_brainmask.py',
                 'helpmsg': 'Creates brain mask (nii/nii.gz) for CLARITY data'
             }
         }

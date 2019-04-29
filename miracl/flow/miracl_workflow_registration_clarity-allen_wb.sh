@@ -24,14 +24,14 @@ function usage()
 
     Executes:
 
-        io/miracl_io_set_orient_gui.py (if run in GUI mode)
-        io/miracl_io_convertTIFFtoNII.py
+        conv/miracl_conv_set_orient_gui.py (if run in GUI mode)
+        conv/miracl_conv_convertTIFFtoNII.py
         reg/miracl_reg_clar-allen_whole_brain.sh
 
     Usage: `basename $0`
 
         A GUI will open to set data orientation
-        For "miracl_io_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
+        For "miracl_conv_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
 
 
     ----------
@@ -269,14 +269,14 @@ if [[ "$#" -gt 1 ]]; then
     if [[ -z "${convopts}" ]];
 	then
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f "${indir}" \n"
-        # miracl_io_convertTIFFtoNII.py -f ${indir}
+        printf "\n miracl_conv_convertTIFFtoNII.py -f "${indir}" \n"
+        # miracl_conv_convertTIFFtoNII.py -f ${indir}
         miracl io tiff_nii -f "${indir}"
 
     else
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f "${indir}" ${convopts} \n"
-        # miracl_io_convertTIFFtoNII.py -f ${indir} ${convopts}
+        printf "\n miracl_conv_convertTIFFtoNII.py -f "${indir}" ${convopts} \n"
+        # miracl_conv_convertTIFFtoNII.py -f ${indir} ${convopts}
         miracl io tiff_nii -f "${indir}" ${convopts}
 
     fi
@@ -320,8 +320,8 @@ else
 
     printf "\n Running Set orient with the following command: \n"
 
-    printf "\n miracl_io_set_orient_gui.py \n"
-    miracl_io_set_orient_gui.py
+    printf "\n miracl_conv_set_orient_gui.py \n"
+    miracl_conv_set_orient_gui.py
 
 
     indir=`cat ort2std.txt | grep tifdir | cut -d '=' -f 2`
@@ -358,7 +358,7 @@ else
 
 
     # options gui Nii conv
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Nii conversion options" -f "out nii (def = clarity)" "downsample ratio (def = 5)" \
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Nii conversion options" -f "out nii (def = clarity)" "downsample ratio (def = 5)" \
 	 "channel #" "channel prefix" "channel name (def = eyfp)" "in-plane res (def = 5 um)" "z res (def = 5 um)" "center (def = 0 0 0)"  -hf "`usage`")
 
 	# populate array
@@ -404,7 +404,7 @@ else
     # Get reg opts
 
     # options gui for Reg
-	regopts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" \
+	regopts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" \
 	        -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side [blank (def) / rh / lh]"  -hf "`usage`")
 
 	# populate array
@@ -438,13 +438,13 @@ else
 
     if [[ -z ${chanp} ]]; then
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+        printf "\n miracl_conv_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+        miracl_conv_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
 
     else
 
-        printf "\n miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
+        printf "\n miracl_conv_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+        miracl_conv_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
 
     fi
 

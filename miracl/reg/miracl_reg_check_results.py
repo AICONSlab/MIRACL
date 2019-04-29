@@ -54,7 +54,7 @@ def parseinputs():
         miracl_home = os.environ['MIRACL_HOME']
 
         indirstr = subprocess.check_output(
-            '%s/io/miracl_io_file_folder_gui.py -f %s -s %s' % (miracl_home, 'folder', '"Please open reg final dir"'),
+            '%s/conv/miracl_conv_file_folder_gui.py -f %s -s %s' % (miracl_home, 'folder', '"Please open reg final dir"'),
             shell=True,
             stderr=subprocess.PIPE)
         indir = indirstr.split(":")[1].lstrip().rstrip()

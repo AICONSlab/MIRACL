@@ -13,11 +13,11 @@ from PyQt4.QtGui import *
 # Inputs #
 
 def helpmsg():
-    return '''miracl_io_file_folder_gui -f [file/folder] -s string -t [types or extensions if file (optional)]
+    return '''miracl_conv_file_folder_gui -f [file/folder] -s string -t [types or extensions if file (optional)]
 
 Opens gui to choose file / folder & shows input string as message
 
-example: miracl_io_file_folder_gui -f file -s "Please open your picture" -t "*.nii *.nii.gz"
+example: miracl_conv_file_folder_gui -f file -s "Please open your picture" -t "*.nii *.nii.gz"
 
 File/Folder path will be printed in output
 '''

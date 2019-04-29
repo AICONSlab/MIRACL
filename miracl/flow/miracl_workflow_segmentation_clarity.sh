@@ -256,7 +256,7 @@ else
 	printf "\n No inputs given ... running in GUI mode \n"
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" \
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Seg options" \
 	     -d "Input tiff dir" \
 	     -v "Registered allen labels (..clar_vox.tif) in the reg_final dir" \
 	     -f "seg type [virus (def), cFOS, sparse or nuclear]" "channel prefix (ex = C001) " "labels voxel size" -hf "`usage`")

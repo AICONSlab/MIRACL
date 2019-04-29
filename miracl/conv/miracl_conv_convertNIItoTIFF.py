@@ -16,7 +16,7 @@ import scipy.ndimage
 import tifffile as tiff
 from PyQt4.QtGui import *
 
-import miracl_io_gui_options as gui_opts
+import miracl_conv_gui_options as gui_opts
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -34,9 +34,9 @@ Converts Nifti images to Tiff
 
     For command-line / scripting
 
-    Usage: miracl_io_convertNIItoTIFF.py -i [Nii file]
+    Usage: miracl_conv_convertNIItoTIFF.py -i [Nii file]
 
-    Example: miracl_io_convertNIItoTIFF.py -i stroke2.nii.gz -o stroke2.tiff -u 5
+    Example: miracl_conv_convertNIItoTIFF.py -i stroke2.nii.gz -o stroke2.tiff -u 5
 
     required arguments:
       -i, --input          Input CLARITY Nii

@@ -22,11 +22,11 @@ function usage()
 
     Executes:
 
-        io/miracl_io_convertTifftoNII.py
+        conv/miracl_conv_convertTifftoNII.py
         lbls/miracl_lbls_get_graph_info.py
         lbls/miracl_lbls_generate_parents_at_depth.py
-        utils/miracl_extract_lbl.py
-        utils/miracl_create_brain_mask.py
+        utilfn/miracl_extract_lbl.py
+        utilfn/miracl_create_brain_mask.py
         sta/miracl_sta_track_primary_eigen.py
         lbls/miracl_lbls_stats.py
         sta/miracl_sta_gen_tract_density.py
@@ -158,7 +158,7 @@ function choose_folder_gui()
 	local openstrfol=$1
 	local _inpathfol=$2
 
-    folderpath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f folder -s "$openstrfol")
+    folderpath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f folder -s "$openstrfol")
 
 	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -175,7 +175,7 @@ function choose_file_gui()
 	local openstrfil=$1
 	local _inpathfil=$2
 
-    filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstrfil")
+    filepath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f file -s "$openstrfil")
 
 	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -342,9 +342,9 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running conversion to nii with the following command: \n"
 
-        printf "\n miracl_io_convertTifftoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
+        printf "\n miracl_conv_convertTifftoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1 \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
+        miracl_conv_convertTIFFtoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1
 
     else
@@ -395,8 +395,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running label extraction with the following command: \n"
 
-        printf "\n miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
-        miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
+        printf "\n miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
 
     else
 
@@ -413,8 +413,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running brain mask creation with the following command: \n"
 
-        printf "\n miracl_utils_create_brain_mask.py -i ${nii_file} \n"
-        miracl_utils_create_brainmask.py -i ${nii_file}
+        printf "\n miracl_utilfn_create_brain_mask.py -i ${nii_file} \n"
+        miracl_utilfn_create_brainmask.py -i ${nii_file}
 
     else
 
@@ -549,7 +549,7 @@ else
 #    choose_folder_gui "Open clarity dir (with .tif files) by double clicking then OK" indir
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "STA workflow"  \
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "STA workflow"  \
 	        -d "Input tiff folder" "CLARITY final registration folder" \
 	        -f "Out nii name (def = clarity)" "Seed label abbreviation" "hemi (combined or split)" \
 	           "Derivative of Gaussian (dog) sigma" "Gaussian smoothing sigma" "Tracking angle threshold" \
@@ -636,9 +636,9 @@ else
 
         printf "\n Running conversion to nii with the following command: \n"
 
-        printf "\n miracl_io_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+        printf "\n miracl_conv_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
                 -ch ${chan} -cn ${chann} -cp ${chanp} \n"
-        miracl_io_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+        miracl_conv_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
                                         -ch ${chan} -cn ${chann} -cp ${chanp}
 
     else
@@ -687,8 +687,8 @@ else
 
         printf "\n Running label extraction with the following command: \n"
 
-        printf "\n miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
-        miracl_utils_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
+        printf "\n miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
 
     else
 
@@ -705,8 +705,8 @@ else
 
         printf "\n Running brain mask creation with the following command: \n"
 
-        printf "\n miracl_utils_create_brain_mask.py -i ${nii_file} \n"
-        miracl_utils_create_brainmask.py -i ${nii_file}
+        printf "\n miracl_utilfn_create_brain_mask.py -i ${nii_file} \n"
+        miracl_utilfn_create_brainmask.py -i ${nii_file}
 
     else
 

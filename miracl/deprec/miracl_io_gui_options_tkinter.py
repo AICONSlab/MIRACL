@@ -7,11 +7,11 @@ from Tkinter import *
 # Inputs #########
 
 def helpmsg(name=None):
-    return '''miracl_io_gui_options.py -t title -f fields [separated by space] -hf helpfun
+    return '''miracl_conv_gui_options.py -t title -f fields [separated by space] -hf helpfun
 
 Takes list of strings as options for entries for a gui options, and a gui title
 
-example: miracl_io_gui_options.py -t "Reg options" -f orient label resolution
+example: miracl_conv_gui_options.py -t "Reg options" -f orient label resolution
 
 Input options will be printed as output
 

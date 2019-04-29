@@ -58,7 +58,7 @@ function usage()
 
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
-        p.  if utils intensity correction already run, skip correction inside registration (default: 0)
+        p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
 
         w.  warp high-res clarity to Allen space (default: 0)
 
@@ -183,7 +183,7 @@ function choose_file_gui()
 	local ftype=$2
 	local _inpath=$3
 
-	filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
+	filepath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
 
     filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -272,7 +272,7 @@ else
 	#choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel" "*.nii *.nii.gz" inclar
 
 	# options gui 
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel "  \
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel "  \
 	-f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')"  \
 	  "olfactory bulb incl. (def = 0)" "side (def = None)" "extra int correct (def = 0)" -hf "`usage`")
 
@@ -1188,7 +1188,7 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-miracl_utils_endstatement.py -f "Registration and Allen labels warping" -t "$DIFF minutes"
+miracl_utilfn_endstatement.py -f "Registration and Allen labels warping" -t "$DIFF minutes"
 
 
 # TODOs

@@ -21,7 +21,7 @@ import scipy.ndimage
 from PyQt4.QtGui import *
 from joblib import Parallel, delayed
 
-import miracl_io_gui_options as gui_opts
+import miracl_conv_gui_options as gui_opts
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -39,9 +39,9 @@ Converts Tiff images to Nifti
 
     For command-line / scripting
 
-    Usage: miracl_io_convertTIFFtoNII.py -f [Tiff folder]
+    Usage: miracl_conv_convertTIFFtoNII.py -f [Tiff folder]
 
-    Example: miracl_io_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+    Example: miracl_conv_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
     required arguments:
       -f dir, --folder dir  Input CLARITY TIFF folder/dir

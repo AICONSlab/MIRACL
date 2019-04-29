@@ -54,11 +54,11 @@ The pipeline is combined of different "Modules" depending on their functionality
 Functions for each module are grouped together:
 
  - connect -> Connectivity
- - io -> Input/Output (conversion/orientation)
+ - conv -> Conversion (Input/Output)
  - reg -> Registration
  - seg -> Segmentation
  - lbls -> Labels
- - utils -> Utilities
+ - utilfn -> Utilities
  - sta -> Structure Tensor Analysis
  - stats -> Statistics
 
