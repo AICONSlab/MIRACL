@@ -34,7 +34,8 @@ ENV ANTSPATH /opt/ANTs
 WORKDIR /tmp
 RUN wget http://downloads.imagej.net/fiji/latest/fiji-linux64.zip && \
     unzip fiji-linux64.zip && \
-    mv Fiji.app/ /opt/fiji
+    mv Fiji.app/ /opt/fiji && \
+    rm fiji-linux64.zip
 ENV PATH $ANTSPATH/bin:/opt/fiji/bin:${PATH}
 
 # Fiji Plugins
