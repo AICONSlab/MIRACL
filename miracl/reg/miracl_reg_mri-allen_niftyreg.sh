@@ -138,7 +138,7 @@ function choose_file_gui()
 	local ftype=$2
 	local _inpath=$3
 
-    filepath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
+    filepath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
 
 	filepath=`echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -226,7 +226,7 @@ else
 	#choose_file_gui "In-vivo or Ex-vivo MRI" "*.nii *.nii.gz" inmr
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Reg options" -v "In-vivo or Ex-vivo MRI" \
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "In-vivo or Ex-vivo MRI" \
 	-f "Orient code (def = RSP)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')"  \
 	 "olfactory bulb incl. (def = 0)" "skull strip (def = 1)" "No orient (def = 0)"  -hf "`usage`")
 

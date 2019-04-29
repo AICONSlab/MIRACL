@@ -19,7 +19,7 @@ import scipy.ndimage
 import tifffile as tiff
 from joblib import Parallel, delayed
 
-import miracl_utils_endstatement as statement
+import miracl_utilfn_endstatement as statement
 
 
 # from skimage import exposure
@@ -33,7 +33,7 @@ def helpmsg():
     Runs N4 'bias field' / intensity correction on the nifti
     Up-samples the output bias field and applies it to the tiff data
 
-    Example: miracl_utils_int_corr_tiffs.py -f tiff_folder -od bias_corr_folder
+    Example: miracl_utilfn_int_corr_tiffs.py -f tiff_folder -od bias_corr_folder
         '''
 
 
@@ -152,13 +152,13 @@ def createnii(tifdir, down, chann, chanp, chan, outnii, vx, vz):
 
     if chanp is None:
         subprocess.check_call(
-            'miracl_io_convertTIFFtoNII.py -f %s -d %s -ch %s -vx %s -vz %s -o %s'
+            'miracl_conv_convertTIFFtoNII.py -f %s -d %s -ch %s -vx %s -vz %s -o %s'
             % (tifdir, down, chan, vx, vz, outnii),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     else:
         subprocess.check_call(
-            'miracl_io_convertTIFFtoNII.py -f %s -d %s -cn %s -cp %s -ch %s -vx %s -vz %s -o %s'
+            'miracl_conv_convertTIFFtoNII.py -f %s -d %s -cn %s -cp %s -ch %s -vx %s -vz %s -o %s'
             % (tifdir, down, chann, chanp, chan, vx, vz, outnii),
             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 

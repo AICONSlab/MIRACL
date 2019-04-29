@@ -13,11 +13,11 @@ from tkFileDialog import askopenfilename
 ### Inputs #########
 
 def helpmsg(name=None):
-    return '''miracl_io_file_folder_gui -f [file/folder] -s string
+    return '''miracl_conv_file_folder_gui -f [file/folder] -s string
 
 Opens gui to choose file / folder & shows input string as message
 
-example: miracl_io_file_folder_gui -f file -s "Please open your picture"
+example: miracl_conv_file_folder_gui -f file -s "Please open your picture"
 
 File/Folder path will be printed in output
 '''

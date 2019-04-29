@@ -12,8 +12,8 @@ import numpy as np
 import pandas as pd
 from PyQt4.QtGui import QApplication
 
-sys.path.insert(0, '%s/io' % os.environ['MIRACL_HOME'])
-import miracl_io_gui_options as gui_opts
+sys.path.insert(0, '%s/conv' % os.environ['MIRACL_HOME'])
+import miracl_conv_gui_options as gui_opts
 
 
 # import commands

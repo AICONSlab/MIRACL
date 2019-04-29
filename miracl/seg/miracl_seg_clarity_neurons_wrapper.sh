@@ -116,7 +116,7 @@ function choose_file_gui()
 	local openstr=$1
 	local _inpath=$2
 
-    folderpath=$(${MIRACL_HOME}/io/miracl_io_file_folder_gui.py -f folder -s "$openstr")
+    folderpath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f folder -s "$openstr")
 
 	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
@@ -189,7 +189,7 @@ else
 	fi
 
 	# options gui
-	opts=$(${MIRACL_HOME}/io/miracl_io_gui_options.py -t "Seg options" -f "seg type (def = virus)" "channel prefix (ex = C001) "  -hf "`usage`")
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Seg options" -f "seg type (def = virus)" "channel prefix (ex = C001) "  -hf "`usage`")
 
 	# populate array
 	arr=()
