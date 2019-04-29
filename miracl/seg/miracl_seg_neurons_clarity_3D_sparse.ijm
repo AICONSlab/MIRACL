@@ -3,7 +3,7 @@
 // Macro for Fiji/ImageJ 
 // Segments neurons in cleared mouse brain of sparse stains (like Thy1) in 3D 
 // 
-// (c) Maged Goubran, mgoubran@stanford.edu, 2017
+// (c) Maged Goubran, mgoubran@stanford.edu, 2018
 //
 // based on plugins from:
 // 

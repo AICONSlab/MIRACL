@@ -35,7 +35,7 @@ WORKDIR /tmp
 RUN wget http://downloads.imagej.net/fiji/latest/fiji-linux64.zip && \
     unzip fiji-linux64.zip && \
     mv Fiji.app/ /opt/fiji && \
-    rm fiji-linux64.zip
+    rm /tmp/fiji-linux64.zip
 ENV PATH $ANTSPATH/bin:/opt/fiji/bin:${PATH}
 
 # Fiji Plugins
