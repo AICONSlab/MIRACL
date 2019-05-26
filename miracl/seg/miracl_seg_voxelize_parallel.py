@@ -62,7 +62,7 @@ def helpmsg(name=None):
 # Get input arguments
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
     parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
     parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
     parser.add_argument('-v', '--res', type=int, help="voxel size")
