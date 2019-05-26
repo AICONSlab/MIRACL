@@ -24,13 +24,14 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # sta
-    parser_sta = subparsers.add_parser('track_tensor', help="")
+    parser_sta = subparsers.add_parser('track_tensor', add_help=False, help="")
     parser_sta.add_argument('-f',
                             help="")
     parser_sta.add_argument('-o',
                             help="")
     parser_sta.add_argument('-n',
                             help="")
+    parser_sta.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta_tensor)
 

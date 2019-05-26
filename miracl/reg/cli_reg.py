@@ -75,7 +75,7 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # clar allen
-    parser_clar_allen_wb = subparsers.add_parser('clar_allen_wb',
+    parser_clar_allen_wb = subparsers.add_parser('clar_allen_wb', add_help=False,
                                                  help="whole-brain CLARITY registration to Allen atlas")
     parser_clar_allen_wb.add_argument('-i', '--in_nii', metavar='',
                                       help="input nifti")
@@ -90,7 +90,8 @@ def get_parser():
     parser_clar_allen_wb.set_defaults(func=run_clar_allen_wb)
 
     # mri allen ants
-    parser_mri_allen = subparsers.add_parser('mri_allen_ants', help="MRI registration to Allen atlas")
+    parser_mri_allen = subparsers.add_parser('mri_allen_ants', add_help=False,
+                                             help="MRI registration to Allen atlas")
     parser_mri_allen.add_argument('-i', '--in_nii', metavar='',
                                   help="input niti")
     parser_mri_allen.add_argument('-o', '--ort', metavar='',
@@ -112,7 +113,7 @@ def get_parser():
     parser_mri_allen.set_defaults(func=run_mri_allen_ants)
 
     # warp clar
-    parser_warp_clar = subparsers.add_parser('warp_clar',
+    parser_warp_clar = subparsers.add_parser('warp_clar', add_help=False,
                                              help="Warp CLARITY data to Allen space")
     parser_warp_clar.add_argument('-i', '--in_nii', metavar='',
                                   help="input nifti")
@@ -127,7 +128,7 @@ def get_parser():
     parser_warp_clar.set_defaults(func=run_warp_clar)
 
     # warp mr
-    parser_warp_mr = subparsers.add_parser('warp_mr',
+    parser_warp_mr = subparsers.add_parser('warp_mr', add_help=False,
                                              help="Warp MRI data to Allen space")
     parser_warp_mr.add_argument('-i', '--in_nii', metavar='',
                                   help="input nifti")
