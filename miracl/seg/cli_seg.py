@@ -2,69 +2,72 @@ import os
 import sys
 import argparse
 import subprocess
-import logging
-
-# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# logger = logging.getLogger()
+from miracl.seg import miracl_seg_feat_extract, miracl_seg_voxelize_parallel
 
 
-def run_reg_clar(parser, args):
+def run_seg_clar(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
-    # flow_cli = os.path.realpath(__file__)
-    # flow_dir = Path(flow_cli).parents[0]
-
     args = vars(args)
 
-    bash_args = '-f "%s" -n "%s" -r "%s"' % (args['folder'][0], args['conv_opts'][0], args['reg_opts'][0])
+    if args['help']:
+        subprocess.Popen('%s/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
+                         shell=True)
+    else:
 
-    subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
-                          shell=True,
-                          stderr=subprocess.STDOUT)
+        bash_args = '-f "%s" -t "%s" -p "%s"' % (args['folder'], args['type'], args['chan_pre'])
+
+        subprocess.check_call('%s/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
+                              shell=True,
+                              stderr=subprocess.STDOUT)
 
 
-def run_sta(parser, args):
-    miracl_home = os.environ['MIRACL_HOME']
+def run_feat_extract(parser, args):
+    miracl_seg_feat_extract.main(args)
 
-    args = vars(args)
 
-    subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, args), shell=True,
-                          stderr=subprocess.STDOUT)
+def run_voxelize(parser, args):
+    miracl_seg_voxelize_parallel.main(args)
 
 
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # reg_clarity
-    parser_regclar = subparsers.add_parser('reg_clar', help="whole-brain clarity registration to Allen atlas")
-    parser_regclar.add_argument('-f', '--folder', nargs='+',
+    # seg clar
+    parser_seg_clar = subparsers.add_parser('seg_clar', help="segment CLARITY volume")
+    parser_seg_clar.add_argument('-f', '--folder',
                                  help="input registration folder")
-    parser_regclar.add_argument('-n', '--conv_opts', nargs='+', metavar='',
-                                 help="file conversion options")
-    parser_regclar.add_argument('-r', '--reg_opts', nargs='+', metavar='',
-                                 help="registration options")
+    parser_seg_clar.add_argument('-t', '--type', metavar='',
+                                 help="segmentation type")
+    parser_seg_clar.add_argument('-p', '--chan_pre', metavar='',
+                                 help="channel_prefix")
+    parser_seg_clar.add_argument('-h', '--help', action='store_true')
 
+    parser_seg_clar.set_defaults(func=run_seg_clar)
 
-    parser_regclar.set_defaults(func=run_reg_clar)
+    # feat extract
+    feat_extract_parser = miracl_seg_feat_extract.parsefn()
+    parser_feat_extract = subparsers.add_parser('feat_extract', parents=[feat_extract_parser], add_help=False,
+                                            help='Extract features from CLARITY seg')
 
-    # sta
-    parser_sta = subparsers.add_parser('sta', help="")
-    parser_sta.add_argument('-f',
-                            help="")
-    parser_sta.add_argument('-o',
-                            help="")
-    parser_sta.add_argument('-n',
-                            help="")
+    parser_feat_extract.set_defaults(func=run_feat_extract)
 
-    parser_sta.set_defaults(func=run_sta)
+    # voxelize
+    voxelize_parser = miracl_seg_voxelize_parallel.parsefn()
+    parser_voxelize = subparsers.add_parser('voxelize', parents=[voxelize_parser], add_help=False,
+                                            help='convert Tiff stacks to Nii')
+
+    parser_voxelize.set_defaults(func=run_voxelize)
 
     return parser
 
 
-def main():
+def main(args=None):
+    if args is None:
+        args = sys.argv[2:]
+
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     args.func(parser, args)
 
 

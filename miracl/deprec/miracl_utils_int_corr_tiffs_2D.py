@@ -174,7 +174,7 @@ def main():
         maskdir = os.path.join(outdir, 'masks')
         os.makedirs(maskdir)
 
-    Parallel(n_jobs=ncpus)(
+    Parallel(n_jobs=ncpus, backend='threading')(
         delayed(biascorr)(i, tif, outdir, maskimg, shrink, hist, conv)
         for i, tif in enumerate(file_list))
 
