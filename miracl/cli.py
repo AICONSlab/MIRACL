@@ -10,8 +10,7 @@ from pathlib import Path
 from miracl.flow import cli_flow
 from miracl.reg import cli_reg
 from miracl.seg import cli_seg
-# from miracl.conv import cli_conv
-from miracl.conv import miracl_conv_convertTIFFtoNII, miracl_conv_gui_options
+from miracl.conv import cli_conv
 from miracl.connect import cli_connect
 from miracl.lbls import cli_lbls
 from miracl.sta import cli_sta
@@ -29,11 +28,8 @@ def run_seg(parser, args):
     cli_seg.main()
 
 
-# def run_io(parser, args):
-#    cli_conv.main()
-
-def run_tiff_nii(parser, args):
-    miracl_conv_convertTIFFtoNII.main(args)
+def run_io(parser, args):
+   cli_conv.main()
 
 
 def run_connect(parser, args):
@@ -88,18 +84,11 @@ def get_parser():
     parser_connect.set_defaults(func=run_connect)
 
     # conv
-    # io_parser = cli_conv.get_parser()
-    # parser_io = subparsers.add_parser('conv', parents=[io_parser], add_help=False,
-    #                                   help="conv functions")
+    io_parser = cli_conv.get_parser()
+    parser_io = subparsers.add_parser('conv', parents=[io_parser], add_help=False,
+                                      help="conv functions")
 
-    # parser_io.set_defaults(func=run_io)
-
-    # tiff_nii
-    tiff_nii_parser = miracl_conv_convertTIFFtoNII.parsefn()
-    parser_tiff_nii = subparsers.add_parser('conv_tiff_nii', parents=[tiff_nii_parser], add_help=False,
-                                            help='convert Tiff stacks to Nii')
-    parser_tiff_nii.set_defaults(func=run_tiff_nii)
-
+    parser_io.set_defaults(func=run_io)
 
     # lbls
     lbls_parser = cli_lbls.get_parser()

@@ -75,7 +75,7 @@ def folder_dialog(self, msg):
     return folder
 
 
-def parsefn(args):
+def parsefn():
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s  -i [In nii] -o [Out tiff] -u [Up-sample ratio] -s [Spline order]')
 
@@ -90,6 +90,13 @@ def parsefn(args):
     optional.add_argument('-s', '--spline', type=int, metavar='', help="Spline order")
 
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     if len(args) == 1:
 
@@ -220,7 +227,9 @@ def main(args):
 
     starttime = datetime.now()
 
-    [input, outtiff, u, s] = parsefn(args)
+    parser = parsefn()
+
+    [input, outtiff, u, s] = parse_inputs(parser, args)
 
     # convert nii volume to tiff
     print("\n converting NII volume to TIFF")

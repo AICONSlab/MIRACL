@@ -18,11 +18,8 @@ Then create the environment:
 
 install Dependencies
 
-    mv io tmp
-
     pip install -e .
 
-    mv tmp io
 
 #### PyQT
 install PyQt4 using anaconda, run:
@@ -84,27 +81,6 @@ choose the following update sites there:
     wget https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py
     sudo python fslinstaller.py
 
-## Setup user path
-
-For Linux run:
-
-    ./user_setup.sh
-
-or for Mac run:
-
-    ./user_setup_mac.sh
-
-This script will setup your environment to add MIRACL functions to your path
-    (to call them from anywhere) & with the following aliases:
-
-    $MIRACL_HOME = localtion of pipeline and its dependencies
-
-Allen reference atlas (ara) files (with resolutions 10, 25 & 50 um):
-
-    $allen10 -> Template/Atlas Image
-    $lbls10  -> Annoation/Segmentation
-    $snaplut -> ITKsnap Label Descriptions
-    $freelut -> Freeview Label Descriptions
 
 ## Visualization
 

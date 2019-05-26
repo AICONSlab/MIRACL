@@ -2,15 +2,15 @@ import os
 import sys
 import argparse
 import subprocess
-import logging
-from miracl.conv import miracl_conv_convertTIFFtoNII, miracl_conv_gui_options
-
-# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# logger = logging.getLogger()
+from miracl.conv import miracl_conv_convertTIFFtoNII, miracl_conv_gui_options, miracl_conv_convertNIItoTIFF
 
 
 def run_tiff_nii(parser, args):
     miracl_conv_convertTIFFtoNII.main(args)
+
+
+def run_nii_tiff(parser, args):
+    miracl_conv_convertNIItoTIFF.main(args)
 
 
 def run_set_orient(parser):
@@ -34,6 +34,13 @@ def get_parser():
                                             help='convert Tiff stacks to Nii')
 
     parser_tiff_nii.set_defaults(func=run_tiff_nii)
+
+    # nii_tiff
+    nii_tiff_parser = miracl_conv_convertNIItoTIFF.parsefn()
+    parser_nii_tiff = subparsers.add_parser('nii_tiff', parents=[nii_tiff_parser], add_help=False,
+                                            help='convert Nii volume to Tiff stack')
+
+    parser_nii_tiff.set_defaults(func=run_nii_tiff)
 
     # set orient
     parser_set_orient = subparsers.add_parser('set_orient', help="Set orientation tag with GUI")

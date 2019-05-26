@@ -416,7 +416,7 @@ def main(args):
 
     newdata = np.memmap(memap, dtype=float, shape=(len(file_list), tifxd, tifyd), mode='w+')
 
-    Parallel(n_jobs=ncpus)(
+    Parallel(n_jobs=ncpus, backend="threading")(
         delayed(converttiff2nii)(d, i, x, newdata, tifx) for i, x in enumerate(file_list))
 
     # stack slices
@@ -443,6 +443,3 @@ def main(args):
 
 if __name__ == "__main__":
     main(sys.argv)
-
-
-# Todos

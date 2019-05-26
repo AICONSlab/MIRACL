@@ -13,9 +13,7 @@ import scipy as sp
 import tifffile as tiff
 from PyQt4.QtGui import QApplication
 from skimage.measure import regionprops
-
-sys.path.insert(0, '%s/conv' % os.environ['MIRACL_HOME'])
-import miracl_conv_gui_options as gui_opts
+from miracl.conv import  miracl_conv_gui_options as gui_opts
 
 
 # import commands

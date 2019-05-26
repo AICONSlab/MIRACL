@@ -62,14 +62,25 @@ def helpmsg(name=None):
 # ---------
 # Get input arguments
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-s', '--seg', type=str, help="segmentation tif", required=True)
-parser.add_argument('-l', '--lbl', type=str, help="label annotations", required=True)
-parser.add_argument('-m', '--mask', type=str, help="ROI mask")
+def parsefn():
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
+    parser.add_argument('-s', '--seg', type=str, help="segmentation tif", required=True)
+    parser.add_argument('-l', '--lbl', type=str, help="label annotations", required=True)
+    parser.add_argument('-m', '--mask', type=str, help="ROI mask")
 
-args, unknown = parser.parse_known_args()
-inseg = args.seg
-inlbls = args.lbl
+    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
+
+    inseg = args.seg
+    inlbls = args.lbl
+
+    return inseg, inlbls
 
 
 # ---------
@@ -239,7 +250,7 @@ def getlblvals(lbls):
 # ---------
 # main fn
 
-def main():
+def main(args):
     scriptlog('feature_extraction.log')
 
     startTime = datetime.now()
@@ -247,6 +258,9 @@ def main():
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)  # 95% of cores used
+
+    parser = parsefn()
+    inseg, inlbls = parse_inputs(parser, args)
 
     # open seg
     print ("Reading segmentation")
@@ -280,7 +294,6 @@ def main():
 
         # upsample or swap if needed
         reslbls = upsampleswplbls(seg, maslbls)
-
 
     print ("Computing Feature extraction...")
     [allareas, allstdareas, allmaxareas, allnums, alldens] = runalllblspar(seg, reslbls, ncpus, alllbls)
@@ -345,4 +358,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

@@ -22,6 +22,7 @@ from joblib import Parallel, delayed
 from scipy import ndimage
 from skimage.feature import peak_local_max
 
+
 # ---------
 # help fn
 
@@ -60,16 +61,28 @@ def helpmsg(name=None):
 # ---------
 # Get input arguments
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
-parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
-parser.add_argument('-v', '--res', type=int, help="voxel size")
+def parsefn():
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
+    parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
+    parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
+    parser.add_argument('-v', '--res', type=int, help="voxel size")
 
-args, unknown = parser.parse_known_args()
-seg = args.seg
+    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
-res = 10 if args.res is None else args.res
-down = 2 if args.down is None else args.down
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
+
+    seg = args.seg
+
+    res = 10 if args.res is None else args.res
+    down = 2 if args.down is None else args.down
+
+    return seg, res, down
+
 
 # ---------
 # Parameters
@@ -78,6 +91,7 @@ radius = 1
 cpuload = 0.95
 cpus = multiprocessing.cpu_count()
 ncpus = int(cpuload * cpus)  # 95% of cores used2
+
 
 # ---------
 # Logging fn
@@ -141,7 +155,7 @@ def vox(segflt, kernel, down, i, radius):
                                 labels=circv)
     conncomp = ndimage.label(local_maxi)[0]
 
-    return conncomp 
+    return conncomp
 
 
 # ---------
@@ -217,10 +231,14 @@ def savenvoxnii(marray, outvoxnii, res):
 # ---------
 # main fn
 
-def main():
+def main(args):
     scriptlog('parallel_voxelization.log')
 
     startTime = datetime.now()
+
+    parser = parsefn()
+
+    seg, res, down = parse_inputs(parser, args)
 
     segdir = os.path.dirname(os.path.realpath(seg))
 
@@ -263,8 +281,6 @@ def main():
 
         print ('\n Voxelized binarized map already created')
 
+
 if __name__ == "__main__":
-    main()
-
-# TODOs
-
+    main(sys.argv)

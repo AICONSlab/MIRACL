@@ -307,7 +307,7 @@ def main():
 
     print("\n Correcting TIFF images in parallel using %02d cpus" % ncpus)
 
-    Parallel(n_jobs=ncpus)(
+    Parallel(n_jobs=ncpus, backend='threading')(
         delayed(applycorr)(i, tif, outdir, biasres, down, mulpower, maskimg, maskres)
         for i, tif in enumerate(file_list))
 
