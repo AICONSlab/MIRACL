@@ -269,15 +269,15 @@ if [[ "$#" -gt 1 ]]; then
     if [[ -z "${convopts}" ]];
 	then
 
-        printf "\n miracl_conv_convertTIFFtoNII.py -f "${indir}" \n"
+        printf "\n miracl conv tiff_nii -f "${indir}" \n"
         # miracl_conv_convertTIFFtoNII.py -f ${indir}
-        miracl io tiff_nii -f "${indir}"
+        miracl conv tiff_nii -f "${indir}"
 
     else
 
-        printf "\n miracl_conv_convertTIFFtoNII.py -f "${indir}" ${convopts} \n"
+        printf "\n miracl conv tiff_nii -f "${indir}" ${convopts} \n"
         # miracl_conv_convertTIFFtoNII.py -f ${indir} ${convopts}
-        miracl io tiff_nii -f "${indir}" ${convopts}
+        miracl conv tiff_nii -f "${indir}" ${convopts}
 
     fi
 
@@ -292,13 +292,13 @@ if [[ "$#" -gt 1 ]]; then
     if [[ -z "${regopts}" ]];
 	then
 
-        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} \n"
+        printf "\n miracl reg clar_allen_wb -i niftis/${nii} \n"
         # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii}
         miracl reg clar_allen_wb -i niftis/${nii}
 
     else
 
-        printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts} \n"
+        printf "\n miracl reg clar_allen_wb -i niftis/${nii} ${regopts} \n"
         # miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} ${regopts}
         miracl reg clar_allen_wb -i niftis/${nii} ${regopts}
 
