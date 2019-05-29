@@ -11,7 +11,7 @@ RUN python /code/setup.py install
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN git clone https://github.com/vsoch/MIRACLextra && \
+RUN git clone https://github.com/mgoubran/MIRACLextra && \
     cd MIRACLextra && \
     mv ara /code/atlases/ara
 
@@ -43,8 +43,5 @@ RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/a
     chmod +x /usr/bin/ants_miracl_clar
 
 ################################################################################
-
-# Clean up extra numpy
-RUN  ls /opt/miniconda/lib/python2.7/site-packages/num*
 
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
