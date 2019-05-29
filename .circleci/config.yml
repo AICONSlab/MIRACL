@@ -38,7 +38,7 @@ jobs:
           no_output_timeout: 2h
           command: |
              echo "Runing tests:"
-             docker run --entrypoint bash -it mgoubran/miracl bet
+             # docker run --entrypoint bash -it mgoubran/miracl bet
              docker run -it mgoubran/miracl conv tiff_nii -f /tmp/MIRACLextra/input -d 5
       - store_test_results:
           path: /home/circleci/out/tests
