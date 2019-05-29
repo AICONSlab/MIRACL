@@ -35,6 +35,11 @@ ENV gplbls50="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50u
 ENV snaplut "${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt"
 # Freeview LUT
 ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
+
+# ANTs commands
+ENV ants_miracl_clar "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL.sh"
+ENV ants_miracl_mr "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL_MRI.sh"
+
 ################################################################################
 
 # Clean up extra numpy

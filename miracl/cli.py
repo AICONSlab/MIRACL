@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+# coding: utf-8
+
+import argcomplete
 import os
 import sys
 import argparse
@@ -112,6 +117,7 @@ def main(args=None):
     os.environ['MIRACL_HOME'] = '%s' % miracl_dir
 
     parser = get_parser()
+    argcomplete.autocomplete(parser)
     args = parser.parse_args(args)
     args.func(parser, args)
 

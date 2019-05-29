@@ -23,19 +23,21 @@ RUN apt install -y libhdf5-serial-dev && \
     pip install menpo opencv-python
 
 # ANTS
-RUN mkdir -p /opt/ANTs && \
-    wget https://downloads.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.sh?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fadvants%2Ffiles%2FANTS%2FANTS_Latest%2F -O ANTs-latest.sh && \
-    chmod u+x ANTs-latest.sh && \
-    ./ANTs-latest.sh --prefix=/opt/ANTs --skip-license
-
 ENV ANTSPATH /opt/ANTs
+RUN mkdir -p /opt/ANTs && \
+    curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz" \
+    | tar -xzC $ANTSPATH --strip-components 1
+#    wget https://downloads.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.sh?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fadvants%2Ffiles%2FANTS%2FANTS_Latest%2F -O ANTs-latest.sh && \
+#    chmod u+x ANTs-latest.sh && \
+#    ./ANTs-latest.sh --prefix=/opt/ANTs --skip-license
 
 # ImageJ / Fiji
 WORKDIR /tmp
 RUN wget http://downloads.imagej.net/fiji/latest/fiji-linux64.zip && \
     unzip fiji-linux64.zip && \
     mv Fiji.app/ /opt/fiji && \
-    rm /tmp/fiji-linux64.zip
+    rm fiji-linux64.zip
+
 ENV PATH $ANTSPATH/bin:/opt/fiji/bin:${PATH}
 
 # Fiji Plugins
@@ -47,8 +49,28 @@ RUN wget https://github.com/ijpb/MorphoLibJ/releases/download/v1.4.0/MorphoLibJ_
 
 # C3D
 RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz && \
-    tar -xzvf c3d-nightly-Linux-x86_64.tar.gz && mv c3d-1.1.0-Linux-x86_64 /opt/cd3
+    tar -xzvf c3d-nightly-Linux-x86_64.tar.gz && mv c3d-1.1.0-Linux-x86_64 /opt/cd3 && \
+    rm c3d-nightly-Linux-x86_64.tar.gz
 ENV PATH /opt/cd3/bin:${PATH}
+
+# FSL
+# Installing Neurodebian packages FSL
+RUN curl -sSL "http://neuro.debian.net/lists/$( lsb_release -c | cut -f2 ).us-ca.full" >> /etc/apt/sources.list.d/neurodebian.sources.list && \
+    apt-key add /usr/local/etc/neurodebian.gpg && \
+    (apt-key adv --refresh-keys --keyserver hkp://ha.pool.sks-keyservers.net 0xA5D32F012649A5A9 || true)
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+                    fsl-core=5.0.9-5~nd16.04+1 \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/*
+
+ENV FSLDIR="/usr/share/fsl/5.0" \
+    FSLOUTPUTTYPE="NIFTI_GZ" \
+    FSLMULTIFILEQUIT="TRUE" \
+    POSSUMDIR="/usr/share/fsl/5.0" \
+    LD_LIBRARY_PATH="/usr/lib/fsl/5.0:$LD_LIBRARY_PATH" \
+
+ENV PATH="/usr/lib/fsl/5.0:$PATH"
 
 WORKDIR /code
 RUN pip install scikit-image==0.14.2 && \
