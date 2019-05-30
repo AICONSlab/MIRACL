@@ -716,11 +716,11 @@ function initclarallenreg()
 	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
 
     # kill after 3 min (gcc issue)
-    if [ ! -f "${initallen}" ] ; then
-        sleep 180
-
-        kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
-    fi
+#    if [ ! -f "${initallen}" ] ; then
+#        sleep 180
+#
+#        kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
+#    fi
 
 	# Warp Allen
 	ifdsntexistrun ${initallen} "initializing Allen template" \

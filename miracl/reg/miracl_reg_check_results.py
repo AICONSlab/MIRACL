@@ -23,10 +23,10 @@ Checks registration results
 
     For command-line / scripting
 
-    Usage: miracl_reg_check_results.py -f [reg final folder] -v [visualization software] -s [reg space (clarity or
+    Usage: miracl reg check_reg -f [reg final folder] -v [visualization software] -s [reg space (clarity or
     allen)]
 
-Example: miracl_convertTifftoNii.py -f reg_final -v itk -s clarity
+    Example: miracl reg check_reg -f reg_final -v itk -s clarity
 
     Arguments (required):
 
@@ -34,6 +34,7 @@ Example: miracl_convertTifftoNii.py -f reg_final -v itk -s clarity
 
     Optional arguments:
 
+        -m Hemisphere (split or combined)
         -v Visualization software: itkSNAP 'itk' (default) or freeview 'free'
         -s Registration Space of results: clarity (default) or allen
 
@@ -62,6 +63,7 @@ def parseinputs():
         # args = parser.parse_args()
         viz = 'itk'
         space = 'clarity'
+        hemi = 'combined'
 
     else:
 
@@ -71,6 +73,7 @@ def parseinputs():
         parser.add_argument('-f', '--folder', type=str, help="reg final folder", required=True)
         parser.add_argument('-v', '--viz', type=str, help="Visualization software")
         parser.add_argument('-s', '--space', type=str, help="Registration Space")
+        parser.add_argument('-m', '--hemi', type=str, help="Hemisphere (split or combined)")
 
         args = parser.parse_args()
 
@@ -94,13 +97,20 @@ def parseinputs():
             assert isinstance(args.space, str)
             space = args.space
 
-    return indir, viz, space
+        if args.hemi is None:
+            hemi = 'combined'
+            print("\n hemisphere not specified ... choosing combined")
+        else:
+            assert isinstance(args.hemi, str)
+            hemi = args.hemi
+
+    return indir, viz, space, hemi
 
 
 # ---------
 
 def main():
-    [indir, viz, space] = parseinputs()
+    [indir, viz, space, hemi] = parseinputs()
 
     if viz == "itk":
 
@@ -116,8 +126,8 @@ def main():
             print("\n Viewing downsampled CLARITY volume with registered Allen labels using itkSNAP ...\n")
 
             subprocess.check_call(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_combined_??um_clar_downsample.nii.gz -l $snaplut' % (
-                indir, indir), shell=True,
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_%s_??um_clar_downsample.nii.gz -l $snaplut' % (
+                indir, indir, hemi), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
@@ -152,8 +162,8 @@ def main():
             # 'freeview -v %s/clar_downsample_res??um.nii.gz -v %s/annotation_hemi_combined_??um_clar_downsample.nii.gz:lut=$freelut'
 
             subprocess.check_call(
-                'freeview -v %s/clar_downsample_res??um.nii.gz -v %s/annotation_hemi_combined_??um_clar_downsample.nii.gz'
-                % (indir, indir), shell=True,
+                'freeview -v %s/clar_downsample_res??um.nii.gz -v %s/annotation_hemi_%s_??um_clar_downsample.nii.gz'
+                % (indir, indir, hemi), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
