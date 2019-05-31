@@ -10,13 +10,13 @@ def run_seg_clar(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
+        subprocess.Popen('%s/miracl/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
                          shell=True)
     else:
 
         bash_args = '-f "%s" -t "%s" -p "%s"' % (args['folder'], args['type'], args['chan_pre'])
 
-        subprocess.check_call('%s/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/miracl/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
