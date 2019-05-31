@@ -42,6 +42,8 @@ RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_
 RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_miracl_mr && \
     chmod +x /usr/bin/ants_miracl_clar
 
+ENV IN_DOCKER_CONTAINER Yes
+
 ################################################################################
 
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
