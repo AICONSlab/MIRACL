@@ -476,4 +476,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-printf "\n Conversion, Registration and Allen labels warping done in ${DIFF} minutes. Have a good day!"
+miracl utils endstate -f "Conversion, Registration and Allen labels warping" -t "$DIFF minutes"

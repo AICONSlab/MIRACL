@@ -4,6 +4,7 @@
 # coding: utf-8
 
 import argparse
+import sys
 import os
 import pwd
 import re
@@ -19,7 +20,7 @@ def helpmsg():
         '''
 
 
-def parseargs():
+def parsefn():
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s -f [ function ] -t [ time diff ]')
 
@@ -29,7 +30,12 @@ def parseargs():
     required.add_argument('-t', '--timediff', type=str, required=True, metavar='timediff',
                           help="Time diff")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     task = args.func
     timediff = args.timediff
@@ -37,9 +43,10 @@ def parseargs():
     return task, timediff
 
 
-def main(task=None, timediff=None):
-    if task is None or timediff is None:
-        task, timediff = parseargs()
+def main(args):
+
+    parser = parsefn()
+    task, timediff = parse_inputs(parser, args)
 
     # try:
     #     fing = subprocess.Popen("finger $(whoami)",
@@ -77,4 +84,4 @@ def main(task=None, timediff=None):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

@@ -800,8 +800,7 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "STA and signal analysis done in $DIFF minutes. Have a good day!"
-
+miracl utils endstate -f "STA and signal analysis " -t "$DIFF minutes"
 
 # TODOs
 # streamline after reg

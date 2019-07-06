@@ -843,7 +843,7 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Registration and Allen labels warping done in $DIFF minutes. Have a good day!"
+miracl utils endstate -f "Registration and Allen labels warping" -t "$DIFF minutes"
 
 
 #--------------------

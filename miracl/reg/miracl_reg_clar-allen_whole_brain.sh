@@ -1188,7 +1188,7 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-miracl_utilfn_endstatement.py -f "Registration and Allen labels warping" -t "$DIFF minutes"
+miracl utils endstate -f "Registration and Allen labels warping" -t "$DIFF minutes"
 
 
 # TODOs

@@ -358,4 +358,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Segmentation, voxelization and feature extraction done in ${DIFF} minutes. Have a good day!"
+miracl utils endstate -f "Segmentation, voxelization and feature extraction" -t "$DIFF minutes"

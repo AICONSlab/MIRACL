@@ -14,6 +14,7 @@ from miracl.conv import cli_conv
 from miracl.connect import cli_connect
 from miracl.lbls import cli_lbls
 from miracl.sta import cli_sta
+from miracl.utilfn import cli_utilfn
 
 
 def run_flow(parser, args):
@@ -42,6 +43,10 @@ def run_lbls(parser, args):
 
 def run_sta(parser, args):
     cli_sta.main()
+
+
+def run_utils(parser, args):
+    cli_utilfn.main()
 
 
 def get_parser():
@@ -96,6 +101,14 @@ def get_parser():
                                       help="Label manipulation functions")
 
     parser_lbls.set_defaults(func=run_lbls)
+
+    # utils
+    utils_parser = cli_lbls.get_parser()
+    parser_utils = subparsers.add_parser('utils', parents=[utils_parser], add_help=False,
+                                      help="Utils functions")
+
+    parser_utils.set_defaults(func=run_utils)
+
 
     return parser
 
