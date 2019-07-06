@@ -15,8 +15,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     license='GNU GENERAL PUBLIC LICENSE v3',
-    url='https://github.com/mgoubran/MIRACL',  # change later
-    download_url='https://github.com/mgoubran/MIRACL',
+    url='https://github.com/mgoubran/MIRACLdev',  # change later
+    download_url='https://github.com/mgoubran/MIRACLdev',
     long_description=open('README.md').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -38,7 +38,7 @@ setup(
     ],
     install_requires=[
         'opencv-python', 'tifffile', 'nibabel', 'argparse', 'allensdk', 'lightning-python', 'multiprocessing', 'joblib',
-        'matplotlib==2.1'
+        'matplotlib==2.1', 'argcomplete'
     ],
     entry_points = {'console_scripts': [ 'miracl=miracl.cli:main' ],
                     'gui_scripts': ['miraclGUI=miracl.miraclGUI:main']},

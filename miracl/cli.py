@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+# coding: utf-8
+
+import argcomplete
 import os
 import sys
 import argparse
@@ -119,12 +124,13 @@ def main(args=None):
         args = sys.argv[1:]
 
     # set miracl home
-    # if os.environ['MIRACL_HOME'] is None:
-    cli_file = os.path.realpath(__file__)
-    miracl_dir = Path(cli_file).parents[0]
-    os.environ['MIRACL_HOME'] = '%s' % miracl_dir
+    if 'MIRACL_HOME' not in os.environ:
+        cli_file = os.path.realpath(__file__)
+        miracl_dir = Path(cli_file).parents[0]
+        os.environ['MIRACL_HOME'] = '%s' % miracl_dir
 
     parser = get_parser()
+    argcomplete.autocomplete(parser)
     args = parser.parse_args(args)
     args.func(parser, args)
 

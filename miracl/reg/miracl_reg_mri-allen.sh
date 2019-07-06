@@ -608,7 +608,7 @@ function regmrallen()
 	# Perform ANTs registration between MRI and Allen atlas
 
 	ifdsntexistrun ${antsallen} "Registering MRI data to allen atlas ... this will take a while" \
-	antsRegistrationMIRACL_MRI.sh -d 3 -f ${mrprereg} -m ${allen} -o ${regdir}/allen_mr_ants -t ${trans} -p ${prec} -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
+	ants_miracl_mr -d 3 -f ${mrprereg} -m ${allen} -o ${regdir}/allen_mr_ants -t ${trans} -p ${prec} -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
 
 
 }

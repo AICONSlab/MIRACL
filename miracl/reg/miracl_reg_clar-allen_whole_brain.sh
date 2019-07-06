@@ -716,7 +716,7 @@ function initclarallenreg()
 	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
 
     # kill after 3 min (gcc issue)
-    if [ ! -f "${initallen}" ] ; then
+    if [[ ! -f "${initallen}" ]] ; then
         sleep 180
 
         kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
@@ -759,7 +759,7 @@ function regclarallen()
 	# Perform ANTs registration between CLARITY and Allen atlas
 
 	ifdsntexistrun ${antsallen} "Registering CLARITY data to allen atlas ... this will take a while" \
-	antsRegistrationMIRACL.sh -d 3 -f ${clarroi} -m ${initallen} -o ${regdir}/allen_clar_ants -t ${trans} -p ${prec} \
+	ants_miracl_clar -d 3 -f ${clarroi} -m ${initallen} -o ${regdir}/allen_clar_ants -t ${trans} -p ${prec} \
 	 -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
 
 

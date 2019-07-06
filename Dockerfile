@@ -11,7 +11,7 @@ RUN python /code/setup.py install
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN git clone https://github.com/vsoch/MIRACLextra && \
+RUN git clone https://github.com/mgoubran/MIRACLextra && \
     cd MIRACLextra && \
     mv ara /code/atlases/ara
 
@@ -35,9 +35,15 @@ ENV gplbls50="${MIRACL_HOME}/atlases/ara/annotation/annotation_hemi_combined_50u
 ENV snaplut "${MIRACL_HOME}/atlases/ara/ara_snaplabels_lut.txt"
 # Freeview LUT
 ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
-################################################################################
 
-# Clean up extra numpy
-RUN  ls /opt/miniconda/lib/python2.7/site-packages/num*
+# ANTs commands
+RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_miracl_clar && \
+    chmod +x /usr/bin/ants_miracl_clar
+RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_miracl_mr && \
+    chmod +x /usr/bin/ants_miracl_clar
+
+ENV IN_DOCKER_CONTAINER Yes
+
+################################################################################
 
 ENTRYPOINT ["/opt/miniconda/bin/miracl"]
