@@ -344,7 +344,7 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n miracl_conv_convertTifftoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1 \n"
-        miracl_conv_convertTIFFtoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
+        miracl conv tiff_nii -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1
 
     else
