@@ -320,7 +320,7 @@ else
 
     printf "\n Running Set orient with the following command: \n"
 
-    printf "\n miracl_conv_set_orient_gui.py \n"
+    printf "\n miracl conv set_orient \n"
     miracl conv set_orient
 
 
@@ -438,12 +438,12 @@ else
 
     if [[ -z ${chanp} ]]; then
 
-        printf "\n miracl_conv_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+        printf "\n miracl conv tiff_nii -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
         miracl conv tiff_nii -f ${indir} -o ${outnii} -d ${d} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
 
     else
 
-        printf "\n miracl_conv_convertTIFFtoNII.py -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
+        printf "\n miracl conv tiff_nii -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent} \n"
         miracl conv tiff_nii -f ${indir} -o ${outnii} -d ${d} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} -c ${cent}
 
     fi
@@ -460,7 +460,7 @@ else
     ort=`cat ort2std.txt | grep ortcode | cut -d '=' -f 2`
     ort="${ort:0:3}"
 
-    printf "\n miracl_reg_clar-allen_whole_brain.sh -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} \n"
+    printf "\n miracl reg clar_allen_wb -i niftis/${nii} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} \n"
     miracl reg clar_allen_wb -i "niftis/"${nii}"" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}"
 
 

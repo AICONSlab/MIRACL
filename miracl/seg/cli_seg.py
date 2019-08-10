@@ -34,7 +34,7 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # seg clar
-    parser_seg_clar = subparsers.add_parser('seg_clar', add_help=False,
+    parser_seg_clar = subparsers.add_parser('clar', add_help=False,
                                             help="segment CLARITY volume")
     parser_seg_clar.add_argument('-f', '--folder',
                                  help="input registration folder")

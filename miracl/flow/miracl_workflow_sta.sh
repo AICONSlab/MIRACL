@@ -342,7 +342,7 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running conversion to nii with the following command: \n"
 
-        printf "\n miracl_conv_convertTifftoNII.py -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
+        printf "\n miracl conv tiff_nii -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1 \n"
         miracl conv tiff_nii -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1
@@ -362,12 +362,12 @@ if [[ "$#" -gt 1 ]]; then
     if [[ "${hemi}" == "combined" ]]; then
 
         # get chosen depth
-        depth=`miracl_lbls_get_graph_info.py -l ${lbl} | grep depth | tr -dc '0-9'`
+        depth=`miracl lbls graph_info -l ${lbl} | grep depth | tr -dc '0-9'`
 
     else
 
         clbl=${lbl:1:${#lbl}}
-        depth=`miracl_lbls_get_graph_info.py -l ${clbl} | grep depth | tr -dc '0-9'`
+        depth=`miracl lbls graph_info -l ${clbl} | grep depth | tr -dc '0-9'`
 
     fi
 
@@ -379,7 +379,7 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
-        miracl_lbls_generate_parents_at_depth.py -l ${reg_lbls} -d ${depth}
+        miracl lbls parents_at_depth -l ${reg_lbls} -d ${depth}
 
         c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
@@ -395,8 +395,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running label extraction with the following command: \n"
 
-        printf "\n miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
-        miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
+        printf "\n miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi}
 
     else
 
@@ -413,8 +413,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running brain mask creation with the following command: \n"
 
-        printf "\n miracl_utilfn_create_brain_mask.py -i ${nii_file} \n"
-        miracl_utilfn_create_brainmask.py -i ${nii_file}
+        printf "\n miracl utilfn create_brainmask -i ${nii_file} \n"
+        miracl utilfn create_brainmask -i ${nii_file}
 
     else
 
@@ -433,9 +433,9 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running STA with the following command: \n"
 
-        printf "\n miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
+        printf "\n miracl sta primary_eigen -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
         -o ${out_dir} -g ${dog} -k ${gauss} -a ${angle} \n"
-        miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz -o ${out_dir} \
+        miracl sta primary_eigen -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz -o ${out_dir} \
         -g ${dog} -k ${gauss} -a ${angle}
 
     else
@@ -452,8 +452,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Computing signal statistics with the following command: \n"
 
-        printf "\n miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max \n"
-        miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max
+        printf "\n miracl lbls stats -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max \n"
+        miracl lbls stats -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max
 
     else
 
@@ -473,8 +473,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Generating tract density map with the following command: \n"
 
-        printf "\n miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
-        miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map}
+        printf "\n miracl sta tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
+        miracl sta tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map}
 
         echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
         c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
@@ -494,8 +494,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Computing tract density statistics with the following command: \n"
 
-        printf "\n miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
-        miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+        printf "\n miracl lbls stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+        miracl lbls stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
 
     else
 
@@ -636,9 +636,9 @@ else
 
         printf "\n Running conversion to nii with the following command: \n"
 
-        printf "\n miracl_conv_convertTifftoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+        printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
                 -ch ${chan} -cn ${chann} -cp ${chanp} \n"
-        miracl_conv_convertTIFFtoNII.py -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+        miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
                                         -ch ${chan} -cn ${chann} -cp ${chanp}
 
     else
@@ -671,7 +671,7 @@ else
 
         printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
-        miracl_lbls_generate_parents_at_depth.py -l ${reg_lbls} -d ${depth}
+        miracl lbls parents_at_depth -l ${reg_lbls} -d ${depth}
 
         c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
@@ -687,8 +687,8 @@ else
 
         printf "\n Running label extraction with the following command: \n"
 
-        printf "\n miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
-        miracl_utilfn_extract_lbl.py -i ${deep_lbls} -l ${lbl} -m ${hemi}
+        printf "\n miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi}
 
     else
 
@@ -705,8 +705,8 @@ else
 
         printf "\n Running brain mask creation with the following command: \n"
 
-        printf "\n miracl_utilfn_create_brain_mask.py -i ${nii_file} \n"
-        miracl_utilfn_create_brainmask.py -i ${nii_file}
+        printf "\n miracl utilfn create_brain_mask -i ${nii_file} \n"
+        miracl utilfn create_brainmask -i ${nii_file}
 
     else
 
@@ -721,9 +721,9 @@ else
 
     printf "\n Running STA with the following command: \n"
 
-    printf "\n miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
+    printf "\n miracl sta primary_eigen -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
                -dog ${dog} -gauss ${gauss} -angle ${angle} -o ${out_dir} \n"
-    miracl_sta_track_primary_eigen.sh -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
+    miracl sta primary_eigen -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
                                      -g ${dog} -k ${gauss} -a ${angle} -o ${out_dir}
 
     #---------------------------
@@ -735,8 +735,8 @@ else
 
         printf "\n Computing signal statistics with the following command: \n"
 
-        printf "\n miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max \n"
-        miracl_lbls_stats.py -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max
+        printf "\n miracl lbls stats -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max \n"
+        miracl lbls stats -i ${nii_file} -l ${deep_lbls} -o ${lbl_stats} -m ${hemi} -d ${depth} -s Max
 
     else
 
@@ -756,8 +756,8 @@ else
 
         printf "\n Generating tract density map with the following command: \n"
 
-        printf "\n miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
-        miracl_sta_gen_tract_density.py -t ${tracts} -r ${ga_vol} -o ${dens_map}
+        printf "\n miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
+        miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map}
 
         echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
         c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
@@ -777,8 +777,8 @@ else
 
         printf "\n Computing tract density statistics with the following command: \n"
 
-        printf "\n miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
-        miracl_lbls_stats.py -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+        printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+        miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
 
     else
 

@@ -208,13 +208,13 @@ if [[ "$#" -gt 1 ]]; then
     if [[ -z "${segopts}" ]];
 	then
 
-        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
-        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
+        echo miracl seg clar -f "${indir}" -t "${type}"
+        miracl seg clar -f "${indir}" -t "${type}"
 
     else
 
-        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" "${segopts}"
-        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" ${segopts}
+        echo miracl seg clar -f "${indir}" -t "${type}" "${segopts}"
+        miracl seg clar -f "${indir}" -t "${type}" ${segopts}
 
     fi
 
@@ -223,8 +223,8 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
-    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
+    echo miracl seg voxelize -s segmentation_${type}/seg_${type}.tif -v ${vox}
+    miracl seg voxelize -s segmentation_${type}/seg_${type}.tif -v ${vox}
 
 
     #---------------------------
@@ -235,13 +235,13 @@ if [[ "$#" -gt 1 ]]; then
     if [[ -z "${extopts}" ]];
 	then
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+        echo miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+        miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif  -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
     else
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
+        echo miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif "${extopts}"
+        miracl seg feat_extract  -s segmentation_${type}/voxelized_seg_${type}.tif ${extopts}
 
     fi
 
@@ -307,13 +307,13 @@ else
     if [[ -z "${prefix}" ]];
 	then
 
-        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
-        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}"
+        echo miracl seg clar -f "${indir}" -t "${type}"
+        miracl seg clar -f "${indir}" -t "${type}"
 
     else
 
-        echo miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" -p "${prefix}"
-        miracl_seg_clarity_neurons_wrapper.sh -f "${indir}" -t "${type}" -p ${prefix}
+        echo miracl seg clar -f "${indir}" -t "${type}" -p "${prefix}"
+        miracl seg clar -f "${indir}" -t "${type}" -p ${prefix}
 
     fi
 
@@ -323,12 +323,11 @@ else
 
     printf "\n Running voxelize segmentation with the following command: \n"
 
-    echo miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
-    miracl_seg_voxelize_parallel.py -s segmentation_${type}/seg_${type}.tif -v ${vox}
-
+    echo miracl seg voxelize -s segmentation_${type}/seg_${type}.tif -v ${vox}
+    miracl seg voxelize -s segmentation_${type}/seg_${type}.tif -v ${vox}
 
     #---------------------------
-    # Call registration
+    # Call feat extract
 
     printf "\n Running feature extraction with the following command: \n"
 
@@ -336,13 +335,13 @@ else
     if [[ -z "${lbls}" ]];
 	then
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+        echo miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
+        miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif -l reg_final/annotation_hemi_combined_??um_clar_vox.tif
 
     else
 
-        echo miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l ${lbls}
-        miracl_seg_feat_extract.py -s segmentation_${type}/voxelized_seg_${type}.tif -l ${lbls}
+        echo miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif -l ${lbls}
+        miracl seg feat_extract -s segmentation_${type}/voxelized_seg_${type}.tif -l ${lbls}
 
     fi
 
