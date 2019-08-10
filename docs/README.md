@@ -13,7 +13,7 @@ MIRACL is a general-purpose, open-source pipeline for automated:
 
 	3) Registration of mice multimodal imaging data (MRI & CT, in-vivo & ex-vivo) to Allen reference atlas
 
-	4) Label or region specific connectivity analysis based on the Allen connectivity atlas
+	4) Tract or label specific connectivity analysis based on the Allen connectivity atlas
 
     5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY &
       Allen connectivity atlas
@@ -31,12 +31,16 @@ MIRACL is a general-purpose, open-source pipeline for automated:
 
 ## Tutorials
 
+Running locally:
+
 - [Clarity registration workflow](tutorials/clar_reg/clar_reg.md)
 - [Clarity segmentation workflow](tutorials/clar_seg/clar_seg.md)
 - [Structural tensor analysis (STA) workflow](tutorials/sta/sta.md)
 - [MRI registration workflow](tutorials/mri_reg/mri_reg.md)
 - [Tiff to NII conversion](tutorials/tiff_to_nii/tiff_to_nii.md)
 - [Intensity correction](tutorials/int_corr/int_corr.md)
+
+Running on
 
 ## Documentation
 

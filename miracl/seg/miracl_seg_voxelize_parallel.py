@@ -27,11 +27,11 @@ from skimage.feature import peak_local_max
 # help fn
 
 def helpmsg(name=None):
-    return '''Usage: mouse_seg_voxelize_parallel.py -s [segmentation tif]
+    return '''Usage: miracl seg voxelize -s [segmentation tif]
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: mouse_seg_voxelize_parallel.py -s seg_sparse.tif -v 10 -d 5
+	example: miracl seg voxelize -s seg_sparse.tif -v 10 -d 5
 
         arguments (required):
 
@@ -49,14 +49,8 @@ def helpmsg(name=None):
         voxelized_seg_sparse.(tif/nii) or nuclear (segmentation results voxelized to ARA resolution)
         voxelized_seg_bin_sparse.(tif/nii) (binarized version)
 
-    -----
-
-	Dependencies:
-
-	    Python 2.7
 
 	'''
-
 
 # ---------
 # Get input arguments
@@ -248,26 +242,26 @@ def main(args):
 
     type = fstr[0].split("_")[1]
 
-    # outvox = '%s/voxelized_seg_%s.tif' % (segdir, type)
-    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    outvox = '%s/voxelized_seg_%s.tif' % (segdir, type)
+    outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
 
-    # if not os.path.exists(outvox):
+    if not os.path.exists(outvox):
 
-    #     marray = parcomputevox(seg, radius, ncpus, down, outvox)
+        marray = parcomputevox(seg, radius, ncpus, down, outvox)
 
-    #     savenvoxnii(marray, outvoxnii, res)
+        savenvoxnii(marray, outvoxnii, res)
 
-    #     print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
+        print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
-    # else:
+    else:
 
-    #     print ('\n Voxelized map already created')
+        print ('\n Voxelized map already created')
 
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
 
-    outvoxbin = '%s/voxelized_seg_%s.tif' % (segdir, type)
-    outvoxniibin = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    outvoxbin = '%s/voxelized_seg_%s_bin.tif' % (segdir, type)
+    outvoxniibin = '%s/voxelized_seg_%s_bin.nii.gz' % (segdir, type)
 
     if not os.path.exists(outvoxbin):
 

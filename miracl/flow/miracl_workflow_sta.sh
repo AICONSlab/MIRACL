@@ -413,8 +413,8 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n Running brain mask creation with the following command: \n"
 
-        printf "\n miracl utilfn create_brainmask -i ${nii_file} \n"
-        miracl utilfn create_brainmask -i ${nii_file}
+        printf "\n miracl utilfn brain_mask -i ${nii_file} \n"
+        miracl utilfn brain_mask -i ${nii_file}
 
     else
 
@@ -705,8 +705,8 @@ else
 
         printf "\n Running brain mask creation with the following command: \n"
 
-        printf "\n miracl utilfn create_brain_mask -i ${nii_file} \n"
-        miracl utilfn create_brainmask -i ${nii_file}
+        printf "\n miracl utilfn brain_mask -i ${nii_file} \n"
+        miracl utilfn brain_mask -i ${nii_file}
 
     else
 

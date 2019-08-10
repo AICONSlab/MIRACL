@@ -16,9 +16,9 @@ def helpmsg():
 
     Creates brain mask (nii/nii.gz) for CLARITY data
 
-    Usage: miracl_utilfn_create_brainmask.py -i [input volume] -o [output brain mask]
+    Usage: miracl utilfn brain_mask -i [input volume] -o [output brain mask]
 
-Example: miracl_utilfn_create_brainmask.py -i clarity_downsample_05x_virus_chan.nii.gz -o clarity_brain_mask.nii.gz
+Example: miracl utilfn brain_mask -i clarity_downsample_05x_virus_chan.nii.gz -o clarity_brain_mask.nii.gz
 
     Arguments (required):
 
@@ -63,7 +63,7 @@ def parseinputs():
 
 # ---------
 
-def main():
+def main(args):
     # parse in args
     [invol, outfile] = parseinputs()
 
@@ -82,4 +82,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
