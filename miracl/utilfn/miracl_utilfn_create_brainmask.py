@@ -31,18 +31,22 @@ Example: miracl utilfn brain_mask -i clarity_downsample_05x_virus_chan.nii.gz -o
         '''
 
     # Dependencies:
-
     #     c3d
     #     Python 2.7
 
 
-def parseinputs():
+def parse_fn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
     parser.add_argument('-o', '--outfile', type=str, help="Output file")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # check if pars given
 
@@ -65,7 +69,8 @@ def parseinputs():
 
 def main(args):
     # parse in args
-    [invol, outfile] = parseinputs()
+    parser = parse_fn()
+    [invol, outfile] = parse_inputs(parser, args)
 
     # create mask
     print("\n Creating brain mask for CLARITY volume ...\n")

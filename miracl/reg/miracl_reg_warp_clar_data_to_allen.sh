@@ -295,7 +295,7 @@ function warpclartoallen()
 
         # orient to org
         ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
-        c3d ${swp_vox} -binarize -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} \
+        c3d ${swp_vox} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} \
          -type ${orttypeclar} -o ${ortclar}
 
     else
@@ -321,15 +321,15 @@ function warpclartoallen()
 
   	# warp to registered clarity
 
-  	if [[ -z ${channel} ]]; then
+#  	if [[ -z ${channel} ]]; then
         ifdsntexistrun ${wrpclar} "Applying ants deformations to CLARITY data" \
         antsApplyTransforms -d 3 -r ${allenref} -i ${cp_clar} -n Bspline -t [ ${initform}, 1 ] ${comb_def} -o ${wrpclar}
-    else
-        ifdsntexistrun ${wrpclar} "Applying ants deformations to CLARITY data" \
-        antsApplyTransforms -d 3 -r ${allenref} -i ${cp_clar} -t [ ${initform}, 1 ] ${comb_def} -o ${wrpclar}
-
-        c3d ${wrpclar} -binarize -o ${wrpclar}
-    fi
+#    else
+#        ifdsntexistrun ${wrpclar} "Applying ants deformations to CLARITY data" \
+#        antsApplyTransforms -d 3 -r ${allenref} -i ${cp_clar} -t [ ${initform}, 1 ] ${comb_def} -o ${wrpclar}
+#
+#        c3d ${wrpclar} -binarize -o ${wrpclar}
+#    fi
 
 }
 
