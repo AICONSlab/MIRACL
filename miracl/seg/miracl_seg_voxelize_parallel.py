@@ -52,6 +52,7 @@ def helpmsg(name=None):
 
 	'''
 
+
 # ---------
 # Get input arguments
 
@@ -196,7 +197,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
     marray = sp.ndimage.zoom(marray, (dr, 1, 1), order=0)
 
     # save stack
-    tiff.imsave(outvox, marray)
+    tiff.imsave(outvox, marray, bigtiff=True)
 
     return marray
 
@@ -251,11 +252,11 @@ def main(args):
 
         savenvoxnii(marray, outvoxnii, res)
 
-        print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
+        print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
     else:
 
-        print ('\n Voxelized map already created')
+        print('\n Voxelized map already created')
 
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
@@ -269,11 +270,11 @@ def main(args):
 
         savenvoxnii(marraybin, outvoxniibin, res)
 
-        print ("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
+        print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
     else:
 
-        print ('\n Voxelized binarized map already created')
+        print('\n Voxelized binarized map already created')
 
 
 if __name__ == "__main__":
