@@ -27,7 +27,7 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS',
         'Operating System :: Unix',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Unix Shell',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Medical Science Apps.',
