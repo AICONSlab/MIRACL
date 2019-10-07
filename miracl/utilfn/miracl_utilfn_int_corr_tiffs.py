@@ -19,7 +19,7 @@ import scipy.ndimage
 import tifffile as tiff
 from joblib import Parallel, delayed
 
-import miracl_utilfn_endstatement as statement
+from miracl.utilfn import miracl_utilfn_endstatement as statement
 
 
 # from skimage import exposure

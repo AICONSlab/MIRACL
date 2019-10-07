@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, '%s/utilfn' % os.environ['MIRACL_HOME'])
-import miracl_utilfn_endstatement as endstatement
+from miracl.utilfn import miracl_utilfn_endstatement as endstatement
 
 # ---------
 # help fn
