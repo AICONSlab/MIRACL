@@ -2,62 +2,63 @@ import os
 import sys
 import argparse
 import subprocess
+from miracl.lbls import miracl_lbls_stats, miracl_lbls_get_graph_info, miracl_lbls_generate_parents_at_depth, \
+    miracl_lbls_get_gp_volumes
 
 
-def run_reg_clar(parser, args):
-    miracl_home = os.environ['MIRACL_HOME']
-
-    args = vars(args)
-
-    bash_args = '-f "%s" -n "%s" -r "%s"' % (args['folder'][0], args['conv_opts'][0], args['reg_opts'][0])
-
-    subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
-                          shell=True,
-                          stderr=subprocess.STDOUT)
+def run_lbl_stats(parser, args):
+    miracl_lbls_stats.main(args)
 
 
-def run_sta(parser, args):
-    miracl_home = os.environ['MIRACL_HOME']
+def run_graph_info(parser, args):
+    miracl_lbls_get_graph_info.main(args)
 
-    args = vars(args)
 
-    subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, args), shell=True,
-                          stderr=subprocess.STDOUT)
+def run_gen_parents_depth(parser, args):
+    miracl_lbls_generate_parents_at_depth.main(args)
+
+
+def run_gp_volumes(parser, args):
+    miracl_lbls_get_gp_volumes.main(args)
 
 
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # reg_clarity
-    parser_regclar = subparsers.add_parser('reg_clar', help="whole-brain clarity registration to Allen atlas")
-    parser_regclar.add_argument('-f', '--folder', nargs='+',
-                                 help="input registration folder")
-    parser_regclar.add_argument('-n', '--conv_opts', nargs='+', metavar='',
-                                 help="file conversion options")
-    parser_regclar.add_argument('-r', '--reg_opts', nargs='+', metavar='',
-                                 help="registration options")
+    # lbl stats
+    lbl_stats_parser = miracl_lbls_stats.parsefn()
+    parser_lbl_stats = subparsers.add_parser('stats', parents=[lbl_stats_parser], add_help=False,
+                                             help="Get label stats")
+    parser_lbl_stats.set_defaults(func=run_lbl_stats)
 
+    # graph info
+    graph_info_parser = miracl_lbls_get_graph_info.parsefn()
+    parser_graph_info = subparsers.add_parser('graph_info', parents=[graph_info_parser], add_help=False,
+                                              help="Get label Allen graph info")
+    parser_graph_info.set_defaults(func=run_graph_info)
 
-    parser_regclar.set_defaults(func=run_reg_clar)
+    # gen parents @ depth
+    parents_depth_parser = miracl_lbls_generate_parents_at_depth.parsefn()
+    parser_parents_depth = subparsers.add_parser('parents_at_depth', parents=[parents_depth_parser], add_help=False,
+                                                 help="Generate parent labels at depth")
+    parser_parents_depth.set_defaults(func=run_gen_parents_depth)
 
-    # sta
-    parser_sta = subparsers.add_parser('sta', help="")
-    parser_sta.add_argument('-f',
-                            help="")
-    parser_sta.add_argument('-o',
-                            help="")
-    parser_sta.add_argument('-n',
-                            help="")
-
-    parser_sta.set_defaults(func=run_sta)
+    # gp volumes
+    gp_vols_parser = miracl_lbls_get_gp_volumes.parsefn()
+    parser_gp_vols = subparsers.add_parser('grandparent_volumes', parents=[gp_vols_parser], add_help=False,
+                                           help="Get grand parent volumes")
+    parser_gp_vols.set_defaults(func=run_gp_volumes)
 
     return parser
 
 
-def main():
+def main(args=None):
+    if args is None:
+        args = sys.argv[2:]
+
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     args.func(parser, args)
 
 

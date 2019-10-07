@@ -35,7 +35,7 @@ Example: miracl utilfn brain_mask -i clarity_downsample_05x_virus_chan.nii.gz -o
     #     Python 2.7
 
 
-def parse_fn():
+def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
@@ -69,8 +69,8 @@ def parse_inputs(parser, args):
 
 def main(args):
     # parse in args
-    parser = parse_fn()
-    [invol, outfile] = parse_inputs(parser, args)
+    parser = parsefn()
+    invol, outfile = parse_inputs(parser, args)
 
     # create mask
     print("\n Creating brain mask for CLARITY volume ...\n")

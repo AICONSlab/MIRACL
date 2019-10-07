@@ -42,7 +42,7 @@ jobs:
              # docker run -it mgoubran/miracl conv tiff_nii -f /tmp/MIRACLextra/input -d 5
              docker run -it mgoubran/miracl -h
       - store_test_results:
-          path: /home/circleci/out/tests
+          path: /tmp/tests
 
 
 workflows:

@@ -6,6 +6,7 @@
 import argparse
 import os
 import re
+import sys
 from datetime import datetime
 from os.path import basename
 from subprocess import call
@@ -39,14 +40,19 @@ def helpmsg():
 # ---------
 # Get input arguments
 
-def parseinput():
+def parsefn():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
     parser.add_argument('-d', '--depth', type=int, help="chosen depth", required=True)
     parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not", required=False)
     parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)
     parser.add_argument('-l', '--inlbls', type=str, help="input labels", required=False)
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # check if pars given
 
@@ -158,10 +164,12 @@ def saveniiparents(parentdata, vx, outnii):
     nib.save(nii, outnii)
 
 
-def main():
+def main(args):
     starttime = datetime.now()
 
-    d, inlbls, hemi, res = parseinput()
+    parser = parsefn()
+    d, inlbls, hemi, res = parse_inputs(parser, args)
+
 
     miracl_home = os.environ['MIRACL_HOME']
 
@@ -212,4 +220,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

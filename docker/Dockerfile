@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt install -y libsm6 libxext6 libfontconfig1 libxrender1
 
 # Install miniconda
-RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-latest-Linux-x86_64.sh && \
-    bash Miniconda2-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
-    rm Miniconda2-latest-Linux-x86_64.sh
+RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda-latest-Linux-x86_64.sh && \
+    bash Miniconda-latest-Linux-x86_64.sh -p /opt/miniconda -b && \
+    rm Miniconda-latest-Linux-x86_64.sh
 ENV PATH=/opt/miniconda/bin:${PATH}
 
 RUN mkdir -p /code/atlases /data
@@ -73,6 +73,6 @@ ENV PATH="/usr/lib/fsl/5.0":${PATH}
 WORKDIR /code
 RUN pip install scikit-image==0.14.2 && \
     pip install cython h5py && \
-    pip install pandas==0.19.2
+    pip install pandas==0.24.2
 
 RUN conda install -y --no-update-deps pyqt=4

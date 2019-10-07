@@ -7,13 +7,13 @@ import argparse
 import os
 import subprocess
 import sys
-
+import scipy as sp
 import numpy as np
 import pandas as pd
 from PyQt4.QtGui import QApplication
 
 sys.path.insert(0, '%s/conv' % os.environ['MIRACL_HOME'])
-import miracl_conv_gui_options as gui_opts
+from miracl.conv import miracl_conv_gui_options as gui_opts
 
 
 # import commands
@@ -67,7 +67,7 @@ Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l reg
     #     Python 2.7
 
 
-def parseinputs():
+def parsefn():
     if len(sys.argv) == 1:
 
         print("Running in GUI mode")
@@ -104,6 +104,13 @@ def parseinputs():
         parser.add_argument('-d', '--depth', type=int, help="Labels depth")
         parser.add_argument('-o', '--outfile', type=str, help="Output file",
                             default='clarity_label_statistics.csv')
+
+        return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
         args = parser.parse_args()
 
@@ -197,10 +204,11 @@ def upsampleswplbls(seg, lbls):
 
 # ---------
 
-def main():
+def main(args):
     # parse in args
 
-    invol, lbls, outfile, sort, hemi, label_depth = parseinputs()
+    parser = parsefn()
+    invol, lbls, outfile, sort, hemi, label_depth = parse_inputs(parser, args)
 
     # extract stats
     print(" Extracting stats from input volume using registered labels ...\n")
@@ -265,7 +273,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 
 
 # TODOlp

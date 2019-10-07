@@ -6,7 +6,6 @@
 import argparse
 import os
 import sys
-
 import numpy as np
 import pandas as pd
 
@@ -25,19 +24,26 @@ def helpmsg():
             miracl_lbls_get_graph_info.py -l CP
     '''
 
-def parseargs():
+
+def parsefn():
     parser = argparse.ArgumentParser(description='Get lbl info', usage=helpmsg())
     parser.add_argument('-l', '--lbl', help="input label", required=True)
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     lbl = args.lbl
 
     return lbl
 
 
-def main():
-    lbl = parseargs()
+def main(args):
+    parser = parsefn()
+    lbl = parse_inputs(parser, args)
 
     # read graph
     miracl_home = os.environ['MIRACL_HOME']
@@ -60,4 +66,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main(sys.argv)

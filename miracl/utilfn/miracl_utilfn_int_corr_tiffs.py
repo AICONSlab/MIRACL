@@ -12,17 +12,14 @@ import subprocess
 import sys
 from argparse import RawTextHelpFormatter
 from datetime import datetime
-
 import nibabel as nib
 import numpy as np
 import scipy.ndimage
 import tifffile as tiff
 from joblib import Parallel, delayed
 
-import miracl_utilfn_endstatement as statement
+from miracl.utilfn import miracl_utilfn_endstatement as statement
 
-
-# from skimage import exposure
 
 def helpmsg():
     return '''
@@ -37,7 +34,7 @@ def helpmsg():
         '''
 
 
-def parseargs():
+def parsefn():
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
                                      usage='%(prog)s -f [input tiff folder] -o [ output folder ] -s [ shrink factor] '
                                            '-cn [ channel num ] -cp [ channel prefix ] -p [ power ]')
@@ -88,7 +85,12 @@ def parseargs():
                                "(default: %(default)s)")
     optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     indir = args.folder
     assert os.path.exists(indir), 'Input dir: %s does not exist!' % indir
@@ -256,12 +258,12 @@ def applycorr(i, tif, outdir, biasres, down, mulpower, maskimg, maskres=None):
     tiff.imsave(tifcorrfile, corrtif)
 
 
-def main():
-
+def main(args):
     starttime = datetime.now()
 
+    parser = parsefn()
     indir, outdir, maskimg, segment, chann, chanp, down, fwhm, noise, bins, levels, iters, thresh, mulpower, outnii, \
-    vx, vz, chan = parseargs()
+    vx, vz, chan = parse_inputs(parser, args)
 
     # make downsampled nii
     createnii(indir, down, chann, chanp, chan, outnii, vx, vz)
@@ -316,4 +318,4 @@ def main():
     statement.main('Intensity correction', '%s' % (datetime.now() - starttime))
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

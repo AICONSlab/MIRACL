@@ -7,7 +7,6 @@ import argparse
 import os
 import subprocess
 import sys
-
 import pandas as pd
 
 
@@ -42,7 +41,7 @@ Example: miracl_utilfn_extract_lbl.py -i clarity_registered_allen_labels.nii.gz 
     #     Python 2.7
 
 
-def parseinputs():
+def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     parser.add_argument('-i', '--inlbls', type=str, help="In lbls", required=True)
@@ -50,7 +49,12 @@ def parseinputs():
     parser.add_argument('-m', '--side', type=str, help="Labels combined or split by side", required=True)
     parser.add_argument('-d', '--down', type=int, help="Down-sample ratio")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # check if pars given
 
@@ -80,15 +84,15 @@ def parseinputs():
 
 # ---------
 
-def main():
+def main(args):
     # parse in args
-    [inlbls, outlbl, d, m] = parseinputs()
+    parser = parsefn()
+    inlbls, outlbl, d, m = parse_inputs(parser, args)
 
     # extract lbl
     print("\n reading input labels ...")
 
     # in python
-
     # inlblsnii = nib.load("%s" % inlbls)
     # inlblsdata = inlblsnii.get_data()
     #
@@ -145,4 +149,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

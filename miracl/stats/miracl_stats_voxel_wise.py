@@ -51,7 +51,7 @@ def helpmsg():
     '''
 
 
-def parse_fn():
+def parsefn():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
     parser.add_argument('-w', '--wild_dir', type=str, help="wild dir", required=True)
     parser.add_argument('-d', '--disease_dir', type=str, help="disease dir", required=True)
@@ -98,7 +98,7 @@ def main(args):
     cpus = multiprocessing.cpu_count()
     n_cpus = int(cpu_load * cpus)  # 95% of cores used2
 
-    parser = parse_fn()
+    parser = parsefn()
     wild_dir, disease_dir, seg_type, out_dir, sigma, param = parse_inputs(parser, args)
 
     # create out dir
