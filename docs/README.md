@@ -100,7 +100,10 @@ for a detailed description & input parameters please check the respective README
 
 ## Troubleshooting
 
-check reported issues (coming soon)
+check reported issues (coming soon) or reach out at: 
+
+## References
+If you use our pipeline in your work please cite our paper:
 
 
 ## Acknowledgements
@@ -110,9 +113,3 @@ Huge thank you to:
  - Newton Cho, Jordan Squair & Stéphane Pagès for helping optimize the segmentation workflows & troubleshooting
 
 
-## References
-
- - (coming soon)
- - ANTs
- - c3d
- - FSL

@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import subprocess
+from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density
 
 
 def run_sta_tensor(parser, args):
@@ -17,6 +18,14 @@ def run_sta_tensor(parser, args):
         subprocess.check_call('%s/sta/miracl_sta_track_primary_eigen.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
+
+
+def run_force_graph(parser, args):
+    miracl_sta_create_force_graph.main(args)
+
+
+def run_tract_density(parser, args):
+    miracl_sta_gen_tract_density.main(args)
 
 
 def get_parser():
@@ -35,10 +44,26 @@ def get_parser():
 
     parser_sta.set_defaults(func=run_sta_tensor)
 
+    # force graph
+    force_graph_parser = miracl_sta_create_force_graph.parsefn()
+    parser_force_graph = subparsers.add_parser('conn_graph', parents=[force_graph_parser], add_help=False,
+                                            help="Generate connectivity graph")
+    parser_force_graph.set_defaults(func=run_force_graph)
+
+    # tract density
+    tract_density_parser = miracl_sta_gen_tract_density.parsefn()
+    parser_tract_density = subparsers.add_parser('tract_density', parents=[tract_density_parser], add_help=False,
+                                            help="Generate tract density map")
+    parser_tract_density.set_defaults(func=run_tract_density)
+
+
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[2:]
+
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
