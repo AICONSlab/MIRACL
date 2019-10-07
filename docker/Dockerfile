@@ -73,6 +73,6 @@ ENV PATH="/usr/lib/fsl/5.0":${PATH}
 WORKDIR /code
 RUN pip install scikit-image==0.14.2 && \
     pip install cython h5py && \
-    pip install pandas==0.19.2
+    pip install pandas==0.24.2
 
 RUN conda install -y --no-update-deps pyqt=4
