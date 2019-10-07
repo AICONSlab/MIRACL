@@ -5,8 +5,7 @@ ADD . /code
 RUN git clone https://github.com/sergivalverde/nifti_tools && \
     mv nifti_tools /code/depends/NIFTI_TOOLS
 ENV MIRACL_HOME=/code
-RUN apt-get install -y python3-setuptools
-RUN python3 /code/setup.py install
+RUN python /code/setup.py install
 
 ###############################################################################
 #--- Allen atlas alias ----
