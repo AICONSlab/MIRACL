@@ -7,7 +7,9 @@
       <w>autofluo</w>
       <w>binarize</w>
       <w>binarized</w>
+      <w>brainmask</w>
       <w>clar</w>
+      <w>conv</w>
       <w>dicoms</w>
       <w>downsample</w>
       <w>downsampled</w>
@@ -41,12 +43,15 @@
       <w>tifs</w>
       <w>upsampling</w>
       <w>usampling</w>
+      <w>utilfn</w>
       <w>voxel</w>
       <w>voxelization</w>
       <w>voxelize</w>
       <w>voxelized</w>
       <w>voxelizes</w>
+      <w>voxels</w>
       <w>wildtype</w>
+      <w>workflows</w>
     </words>
   </dictionary>
 </component>
