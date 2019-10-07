@@ -6,10 +6,10 @@ a similar approach applies to other commands
 ### Copy your data to Sherlock 
 For example a folder called "input_clar" with tiff files for registration to Allen atlas:
     
-    $ scp -r  input_clar sherlock.stanford.edu:/ 
+    $ scp -r input_clar sherlock.stanford.edu:/scratch/users/username/. 
 
 ### Login to Sherlock
-    $ ssh -XY login.sherlock.stanford.edu
+    $ ssh -XY username@sherlock.stanford.edu
 
 ### Start interactive session
     $ sdev

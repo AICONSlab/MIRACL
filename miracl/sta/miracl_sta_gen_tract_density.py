@@ -4,7 +4,7 @@
 # coding: utf-8
 
 import argparse
-
+import sys
 import nibabel as nib
 from dipy.tracking import utils
 from nibabel import trackvis
@@ -37,14 +37,19 @@ Example: miracl_sta_gen_tract_density.py -t  -r  -o
     #     Python 2.7
 
 
-def parseinputs():
+def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     parser.add_argument('-t', '--tracts', type=str, help="Input tracts ", required=True)
     parser.add_argument('-r', '--ref_vol', type=str, help="Reference nifti volume", required=True)
     parser.add_argument('-o', '--out_dens', type=str, help="Output tract density")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # check if pars given
 
@@ -84,13 +89,15 @@ def gen_dens(tracts, ref_vol, out_dens):
 
 # ---------
 
-def main():
+def main(args):
     # parse in args
-    [tracts, ref_vol, out_dens] = parseinputs()
+    parser = parsefn()
+    tracts, ref_vol, out_dens = parse_inputs(parser, args)
+
 
     # create dens map
     gen_dens(tracts, ref_vol, out_dens)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

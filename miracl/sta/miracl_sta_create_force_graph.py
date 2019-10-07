@@ -35,14 +35,19 @@ Example: miracl_sta_create_force_graph.py -l  -s
         '''
 
 
-def parseinputs():
+def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     parser.add_argument('-l', '--label_stats', type=str, help="Label stats", required=True)
     parser.add_argument('-s', '--side', type=str, help="Side", required=True)
     parser.add_argument('-o', '--graph', type=str, help="Out graph")
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # check pars
 
@@ -135,19 +140,19 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
 
 # ---------
 
-def main():
+def main(args):
     # parse in args
-    [invol, side] = parseinputs()
+    parser = parsefn()
+    invol, side = parse_inputs(parser, args)
 
     miracl_home = os.environ['MIRACL_HOME']
 
     # allen graph
     allengraph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_%s.csv' % (miracl_home, side))
 
-    force()
-
     # create graph
+    force()
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

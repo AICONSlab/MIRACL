@@ -7,7 +7,7 @@ import argparse
 import glob
 import os
 from subprocess import call
-
+import sys
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -30,23 +30,32 @@ example: miracl_stats_paired_ttest_ipsi_contra.py -d feat_extract_csv
 
         '''
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
-parser.add_argument('-d', '--dir', type=str, help="dir with csv files", required=True)
+def parsefn():
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
 
-args = parser.parse_args()
+    parser.add_argument('-d', '--dir', type=str, help="dir with csv files", required=True)
 
-dir = args.dir
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
+
+    dir = args.dir
+
+    return dir
+
 
 # -----------------
 # read csvs
 
 def readcsvs(indir, splitval=20000):
-
     file_list = glob.glob('%s/*.csv' % indir)
 
     # Prep df per mouse
-    alldfs ={}
+    alldfs = {}
 
     for c, csv in enumerate(file_list):
         df = pd.read_csv(csv)
@@ -63,23 +72,21 @@ def readcsvs(indir, splitval=20000):
 
     return vals, df
 
+
 # -----------------
 # clean up fn
 
 def cleanuplbls(vals, splitval=20000):
-
     # get lbl intersec
     inter = set(vals[0].LabelAbrv)
     for vallist in vals[0:]:
         inter.intersection_update(vallist.LabelAbrv)
-
 
     # use intersec only
     for i in range(len(vals)):
         vals[i] = vals[i][vals[i].LabelAbrv.isin(inter)]
 
     ids = vals[0].LabelID
-
 
     # drop ipsi labels with no contra
     ipsi = ids[ids < splitval]
@@ -90,10 +97,10 @@ def cleanuplbls(vals, splitval=20000):
 
     return ipsi
 
+
 # -----------------
 
 def computepairttest(vals, ipsi, pars, splitval=20000):
-
     # compute paired-ttest test on ipsi vs. contra
     ttsss = {}
     ttpss = {}
@@ -104,37 +111,34 @@ def computepairttest(vals, ipsi, pars, splitval=20000):
         ttps = []
 
         for ip in ipsi:
-
             ipstr = 'vals[i].%s[vals[i].LabelID==ip]' % par
             contstr = 'vals[i].%s[vals[i].LabelID==(ip+splitval)]' % par
 
-            met_ipsi = [ eval(ipstr) for i in range(len(vals)) ]
-            met_ipsi = np.asarray([ map(np.float, x) for x in met_ipsi ])[:,0]
+            met_ipsi = [eval(ipstr) for i in range(len(vals))]
+            met_ipsi = np.asarray([map(np.float, x) for x in met_ipsi])[:, 0]
 
-            met_cont = [ eval(contstr) for i in range(len(vals)) ]
-            met_cont = np.asarray([ map(np.float, x) for x in met_cont ])[:,0]
+            met_cont = [eval(contstr) for i in range(len(vals))]
+            met_cont = np.asarray([map(np.float, x) for x in met_cont])[:, 0]
 
-            [tts,ttp] = stats.ttest_rel(met_ipsi,met_cont)
+            [tts, ttp] = stats.ttest_rel(met_ipsi, met_cont)
             ttss.append(tts)
             ttps.append(ttp)
 
         ttsss[par] = ttss
         ttpss[par] = ttps
 
-
-    tt_stat = [ ttsss[key] for key in sorted(ttsss.iterkeys()) ]
-    tt_pval = [ ttpss[key] for key in sorted(ttpss.iterkeys()) ]
-
+    tt_stat = [ttsss[key] for key in sorted(ttsss.iterkeys())]
+    tt_pval = [ttpss[key] for key in sorted(ttpss.iterkeys())]
 
     return tt_stat, tt_pval
+
 
 # -----------------
 
 def savecsv(df, ipsi, tt_stat, tt_pval, outdir, pars):
-
     # save output
     # get lbl demos
-    orgdf = df.ix[df.LabelID.isin(ipsi),1:6]
+    orgdf = df.ix[df.LabelID.isin(ipsi), 1:6]
     orgdf = orgdf.reset_index()
 
     # get stats
@@ -151,23 +155,23 @@ def savecsv(df, ipsi, tt_stat, tt_pval, outdir, pars):
 
     # combine stats & pvals
     comb = [stats, pvals]
-    comb = pd.concat(comb,axis=1)
-    comb = comb.sort_index(ascending=True,axis=1)
+    comb = pd.concat(comb, axis=1)
+    comb = comb.sort_index(ascending=True, axis=1)
 
     # combine with demos
     frames = [orgdf, comb]
-    savedf = pd.concat(frames,axis=1)
+    savedf = pd.concat(frames, axis=1)
 
     # save df as csv
     outcsv = '%s/paired_ttest_test.csv' % outdir
-    savedf.ix[:,1:].to_csv(outcsv,index=False)
+    savedf.ix[:, 1:].to_csv(outcsv, index=False)
 
     return savedf
 
+
 # -----------------
 
-def savexlsx(savedf,outdir):
-
+def savexlsx(savedf, outdir):
     # save as excel
     outexcel = '%s/paired_ttest_text.xlsx' % outdir
 
@@ -183,7 +187,7 @@ def savexlsx(savedf,outdir):
     format1 = workbook.add_format({'bg_color': '#C6EFCE',
                                    'font_color': '#006100'})
 
-    color_range = "F2:Q{}".format(number_rows+1)
+    color_range = "F2:Q{}".format(number_rows + 1)
 
     # green cells less than alpha (0.05)
     worksheet.conditional_format(color_range, {'type': 'cell',
@@ -195,20 +199,18 @@ def savexlsx(savedf,outdir):
 
 # -----------------
 
-def projpvalonatlas(atlas,pars,ipsi,tt_pval,outdir):
-
+def projpvalonatlas(atlas, pars, ipsi, tt_pval, outdir):
     # project onto labels
 
     nii = nib.load('%s' % atlas)
     img = nii.get_data()
 
     # replace intensities with p-values
-    for p,par in enumerate(pars):
+    for p, par in enumerate(pars):
 
         newimg = np.ones(img.shape)
 
         for t, ttx in enumerate(tt_pval[p]):
-
             orgipsi = ipsi[t]
             idxip = (img == orgipsi)
             newimg[idxip] = tt_pval[p][t]
@@ -219,12 +221,12 @@ def projpvalonatlas(atlas,pars,ipsi,tt_pval,outdir):
             # newimg[idxcont] = tt_pval[p][w]
 
         # save new nifti
-        mat = np.eye(4)*0.025
-        mat[3,3] = 1
+        mat = np.eye(4) * 0.025
+        mat[3, 3] = 1
 
-        newnii = nib.Nifti1Image(newimg,mat)
+        newnii = nib.Nifti1Image(newimg, mat)
         niiname = '%s/%s_paired_ttest_pval.nii.gz' % (outdir, pars[p])
-        nib.save(newnii,niiname)
+        nib.save(newnii, niiname)
 
     # ort out niftis
     for par in pars:
@@ -232,7 +234,9 @@ def projpvalonatlas(atlas,pars,ipsi,tt_pval,outdir):
               "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par)])
 
 
-def main():
+def main(args):
+    parser = parsefn()
+    dir = parse_inputs(parser, args)
 
     # mkdir
     outdir = '%s/paired_ttest_ipsi_vs_contra' % dir
@@ -266,7 +270,7 @@ def main():
 
     # save xlsx
     print("\n Saving stats as xlsx file with significant p-values as green cells")
-    savexlsx(savedf,outdir)
+    savexlsx(savedf, outdir)
 
     # project onto atlas labels
     print("\n Projecting stats onto atlas label and saving nifti file")
@@ -274,7 +278,8 @@ def main():
     miracl_home = os.environ['MIRACL_HOME']
     atlas = '%s/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz' % miracl_home
 
-    projpvalonatlas(atlas,pars,ipsi,tt_pval,outdir)
+    projpvalonatlas(atlas, pars, ipsi, tt_pval, outdir)
+
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

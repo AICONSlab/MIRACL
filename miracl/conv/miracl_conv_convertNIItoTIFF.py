@@ -16,7 +16,7 @@ import scipy.ndimage
 import tifffile as tiff
 from PyQt4.QtGui import *
 
-import miracl_conv_gui_options as gui_opts
+from miracl.conv import miracl_conv_gui_options as gui_opts
 
 warnings.simplefilter("ignore", UserWarning)
 

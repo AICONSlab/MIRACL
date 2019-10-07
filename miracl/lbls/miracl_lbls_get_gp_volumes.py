@@ -8,7 +8,6 @@ import os
 import re
 import sys
 from datetime import datetime
-
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -36,7 +35,7 @@ def helpmsg():
 # ---------
 # Get input arguments
 
-def parseinput():
+def parsefn():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
     parser.add_argument('-i', '--img', type=str, help="Input labels", required=False)
     parser.add_argument('-ln', '--names', type=str, nargs='+', help="Label names", required=False)
@@ -45,7 +44,12 @@ def parseinput():
     parser.add_argument('-o', '--outfile', type=str, help="Output file",
                         default='grand_parent_volumes.csv')
 
-    args = parser.parse_args()
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # check if pars given
     if (args.names is None) & (args.acronyms is None):
@@ -105,10 +109,11 @@ def computevolumes(aragraph, dataflat, inlbl, imglbls, metric):
     return sum(volumes)
 
 
-def main():
+def main(args):
     starttime = datetime.now()
 
-    inlbls, img, metric, outfile, s = parseinput()
+    parser = parsefn()
+    inlbls, img, metric, outfile, s = parse_inputs(parser, args)
 
     # load img
     print("Reading Input Labels")
@@ -149,4 +154,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

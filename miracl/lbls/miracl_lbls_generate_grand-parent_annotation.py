@@ -32,36 +32,43 @@ def helpmsg():
 # ---------
 # Get input arguments
 
-parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-parser.add_argument('-p', '--pl', type=int, help="parent level", required=False)
-parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not", required=False)
-parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)
 
-args = parser.parse_args()
+def parsefn():
+    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+    parser.add_argument('-p', '--pl', type=int, help="parent level", required=False)
+    parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not", required=False)
+    parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)
+
+    return parser
 
 # check if pars given
 
-if args.pl is None:
-    pl = 3
-    print("parent level not specified ... choosing default value of %d" % pl)
-else:
-    assert isinstance(args.pl, int)
-    pl = args.pl
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
-if args.hemi is None:
-    hemi = "combined"
-    print("hemisphere not specified ... choosing default value of %s" % hemi)
-else:
-    assert isinstance(args.hemi, str)
-    hemi = args.hemi
+    if args.pl is None:
+        pl = 3
+        print("parent level not specified ... choosing default value of %d" % pl)
+    else:
+        assert isinstance(args.pl, int)
+        pl = args.pl
 
-if args.res is None:
-    res = 25
-    print("voxel size not specified ... choosing default value of %dum" % res)
-else:
-    assert isinstance(args.res, int)
-    res = args.res
+    if args.hemi is None:
+        hemi = "combined"
+        print("hemisphere not specified ... choosing default value of %s" % hemi)
+    else:
+        assert isinstance(args.hemi, str)
+        hemi = args.hemi
 
+    if args.res is None:
+        res = 25
+        print("voxel size not specified ... choosing default value of %dum" % res)
+    else:
+        assert isinstance(args.res, int)
+        res = args.res
+
+    return pl, hemi, res
 
 # --- Init pars ---
 
@@ -132,8 +139,11 @@ def saveniiparents(parentdata, vx, outnii):
     nib.save(nii, outnii)
 
 
-def main():
+def main(args):
     starttime = datetime.now()
+
+    parser = parsefn()
+    pl, hemi, res = parse_inputs(parser, args)
 
     # load annotations
     print("Reading ARA annotation with %s hemispheres and %d voxel size" % (hemi, res))
@@ -181,4 +191,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
