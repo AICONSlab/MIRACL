@@ -56,7 +56,6 @@ def get_parser():
 
 
 def main(args=None):
-
     if args is None:
         args = sys.argv[2:]
 

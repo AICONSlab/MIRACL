@@ -8,7 +8,7 @@ import os
 import warnings
 from datetime import datetime
 from subprocess import call
-
+import sys
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
@@ -67,14 +67,19 @@ def helpmsg():
 # Get input arguments
 
 
-def getinpars():
+def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-l', '--lbl', type=str, help="Input label abrv", required=True)
     parser.add_argument('-t', '--trans', type=str, help="Transgenic line")
     parser.add_argument('-p', '--projmet', type=str, help="Projection metric")
     args = parser.parse_args()
 
-    # check if pars given
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     # assert isinstance(args.lbl, int)
     lbl = args.lbl
@@ -281,11 +286,12 @@ def exportprojmap(all_norm_proj, export_connect_abv, lbl_abrv, inj_exp, projmet)
 
 # ---------------
 
-def main():
+def main(args):
     starttime = datetime.now()
 
-    # initial pars & read inputs
-    [lbl, trans, projmet] = getinpars()
+    # parse in args
+    parser = parsefn()
+    lbl, trans, projmet = parse_inputs(parser, args)
 
     [cutoff, miracl_home, annot_csv, exclude] = initialize()
 
@@ -369,7 +375,4 @@ def main():
 
 # Call main function
 if __name__ == "__main__":
-    main()
-
-# ------
-# TODOs
+    main(sys.argv)

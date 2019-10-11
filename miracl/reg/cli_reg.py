@@ -2,11 +2,6 @@ import os
 import sys
 import argparse
 import subprocess
-import logging
-
-
-# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# logger = logging.getLogger()
 
 
 def run_clar_allen_wb(parser, args):
@@ -93,7 +88,7 @@ def get_parser():
     parser_mri_allen = subparsers.add_parser('mri_allen_ants', add_help=False,
                                              help="MRI registration to Allen atlas")
     parser_mri_allen.add_argument('-i', '--in_nii', metavar='',
-                                  help="input niti")
+                                  help="input nifti")
     parser_mri_allen.add_argument('-o', '--ort', metavar='',
                                   help="orientation tag")
     parser_mri_allen.add_argument('-m', '--hemi', metavar='',
@@ -122,24 +117,23 @@ def get_parser():
     parser_warp_clar.add_argument('-o', '--ort_file', metavar='',
                                   help="file with ort tag")
     parser_warp_clar.add_argument('-s', '--seg_chan', metavar='',
-                                  help="segmenation channel")
+                                  help="segmentation channel")
     parser_warp_clar.add_argument('-h', '--help', action='store_true')
 
     parser_warp_clar.set_defaults(func=run_warp_clar)
 
     # warp mr
     parser_warp_mr = subparsers.add_parser('warp_mr', add_help=False,
-                                             help="Warp MRI data to Allen space")
+                                           help="Warp MRI data to Allen space")
     parser_warp_mr.add_argument('-i', '--in_nii', metavar='',
-                                  help="input nifti")
+                                help="input nifti")
     parser_warp_mr.add_argument('-r', '--reg_dir', metavar='',
-                                  help="registration dir")
+                                help="registration dir")
     parser_warp_mr.add_argument('-o', '--ort_file', metavar='',
-                                  help="file with ort tag")
+                                help="file with ort tag")
     parser_warp_mr.add_argument('-h', '--help', action='store_true')
 
     parser_warp_mr.set_defaults(func=run_warp_mr)
-
 
     return parser
 

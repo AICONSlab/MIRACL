@@ -5,7 +5,7 @@
 
 import argparse
 import os
-
+import sys
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
@@ -52,14 +52,17 @@ def helpmsg():
 # ---------
 # Get input arguments
 
-def getinpars():
+def parsefn():
     parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
     parser.add_argument('-r', '--roi', type=str, help="Input ROI", required=True)
     parser.add_argument('-n', '--numlbl', type=int, help="Number of primary labels", required=True)
 
-    args = parser.parse_args()
+    return parser
 
-    # check if pars given
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     assert isinstance(args.roi, str)
     inmask = args.roi
@@ -473,11 +476,13 @@ def createconnectogram(num_out_lbl, heatmap, annot_csv, uniq_lbls, targ, dic):
 
     c.save_html('connectogram_grouped_by_parent_id_%d_labels.html' % num_out_lbl, overwrite=True)
 
+
 # ---------------
 
-def main():
-    # initial pars & read inputs
-    [inmask, num_out_lbl] = getinpars()
+def main(args):
+    # parse in args
+    parser = parsefn()
+    inmask, num_out_lbl = parse_inputs(parser, args)
 
     print("\n Reading input mask (ROI) and Allen annotations")
 
@@ -563,7 +568,7 @@ def main():
 
 # Call main function
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 
 # ------
 # TODOs:

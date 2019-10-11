@@ -2,24 +2,27 @@ import os
 import sys
 import argparse
 import subprocess
-import logging
-from pathlib import Path
-
-# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# logger = logging.getLogger()
+from miracl.connect import miracl_connect_label_graph_proj_dens, miracl_connect_ROI_matrix_connectogram
 
 
-def run_reg_clar(parser, args):
+def run_proj_dens(parser, args):
+    miracl_connect_label_graph_proj_dens.main(args)
+
+
+def run_roi_mat(parser, args):
+    miracl_connect_ROI_matrix_connectogram.main(args)
+
+
+def run_csd_track(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-
-    # flow_cli = os.path.realpath(__file__)
-    # flow_dir = Path(flow_cli).parents[0]
 
     args = vars(args)
 
-    bash_args = '-f "%s" -n "%s" -r "%s"' % (args['folder'][0], args['conv_opts'][0], args['reg_opts'][0])
+    bash_args = '-d %s -m %s -r %s -b %s -s %s -v %s -t %s -f %s' % (args['dti_data'], args['mask'], args['bvecs'],
+                                                                     args['bvals'], args['seed'], args['vox'],
+                                                                     args['tract_name'], args['folder'])
 
-    subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
+    subprocess.check_call('%s/connect/miracl_connect_csd_tractography.sh %s' % (miracl_home, bash_args),
                           shell=True,
                           stderr=subprocess.STDOUT)
 
@@ -37,33 +40,49 @@ def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # reg_clarity
-    parser_regclar = subparsers.add_parser('reg_clar', help="whole-brain clarity registration to Allen atlas")
-    parser_regclar.add_argument('-f', '--folder', nargs='+',
-                                 help="input registration folder")
-    parser_regclar.add_argument('-n', '--conv_opts', nargs='+', metavar='',
-                                 help="file conversion options")
-    parser_regclar.add_argument('-r', '--reg_opts', nargs='+', metavar='',
-                                 help="registration options")
+    # csd_track
+    parser_csd_track = subparsers.add_parser('csd_track', help="Performs CSD tractography and "
+                                                               "track density mapping for a seed region using MRtrix3")
+    parser_csd_track.add_argument('-d', '--dti_data', metavar='',
+                                  help="input DTI data")
+    parser_csd_track.add_argument('-m', '--mask', metavar='',
+                                  help="DTI mask")
+    parser_csd_track.add_argument('-r', '--bvecs', metavar='',
+                                  help="DTI bvecs")
+    parser_csd_track.add_argument('-b', '--bvals', metavar='',
+                                  help="DTI bvals")
+    parser_csd_track.add_argument('-s', '--seed', metavar='',
+                                  help="Tractography seed")
+    parser_csd_track.add_argument('-v', '--vox', metavar='',
+                                  help="Tract density map voxel size (in mm)")
+    parser_csd_track.add_argument('-t', '--tract_name', metavar='',
+                                  help="Output tract name")
+    parser_csd_track.add_argument('-f', '--folder', metavar='',
+                                  help="Folder containing DTI data")
+    parser_csd_track.set_defaults(func=run_csd_track)
 
+    # proj_dens
+    proj_dens_parser = miracl_connect_label_graph_proj_dens.parsefn()
+    parser_proj_dens = subparsers.add_parser('proj_dens', parents=[proj_dens_parser], add_help=False,
+                                             help="Query Allen connectivity API for injection experiments &"
+                                                  "Outputs a connectivity graph of that experiment & "
+                                                  "its projection density images")
+    parser_proj_dens.set_defaults(func=run_proj_dens)
 
-    parser_regclar.set_defaults(func=run_reg_clar)
-
-    # sta
-    parser_sta = subparsers.add_parser('sta', help="")
-    parser_sta.add_argument('-f',
-                            help="")
-    parser_sta.add_argument('-o',
-                            help="")
-    parser_sta.add_argument('-n',
-                            help="")
-
-    parser_sta.set_defaults(func=run_sta)
+    # roi_mat
+    roi_mat_parser = miracl_connect_ROI_matrix_connectogram.parsefn()
+    parser_roi_mat = subparsers.add_parser('roi_mat', parents=[roi_mat_parser], add_help=False,
+                                           help="Finds the largest N Allen labels in the Region of Interest & "
+                                                "extracts its N closely connected regions")
+    parser_roi_mat.set_defaults(func=run_roi_mat)
 
     return parser
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[2:]
+
     parser = get_parser()
     args = parser.parse_args(args)
     args.func(parser, args)
