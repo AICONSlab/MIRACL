@@ -15,8 +15,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     license='GNU GENERAL PUBLIC LICENSE v3',
-    url='https://github.com/mgoubran/MIRACLdev',  # change later
-    download_url='https://github.com/mgoubran/MIRACLdev',
+    url='https://github.com/mgoubran/MIRACL',  # change later
+    download_url='https://github.com/mgoubran/MIRACL',
     long_description=open('README.md').read(),
     classifiers=[
         'Development Status :: 4 - Beta',

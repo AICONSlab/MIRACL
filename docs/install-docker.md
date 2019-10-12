@@ -21,8 +21,8 @@ in that folder and push new images.
 ## Build from scratch
 
 ```
-git clone https://www.github.com/mgoubran/MIRACLdev
-cd MIRACLdev
+git clone https://www.github.com/mgoubran/MIRACL
+cd MIRACL
 ```
 Build the image using the Dockerfile
 

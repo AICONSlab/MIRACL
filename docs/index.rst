@@ -41,6 +41,7 @@ All Rights Reserved.
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :hidden:
 
    before_install
    install-local
@@ -52,9 +53,3 @@ All Rights Reserved.
    data
    gallery
 
-Indices and tables
-====================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
