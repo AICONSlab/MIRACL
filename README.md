@@ -13,15 +13,11 @@ is a general-purpose, open-source pipeline for automated:
 4) Tract or label specific connectivity analysis based on the Allen connectivity atlas
 5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY &
    Allen connectivity atlas
-
 6) Statistical analysis of CLARITY & Imaging data
-
 7) Atlas generation & Label manipulation
 
 (c) Maged Goubran, 
     mgoubran@stanford.edu
-
-@ Stanford University, 2018
 
 All Rights Reserved. 
 

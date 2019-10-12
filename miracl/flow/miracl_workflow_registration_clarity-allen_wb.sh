@@ -127,7 +127,7 @@ function usage()
 
 	-----------------------------------
 
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 
 	-----------------------------------
@@ -476,4 +476,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-miracl utils endstate -f "Conversion, Registration and Allen labels warping" -t "$DIFF minutes"
+miracl utils end_state -f "Conversion, Registration and Allen labels warping" -t "$DIFF minutes"

@@ -44,7 +44,7 @@ Running on
 
 ## Documentation
 
-A [PDF of our documentation](MIRACL_documentation.pdf) is available.
+A [PDF of our documentation](tutorials/MIRACL_documentation.pdf) is available.
 
 
 ## Gallery
@@ -98,12 +98,10 @@ The **Data** folder contains test data with example inputs and outputs for the r
 for a detailed description & input parameters please check the respective README.md of each module 
 
 
-## Troubleshooting
-
-check reported issues (coming soon) or reach out at: 
-
 ## References
 If you use our pipeline in your work please cite our paper:
+
+Goubran, M., Leuze, C., Hsueh, B., Aswendt, M., Ye, L., Tian, Q., Cheng, M.Y., Crow, A., Steinberg, G.K., McNab, J.A., Deisseroth, K., and Zeineh, M. “Investigating whole-brain and tract-level alterations using imaging across resolution scales.” Nature communications. (2019). 
 
 
 ## Acknowledgements

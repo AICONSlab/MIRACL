@@ -2,10 +2,6 @@ import os
 import sys
 import argparse
 import subprocess
-# import logging
-
-# logging.basicConfig(format='%(asctime)15s - %(levelname)s - %(message)s', level=logging.DEBUG)
-# logger = logging.getLogger()
 
 
 def run_reg_clar(parser, args):
@@ -21,7 +17,8 @@ def run_reg_clar(parser, args):
         print('Running CLARITY to Allen registration workflow with the following arguments: \n'
               "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args)
 
-        subprocess.check_call('%s/miracl/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/miracl/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home,
+                                                                                                      bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
@@ -50,8 +47,10 @@ def run_sta(parser, args):
         subprocess.Popen('%s/miracl/flow/miracl_workflow_sta.sh -h' % miracl_home,
                          shell=True)
     else:
-        bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
-                                                           args['seg_opts'][0], args['ext_opts'][0])
+        bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s' % (
+            args['folder'], args['out_nii'], args['seed_label'],
+            args['clar_reg'], args['hemi'], args['dog'],
+            args['sigma'], args['angle'])
 
         subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                               stderr=subprocess.STDOUT)
@@ -77,11 +76,21 @@ def get_parser():
     # sta
     parser_sta = subparsers.add_parser('sta', add_help=False, help="Structure Tensor Analysis (STA)")
     parser_sta.add_argument('-f', '--folder', metavar='',
-                            help="input segmentation folder")
-    parser_sta.add_argument('-o',
-                            help="")
-    parser_sta.add_argument('-n',
-                            help="")
+                            help="input folder")
+    parser_sta.add_argument('-o', '--out_nii', metavar='',
+                            help="output nifti")
+    parser_sta.add_argument('-l', '--seed_label', metavar='',
+                            help="Seed label abbreviation (from Allen atlas ontology)")
+    parser_sta.add_argument('-r', '--clar_reg', metavar='',
+                            help="CLARITY final registration folder")
+    parser_sta.add_argument('-m', '--hemi', metavar='',
+                            help="Labels hemi")
+    parser_sta.add_argument('-g', '--dog', metavar='',
+                            help="Derivative of Gaussian (dog) sigma")
+    parser_sta.add_argument('-k', '--sigma', metavar='',
+                            help="Gaussian smoothing sigma")
+    parser_sta.add_argument('-a', '--angle', metavar='',
+                            help="Tracking angle threshold")
     parser_sta.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta)
@@ -91,7 +100,7 @@ def get_parser():
     parser_seg.add_argument('-f', '--folder', metavar='',
                             help="input segmentation folder")
     parser_seg.add_argument('-t', '--type', metavar='',
-                            help="segmentation type: virus, cFOS, sparse or nuclear")
+                            help="segmentation type: virus, cfos, sparse or nuclear")
     parser_seg.add_argument('-v', '--vox_res', metavar='',
                             help="voxel resolution/size")
     parser_seg.add_argument('-s', '--seg_opts', nargs='+', metavar='',
