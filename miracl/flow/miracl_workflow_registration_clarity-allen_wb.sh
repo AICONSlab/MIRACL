@@ -127,7 +127,7 @@ function usage()
 
 	-----------------------------------
 
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 
 	-----------------------------------
