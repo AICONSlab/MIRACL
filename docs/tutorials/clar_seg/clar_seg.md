@@ -26,11 +26,11 @@ from the main GUI OR run:
 
 the following window will appear to choose input tiff folder with Thy1-YFP or other channel:
 
-<img src="seg1.png" alt="alt text" width="650" height="500"/>
+![input folder](seg1.png)
 
 then choose the segmentation parameters:
 
-<img src="seg2.png" alt="alt text" width="350" height="200"/>
+![seg pars](seg2.png)
 
     - Channel type: virus, cFos, sparse (like Thy1 YFP) or nuclear (like PI)
 
@@ -41,8 +41,7 @@ then choose the registered labels **annotation_hemi\__side_\_XXum_clar_vox.tif**
 * where side -> combined or split, and
 * XX is the resolution 10, 25 or 50
 
-<img src="seg3.png" alt="alt text" width="650" height="500"/>
-
+![reg labels](seg3.png)
 
 # Command-line
 

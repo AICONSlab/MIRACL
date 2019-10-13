@@ -23,7 +23,7 @@ Run
 
 and from the main GUI choose:
 
-<img src="reg0.png" alt="alt text" width="450" height="500"/>
+![reg](reg0.png)
 
 OR run:
 
@@ -31,41 +31,40 @@ OR run:
 
 ---
 
-
 First choose the input tiff folder with the auto fluorescence channel:
 
-<img src="../tiff_to_nii/tiff_to_nii2.png" alt="alt text" width="500" height="400"/>
+![reg](../tiff_to_nii/tiff_to_nii2.png)
 
 this GUI will appear showing the data to orient it:
 
-<img src="reg1.png" alt="alt text" width="550" height="500"/>
+![reg](reg1.png)
 
 * you can navigate through the data using the bar bellow, by specifying the slice number
 or using the arrows
 
-<img src="reg2.png" alt="alt text" width="550" height="80"/>
+![reg](reg2.png)
 
 * First choose the data plane (axial, coronal or sagittal)
 
-<img src="reg3.png" alt="alt text" width="300" height="200"/>
+![reg](reg3.png)
 
 * Then choose the orientation at the top and right of the image
 
-<img src="reg4.png" alt="alt text" width="300" height="200"/>
+![reg](reg4.png)
 
 * Then choose the orientation for scrolling through the slices (going into the page),
 can confirm the orientation by changing the image number at the bottom (enter higher number and press Enter),
 or using the Next or Prev image buttons
 
-<img src="reg5.png" alt="alt text" width="300" height="200"/>
+![reg](reg5.png)
 
 * Finally close the GUI
 
-<img src="reg6.png" alt="alt text" width="350" height="150"/>
+![reg](reg6.png)
 
 and the tiff conversion parameters:
 
-<img src="reg7.png" alt="alt text" width="350" height="400"/>
+![reg](reg7.png)
 
 Conversion parameters description:
 
@@ -84,7 +83,7 @@ Conversion parameters description:
     - center: center of nifti file
 and then choose the registration options:
 
-<img src="reg8.png" alt="alt text" width="350" height="200"/>
+![reg](reg8.png)
 
 Registration parameters description:
 
