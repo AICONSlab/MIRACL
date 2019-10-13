@@ -16,8 +16,7 @@ is a general-purpose, open-source pipeline for automated:
     6) Statistical analysis of CLARITY & Imaging data
     7) Atlas generation & Label manipulation
 
-Copyright (c) 2019 Maged Goubran, 
-    mgoubran@stanford.edu
+Copyright (c) 2019 Maged Goubran, mgoubran@stanford.edu
 
 All Rights Reserved. 
 
