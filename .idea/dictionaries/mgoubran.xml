@@ -8,11 +8,15 @@
       <w>binarize</w>
       <w>binarized</w>
       <w>brainmask</w>
+      <w>bvals</w>
+      <w>bvecs</w>
       <w>clar</w>
       <w>conv</w>
       <w>dicoms</w>
       <w>downsample</w>
       <w>downsampled</w>
+      <w>eigen</w>
+      <w>endstatmenet</w>
       <w>eyfp</w>
       <w>github</w>
       <w>goubran</w>
@@ -37,10 +41,15 @@
       <w>parallelization</w>
       <w>parseinputs</w>
       <w>pathid</w>
+      <w>proj</w>
+      <w>regclar</w>
+      <w>rtrix</w>
       <w>snaplabels</w>
       <w>snaplut</w>
       <w>thresholded</w>
       <w>tifs</w>
+      <w>tractography</w>
+      <w>ttest</w>
       <w>upsampling</w>
       <w>usampling</w>
       <w>utilfn</w>

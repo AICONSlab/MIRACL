@@ -12,7 +12,7 @@ jobs:
       - CONTAINER_NAME: "mgoubran/miracl"
     docker:
       - image: docker:18.06.3-ce-git
-    working_directory: /tmp/src/MIRACLdev
+    working_directory: /tmp/src/MIRACL
     steps:
       - checkout
       - setup_remote_docker
@@ -21,13 +21,13 @@ jobs:
           no_output_timeout: 60m
           command: |
             # Build docker image
-            MIRACL_VERSION=$(cat /tmp/src/MIRACLdev/version.txt)
+            MIRACL_VERSION=$(cat /tmp/src/MIRACL/version.txt)
             echo "miracl version is ${MIRACL_VERSION}"
             e=1 && for i in {1..5}; do
               docker build \
                 --rm=false \
                 -t ${CONTAINER_NAME} \
-                -f /tmp/src/MIRACLdev/Dockerfile \
+                -f /tmp/src/MIRACL/Dockerfile \
                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
                 --build-arg VCS_REF=`git rev-parse --short HEAD` \
                 --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
