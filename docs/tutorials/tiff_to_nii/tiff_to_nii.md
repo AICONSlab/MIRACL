@@ -8,11 +8,11 @@ run:
 
 the following window will appear:
 
-<img src="tiff_to_nii1.png" alt="alt text" width="450" height="500"/>
+![conv gui](tiff_to_nii1.png)
 
 choose input tiff folder:
 
-<img src="tiff_to_nii2.png" alt="alt text" width="600" height="500"/>
+![in folder](tiff_to_nii2.png)
 
 then choose the desired parameters, if default value is ok you can leave it blank
 

@@ -31,11 +31,11 @@ from the main GUI OR run:
 
 the following window will appear:
 
-<img src="sta1.png" alt="alt text" width="450" height="500"/>
+![sta gui](sta1.png)
 
 choose input tiff folder with virus channel:
 
-<img src="../tiff_to_nii/tiff_to_nii2.png" alt="alt text" width="600" height="500"/>
+![in folder](sta2.png)
 
 then choose the registered Allen labels inside the final registration folder (reg_final):
 

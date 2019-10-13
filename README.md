@@ -24,6 +24,6 @@ ____________________________
 
 
 We provide containers for using the software (Docker and Singularity) as well as
-local install instructions. For more details, see our [docs](docs). Note that
-the base image for the docker container can be found in [docker](docker) and
+local install instructions. For more details, see our [docs](https://miracl.readthedocs.io). 
+Note that the base image for the docker container can be found in [docker](docker) and
 the container `mgoubran/miracl` is built on top of that.
