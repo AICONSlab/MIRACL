@@ -48,7 +48,7 @@ Checks registration results
 def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
-    if sys.argv[-1] == 'check':
+    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'check':
 
         print("Running in GUI mode")
 

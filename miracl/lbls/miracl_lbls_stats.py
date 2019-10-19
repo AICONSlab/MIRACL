@@ -67,8 +67,7 @@ Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l reg
 
 
 def parsefn():
-    if len(sys.argv) == 3:
-
+    if sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
         print("Running in GUI mode")
 
         title = 'Label Statistics'
