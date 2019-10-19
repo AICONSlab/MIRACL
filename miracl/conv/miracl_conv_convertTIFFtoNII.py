@@ -126,10 +126,6 @@ def parsefn():
 
 
 def parse_inputs(parser, args):
-
-    if isinstance(args, list):
-        args, unknown = parser.parse_known_args()
-
     if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
 
         print("Running in GUI mode")
@@ -178,7 +174,8 @@ def parse_inputs(parser, args):
 
     else:
 
-        args, unknown = parser.parse_known_args()
+        if isinstance(args, list):
+            args, unknown = parser.parse_known_args()
 
         print("\n running in script mode")
 
