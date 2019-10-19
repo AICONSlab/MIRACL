@@ -126,122 +126,76 @@ def parsefn():
 
 
 def parse_inputs(parser, args):
-    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
 
-        print("Running in GUI mode")
 
-        title = 'Tiff to Nii conversion'
-        dirs = ['Input tiff folder']
-        fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix',
-                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")',
-                  'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
-        # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
-        app = QApplication(sys.argv)
-        menu, linedits, labels = gui_opts.OptsMenu(title=title, dirs=dirs, fields=fields, helpfun=helpmsg())
-        menu.show()
-        app.exec_()
-        app.processEvents()
+    print("\n running in script mode")
 
-        indirstr = labels[dirs[0]].text()
-        indir = str(indirstr.split(":")[1]).lstrip()
-        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+    # check if pars given
 
-        # Initialize default params
+    assert isinstance(args.folder, str)
+    indir = args.folder
 
-        outnii = 'clarity' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
-        # assert isinstance(outnii, str), '-outnii not a string'
+    assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
 
-        d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
-        # assert isinstance(d, int), '-d not a integer'
-
-        chann = 0 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
-        # assert isinstance(chann, int), '-chann not a integer'
-
-        chanp = None if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
-
-        chan = 'eyfp' if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
-
-        vx = 5 if not linedits[fields[5]].text() else float(linedits[fields[5]].text())
-
-        vz = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
-
-        cent = [0, 0, 0] if not linedits[fields[7]].text() else linedits[fields[7]].text()
-
-        downz = 1 if not linedits[fields[8]].text() else int(linedits[fields[8]].text())
-
-        pd = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
-
+    if args.outnii is None:
+        outnii = 'clarity'
     else:
+        assert isinstance(args.outnii, str)
+        outnii = args.outnii
 
-        if isinstance(args, list):
-            args, unknown = parser.parse_known_args()
+    if args.down is None:
+        d = 5
+        print("\n down-sample ratio not specified ... choosing default value of %d" % d)
+    else:
+        assert isinstance(args.down, int)
+        d = args.down
 
-        print("\n running in script mode")
+    if args.channum is None:
+        chann = 0
+        print("\n channel # not specified ... choosing default value of %d" % chann)
+    else:
+        assert isinstance(args.channum, int)
+        chann = args.channum
 
-        # check if pars given
+        if args.chanprefix is None:
+            sys.exit('-cp (channel prefix) not specified ')
 
-        assert isinstance(args.folder, str)
-        indir = args.folder
+    chanp = args.chanprefix if args.chanprefix is not None else None
 
-        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+    if args.channame is None:
+        chan = 'eyfp'
+        print("\n channel name not specified ... choosing default value of %s" % chan)
+    else:
+        assert isinstance(args.channame, str)
+        chan = args.channame
 
-        if args.outnii is None:
-            outnii = 'clarity'
-        else:
-            assert isinstance(args.outnii, str)
-            outnii = args.outnii
+    if args.resx is None:
+        vx = 5
+    else:
+        vx = args.resx
 
-        if args.down is None:
-            d = 5
-            print("\n down-sample ratio not specified ... choosing default value of %d" % d)
-        else:
-            assert isinstance(args.down, int)
-            d = args.down
+    if args.resz is None:
+        vz = 5
+    else:
+        vz = args.resz
 
-        if args.channum is None:
-            chann = 0
-            print("\n channel # not specified ... choosing default value of %d" % chann)
-        else:
-            assert isinstance(args.channum, int)
-            chann = args.channum
+    if args.center is None:
+        cent = [0, 0, 0]
+    else:
+        cent = args.center
 
-            if args.chanprefix is None:
-                sys.exit('-cp (channel prefix) not specified ')
+    if args.downzdim is None:
+        downz = 1
+    else:
+        downz = args.downzdim
 
-        chanp = args.chanprefix if args.chanprefix is not None else None
-
-        if args.channame is None:
-            chan = 'eyfp'
-            print("\n channel name not specified ... choosing default value of %s" % chan)
-        else:
-            assert isinstance(args.channame, str)
-            chan = args.channame
-
-        if args.resx is None:
-            vx = 5
-        else:
-            vx = args.resx
-
-        if args.resz is None:
-            vz = 5
-        else:
-            vz = args.resz
-
-        if args.center is None:
-            cent = [0, 0, 0]
-        else:
-            cent = args.center
-
-        if args.downzdim is None:
-            downz = 1
-        else:
-            downz = args.downzdim
-
-        if args.prevdown is None:
-            pd = 1
-        else:
-            pd = args.prevdown
+    if args.prevdown is None:
+        pd = 1
+    else:
+        pd = args.prevdown
 
     # make res in um
     vx /= float(1000)  # in um
@@ -249,6 +203,53 @@ def parse_inputs(parser, args):
 
     return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
 
+
+def parse_gui():
+    print("Running in GUI mode")
+
+    title = 'Tiff to Nii conversion'
+    dirs = ['Input tiff folder']
+    fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix',
+              'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")',
+              'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
+    # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
+
+    app = QApplication(sys.argv)
+    menu, linedits, labels = gui_opts.OptsMenu(title=title, dirs=dirs, fields=fields, helpfun=helpmsg())
+    menu.show()
+    app.exec_()
+    app.processEvents()
+
+    indirstr = labels[dirs[0]].text()
+    indir = str(indirstr.split(":")[1]).lstrip()
+    assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+
+    # Initialize default params
+
+    outnii = 'clarity' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+    # assert isinstance(outnii, str), '-outnii not a string'
+
+    d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
+    # assert isinstance(d, int), '-d not a integer'
+
+    chann = 0 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
+    # assert isinstance(chann, int), '-chann not a integer'
+
+    chanp = None if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+
+    chan = 'eyfp' if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
+
+    vx = 5 if not linedits[fields[5]].text() else float(linedits[fields[5]].text())
+
+    vz = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
+
+    cent = [0, 0, 0] if not linedits[fields[7]].text() else linedits[fields[7]].text()
+
+    downz = 1 if not linedits[fields[8]].text() else int(linedits[fields[8]].text())
+
+    pd = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
+
+    return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
 
 # ---------
 # Logging fn
@@ -377,9 +378,11 @@ def main(args):
 
     starttime = datetime.now()
 
-    parser = parsefn()
-
-    [indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd] = parse_inputs(parser, args)
+    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
+        indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_gui()
+    else:
+        parser = parsefn()
+        indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
