@@ -205,7 +205,6 @@ def upsampleswplbls(seg, lbls):
 
 def main(args):
     # parse in args
-
     parser = parsefn()
     invol, lbls, outfile, sort, hemi, label_depth = parse_inputs(parser, args)
 

@@ -63,7 +63,7 @@ def helpmsg():
         '''
 
 
-def parseinputs():
+def parsefn():
     if len(sys.argv) == 3:
 
         print("Running in GUI mode")
@@ -102,15 +102,20 @@ def parseinputs():
         parser.add_argument('-o', '--outfile', type=str, help="Output file",
                             default='clarity_label_statistics.csv')
 
-        args = parser.parse_args()
+        return parser
 
-        invol = args.invol
-        lbls = args.lbls
-        outfile = args.outfile
-        sort = args.sort
-        hemi = args.hemi if args.hemi is not None else "combined"
-        label_depth = args.depth 
-        cortex = args.cortex
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
+
+    invol = args.invol
+    lbls = args.lbls
+    outfile = args.outfile
+    sort = args.sort
+    hemi = args.hemi if args.hemi is not None else "combined"
+    label_depth = args.depth
+    cortex = args.cortex
 
     # check if pars given
 
@@ -203,10 +208,10 @@ def getlblvals(lbls):
 
 # ---------
 
-def main():
+def main(args):
     # parse in args
-
-    invol, lbls, outfile, sort, hemi, label_depth, cortex = parseinputs()
+    parser = parsefn()
+    invol, lbls, outfile, sort, hemi, label_depth, cortex = parse_inputs(parser, args)
 
     # extract stats
     print(" Extracting stats from input volume using registered labels ...\n")
@@ -332,4 +337,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

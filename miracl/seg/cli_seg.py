@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.seg import miracl_seg_feat_extract, miracl_seg_voxelize_parallel
+from miracl.seg import miracl_seg_feat_extract, miracl_seg_voxelize_parallel, miracl_seg_feats_cortex
 
 
 def run_seg_clar(parser, args):
@@ -23,6 +23,10 @@ def run_seg_clar(parser, args):
 
 def run_feat_extract(parser, args):
     miracl_seg_feat_extract.main(args)
+
+
+def run_feat_extract_ctx(parser, args):
+    miracl_seg_feats_cortex.main(args)
 
 
 def run_voxelize(parser, args):
@@ -52,6 +56,13 @@ def get_parser():
                                             help='Extract features from CLARITY seg')
 
     parser_feat_extract.set_defaults(func=run_feat_extract)
+
+    # feat extract_ctx
+    feat_extract_ctx_parser = miracl_seg_feats_cortex.parsefn()
+    parser_feat_ctx_extract = subparsers.add_parser('feat_extract_ctx', parents=[feat_extract_ctx_parser], add_help=False,
+                                            help='Extract features from CLARITY seg')
+
+    parser_feat_ctx_extract.set_defaults(func=run_feat_extract_ctx)
 
     # voxelize
     voxelize_parser = miracl_seg_voxelize_parallel.parsefn()

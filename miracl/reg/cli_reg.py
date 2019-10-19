@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import subprocess
-
+from miracl.reg import miracl_reg_check_results
 
 def run_clar_allen_wb(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
@@ -63,6 +63,10 @@ def run_warp_mr(parser, args):
         subprocess.check_call('%s/miracl/reg/miracl_reg_warp_mr_data_to_allen.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
+
+
+def run_check_reg(parser, args):
+    miracl_reg_check_results.main(args)
 
 
 def get_parser():
@@ -134,6 +138,13 @@ def get_parser():
     parser_warp_mr.add_argument('-h', '--help', action='store_true')
 
     parser_warp_mr.set_defaults(func=run_warp_mr)
+
+    # check_reg
+    check_reg_parser = miracl_reg_check_results.parsefn()
+    parser_check_reg = subparsers.add_parser('check', parents=[check_reg_parser], add_help=False,
+                                           help="Check registration")
+    parser_check_reg.set_defaults(func=run_check_reg)
+
 
     return parser
 
