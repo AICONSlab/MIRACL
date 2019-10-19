@@ -21,7 +21,7 @@ import scipy.ndimage
 from PyQt4.QtGui import *
 from joblib import Parallel, delayed
 
-import miracl_conv_gui_options as gui_opts
+from miracl.conv import miracl_conv_gui_options as gui_opts
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -130,7 +130,7 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    if len(vars(args)) == 1:
+    if len(vars(args)) == 3:
 
         print("Running in GUI mode")
 
