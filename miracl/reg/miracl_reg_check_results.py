@@ -48,7 +48,7 @@ Checks registration results
 def parseinputs():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 3:
 
         print("Running in GUI mode")
 
