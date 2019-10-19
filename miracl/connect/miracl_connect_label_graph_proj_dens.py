@@ -72,7 +72,6 @@ def parsefn():
     parser.add_argument('-l', '--lbl', type=str, help="Input label abrv", required=True)
     parser.add_argument('-t', '--trans', type=str, help="Transgenic line")
     parser.add_argument('-p', '--projmet', type=str, help="Projection metric")
-    args = parser.parse_args()
 
     return parser
 
