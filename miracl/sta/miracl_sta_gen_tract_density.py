@@ -17,7 +17,7 @@ def helpmsg():
 
     Usage: miracl_sta_gen_tract_density.py -t [ input tracts (.trk) ]  -r [ reference volume ] -o [ output tract density ]
 
-Example: miracl_sta_gen_tract_density.py -t  -r  -o
+    Example: miracl_sta_gen_tract_density.py -t  -r  -o
 
     Arguments (required):
 
@@ -93,7 +93,6 @@ def main(args):
     # parse in args
     parser = parsefn()
     tracts, ref_vol, out_dens = parse_inputs(parser, args)
-
 
     # create dens map
     gen_dens(tracts, ref_vol, out_dens)

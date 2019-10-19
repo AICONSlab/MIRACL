@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 from PyQt4.QtGui import QApplication
 
-sys.path.insert(0, '%s/conv' % os.environ['MIRACL_HOME'])
 from miracl.conv import miracl_conv_gui_options as gui_opts
 
 
@@ -112,14 +111,14 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-        args = parser.parse_args()
+    args = parser.parse_args()
 
-        invol = args.invol
-        lbls = args.lbls
-        outfile = args.outfile
-        sort = args.sort
-        hemi = args.hemi if args.hemi is not None else "combined"
-        label_depth = args.depth if args.depth is not None else None
+    invol = args.invol
+    lbls = args.lbls
+    outfile = args.outfile
+    sort = args.sort
+    hemi = args.hemi if args.hemi is not None else "combined"
+    label_depth = args.depth if args.depth is not None else None
 
     # check if pars given
 
