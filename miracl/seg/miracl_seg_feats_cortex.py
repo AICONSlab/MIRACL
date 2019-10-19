@@ -89,8 +89,6 @@ def parsefn():
 
     else:
 
-        print("\n running in script mode \n")
-
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
         parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
@@ -108,6 +106,8 @@ def parsefn():
 def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
+
+    print("\n running in script mode \n")
 
     invol = args.invol
     lbls = args.lbls

@@ -67,8 +67,6 @@ def parsefn():
 
     else:
 
-        print("\n running in script mode \n")
-
         # check if pars given
         parser.add_argument('-f', '--folder', type=str, help="reg final folder", required=True)
         parser.add_argument('-v', '--viz', type=str, help="Visualization software")
@@ -81,6 +79,8 @@ def parsefn():
 def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
+
+    print("\n running in script mode \n")
 
     assert isinstance(args.folder, str)
     indir = args.folder
