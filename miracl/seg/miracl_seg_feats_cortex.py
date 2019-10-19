@@ -64,7 +64,7 @@ def helpmsg():
 
 
 def parsefn():
-    if len(sys.argv) == 3:
+    if sys.argv[-1] == 'feat_extract_ctx':
 
         print("Running in GUI mode")
 

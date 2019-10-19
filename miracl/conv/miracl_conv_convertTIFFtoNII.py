@@ -130,7 +130,7 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    if len(vars(args)) == 3:
+    if sys.argv[-1] == 'tiff_nii':
 
         print("Running in GUI mode")
 
