@@ -18,6 +18,7 @@ def get_parser():
     # paired t-test
     paired_parser = miracl_stats_paired_ttest_ipsi_contra.parsefn()
     parser_paired = subparsers.add_parser('paired_ttest', parents=[paired_parser], add_help=False,
+                                          usage=paired_parser.usage,
                                           help='run paired ttest stats')
 
     parser_paired.set_defaults(func=run_paired_ttest)
@@ -25,6 +26,7 @@ def get_parser():
     # voxel wise stats
     voxel_parser = miracl_stats_voxel_wise.parsefn()
     parser_voxel = subparsers.add_parser('voxel_wise', parents=[voxel_parser], add_help=False,
+                                         usage=voxel_parser.usage,
                                          help='run voxel wise stats')
 
     parser_voxel.set_defaults(func=run_voxel_wise)

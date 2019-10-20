@@ -50,12 +50,6 @@ def helpmsg(name=None):
 
         clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)
 
-    ------
-
-	Dependencies:
-
-	    Python 2.7
-
     '''
 
 
@@ -63,12 +57,12 @@ def helpmsg(name=None):
 # Get input arguments
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
+    parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
     parser.add_argument('-s', '--seg', type=str, help="segmentation tif", required=True)
     parser.add_argument('-l', '--lbl', type=str, help="label annotations", required=True)
     parser.add_argument('-m', '--mask', type=str, help="ROI mask")
 
-    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+    # parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
 

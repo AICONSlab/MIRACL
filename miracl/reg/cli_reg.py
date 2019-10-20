@@ -9,12 +9,12 @@ def run_clar_allen_wb(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/reg/miracl_reg_clar-allen_whole_brain.sh -h' % miracl_home,
+        subprocess.Popen('%s/reg/miracl_reg_clar-allen_whole_brain.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-i %s -o %s -m %s -v %s' % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'])
 
-        subprocess.check_call('%s/miracl/reg/miracl_reg_clar-allen_whole_brain.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/reg/miracl_reg_clar-allen_whole_brain.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
@@ -24,14 +24,14 @@ def run_mri_allen_ants(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/reg/miracl_reg_mri-allen.sh -h' % miracl_home,
+        subprocess.Popen('%s/reg/miracl_reg_mri-allen.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-i %s -o %s -m %s -v %s -l %s -b %s -s % -f %s' \
                     % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'], args['lbls'], args['bulb'],
                        args['skull'], args['bet'])
 
-        subprocess.check_call('%s/miracl/reg/miracl_reg_mri-allen.sh %s' % (miracl_home, bash_args), shell=True,
+        subprocess.check_call('%s/reg/miracl_reg_mri-allen.sh %s' % (miracl_home, bash_args), shell=True,
                               stderr=subprocess.STDOUT)
 
 
@@ -40,12 +40,12 @@ def run_warp_clar(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/reg/miracl_reg_warp_clar_data_to_allen.sh -h' % miracl_home,
+        subprocess.Popen('%s/reg/miracl_reg_warp_clar_data_to_allen.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-i %s -o %s -r %s -s %s' % (args['in_nii'], args['ort_file'], args['reg_dir'], args['seg_chan'])
 
-        subprocess.check_call('%s/miracl/reg/miracl_reg_warp_clar_data_to_allen.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/reg/miracl_reg_warp_clar_data_to_allen.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
@@ -55,12 +55,12 @@ def run_warp_mr(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/reg/miracl_reg_warp_mr_data_to_allen.sh -h' % miracl_home,
+        subprocess.Popen('%s/reg/miracl_reg_warp_mr_data_to_allen.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-i %s -o %s -r %s' % (args['in_nii'], args['ort_file'], args['reg_dir'])
 
-        subprocess.check_call('%s/miracl/reg/miracl_reg_warp_mr_data_to_allen.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/reg/miracl_reg_warp_mr_data_to_allen.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
@@ -142,7 +142,8 @@ def get_parser():
     # check_reg
     check_reg_parser = miracl_reg_check_results.parsefn()
     parser_check_reg = subparsers.add_parser('check', parents=[check_reg_parser], add_help=False,
-                                           help="Check registration")
+                                             usage=check_reg_parser.usage,
+                                             help="Check registration")
     parser_check_reg.set_defaults(func=run_check_reg)
 
 

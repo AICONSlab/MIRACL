@@ -57,12 +57,14 @@ def get_parser():
     # force graph
     force_graph_parser = miracl_sta_create_force_graph.parsefn()
     parser_force_graph = subparsers.add_parser('conn_graph', parents=[force_graph_parser], add_help=False,
+                                               usage=force_graph_parser.usage,
                                                help="Generate connectivity graph")
     parser_force_graph.set_defaults(func=run_force_graph)
 
     # tract density
     tract_density_parser = miracl_sta_gen_tract_density.parsefn()
     parser_tract_density = subparsers.add_parser('tract_density', parents=[tract_density_parser], add_help=False,
+                                                 usage=tract_density_parser.usage,
                                                  help="Generate tract density map")
     parser_tract_density.set_defaults(func=run_tract_density)
 

@@ -53,7 +53,7 @@ def helpmsg():
 # Get input arguments
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+    parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-r', '--roi', type=str, help="Input ROI", required=True)
     parser.add_argument('-n', '--numlbl', type=int, help="Number of primary labels", required=True)
 

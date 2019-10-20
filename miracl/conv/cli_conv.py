@@ -31,6 +31,7 @@ def get_parser():
     # tiff_nii
     tiff_nii_parser = miracl_conv_convertTIFFtoNII.parsefn()
     parser_tiff_nii = subparsers.add_parser('tiff_nii', parents=[tiff_nii_parser], add_help=False,
+                                            usage=tiff_nii_parser.usage,
                                             help='convert Tiff stacks to Nii')
 
     parser_tiff_nii.set_defaults(func=run_tiff_nii)
@@ -38,12 +39,13 @@ def get_parser():
     # nii_tiff
     nii_tiff_parser = miracl_conv_convertNIItoTIFF.parsefn()
     parser_nii_tiff = subparsers.add_parser('nii_tiff', parents=[nii_tiff_parser], add_help=False,
+                                            usage=nii_tiff_parser.usage,
                                             help='convert Nii volume to Tiff stack')
 
     parser_nii_tiff.set_defaults(func=run_nii_tiff)
 
     # set orient
-    parser_set_orient = subparsers.add_parser('set_orient', help="Set orientation tag with GUI")
+    parser_set_orient = subparsers.add_parser('set_orient', help="Set orientation tag with GUI", add_help=False)
     parser_set_orient.set_defaults(func=run_set_orient)
 
     # gui_opts

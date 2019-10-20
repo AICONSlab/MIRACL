@@ -66,12 +66,11 @@ function usage()
 
 	Main Outputs
 
-
-		reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
+        reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
 
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
 
-		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
 
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
 

@@ -26,10 +26,8 @@ from miracl.conv import miracl_conv_gui_options as gui_opts
 warnings.simplefilter("ignore", UserWarning)
 
 
-def helpmsg():
-    return '''
-
-Converts Tiff images to Nifti 
+def helpmsg(name=None):
+    return ''' Converts Tiff images to Nifti 
 
     A GUI will open to choose your:
 
@@ -60,23 +58,13 @@ Converts Tiff images to Nifti
       -pd , --prevdown      Previous down-sample ratio, if already downs-sampled
       -h, --help            Show this help message and exit
 
-
-        '''
-
-
-# Dependencies:
-#
-#     Python 2.7
-#     used modules:
-#         argparse, numpy, cv2, nibabel, pyqt4,
-#         glob, re, os, sys, datetime, joblib, multiprocessing
+    '''
 
 
 def folder_dialog(self, msg):
     """
     Get file / folder with gui with QFileDialog
     """
-
     folder = str(QFileDialog.getExistingDirectory(self, "%s" % msg, "."))
 
     if len(folder) > 0:
@@ -88,114 +76,163 @@ def folder_dialog(self, msg):
 
 
 def parsefn():
-    # parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
-    # add_help=False)
-    parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
-                                     usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
-                                           ' -cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
-                                           ' -vz [z res] -c [center] -dz [down-sample in z]')
+    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
+        parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
+                                         add_help=False)
+    else:
+        parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
+                                         add_help=False)
+        # parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
+        #                                  usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
+        #                                        ' -cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
+        #                                        ' -vz [z res] -c [center] -dz [down-sample in z]')
 
-    required = parser.add_argument_group('required arguments')
-    required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
-                          help="Input CLARITY TIFF folder/dir")
+        required = parser.add_argument_group('required arguments')
+        required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
+                              help="Input CLARITY TIFF folder/dir")
 
-    optional = parser.add_argument_group('optional arguments')
+        optional = parser.add_argument_group('optional arguments')
 
-    optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
-    optional.add_argument('-cn', '--channum', type=int, metavar='',
-                          help="Chan # for extracting single channel from multiple channel data (default: 0)")
-    optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
-                          help="Chan prefix (string before channel number in file name). ex: C00")
-    optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
-    optional.add_argument('-o', '--outnii', type=str, metavar='',
-                          help="Output nii name (script will append downsample ratio & channel info to given name)")
-    optional.add_argument('-vx', '--resx', type=float, metavar='',
-                          help="Original resolution in x-y plane in um (default: 5)")
-    optional.add_argument('-vz', '--resz', type=float, metavar='',
-                          help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
-    optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
-                          help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
-    optional.add_argument('-dz', '--downzdim', type=int, metavar='',
-                          help="Down-sample in z dimension, binary argument, (default: 1) => yes")
-    optional.add_argument('-pd', '--prevdown', type=int, metavar='',
-                          help="Previous down-sample ratio, if already downs-sampled")
+        optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
+        optional.add_argument('-cn', '--channum', type=int, metavar='',
+                              help="Chan # for extracting single channel from multiple channel data (default: 0)")
+        optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
+                              help="Chan prefix (string before channel number in file name). ex: C00")
+        optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
+        optional.add_argument('-o', '--outnii', type=str, metavar='',
+                              help="Output nii name (script will append downsample ratio & channel info to given name)")
+        optional.add_argument('-vx', '--resx', type=float, metavar='',
+                              help="Original resolution in x-y plane in um (default: 5)")
+        optional.add_argument('-vz', '--resz', type=float, metavar='',
+                              help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
+        optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
+                              help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
+        optional.add_argument('-dz', '--downzdim', type=int, metavar='',
+                              help="Down-sample in z dimension, binary argument, (default: 1) => yes")
+        optional.add_argument('-pd', '--prevdown', type=int, metavar='',
+                              help="Previous down-sample ratio, if already downs-sampled")
 
-    optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+        # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
 
 
 def parse_inputs(parser, args):
-
-
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    print("\n running in script mode")
+    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
 
-    # check if pars given
+        print("Running in GUI mode")
 
-    assert isinstance(args.folder, str)
-    indir = args.folder
+        title = 'Tiff to Nii conversion'
+        dirs = ['Input tiff folder']
+        fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix',
+                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")',
+                  'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
+        # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
 
-    assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+        app = QApplication(sys.argv)
+        menu, linedits, labels = gui_opts.OptsMenu(title=title, dirs=dirs, fields=fields, helpfun=helpmsg())
+        menu.show()
+        app.exec_()
+        app.processEvents()
 
-    if args.outnii is None:
-        outnii = 'clarity'
+        indirstr = labels[dirs[0]].text()
+        indir = str(indirstr.split(":")[1]).lstrip()
+        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+
+        # Initialize default params
+
+        outnii = 'clarity' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+        # assert isinstance(outnii, str), '-outnii not a string'
+
+        d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
+        # assert isinstance(d, int), '-d not a integer'
+
+        chann = 0 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
+        # assert isinstance(chann, int), '-chann not a integer'
+
+        chanp = None if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+
+        chan = 'eyfp' if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
+
+        vx = 5 if not linedits[fields[5]].text() else float(linedits[fields[5]].text())
+
+        vz = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
+
+        cent = [0, 0, 0] if not linedits[fields[7]].text() else linedits[fields[7]].text()
+
+        downz = 1 if not linedits[fields[8]].text() else int(linedits[fields[8]].text())
+
+        pd = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
+
     else:
-        assert isinstance(args.outnii, str)
-        outnii = args.outnii
 
-    if args.down is None:
-        d = 5
-        print("\n down-sample ratio not specified ... choosing default value of %d" % d)
-    else:
-        assert isinstance(args.down, int)
-        d = args.down
+        print("\n running in script mode")
 
-    if args.channum is None:
-        chann = 0
-        print("\n channel # not specified ... choosing default value of %d" % chann)
-    else:
-        assert isinstance(args.channum, int)
-        chann = args.channum
+        # check if pars given
+        assert isinstance(args.folder, str)
+        indir = args.folder
 
-        if args.chanprefix is None:
-            sys.exit('-cp (channel prefix) not specified ')
+        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
 
-    chanp = args.chanprefix if args.chanprefix is not None else None
+        if args.outnii is None:
+            outnii = 'clarity'
+        else:
+            assert isinstance(args.outnii, str)
+            outnii = args.outnii
 
-    if args.channame is None:
-        chan = 'eyfp'
-        print("\n channel name not specified ... choosing default value of %s" % chan)
-    else:
-        assert isinstance(args.channame, str)
-        chan = args.channame
+        if args.down is None:
+            d = 5
+            print("\n down-sample ratio not specified ... choosing default value of %d" % d)
+        else:
+            assert isinstance(args.down, int)
+            d = args.down
 
-    if args.resx is None:
-        vx = 5
-    else:
-        vx = args.resx
+        if args.channum is None:
+            chann = 0
+            print("\n channel # not specified ... choosing default value of %d" % chann)
+        else:
+            assert isinstance(args.channum, int)
+            chann = args.channum
 
-    if args.resz is None:
-        vz = 5
-    else:
-        vz = args.resz
+            if args.chanprefix is None:
+                sys.exit('-cp (channel prefix) not specified ')
 
-    if args.center is None:
-        cent = [0, 0, 0]
-    else:
-        cent = args.center
+        chanp = args.chanprefix if args.chanprefix is not None else None
 
-    if args.downzdim is None:
-        downz = 1
-    else:
-        downz = args.downzdim
+        if args.channame is None:
+            chan = 'eyfp'
+            print("\n channel name not specified ... choosing default value of %s" % chan)
+        else:
+            assert isinstance(args.channame, str)
+            chan = args.channame
 
-    if args.prevdown is None:
-        pd = 1
-    else:
-        pd = args.prevdown
+        if args.resx is None:
+            vx = 5
+        else:
+            vx = args.resx
+
+        if args.resz is None:
+            vz = 5
+        else:
+            vz = args.resz
+
+        if args.center is None:
+            cent = [0, 0, 0]
+        else:
+            cent = args.center
+
+        if args.downzdim is None:
+            downz = 1
+        else:
+            downz = args.downzdim
+
+        if args.prevdown is None:
+            pd = 1
+        else:
+            pd = args.prevdown
 
     # make res in um
     vx /= float(1000)  # in um
@@ -203,53 +240,6 @@ def parse_inputs(parser, args):
 
     return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
 
-
-def parse_gui():
-    print("Running in GUI mode")
-
-    title = 'Tiff to Nii conversion'
-    dirs = ['Input tiff folder']
-    fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix',
-              'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")',
-              'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
-    # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
-
-    app = QApplication(sys.argv)
-    menu, linedits, labels = gui_opts.OptsMenu(title=title, dirs=dirs, fields=fields, helpfun=helpmsg())
-    menu.show()
-    app.exec_()
-    app.processEvents()
-
-    indirstr = labels[dirs[0]].text()
-    indir = str(indirstr.split(":")[1]).lstrip()
-    assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
-
-    # Initialize default params
-
-    outnii = 'clarity' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
-    # assert isinstance(outnii, str), '-outnii not a string'
-
-    d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
-    # assert isinstance(d, int), '-d not a integer'
-
-    chann = 0 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
-    # assert isinstance(chann, int), '-chann not a integer'
-
-    chanp = None if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
-
-    chan = 'eyfp' if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
-
-    vx = 5 if not linedits[fields[5]].text() else float(linedits[fields[5]].text())
-
-    vz = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
-
-    cent = [0, 0, 0] if not linedits[fields[7]].text() else linedits[fields[7]].text()
-
-    downz = 1 if not linedits[fields[8]].text() else int(linedits[fields[8]].text())
-
-    pd = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
-
-    return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
 
 # ---------
 # Logging fn
@@ -371,18 +361,10 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
 # ---------
 
 def main(args):
-    """
-    :rtype: nifti file
-    """
-    # scriptlog('tif2nii.log')
-
     starttime = datetime.now()
 
-    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
-        indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_gui()
-    else:
-        parser = parsefn()
-        indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
+    parser = parsefn()
+    indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()

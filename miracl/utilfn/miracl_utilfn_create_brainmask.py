@@ -18,7 +18,7 @@ def helpmsg():
 
     Usage: miracl utilfn brain_mask -i [input volume] -o [output brain mask]
 
-Example: miracl utilfn brain_mask -i clarity_downsample_05x_virus_chan.nii.gz -o clarity_brain_mask.nii.gz
+    Example: miracl utilfn brain_mask -i clarity_downsample_05x_virus_chan.nii.gz -o clarity_brain_mask.nii.gz
 
     Arguments (required):
 

@@ -32,7 +32,6 @@ def helpmsg():
         '''
 
     # Dependencies:
-
     #     dipy
     #     Python 2.7
 

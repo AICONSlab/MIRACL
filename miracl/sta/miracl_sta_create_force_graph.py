@@ -20,7 +20,7 @@ def helpmsg():
 
     Usage: miracl_sta_create_force_graph.py -l [ label stats ] -s [ side ] -o [ out graph ]
 
-Example: miracl_sta_create_force_graph.py -l  -s
+    Example: miracl_sta_create_force_graph.py -l  -s
 
     Arguments (required):
 

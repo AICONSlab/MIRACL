@@ -76,8 +76,8 @@ def folder_dialog(self, msg):
 
 
 def parsefn():
-    parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
-                                     usage='%(prog)s  -i [In nii] -o [Out tiff] -u [Up-sample ratio] -s [Spline order]')
+    parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
+                                     #usage='%(prog)s  -i [In nii] -o [Out tiff] -u [Up-sample ratio] -s [Spline order]')
 
     required = parser.add_argument_group('required arguments')
     required.add_argument('-i', '--input', type=str, required=True, metavar='dir',
@@ -89,7 +89,7 @@ def parsefn():
     optional.add_argument('-o', '--outtiff', type=str, metavar='', help="Output tiff name")
     optional.add_argument('-s', '--spline', type=int, metavar='', help="Spline order")
 
-    optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+    # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
 

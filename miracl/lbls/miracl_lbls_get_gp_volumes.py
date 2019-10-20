@@ -35,7 +35,7 @@ def helpmsg():
 # Get input arguments
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+    parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-i', '--img', type=str, help="Input labels", required=False)
     parser.add_argument('-ln', '--names', type=str, nargs='+', help="Label names", required=False)
     parser.add_argument('-la', '--acronyms', type=str, nargs='+', help="Label acronyms", required=False)

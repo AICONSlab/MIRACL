@@ -83,7 +83,7 @@ def parsefn():
     optional.add_argument('-p', '--mulpower', type=float, metavar='', default=1.0,
                           help="Use the bias field raised to a power of 'p' to enhance its effects"
                                "(default: %(default)s)")
-    optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+    # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
 

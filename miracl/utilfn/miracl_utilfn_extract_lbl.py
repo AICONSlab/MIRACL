@@ -17,11 +17,11 @@ def helpmsg():
 
     Usage: miracl_utilfn_extract_lbl.py -i [input (registered) labels] -l [output label] -d [down-sample ratio]
 
-Example: miracl_utilfn_extract_lbl.py -i clarity_registered_allen_labels.nii.gz -l PL -m combined -d 5
-
-OR for right PL:
-
-Example: miracl_utilfn_extract_lbl.py -i clarity_registered_allen_labels.nii.gz -l RPL -m split -d 5
+    Example: miracl_utilfn_extract_lbl.py -i clarity_registered_allen_labels.nii.gz -l PL -m combined -d 5
+    
+    OR for right PL:
+    
+    Example: miracl_utilfn_extract_lbl.py -i clarity_registered_allen_labels.nii.gz -l RPL -m split -d 5
 
     Arguments (required):
 

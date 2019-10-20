@@ -82,7 +82,7 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'Tiff to Nii',
-                'script': 'miracl_conv_convertTIFFtoNII.py',
+                'script': 'tiff_nii',
                 'helpmsg': 'Converts a Tiff stack images to Nifti format and down-sample if chosen'
             },
             1: {
@@ -289,8 +289,8 @@ def runfunc(miracl_home, nestedictionary, module, btnnum):
             subprocess.check_call('open %s/%s/%s' % (miracl_home, folder, script),
                                   shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-        subprocess.check_call('%s/%s/%s' % (miracl_home, folder, script),
-                              shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.check_call('miracl %s %s' % (folder, script),
+                              shell=True, stderr=subprocess.STDOUT)
 
 
 def main():

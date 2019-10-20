@@ -49,20 +49,18 @@ def helpmsg(name=None):
         voxelized_seg_sparse.(tif/nii) or nuclear (segmentation results voxelized to ARA resolution)
         voxelized_seg_bin_sparse.(tif/nii) (binarized version)
 
-
 	'''
-
 
 # ---------
 # Get input arguments
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
+    parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
     parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
     parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
     parser.add_argument('-v', '--res', type=int, help="voxel size")
 
-    parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
+    # parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
 

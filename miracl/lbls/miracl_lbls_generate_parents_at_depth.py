@@ -41,7 +41,7 @@ def helpmsg():
 # Get input arguments
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
+    parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-d', '--depth', type=int, help="chosen depth", required=True)
     parser.add_argument('-m', '--hemi', type=str, help="hemisphere mirrored or not", required=False)
     parser.add_argument('-v', '--res', type=int, help="voxel size in um", required=False)

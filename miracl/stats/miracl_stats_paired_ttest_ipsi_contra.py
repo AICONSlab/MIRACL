@@ -20,20 +20,19 @@ import scipy.stats as stats
 def helpmsg(name=None):
     return '''miracl_stats_paired_ttest_ipsi_contra.py -d [ folder with feature extraction csv files]
 
-Computes paired_ttest test between both hemispheres for all labels across mice
-
-Looks for feature exraction csv files within input directory
-
-Outputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
-
-example: miracl_stats_paired_ttest_ipsi_contra.py -d feat_extract_csv
+    Computes paired_ttest test between both hemispheres for all labels across mice
+    
+    Looks for feature exraction csv files within input directory
+    
+    Outputs csv,xlsx files with stats results & a nifti image with label values corresponding to p-values of the t-test
+    
+    example: miracl_stats_paired_ttest_ipsi_contra.py -d feat_extract_csv
 
         '''
 
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg())
-
+    parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-d', '--dir', type=str, help="dir with csv files", required=True)
 
     return parser

@@ -43,16 +43,11 @@ def helpmsg():
         s. Gaussian resampling sigma (in voxels)
         n. number of permutations
 
-    -----
-
-    Main Outputs
-
-
     '''
 
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='Sample argparse py', usage=helpmsg(), add_help=False)
+    parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
     parser.add_argument('-w', '--wild_dir', type=str, help="wild dir", required=True)
     parser.add_argument('-d', '--disease_dir', type=str, help="disease dir", required=True)
     parser.add_argument('-t', '--seg_type', type=str, help="segmentation type", required=True)

@@ -10,13 +10,13 @@ def run_seg_clar(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
+        subprocess.Popen('%s/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
                          shell=True)
     else:
 
         bash_args = '-f "%s" -t "%s" -p "%s"' % (args['folder'], args['type'], args['chan_pre'])
 
-        subprocess.check_call('%s/miracl/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
@@ -53,20 +53,23 @@ def get_parser():
     # feat extract
     feat_extract_parser = miracl_seg_feat_extract.parsefn()
     parser_feat_extract = subparsers.add_parser('feat_extract', parents=[feat_extract_parser], add_help=False,
-                                            help='Extract features from CLARITY seg')
+                                                usage=feat_extract_parser.usage,
+                                                help='Extract features from CLARITY seg')
 
     parser_feat_extract.set_defaults(func=run_feat_extract)
 
     # feat extract_ctx
     feat_extract_ctx_parser = miracl_seg_feats_cortex.parsefn()
-    parser_feat_ctx_extract = subparsers.add_parser('feat_extract_ctx', parents=[feat_extract_ctx_parser], add_help=False,
-                                            help='Extract features from CLARITY seg')
+    parser_feat_ctx_extract = subparsers.add_parser('feat_extract_ctx', parents=[feat_extract_ctx_parser],
+                                                    add_help=False, usage=feat_extract_ctx_parser.usage,
+                                                    help='Extract features from CLARITY seg')
 
     parser_feat_ctx_extract.set_defaults(func=run_feat_extract_ctx)
 
     # voxelize
     voxelize_parser = miracl_seg_voxelize_parallel.parsefn()
     parser_voxelize = subparsers.add_parser('voxelize', parents=[voxelize_parser], add_help=False,
+                                            usage=voxelize_parser.usage,
                                             help='convert Tiff stacks to Nii')
 
     parser_voxelize.set_defaults(func=run_voxelize)

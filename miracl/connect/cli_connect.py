@@ -17,23 +17,17 @@ def run_csd_track(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
 
     args = vars(args)
+    if args['help']:
+        subprocess.Popen('%s/connect/miracl_connect_csd_tractography.sh -h' % miracl_home,
+                         shell=True)
+    else:
+        bash_args = '-d %s -m %s -r %s -b %s -s %s -v %s -t %s -f %s' % (args['dti_data'], args['mask'], args['bvecs'],
+                                                                         args['bvals'], args['seed'], args['vox'],
+                                                                         args['tract_name'], args['folder'])
 
-    bash_args = '-d %s -m %s -r %s -b %s -s %s -v %s -t %s -f %s' % (args['dti_data'], args['mask'], args['bvecs'],
-                                                                     args['bvals'], args['seed'], args['vox'],
-                                                                     args['tract_name'], args['folder'])
-
-    subprocess.check_call('%s/connect/miracl_connect_csd_tractography.sh %s' % (miracl_home, bash_args),
-                          shell=True,
-                          stderr=subprocess.STDOUT)
-
-
-def run_sta(parser, args):
-    miracl_home = os.environ['MIRACL_HOME']
-
-    args = vars(args)
-
-    subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, args), shell=True,
-                          stderr=subprocess.STDOUT)
+        subprocess.check_call('%s/connect/miracl_connect_csd_tractography.sh %s' % (miracl_home, bash_args),
+                              shell=True,
+                              stderr=subprocess.STDOUT)
 
 
 def get_parser():
@@ -41,7 +35,7 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # csd_track
-    parser_csd_track = subparsers.add_parser('csd_track', help="Performs CSD tractography and "
+    parser_csd_track = subparsers.add_parser('csd_track', add_help=False, help="Performs CSD tractography and "
                                                                "track density mapping for a seed region using MRtrix3")
     parser_csd_track.add_argument('-d', '--dti_data', metavar='',
                                   help="input DTI data")
@@ -59,11 +53,13 @@ def get_parser():
                                   help="Output tract name")
     parser_csd_track.add_argument('-f', '--folder', metavar='',
                                   help="Folder containing DTI data")
+    parser_csd_track.add_argument('-h', '--help', action='store_true')
     parser_csd_track.set_defaults(func=run_csd_track)
 
     # proj_dens
     proj_dens_parser = miracl_connect_label_graph_proj_dens.parsefn()
     parser_proj_dens = subparsers.add_parser('proj_dens', parents=[proj_dens_parser], add_help=False,
+                                             usage=proj_dens_parser.usage,
                                              help="Query Allen connectivity API for injection experiments &"
                                                   "Outputs a connectivity graph of that experiment & "
                                                   "its projection density images")
@@ -72,6 +68,7 @@ def get_parser():
     # roi_mat
     roi_mat_parser = miracl_connect_ROI_matrix_connectogram.parsefn()
     parser_roi_mat = subparsers.add_parser('roi_mat', parents=[roi_mat_parser], add_help=False,
+                                           usage=roi_mat_parser.usage,
                                            help="Finds the largest N Allen labels in the Region of Interest & "
                                                 "extracts its N closely connected regions")
     parser_roi_mat.set_defaults(func=run_roi_mat)

@@ -9,7 +9,7 @@ def run_reg_clar(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/flow/miracl_workflow_registration_clarity-allen_wb.sh -h' % miracl_home,
+        subprocess.Popen('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-f %s -n "%s" -r "%s"' % (args['folder'], args['conv_opts'][0], args['reg_opts'][0])
@@ -17,7 +17,7 @@ def run_reg_clar(parser, args):
         print('Running CLARITY to Allen registration workflow with the following arguments: \n'
               "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args)
 
-        subprocess.check_call('%s/miracl/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home,
+        subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home,
                                                                                                       bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
@@ -28,13 +28,13 @@ def run_seg(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/flow/miracl_workflow_segmentation_clarity.sh -h' % miracl_home,
+        subprocess.Popen('%s/flow/miracl_workflow_segmentation_clarity.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
                                                            args['seg_opts'][0], args['ext_opts'][0])
 
-        subprocess.check_call('%s/miracl/flow/miracl_workflow_segmentation_clarity.sh %s' % (miracl_home, bash_args),
+        subprocess.check_call('%s/flow/miracl_workflow_segmentation_clarity.sh %s' % (miracl_home, bash_args),
                               shell=True,
                               stderr=subprocess.STDOUT)
 
@@ -44,7 +44,7 @@ def run_sta(parser, args):
     args = vars(args)
 
     if args['help']:
-        subprocess.Popen('%s/miracl/flow/miracl_workflow_sta.sh -h' % miracl_home,
+        subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
                          shell=True)
     else:
         bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s' % (
@@ -52,7 +52,7 @@ def run_sta(parser, args):
             args['clar_reg'], args['hemi'], args['dog'],
             args['sigma'], args['angle'])
 
-        subprocess.check_call('%s/miracl/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
+        subprocess.check_call('%s/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                               stderr=subprocess.STDOUT)
 
 
