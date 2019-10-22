@@ -27,7 +27,7 @@ executes:
 
 from the main GUI OR run:
 
-    miracl_workflow_sta.sh
+    miracl flow sta
 
 the following window will appear:
 
@@ -81,12 +81,12 @@ after choosing the parameters press **Enter** to save them then **Run**
 
 usage:
 
-    miracl_workflow_sta.sh -f [Tiff folder] -o [output nifti] -m [ hemisphere ] -l [Allen seed label] -r [Reg final dir] -d [ downsample ratio ]
+    miracl flow sta -f [Tiff folder] -o [output nifti] -m [ hemisphere ] -l [Allen seed label] -r [Reg final dir] -d [ downsample ratio ]
 
 
 example:
 
-    miracl_workflow_sta.sh -f my_tifs -o clarity_virus_05xdown.nii.gz -m combined -l PL -r clar_reg_final -n "-d 5 -ch AAV" -t "-g 0.5 -k 0.5 -a 25"
+    miracl flow sta -f my_tifs -o clarity_virus_05xdown.nii.gz -m combined -l PL -r clar_reg_final -n "-d 5 -ch AAV" -t "-g 0.5 -k 0.5 -a 25"
 
 arguments (required):
 

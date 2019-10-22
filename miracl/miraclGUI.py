@@ -54,24 +54,24 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'CLARITY-Allen Registration',
-                'script': 'miracl_workflow_registration_clarity-allen_wb.sh',
+                'script': 'miracl flow reg_clar',
                 'helpmsg': 'Wrapper for registering CLARITY data to Allen Reference brain atlas'
             },
             1: {
                 'name': 'CALRITY STA',
-                'script': 'miracl_workflow_sta.sh',
+                'script': 'miracl flow sta',
                 'helpmsg': 'Wrapper for structure tensor analysis (STA), uses registered labels to create'
                            '\nseed & brain masks, then runs STA tracing'
             },
             2: {
                 'name': 'CLARITY segmentation',
-                'script': 'miracl_workflow_segmentation_clarity.sh',
+                'script': 'miracl flow seg',
                 'helpmsg': 'Wrapper for segmentation, segments neurons in cleared mouse brain of sparse or nuclear'
                            '\nstains in 3D, voxelizes the results and computes cellular features'
             },
             3: {
                 'name': 'Multiple mice',
-                'script': 'miracl_workflow_multiple_mice.sh',
+                'script': 'miracl flow mul',
                 'helpmsg': 'Wrapper for running a MIRACL script on multiple mice'
             }
         }
@@ -86,9 +86,10 @@ nestedict = {
                 'helpmsg': 'Converts a Tiff stack images to Nifti format and down-sample if chosen'
             },
             1: {
-                'name': 'Dcm to Nii',
-                'script': 'miracl_conv_convertDCMtoNII.sh',
-                'helpmsg': 'Converts dicoms in sub-directories to nii & renames sub-directories with sequence name'
+                'name': 'Nii to Tiff',
+                'script': 'nii_tii',
+'helpmsg'       'helpmsg': 'Converts a Nifti image to a Tiff stack'
+                #'helpmsg': 'Converts dicoms in sub-directories to nii & renames sub-directories with sequence name'
             }
         }
     },
@@ -98,29 +99,29 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'CLARITY-Allen',
-                'script': 'miracl_reg_clar-allen_whole_brain.sh',
+                'script': 'miracl reg clar_allen_wb',
                 'helpmsg': 'Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas & warps'
                            '\nAllen annotations to the original high-res CLARITY space, and CLARITY to Allen space'
             },
             1: {
                 'name': 'MRI-Allen',
-                'script': 'miracl_reg_mri-allen.sh',
+                'script': 'miracl reg mri_allen_ants',
                 'helpmsg': 'Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas &'
                            '\nwarps Allen annotations to the MRI space'
             },
             2: {
                 'name': 'Warp CLARITY to Allen',
-                'script': 'miracl_reg_warp_clar_data_to_allen.sh',
+                'script': 'miracl reg warp_clar',
                 'helpmsg': 'Warps downsampled CLARITY data/channels from native space to Allen atlas'
             },
             3: {
                 'name': 'Warp MRI to Allen',
-                'script': 'miracl_reg_warp_mr_data_to_allen.sh',
+                'script': 'miracl reg warp_mr',
                 'helpmsg': 'Warps MRI data from native space to Allen atlas'
             },
             4: {
                 'name': 'Check registration results',
-                'script': 'miracl_reg_check_results.py',
+                'script': 'miracl reg check',
                 'helpmsg': 'Checks registration results in a chosen space with a chosen visualizaiton software'
             }
         }
@@ -131,19 +132,19 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'Label projection density',
-                'script': 'miracl_connect_label_graph_proj_dens.py',
+                'script': 'miracl connect proj_dens',
                 'helpmsg': 'Query Allen connectivity API for injection experiments & finds the experiment'
                            '\nwith highest projection volume'
             },
             1: {
                 'name': 'ROI connectogram',
-                'script': 'miracl_connect_ROI_matrix_connectogram.py',
+                'script': 'miracl connect roi_mat',
                 'helpmsg': 'Finds the largest N Allen labels in the Region of Interest and extracts its N closely '
                            '\nconnected regions from the Allen Connectivity atlas'
             },
             2: {
                 'name': 'CSD tractography',
-                'script': 'miracl_connect_csd_tractography.sh',
+                'script': 'miracl connect csd_track',
                 'helpmsg': 'Performs CSD tractography and track density mapping for a seed region using MRtrix3'
             }
         }
@@ -154,7 +155,7 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'Trace primary fibers',
-                'script': 'miracl_sta_track_primary_eigen.sh',
+                'script': 'miracl sta track_tensor',
                 'helpmsg': 'Performs Structure Tensor Analysis (STA) on CLARITY viral tracing or stains'
             }
         }
@@ -165,39 +166,39 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'Get labels statistics',
-                'script': 'miracl_lbls_stats.py',
+                'script': 'miracl lbls stats',
                 'helpmsg': 'Extract volumes of labels of interest and their subdivisions from input label file'
             },
             1: {
-                'name': 'Warp to CALRITY',
-                'script': 'miracl_lbls_warp_to_clar_space.sh',
+                'name': 'Warp to CLARITY',
+                'script': 'miracl lbls warp_clar',
                 'helpmsg': 'Warps Allen annotations to the original high-res CLARITY space'
             },
             2: {
                 'name': 'Warp to MRI',
-                'script': 'miracl_lbls_warp_to_mri_space.sh',
+                'script': 'miracl lbls warp_mri',
                 'helpmsg': 'Warps Allen annotations to the MRI space'
             },
-            3: {
-                'name': 'Generate Grand-parent at certain depth',
-                'script': 'miracl_lbls_generate_parents_at_depth.py',
-                'helpmsg': 'Generate parents labels at specific depth from Allen labels'
-            },
-            4: {
-                'name': 'Generate Grand-parent annotations',
-                'script': 'miracl_lbls_generate_grand-parent_annotation.py',
-                'helpmsg': 'Generate multi-resolution atlases from Allen labels'
-            },
-            5: {
-                'name': 'Get Grand-parent volumes',
-                'script': 'miracl_lbls_get_gp_volumes.py',
-                'helpmsg': 'Extract volumes of labels of interest and their subdivisions from input label file'
-            },
-            6: {
-                'name': 'Get label ontology graph info',
-                'script': 'miracl_lbls_get_graph_info.py',
-                'helpmsg': 'Get label info from Allen atlas ontology graph'
-            }
+            # 3: {
+            #     'name': 'Generate Grand-parent at certain depth',
+            #     'script': 'miracl lbls gp_at_depth',
+            #     'helpmsg': 'Generate parents labels at specific depth from Allen labels'
+            # },
+            # 4: {
+            #     'name': 'Generate Grand-parent annotations',
+            #     'script': 'miracl_lbls_generate_grand-parent_annotation.py',
+            #     'helpmsg': 'Generate multi-resolution atlases from Allen labels'
+            # },
+            # 5: {
+            #     'name': 'Get Grand-parent volumes',
+            #     'script': 'miracl lbls gp_vols',
+            #     'helpmsg': 'Extract volumes of labels of interest and their subdivisions from input label file'
+            # },
+            # 6: {
+            #     'name': 'Get label ontology graph info',
+            #     'script': 'miracl lbls graph_info',
+            #     'helpmsg': 'Get label info from Allen atlas ontology graph'
+            # }
         }
     },
 
@@ -206,28 +207,28 @@ nestedict = {
         'functions': {
             0: {
                 'name': '3D segmentation',
-                'script': 'miracl_seg_clarity_neurons_wrapper.sh',
+                'script': 'miracl seg clar',
                 'helpmsg': 'Segments neurons in cleared mouse brain of sparse or nuclear stains in 3D'
             },
             1: {
                 'name': 'Feature extraction',
-                'script': 'miracl_seg_feat_extract.pyc',
+                'script': 'miracl seg feat_extract',
                 'helpmsg': 'Computes features of segmented image and summarizes them per label'
             },
             2: {
                 'name': 'Voxelize segmentations',
-                'script': 'miracl_seg_voxelize_parallel.py',
+                'script': 'miracl seg voxelize',
                 'helpmsg': 'Voxelizes segmentation results into density maps with Allen atlas resolution'
             }
         }
     },
 
-    'Statitstics': {
+    'Statistics': {
         'folder': 'stats',
         'functions': {
             0: {
                 'name': 'Paired-ttest ipsi/contra hemispheres',
-                'script': 'miracl_stats_paired_ttest_ipsi_contra.py',
+                'script': 'miracl stats paired',
                 'helpmsg': 'Computes paired_ttest test between both hemispheres for all labels across mice'
             }
         }
@@ -238,17 +239,17 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'CLARITY intensity correction',
-                'script': 'miracl_utilfn_int_corr_tiffs.py',
+                'script': 'miracl utils int_corr',
                 'helpmsg': 'Performs intensity correction on CLARITY tiff data in parallel using N4'
             },
             1: {
                 'name': 'Extract label from registration',
-                'script': 'miracl_utilfn_extract_lbl.py',
+                'script': 'miracl utils extract_lbl',
                 'helpmsg': 'Outputs nifti file with only chosen label'
             },
             2: {
                 'name': 'Create brain mask',
-                'script': 'miracl_utilfn_create_brainmask.py',
+                'script': 'miracl utils brain_mask',
                 'helpmsg': 'Creates brain mask (nii/nii.gz) for CLARITY data'
             }
         }

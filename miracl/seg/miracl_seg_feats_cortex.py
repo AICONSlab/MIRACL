@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 import tifffile as tiff
-from PyQt4.QtGui import QApplication
 from skimage.measure import regionprops
 from miracl.conv import  miracl_conv_gui_options as gui_opts
 
@@ -54,53 +53,22 @@ def helpmsg():
 
         clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)
 
-    ------
-
-    Dependencies:
-
-        Python 2.7
-
         '''
 
 
 def parsefn():
-    if sys.argv[-2] == 'seg' and sys.argv[-1] == 'feat_extract_ctx':
+    parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
-        print("Running in GUI mode")
+    parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
+    parser.add_argument('-l', '--lbls', type=str, help="Reg lbls", required=True)
+    parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Counts')
+    parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
+    parser.add_argument('-d', '--depth', type=int, help="Labels depth", default=None)
+    parser.add_argument('-c', '--cortex', type=int, help="Filter by cortex", default=None)
+    parser.add_argument('-o', '--outfile', type=str, help="Output file",
+                        default='clarity_label_statistics.csv')
 
-        title = 'Label Statistics'
-        vols = ['Input Volume', 'Registered Labels']
-        fields = ['Output file name', 'Sort (def = Mean)']
-
-        app = QApplication(sys.argv)
-        menu, linedits, labels = gui_opts.OptsMenu(title=title, vols=vols, fields=fields, helpfun=helpmsg())
-        menu.show()
-        app.exec_()
-        app.processEvents()
-
-        volstr = labels[vols[0]].text()
-        invol = str(volstr.split(":")[1]).lstrip()
-
-        lblsstr = labels[vols[1]].text()
-        lbls = str(lblsstr.split(":")[1]).lstrip()
-
-        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
-        sort = 'Mean' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
-
-    else:
-
-        parser = argparse.ArgumentParser(description='', usage=helpmsg())
-
-        parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
-        parser.add_argument('-l', '--lbls', type=str, help="Reg lbls", required=True)
-        parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Counts')
-        parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
-        parser.add_argument('-d', '--depth', type=int, help="Labels depth", default=None)
-        parser.add_argument('-c', '--cortex', type=int, help="Filter by cortex", default=None)
-        parser.add_argument('-o', '--outfile', type=str, help="Output file",
-                            default='clarity_label_statistics.csv')
-
-        return parser
+    return parser
 
 
 def parse_inputs(parser, args):

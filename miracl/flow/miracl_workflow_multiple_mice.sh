@@ -20,7 +20,7 @@ function usage()
 
 	Usage: `basename $0` -sm [ script module ] -sc [ script ] -id [ input directory ] -opt [options] -nj [ #_of_jobs] -tj [ time_between_batches(min) ]
 
-	Example: `basename $0` -st reg -sc miracl_clar-allen_reg_ants.sh -id my_data_dir -opt "-m combined" -nj 3 -tj 10 
+	Example: `basename $0` -st reg -sc clar_allen_wb -id my_data_dir -opt "-m combined" -nj 3 -tj 10
 
 	arguments (required):
 
@@ -28,7 +28,7 @@ function usage()
 			example: reg or seg or lbls or connect 
 
 		sc. script name 
-			example: miracl_clar-allen_reg_ants.sh
+			example: clar_allen_wb
 
 		id. input directory with multiple mice data
 
@@ -41,7 +41,7 @@ function usage()
 
 	-----------------------------------
 	
-	(c) Maged Goubran @ Stanford University, 2016
+	(c) Maged Goubran @ Stanford University, 2017
 	mgoubran@stanford.edu
 	
 	-----------------------------------
@@ -113,7 +113,7 @@ exec 2>&1
 ts=$((${t}*60));
 
 # script to run
-run=${MIRACL_HOME}/${stype}/${script}
+# run=${MIRACL_HOME}/${stype}/${script}
 
 j=1;
 
@@ -122,11 +122,10 @@ do
 
 	j=$(($j+1))
 
-	printf "\n running $script for `basename ${i}` \n"
+    num=`basename ${i}`
+	printf "\n running ${stype} ${script} for ${num} \n"
 
-	num=`basename ${i}`
-
-	bash ${run} "${opts}" ${num} &
+	miracl ${stype} ${script} "${opts}" -i ${num} &
 	
 		# wait before running more || jobs 		
 		while [[ "$j" -gt "$n" ]]; do			

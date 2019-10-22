@@ -50,7 +50,6 @@ def parse_inputs(parser, args):
         args, unknown = parser.parse_known_args()
 
     # check pars
-
     if not os.path.exists(args.label_stats):
         sys.exit('%s does not exist ... please check path and rerun script' % args.label_stats)
     else:
@@ -143,16 +142,22 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
 def main(args):
     # parse in args
     parser = parsefn()
-    invol, side = parse_inputs(parser, args)
+    label_stats, side, out_graph = parse_inputs(parser, args)
 
     miracl_home = os.environ['MIRACL_HOME']
 
     # allen graph
-    allengraph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_%s.csv' % (miracl_home, side))
+    allengraph = pd.read_csv('%s/../atlases/ara/ara_mouse_structure_graph_hemi_%s.csv' % (miracl_home, side))
+    # export acronynms
+    dic = allengraph.set_index('id')['acronym'].to_dict()
+
+    label_df = pd.read_csv(label_stats)
+    lblid = label_df.LabelID[0]
+    thr = 0.001
+    k = 0.5
 
     # create graph
-    force()
-
+    force(label_df, dic, allengraph, lblid, thr, k, out_graph)
 
 if __name__ == "__main__":
     main(sys.argv)

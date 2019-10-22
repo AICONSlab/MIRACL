@@ -4,7 +4,7 @@ To convert Tiff images to Nifti format for analysis or visualization
 
 run:
 
-    miracl_io_convertTIFFtoNII.py
+    miracl conv tiff_nii
 
 the following window will appear:
 
@@ -47,11 +47,11 @@ After conversion is done, nifti (nii/nii.gz) files can be visualized in ITKsnap
 
 usage:
 
-    miracl_io_convertTIFFtoNII.py -f [Tiff folder]
+    miracl conv tiff_nii -f [Tiff folder]
 
 example:
 
-    miracl_io_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+    miracl conv tiff_nii -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
 required arguments:
 

@@ -9,17 +9,21 @@ def run_sta_tensor(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    if args['help']:
-        subprocess.Popen('%s/sta/miracl_sta_track_primary_eigen.sh -h' % miracl_home,
+    if sys.argv[-2] == 'sta' and sys.argv[-1] == 'track_tensor':
+        subprocess.Popen('%s/sta/miracl_sta_track_primary_eigen.sh' % miracl_home,
                          shell=True)
     else:
-        bash_args = '-i %s -g %s -k %s -a %s -s %s -b %s -o %s' % (args['in_nii'], args['dog'], args['sigma'],
-                                                                   args['angle'], args['seed_mask'], args['brain_mask'],
-                                                                   args['out_dir'])
+        if args['help']:
+            subprocess.Popen('%s/sta/miracl_sta_track_primary_eigen.sh -h' % miracl_home,
+                             shell=True)
+        else:
+            bash_args = '-i %s -g %s -k %s -a %s -s %s -b %s -o %s' % (args['in_nii'], args['dog'], args['sigma'],
+                                                                       args['angle'], args['seed_mask'], args['brain_mask'],
+                                                                       args['out_dir'])
 
-        subprocess.check_call('%s/sta/miracl_sta_track_primary_eigen.sh %s' % (miracl_home, bash_args),
-                              shell=True,
-                              stderr=subprocess.STDOUT)
+            subprocess.check_call('%s/sta/miracl_sta_track_primary_eigen.sh %s' % (miracl_home, bash_args),
+                                  shell=True,
+                                  stderr=subprocess.STDOUT)
 
 
 def run_force_graph(parser, args):

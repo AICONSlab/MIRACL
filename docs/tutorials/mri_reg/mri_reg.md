@@ -9,7 +9,7 @@ This workflow performs the following tasks:
 
 from the main GUI OR run:
 
-    miracl_reg_mri-allen.sh
+    miracl reg mri_allen_ants
 
 this window will open to choose the input MRI nii (preferable T2-w):
 
@@ -40,11 +40,11 @@ then choose registration options
 
 Usage:
 
-    miracl_reg_mri-allen.sh -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+    miracl reg mri_allen_ants -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
 Example:
 
-    miracl_reg_mri-allen.sh -i inv_mri.nii.gz -o RSP -m combined -v 25
+    miracl reg mri_allen_ants -i inv_mri.nii.gz -o RSP -m combined -v 25
 
 arguments (required):
 

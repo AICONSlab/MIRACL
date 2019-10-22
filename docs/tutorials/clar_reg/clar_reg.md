@@ -19,7 +19,7 @@ https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
 
 Run
 
-    miracl
+    miraclGUI
 
 and from the main GUI choose:
 
@@ -27,7 +27,7 @@ and from the main GUI choose:
 
 OR run:
 
-    miracl_workflow_registration_clarity-allen_wb.sh
+    miracl flow reg_clar
 
 ---
 
@@ -104,11 +104,11 @@ Registration parameters description:
 
 Usage:
 
-miracl_workflow_registration_clarity-allen_wb.sh -f [Tiff folder]
+    miracl flow reg_clar -f [Tiff folder]
 
 Example:
 
-miracl_workflow_registration_clarity-allen_wb.sh -f my_tifs -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
+    miracl flow reg_clar  -f my_tifs -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 
 arguments (required):
 
@@ -160,16 +160,16 @@ reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen labels registered to or
 
 run
 
-miracl_reg_check_results.py
+    miracl reg check
 
 Usage:
 
-    miracl_reg_check_results.py -f [reg final folder] -v [visualization software] -s [reg space (clarity or
+    miracl reg check -f [reg final folder] -v [visualization software] -s [reg space (clarity or
     allen)]
 
 Example:
 
-    miracl_convertTifftoNii.py -f reg_final -v itk -s clarity
+    miracl reg check -f reg_final -v itk -s clarity
 
 Arguments (required):
 

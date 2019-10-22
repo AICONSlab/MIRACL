@@ -156,8 +156,7 @@ def print_help(main, helpfun):
 
 def main(args):
     parser = parsefn()
-
-    [title, vols, dirs, fields, helpfun] = parsea_inputs(parser, args)
+    title, vols, dirs, fields, helpfun = parse_inputs(parser, args)
 
     # Create an PyQT4 application object.
     app = QApplication(sys.argv)

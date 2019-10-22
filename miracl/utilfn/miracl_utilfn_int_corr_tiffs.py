@@ -315,7 +315,8 @@ def main(args):
 
     # print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
-    statement.main('Intensity correction', '%s' % (datetime.now() - starttime))
+    statement.main(['Intensity correction', '%s' % (datetime.now() - starttime)])
+
 
 if __name__ == "__main__":
     main(sys.argv)

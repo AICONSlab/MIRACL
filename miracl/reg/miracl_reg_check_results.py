@@ -46,16 +46,32 @@ Checks registration results
 #    Python 2.7, itksnap or freeview
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='', usage=helpmsg())
+    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'check':
+        parser = argparse.ArgumentParser(description='', usage=helpmsg())
+
+    else:
+        parser = argparse.ArgumentParser(description='', usage=helpmsg())
+        # check if pars given
+        parser.add_argument('-f', '--folder', type=str, help="reg final folder", required=True)
+        parser.add_argument('-v', '--viz', type=str, help="Visualization software")
+        parser.add_argument('-s', '--space', type=str, help="Registration Space")
+        parser.add_argument('-m', '--hemi', type=str, help="Hemisphere (split or combined)")
+
+    return parser
+
+
+def parse_inputs(parser, args):
+    if isinstance(args, list):
+        args, unknown = parser.parse_known_args()
 
     if sys.argv[-2] == 'reg' and sys.argv[-1] == 'check':
-
         print("Running in GUI mode")
 
         miracl_home = os.environ['MIRACL_HOME']
 
         indirstr = subprocess.check_output(
-            '%s/conv/miracl_conv_file_folder_gui.py -f %s -s %s' % (miracl_home, 'folder', '"Please open reg final dir"'),
+            '%s/conv/miracl_conv_file_folder_gui.py -f %s -s %s' % (
+            miracl_home, 'folder', '"Please open reg final dir"'),
             shell=True,
             stderr=subprocess.PIPE)
         indir = indirstr.split(":")[1].lstrip().rstrip()
@@ -66,48 +82,34 @@ def parsefn():
         hemi = 'combined'
 
     else:
+        print("\n running in script mode \n")
 
-        # check if pars given
-        parser.add_argument('-f', '--folder', type=str, help="reg final folder", required=True)
-        parser.add_argument('-v', '--viz', type=str, help="Visualization software")
-        parser.add_argument('-s', '--space', type=str, help="Registration Space")
-        parser.add_argument('-m', '--hemi', type=str, help="Hemisphere (split or combined)")
+        assert isinstance(args.folder, str)
+        indir = args.folder
 
-        return parser
+        if not os.path.exists(indir):
+            sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
+        if args.viz is None:
+            viz = 'itk'
+            print("\n software not specified ... choosing itkSNAP")
+        else:
+            assert isinstance(args.viz, str)
+            viz = args.viz
 
-def parse_inputs(parser, args):
-    if isinstance(args, list):
-        args, unknown = parser.parse_known_args()
+        if args.space is None:
+            space = 'clarity'
+            print("\n registration space not specified ... choosing clarity space")
+        else:
+            assert isinstance(args.space, str)
+            space = args.space
 
-    print("\n running in script mode \n")
-
-    assert isinstance(args.folder, str)
-    indir = args.folder
-
-    if not os.path.exists(indir):
-        sys.exit('%s does not exist ... please check path and rerun script' % indir)
-
-    if args.viz is None:
-        viz = 'itk'
-        print("\n software not specified ... choosing itkSNAP")
-    else:
-        assert isinstance(args.viz, str)
-        viz = args.viz
-
-    if args.space is None:
-        space = 'clarity'
-        print("\n registration space not specified ... choosing clarity space")
-    else:
-        assert isinstance(args.space, str)
-        space = args.space
-
-    if args.hemi is None:
-        hemi = 'combined'
-        print("\n hemisphere not specified ... choosing combined")
-    else:
-        assert isinstance(args.hemi, str)
-        hemi = args.hemi
+        if args.hemi is None:
+            hemi = 'combined'
+            print("\n hemisphere not specified ... choosing combined")
+        else:
+            assert isinstance(args.hemi, str)
+            hemi = args.hemi
 
     return indir, viz, space, hemi
 
@@ -132,7 +134,7 @@ def main(args):
 
             subprocess.check_call(
                 'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_%s_??um_clar_downsample.nii.gz -l $snaplut' % (
-                indir, indir, hemi), shell=True,
+                    indir, indir, hemi), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 

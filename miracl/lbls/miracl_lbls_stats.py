@@ -11,16 +11,13 @@ import scipy as sp
 import numpy as np
 import pandas as pd
 from PyQt4.QtGui import QApplication
-
 from miracl.conv import miracl_conv_gui_options as gui_opts
 
-
-# import commands
 
 def helpmsg():
     return '''Usage: miracl_lbls_stats.py 
 
-Computes Allen label stats of input volume 
+    Computes Allen label stats of input volume 
 
     A GUI will open to choose your:
 
@@ -34,7 +31,7 @@ Computes Allen label stats of input volume
 
     Usage: miracl_lbls_stats.py -i [input volume] -l [reg Allen labels] -o [ out csv ]
 
-Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv
+    Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv
         -s Count
 
     Arguments (required):
@@ -68,29 +65,8 @@ Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l reg
 
 def parsefn():
     if sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
-        print("Running in GUI mode")
-
-        title = 'Label Statistics'
-        vols = ['Input Volume', 'Registered Labels']
-        fields = ['Output file name', 'Sort (def = Mean)']
-
-        app = QApplication(sys.argv)
-        menu, linedits, labels = gui_opts.OptsMenu(title=title, vols=vols, fields=fields, helpfun=helpmsg())
-        menu.show()
-        app.exec_()
-        app.processEvents()
-
-        volstr = labels[vols[0]].text()
-        invol = str(volstr.split(":")[1]).lstrip()
-
-        lblsstr = labels[vols[1]].text()
-        lbls = str(lblsstr.split(":")[1]).lstrip()
-
-        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
-        sort = 'Mean' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
-
+        parser = argparse.ArgumentParser(description='', usage=helpmsg())
     else:
-
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
         parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
@@ -108,23 +84,48 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    print("\n running in script mode \n")
+    if sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
+        print("Running in GUI mode")
 
-    invol = args.invol
-    lbls = args.lbls
-    outfile = args.outfile
-    sort = args.sort
-    hemi = args.hemi if args.hemi is not None else "combined"
-    label_depth = args.depth if args.depth is not None else None
+        title = 'Label Statistics'
+        vols = ['Input Volume', 'Registered Labels']
+        fields = ['Output file name', 'Sort (def = Mean)', 'Hemi', 'Label depth']
 
-    # check if pars given
+        app = QApplication(sys.argv)
+        menu, linedits, labels = gui_opts.OptsMenu(title=title, vols=vols, fields=fields, helpfun=helpmsg())
+        menu.show()
+        app.exec_()
+        app.processEvents()
 
-    assert isinstance(invol, str)
-    assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
-    assert isinstance(lbls, str)
-    assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
-    assert isinstance(outfile, str)
-    assert isinstance(sort, str)
+        volstr = labels[vols[0]].text()
+        invol = str(volstr.split(":")[1]).lstrip()
+
+        lblsstr = labels[vols[1]].text()
+        lbls = str(lblsstr.split(":")[1]).lstrip()
+
+        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+        sort = 'Mean' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
+        hemi = 'Combined' if not linedits[fields[2]].text() else str(linedits[fields[2]].text())
+        label_depth = '' if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+
+    else:
+        print("\n running in script mode \n")
+
+        invol = args.invol
+        lbls = args.lbls
+        outfile = args.outfile
+        sort = args.sort
+        hemi = args.hemi if args.hemi is not None else "combined"
+        label_depth = args.depth if args.depth is not None else None
+
+        # check if pars given
+
+        assert isinstance(invol, str)
+        assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
+        assert isinstance(lbls, str)
+        assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
+        assert isinstance(outfile, str)
+        assert isinstance(sort, str)
 
     return invol, lbls, outfile, sort, hemi, label_depth
 
@@ -144,7 +145,7 @@ def upsampleswplbls(seg, lbls):
 
         if segx == lblsy:
 
-            print ('Swapping x-y')
+            print('Swapping x-y')
             reslbls = np.swapaxes(lbls, 1, 2)
 
         else:
@@ -170,7 +171,7 @@ def upsampleswplbls(seg, lbls):
             resx = reslbls.shape[1]
 
             if segx != resx:
-                print ('Swapping x-y')
+                print('Swapping x-y')
                 reslbls = np.swapaxes(reslbls, 1, 2)
 
     else:
@@ -269,7 +270,6 @@ def main(args):
 
 if __name__ == "__main__":
     main(sys.argv)
-
 
 # TODOlp
 # copy tform if tolerance exceeds limit

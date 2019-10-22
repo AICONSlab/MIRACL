@@ -22,7 +22,7 @@ executes:
 
 from the main GUI OR run:
 
-    miracl_workflow_segmentation_clarity.sh
+    miracl flow seg
 
 the following window will appear to choose input tiff folder with Thy1-YFP or other channel:
 
@@ -47,11 +47,11 @@ then choose the registered labels **annotation_hemi\__side_\_XXum_clar_vox.tif**
 
 Usage:
 
-    miracl_workflow_segmentation_clarity.sh -f [Tiff folder]
+    miracl flow seg -f [Tiff folder]
 
 Example:
 
-    miracl_workflow_segmentation_clarity.sh -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
+    miracl flow seg -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
 
 arguments (required):
 

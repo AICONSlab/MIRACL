@@ -129,7 +129,7 @@ def upsampleswplbls(seg, lbls):
 
         if segx == lblsy:
 
-            print ('Swapping x-y')
+            print('Swapping x-y')
             reslbls = np.swapaxes(lbls, 1, 2)
 
         else:
@@ -155,7 +155,7 @@ def upsampleswplbls(seg, lbls):
             resx = reslbls.shape[1]
 
             if segx != resx:
-                print ('Swapping x-y')
+                print('Swapping x-y')
                 reslbls = np.swapaxes(reslbls, 1, 2)
 
     else:
@@ -257,11 +257,11 @@ def main(args):
     inseg, inlbls = parse_inputs(parser, args)
 
     # open seg
-    print ("Reading segmentation")
+    print("Reading segmentation")
     seg = tiff.imread(inseg)
 
     # open lbls
-    print ("Reading labels")
+    print("Reading labels")
     lbls = tiff.imread(inlbls)
 
     if (lbls.dtype == np.float64) or (lbls.dtype == np.float32) or (lbls.dtype == np.int32):
@@ -289,10 +289,10 @@ def main(args):
         # upsample or swap if needed
         reslbls = upsampleswplbls(seg, maslbls)
 
-    print ("Computing Feature extraction...")
+    print("Computing Feature extraction...")
     [allareas, allstdareas, allmaxareas, allnums, alldens] = runalllblspar(seg, reslbls, ncpus, alllbls)
 
-    print ('\n Exporting features to csv file')
+    print('\n Exporting features to csv file')
 
     miracl_home = os.environ['MIRACL_HOME']
 
@@ -348,7 +348,7 @@ def main(args):
     propscsv = "%s/clarity_segmentation_features_ara_labels.csv" % segdir
     propsdf.to_csv(propscsv)
 
-    print ("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))
+    print("\n Features Computation done in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
 
 if __name__ == "__main__":

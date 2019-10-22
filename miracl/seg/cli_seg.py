@@ -9,16 +9,20 @@ def run_seg_clar(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    if args['help']:
-        subprocess.Popen('%s/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
+    if sys.argv[-2] == 'seg' and sys.argv[-1] == 'clar':
+        subprocess.Popen('%s/seg/miracl_seg_clarity_neurons_wrapper.sh' % miracl_home,
                          shell=True)
     else:
+        if args['help']:
+            subprocess.Popen('%s/seg/miracl_seg_clarity_neurons_wrapper.sh -h' % miracl_home,
+                             shell=True)
+        else:
 
-        bash_args = '-f "%s" -t "%s" -p "%s"' % (args['folder'], args['type'], args['chan_pre'])
+            bash_args = '-f "%s" -t "%s" -p "%s"' % (args['folder'], args['type'], args['chan_pre'])
 
-        subprocess.check_call('%s/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
-                              shell=True,
-                              stderr=subprocess.STDOUT)
+            subprocess.check_call('%s/seg/miracl_seg_clarity_neurons_wrapper.sh %s' % (miracl_home, bash_args),
+                                  shell=True,
+                                  stderr=subprocess.STDOUT)
 
 
 def run_feat_extract(parser, args):

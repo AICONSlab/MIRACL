@@ -76,18 +76,22 @@ def folder_dialog(self, msg):
 
 
 def parsefn():
-    parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
-                                     #usage='%(prog)s  -i [In nii] -o [Out tiff] -u [Up-sample ratio] -s [Spline order]')
+    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'nii_tiff':
+        parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
+                                         add_help=False)
+    else:
+        parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False)
+                                         #usage='%(prog)s  -i [In nii] -o [Out tiff] -u [Up-sample ratio] -s [Spline order]')
 
-    required = parser.add_argument_group('required arguments')
-    required.add_argument('-i', '--input', type=str, required=True, metavar='dir',
-                          help="Input NII")
+        required = parser.add_argument_group('required arguments')
+        required.add_argument('-i', '--input', type=str, required=True, metavar='dir',
+                              help="Input NII")
 
-    optional = parser.add_argument_group('optional arguments')
+        optional = parser.add_argument_group('optional arguments')
 
-    optional.add_argument('-u', '--up', type=int, metavar='', help="Up-sample ratio (default: 1)")
-    optional.add_argument('-o', '--outtiff', type=str, metavar='', help="Output tiff name")
-    optional.add_argument('-s', '--spline', type=int, metavar='', help="Spline order")
+        optional.add_argument('-u', '--up', type=int, metavar='', help="Up-sample ratio (default: 1)")
+        optional.add_argument('-o', '--outtiff', type=str, metavar='', help="Output tiff name")
+        optional.add_argument('-s', '--spline', type=int, metavar='', help="Spline order")
 
     # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -125,8 +129,6 @@ def parse_inputs(parser, args):
         s = 3 if not linedits[fields[2]].text() else int(linedits[fields[1]].text())
 
     else:
-
-        args, unknown = parser.parse_known_args()
 
         print("\n running in script mode")
 
@@ -220,16 +222,10 @@ def scriptlog(logname):
 # ---------
 
 def main(args):
-    """
-    :rtype: nifti file
-    """
-    # scriptlog('tif2nii.log')
-
     starttime = datetime.now()
 
     parser = parsefn()
-
-    [input, outtiff, u, s] = parse_inputs(parser, args)
+    input, outtiff, u, s = parse_inputs(parser, args)
 
     # convert nii volume to tiff
     print("\n converting NII volume to TIFF")

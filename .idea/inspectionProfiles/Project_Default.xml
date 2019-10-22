@@ -6,7 +6,7 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="11">
+          <list size="12">
             <item index="0" class="java.lang.String" itemvalue="opencv-python" />
             <item index="1" class="java.lang.String" itemvalue="allensdk" />
             <item index="2" class="java.lang.String" itemvalue="tifffile" />
@@ -18,6 +18,7 @@
             <item index="8" class="java.lang.String" itemvalue="argcomplete" />
             <item index="9" class="java.lang.String" itemvalue="scipy" />
             <item index="10" class="java.lang.String" itemvalue="tables" />
+            <item index="11" class="java.lang.String" itemvalue="numpy" />
           </list>
         </value>
       </option>
@@ -35,6 +36,8 @@
           <option value="bool.any" />
           <option value="scipy.stats" />
           <option value="lightning.main.Lightning.circle" />
+          <option value="miracl.conv.miracl_conv_convertTIFFtoNII.PyQt4" />
+          <option value="miracl.conv.miracl_conv_convertTIFFtoNII.QFileDialog" />
         </list>
       </option>
     </inspection_tool>

@@ -19,6 +19,7 @@ from miracl.conv import cli_conv
 from miracl.connect import cli_connect
 from miracl.lbls import cli_lbls
 from miracl.sta import cli_sta
+from miracl.stats import cli_stats
 from miracl.utilfn import cli_utilfn
 
 
@@ -50,6 +51,10 @@ def run_sta(parser, args):
     cli_sta.main()
 
 
+def run_stats(parser, args):
+    cli_stats.main()
+
+
 def run_utils(parser, args):
     cli_utilfn.main()
 
@@ -58,12 +63,33 @@ def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
+    # connect
+    connect_parser = cli_connect.get_parser()
+    parser_connect = subparsers.add_parser('connect', parents=[connect_parser], add_help=False,
+                                           help="connect functions")
+
+    parser_connect.set_defaults(func=run_connect)
+
+    # conv
+    io_parser = cli_conv.get_parser()
+    parser_io = subparsers.add_parser('conv', parents=[io_parser], add_help=False,
+                                      help="conv functions")
+
+    parser_io.set_defaults(func=run_io)
+
     # flow
     flow_parser = cli_flow.get_parser()
     parser_flow = subparsers.add_parser('flow', parents=[flow_parser], add_help=False,
                                         help="workflows to run")
 
     parser_flow.set_defaults(func=run_flow)
+
+    # lbls
+    lbls_parser = cli_lbls.get_parser()
+    parser_lbls = subparsers.add_parser('lbls', parents=[lbls_parser], add_help=False,
+                                      help="Label manipulation functions")
+
+    parser_lbls.set_defaults(func=run_lbls)
 
     # reg
     reg_parser = cli_reg.get_parser()
@@ -86,29 +112,15 @@ def get_parser():
 
     parser_sta.set_defaults(func=run_sta)
 
-    # connect
-    connect_parser = cli_connect.get_parser()
-    parser_connect = subparsers.add_parser('connect', parents=[connect_parser], add_help=False,
-                                           help="connect functions")
+    # stats
+    stats_parser = cli_stats.get_parser()
+    parser_stats = subparsers.add_parser('sta', parents=[stats_parser], add_help=False,
+                                       help="STA functions")
 
-    parser_connect.set_defaults(func=run_connect)
-
-    # conv
-    io_parser = cli_conv.get_parser()
-    parser_io = subparsers.add_parser('conv', parents=[io_parser], add_help=False,
-                                      help="conv functions")
-
-    parser_io.set_defaults(func=run_io)
-
-    # lbls
-    lbls_parser = cli_lbls.get_parser()
-    parser_lbls = subparsers.add_parser('lbls', parents=[lbls_parser], add_help=False,
-                                      help="Label manipulation functions")
-
-    parser_lbls.set_defaults(func=run_lbls)
+    parser_stats.set_defaults(func=run_stats)
 
     # utils
-    utils_parser = cli_lbls.get_parser()
+    utils_parser = cli_utilfn.get_parser()
     parser_utils = subparsers.add_parser('utils', parents=[utils_parser], add_help=False,
                                       help="Utils functions")
 

@@ -10,11 +10,11 @@ Intensity correction for data with inhomogeneity issues
 
 usage:
 
-    miracl_utils_int_corr_tiffs.py -f [input tiff folder] -o [ output folder ] -s [ shrink factor] -cn [ channel num ] -cp [ channel prefix ] -p [ power ]
+    miracl utils int_corr -f [input tiff folder] -o [ output folder ] -s [ shrink factor] -cn [ channel num ] -cp [ channel prefix ] -p [ power ]
 
 example:
 
-    miracl_utils_int_corr_tiffs.py -f tiff_folder -od bias_corr_folder
+    miracl utils int_corr -f tiff_folder -od bias_corr_folder
 
 required arguments:
 

@@ -18,7 +18,7 @@ function usage()
 
     1) Segments neurons in cleared mouse brain of virus, cFOS, sparse or nuclear stains in 3D
     2) Voxelizes segmentation results into density maps with Allen atlas resolution
-	3) Computes features of segmented image and summarizes them per registered labels
+    3) Computes features of segmented image and summarizes them per registered labels
 
     Executes:
 
@@ -45,7 +45,7 @@ function usage()
 
             f. Input Clarity tif folder/dir [folder name without spaces]
 
-            t. Channel type: virus or cFOS or sparse (like Thy1 YFP) or nuclear (like PI)
+            t. Channel type: virus (default) or cfos or sparse (like Thy1 YFP) or nuclear (like PI)
 
             v. Registered labels voxel size (10, 25, or 50um)
 
@@ -259,7 +259,7 @@ else
 	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Seg options" \
 	     -d "Input tiff dir" \
 	     -v "Registered allen labels (..clar_vox.tif) in the reg_final dir" \
-	     -f "seg type [virus (def), cFOS, sparse or nuclear]" "channel prefix (ex = C001) " "labels voxel size" -hf "`usage`")
+	     -f "seg type [virus (def), cfos, sparse or nuclear]" "channel prefix (ex = C001) " "labels voxel size" -hf "`usage`")
 
 	# populate array
 	arr=()
