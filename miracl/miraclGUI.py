@@ -44,7 +44,7 @@ class HorzTabWidget(QtGui.QTabWidget):
 # nestedict = lambda: defaultdict(nestedict)
 # treedict = nestedict()
 
-modules = ['Workflows', 'Conversion', 'Registration', 'Connectivity', 'STA', 'Labels', 'Segmentation', 'Statitstics',
+modules = ['Workflows', 'Conversion', 'Registration', 'Connectivity', 'STA', 'Labels', 'Segmentation', 'Statistics',
            'Utilities', 'Help']
 
 nestedict = {
@@ -88,7 +88,7 @@ nestedict = {
             1: {
                 'name': 'Nii to Tiff',
                 'script': 'nii_tii',
-'helpmsg'       'helpmsg': 'Converts a Nifti image to a Tiff stack'
+                'helpmsg': 'Converts a Nifti image to a Tiff stack'
                 #'helpmsg': 'Converts dicoms in sub-directories to nii & renames sub-directories with sequence name'
             }
         }
