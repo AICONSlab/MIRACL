@@ -290,7 +290,7 @@ def runfunc(miracl_home, nestedictionary, module, btnnum):
             subprocess.check_call('open %s/%s/%s' % (miracl_home, folder, script),
                                   shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
-        subprocess.check_call('miracl %s %s' % (folder, script),
+        subprocess.check_call('%s' % script,
                               shell=True, stderr=subprocess.STDOUT)
 
 
@@ -308,7 +308,7 @@ def main():
     gui_cli = os.path.realpath(__file__)
     miracl_home = Path(gui_cli).parents[1]
 
-    with open('%s/version.txt' % miracl_home, 'r') as versfile:
+    with open('%s/miracl/version.txt' % miracl_home, 'r') as versfile:
         vers = versfile.read()
     mainwidget.setWindowTitle("MIRACL v. %s" % vers.rstrip())
 

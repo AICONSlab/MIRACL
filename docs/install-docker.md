@@ -10,7 +10,7 @@ First, you should understand how the container is built. There is a base image
 in the [docker](../docker) folder that installs Python and dependencies,
 and then the [Dockerfile](../Dockerfile) in the base of the repository builds
 the [mgoubran/miracl](https://hub.docker.com/r/mgoubran/miracl) image from
-that base. When the build happens, it cats the [version.txt](../version.txt)
+that base. When the build happens, it cats the [version.txt](../miracl/version.txt)
 file in the repository in the repo to save a versioned base, but then the build
 uses the tag `base-latest` that is always the latest base.
 The base container is built from this folder and pushed manually, while the

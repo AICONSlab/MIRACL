@@ -12,7 +12,7 @@ https://www.anaconda.com/distribution/#download-section,
 
 Then create the environment:
 
-    conda create --name miracl python=2.7.11 pip
+    conda create --name miracl python=2.7.17 pip
 
     source activate miracl
 
@@ -24,7 +24,7 @@ install Dependencies
 #### PyQT
 install PyQt4 using anaconda, run:
         
-    conda install pyqt=4
+    conda install pyqt=4 -c anaconda
 
 #### ANTS & c3d
 

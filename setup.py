@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 # get version from file
-version_file = open('version.txt')
+version_file = open('miracl/version.txt')
 version = version_file.read().strip()
 
 setup(
