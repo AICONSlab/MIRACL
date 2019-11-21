@@ -4,6 +4,7 @@ atlases/
 
 # Depends #
 -----------
+depends/
 data/
 
 # Singularity #

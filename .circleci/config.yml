@@ -21,7 +21,7 @@ jobs:
           no_output_timeout: 60m
           command: |
             # Build docker image
-            MIRACL_VERSION=$(cat /tmp/src/MIRACL/version.txt)
+            MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
             echo "miracl version is ${MIRACL_VERSION}"
             e=1 && for i in {1..5}; do
               docker build \
@@ -68,7 +68,7 @@ workflows:
             - run:
                 name: Preview Docker Tag for Build
                 command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/version.txt)
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
 
@@ -85,6 +85,6 @@ workflows:
             - run:
                 name: Publish Docker Tag with MIRACL Version
                 command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/version.txt)
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
