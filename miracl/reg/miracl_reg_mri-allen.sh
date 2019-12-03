@@ -104,7 +104,7 @@ then
 
 fi
 
-
+ANTSPATH="${MIRACL_HOME}/../depends/ants"
 if [ -z ${ANTSPATH} ];
 then
 	printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"

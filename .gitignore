@@ -19,6 +19,7 @@ miracl.img
 *.exe
 *.o
 *.so
+*.pyc
 
 # Packages #
 ############
@@ -51,3 +52,4 @@ Thumbs.db
 
 .idea/
 /miracl/deprec/
+.vscode/

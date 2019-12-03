@@ -82,12 +82,12 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'Tiff to Nii',
-                'script': 'tiff_nii',
+                'script': 'miracl conv tiff_nii',
                 'helpmsg': 'Converts a Tiff stack images to Nifti format and down-sample if chosen'
             },
             1: {
                 'name': 'Nii to Tiff',
-                'script': 'nii_tii',
+                'script': 'miracl conv nii_tii',
                 'helpmsg': 'Converts a Nifti image to a Tiff stack'
                 #'helpmsg': 'Converts dicoms in sub-directories to nii & renames sub-directories with sequence name'
             }

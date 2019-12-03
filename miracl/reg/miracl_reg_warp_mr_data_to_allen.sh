@@ -78,13 +78,16 @@ fi
 #----------
 # check dependencies
 
-if [ -z ${ANTSPATH} ];
+ANTSPATH="${MIRACL_HOME}/../depends/ants"
+ANTS=${ANTSPATH}/antsRegistration
+
+if [[ ! -s ${ANTS} ]];
 then
-	printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"
+    printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"
 	exit 1
-else 
-	printf "\n ANTS path check: OK... \n" 
 fi
+
+printf "\n ANTS path check: OK... \n"
 
 c3ddir=`which c3d`
 
