@@ -12,7 +12,7 @@ https://www.anaconda.com/distribution/#download-section,
 
 Then create the environment:
 
-    conda create --name miracl python=2.7.13 pip
+    conda create --name miracl python=2.7.17 pip
 
     conda activate miracl
 
