@@ -147,15 +147,6 @@ then
 fi
 
 
-if [ -z ${ANTSPATH} ];
-then
-	printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"
-	exit 1
-else 
-	printf "\n ANTS path check: OK... \n" 
-fi
-
-
 c3ddir=`which c3d`
 
 if [[ -z "${c3ddir// }" ]]; 

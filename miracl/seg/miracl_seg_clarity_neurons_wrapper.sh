@@ -96,15 +96,25 @@ fi
 
 # check dependencies
 
-fijidir=`which c3d`
+command -v Fiji >/dev/null 2>&1 || command -v ${MIRACL_HOME}/../depends/Fiji.app/ImageJ-linux64 || { echo >&2 "I require Fiji but it's not installed.  Aborting."; exit 1; }
 
-if [[ -z "${fijidir// }" ]]; 
+fijidir=$( command -v Fiji )
+fiji_local=$( command -v "${MIRACL_HOME}/../depends/Fiji.app/ImageJ-linux64" )
+
+if [[ -z "${fijidir// }" && -z "${fiji_local// }" ]]; 
 then
 	printf "\n ERROR: Fiji not initialized .. please install it (& the required plugins) & rerun script \n"
 	exit 1
-else 
-	printf "\n Fiji path check: OK...\n" 	
+elif [[ -z "${fijidir// }" && -n "${fiji_local// }" ]];
+then
+	printf "\n Setting Fiji to ${MIRACL_HOME}/../depends/Fiji.app/ImageJ-linux64x"
+	Fiji="${fiji_local}"
+	eval "$Fiji --help" 	
+else
+	printf "\ Retaining Fiji as version not installed in MIRACL"
+	Fiji=$fijidir
 fi
+printf "\n Fiji path check: OK...\n"
 
 #------------
 
@@ -220,7 +230,7 @@ then
 fi
 
 # get macro
-macro=${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm
+macro="${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm"
 
 motherdir=$(dirname "${tifdir}")
 #inputdir=$(basename ${tifdir})
@@ -251,18 +261,12 @@ if [[ ! -f ${outseg} ]]; then
 	printf "\n Performing Segmentation using Fiji \n"
 
     if [[ -z ${prefix} ]] ; then
-
-        echo Fiji -macro ${macro} "${tifdir}"
-	    # Fiji -macro ${macro} "${PWD}/${tifdir}/" | tee "${log}"
-	    Fiji -macro ${macro} "${tifdir}/" | tee "${log}"
-
+        st="${Fiji} -macro ${macro} ${tifdir}/ | tee ${log}"
     else
-
-        echo Fiji -macro ${macro} ""${tifdir}" ${prefix}"
-	    # Fiji -macro ${macro} ""${PWD}/${tifdir}" ${prefix}" | tee "${log}"
-	    Fiji -macro ${macro} ""${tifdir}" ${prefix}" | tee "${log}"
-
+	    st="${Fiji} -macro ${macro} ${tifdir} ${prefix}/ | tee ${log}"
     fi
+	echo $st
+	eval $st
 
 else
 

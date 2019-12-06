@@ -104,15 +104,6 @@ then
 
 fi
 
-
-if [ -z ${ANTSPATH} ];
-then
-	printf "\n ERROR: ANTS not initialized .. please install it & rerun script \n"
-	exit 1
-else 
-	printf "\n ANTS path check: OK... \n" 
-fi
-
 fslcmd=`which fsl`
 
 if [ -z "${fslcmd// }" ];
