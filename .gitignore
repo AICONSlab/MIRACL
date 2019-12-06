@@ -1,11 +1,11 @@
 # Atlases #
 -----------
-atlases/
+/atlases/
 
-# Depends #
+# Depends and data #
 -----------
-depends/
-data/
+/depends/
+/data/
 
 # Singularity #
 ###############
