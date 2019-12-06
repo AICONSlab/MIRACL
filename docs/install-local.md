@@ -12,9 +12,9 @@ https://www.anaconda.com/distribution/#download-section,
 
 Then create the environment:
 
-    conda create --name miracl python=2.7.17 pip
+    conda create --name miracl python=2.7.13 pip
 
-    source activate miracl
+    conda activate miracl
 
 install Dependencies
 
@@ -106,7 +106,7 @@ If you have diffusion MRI data install:
 
 To end session
 
-    source deactivate
+    conda deactivate
 
 ## Update MIRACL
 
