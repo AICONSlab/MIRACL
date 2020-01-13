@@ -51,7 +51,7 @@ RUN wget https://github.com/ijpb/MorphoLibJ/releases/download/v1.4.0/MorphoLibJ_
 RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz && \
     tar -xzvf c3d-nightly-Linux-x86_64.tar.gz && mv c3d-1.1.0-Linux-x86_64 /opt/cd3 && \
     rm c3d-nightly-Linux-x86_64.tar.gz
-ENV PATH /opt/cd3/bin:${PATH}
+ENV PATH /opt/c3d/bin:${PATH}
 
 # Install FSL
 RUN wget -O- http://neuro.debian.net/lists/trusty.us-tn.full | tee /etc/apt/sources.list.d/neurodebian.sources.list

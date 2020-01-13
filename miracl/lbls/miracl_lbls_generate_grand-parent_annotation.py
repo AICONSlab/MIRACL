@@ -15,6 +15,8 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 
+from miracl.utilfn.depends_manager import add_paths
+
 
 # ---------
 # help fn
@@ -174,7 +176,8 @@ def main(args):
     saveniiparents(parentdata, vx, outnii)
 
     # orient
-    call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
+    with add_paths():
+        call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
 
     # set origin
     # aratemplate = "%s/atlases/ara/template/average_template_50um.nii.gz" % miracl_home

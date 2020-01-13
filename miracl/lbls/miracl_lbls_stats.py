@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from PyQt4.QtGui import QApplication
 from miracl.conv import miracl_conv_gui_options as gui_opts
+from miracl.utilfn.depends_manager import add_paths
 
 
 def helpmsg():
@@ -213,9 +214,10 @@ def main(args):
     #                       stdout=subprocess.PIPE,
     #                       stderr=subprocess.PIPE)
 
-    subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE)
+    with add_paths():
+        subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
     # read fwf
     out_stats = pd.read_fwf('%s' % outfile)

@@ -17,6 +17,8 @@ import seaborn as sns
 import tifffile as tiff
 from allensdk.core.mouse_connectivity_cache import MouseConnectivityCache
 
+from miracl.utilfn.depends_manager import add_paths
+
 warnings.filterwarnings("ignore")
 
 
@@ -349,7 +351,8 @@ def main(args):
     savetiff(projd, outtif)
 
     # orient
-    call(["c3d", "%s" % outpd, "-orient", "ASR", "-o", "%s" % outpd])
+    with add_paths:
+        call(["c3d", "%s" % outpd, "-orient", "ASR", "-o", "%s" % outpd])
 
     # savenii(ind, vx, outind)
     # savenii(dm, vx, outdm)

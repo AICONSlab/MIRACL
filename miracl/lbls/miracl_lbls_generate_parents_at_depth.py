@@ -15,6 +15,7 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 
+from miracl.utilfn.depends_manager import add_paths
 
 # ---------
 # help fn
@@ -212,9 +213,10 @@ def main(args):
 
     if inlbls == "Allen":
         # orient
-        call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
+        with add_paths():
+            call(["c3d", "%s" % outnii, "-orient", "ASR", "-type", "ushort", "-o", "%s" % outnii])
 
-        call(["c3d", "%s" % outnii, "-origin", "-11.4x0x0mm", "-o", "%s" % outnii])
+            call(["c3d", "%s" % outnii, "-origin", "-11.4x0x0mm", "-o", "%s" % outnii])
 
     print ("\n Parent labels at depth done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 

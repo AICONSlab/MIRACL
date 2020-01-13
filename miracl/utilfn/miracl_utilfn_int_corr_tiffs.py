@@ -19,6 +19,7 @@ import tifffile as tiff
 from joblib import Parallel, delayed
 
 from miracl.utilfn import miracl_utilfn_endstatement as statement
+from depends_manager import add_paths
 
 
 def helpmsg():
@@ -284,38 +285,39 @@ def main(args):
     field = os.path.join(niidir, '%s_biasfield.nii.gz' % corname)
     mask = os.path.join(niidir, '%s_mask.nii.gz' % corname)
 
-    biascorrnii(niiname, maskimg, segment, hist, conv, niicorr, mask, field)
+    with add_paths:
+        biascorrnii(niiname, maskimg, segment, hist, conv, niicorr, mask, field)
 
-    # up-sample bias field & mask
-    biasnii = nib.load(field)
-    bias = biasnii.get_data()
-    biasres = scipy.ndimage.interpolation.zoom(bias, [1, 1, down])
+        # up-sample bias field & mask
+        biasnii = nib.load(field)
+        bias = biasnii.get_data()
+        biasres = scipy.ndimage.interpolation.zoom(bias, [1, 1, down])
 
-    if maskimg == 1:
-        masknii = nib.load(mask).get_data()
-        maskres = scipy.ndimage.interpolation.zoom(masknii, [1, 1, down], order=1)
-    else:
-        maskres = None
+        if maskimg == 1:
+            masknii = nib.load(mask).get_data()
+            maskres = scipy.ndimage.interpolation.zoom(masknii, [1, 1, down], order=1)
+        else:
+            maskres = None
 
-    # sort files
-    if chanp is None:
-        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalsort)
-    else:
-        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalsort)
+        # sort files
+        if chanp is None:
+            file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalsort)
+        else:
+            file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalsort)
 
-    cpuload = 0.95
-    cpus = multiprocessing.cpu_count()
-    ncpus = int(cpuload * cpus)
+        cpuload = 0.95
+        cpus = multiprocessing.cpu_count()
+        ncpus = int(cpuload * cpus)
 
-    print("\n Correcting TIFF images in parallel using %02d cpus" % ncpus)
+        print("\n Correcting TIFF images in parallel using %02d cpus" % ncpus)
 
-    Parallel(n_jobs=ncpus, backend='threading')(
-        delayed(applycorr)(i, tif, outdir, biasres, down, mulpower, maskimg, maskres)
-        for i, tif in enumerate(file_list))
+        Parallel(n_jobs=ncpus, backend='threading')(
+            delayed(applycorr)(i, tif, outdir, biasres, down, mulpower, maskimg, maskres)
+            for i, tif in enumerate(file_list))
 
-    # print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+        # print("\n Intensity correction done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
-    statement.main(['Intensity correction', '%s' % (datetime.now() - starttime)])
+        statement.main(['Intensity correction', '%s' % (datetime.now() - starttime)])
 
 
 if __name__ == "__main__":

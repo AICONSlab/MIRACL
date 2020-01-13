@@ -242,7 +242,7 @@ def main(args):
 
     type = fstr[0].split("_")[1]
 
-    outvox = '%s/voxelized_seg_%s.tif' % (segdir, type)
+    outvox = '%s/voxelized_seg_%s.tiff' % (segdir, type)
     outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
 
     if not os.path.exists(outvox):
@@ -260,7 +260,7 @@ def main(args):
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
 
-    outvoxbin = '%s/voxelized_seg_%s_bin.tif' % (segdir, type)
+    outvoxbin = '%s/voxelized_seg_%s_bin.tiff' % (segdir, type)
     outvoxniibin = '%s/voxelized_seg_%s_bin.nii.gz' % (segdir, type)
 
     if not os.path.exists(outvoxbin):

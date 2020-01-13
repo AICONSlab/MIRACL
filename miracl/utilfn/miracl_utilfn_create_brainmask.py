@@ -7,6 +7,7 @@ import argparse
 import os
 import subprocess
 import sys
+from depends_manager import add_paths
 
 
 # import commands
@@ -31,6 +32,7 @@ def helpmsg():
         '''
 
     # Dependencies:
+    #     ANTs
     #     c3d
     #     Python 2.7
 
@@ -76,14 +78,14 @@ def main(args):
     print("\n Creating brain mask for CLARITY volume ...\n")
 
     # thr = '60%'
+    with add_paths():
+        subprocess.check_call("ThresholdImage 3 %s %s Otsu 5 " % (invol, outfile), shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
-    subprocess.check_call("ThresholdImage 3 %s %s Otsu 5 " % (invol, outfile), shell=True,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE)
-
-    subprocess.check_call("c3d %s -binarize -o %s" % (outfile, outfile), shell=True,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE)
+        subprocess.check_call("c3d %s -binarize -o %s" % (outfile, outfile), shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
 
 
 if __name__ == "__main__":

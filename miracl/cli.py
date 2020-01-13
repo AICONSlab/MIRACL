@@ -131,7 +131,8 @@ def get_parser():
 
 
 def main(args=None):
-    """ main cli call"""
+    """ Main command line interface (CLI) call. Parse all arguments, perform required action.
+    If no commands are passed, return to GUI."""
     if args is None:
         args = sys.argv[1:]
 
