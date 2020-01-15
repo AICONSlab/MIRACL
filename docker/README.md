@@ -14,7 +14,7 @@ the container base based on the version of the software.
 ```bash
 VERSION=$(cat ../version.txt)
 $ echo $VERSION 
-0.9
+1.1.0
 ```
 
 Next, build the base container. We will give it tag "base-latest" and the version tag

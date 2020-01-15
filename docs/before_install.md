@@ -10,9 +10,9 @@ The code is released for academic research use only. For commercial use, please 
 
 ## Reference
 
-If you use MIRACL in your work please cite our paper:
+If you use MIRACL in your work please cite our [paper](https://www.nature.com/articles/s41467-019-13374-0):
 
-Goubran, M., Leuze, C., Hsueh, B., Aswendt, M., Ye, L., Tian, Q., Cheng, M.Y., Crow, A., Steinberg, G.K., McNab, J.A., Deisseroth, K., and Zeineh, M. “Multimodal image registration and connectivity analysis for integration of connectomic data from microscopy to MRI.” Nature communications. (2019).
+Goubran, M., Leuze, C., Hsueh, B., Aswendt, M., Ye, L., Tian, Q., Cheng, M.Y., Crow, A., Steinberg, G.K., McNab, J.A., Deisseroth, K., and Zeineh, M. “Multimodal image registration and connectivity analysis for integration of connectomic data from microscopy to MRI.” Nature communications. 2019. 
 
 Some of our functions build on or use these tools (please cite their work if you are using them):
 

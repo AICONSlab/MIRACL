@@ -1,11 +1,11 @@
 # Atlases #
-###############
-atlases/
+-----------
+/atlases/
 
-# Depends #
-###############
-depends/
-data/
+# Depends and data #
+-----------
+/depends/
+/data/
 
 # Singularity #
 ###############
@@ -19,7 +19,6 @@ miracl.img
 *.exe
 *.o
 *.so
-*.pyc
 
 # Packages #
 ############
@@ -52,4 +51,3 @@ Thumbs.db
 
 .idea/
 /miracl/deprec/
-.vscode/
