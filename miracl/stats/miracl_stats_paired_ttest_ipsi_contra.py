@@ -12,7 +12,7 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-
+from miracl.utilfn.depends_manager import add_paths
 
 ### Inputs #########
 
@@ -228,9 +228,10 @@ def projpvalonatlas(atlas, pars, ipsi, tt_pval, outdir):
         nib.save(newnii, niiname)
 
     # ort out niftis
-    for par in pars:
-        call(["c3d", "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par), "-orient", "ASR", "-o",
-              "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par)])
+    with add_paths():
+        for par in pars:
+            call(["c3d", "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par), "-orient", "ASR", "-o",
+                "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par)])
 
 
 def main(args):

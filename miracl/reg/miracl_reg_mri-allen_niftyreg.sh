@@ -114,14 +114,22 @@ fi
 
 c3ddir=`which c3d`
 
-if [[ -z "${c3ddir// }" ]]; 
+c3dpath=`which c3d`
+if [ -z ${c3dpath} ];
 then
-	printf "\n ERROR: C3D not initialized .. please install it & rerun script \n"
-	exit 1
-else 
-	printf "\n C3D path check: OK...\n" 	
+    abspath_pwd="$( cd "$(dirname "$0")" ; pwd -P )"
+    c3dpath="${abspath_pwd}/../../depends/c3d/bin"
+    export PATH="$PATH:${abspath_pwd}/../../depends/c3d/bin"
 fi
 
+test_c3dpath=`which c3d`
+if [ -z ${test_c3dpath} ];
+then
+    printf "\n ERROR: c3d not initialized .. please setup miracl & rerun script \n"
+	exit 1
+else
+	printf "\n c3d path check: OK... \n"
+fi
 
 #----------
 
