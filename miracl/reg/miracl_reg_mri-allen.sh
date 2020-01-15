@@ -593,9 +593,6 @@ function regmrallen()
 	# Reg out
 	local antsallen=$8
 
-    # convert init allen into int
-    c3d ${initallen} -type int -o ${initallen}
-
 	# Perform ANTs registration between MRI and Allen atlas
 
 	ifdsntexistrun ${antsallen} "Registering MRI data to allen atlas ... this will take a while" \
