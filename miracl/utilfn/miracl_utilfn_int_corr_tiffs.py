@@ -285,7 +285,7 @@ def main(args):
     field = os.path.join(niidir, '%s_biasfield.nii.gz' % corname)
     mask = os.path.join(niidir, '%s_mask.nii.gz' % corname)
 
-    with add_paths:
+    with add_paths():
         biascorrnii(niiname, maskimg, segment, hist, conv, niicorr, mask, field)
 
         # up-sample bias field & mask

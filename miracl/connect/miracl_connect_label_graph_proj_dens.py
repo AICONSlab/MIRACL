@@ -351,7 +351,7 @@ def main(args):
     savetiff(projd, outtif)
 
     # orient
-    with add_paths:
+    with add_paths():
         call(["c3d", "%s" % outpd, "-orient", "ASR", "-o", "%s" % outpd])
 
     # savenii(ind, vx, outind)
