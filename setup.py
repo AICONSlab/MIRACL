@@ -38,7 +38,7 @@ setup(
     ],
     install_requires=[
         'pandas==0.24.2', 'scipy==1.2.1', 'opencv-python', 'tifffile', 'nibabel==3.0.0', 'argparse', 'tables==3.5.2', 'allensdk',
-        'lightning-python', 'multiprocessing', 'joblib', 'matplotlib==2.1', 'argcomplete', 'dipy', 'seaborn', 'pytest=4.6.0'
+        'lightning-python', 'multiprocessing', 'joblib', 'matplotlib==2.1', 'argcomplete', 'dipy', 'seaborn', 'pytest==4.6.0'
     ],
     entry_points={'console_scripts': ['miracl=miracl.cli:main'],
                   'gui_scripts': ['miraclGUI=miracl.miraclGUI:main']},
