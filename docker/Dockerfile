@@ -18,7 +18,7 @@ WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
     pip install numpy==1.15.4 && \
-    pip install matplotlib joblib scipy && \
+    pip install matplotlib joblib scipy==1.2.1 && \
     pip install tifffile && \
     pip install menpo opencv-python
 
@@ -68,7 +68,7 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLWISH="/usr/bin/wish" \
     POSSUMDIR="/usr/share/fsl/5.0"
 
-ENV PATH="/usr/lib/fsl/5.0":${PATH}
+ENV PATH="/usr/lib/fsl/5.0:${PATH}"
 
 WORKDIR /code
 RUN pip install scikit-image==0.14.2 && \
