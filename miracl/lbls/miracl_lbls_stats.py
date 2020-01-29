@@ -214,10 +214,9 @@ def main(args):
     #                       stdout=subprocess.PIPE,
     #                       stderr=subprocess.PIPE)
 
-    with add_paths():
-        subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
 
     # read fwf
     out_stats = pd.read_fwf('%s' % outfile)
