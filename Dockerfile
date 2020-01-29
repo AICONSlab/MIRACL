@@ -40,7 +40,8 @@ ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_miracl_clar && \
     chmod +x /usr/bin/ants_miracl_clar
 RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_miracl_mr && \
-    chmod +x /usr/bin/ants_miracl_clar
+    chmod +x /usr/bin/ants_miracl_mr
+ENV ANTSPATH "${ANTSPATH}:${MIRACL_HOME}/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
 
