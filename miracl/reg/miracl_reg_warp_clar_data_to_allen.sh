@@ -82,14 +82,22 @@ fi
 #----------
 # check dependencies
 
-c3ddir=`which c3d`
-
-if [[ -z "${c3ddir// }" ]]; 
-then
-	printf "\n ERROR: C3D not initialized .. please install it & rerun script \n"
+c3dpath=`which c3d`
+if [ -z ${c3dpath} ]; then
+    printf "\n ERROR: c3d not initialized .. please setup miracl & rerun script \n"
 	exit 1
 else 
 	printf "\n C3D path check: OK...\n" 	
+fi
+
+# ANTs
+ANTS=`which antsRegistration`
+if [[ -z ${ANTS} ]];
+  then
+    echo "ANTS program can't be found. Please (re)define \$ANTSPATH in your environment."
+    exit 1
+else
+	printf "\n ANTS path check: OK... \n"
 fi
 
 #----------

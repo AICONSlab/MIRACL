@@ -140,23 +140,28 @@ fi
 
 if [ -z ${MIRACL_HOME} ];
 then
-
     printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh & rerun script \n"
 	exit 1
 
 fi
 
-
-c3ddir=`which c3d`
-
-if [[ -z "${c3ddir// }" ]]; 
-then
-	printf "\n ERROR: C3D not initialized .. please install it & rerun script \n"
+c3dpath=`which c3d`
+if [ -z ${c3dpath} ]; then
+    printf "\n ERROR: c3d not initialized .. please setup miracl & rerun script \n"
 	exit 1
-else 
-	printf "\n C3D path check: OK...\n" 	
 fi
 
+# ants_miracl_clar is required. Make sure a symbolic link is added
+ants_miracl_clar_path=`which ants_miracl_clar`
+if [[ ! -z "${ants_miracl_clar_path}" ]]; then
+	if [[ -f "${MIRACL_HOME}/../depends/ants/antsRegistrationMIRACL.sh" ]]; then
+		ln -s "${MIRACL_HOME}/../depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_miracl_clar && \
+		chmod +x /usr/bin/ants_miracl_clar
+	else
+		echo "\n ERROR: ants_miracl_clar is not initialized. Please ensure that antsRegistrationMIRACL.sh has been downloaded to the necessary directory and rerun the script"
+		exit 1
+	fi
+fi
 
 #----------
 

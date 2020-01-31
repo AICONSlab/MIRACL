@@ -98,37 +98,21 @@ fi
 
 if [ -z ${MIRACL_HOME} ];
 then
-
-    printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh & rerun script \n"
+    printf "\n ERROR: MIRACL not initialized. Please run init/setup_miracl.sh & rerun script \n"
 	exit 1
-
 fi
 
 fslcmd=`which fsl`
-
 if [ -z "${fslcmd// }" ];
 then
 	echo "ERROR: < FSL not initialized .. please intall it & run init/check_depend.sh > not specified"
 	exit 1
 fi
 
-c3ddir=`which c3d`
-
 c3dpath=`which c3d`
-if [ -z ${c3dpath} ];
-then
-    abspath_pwd="$( cd "$(dirname "$0")" ; pwd -P )"
-    c3dpath="${abspath_pwd}/../../depends/c3d/bin"
-    export PATH="$PATH:${abspath_pwd}/../../depends/c3d/bin"
-fi
-
-test_c3dpath=`which c3d`
-if [ -z ${test_c3dpath} ];
-then
+if [ -z ${c3dpath} ]; then
     printf "\n ERROR: c3d not initialized .. please setup miracl & rerun script \n"
 	exit 1
-else
-	printf "\n c3d path check: OK... \n"
 fi
 
 #----------
