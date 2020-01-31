@@ -19,6 +19,8 @@ miracl.img
 *.exe
 *.o
 *.so
+*.pyc
+*/*/*.pyc
 
 # Packages #
 ############
