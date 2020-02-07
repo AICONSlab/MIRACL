@@ -24,14 +24,15 @@ SETPATH
 # export ANTSPATH=${ANTSPATH:="$HOME/bin/ants/"} # EDIT THIS
 
 #ANTSPATH=YOURANTSPATH
-if [[ ${#ANTSPATH} -le 3 ]];
-  then
-    setPath >&2
-  fi
+# if [[ ${#ANTSPATH} -le 3 ]];
+#   then
+#     setPath >&2
+#   fi
 
+ANTSPATH="$( dirname "${MIRACL_HOME}" )/depends/ants"
 ANTS=${ANTSPATH}/antsRegistration
 
-if [[ ! -s ${ANTS} ]];
+if [[ -z ${ANTS} ]];
   then
     echo "antsRegistration program can't be found. Please (re)define \$ANTSPATH in your environment."
     exit
