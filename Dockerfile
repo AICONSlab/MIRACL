@@ -11,9 +11,7 @@ RUN pip install -e /code/
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN git clone https://github.com/mgoubran/MIRACLextra && \
-    cd MIRACLextra && \
-    mv ara /code/atlases/ara
+RUN wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases/ara http://web.stanford.edu/group/zeinehlab/MIRACLextra/
 
 ENV aradir "${MIRACL_HOME}/atlases/ara"
 
