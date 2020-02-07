@@ -498,9 +498,15 @@ function mulheader()
 	local mulfac=$2
 	local hdmr=$3
 
-	dim1=`fslinfo ${unhdmr} | grep pixdim1`; x=${dim1##*1 } ;
-	dim2=`fslinfo ${unhdmr} | grep pixdim2`; y=${dim2##*2 } ;
-	dim3=`fslinfo ${unhdmr} | grep pixdim3`; z=${dim3##*3 } ;
+	# split each pixdim value into an array to extract the last value
+	dim1_arr=( $(fslinfo ${unhdmr} | grep pixdim1 | tr " " "\t" ) )
+	x="${dim1_arr[1]}"
+
+	dim2_arr=( $(fslinfo ${unhdmr} | grep pixdim2 | tr " " "\t" ) )
+	y="${dim2_arr[1]}"
+
+	dim3_arr=( $(fslinfo ${unhdmr} | grep pixdim3 | tr " " "\t" ) )
+	z="${dim3_arr[1]}"
 
     nx=`echo ${x}*${mulfac} | bc` ;
     ny=`echo ${y}*${mulfac} | bc` ;
