@@ -50,6 +50,7 @@ miracl.img
 .Trashes
 ehthumbs.db
 Thumbs.db
-
+.vscode/
+MIRACL.egg-info/
 .idea/*
 /miracl/deprec/
