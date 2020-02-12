@@ -39,7 +39,7 @@ inside the **miracl** folder
     unzip depends.zip
     rm depends.zip
 
-This folder contains compiled versions of **ANTS** and **c3d** for Linux or Mac OS
+This folder contains compiled versions of **ANTS** and **c3d** for Linux or Mac OS. Before continuing, make sure to change the permissions.
 
 #### Allen atlases
 

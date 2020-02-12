@@ -11,9 +11,8 @@ RUN pip install -e /code/
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN git clone https://github.com/mgoubran/MIRACLextra && \
-    cd MIRACLextra && \
-    mv ara /code/atlases/ara
+RUN mkdir -p "${MIRACL_HOME}/atlases/ara"
+RUN wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases/ara http://web.stanford.edu/group/zeinehlab/MIRACLextra/
 
 ENV aradir "${MIRACL_HOME}/atlases/ara"
 
@@ -40,7 +39,8 @@ ENV freelut "${MIRACL_HOME}/atlases/ara/ara_freeviewlabels_lut.txt"
 RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_miracl_clar && \
     chmod +x /usr/bin/ants_miracl_clar
 RUN ln -s "${MIRACL_HOME}/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_miracl_mr && \
-    chmod +x /usr/bin/ants_miracl_clar
+    chmod +x /usr/bin/ants_miracl_mr
+ENV ANTSPATH "${ANTSPATH}:${MIRACL_HOME}/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
 

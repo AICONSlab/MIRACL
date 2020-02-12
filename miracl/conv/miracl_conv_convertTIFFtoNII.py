@@ -374,9 +374,9 @@ def main(args):
 
     # sort files
     if chanp is None:
-        file_list = sorted(glob.glob("%s/*.tif" % indir), key=numericalsort)
+        file_list = sorted(glob.glob("%s/*.tif*" % indir), key=numericalsort)
     else:
-        file_list = sorted(glob.glob("%s/*%s%01d*.tif" % (indir, chanp, chann)), key=numericalsort)
+        file_list = sorted(glob.glob("%s/*%s%01d*.tif*" % (indir, chanp, chann)), key=numericalsort)
 
     # make out dir
     outdir = 'niftis'

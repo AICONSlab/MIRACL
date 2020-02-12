@@ -87,7 +87,7 @@ nestedict = {
             },
             1: {
                 'name': 'Nii to Tiff',
-                'script': 'miracl conv nii_tii',
+                'script': 'miracl conv nii_tiff',
                 'helpmsg': 'Converts a Nifti image to a Tiff stack'
                 #'helpmsg': 'Converts dicoms in sub-directories to nii & renames sub-directories with sequence name'
             }

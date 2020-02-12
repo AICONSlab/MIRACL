@@ -228,10 +228,9 @@ def projpvalonatlas(atlas, pars, ipsi, tt_pval, outdir):
         nib.save(newnii, niiname)
 
     # ort out niftis
-    with add_paths():
-        for par in pars:
-            call(["c3d", "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par), "-orient", "ASR", "-o",
-                "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par)])
+    for par in pars:
+        call(["c3d", "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par), "-orient", "ASR", "-o",
+            "%s/%s_paired_ttest_pval.nii.gz" % (outdir, par)])
 
 
 def main(args):

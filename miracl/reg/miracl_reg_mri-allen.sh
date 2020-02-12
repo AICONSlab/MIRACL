@@ -103,6 +103,7 @@ then
 	exit 1
 
 fi
+echo "${MIRACL_HOME}"
 
 fslcmd=`which fsl`
 
@@ -112,22 +113,42 @@ then
 	exit 1
 fi
 
-c3ddir=`which c3d`
-
-if [[ -z "${c3ddir// }" ]]; 
-then
-	printf "\n ERROR: C3D not initialized .. please install it & rerun script \n"
-	exit 1
-else 
-	printf "\n C3D path check: OK...\n" 	
+# ANTs
+ANTS=`which antsRegistration`
+if [[ -z ${ANTS} ]];
+  then
+    echo "ANTS program can't be found. Please (re)define \$ANTSPATH in your environment."
+    exit 1
+else
+	printf "\n ANTS path check: OK... \n"
 fi
 
+# C3D
+c3dpath=`which c3d`
+if [ -z ${c3dpath} ]; then
+    printf "\n ERROR: c3d not initialized. Please setup miracl & rerun script \n"
+	exit 1
+else
+	printf "\n c3d path check: OK... \n"
+fi
+
+# ants_miracl_mr is required. Make sure a symbolic link is added
+ants_miracl_mr_path=`which ants_miracl_mr`
+if [[ ! -z "${ants_miracl_mr_path}" ]]; then
+	if [[ -f "${MIRACL_HOME}/../depends/ants/antsRegistrationMIRACL_MRI.sh" ]]; then
+		ln -s "${MIRACL_HOME}/../depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_miracl_mr && \
+		chmod +x /usr/bin/ants_miracl_mr
+	else
+		echo "\n ERROR: ants_miracl_mr is not initialized. Please ensure that antsRegistrationMIRACL_MRI.sh has been downloaded to the necessary directory and rerun the script"
+		exit 1
+	fi
+fi
 
 #----------
 
 # Init atlas dir
 
-atlasdir=${MIRACL_HOME}/atlases
+atlasdir=$( dirname ${MIRACL_HOME} )/atlases
 
 
 # GUI for MRI input imgs
@@ -477,9 +498,15 @@ function mulheader()
 	local mulfac=$2
 	local hdmr=$3
 
-	dim1=`fslinfo ${unhdmr} | grep pixdim1`; x=${dim1##*1 } ;
-	dim2=`fslinfo ${unhdmr} | grep pixdim2`; y=${dim2##*2 } ;
-	dim3=`fslinfo ${unhdmr} | grep pixdim3`; z=${dim3##*3 } ;
+	# split each pixdim value into an array to extract the last value
+	dim1_arr=( $(fslinfo ${unhdmr} | grep pixdim1 | tr " " "\t" ) )
+	x="${dim1_arr[1]}"
+
+	dim2_arr=( $(fslinfo ${unhdmr} | grep pixdim2 | tr " " "\t" ) )
+	y="${dim2_arr[1]}"
+
+	dim3_arr=( $(fslinfo ${unhdmr} | grep pixdim3 | tr " " "\t" ) )
+	z="${dim3_arr[1]}"
 
     nx=`echo ${x}*${mulfac} | bc` ;
     ny=`echo ${y}*${mulfac} | bc` ;

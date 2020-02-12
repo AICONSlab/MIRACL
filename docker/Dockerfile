@@ -68,7 +68,7 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLWISH="/usr/bin/wish" \
     POSSUMDIR="/usr/share/fsl/5.0"
 
-ENV PATH="/usr/lib/fsl/5.0":${PATH}
+ENV PATH="/usr/lib/fsl/5.0:${PATH}"
 
 WORKDIR /code
 RUN pip install scikit-image==0.14.2 && \

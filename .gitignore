@@ -19,6 +19,8 @@ miracl.img
 *.exe
 *.o
 *.so
+*.pyc
+*/*/*.pyc
 
 # Packages #
 ############
@@ -48,6 +50,7 @@ miracl.img
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-.idea/
+.vscode/
+MIRACL.egg-info/
+.idea/*
 /miracl/deprec/

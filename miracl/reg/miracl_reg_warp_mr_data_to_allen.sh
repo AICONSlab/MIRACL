@@ -88,9 +88,19 @@ else
 	printf "\n C3D path check: OK...\n" 	
 fi
 
+# ANTs
+ANTS=`which antsRegistration`
+if [[ -z ${ANTS} ]];
+  then
+    echo "ANTS program can't be found. Please (re)define \$ANTSPATH in your environment."
+    exit 1
+else
+	printf "\n ANTS path check: OK... \n"
+fi
+
 #----------
 # Init atlas dir
-atlasdir=${MIRACL_HOME}/atlases
+atlasdir=$( dirname ${MIRACL_HOME} )/atlases
 
 
 # GUI for MRI input imgs

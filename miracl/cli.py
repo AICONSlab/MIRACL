@@ -22,6 +22,8 @@ from miracl.sta import cli_sta
 from miracl.stats import cli_stats
 from miracl.utilfn import cli_utilfn
 
+from miracl.utilfn import depends_manager
+
 
 def run_flow(parser, args):
     cli_flow.main()
@@ -145,7 +147,9 @@ def main(args=None):
     parser = get_parser()
     argcomplete.autocomplete(parser)
     args = parser.parse_args(args)
-    args.func(parser, args)
+
+    with depends_manager.add_paths():
+        args.func(parser, args)
 
 
 if __name__ == '__main__':
