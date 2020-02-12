@@ -37,8 +37,8 @@ setup(
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     install_requires=[
-        'pandas==0.24.2', 'scipy==1.2.1', 'opencv-python', 'tifffile', 'nibabel==2.5.0', 'argparse', 'tables==3.5.2', 'allensdk',
-        'lightning-python', 'multiprocessing', 'joblib', 'matplotlib==2.1.2', 'argcomplete', 'dipy==0.16.0', 'seaborn', 'pytest==4.6.0'
+        'pandas==0.24.2', 'scipy==1.2.1', 'numpy==1.16.1', 'opencv-python', 'tifffile', 'nibabel==2.5.0', 'argparse', 'tables==3.5.2', 'statsmodels==0.9.0',
+        'allensdk', 'lightning-python', 'multiprocessing', 'joblib', 'matplotlib==2.1', 'argcomplete', 'dipy==0.16.0', 'seaborn', 'pytest==4.6.9'
     ],
     entry_points={'console_scripts': ['miracl=miracl.cli:main'],
                   'gui_scripts': ['miraclGUI=miracl.miraclGUI:main']},
