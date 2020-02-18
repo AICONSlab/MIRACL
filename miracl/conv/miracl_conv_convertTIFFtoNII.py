@@ -76,7 +76,7 @@ def folder_dialog(self, msg):
 
 
 def parsefn():
-    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
+    if len(sys.argv) >= 3 and sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
         parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
                                          add_help=False)
     else:

@@ -65,7 +65,7 @@ def helpmsg():
 
 
 def parsefn():
-    if sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
+    if len(sys.argv) >= 3 and sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
     else:
         parser = argparse.ArgumentParser(description='', usage=helpmsg())

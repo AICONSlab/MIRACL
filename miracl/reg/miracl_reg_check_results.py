@@ -46,7 +46,7 @@ Checks registration results
 #    Python 2.7, itksnap or freeview
 
 def parsefn():
-    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'check':
+    if len(sys.argv) >= 3 and sys.argv[-2] == 'reg' and sys.argv[-1] == 'check':
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     else:
