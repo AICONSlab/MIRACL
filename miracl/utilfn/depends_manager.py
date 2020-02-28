@@ -30,7 +30,10 @@ class add_paths():
 
         # if ants is added, we have to include it in ANTSPATH
         if self.command_paths['ANTS'] in self.added_paths:
-            os.environ['ANTSPATH'] += os.pathsep + self.command_paths['ANTS']
+            if os.environ['ANTSPATH'] in os.environ.keys():
+                os.environ['ANTSPATH'] += os.pathsep + self.command_paths['ANTS']
+            else:
+                os.environ['ANTSPATH'] = self.command_paths['ANTS']
 
     def __exit__(self, exc_type, exc_value, traceback):
         for path in self.added_paths:  # remove all added PATH variables
@@ -38,3 +41,7 @@ class add_paths():
                 os.environ['PATH'] = os.environ['PATH'].replace(path, '')
             except ValueError:
                 pass
+        
+        # remove ANTSPATH if it was set
+        if os.environ['ANTSPATH'] in os.environ.keys() and self.command_paths['ANTS'] in self.added_paths:
+            os.environ['ANTSPATH']  = os.environ['PATH'].replace(self.command_paths['ANTS'], '')
