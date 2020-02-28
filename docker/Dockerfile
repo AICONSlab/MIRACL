@@ -17,7 +17,6 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
-    pip install numpy==1.15.4 && \
     pip install matplotlib joblib scipy==1.2.1 && \
     pip install tifffile && \
     pip install menpo opencv-python
