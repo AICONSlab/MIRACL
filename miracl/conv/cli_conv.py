@@ -13,7 +13,7 @@ def run_nii_tiff(parser, args):
     miracl_conv_convertNIItoTIFF.main(args)
 
 
-def run_set_orient(parser):
+def run_set_orient(parser, args=None):
     miracl_home = os.environ['MIRACL_HOME']
     subprocess.check_call('%s/conv/miracl_conv_set_orient_gui.py' % miracl_home,
                           shell=True,
