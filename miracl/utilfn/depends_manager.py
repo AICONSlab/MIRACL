@@ -13,6 +13,11 @@ class add_paths():
                                   c3d=os.path.join(DEPENDS_DIR, "c3d/bin"))
         self.added_paths = []  # empty list for all paths to be added
 
+        # dictionary of symbolic links, and the paths that add them
+        self.symlinks = dict(ants_miracl_clar=os.path.join(DEPENDS_DIR, "ants/antsRegistrationMIRACL.sh"),
+                             ants_miracl_mr=os.path.join(DEPENDS_DIR, "ants/antsRegistrationMIRACL_MRI.sh"))
+        self.added_links = []
+
     def __enter__(self):
         ''' Add paths to PATH environment variable prior to running the function.
         '''
@@ -35,6 +40,12 @@ class add_paths():
             else:
                 os.environ['ANTSPATH'] = self.command_paths['ANTS']
 
+        # create the symbolic links here
+        for link in self.symlinks.keys():
+            if not os.path.islink(os.path.join(self.command_paths['ANTS'], link)):
+                os.symlink(self.symlinks[link], os.path.join(self.command_paths['ANTS'], link))
+                self.added_links.append(os.path.join(self.command_paths['ANTS'], link))
+
     def __exit__(self, exc_type, exc_value, traceback):
         for path in self.added_paths:  # remove all added PATH variables
             try:
@@ -42,6 +53,11 @@ class add_paths():
             except ValueError:
                 pass
         
+        # remove symlinks
+        for link in self.added_links:
+            if os.path.islink(link):
+                os.unlink(link)
+
         # remove ANTSPATH if it was set
         if 'ANTSPATH' in os.environ.keys() and self.command_paths['ANTS'] in self.added_paths:
             os.environ['ANTSPATH']  = os.environ['PATH'].replace(self.command_paths['ANTS'], '')
