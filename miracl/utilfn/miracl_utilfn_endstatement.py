@@ -25,7 +25,7 @@ def parsefn():
                                      usage='%(prog)s -f [ function ] -t [ time diff ]')
 
     required = parser.add_argument_group('required arguments')
-    required.add_argument('-f', '--func', type=str, required=True, metavar='task',
+    required.add_argument('-f', '--function', type=str, required=True, metavar='task',
                           help="Done taks")
     required.add_argument('-t', '--timediff', type=str, required=True, metavar='timediff',
                           help="Time diff")
@@ -37,7 +37,7 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    task = args.func
+    task = args.function
     timediff = args.timediff
 
     return task, timediff
