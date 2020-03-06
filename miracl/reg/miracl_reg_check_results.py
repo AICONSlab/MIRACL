@@ -9,6 +9,7 @@ import os
 import subprocess
 import sys
 
+from miracl import ATLAS_DIR
 
 def helpmsg():
     return '''Usage: miracl_reg_check_results.py 
@@ -120,6 +121,8 @@ def main(args):
     parser = parsefn()
     indir, viz, space, hemi = parse_inputs(parser, args)
 
+    snaplut = os.path.join(ATLAS_DIR, "ara/ara_snaplabels_lut.txt")
+
     if viz == "itk":
         # check for itk
         status, result = commands.getstatusoutput("which itksnap")
@@ -133,8 +136,8 @@ def main(args):
             print("\n Viewing downsampled CLARITY volume with registered Allen labels using itkSNAP ...\n")
 
             subprocess.check_call(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_%s_??um_clar_downsample.nii.gz -l $snaplut' % (
-                    indir, indir, hemi), shell=True,
+                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_%s_??um_clar_downsample.nii.gz -l %s' % (
+                    indir, indir, hemi, snaplut), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
@@ -148,7 +151,7 @@ def main(args):
             print("\n Viewing registered CLARITY volume in Allen space with labels using itkSNAP ...\n")
 
             subprocess.check_call(
-                'itksnap -g %s/clar_allen_space.nii.gz -o $allen%d -s $lbls%d -l $snaplut' % (indir, res, res),
+                'itksnap -g %s/clar_allen_space.nii.gz -o $allen%d -s $lbls%d -l %s' % (indir, res, res, snaplut),
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
