@@ -4,7 +4,7 @@ from miracl.utilfn import miracl_utilfn_endstatement, miracl_utilfn_create_brain
     miracl_utilfn_int_corr_tiffs
 
 
-def run_endstatmenet(parser, args):
+def run_endstatement(parser, args):
     miracl_utilfn_endstatement.main(args)
 
 
@@ -28,7 +28,7 @@ def get_parser():
     end_state_parser = miracl_utilfn_endstatement.parsefn()
     parser_end_state = subparsers.add_parser('end_state', parents=[end_state_parser], add_help=False,
                                              help='end statement')
-    parser_end_state.set_defaults(func=run_endstatmenet)
+    parser_end_state.set_defaults(func=run_endstatement)    
 
     # brain mask
     brain_mask_parser = miracl_utilfn_create_brainmask.parsefn()
