@@ -30,7 +30,7 @@ install PyQt4 using anaconda, run:
 
 Place the **depends** folder inside **linux_depends** or **mac_depends** (based on your OS), found here:
 
-https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
+[https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i]https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
 
 inside the **miracl** folder
 
@@ -40,6 +40,11 @@ inside the **miracl** folder
     rm depends.zip
 
 This folder contains compiled versions of **ANTS** and **c3d** for Linux or Mac OS. Before continuing, make sure to change the permissions.
+
+In order to run the pipeline, some symbolic links must be added to access certain commands. Inside the **miracl** folder, run:
+
+    sudo ln -s depends/ants/antsRegistrationMIRACL.sh /usr/bin/ants_miracl_clar && chmod +x /usr/bin/ants_miracl_clar
+    sudo ln -s depends/ants/antsRegistrationMIRACL_MRI.sh /usr/bin/ants_miracl_mr && chmod +x /usr/bin/ants_miracl_mr
 
 #### Allen atlases
 
