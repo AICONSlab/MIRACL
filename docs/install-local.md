@@ -30,7 +30,7 @@ install PyQt4 using anaconda, run:
 
 Place the **depends** folder inside **linux_depends** or **mac_depends** (based on your OS), found here:
 
-[https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i]https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
+[https://utoronto-my.sharepoint.com/:f:/g/personal/maged_goubran_utoronto_ca/EktrGgawrY9KrgJ6OVMg5B4B4Y5MyNFvoynltDCtCJXCtA?e=CdLcUl](https://utoronto-my.sharepoint.com/:f:/g/personal/maged_goubran_utoronto_ca/EktrGgawrY9KrgJ6OVMg5B4B4Y5MyNFvoynltDCtCJXCtA?e=CdLcUl)
 
 inside the **miracl** folder
 
@@ -39,13 +39,17 @@ inside the **miracl** folder
     unzip depends.zip
     rm depends.zip
 
-This folder contains compiled versions of **ANTS** and **c3d** for Linux or Mac OS. Before continuing, make sure to change the permissions.
+This folder contains compiled versions of **ANTS** and **c3d** for Linux or Mac OS. Before continuing, make sure to change the permissions. This can be done by running
+
+    chmod -R 755 {path/to/depends}/*
 
 In order to run the pipeline, some symbolic links must be added to access certain commands. Inside the **miracl** folder, run:
 
-    sudo ln -s depends/ants/antsRegistrationMIRACL.sh /usr/bin/ants_miracl_clar && chmod +x /usr/bin/ants_miracl_clar
-    sudo ln -s depends/ants/antsRegistrationMIRACL_MRI.sh /usr/bin/ants_miracl_mr && chmod +x /usr/bin/ants_miracl_mr
+    sudo ln -s {path/to/depends}/ants/antsRegistrationMIRACL.sh /usr/bin/ants_miracl_clar && chmod +x /usr/bin/ants_miracl_clar
+    sudo ln -s {path/to/depends}/ants/antsRegistrationMIRACL_MRI.sh /usr/bin/ants_miracl_mr && chmod +x /usr/bin/ants_miracl_mr
 
+Make sure {path/to/depends} is replaced with the directory path that leads to the depends directory
+.
 #### Allen atlases
 
 Place the **atlases** folder in the same link above inside the **miracl** folder
