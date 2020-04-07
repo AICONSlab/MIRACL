@@ -167,7 +167,7 @@ fi
 
 # Init atlas dir
 
-atlasdir=${MIRACL_HOME}/atlases
+atlasdir=${MIRACL_HOME}/../atlases
 
 
 # GUI for CLARITY input imgs

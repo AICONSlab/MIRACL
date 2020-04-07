@@ -3,6 +3,7 @@ import sys
 import argparse
 import subprocess
 from miracl.reg import miracl_reg_check_results
+from miracl.reg import miracl_reg_mri_allen_niftyreg as allen_niftyreg
 
 
 def run_clar_allen_wb(parser, args):
@@ -17,7 +18,7 @@ def run_clar_allen_wb(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_clar-allen_whole_brain.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -o %s -m %s -v %s' % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'])
+            bash_args = '-i %s -o %s -m %s -v %s -b %s -s %s' % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'], args['bulb'], args['side'])
 
             subprocess.check_call('%s/reg/miracl_reg_clar-allen_whole_brain.sh %s' % (miracl_home, bash_args),
                                   shell=True,
@@ -42,6 +43,10 @@ def run_mri_allen_ants(parser, args):
 
             subprocess.check_call('%s/reg/miracl_reg_mri-allen.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
+
+
+def run_mri_allen_nifty_py(parser, args):
+    allen_niftyreg.main()
 
 
 def run_mri_allen_nifty(parser, args):
@@ -111,6 +116,11 @@ def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
+    # mri allen with niftyreg
+    mri_allen_nifty_py_parser = allen_niftyreg.parse_function()
+    parser_mri_allen_nifty_py = subparsers.add_parser('mri_allen_nifty_py', parents=[mri_allen_nifty_py_parser], add_help=False, help='parsing with python')
+    parser_mri_allen_nifty_py.set_defaults(func=run_mri_allen_nifty_py)
+
     # clar allen
     parser_clar_allen_wb = subparsers.add_parser('clar_allen_wb', add_help=False,
                                                  help="whole-brain CLARITY registration to Allen atlas")
@@ -122,6 +132,10 @@ def get_parser():
                                       help="whole brain or hemi")
     parser_clar_allen_wb.add_argument('-v', '--vox_res', metavar='',
                                       help="voxel resolution")
+    parser_clar_allen_wb.add_argument('-b', '--bulb', metavar='',
+                                      help="olfactory bulb included in brain, binary option")
+    parser_clar_allen_wb.add_argument('-s', '--side', metavar='', default='',
+                                      help="side, if only registering a hemisphere instead of a wholebrain")
     parser_clar_allen_wb.add_argument('-h', '--help', action='store_true')
 
     parser_clar_allen_wb.set_defaults(func=run_clar_allen_wb)
