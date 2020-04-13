@@ -11,8 +11,8 @@ RUN pip install -e /code/
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN mkdir -p "/code/atlases/ara"
-RUN wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases/ara http://web.stanford.edu/group/zeinehlab/MIRACLextra/
+RUN mkdir -p "/code/atlases/"
+RUN wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases http://web.stanford.edu/group/zeinehlab/MIRACLextra/
 
 ENV aradir "/code/atlases/ara"
 
