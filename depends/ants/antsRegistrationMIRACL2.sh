@@ -25,16 +25,7 @@ SETPATH
     exit 1
 }
 
-# Uncomment the line below in case you have not set the ANTSPATH variable in your environment.
-# export ANTSPATH=${ANTSPATH:="$HOME/bin/ants/"} # EDIT THIS
-
-#ANTSPATH=YOURANTSPATH
-# if [[ ${#ANTSPATH} -le 3 ]];
-#   then
-#     setPath >&2
-#   fi
-
-ANTSPATH="$( dirname "${MIRACL_HOME}" )/depends/ants"
+ANTSPATH="$( which antsRegistration )"
 ANTS=${ANTSPATH}/antsRegistration
 
 if [[ ! -s ${ANTS} ]];
