@@ -25,7 +25,7 @@ SETPATH
     exit 1
 }
 
-ANTSPATH="$( which antsRegistration )"
+ANTSPATH="$( dirname $( which antsRegistration ) )"
 ANTS=${ANTSPATH}/antsRegistration
 
 if [[ ! -s ${ANTS} ]];
