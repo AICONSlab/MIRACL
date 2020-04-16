@@ -18,4 +18,4 @@ Click on the corresponding tutorial for instructions:
 
 [Using MIRACL on Sherlock @ Stanford](sherlock/sherlock.md)
 
-[Using MIRACL on Compute Canada](compute_canada/compute_canada.md)
+[Using MIRACL on Compute Canada](tutorials/compute_canada/compute_canada.md)
