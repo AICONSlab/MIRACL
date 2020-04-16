@@ -116,7 +116,7 @@ def get_parser():
 
     # stats
     stats_parser = cli_stats.get_parser()
-    parser_stats = subparsers.add_parser('sta', parents=[stats_parser], add_help=False,
+    parser_stats = subparsers.add_parser('stats', parents=[stats_parser], add_help=False,
                                        help="STA functions")
 
     parser_stats.set_defaults(func=run_stats)
