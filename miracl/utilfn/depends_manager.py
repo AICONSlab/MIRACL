@@ -47,7 +47,7 @@ class add_paths():
                     os.symlink(self.symlinks[link], os.path.join(self.command_paths['ANTS'], link))
                     self.added_links.append(os.path.join(self.command_paths['ANTS'], link))
         except OSError:  # error comes up with readonly system (e.g. Docker)
-            print('WARNING: unable to add symbolic link for %s. Please ensure that symbolic link has been set externally (i.e. in Dockerfile)' % (link))
+            pass
 
     def __exit__(self, exc_type, exc_value, traceback):
         for path in self.added_paths:  # remove all added PATH variables
