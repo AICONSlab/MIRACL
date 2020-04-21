@@ -122,6 +122,10 @@ def get_parser():
                                       help="whole brain or hemi")
     parser_clar_allen_wb.add_argument('-v', '--vox_res', metavar='',
                                       help="voxel resolution")
+    parser_clar_allen_wb.add_argument('-b', '--bulb', metavar='',
+                                      help="olfactory bulb included in brain, binary option")
+    parser_clar_allen_wb.add_argument('-s', '--side', metavar='',
+                                      help="voxel resolution")
     parser_clar_allen_wb.add_argument('-h', '--help', action='store_true')
 
     parser_clar_allen_wb.set_defaults(func=run_clar_allen_wb)
