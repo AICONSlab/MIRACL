@@ -143,7 +143,9 @@ a.set_title(os.path.basename(flist[index]), color='white', y=1.05, fontsize=10)
 canvas = FigureCanvasTkAgg(f, master=root)
 canvas.show()
 
-toolbar = NavigationToolbar2TkAgg(canvas, root)
+# creating frame for toolbar
+frame = Tk.Frame(root)
+toolbar = NavigationToolbar2TkAgg(canvas, frame)
 toolbar.update()
 toolbar.grid(row=8, column=1, padx=4, pady=4, sticky="e")
 
