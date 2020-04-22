@@ -16,6 +16,6 @@ Click on the corresponding tutorial for instructions:
 
 [Intensity correction](tutorials/int_corr/int_corr.md)
 
-[Using MIRACL on Sherlock @ Stanford](sherlock/sherlock.md)
+[Using MIRACL on Sherlock @ Stanford](tutorials/sherlock/sherlock.md)
 
 [Using MIRACL on Compute Canada](tutorials/compute_canada/compute_canada.md)

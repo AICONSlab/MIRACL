@@ -8,7 +8,7 @@ When using Compute Canada, the Docker image for MIRACL can be used in Singularit
 ### Copy your data to Compute Canada
 For example, to copy a folder called "input_clar" containing tiff files for registration to the Allen atlas:
     
-    $ scp -r input_clar niagara.computecanada.edu:/home/{username}/scratch/. 
+    $ scp -r input_clar niagara.computecanada.edu:/scratch/{username}/.
 
 ### Login the same to Compute Canada Server
 
@@ -32,10 +32,10 @@ Start singularity with binded data
 
     $ singularity shell miracl.sif
 
-Within the shell, try loading the GUI
+Within the shell, load the GUI
 
 	> miraclGUI
 
-To test the shell, try running miracl's CLARITY registration workflow on the directory that was copied over
+Or use command line, for example run miracl's CLARITY registration workflow on the directory that was copied over
 
     > miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
