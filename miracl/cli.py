@@ -68,14 +68,14 @@ def get_parser():
     # connect
     connect_parser = cli_connect.get_parser()
     parser_connect = subparsers.add_parser('connect', parents=[connect_parser], add_help=False,
-                                           help="connect functions")
+                                           help="connectivity functions")
 
     parser_connect.set_defaults(func=run_connect)
 
     # conv
     io_parser = cli_conv.get_parser()
     parser_io = subparsers.add_parser('conv', parents=[io_parser], add_help=False,
-                                      help="conv functions")
+                                      help="conversion functions")
 
     parser_io.set_defaults(func=run_io)
 
@@ -89,7 +89,7 @@ def get_parser():
     # lbls
     lbls_parser = cli_lbls.get_parser()
     parser_lbls = subparsers.add_parser('lbls', parents=[lbls_parser], add_help=False,
-                                      help="Label manipulation functions")
+                                      help="label manipulation functions")
 
     parser_lbls.set_defaults(func=run_lbls)
 
@@ -110,21 +110,21 @@ def get_parser():
     # sta
     sta_parser = cli_sta.get_parser()
     parser_sta = subparsers.add_parser('sta', parents=[sta_parser], add_help=False,
-                                       help="STA functions")
+                                       help="structure tensor analysis functions")
 
     parser_sta.set_defaults(func=run_sta)
 
     # stats
     stats_parser = cli_stats.get_parser()
     parser_stats = subparsers.add_parser('stats', parents=[stats_parser], add_help=False,
-                                       help="Run statistical functions (voxel-wise and paired ttest)")
+                                       help="statistical functions (voxel-wise and paired ttest)")
 
     parser_stats.set_defaults(func=run_stats)
 
     # utils
     utils_parser = cli_utilfn.get_parser()
     parser_utils = subparsers.add_parser('utils', parents=[utils_parser], add_help=False,
-                                      help="Utils functions")
+                                      help="utility functions")
 
     parser_utils.set_defaults(func=run_utils)
 
