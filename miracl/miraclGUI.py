@@ -150,17 +150,6 @@ nestedict = {
         }
     },
 
-    'STA': {
-        'folder': 'sta',
-        'functions': {
-            0: {
-                'name': 'Trace primary fibers',
-                'script': 'miracl sta track_tensor',
-                'helpmsg': 'Performs Structure Tensor Analysis (STA) on CLARITY viral tracing or stains'
-            }
-        }
-    },
-
     'Labels': {
         'folder': 'lbls',
         'functions': {
@@ -219,6 +208,27 @@ nestedict = {
                 'name': 'Voxelize segmentations',
                 'script': 'miracl seg voxelize',
                 'helpmsg': 'Voxelizes segmentation results into density maps with Allen atlas resolution'
+            }
+        }
+    },
+
+    'STA': {
+        'folder': 'sta',
+        'functions': {
+            0: {
+                'name': 'Trace primary fibers',
+                'script': 'miracl sta track_tensor',
+                'helpmsg': 'Performs Structure Tensor Analysis (STA) on CLARITY viral tracing or stains'
+            },
+            1: {
+                'name': 'Compute tract density',
+                'script': 'miracl sta tract_density',
+                'helpmsg': 'Computes tract density after STA'
+            },
+            2: {
+                'name': 'Generate connectivity graph',
+                'script': 'miracl sta conn_graph',
+                'helpmsg': 'Generate connectivity graph from virus signal or tract density'
             }
         }
     },
