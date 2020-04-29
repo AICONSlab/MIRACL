@@ -21,61 +21,32 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+	Usage: miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
-    Example: `basename $0` -i inv_mri.nii.gz -o RSP -m combined -v 25
+    Example: miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
     arguments (required):
-
 		i.  input MRI nii
             Preferably T2-weighted
 
     optional arguments:
-
         o.  orient code (default: RSP)
             to orient nifti from original orientation to "standard/Allen" orientation
-
         m.  hemisphere mirror (default: combined)
             warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 			accepted inputs are: <split> or <combined>
-
         v.  labels voxel size/Resolution in um (default: 10)
 			accepted inputs are: 10, 25 or 50
-
         l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
 			input labels could be at a different depth than default labels
-
 			If l. is specified (m & v cannot be specified)
-
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
-
         s.  skull strip or not, binary option (default: 1 -> skull-strip)
-
         f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
-
         n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
 
-	----------		
-
-	Dependencies:
-	
-		- NiftyReg
-		http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftyReg		
-
-		- FSL
-
-		- c3d
-		https://sourceforge.net/projects/c3d
-
 	-----------------------------------
-	
-	(c) Maged Goubran @ Stanford University, 2018
-	mgoubran@stanford.edu
-	
-	-----------------------------------
-
-	registration based on NiftyReg 	
-
+	registration based on NiftyReg
 	-----------------------------------
 
 usage

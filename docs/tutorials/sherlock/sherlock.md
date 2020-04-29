@@ -22,14 +22,14 @@ Build singularity container
 
     $ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
 
-### Running MIRACL in an interactive session
-For quick jobs that don't require much resources
-
-#### Copy your data to Sherlock 
+### Copying your data to Sherlock 
 For example a folder called `input_clar` with tiff files for registration to Allen atlas:
 (replace username with your sherlock username)
     
     $ scp -r input_clar sherlock.stanford.edu:/scratch/users/username/clarity_registration/.
+
+### Running MIRACL in an interactive session
+For quick jobs that don't require much resources
 
 Login to Sherlock
 
@@ -53,12 +53,32 @@ Within the shell, load the GUI
 
 Or use command line
 
-    > miracl flow reg_clar -h
+    > miracl lbls stats -h
 
 ### Running SBATCH jobs
 If you want to run jobs with specific resources for larger, longer jobs
 
-Assuming you wanted to run the following commmand for example on your data:
+For example if you want to run the registration workflow, first get the data orientation 
+(please check the registration tutorial for setting orientation)
+
+    > miracl conv set_orient
+
+After setting the orientation a file called ``ort2std.txt`` will be created that might look like this:
+
+    > cat ort2std.txt
+
+```text
+tifdir=/scratch/users/username/clarity_registration/input_clar
+ortcode=ARS
+```
+
+Use that orientation code `ARS` in your registration workflow 
+
+First check the workflow arguments
+
+    > miracl flow reg_clar -h
+
+Assuming you wanted to run this command with the following arguments for example on your data:
 
     miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 
@@ -93,6 +113,9 @@ Check on submitted job
 
     $ squeue -u $USER
     
+    
 #### For more resources on slurm sbatch jobs check these pages
+
 https://www.sherlock.stanford.edu/docs/getting-started/submitting/
+
 https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/

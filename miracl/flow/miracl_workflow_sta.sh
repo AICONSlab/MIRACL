@@ -21,7 +21,6 @@ function usage()
 	3) Run STA analysis
 
     Executes:
-
         conv/miracl_conv_convertTifftoNII.py
         lbls/miracl_lbls_get_graph_info.py
         lbls/miracl_lbls_generate_parents_at_depth.py
@@ -30,7 +29,6 @@ function usage()
         sta/miracl_sta_track_primary_eigen.py
         lbls/miracl_lbls_stats.py
         sta/miracl_sta_gen_tract_density.py
-
 
     Usage: `basename $0`
 
@@ -51,64 +49,29 @@ function usage()
     Example: `basename $0` -f my_tifs -o clarity_virus -l RPL -m split -r clar_reg_final -d 5 -c AAV -g 0.5 -k 0.5 -a 25
 
         arguments (required):
-
             f. Input Clarity tif folder/dir [folder name without spaces]
-
             o. Output nifti
-
             l. Seed label abbreviation (from Allen atlas ontology)
-
             r. CLARITY final registration folder
-
             m. Labels hemi
-
             g. [ Derivative of Gaussion (dog) sigma ]
-
             k. [ Gaussian smoothing sigma ]
-
             a. [ Tracking angle threshold ]
 
-
         optional arguments:
-
             d. Downsample ratio (default: 5)
-
             c. Output channel name
-
             n. chan # for extracting single channel from multiple channel data (default: 0)
-
             p. chan prefix (string before channel number in file name). ex: C00
-
             x. original resolution in x-y plane in um (default: 5)
-
             z. original thickness (z-axis resolution / spacing between slices) in um (default: 5)
 
-
 	----------
-
 	Main Outputs
-
         tract file = clarity_sta_[label]_seed/dog[dog]_gauss[gauss]/filter_ang[angle].trk
-
         virus stats csv = virus_signal_stats_depth_[depth].csv
-
         streamline density stats csv = sta_streamlines_density_stats_depth_[depth].csv
-
     ----------
-
-    Dependencies:
-
-        - Matlab
-
-        - Python 2.7
-
-	-----------------------------------
-
-	(c) Maged Goubran @ Stanford University, 2017
-	mgoubran@stanford.edu
-
-	-----------------------------------
-
 
 usage
 getversion >&2

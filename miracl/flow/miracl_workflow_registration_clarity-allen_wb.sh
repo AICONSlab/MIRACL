@@ -28,19 +28,17 @@ function usage()
         conv/miracl_conv_convertTIFFtoNII.py
         reg/miracl_reg_clar-allen_whole_brain.sh
 
-    Usage: `basename $0`
+    Usage: miracl flow reg_clar
 
         A GUI will open to set data orientation
         For "miracl_conv_convertTIFFtoNII.py" & "miracl_reg_clar-allen_whole_brain.sh" default parameters will be chosen
 
-
     ----------
-
 	For command-line / scripting
 
-    Usage: `basename $0` -f [Tiff folder]
+    Usage: miracl flow reg_clar -f [Tiff folder]
 
-    Example: `basename $0` -f my_tifs -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
+    Example: miracl flow reg_clar -f my_tifs -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 
         arguments (required):
 
@@ -61,78 +59,29 @@ function usage()
             Registration (invoked by -r " "):
 
             o. Orient code (default: ALS)
-            to orient nifti from original orientation to "standard/Allen" orientation
-
+                to orient nifti from original orientation to "standard/Allen" orientation
             m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-            accepted inputs are: <split> or <combined>  (default: combined)
-
+                accepted inputs are: <split> or <combined>  (default: combined)
             v. Labels voxel size/Resolution of labels in um
                 accepted inputs are: 10, 25 or 50  (default: 10)
-
             l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
                 input could be at a different depth than default labels
-
                 If l. is specified (m & v cannot be specified)
-
             s.  side, if only registering a hemisphere instead of whole brain
                 accepted inputs are: rh (right hemisphere) or lh (left)
 
 	----------
-
 	Main Outputs
 
-
-		reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
-
+        reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
-
-		reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
-
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif : Allen labels registered to original (full-resolution) Clarity
 
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen labels registered to original (full-resolution) Clarity
-
-
-        - To visualize clarity data in Allen space - assuming chosen v/vox 10um
-            from command line:
-
-                itksnap -g \$allen10 -o reg_final/clar_allen_space.nii.gz -s \$lbls10 -l \$snaplut
-
-            from GUI:
-
-                \$allen10 = \$MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz ->  (Main Image)
-
-                \$lbls10 = \$MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
-
-                \$snaplut = \$MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
-
-
-        - To visualize Allen labels in downsampled clarity data space (from command line):
-
-            itksnap -g clar_downsample_res(vox)um.nii.gz -s reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz
-
+        - To visualize results use: miracl reg check
 
         - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
-
-
-    ----------
-
-	Dependencies:
-
-		- ANTs
-		https://github.com/stnava/ANTs
-
-		- c3d
-		https://sourceforge.net/projects/c3d
-
-	-----------------------------------
-
-	(c) Maged Goubran @ Stanford University, 2017
-	mgoubran@stanford.edu
-
-	-----------------------------------
-
-	registration based on ANTs
 
 	-----------------------------------
 

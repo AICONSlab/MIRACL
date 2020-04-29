@@ -18,106 +18,53 @@ function usage()
 	2) Warps Allen annotations to the original high-res CLARITY space
 	3) Warps the higher-resolution CLARITY to Allen space
 
-	if no inputs are given function will run in GUI mode
+    For GUI
+
+    Usage: miracl reg clar_allen_wb
+    -----
 
 	For command-line / scripting
 
-	Usage: `basename $0` -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
+	Usage: miracl reg clar_allen_wb -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
 
-    Example: `basename $0` -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
+    Example: miracl reg clar_allen_wb -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
 
     arguments (required):
-
 		i.  input down-sampled clarity nii
 		    Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
-
 		    file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
             [this should be accurate as it is used for allen label upsampling to clarity]
 
     optional arguments:
-
         o.  orient code (default: ALS)
             to orient nifti from original orientation to "standard/Allen" orientation
-		
         m.  hemisphere mirror (default: combined)
             warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
 			accepted inputs are: <split> or <combined>
-
         v.  labels voxel size/Resolution in um (default: 10)
 			accepted inputs are: 10, 25 or 50
-				
         l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
 			input labels could be at a different depth than default labels
-
 			If l. is specified (m & v cannot be specified)
-
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
-
         f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
-
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
-
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
-
         w.  warp high-res clarity to Allen space (default: 0)
 
 	----------
-
 	Main Outputs
-
         reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
-
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
-
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
-
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
-
         reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif : Allen labels registered to original (full-resolution) Clarity
 
-
-        - To visualize Allen labels in downsampled clarity data space (from command line):
-
-            itksnap -g reg_final/clar_downsample_res(vox)um.nii.gz -s reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz -l \$snaplut
-
-
-        - To visualize clarity data in Allen space - assuming chosen v/vox 10um
-            from command line:
-
-                itksnap -g \$allen10 -o reg_final/clar_allen_space.nii.gz -s \$lbls10 -l \$snaplut
-
-            from GUI:
-
-                \$allen10 = \$MIRACL_HOME/atlases/ara/template/average_template_10um.nii.gz -> (Main Image)
-
-                \$lbls10 = \$MIRACL_HOME/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz -> (Segmentation)
-
-                \$snaplut = \$MIRACL_HOME/atlases/ara/ara_snaplabels_lut.txt -> (Label Descriptions)
-
-
+        - To visualize results use: miracl reg check
         - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
-
-
-    ----------
-
-	Dependencies:
-
-		- ANTs
-		https://github.com/stnava/ANTs			
-		
-		- c3d
-		https://sourceforge.net/projects/c3d
-
-	-----------------------------------
-	
-	(c) Maged Goubran @ Stanford University, 2017
-	mgoubran@stanford.edu
-	
-	-----------------------------------
-
-	registration based on ANTs	
-
+    -----------------------------------
+    registration based on ANTs
 	-----------------------------------
 
 usage

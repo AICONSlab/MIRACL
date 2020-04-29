@@ -16,69 +16,47 @@ function usage()
 
 	1) Performs Structure Tensor Analysis (STA) on CLARITY viral tracing or stains
 
-	Runs Matlab scripts
-	
-	Usage: `basename $0` 
+	Usage: miracl sta track_tensor
 
 	A GUI will open to choose your input down-sampled clarity nifti, brain mask, seed mask
 
 		----------
-
 	For command-line / scripting
 
-
-	Usage: `basename $0` -i <down-sampled clarity nifti> -g <dog sigma> -k <gaussian sigma> -a <tracking angle threshold>
+	Usage: miracl sta track_tensor -i <down-sampled clarity nifti> -g <dog sigma> -k <gaussian sigma> -a <tracking angle threshold>
 	                     -b <brain mask> -s <seed> -o <output dir>
 
-	Example: `basename $0` -i clarity_03x_down_virus_chan.nii.gz -g 0.5 -k 0.5 -a 25 -b brain_mask.nii.gz -s seed.nii.gz -o sta
+	Example: miracl sta track_tensor -i clarity_03x_down_virus_chan.nii.gz -g 0.5 -k 0.5 -a 25 -b brain_mask.nii.gz -s seed.nii.gz -o sta
 
     OR using multiple parameters:
 
-    `basename $0` -i clarity_03x_down_virus_chan.nii.gz -g 0.5,1.5 -k 0.5,2 -a 25,35 -b brain_mask.nii.gz -s seed.nii.gz -o sta
-
+    miracl sta track_tensor -i clarity_03x_down_virus_chan.nii.gz -g 0.5,1.5 -k 0.5,2 -a 25,35 -b brain_mask.nii.gz -s seed.nii.gz -o sta
 
 		required arguments:
-
 			i. Input down-sampled clarity nifti (.nii/.nii.gz)
-
 			g. Derivative of Gaussian (dog) sigma
-
 			k. Gaussian smoothing sigma
-
 			a. Tracking angle threshold
-
 			b. Brain mask (.nii/.nii.gz)
-
 			s. Seed mask (.nii/.nii.gz)
 
         optional arguments:
-
 			o. Out dir
 
-
 		----------
-
     Main Outputs
-
         fiber.trk => Fiber tracts
 
         ----------
-
 	Dependencies:
-	
 		- Matlab
-
 		- Diffusion Toolkit
 
 	-----------------------------------
-
 	(c) Qiyuan Tian @ Stanford University, 2016
 	qytian@stanford.edu
-
-
     (c) Maged Goubran @ Stanford University, 2016
 	mgoubran@stanford.edu
-
 	-----------------------------------
 
 usage
