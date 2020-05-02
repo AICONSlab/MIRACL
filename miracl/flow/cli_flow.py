@@ -9,19 +9,19 @@ def run_reg_clar(parser, args):
     args = vars(args)
 
     if sys.argv[-2] == 'flow' and sys.argv[-1] == 'reg_clar':
-        subprocess.Popen('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh' % miracl_home,
+        subprocess.Popen('%s/flow/miracl_workflow_registration_clarity-allen.sh' % miracl_home,
                          shell=True)
     else:
         if args['help']:
-            subprocess.Popen('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh -h' % miracl_home,
+            subprocess.Popen('%s/flow/miracl_workflow_registration_clarity-allen.sh -h' % miracl_home,
                              shell=True)
         else:
             bash_args = '-f %s -n "%s" -r "%s"' % (args['folder'], args['conv_opts'][0], args['reg_opts'][0])
 
             print('Running CLARITY to Allen registration workflow with the following arguments: \n'
-                  "miracl_workflow_registration_clarity-allen_wb.sh %s " % bash_args)
+                  "miracl_workflow_registration_clarity-allen.sh %s " % bash_args)
 
-            subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen_wb.sh %s' % (miracl_home,
+            subprocess.check_call('%s/flow/miracl_workflow_registration_clarity-allen.sh %s' % (miracl_home,
                                                                                                    bash_args),
                                   shell=True,
                                   stderr=subprocess.STDOUT)

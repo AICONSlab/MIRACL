@@ -19,14 +19,14 @@ function usage()
 
 	Usage: miracl flow mul -sm [ script module ] -sc [ script ] -id [ input directory ] -opt [options] -nj [ #_of_jobs] -tj [ time_between_batches(min) ]
 
-	Example: miracl flow mul -st reg -sc clar_allen_wb -id my_data_dir -opt "-m combined" -nj 3 -tj 10
+	Example: miracl flow mul -st reg -sc clar_allen -id my_data_dir -opt "-m combined" -nj 3 -tj 10
 
 	arguments (required):
 		st. script module / type 
 			example: reg or seg or lbls or connect 
 
 		sc. script name 
-			example: clar_allen_wb
+			example: clar_allen
 
 		id. input directory with multiple mice data
 
