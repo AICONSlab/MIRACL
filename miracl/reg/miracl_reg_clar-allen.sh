@@ -20,14 +20,14 @@ function usage()
 
     For GUI
 
-    Usage: miracl reg clar_allen_wb
+    Usage: miracl reg clar_allen
     -----
 
 	For command-line / scripting
 
-	Usage: miracl reg clar_allen_wb -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
+	Usage: miracl reg clar_allen -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
 
-    Example: miracl reg clar_allen_wb -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
+    Example: miracl reg clar_allen -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
 
     arguments (required):
 		i.  input down-sampled clarity nii
@@ -36,6 +36,7 @@ function usage()
             [this should be accurate as it is used for allen label upsampling to clarity]
 
     optional arguments:
+        w.  output (results) directory (default: working directory)
         o.  orient code (default: ALS)
             to orient nifti from original orientation to "standard/Allen" orientation
         m.  hemisphere mirror (default: combined)
@@ -43,15 +44,16 @@ function usage()
 			accepted inputs are: <split> or <combined>
         v.  labels voxel size/Resolution in um (default: 10)
 			accepted inputs are: 10, 25 or 50
-        l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
+        l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz)
 			input labels could be at a different depth than default labels
 			If l. is specified (m & v cannot be specified)
+		a.  input custom Allen atlas (for example for registering sections)
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
         f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
-        w.  warp high-res clarity to Allen space (default: 0)
+        h.  warp high-res clarity to Allen space (default: 0)
 
 	----------
 	Main Outputs
@@ -85,7 +87,7 @@ fi
 
 # check dependencies
 
-if [ -z ${MIRACL_HOME} ];
+if [[ -z ${MIRACL_HOME} ]];
 then
     printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh & rerun script \n"
 	exit 1
@@ -93,7 +95,7 @@ then
 fi
 
 c3dpath=`which c3d`
-if [ -z ${c3dpath} ]; then
+if [[ -z ${c3dpath} ]]; then
     printf "\n ERROR: c3d not initialized .. please setup miracl & rerun script \n"
 	exit 1
 fi
@@ -140,7 +142,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:s:b:f:p:w:" opt; do
+	while getopts ":i:o:w:l:m:v:a:s:b:f:p:h:" opt; do
     
 	    case "${opt}" in
 
@@ -150,6 +152,10 @@ if [[ "$#" -gt 1 ]]; then
 
             o)
             	ort="${OPTARG}"
+            	;;
+
+            w)
+            	work_dir="${OPTARG}"
             	;;
 
         	l)
@@ -162,6 +168,10 @@ if [[ "$#" -gt 1 ]]; then
 
         	v)
             	vox="${OPTARG}"
+            	;;
+
+            a)
+            	atlas="${OPTARG}"
             	;;
 
             s)
@@ -180,7 +190,7 @@ if [[ "$#" -gt 1 ]]; then
                 prebias="${OPTARG}"
                 ;;
 
-            w)
+            h)
                 warphres="${OPTARG}"
                 ;;
 
@@ -195,7 +205,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	# check required input arguments
 
-	if [ -z ${inclar} ];
+	if [[ -z ${inclar} ]];
 	then
 		usage
 		echo "ERROR: < -i => input down-sampled clarity nii> not specified"
@@ -214,9 +224,10 @@ else
 	#choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel" "*.nii *.nii.gz" inclar
 
 	# options gui 
-	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel "  \
-	-f "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')"  \
-	  "olfactory bulb incl. (def = 0)" "side (def = None)" "extra int correct (def = 0)" -hf "`usage`")
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel"  \
+	-f  "Output directory (def = working dir)" "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" \
+        "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" \
+        "extra int correct (def = 0)" -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -237,27 +248,31 @@ else
 		exit 1
 	fi
 
-	ort=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	work_dir=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen output directory: $work_dir \n"
+
+	ort=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen orient code: $ort \n"
 
-	hemi=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	hemi=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen labels hemi option: $hemi \n"
 
-	vox=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen vox (um): $vox \n"
 
-	bulb=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	bulb=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen olfactory bulb option: $bulb \n"
 
-	side=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	side=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen side option: $side \n"
 
-    field=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    field=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen extra intensity correct: $field \n"
 
@@ -266,10 +281,17 @@ fi
 
 
 # make reg dir
+if [[ -z ${work_dir} ]] || [[ "${work_dir}" == "None" ]]; then
 
-regdirfinal=$PWD/reg_final
-regdir=$PWD/clar_allen_reg
+    regdirfinal=${PWD}/reg_final
+    regdir=${PWD}/clar_allen_reg
 
+else
+
+    regdirfinal=${work_dir}/reg_final
+    regdir=${work_dir}/clar_allen_reg
+
+fi
 
 if [[ ! -d ${regdir} ]]; then
 
@@ -290,15 +312,15 @@ exec 2>&1
 # set defaults and assert (check for input errors)
 
 # orient code
-if [[ -z ${ort} ]]; then
+if [[ -z ${ort} ]] || [[ "${ort}" == "None" ]]; then
     ort=ARS
 fi
 ## if A-P flipped (PLS) & if R-L -> ALS
 
 # If want to warp multi-res / hemi lbls
-if [[ -z ${lbls} ]]; then
+if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
 
-    if [[ -z ${hemi} ]]; then
+    if [[ -z ${hemi} ]] || [[ "${hemi}" == "None" ]]; then
 
         hemi=combined
 
@@ -312,7 +334,7 @@ if [[ -z ${lbls} ]]; then
 
     fi
 
-    if [[ -z ${vox} ]]; then
+    if [[ -z ${vox} ]] || [[ "${vox}" == "None" ]]; then
 
         vox=10
 
@@ -331,7 +353,7 @@ if [[ -z ${lbls} ]]; then
 fi
 
 # set side for hemisphere registration
-if [[ -z ${side} ]] ; then
+if [[ -z ${side} ]] || [[ "${side}" == "None" ]]; then
     side=""
 elif [[ "${side}" == "rh" ]]; then
     side="_right"
@@ -342,9 +364,19 @@ else
     exit 1
 fi
 
+base=`basename ${lbls}`
+lblsname=${base%%.*};
+
 # olfactory bulb
-if [[ -z ${bulb} ]] ; then
+if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]]; then
     bulb=0
+
+    # remove olfactory bulb from labels
+    custom_lbls=${regdir}/${lblsname}.nii.gz
+    c3d ${lbls} -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o ${custom_lbls}
+    c3d ${custom_lbls} -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o ${custom_lbls}
+    lbls=${custom_lbls}
+
 else
 
     if [[ "${bulb}" != 0 ]] && [[ "${bulb}" != 1 ]]; then
@@ -357,17 +389,17 @@ else
 fi
 
 # pre-bias
-if [[ -z ${prebias} ]] ; then
+if [[ -z ${prebias} ]] || [[ "${prebias}" == "None" ]]; then
     prebias=0
 fi
 
 # save mosaic
-if [[ -z ${savefig} ]] ; then
+if [[ -z ${savefig} ]] || [[ "${savefig}" == "None" ]]; then
     savefig=1
 fi
 
 # warp high-res clar
-if [[ -z ${warphres} ]] ; then
+if [[ -z ${warphres} ]] || [[ "${warphres}" == "None" ]]; then
     warphres=0
 fi
 
@@ -376,11 +408,8 @@ fi
 
 START=$(date +%s)
 
-
 #---------------------------
 #---------------------------
-
-
 
 # 1) Process clarity Functions
 
@@ -910,6 +939,7 @@ function createtiledimg()
     local lbl_mask=$5
     local custom_lut=$6
     local mosaic=$7
+    local reghemi=$8
 
     # clip clar intensities
     ifdsntexistrun ${clipped} "Clipping CLARITY intensities" \
@@ -923,8 +953,18 @@ function createtiledimg()
     ConvertScalarImageToRGB 3 ${wrplbls} ${rgb_lbls} ${lbl_mask} custom ${custom_lut}
 
     # create image
+    if [[ ${reghemi} == "combined" ]]; then
+        png_dir=z
+        flip='0x1'
+    else
+        png_dir=x
+        flip='0x0'
+    fi
+
     ifdsntexistrun ${mosaic} "Creating tiled mosaic image" \
-    CreateTiledMosaic -i ${clipped} -r ${rgb_lbls} -a 0.3 -o ${mosaic} -t -1x7 -f '0x1' -s [10,350,1000] -x ${lbl_mask}
+#    CreateTiledMosaic -i ${clipped} -r ${rgb_lbls} -a 0.3 -o ${mosaic} -t -1x7 -f '0x1' -s [10,350,1000] -x ${lbl_mask}
+    CreateTiledMosaic -i ${clipped} -r ${rgb_lbls} -a 0.3 -o ${mosaic} -f ${flip} -x ${lbl_mask} -d ${png_dir}
+
 
 }
 
@@ -996,15 +1036,23 @@ function main()
 # 2a) initialize registration
 
 	# Allen atlas template
+    if [[ -z "${atlas}" ]] || [[ "${atlas}" == "None" ]]; then
+        if [[ "${bulb}" == 0 ]]; then
+            allenref=${atlasdir}/ara/template/average_template_25um_OBmasked${side}.nii.gz
 
-    if [[ "${bulb}" == 0 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_25um_OBmasked${side}.nii.gz
+        elif [[ "${bulb}" == 1 ]]; then
+            allenref=${atlasdir}/ara/template/average_template_25um${side}.nii.gz
 
-    elif [[ "${bulb}" == 1 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_25um${side}.nii.gz
+        fi
+    else
+        # custom input Allen atlas
+        allenref=${atlas}
+
+        custom_lbls=${regdir}/${lblsname}.nii.gz
+        c3d ${allenref} ${lbls} -reslice-identity -o ${custom_lbls}
+        lbls=${custom_lbls}
 
     fi
-
 
 	initform=${regdir}/init_tform.mat
 
@@ -1055,9 +1103,6 @@ function main()
 	# Tforms
 	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
 	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
-
-	base=`basename ${lbls}`
-	lblsname=${base%%.*};
 
 	# Out lbls
 	wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
@@ -1114,7 +1159,7 @@ function main()
     mosaic=${regdirfinal}/allen_labels_to_clar_mosaic.png
 
     if [[ "${savefig}" == 1 ]]; then
-        createtiledimg ${smclarres} ${clipped} ${wrplbls} ${rgb_lbls} ${lbl_mask} ${custom_lut} ${mosaic}
+        createtiledimg ${smclarres} ${clipped} ${wrplbls} ${rgb_lbls} ${lbl_mask} ${custom_lut} ${mosaic} ${hemi}
     fi
 
 }

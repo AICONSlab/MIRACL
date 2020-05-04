@@ -99,7 +99,7 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'CLARITY-Allen',
-                'script': 'miracl reg clar_allen_wb',
+                'script': 'miracl reg clar_allen',
                 'helpmsg': 'Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas & warps'
                            '\nAllen annotations to the original high-res CLARITY space, and CLARITY to Allen space'
             },

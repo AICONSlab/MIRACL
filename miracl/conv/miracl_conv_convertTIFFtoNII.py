@@ -45,6 +45,7 @@ def helpmsg(name=None):
       -f dir, --folder dir  Input CLARITY TIFF folder/dir
 
     optional arguments:
+      -w,  --work_dir        Output directory (default: working directory)
       -d , --down           Down-sample ratio (default: 5)
       -cn , --channum       Chan # for extracting single channel from multiple channel data (default: 0)
       -cp , --chanprefix    Chan prefix (string before channel number in file name). ex: C00
@@ -93,6 +94,8 @@ def parsefn():
 
         optional = parser.add_argument_group('optional arguments')
 
+        optional.add_argument('-w', '--work_dir', type=str, metavar='', default=os.path.abspath(os.getcwd()),
+                              help="Output directory (default: working directory)")
         optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
         optional.add_argument('-cn', '--channum', type=int, metavar='',
                               help="Chan # for extracting single channel from multiple channel data (default: 0)")
@@ -127,9 +130,10 @@ def parse_inputs(parser, args):
 
         title = 'Tiff to Nii conversion'
         dirs = ['Input tiff folder']
-        fields = ['Out nii name (def = clarity)', 'Downsample ratio (def = 5)', 'chan # (def = 1)', 'chan prefix',
-                  'Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")', 'Thickness (z) (def = 5 "um")',
-                  'center (def = 0,0,0)', 'Downsample in z (def = 1)', 'Prev Downsampling (def = 1 -> not downsampled)']
+        fields = ['Output dir (def = working dir)', 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)',
+                  'chan # (def = 1)', 'chan prefix','Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")',
+                  'Thickness (z) (def = 5 "um")','center (def = 0,0,0)', 'Downsample in z (def = 1)',
+                  'Prev Downsampling (def = 1 -> not downsampled)']
         # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
 
         app = QApplication(sys.argv)
@@ -144,28 +148,30 @@ def parse_inputs(parser, args):
 
         # Initialize default params
 
-        outnii = 'clarity' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+        work_dir = os.path.abspath(os.getcwd()) if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+
+        outnii = 'clarity' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
         # assert isinstance(outnii, str), '-outnii not a string'
 
-        d = 5 if not linedits[fields[1]].text() else int(linedits[fields[1]].text())
+        d = 5 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
         # assert isinstance(d, int), '-d not a integer'
 
-        chann = 0 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
+        chann = 0 if not linedits[fields[3]].text() else int(linedits[fields[3]].text())
         # assert isinstance(chann, int), '-chann not a integer'
 
-        chanp = None if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+        chanp = None if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
 
-        chan = 'eyfp' if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
+        chan = 'eyfp' if not linedits[fields[5]].text() else str(linedits[fields[5]].text())
 
-        vx = 5 if not linedits[fields[5]].text() else float(linedits[fields[5]].text())
+        vx = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
 
-        vz = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
+        vz = 5 if not linedits[fields[7]].text() else float(linedits[fields[7]].text())
 
-        cent = [0, 0, 0] if not linedits[fields[7]].text() else linedits[fields[7]].text()
+        cent = [0, 0, 0] if not linedits[fields[8]].text() else linedits[fields[8]].text()
 
-        downz = 1 if not linedits[fields[8]].text() else int(linedits[fields[8]].text())
+        downz = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
 
-        pd = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
+        pd = 1 if not linedits[fields[10]].text() else int(linedits[fields[10]].text())
 
     else:
 
@@ -176,6 +182,8 @@ def parse_inputs(parser, args):
         indir = args.folder
 
         assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+
+        work_dir = args.work_dir
 
         if args.outnii is None:
             outnii = 'clarity'
@@ -238,7 +246,7 @@ def parse_inputs(parser, args):
     vx /= float(1000)  # in um
     vz /= float(1000)
 
-    return indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
+    return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
 
 
 # ---------
@@ -364,7 +372,7 @@ def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
-    indir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
+    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
@@ -379,7 +387,7 @@ def main(args):
         file_list = sorted(glob.glob("%s/*%s%01d*.tif*" % (indir, chanp, chann)), key=numericalsort)
 
     # make out dir
-    outdir = 'niftis'
+    outdir = os.path.join(work_dir, 'niftis')
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)

@@ -5,21 +5,23 @@ import subprocess
 from miracl.reg import miracl_reg_check_results
 
 
-def run_clar_allen_wb(parser, args):
+def run_clar_allen(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'clar_allen_wb':
-        subprocess.Popen('%s/reg/miracl_reg_clar-allen_whole_brain.sh' % miracl_home,
+    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'clar_allen':
+        subprocess.Popen('%s/reg/miracl_reg_clar-allen.sh' % miracl_home,
                          shell=True)
     else:
         if args['help']:
-            subprocess.Popen('%s/reg/miracl_reg_clar-allen_whole_brain.sh -h' % miracl_home,
+            subprocess.Popen('%s/reg/miracl_reg_clar-allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -o %s -m %s -v %s' % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'])
+            bash_args = '-i %s -r %s -o %s -m %s -v %s -f %s -p %s -a %s -w %s -l %s' \
+                        % (args['in_nii'], args['reg_out'], args['ort'], args['hemi'], args['vox_res'], args['fig'],
+                           args['pass_int'], args['atlas'], args['warp'], args['lbls'])
 
-            subprocess.check_call('%s/reg/miracl_reg_clar-allen_whole_brain.sh %s' % (miracl_home, bash_args),
+            subprocess.check_call('%s/reg/miracl_reg_clar-allen.sh %s' % (miracl_home, bash_args),
                                   shell=True,
                                   stderr=subprocess.STDOUT)
 
@@ -112,23 +114,35 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # clar allen
-    parser_clar_allen_wb = subparsers.add_parser('clar_allen_wb', add_help=False,
+    parser_clar_allen = subparsers.add_parser('clar_allen', add_help=False,
                                                  help="whole-brain CLARITY registration to Allen atlas")
-    parser_clar_allen_wb.add_argument('-i', '--in_nii', metavar='',
+    parser_clar_allen.add_argument('-i', '--in_nii', metavar='',
                                       help="input nifti")
-    parser_clar_allen_wb.add_argument('-o', '--ort', metavar='',
+    parser_clar_allen.add_argument('-r', '--reg_out', metavar='', default=os.path.abspath(os.getcwd()),
+                                      help="output registration dir")
+    parser_clar_allen.add_argument('-o', '--ort', metavar='', default='ARS',
                                       help="orientation tag")
-    parser_clar_allen_wb.add_argument('-m', '--hemi', metavar='',
+    parser_clar_allen.add_argument('-m', '--hemi', metavar='', default='combined',
                                       help="whole brain or hemi")
-    parser_clar_allen_wb.add_argument('-v', '--vox_res', metavar='',
+    parser_clar_allen.add_argument('-v', '--vox_res', metavar='', default=10,
                                       help="voxel resolution")
-    parser_clar_allen_wb.add_argument('-b', '--bulb', metavar='',
+    parser_clar_allen.add_argument('-b', '--bulb', metavar='', default=0,
                                       help="olfactory bulb included in brain, binary option")
-    parser_clar_allen_wb.add_argument('-s', '--side', metavar='',
+    parser_clar_allen.add_argument('-s', '--side', metavar='',
                                       help="voxel resolution")
-    parser_clar_allen_wb.add_argument('-h', '--help', action='store_true')
+    parser_clar_allen.add_argument('-a', '--atlas', metavar='',
+                                      help="custom atlas")
+    parser_clar_allen.add_argument('-l', '--lbls', metavar='',
+                                      help="custom labels")
+    parser_clar_allen.add_argument('-p', '--pass_int', metavar='', default=0,
+                                      help="skip intensity correction")
+    parser_clar_allen.add_argument('-f', '--fig', metavar='', default=1,
+                                      help="save mosaic figure of results")
+    parser_clar_allen.add_argument('-w', '--warp', metavar='', default=0,
+                                      help="warp high resolution clarity")
+    parser_clar_allen.add_argument('-h', '--help', action='store_true')
 
-    parser_clar_allen_wb.set_defaults(func=run_clar_allen_wb)
+    parser_clar_allen.set_defaults(func=run_clar_allen)
 
     # mri allen ants
     parser_mri_allen = subparsers.add_parser('mri_allen_ants', add_help=False,
