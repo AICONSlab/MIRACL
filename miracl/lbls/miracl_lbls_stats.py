@@ -14,6 +14,7 @@ from PyQt4.QtGui import QApplication
 from miracl.conv import miracl_conv_gui_options as gui_opts
 from miracl.utilfn.depends_manager import add_paths
 
+from miracl import ATLAS_DIR
 
 def helpmsg():
     return '''Usage: miracl_lbls_stats.py 
@@ -214,21 +215,18 @@ def main(args):
     #                       stdout=subprocess.PIPE,
     #                       stderr=subprocess.PIPE)
 
-    subprocess.check_call('c3d %s %s -lstat > %s' % (invol, lbls, outfile), shell=True,
+    subprocess.check_call("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile), shell=True,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
 
     # read fwf
-    out_stats = pd.read_fwf('%s' % outfile)
+    out_stats = pd.read_csv('%s' % outfile)
 
-    # read Allen ontology
-    miracl_home = os.environ['MIRACL_HOME']
-
-    # combined or split labels
+    # read Allen ontology -- combined or split labels
     if hemi == "combined":
-        annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % ATLAS_DIR)
     else:
-        annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
 
     # extract labels at certain depth only
     if label_depth is not None:
