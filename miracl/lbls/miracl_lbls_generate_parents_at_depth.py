@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 
 from miracl.utilfn.depends_manager import add_paths
+from miracl import ATLAS_DIR
 
 # ---------
 # help fn
@@ -171,15 +172,13 @@ def main(args):
     parser = parsefn()
     d, inlbls, hemi, res = parse_inputs(parser, args)
 
-
-    miracl_home = os.environ['MIRACL_HOME']
-
     if inlbls == "Allen":
 
         # load annotations
         print("Reading ARA annotation with %s hemispheres and %d voxel size" % (hemi, res))
 
-        nii = '%s/atlases/ara/annotation/annotation_hemi_%s_%dum.nii.gz' % (miracl_home, hemi, res)
+        nii = '%s/ara/annotation/annotation_hemi_%s_%dum.nii.gz' % (ATLAS_DIR, hemi, res)
+        print(nii)
 
     else:
         print("Reading input labels")
@@ -190,7 +189,7 @@ def main(args):
 
     # load structure graph
     print("Reading ARA ontology structure_graph")
-    arastrctcsv = "%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv" % miracl_home
+    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_split.csv" % ATLAS_DIR
     aragraph = pd.read_csv(arastrctcsv)
 
     # get lbls
