@@ -362,7 +362,7 @@ if [[ "$#" -gt 1 ]]; then
         printf "\n miracl conv tiff_nii -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
          -d ${down} -o ${nii} -dz 1 \n"
         miracl conv tiff_nii -f ${indir} -cn ${chann} -cp ${chanp} -ch ${chan} -vx ${vx} -vz ${vz} \
-         -d ${down} -o ${nii} -dz 1
+         -d ${down} -o ${nii_file} -dz 1
 
     else
 
@@ -598,6 +598,7 @@ else
     printf "\n Chosen reg dir: $regdir \n"
 
     nii="$(echo -e "${arr[2]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z "${nii}" ]]; then nii='clarity'; fi
     printf "\n Chosen out nii name: $nii \n"
 
     lbl="$(echo -e "${arr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
@@ -607,41 +608,45 @@ else
     printf "\n Chosen label hemi: $hemi \n"
 
     dog="$(echo -e "${arr[5]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z "${dog}" ]]; then dog="0.5,1.5"; fi
     printf "\n Chosen Derivative of Gaussian : $dog \n"
 
     gauss="$(echo -e "${arr[6]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z "${gauss}" ]]; then gauss="0.5,2"; fi
     printf "\n Chosen Gaussian smoothing sigma: $gauss \n"
 
     angle="$(echo -e "${arr[7]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z "${angle}" ]]; then angle="25,35"; fi
     printf "\n Chosen tracking angle threshold: $angle \n"
 
     down="$(echo -e "${arr[8]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen out nii name: $down \n"
     if [[ -z "${down}" ]]; then down=5; fi
-
+    down=$( printf "%02d" $down ) # add leading zeros
+    printf "\n Chosen downsample ratio: $down \n"
+    
     chann="$(echo -e "${arr[9]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen channel num: $chann \n"
     if [[ -z "${chann}" ]]; then chann=""; fi
+    printf "\n Chosen channel num: $chann \n"
 
     chanp="$(echo -e "${arr[10]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen channel prefix: $chanp \n"
     if [[ -z "${chanp}" ]]; then chanp=""; fi
+    printf "\n Chosen channel prefix: $chanp \n"
 
     chan="$(echo -e "${arr[11]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen chan name: $chan \n"
     if [[ -z "${chan}" ]]; then chan="AAV"; fi
+    printf "\n Chosen chan name: $chan \n"
 
     vx="$(echo -e "${arr[12]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen vx: $vx \n"
     if [[ -z "${vx}" ]]; then vx=5; fi
+    printf "\n Chosen vx: $vx \n"
 
     vz="$(echo -e "${arr[13]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen vz: $vz \n"
     if [[ -z "${vz}" ]]; then vz=5; fi
+    printf "\n Chosen vz: $vz \n"
 
     downz="$(echo -e "${arr[14]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    printf "\n Chosen down-samle in z: $downz \n"
     if [[ -z "${downz}" ]]; then downz=1; fi
+    printf "\n Chosen down-sample in z: $downz \n"
 
 
     #---------------------------
@@ -653,10 +658,14 @@ else
 
         printf "\n Running conversion to nii with the following command: \n"
 
-        printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-                -ch ${chan} -cn ${chann} -cp ${chanp} \n"
-        miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-                                        -ch ${chan} -cn ${chann} -cp ${chanp}
+        if [[ -n ${chanp} ]]; then
+            printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan} -cn ${chann} -cp ${chanp} \n"
+            miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+                                            -ch ${chan} -cn ${chann} -cp ${chanp}
+        else
+            printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan}\n"
+            miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan}
+        fi
 
     else
 
@@ -670,14 +679,15 @@ else
     reg_lbls=${regdir}/annotation_hemi_${hemi}_??um_clar_space_downsample.nii.gz
 
     if [[ "${hemi}" == "combined" ]]; then
-
         # get chosen depth
-        depth=`miracl_lbls_get_graph_info.py -l ${lbl} | grep depth | tr -dc '0-9'`
+        depth=`miracl lbls graph_info -l ${lbl} | grep depth | tr -dc '0-9'`
 
     else
 
         clbl=${lbl:1:${#lbl}}
-        depth=`miracl_lbls_get_graph_info.py -l ${clbl} | grep depth | tr -dc '0-9'`
+        echo $clbl
+        echo "miracl lbls graph_info -l ${clbl} | grep depth | tr -dc '0-9'"
+        depth=`miracl lbls graph_info -l ${clbl} | grep depth | tr -dc '0-9'`
 
     fi
 
@@ -688,7 +698,7 @@ else
 
         printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
-        miracl lbls parents_at_depth -l ${reg_lbls} -d ${depth}
+        miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
 
         c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
@@ -704,8 +714,8 @@ else
 
         printf "\n Running label extraction with the following command: \n"
 
-        printf "\n miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
-        miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi}
+        printf "\n miracl utils extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
+        miracl utils extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi}
 
     else
 
@@ -723,7 +733,7 @@ else
         printf "\n Running brain mask creation with the following command: \n"
 
         printf "\n miracl utilfn brain_mask -i ${nii_file} \n"
-        miracl utilfn brain_mask -i ${nii_file}
+        miracl utils brain_mask -i ${nii_file}
 
     else
 
@@ -738,9 +748,9 @@ else
 
     printf "\n Running STA with the following command: \n"
 
-    printf "\n miracl sta primary_eigen -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
+    printf "\n miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz  \
                -dog ${dog} -gauss ${gauss} -angle ${angle} -o ${out_dir} \n"
-    miracl sta primary_eigen -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
+    miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl}_mask.nii.gz \
                                      -g ${dog} -k ${gauss} -a ${angle} -o ${out_dir}
 
     #---------------------------
@@ -764,46 +774,55 @@ else
     #---------------------------
 
     # gen tract density map
-    tracts=${sta_dir}/fiber_ang${angle}.trk
-    dens_map=${sta_dir}/sta_streamlines_density_map.nii.gz
-    dens_map_clar=${sta_dir}/sta_streamlines_density_map_clar_space.nii.gz
-    ga_vol=${sta_dir}/ga.nii.gz
 
-    if [[ ! -f ${dens_map_clar} ]]; then
+    # loop over all derivative of gaussian and gaussian smoothing values
+    for dog_sigma in ${dog//,/ }; do
 
-        printf "\n Generating tract density map with the following command: \n"
+        for gauss_sigma in ${gauss//,/ }; do
 
-        printf "\n miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
-        miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map}
+            for angle_val in ${angle//,/ }; do
+                sta_dir=${out_dir}/dog${dog_sigma}gau${gauss_sigma}
+                tracts=${sta_dir}/fiber_ang${angle_val}.trk
+                dens_map=${sta_dir}/sta_streamlines_density_map.nii.gz
+                dens_map_clar=${sta_dir}/sta_streamlines_density_map_clar_space_angle_${angle_val}.nii.gz
+                ga_vol=${sta_dir}/ga.nii.gz
 
-        echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
-        c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+                if [[ ! -f ${dens_map_clar} ]]; then
 
-    else
+                    printf "\n Generating tract density map with the following command: \n"
 
-        printf "\n Tract density map already generated \n "
+                    printf "\n miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map} \n"
+                    miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map}
 
-    fi
+                    echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+                    c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
 
-    #---------------------------
+                else
 
-    # gen label stats for density
-    dens_stats=${sta_dir}/sta_streamlines_density_stats_depth_${depth}.csv
+                    printf "\n Tract density map already generated \n "
 
-    if [[ ! -f ${dens_stats} ]]; then
+                fi
 
-        printf "\n Computing tract density statistics with the following command: \n"
+                # gen label stats for density
+                dens_stats=${sta_dir}/sta_streamlines_density_stats_depth_${depth}_angle_${angle_val}.csv
 
-        printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
-        miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+                if [[ ! -f ${dens_stats} ]]; then
 
-    else
+                    printf "\n Computing tract density statistics with the following command: \n"
 
-        printf "\n Tract density statistics already computed at this depth \n"
+                    printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+                    miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
 
-    fi
+                else
 
-    #---------------------------
+                    printf "\n Tract density statistics already computed at this depth \n"
+
+                fi
+
+
+            done
+        done
+    done
 
 fi
 
