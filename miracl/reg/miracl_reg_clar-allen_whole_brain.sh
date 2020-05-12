@@ -151,18 +151,6 @@ if [ -z ${c3dpath} ]; then
 	exit 1
 fi
 
-# ants_miracl_clar is required. Make sure a symbolic link is added
-ants_miracl_clar_path=`which ants_miracl_clar`
-if [[ ! -z "${ants_miracl_clar_path}" ]]; then
-	if [[ -f "${MIRACL_HOME}/../depends/ants/antsRegistrationMIRACL.sh" ]]; then
-		ln -s "${MIRACL_HOME}/../depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_miracl_clar && \
-		chmod +x /usr/bin/ants_miracl_clar
-	else
-		echo "\n ERROR: ants_miracl_clar is not initialized. Please ensure that antsRegistrationMIRACL.sh has been downloaded to the necessary directory and rerun the script"
-		exit 1
-	fi
-fi
-
 #----------
 
 # Init atlas dir
@@ -881,6 +869,9 @@ function warpallenlbls()
      c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} ${lblsorgnii}
 
     c3d ${inclar} ${lblsorgnii} -copy-transform -o ${lblsorgnii}
+
+	# set type to int16, to match original labelmap 
+    c3d ${lblsorgnii} -type uint -o ${lblsorgnii}
 
 }
 
