@@ -9,6 +9,8 @@ import subprocess
 import sys
 import pandas as pd
 
+from miracl import ATLAS_DIR
+
 
 def helpmsg():
     return ''' 
@@ -103,12 +105,10 @@ def main(args):
     #     inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down, order=0)
 
     # read Allen ontology
-    miracl_home = os.environ['MIRACL_HOME']
-
     if m == "combined":
-        annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % ATLAS_DIR)
     else:
-        annot_csv = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
 
     # outlbl to lblid
     lblid = annot_csv.id[annot_csv.acronym == "%s" % outlbl].values[0]
