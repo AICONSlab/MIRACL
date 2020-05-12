@@ -311,7 +311,7 @@ for angle in "${angles[@]}"; do
             # run matlab command
             printf "\n Running Structure Tensor Analysis with the following command \n\n"
 
-            runMatlabCmd sta_track "'${inclar}'" "${dog}" "${gauss}" "${angle}" "'${brainmask}'" "'${seed}'" "'${outdir}'"
+            "${MIRACL_HOME}"/utilfn/runMatlabCmd sta_track "'${curr_dir}/${inclar}'" "${dog}" "${gauss}" "${angle}" "'${curr_dir}/${brainmask}'" "'${curr_dir}/${seed}'" "'${curr_dir}/${outdir}'"
 
         done
     done
