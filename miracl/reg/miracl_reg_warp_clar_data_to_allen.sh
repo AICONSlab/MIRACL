@@ -15,55 +15,33 @@ function usage()
 
 	1) Warps downsampled CLARITY data/channels from native space to Allen atlas
 
-	Usage: `basename $0`
+	Usage: miracl reg warp_clar
 
 	A GUI will open to choose your:
 
 		- < Input clarity registration folder > (clar_allen_reg)
-
 		- < downsampled CLARITY nii to warp >
-
 		- < ort2std.txt > 
 
 	----------
-
 	For command-line / scripting
 
-	Usage: `basename $0` -r [ clarity registration dir ] -i [ nifti file to warp ] -o [ orient file ] -s [ seg channel ]
+	Usage: miracl reg warp_clar -r [ clarity registration dir ] -i [ nifti file to warp ] -o [ orient file ] -s [ seg channel ]
 
-	Example: `basename $0` -r clar_reg_allen -i control03_05xdown_PIchan.nii.gz -o ort2std.txt
+	Example: miracl reg warp_clar -r clar_reg_allen -i control03_05xdown_PIchan.nii.gz -o ort2std.txt
 
 	    OR
 
-	    `basename $0` -r clar_reg_allen -i voxelized_seg_virus.nii.gz -o ort2std.txt -s green
+	    miracl reg warp_clar -r clar_reg_allen -i voxelized_seg_virus.nii.gz -o ort2std.txt -s green
 
 		arguments (required):
-
 			r. Input clarity registration dir
-
 			i. Input downsampled CLARITY nii to warp
-
 			o. File with orientation to standard code
 
         arguments (optional):
-
 			s. Segmentation channel (ex. green) - required if voxelized seg is input
 
-	----------		
-
-	Dependencies:
-	
-		- ANTs
-		https://github.com/stnava/ANTs			
-		
-		- c3d
-		https://sourceforge.net/projects/c3d
-
-	-----------------------------------
-	
-	(c) Maged Goubran @ Stanford University, 2018
-	mgoubran@stanford.edu
-	
 	-----------------------------------
 
 usage

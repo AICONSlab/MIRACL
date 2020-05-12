@@ -18,66 +18,32 @@ function usage()
 
 	Runs a Fiji/ImageJ macro 
 	
-	Usage: `basename $0` 
+	Usage: miracl seg clar
 
 	A GUI will open to choose your input clarity folder (with .tif files)
 
 	The folder should contain data from one channel 
 
-
 		----------
-
 	For command-line / scripting
 
+	Usage: miracl seg clar -f <clarity folder> -t <channel type: virus or sparse or nuclear or cfos>
 
-	Usage: `basename $0` -f <clarity folder> -t <channel type: virus or sparse or nuclear or cfos>
-
-	Example: `basename $0` -f my_clarity_tifs -t virus -p Filter0001
+	Example: miracl seg clar -f my_clarity_tifs -t virus -p Filter0001
 
 		arguments (required):
-
 			f. Input clarity folder/directory (including .tif images) [folder name without spaces]
-
 			t. Channel type: virus or cFOS or sparse (like Thy1 YFP) or nuclear (like PI)  (default = virus)
 
 		Optional arguments:
-
 			p. Channel prefix & number if multiple channels (like Filter0001)
-
-
 		----------
-
     Main Outputs
-
-
         segmentation_{type}/seg_{type}.tif (.mhd) : segmentation image with all labels (cells)
-
         segmentation_{type}/seg_bin_{type}.tif (.mhd) : binarized segmentation image
 
-
         Results can be opened in Fiji for visualization
-
-
         ----------
-
-	Dependencies:
-	
-		- Fiji 
-
-		- Fiji Plugins:
-		
-		1) 3D Segmentation plugins (3D ImageJ suite) 	
-		http://imagejdocu.tudor.lu/doku.php?id=plugin:stacks:3d_ij_suite:start	
-
-		2) Mathematical Morphology plugins 
-		http://imagej.net/MorphoLibJ
-
-	-----------------------------------
-	
-	(c) Maged Goubran @ Stanford University, 2018
-	mgoubran@stanford.edu
-	
-	-----------------------------------
 
 usage
 getversion >&2

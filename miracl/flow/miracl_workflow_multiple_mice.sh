@@ -17,18 +17,16 @@ function usage()
 
  	Script has to run in command-line mode
 
+	Usage: miracl flow mul -sm [ script module ] -sc [ script ] -id [ input directory ] -opt [options] -nj [ #_of_jobs] -tj [ time_between_batches(min) ]
 
-	Usage: `basename $0` -sm [ script module ] -sc [ script ] -id [ input directory ] -opt [options] -nj [ #_of_jobs] -tj [ time_between_batches(min) ]
-
-	Example: `basename $0` -st reg -sc clar_allen_wb -id my_data_dir -opt "-m combined" -nj 3 -tj 10
+	Example: miracl flow mul -st reg -sc clar_allen -id my_data_dir -opt "-m combined" -nj 3 -tj 10
 
 	arguments (required):
-
 		st. script module / type 
 			example: reg or seg or lbls or connect 
 
 		sc. script name 
-			example: clar_allen_wb
+			example: clar_allen
 
 		id. input directory with multiple mice data
 
@@ -38,12 +36,6 @@ function usage()
 
 		tj. time for computer to "sleep" between parallel jobs
 
-
-	-----------------------------------
-	
-	(c) Maged Goubran @ Stanford University, 2017
-	mgoubran@stanford.edu
-	
 	-----------------------------------
 
 usage

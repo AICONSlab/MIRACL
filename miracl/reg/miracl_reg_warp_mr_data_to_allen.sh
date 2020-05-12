@@ -15,7 +15,7 @@ function usage()
 
 	1) Warps MRI data from native space to Allen atlas
 
-	Usage: `basename $0`
+	Usage: miracl reg warp_mr
 
 	A GUI will open to choose your:
 
@@ -26,39 +26,16 @@ function usage()
     	- < ort2std.txt > 
 
 	----------
-
 	For command-line / scripting
 
-	Usage: `basename $0` -r [ MRI registration dir ] -i control03_05xdown_PIchan.nii.gz -o [ orient file ]
+	Usage: miracl reg warp_mr -r [ MRI registration dir ] -i control03_05xdown_PIchan.nii.gz -o [ orient file ]
 
-	Example: `basename $0` -r mr_reg_allen -i inv_T2map.nii.gz -o ort2std.txt
+	Example: miracl reg warp_mr -r mr_reg_allen -i inv_T2map.nii.gz -o ort2std.txt
 
 		arguments (required):
-
 			r. Input MRI registration dir
-
-			i. input MRI nii to warp 
-
+			i. input MRI nii to warp
 			o. file with orientation to standard code
-
-	----------		
-
-	Dependencies:
-	
-		- ANTs
-		https://github.com/stnava/ANTs			
-		
-		- c3d
-		https://sourceforge.net/projects/c3d
-
-	-----------------------------------
-	
-	(c) Maged Goubran @ Stanford University, 2018
-	mgoubran@stanford.edu
-	
-	-----------------------------------
-
-	registration based on ANTs	
 
 	-----------------------------------
 

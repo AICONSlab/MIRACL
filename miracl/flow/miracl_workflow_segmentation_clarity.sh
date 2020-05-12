@@ -26,47 +26,35 @@ function usage()
         seg/miracl_seg_voxelize_parallel.py
         seg/miracl_seg_feat_extract.py
 
-
-    Usage: `basename $0`
+    Usage: miracl flow seg
 
         A GUI will open to choose folder with tif files for segmentation (folder must have one channel)
 
         For feature extraction the "reg_final/annotation_hemi_combined_(vox)um_clar_vox.tif" file must exist
 
     ----------
-
 	For command-line / scripting
 
-    Usage: `basename $0` -f [Tiff folder]
+    Usage: miracl flow seg -f [Tiff folder]
 
-    Example: `basename $0` -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
+    Example: miracl flow seg -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
 
         arguments (required):
-
             f. Input Clarity tif folder/dir [folder name without spaces]
-
             t. Channel type: virus (default) or cfos or sparse (like Thy1 YFP) or nuclear (like PI)
-
             v. Registered labels voxel size (10, 25, or 50um)
 
         optional arguments (do not forget the quotes):
 
             Segmentation (invoked by -s " "):
-
 			    p. Channel prefix & number if multiple channels (like Filter0001)
 
             Feature extraction (invoked by -e " "):
-
                 l. Allen labels (registered to clarity) used to summarize features
-
                     reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
-
-
 	----------
 
 	Main Outputs
-
-
         segmentation/seg.tif (.mhd) or seg_nuclear.tif (.mhd) : segmentation image with all labels (cells)
         segmentation/seg_bin.tif (.mhd) or seg_bin_nuclear.tif (.mhd) : binarized segmentation image
 
@@ -75,31 +63,9 @@ function usage()
 
         clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)
 
-
         Results can be opened in Fiji for visualization
 
-
-    ----------
-
-    Dependencies:
-
-		- Fiji
-
-		- Fiji Plugins:
-
-		1) 3D Segmentation plugins (3D ImageJ suite)
-		http://imagejdocu.tudor.lu/doku.php?id=plugin:stacks:3d_ij_suite:start
-
-		2) Mathematical Morphology plugins
-		http://imagej.net/MorphoLibJ
-
 	-----------------------------------
-
-	(c) Maged Goubran @ Stanford University, 2017
-	mgoubran@stanford.edu
-
-	-----------------------------------
-
 
 usage
 getversion >&2
