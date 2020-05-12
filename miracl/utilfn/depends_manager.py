@@ -23,7 +23,7 @@ class add_paths():
         '''
         for command in self.command_paths.keys():
             try:
-                subprocess.check_call(['which', command])
+                val = subprocess.check_call(['which', command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except subprocess.CalledProcessError:  # if the command doesnt exist, add it to the path
                 if os.path.isdir(self.command_paths[command]):
                     os.environ['PATH'] += os.pathsep + self.command_paths[command]

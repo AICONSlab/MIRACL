@@ -9,6 +9,8 @@ import sys
 import numpy as np
 import pandas as pd
 
+from miracl import ATLAS_DIR
+
 
 # from IPython.display import HTML, display
 
@@ -46,19 +48,21 @@ def main(args):
     lbl = parse_inputs(parser, args)
 
     # read graph
-    miracl_home = os.environ['MIRACL_HOME']
-    arastrctcsv = "%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv" % miracl_home
+    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_combined.csv" % ATLAS_DIR
     aragraph = pd.read_csv(arastrctcsv)
 
-    if np.in1d(lbl, aragraph.id.values):
-
-        lblinfo = aragraph[aragraph.id == int(lbl)]
-
-    else:
-        if np.in1d(lbl, aragraph.name.values):
+    try:  # get the data from the atlas, exit if the label doesnt match
+        if isinstance(lbl, int) and int(lbl) in aragraph.id.values:
+            lblinfo = aragraph[aragraph.id == int(lbl)]
+        elif lbl in aragraph.name.values:
             lblinfo = aragraph[aragraph.name == lbl]
-        else:
+        elif lbl in aragraph.acronym.values:
             lblinfo = aragraph[aragraph.acronym == lbl]
+        else:
+            raise ValueError('Error: {} is not a label id, label name, OR label acronym. Please consult {} to see possible values\n'.format(lbl, arastrctcsv))
+    except Exception as e:
+        exit(e)
+        #exit('Could not complete request.')
 
     # print
     # print(lblinfo.to_string(index=False))
