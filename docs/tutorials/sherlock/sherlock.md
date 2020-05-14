@@ -116,6 +116,6 @@ Check on submitted job
     
 #### For more resources on slurm sbatch jobs check these pages
 
-https://www.sherlock.stanford.edu/docs/getting-started/submitting/
+[sherlock submitting jobs](https://www.sherlock.stanford.edu/docs/getting-started/submitting/)
 
-https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/
+[sherlock running jobs](https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/)
