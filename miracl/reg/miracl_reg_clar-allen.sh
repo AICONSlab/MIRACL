@@ -945,10 +945,10 @@ function createtiledimg()
 
     # create image
     if [[ ${reghemi} == "combined" ]]; then
-        png_dir=z
+        png_dir=2
         flip='0x1'
     else
-        png_dir=x
+        png_dir=0
         flip='0x0'
     fi
 
