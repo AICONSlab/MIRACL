@@ -255,6 +255,7 @@ root.mainloop()
 # Axial
 if AOVar.get() == 1:
     ort = list('ARS')
+    print(ort)
 
     # get Top
     if ATVar.get() == 1:
@@ -277,6 +278,7 @@ if AOVar.get() == 1:
 # Sagittal
 elif SOVar.get() == 1:
     ort = list('ASR')
+    print(ort)
 
     # get Top
     if ATVar.get() == 1:
@@ -299,6 +301,7 @@ elif SOVar.get() == 1:
 # Coronal
 elif COVar.get() == 1:
     ort = list('RAS')
+    print(ort)
 
     # get Top
     if STVar.get() == 1:
@@ -318,7 +321,7 @@ elif COVar.get() == 1:
     elif PLVar.get() == 1:
         ort[2] = 'I'
 
-
+print(ort)
 ortstr = ''.join(ort)
 
 # -------------------------------

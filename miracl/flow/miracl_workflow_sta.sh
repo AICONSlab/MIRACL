@@ -588,7 +588,7 @@ else
     printf "\n Chosen downsample ratio: $down \n"
     
     chann="$(echo -e "${arr[9]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    if [[ -z "${chann}" ]]; then chann=""; fi
+    if [[ -z "${chann}" ]]; then chann="1"; fi
     printf "\n Chosen channel num: $chann \n"
 
     chanp="$(echo -e "${arr[10]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
@@ -624,10 +624,10 @@ else
         if [[ -n ${chanp} ]]; then
             printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan} -cn ${chann} -cp ${chanp} \n"
             miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
-                                            -ch ${chan} -cn ${chann} -cp ${chanp}
+                                            -ch ${chan} -cn ${chann} -cp ${chanp} -vx ${vx} -vz ${vz}
         else
             printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan}\n"
-            miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan}
+            miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan} -vx ${vx} -vz ${vz}
         fi
 
     else
@@ -758,7 +758,7 @@ else
                     miracl sta tract_density -t ${tracts} -r ${ga_vol} -o ${dens_map}
 
                     echo c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
-                    c3d ${nii_file} ${dens_map} -copy-transform ${dens_map_clar}
+                    c3d ${nii_file} ${dens_map} -copy-transform -o ${dens_map_clar}
 
                 else
 
