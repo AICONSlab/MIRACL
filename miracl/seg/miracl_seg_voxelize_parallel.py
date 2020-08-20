@@ -242,20 +242,20 @@ def main(args):
 
     type = fstr[0].split("_")[1]
 
-    outvox = '%s/voxelized_seg_%s.tiff' % (segdir, type)
-    outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    # outvox = '%s/voxelized_seg_%s.tiff' % (segdir, type)
+    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
 
-    if not os.path.exists(outvox):
+    # if not os.path.exists(outvox):
 
-        marray = parcomputevox(seg, radius, ncpus, down, outvox)
+    #     marray = parcomputevox(seg, radius, ncpus, down, outvox)
 
-        savenvoxnii(marray, outvoxnii, res)
+    #     savenvoxnii(marray, outvoxnii, res)
 
-        print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
+    #     print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
-    else:
+    # else:
 
-        print('\n Voxelized map already created')
+    #     print('\n Voxelized map already created')
 
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
