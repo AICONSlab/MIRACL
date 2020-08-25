@@ -23,7 +23,6 @@ function usage()
 	5) Warps the higher-resolution CLARITY to Allen space
 
     Executes:
-
         conv/miracl_conv_set_orient_gui.py (if run in GUI mode)
         conv/miracl_conv_convertTIFFtoNII.py
         reg/miracl_reg_clar-allen.sh
@@ -37,19 +36,15 @@ function usage()
 	For command-line / scripting
 
     Usage: miracl flow reg_clar -f [Tiff folder]
-
     Example: miracl flow reg_clar -f my_tifs -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 
         arguments (required):
-
             f. Input Clarity tif dir/folder
 
         optional arguments (remember the quotes):
-
             w.  output directory (default: working directory)
 
             conversion to nii (invoked by -n " "):
-
             d.  [ Downsample ratio (default: 5) ]
             cn. [ chan # for extracting single channel from multiple channel data (default: 1) ]
             cp. [ chan prefix (string before channel number in file name). ex: C00 ]
@@ -59,16 +54,16 @@ function usage()
             c.  [ nii center (default: 5.7 -6.6 -4) corresponding to Allen atlas nii template ]
 
             Registration (invoked by -r " "):
-
-            o. Orient code (default: ALS)
+            o.  Orient code (default: ALS)
                 to orient nifti from original orientation to "standard/Allen" orientation
-            m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
+            m.  Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
                 accepted inputs are: <split> or <combined>  (default: combined)
-            v. Labels voxel size/Resolution of labels in um
+            v.  Labels voxel size/Resolution of labels in um
                 accepted inputs are: 10, 25 or 50  (default: 10)
-            l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
+            l.  image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
                 input could be at a different depth than default labels
                 If l. is specified (m & v cannot be specified)
+            a.  input custom Allen atlas (for example for registering sections)
             s.  side, if only registering a hemisphere instead of whole brain
                 accepted inputs are: rh (right hemisphere) or lh (left)
 
@@ -82,11 +77,9 @@ function usage()
         reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif : Allen labels registered to original (full-resolution) Clarity
 
         - To visualize results use: miracl reg check
-
         - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
 
 	-----------------------------------
-
 
 usage
 getversion >&2
@@ -349,7 +342,9 @@ else
 
     # options gui for Reg
 	regopts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" \
-	        -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side [blank (def) / rh / lh]"  -hf "`usage`")
+	        -f "Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" \
+	         "side [blank (def) / rh / lh]" -v "input custom atlas [blank (def)]" "input custom labels [blank (def)]" \
+	          -hf "`usage`")
 
 	# populate array
 	regarr=()
@@ -373,6 +368,18 @@ else
 	side="$(echo -e "${regarr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
     if [[ -z ${side} ]]; then side="" ; fi
     printf "\n Chosen ob: ${side} \n"
+
+	side="$(echo -e "${regarr[3]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z ${side} ]]; then side="" ; fi
+    printf "\n Chosen ob: ${side} \n"
+
+	atlas="$(echo -e "${regarr[4]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z ${atlas} ]]; then atlas="" ; fi
+    printf "\n Chosen custom atlas: ${atlas} \n"
+
+	lbls="$(echo -e "${regarr[5]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if [[ -z ${lbls} ]]; then lbls="" ; fi
+    printf "\n Chosen custom atlas: ${lbls} \n"
 
     # make reg dir
     regdirfinal=${work_dir}/reg_final
@@ -414,8 +421,8 @@ else
     ort=`cat ${work_dir}/ort2std.txt | grep ortcode | cut -d '=' -f 2`
     ort="${ort:0:3}"
 
-    printf "\n miracl reg clar_allen -i niftis/${nii} -w ${work_dir} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} \n"
-    miracl reg clar_allen -i ""${work_dir}"/niftis/"${nii}"" -w "${work_dir}" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}"
+    printf "\n miracl reg clar_allen -i niftis/${nii} -w ${work_dir} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} -a ${atlas} -l ${lbls} \n"
+    miracl reg clar_allen -i ""${work_dir}"/niftis/"${nii}"" -w "${work_dir}" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}" -a "${atlas}" -l "${lbls}"
 
 fi
 
