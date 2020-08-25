@@ -31,6 +31,7 @@ def parsefn():
     parser.add_argument('-f', '--fields', type=str, nargs='+', help="fields for options")
     parser.add_argument('-v', '--vols', type=str, nargs='+', help="volumes for reading")
     parser.add_argument('-d', '--dirs', type=str, nargs='+', help="directories for reading")
+    parser.add_argument('-c', '--combo', type=str, nargs='+', help="dropdown of options")
     parser.add_argument('-hf', '--helpfun', type=str, help="help fun")
 
     return parser
@@ -43,12 +44,13 @@ def parse_inputs(parser, args):
     fields = args.fields
     vols = args.vols
     dirs = args.dirs
+    combo = args.combo if args.combo else None
     helpfun = args.helpfun
 
-    return title, vols, dirs, fields, helpfun
+    return title, vols, dirs, fields, combo, helpfun
 
 
-def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
+def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None):
     # create GUI
     main = QtGui.QMainWindow()
 
@@ -94,6 +96,15 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
         # Layout for widgets        
         layout.addRow("%s" % field, linedits["%s" % field])
 
+    if combo:
+        combo_field = combo[0]
+        cb = QtGui.QComboBox()
+        cb.addItems(combo[1:])
+        layout.addRow(combo_field, cb)
+    else:
+        combo_field = None
+        cb = None
+
     # Create push button
     helpbutton = QtGui.QPushButton('Help')
     enter = QtGui.QPushButton('Enter')
@@ -105,7 +116,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, helpfun=None):
     widget.setLayout(layout)
 
     widget.connect(helpbutton, QtCore.SIGNAL('clicked()'), lambda: print_help(main, helpfun))
-    widget.connect(enter, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields))
+    widget.connect(enter, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields, combo_field, cb))
     submit.clicked.connect(QtCore.QCoreApplication.instance().quit)
 
     return widget, linedits, labels
@@ -131,9 +142,11 @@ def get_dname(main, labels, dir):
         labels["%s" % dir].setText('No Dir selected')
 
 
-def print_input(linedits, fields):
+def print_input(linedits, fields, combo_field=None, cb=None):
     for f, field in enumerate(fields):
         print("%s :%s" % (field, str(linedits["%s" % field].text()).lstrip()))
+    if combo_field and cb:
+        print("%s :%s" % (combo_field, cb.currentText()))
 
 
 def print_help(main, helpfun):
@@ -156,11 +169,11 @@ def print_help(main, helpfun):
 
 def main(args):
     parser = parsefn()
-    title, vols, dirs, fields, helpfun = parse_inputs(parser, args)
+    title, vols, dirs, fields, combo, helpfun = parse_inputs(parser, args)
 
     # Create an PyQT4 application object.
     app = QApplication(sys.argv)
-    menu, linedits, labels = OptsMenu(title=title, vols=vols, dirs=dirs, fields=fields, helpfun=helpfun)
+    menu, linedits, labels = OptsMenu(title=title, vols=vols, dirs=dirs, fields=fields, combo=combo, helpfun=helpfun)
     menu.show()
     app.exec_()
     app.processEvents()

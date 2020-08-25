@@ -71,16 +71,29 @@ def parse_inputs(parser, args):
         miracl_home = os.environ['MIRACL_HOME']
 
         indirstr = subprocess.check_output(
-            '%s/conv/miracl_conv_file_folder_gui.py -f %s -s %s' % (
-            miracl_home, 'folder', '"Please open reg final dir"'),
+            '%s/conv/miracl_conv_gui_options.py -t "Registration Check Options" -d "%s" -f "%s" "%s" -c "%s" "%s" "%s"' % (
+            miracl_home, 'Final registration directory', 'Registration Space (def = clarity)', 'Hemisphere (def = combined)', 
+            'Visualization Software', 'itk', 'freeview'),
             shell=True,
             stderr=subprocess.PIPE)
-        indir = indirstr.split(":")[1].lstrip().rstrip()
 
-        # args = parser.parse_args()
-        viz = 'itk'
-        space = 'clarity'
-        hemi = 'combined'
+        # put args in args dict iff the user has input a value
+        gui_sts = indirstr.split('\n')
+        gui_args = {}
+        for st in gui_sts:
+            if st:
+                st_split = st.split(':')
+                if st_split[1]:
+                    gui_args[st_split[0]] = st_split[1]
+
+        if 'Final registration directory path' not in gui_args:
+            sys.exit("Please provide location for final registration directory")
+        else:
+            indir = gui_args['Final registration directory path'][1:]
+
+        space = gui_args.get('Registration Space (def = clarity) ', 'clarity')
+        hemi = gui_args.get('Hemisphere (def = combined) ', 'combined')
+        viz = gui_args.get('Visualization Software ', 'itk')
 
     else:
         print("\n running in script mode \n")

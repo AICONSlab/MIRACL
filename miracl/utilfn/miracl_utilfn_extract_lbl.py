@@ -8,6 +8,8 @@ import os
 import subprocess
 import sys
 import pandas as pd
+import nibabel as nib
+import numpy as np
 
 from miracl import ATLAS_DIR
 
@@ -95,14 +97,14 @@ def main(args):
     print("\n reading input labels ...")
 
     # in python
-    # inlblsnii = nib.load("%s" % inlbls)
-    # inlblsdata = inlblsnii.get_data()
-    #
-    # if d > 1:
-    #     print("\n down-sampling mask")
-    #
-    #     down = (1.0 / int(d))
-    #     inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down, order=0)
+    inlblsnii = nib.load("%s" % inlbls)
+    inlblsdata = inlblsnii.get_data()
+    
+    if d > 1:
+        print("\n down-sampling mask")
+    
+        down = (1.0 / int(d))
+        inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down, order=0)
 
     # read Allen ontology
     if m == "combined":
@@ -115,32 +117,32 @@ def main(args):
 
     # in python
 
-    # mask = inlblsdata.copy()
-    #
-    # print(mask.shape)
-    # print(lblid)
-    #
-    # # extract lbl
-    # print("\n extracting label ...")
-    #
-    # mask[mask != lblid] = 0
-    # mask[mask > 0] = 1  # binarize
-    #
-    # # assuming iso resolution
-    # vx = inlblsnii.header.get_zooms()[0]
-    #
-    # outvox = vx * d
-    #
-    # mat = np.eye(4) * outvox
-    # mat[3, 3] = 1
-    #
-    # outnii = "%s_mask.nii.gz" % outlbl
-    #
-    # # extract lbl
-    # print("\n saving label image ...")
-    #
-    # masknii = nib.Nifti1Image(mask, mat)
-    # nib.save(masknii, outnii)
+    mask = inlblsdata.copy()
+    
+    print(mask.shape)
+    print(lblid)
+    
+    # extract lbl
+    print("\n extracting label ...")
+    
+    mask[mask != lblid] = 0
+    mask[mask > 0] = 1  # binarize
+    
+    # assuming iso resolution
+    vx = inlblsnii.header.get_zooms()[0]
+    
+    outvox = vx * d
+    
+    mat = np.eye(4) * outvox
+    mat[3, 3] = 1
+    
+    outnii = "%s_mask.nii.gz" % outlbl
+    
+    # extract lbl
+    print("\n saving label image ...")
+    
+    masknii = nib.Nifti1Image(mask, mat)
+    #nib.save(masknii, outnii)
 
     outnii = "%s_mask.nii.gz" % outlbl
 

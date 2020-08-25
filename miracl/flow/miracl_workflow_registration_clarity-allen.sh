@@ -289,7 +289,7 @@ else
     # Get nii conv opts
 
     # options gui Nii conv
-	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Nii conversion options"
+	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Nii conversion options" \
 	-d "output directory (def = working dir)" -f "out nii (def = clarity)" "downsample ratio (def = 5)" \
 	 "channel #" "channel prefix" "channel name (def = eyfp)" "in-plane res (def = 5 um)" \
     "z res (def = 5 um)" "center (def = 0 0 0)"  -hf "`usage`")
@@ -423,7 +423,6 @@ else
 
     printf "\n miracl reg clar_allen -i niftis/${nii} -w ${work_dir} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} -a ${atlas} -l ${lbls} \n"
     miracl reg clar_allen -i ""${work_dir}"/niftis/"${nii}"" -w "${work_dir}" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}" -a "${atlas}" -l "${lbls}"
-
 
 fi
 

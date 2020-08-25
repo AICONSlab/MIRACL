@@ -318,7 +318,6 @@ elif COVar.get() == 1:
     elif PLVar.get() == 1:
         ort[2] = 'I'
 
-
 ortstr = ''.join(ort)
 
 # -------------------------------
