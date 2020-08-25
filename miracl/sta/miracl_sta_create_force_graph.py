@@ -11,7 +11,6 @@ import sys
 import numpy as np
 import pandas as pd
 from lightning import Lightning
-from IPython import embed
 
 def helpmsg():
     return '''
@@ -134,7 +133,6 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
     #     return lgn.force(dfthr,group=parents,labels=dfthr.index.values,values=dfthr.max(),size=sizes,width=2000,height=1500,colormap=cmap)
 
     #f = lgn.force(dfthr, labels=dfthr.index.values, size=sizes, width=2500, height=1500)
-    print(dfthr.index.values)
     f = lgn.force(dfthr, labels=dfthr.index.values, values=dfthr.max(), size=sizes, width=2500, height=1500)
     f.save_html('%s_conn_force.html' % name, overwrite=True)
 
