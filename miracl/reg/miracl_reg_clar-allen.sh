@@ -30,9 +30,9 @@ function usage()
     Example: miracl reg clar_allen -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
 
     arguments (required):
-		i.  input down-sampled clarity nii
-		    Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
-		    file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
+        i.  input down-sampled clarity nii
+            Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
+            file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
             [this should be accurate as it is used for allen label upsampling to clarity]
 
     optional arguments:
@@ -47,7 +47,7 @@ function usage()
         l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz)
 			input labels could be at a different depth than default labels
 			If l. is specified (m & v cannot be specified)
-		a.  input custom Allen atlas (for example for registering sections)
+        a.  input custom Allen atlas (for example for registering sections)
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
         f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
@@ -67,7 +67,7 @@ function usage()
         - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
     -----------------------------------
     registration based on ANTs
-	-----------------------------------
+    -----------------------------------
 
 usage
 getversion >&2
@@ -945,10 +945,10 @@ function createtiledimg()
 
     # create image
     if [[ ${reghemi} == "combined" ]]; then
-        png_dir=z
+        png_dir=2
         flip='0x1'
     else
-        png_dir=x
+        png_dir=0
         flip='0x0'
     fi
 

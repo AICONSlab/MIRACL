@@ -30,7 +30,7 @@ install PyQt4 using anaconda, run:
 
 Place the **depends** folder inside **linux_depends** or **mac_depends** (based on your OS), found here:
 
-[download link](https://stanfordmedicine.box.com/s/og3czc5wgva41rmi52gkmjhk0y9bcg56)
+[download link](https://www.dropbox.com/sh/i9swdedx7bsz1s8/AABpDmmN1uqPz6qpBLYLtt8va?dl=0)
 
 inside the **miracl** folder
 
