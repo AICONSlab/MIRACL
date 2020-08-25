@@ -296,10 +296,6 @@ else
     # Get nii conv opts
 
     # options gui Nii conv
-# <<<<<<< Updated upstream
-# 	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Nii conversion options"
-# 	-f "output directory (def = working dir)" "out nii (def = clarity)" "downsample ratio (def = 5)" \
-# =======
 	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Nii conversion options" \
 	-d "output directory (def = working dir)" -f "out nii (def = clarity)" "downsample ratio (def = 5)" \
 	 "channel #" "channel prefix" "channel name (def = eyfp)" "in-plane res (def = 5 um)" \
