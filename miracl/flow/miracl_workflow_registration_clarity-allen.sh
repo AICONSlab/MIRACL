@@ -188,6 +188,7 @@ if [[ "$#" -gt 1 ]]; then
     # make reg dir
     if [[ -z "${work_dir}" ]] || [[ "${work_dir}" == "None" ]]; then
 
+        work_dir=${PWD}
         regdirfinal=${PWD}/reg_final
         regdir=${PWD}/clar_allen_reg
 
