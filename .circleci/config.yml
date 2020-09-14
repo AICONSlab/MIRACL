@@ -22,7 +22,7 @@ jobs:
           command: |
             echo "Building base image for MIRACL"
             MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
-            docker build -t ${CONTAINER_NAME}:base-latest -f /tmp/src/MIRACL/docker/Dockerfile
+            docker build -t ${CONTAINER_NAME}:base-latest -f /tmp/src/MIRACL/docker/Dockerfile .
             docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${MIRACL_VERSION}
             docker push ${CONTAINER_NAME}:base-latest
 
