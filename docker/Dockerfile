@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt-get install -y libfreetype6-dev apt-utils pkg-config vim gfortran && \
     apt-get install -y binutils make linux-source unzip && \
     apt install -y libsm6 libxext6 libfontconfig1 libxrender1 && \
-    apt-get install itksnap
+    apt-get install -y itksnap
 
 # Install miniconda
 RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-4.6.14-Linux-x86_64.sh && \
@@ -18,10 +18,11 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
+    pip install --upgrade pip && \
     pip install matplotlib joblib scipy==1.2.1 && \
     pip install tifffile && \
-    pip install menpo opencv-python && \
-    apt remove cmake && \
+    pip install menpo==0.8.0 opencv-python==4.2.0.32 && \
+    apt remove -y cmake && \
     pip install cmake
 
 # Install ANTs
