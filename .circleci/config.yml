@@ -17,6 +17,15 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Build Docker base image
+          no_output_timeout: 120m
+          command: |
+            echo "Building base image for MIRACL"
+            MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
+            docker build -t ${CONTAINER_NAME}:base-latest -f /tmp/src/MIRACL/docker/Dockerfile
+            docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${MIRACL_VERSION}
+            docker push ${CONTAINER_NAME}:base-latest
+      - run:
           name: Build Docker images
           no_output_timeout: 60m
           command: |
@@ -72,19 +81,19 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
 
-  # This workflow will deploy images on merge to master only
+  This workflow will deploy images on merge to master only
   docker_with_lifecycle:
     jobs:
       - docker-publish/publish:
           image: mgoubran/miracl
-          tag: base-latest-dev
+          tag: latest
           filters:
             branches:
-             only: sta_workflow
+             only: master
           after_build:
             - run:
                 name: Publish Docker Tag with MIRACL Version
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag mgoubran/miracl:base-latest-dev mgoubran/miracl:base-dev-${DOCKER_TAG}
+                   docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
