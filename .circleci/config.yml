@@ -77,24 +77,7 @@ workflows:
     jobs:
       - docker-publish/publish:
           image: mgoubran/miracl
-          tag: latest,base-latest
-          filters:
-            branches:
-             only: master
-          after_build:
-            - run:
-                name: Publish Docker Tag with MIRACL Version
-                command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
-                   echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
-                   docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAG}
-
-  docker_with_lifecycle:
-    jobs:
-      - docker-publish/publish:
-          image: entiri/miracl
-          tag: latest,base-latest
+          tag: base-latest-dev
           filters:
             branches:
              only: sta_workflow
@@ -104,5 +87,4 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag entiri/miracl:latest entiri/miracl:${DOCKER_TAG}
-                   docker tag entiri/miracl:base-latest entiri/miracl:base-${DOCKER_TAG}
+                   docker tag mgoubran/miracl:base-latest-dev mgoubran/miracl:base-dev-${DOCKER_TAG}
