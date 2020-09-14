@@ -6,7 +6,7 @@ orbs:
 
 jobs:
 
-  build:
+  build_base_image:
     environment:
       - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
       - CONTAINER_NAME: "mgoubran/miracl"
@@ -25,6 +25,17 @@ jobs:
             docker build -t ${CONTAINER_NAME}:base-latest -f /tmp/src/MIRACL/docker/Dockerfile
             docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${MIRACL_VERSION}
             docker push ${CONTAINER_NAME}:base-latest
+
+  build:
+    environment:
+      - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+      - CONTAINER_NAME: "mgoubran/miracl"
+    docker:
+      - image: docker:18.06.3-ce-git
+    working_directory: /tmp/src/MIRACL
+    steps:
+      - checkout
+      - setup_remote_docker
       - run:
           name: Build Docker images
           no_output_timeout: 60m
@@ -44,7 +55,7 @@ jobs:
             done && [ "$e" -eq "0" ]
       - run:
           name: Run Tests
-          no_output_timeout: 2h
+          no_output_timeout: 15m
           command: |
              echo "Runing tests:"
              # docker run --entrypoint bash -it mgoubran/miracl bet
@@ -64,6 +75,7 @@ workflows:
 
   build_without_publishing_job:
     jobs:
+      - build_base_image
       - docker-publish/publish:
           image: mgoubran/miracl
           deploy: false
@@ -81,7 +93,7 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
 
-  This workflow will deploy images on merge to master only
+  # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
     jobs:
       - docker-publish/publish:
