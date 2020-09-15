@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM neurodebian:xenial
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -81,9 +81,7 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
 ENV PATH /opt/c3d/bin:${PATH}
 
 # Install FSL, cmake
-RUN wget -O- http://neuro.debian.net/lists/trusty.us-tn.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pool.sks-keyservers.net:80 0xA5D32F012649A5A9 && \
-    apt-get update && apt-get install -y fsl-5.0-core fsl && \
+RUN apt-get update && apt-get install -y fsl && \
     apt remove cmake && \
     pip install cmake --upgrade
 
