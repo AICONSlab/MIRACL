@@ -6,26 +6,6 @@ orbs:
 
 jobs:
 
-  build_base_image:
-    environment:
-      - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
-      - CONTAINER_NAME: "mgoubran/miracl"
-    docker:
-      - image: docker:18.06.3-ce-git
-    working_directory: /tmp/src/MIRACL
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Build Docker base image
-          no_output_timeout: 120m
-          command: |
-            echo "Building base image for MIRACL"
-            MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
-            docker build -t ${CONTAINER_NAME}:base-latest -f /tmp/src/MIRACL/docker/Dockerfile .
-            docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${MIRACL_VERSION}
-            docker push ${CONTAINER_NAME}:base-latest
-
   build:
     environment:
       - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -55,7 +35,7 @@ jobs:
             done && [ "$e" -eq "0" ]
       - run:
           name: Run Tests
-          no_output_timeout: 15m
+          no_output_timeout: 2h
           command: |
              echo "Runing tests:"
              # docker run --entrypoint bash -it mgoubran/miracl bet
@@ -75,7 +55,6 @@ workflows:
 
   build_without_publishing_job:
     jobs:
-      - build_base_image
       - docker-publish/publish:
           image: mgoubran/miracl
           deploy: false
