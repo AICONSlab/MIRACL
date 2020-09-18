@@ -12,7 +12,7 @@ To build the base container, first understand the naming convention. We name
 the container base based on the version of the software.
 
 ```bash
-VERSION=$(cat ../version.txt)
+VERSION=$(cat ../miracl/version.txt)
 $ echo $VERSION 
 1.1.0
 ```

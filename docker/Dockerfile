@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM neurodebian:xenial
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt-get install -y libfreetype6-dev apt-utils pkg-config vim gfortran && \
     apt-get install -y binutils make linux-source unzip && \
     apt install -y libsm6 libxext6 libfontconfig1 libxrender1 && \
-    apt-get install itksnap
+    apt-get install -y itksnap
 
 # Install miniconda
 RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-4.6.14-Linux-x86_64.sh && \
@@ -18,10 +18,11 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
+    pip install --upgrade pip && \
     pip install matplotlib joblib scipy==1.2.1 && \
     pip install tifffile && \
-    pip install menpo opencv-python && \
-    apt remove cmake && \
+    pip install menpo==0.8.0 opencv-python==4.2.0.32 && \
+    apt remove -y cmake && \
     pip install cmake
 
 # Install ANTs
@@ -80,9 +81,7 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
 ENV PATH /opt/c3d/bin:${PATH}
 
 # Install FSL, cmake
-RUN wget -O- http://neuro.debian.net/lists/trusty.us-tn.full | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pool.sks-keyservers.net:80 0xA5D32F012649A5A9 && \
-    apt-get update && apt-get install -y fsl-5.0-core fsl && \
+RUN apt-get update && apt-get install -y fsl && \
     apt remove cmake && \
     pip install cmake --upgrade
 
