@@ -65,6 +65,7 @@ function usage()
             p. chan prefix (string before channel number in file name). ex: C00
             x. original resolution in x-y plane in um (default: 5)
             z. original thickness (z-axis resolution / spacing between slices) in um (default: 5)
+            df. dilation factor (factor to dilate seed label by)
 
 	----------
 	Main Outputs
@@ -172,7 +173,7 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Reading input parameters \n"
 
-	while getopts ":f:o:l:r:d:n:m:g:k:a:c:n:p:x:z:" opt; do
+	while getopts ":f:o:l:r:d:n:m:g:k:a:c:n:p:x:z:df:" opt; do
 
 	    case "${opt}" in
 
@@ -236,6 +237,9 @@ if [[ "$#" -gt 1 ]]; then
             	vz="${OPTARG}"
             	;;
 
+            df)
+                dilationf="${OPTARG}"
+                ;;
         	*)
             	usage
             	;;
@@ -310,6 +314,10 @@ if [[ "$#" -gt 1 ]]; then
 		vz=5
 	fi
 
+    if ! [[ "$dilationf" =~ ^[0-9]+$ ]];
+    then
+        dilationf=0
+    fi
 
     #---------------------------
     # Call conversion to nii
@@ -377,6 +385,17 @@ if [[ "$#" -gt 1 ]]; then
 
         printf "\n miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
         miracl utilfn extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi}
+
+        if [[ ${dilationf} ]]; then  ## TEST THIS
+
+            printf "\n dilating label mask by ${dilationf} voxels across all dimentions with the following command: \n"
+
+            printf "\n c3d ${lbl_mask} -dilate 1 ${dilationf}x${dilationf}x${dilationf}vox -o ${lbl_mask}"
+            orig_mask=${lbl}_mask_orig.nii.gz  # store the original mask
+            cp "${lbl_mask}" "${orig_mask}"
+            c3d "${lbl_mask}" -dilate 1 ${dilationf}x${dilationf}x${dilationf}vox -o "${lbl_mask}"
+
+        fi
 
     else
 
@@ -535,7 +554,7 @@ else
 	           "Derivative of Gaussian (dog) sigma" "Gaussian smoothing sigma" "Tracking angle threshold" \
  	          "Downsample ratio (def = 5)"  "chan # (def = 1)" "chan prefix" \
               "Out chan name (def = AAV)" "Resolution (x,y) (def = 5 um)" "Thickness (z) (def = 5 um)" \
-              "Downsample in z (def = 1)"  -hf "`usage`")
+              "Downsample in z (def = 1)" "Dilation factor (def = 0)" -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -611,6 +630,10 @@ else
     if [[ -z "${downz}" ]]; then downz=1; fi
     printf "\n Chosen down-sample in z: $downz \n"
 
+    dilationf="$(echo -e "${arr[14]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
+    if ! [[ -z "${dilationf}" ]]; then dilationf=0; fi
+    printf "\n Chosen dilation factor: $dilationf \n"
+
 
     #---------------------------
     # Call conversion to nii
@@ -679,6 +702,15 @@ else
 
         printf "\n miracl utils extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi} \n"
         miracl utils extract_lbl -i ${deep_lbls} -l ${lbl} -m ${hemi}
+
+        if [[ ${dilationf} ]]; then 
+            printf "\n dilating label mask by ${dilationf} voxels across all dimentions with the following command: \n"
+
+            printf "\n c3d ${lbl_mask} -dilate 1 ${dilationf}x${dilationf}x${dilationf}vox -o ${lbl_mask}"
+            orig_mask=${lbl}_mask_orig.nii.gz  # store the original mask
+            cp "${lbl_mask}" "${orig_mask}"
+            c3d "${lbl_mask}" -dilate 1 ${dilationf}x${dilationf}x${dilationf}vox -o "${lbl_mask}"
+        fi
 
     else
 
