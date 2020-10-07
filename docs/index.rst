@@ -5,7 +5,8 @@
 
 Welcome to MIRACL's documentation!
 ==================================
-.. image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=Docker%2FRelease%20Downloads   :alt: Docker Pulls
+.. image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=Docker%2FRelease%20Downloads
+    :alt: Docker Pulls
 
 .. image:: gallery/icon.png
     :width: 550px
