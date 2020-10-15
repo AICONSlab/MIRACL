@@ -7,6 +7,7 @@ import argparse
 import os
 import re
 import sys
+import socket
 
 import numpy as np
 import pandas as pd
@@ -39,6 +40,7 @@ def parsefn():
 
     parser.add_argument('-l', '--label_stats', type=str, help="Label stats", required=True)
     parser.add_argument('-s', '--side', type=str, help="Side", required=True)
+    #parser.add_argument('-r', '--region', type=str, help="Label region", required=True)
     parser.add_argument('-o', '--graph', type=str, help="Out graph")
 
     return parser
@@ -59,7 +61,7 @@ def parse_inputs(parser, args):
     side = args.side
 
     if not args.graph:
-        out_graph = 'clarity_brain_mask.html'
+        out_graph = 'clarity_brain_mask'
     else:
         assert isinstance(args.graph, str)
         out_graph = args.graph
@@ -71,8 +73,7 @@ def parse_inputs(parser, args):
 
 def force(indf, dic, allengraph, lblid, thr, k, name):
     # force graph
-    lgn = Lightning(ipython=True, local=True)
-
+    lgn = Lightning(local=True)
     means = indf.Mean.values
     #means = indf.Sum.values
     zeros = np.zeros((means.shape[0] + 1, means.shape[0] + 1))
@@ -127,7 +128,8 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
 
         parents.append(parent)
 
-    sizes = (dfthr.PL.values + 1) * k
+    #print(dfthr)
+    sizes = (dfthr.PL.values + 1) * k  # follow up with Maged
     sizes[-1] = np.max(sizes)
 
     #     return lgn.force(dfthr,group=parents,labels=dfthr.index.values,values=dfthr.max(),size=sizes,width=2000,height=1500,colormap=cmap)

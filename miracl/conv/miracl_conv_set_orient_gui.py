@@ -18,6 +18,19 @@ import os
 import sys
 import cv2
 
+
+class SelectOrientUI:
+    def __init__(self, master):
+        self.master = master
+        self.indir = self.startup()
+
+    def initUI():
+        indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
+        assert isinstance(indir, str)
+
+        if not os.path.exists(indir):
+            sys.exit('%s does not exist ... please check path and rerun script' % indir)
+
 root = Tk.Tk()
 root.withdraw()
 indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
@@ -28,6 +41,7 @@ if not os.path.exists(indir):
     sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
 flist = glob.glob(os.path.join(indir, '*.tif*'))
+flist.sort()
 # flist = glob.glob('%s/*.tif' % indir)
 
 root.deiconify()
@@ -179,6 +193,7 @@ def nextframe(i=1, imgnum=-1):
 
     evar.set(index + 1)
 
+    print(index)
     return index
 
 
@@ -229,7 +244,7 @@ ilabel = Tk.Label(fr, text="image number:")
 ilabel.grid(row=7, column=2, padx=4, pady=4)
 
 evar = Tk.IntVar()
-evar.set(1)
+evar.set(index)
 
 entry = Tk.Entry(fr, textvariable=evar)
 entry.grid(row=7, column=3, pady=4)
@@ -237,6 +252,11 @@ entry.bind('<Return>', gotoimg)
 
 nxtbutton = Tk.Button(master=root, text='Next image', command=lambda: nextimg())
 nxtbutton.grid(row=7, column=1, sticky="e", padx=4, pady=4)
+
+
+def submit():
+    orientation = ""
+    if messagebox.askokcancel("Quit", "Continue with this orientation: {}?".format())
 
 
 def on_closing():
@@ -251,77 +271,78 @@ root.mainloop()
 # -------------------------------
 
 # Get orientation and annotations
+def set_orientation():
+    # Axial
+    if AOVar.get() == 1:
+        ort = list('ARS')
 
-# Axial
-if AOVar.get() == 1:
-    ort = list('ARS')
+        # get Top
+        if ATVar.get() == 1:
+            ort[0] = 'A'
+        elif PTVar.get() == 1:
+            ort[0] = 'P'
 
-    # get Top
-    if ATVar.get() == 1:
-        ort[0] = 'A'
-    elif PTVar.get() == 1:
-        ort[0] = 'P'
+        # get Right
+        if RRVar.get() == 1:
+            ort[1] = 'L'
+        elif LRVar.get() == 1:
+            ort[1] = 'R'
 
-    # get Right
-    if RRVar.get() == 1:
-        ort[1] = 'L'
-    elif LRVar.get() == 1:
-        ort[1] = 'R'
+        # get into page (left button)
+        if SLVar.get() == 1:
+            ort[2] = 'I'
+        elif ILVar.get() == 1:
+            ort[2] = 'S'
 
-    # get into page (left button)
-    if SLVar.get() == 1:
-        ort[2] = 'I'
-    elif ILVar.get() == 1:
-        ort[2] = 'S'
+    # Sagittal
+    elif SOVar.get() == 1:
+        ort = list('ASR')
 
-# Sagittal
-elif SOVar.get() == 1:
-    ort = list('ASR')
+        # get Top
+        if ATVar.get() == 1:
+            ort[0] = 'A'
+        elif PTVar.get() == 1:
+            ort[0] = 'P'
 
-    # get Top
-    if ATVar.get() == 1:
-        ort[0] = 'A'
-    elif PTVar.get() == 1:
-        ort[0] = 'P'
+        # get Right
+        if SRVar.get() == 1:
+            ort[1] = 'I'
+        elif IRVar.get() == 1:
+            ort[1] = 'S'
 
-    # get Right
-    if SRVar.get() == 1:
-        ort[1] = 'I'
-    elif IRVar.get() == 1:
-        ort[1] = 'S'
+        # get into page
+        if RLVar.get() == 1:
+            ort[2] = 'R'
+        elif LLVar.get() == 1:
+            ort[2] = 'L'
 
-    # get into page
-    if RLVar.get() == 1:
-        ort[2] = 'R'
-    elif LLVar.get() == 1:
-        ort[2] = 'L'
+    # Coronal
+    elif COVar.get() == 1:
+        ort = list('RAS')
 
-# Coronal
-elif COVar.get() == 1:
-    ort = list('RAS')
+        # get Top
+        if STVar.get() == 1:
+            ort[0] = 'R'
+        elif ITVar.get() == 1:
+            ort[0] = 'L'
 
-    # get Top
-    if STVar.get() == 1:
-        ort[0] = 'R'
-    elif ITVar.get() == 1:
-        ort[0] = 'L'
+        # get Right
+        if RRVar.get() == 1:
+            ort[1] = 'A'
+        elif LRVar.get() == 1:
+            ort[1] = 'P'
 
-    # get Right
-    if RRVar.get() == 1:
-        ort[1] = 'A'
-    elif LRVar.get() == 1:
-        ort[1] = 'P'
+        # get into page
+        if ALVar.get() == 1:
+            ort[2] = 'S'
+        elif PLVar.get() == 1:
+            ort[2] = 'I'
 
-    # get into page
-    if ALVar.get() == 1:
-        ort[2] = 'S'
-    elif PLVar.get() == 1:
-        ort[2] = 'I'
-
-ortstr = ''.join(ort)
+    ortstr = ''.join(ort)
+    return ortstr
 
 # -------------------------------
-
+ortstr = set_orientation()
 with open("ort2std.txt", "w") as myfile:
     myfile.write("tifdir=%s \nortcode=%s \n" % (indir, ortstr))
 

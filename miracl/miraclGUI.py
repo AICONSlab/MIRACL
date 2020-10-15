@@ -58,7 +58,7 @@ nestedict = {
                 'helpmsg': 'Wrapper for registering CLARITY data to Allen Reference brain atlas'
             },
             1: {
-                'name': 'CALRITY STA',
+                'name': 'CLARITY STA',
                 'script': 'miracl flow sta',
                 'helpmsg': 'Wrapper for structure tensor analysis (STA), uses registered labels to create'
                            '\nseed & brain masks, then runs STA tracing'
@@ -225,11 +225,11 @@ nestedict = {
                 'script': 'miracl sta tract_density',
                 'helpmsg': 'Computes tract density after STA'
             },
-            2: {
-                'name': 'Generate connectivity graph',
-                'script': 'miracl sta conn_graph',
-                'helpmsg': 'Generate connectivity graph from virus signal or tract density'
-            }
+            # 2: {
+            #     'name': 'Generate connectivity graph',
+            #     'script': 'miracl sta conn_graph',
+            #     'helpmsg': 'Generate connectivity graph from virus signal or tract density'
+            # }
         }
     },
 

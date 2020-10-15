@@ -94,7 +94,8 @@ function choose_file_gui()
 
     folderpath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f folder -s "$openstr")
 
-	folderpath=`echo "${folderpath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    folderpath=${folderpath//: /#}
+	folderpath=`echo "${folderpath}" | cut -d'#' -f2 | tr -d $'\n'`
 
 #	folderpath=`cat path.txt`
 	
@@ -189,10 +190,8 @@ fi
 START=$(date +%s)
 
 # Default type to virus
-if [ -z ${type} ];
-then
-    type=virus
-
+if [[ -z ${type} ]]; then
+    type=cfos2
 fi
 
 # get macro
@@ -201,16 +200,17 @@ macro="${MIRACL_HOME}/seg/miracl_seg_neurons_clarity_3D_${type}.ijm"
 motherdir=$(dirname "${tifdir}")
 #inputdir=$(basename ${tifdir})
 
-segdir="${motherdir}"/segmentation_${type}
+segdir="${motherdir}/segmentation_${type}"
 
 # make seg dir
-if [[ ! -d "${segdir}" ]];then
-
-	printf "\n Creating Segmentation folder\n"
+if [[ -d ${segdir} ]]; then
+	printf "\n Segmentation folder exists\n"
+else 
+	printf "\n Creating Segmentation folder: ${segdir}\n"
+	echo "mkdir -p ${segdir}"
 	mkdir -p "${segdir}"
 
 fi
-
 
 # free up cached memory -- needs sudo permissions
 # printf "\n Freeing up cached memory \n"
