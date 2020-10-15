@@ -119,9 +119,6 @@ def main(args):
 
     mask = inlblsdata.copy()
     
-    print(mask.shape)
-    print(lblid)
-    
     # extract lbl
     print("\n extracting label ...")
     
@@ -136,7 +133,7 @@ def main(args):
     mat = np.eye(4) * outvox
     mat[3, 3] = 1
     
-    outnii = "%s_mask.nii.gz" % outlbl
+    outnii = "%s_mask.nii.gz" % outlbl.replace('/', '_')
     
     # extract lbl
     print("\n saving label image ...")
@@ -144,10 +141,12 @@ def main(args):
     masknii = nib.Nifti1Image(mask, mat)
     #nib.save(masknii, outnii)
 
-    outnii = "%s_mask.nii.gz" % outlbl
+    outnii = "%s_mask.nii.gz" % outlbl.replace('/', '_')
 
-    subprocess.Popen("fslmaths %s -thr %s -uthr %s -bin %s" % (inlbls, lblid, lblid, outnii),
-                     shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.check_call("fslmaths %s -thr %s -uthr %s -bin %s" % (inlbls, lblid, lblid, outnii),
+                     shell=True, stderr=subprocess.STDOUT)
+
+    print('done')
 
 
 if __name__ == "__main__":
