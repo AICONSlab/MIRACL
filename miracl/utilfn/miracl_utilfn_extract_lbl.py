@@ -144,8 +144,9 @@ def main(args):
 
     outnii = "%s_mask.nii.gz" % outlbl
 
-    subprocess.Popen("fslmaths %s -thr %s -uthr %s -bin %s" % (inlbls, lblid, lblid, outnii),
-                     shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.check_call("c3d %s -threshold %s %s 1 0 -o %s" % (inlbls, lblid, lblid, outnii),
+                     shell=True, stderr=subprocess.STDOUT)
+
 
 
 if __name__ == "__main__":
