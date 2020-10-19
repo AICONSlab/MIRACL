@@ -1,11 +1,12 @@
-FROM ubuntu:14.04
+FROM neurodebian:xenial
 
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake curl clang && \
     apt-get install -y libfreetype6-dev apt-utils pkg-config vim gfortran && \
     apt-get install -y binutils make linux-source unzip && \
-    apt install -y libsm6 libxext6 libfontconfig1 libxrender1
+    apt install -y libsm6 libxext6 libfontconfig1 libxrender1 && \
+    apt-get install -y itksnap
 
 # Install miniconda
 RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-4.6.14-Linux-x86_64.sh && \
@@ -17,27 +18,54 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
+    pip install --upgrade pip && \
     pip install matplotlib joblib scipy==1.2.1 && \
     pip install tifffile && \
-    pip install menpo opencv-python
+    pip install menpo==0.8.0 opencv-python==4.2.0.32 && \
+    apt remove -y cmake && \
+    pip install cmake
 
-# ANTS
-ENV ANTSPATH /opt/ANTs
-RUN mkdir -p /opt/ANTs && \
-    curl -sSL "https://dl.dropbox.com/s/2f4sui1z6lcgyek/ANTs-Linux-centos5_x86_64-v2.2.0-0740f91.tar.gz" \
-    | tar -xzC $ANTSPATH --strip-components 1
-#    wget https://downloads.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.sh?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fadvants%2Ffiles%2FANTS%2FANTS_Latest%2F -O ANTs-latest.sh && \
-#    chmod u+x ANTs-latest.sh && \
-#    ./ANTs-latest.sh --prefix=/opt/ANTs --skip-license
+# Install ANTs
+###   Install ANTs   ###
+# The following installs a given version of ANTs:
+# Specify where to install packages:
+ENV ANTS_FOLDER=/usr/local/ANTs
+# Grab the Github repository, checkout the needed version,
+#   build
+ARG ANTs_VERSION
+RUN cd /tmp && \
+    git clone https://github.com/ANTsX/ANTs.git && \
+    cd ANTs && \
+    git checkout ${ANTs_VERSION} && \
+    buildDir=${PWD}/build && \
+    mkdir -p $buildDir ${ANTS_FOLDER} && \
+    cd $buildDir && \
+    cmake \
+        -DCMAKE_INSTALL_PREFIX=${ANTS_FOLDER} \
+        -DBUILD_SHARED_LIBS=OFF \
+    -DSuperBuild_ANTS_USE_GIT_PROTOCOL=OFF \
+        -DBUILD_TESTING=OFF \
+        -DRUN_LONG_TESTS=OFF \
+        -DRUN_SHORT_TESTS=OFF \
+        /tmp/ANTs 2>&1 | tee cmake.log && \
+    make 2>&1 | tee build.log && \
+    cd ${buildDir}/ANTS-build && \
+    make install 2>&1 | tee install.log && \
+    rm -r /tmp/ANTs
+
+# Add ANTs/bin to the path:
+ENV PATH=$ANTS_FOLDER/bin/:$PATH
+ENV ANTSPATH=$ANTS_FOLDER/bin/
 
 # ImageJ / Fiji
 WORKDIR /tmp
 RUN wget http://downloads.imagej.net/fiji/latest/fiji-linux64.zip && \
     unzip fiji-linux64.zip && \
     mv Fiji.app/ /opt/fiji && \
-    rm fiji-linux64.zip
+    rm fiji-linux64.zip && \
+    ln -s /opt/fiji/ImageJ-linux64 /opt/fiji/Fiji
 
-ENV PATH ${ANTSPATH}:/opt/fiji/bin:${PATH}
+ENV PATH ${ANTSPATH}:/opt/fiji:${PATH}
 
 # Fiji Plugins
 WORKDIR /opt/fiji/plugins
@@ -52,11 +80,10 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
     rm c3d-nightly-Linux-x86_64.tar.gz
 ENV PATH /opt/c3d/bin:${PATH}
 
-# Install FSL
-RUN wget -O- http://neuro.debian.net/lists/trusty.us-tn.full | tee /etc/apt/sources.list.d/neurodebian.sources.list
-RUN apt-key adv --recv-keys --keyserver hkp://pool.sks-keyservers.net:80 0xA5D32F012649A5A9
-
-RUN apt-get update && apt-get install -y fsl-5.0-core fsl
+# Install FSL, cmake
+RUN apt-get update && apt-get install -y fsl && \
+    apt remove cmake && \
+    pip install cmake --upgrade
 
 ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLOUTPUTTYPE="NIFTI_GZ" \

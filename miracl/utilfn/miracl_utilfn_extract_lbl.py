@@ -8,6 +8,8 @@ import os
 import subprocess
 import sys
 import pandas as pd
+import nibabel as nib
+import numpy as np
 
 from miracl import ATLAS_DIR
 
@@ -95,14 +97,14 @@ def main(args):
     print("\n reading input labels ...")
 
     # in python
-    # inlblsnii = nib.load("%s" % inlbls)
-    # inlblsdata = inlblsnii.get_data()
-    #
-    # if d > 1:
-    #     print("\n down-sampling mask")
-    #
-    #     down = (1.0 / int(d))
-    #     inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down, order=0)
+    inlblsnii = nib.load("%s" % inlbls)
+    inlblsdata = inlblsnii.get_data()
+    
+    if d > 1:
+        print("\n down-sampling mask")
+    
+        down = (1.0 / int(d))
+        inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down, order=0)
 
     # read Allen ontology
     if m == "combined":

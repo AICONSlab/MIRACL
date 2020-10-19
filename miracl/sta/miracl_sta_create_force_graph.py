@@ -7,11 +7,11 @@ import argparse
 import os
 import re
 import sys
+import socket
 
 import numpy as np
 import pandas as pd
 from lightning import Lightning
-
 
 def helpmsg():
     return '''
@@ -40,6 +40,7 @@ def parsefn():
 
     parser.add_argument('-l', '--label_stats', type=str, help="Label stats", required=True)
     parser.add_argument('-s', '--side', type=str, help="Side", required=True)
+    #parser.add_argument('-r', '--region', type=str, help="Label region", required=True)
     parser.add_argument('-o', '--graph', type=str, help="Out graph")
 
     return parser
@@ -59,8 +60,8 @@ def parse_inputs(parser, args):
     assert isinstance(args.side, str)
     side = args.side
 
-    if not args.outfile:
-        out_graph = 'clarity_brain_mask.html'
+    if not args.graph:
+        out_graph = 'clarity_brain_mask'
     else:
         assert isinstance(args.graph, str)
         out_graph = args.graph
@@ -72,15 +73,14 @@ def parse_inputs(parser, args):
 
 def force(indf, dic, allengraph, lblid, thr, k, name):
     # force graph
-    lgn = Lightning(ipython=True, local=True)
-
-    #     means = indf.Mean.values
-    means = indf.Sum.values
+    lgn = Lightning(local=True)
+    means = indf.Mean.values
+    #means = indf.Sum.values
     zeros = np.zeros((means.shape[0] + 1, means.shape[0] + 1))
     zeros[:-1, -1] = means
     zeros[-1, :-1] = means
     df = pd.DataFrame(zeros)
-    lbls = np.append(indf.Label.values, lblid)
+    lbls = np.append(indf.LabelID.values, lblid)
 
     lblsdf = pd.DataFrame(lbls)
     lblsdf.columns = ['lbls']
@@ -91,8 +91,8 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
 
     # threshold for force graph
     dfthr = df.copy()
-    thrval = indf.Sum.mean() * thr
-    #     thrval = indf.Mean.mean() * thr
+    #thrval = indf.Sum.mean() * thr
+    thrval = indf.Mean.mean() * thr
     dfthr[dfthr < thrval] = 0
 
     # drop zeros
@@ -128,12 +128,14 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
 
         parents.append(parent)
 
-    sizes = (dfthr.PL.values + 1) * k
+    #print(dfthr)
+    sizes = (dfthr.PL.values + 1) * k  # follow up with Maged
     sizes[-1] = np.max(sizes)
 
     #     return lgn.force(dfthr,group=parents,labels=dfthr.index.values,values=dfthr.max(),size=sizes,width=2000,height=1500,colormap=cmap)
 
-    f = lgn.force(dfthr, labels=dfthr.index.values, size=sizes, width=2500, height=1500)
+    #f = lgn.force(dfthr, labels=dfthr.index.values, size=sizes, width=2500, height=1500)
+    f = lgn.force(dfthr, labels=dfthr.index.values, values=dfthr.max(), size=sizes, width=2500, height=1500)
     f.save_html('%s_conn_force.html' % name, overwrite=True)
 
 

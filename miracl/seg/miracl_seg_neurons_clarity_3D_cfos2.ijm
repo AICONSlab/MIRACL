@@ -36,7 +36,7 @@ if (lengthOf(args)>1) {
 
 print("Files path is:" + path);
 
-segpath = path + "/../segmentation_cfos/" ;
+segpath = path + "/../segmentation_cfos2/" ;
 
 // Init Parameters:-
 
@@ -332,7 +332,7 @@ close();
 
 // Compute Marker controlled Watershed 
 
-outseg = segpath + "seg_cfos.tif";
+outseg = segpath + "seg_cfos2.tif";
 
 // Collect Garbage
 call("java.lang.System.gc");
@@ -359,7 +359,7 @@ if (!File.exists(outseg)) {
 	run("Make Binary", "method=Percentile background=Default calculate black");
 
 	// Save segmentation bin
-	save(segpath + "seg_bin_cfos.tif");
+	save(segpath + "seg_bin_cfos2.tif");
 
 
 } else {
