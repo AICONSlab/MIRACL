@@ -40,7 +40,7 @@ def parsefn():
 
     parser.add_argument('-l', '--label_stats', type=str, help="Label stats", required=True)
     parser.add_argument('-s', '--side', type=str, help="Side", required=True)
-    #parser.add_argument('-r', '--region', type=str, help="Label region", required=True)
+    parser.add_argument('-r', '--region', type=str, help="Label region", required=True)
     parser.add_argument('-o', '--graph', type=str, help="Out graph")
 
     return parser
@@ -65,13 +65,15 @@ def parse_inputs(parser, args):
     else:
         assert isinstance(args.graph, str)
         out_graph = args.graph
+    
+    region = args.region
 
-    return label_stats, side, out_graph
+    return label_stats, side, region, out_graph
 
 
 # ---------
 
-def force(indf, dic, allengraph, lblid, thr, k, name):
+def force(indf, dic, allengraph, lblid, thr, k, region, name):
     # force graph
     lgn = Lightning(local=True)
     means = indf.Mean.values
@@ -129,7 +131,7 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
         parents.append(parent)
 
     #print(dfthr)
-    sizes = (dfthr.PL.values + 1) * k  # follow up with Maged
+    sizes = (dfthr[region].values + 1) * k 
     sizes[-1] = np.max(sizes)
 
     #     return lgn.force(dfthr,group=parents,labels=dfthr.index.values,values=dfthr.max(),size=sizes,width=2000,height=1500,colormap=cmap)
@@ -144,7 +146,7 @@ def force(indf, dic, allengraph, lblid, thr, k, name):
 def main(args):
     # parse in args
     parser = parsefn()
-    label_stats, side, out_graph = parse_inputs(parser, args)
+    label_stats, side, region, out_graph = parse_inputs(parser, args)
 
     miracl_home = os.environ['MIRACL_HOME']
 
@@ -159,7 +161,7 @@ def main(args):
     k = 0.5
 
     # create graph
-    force(label_df, dic, allengraph, lblid, thr, k, out_graph)
+    force(label_df, dic, allengraph, lblid, thr, k, region, out_graph)
 
 if __name__ == "__main__":
     main(sys.argv)
