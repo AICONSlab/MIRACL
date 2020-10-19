@@ -601,8 +601,8 @@ signal_graph=virus_signal_connectivity_graph_depth_${depth}.html
 if [[ ! -f ${signal_graph} ]]; then
     printf " \n Generating virus signal connectivity graph with the following command: \n "
 
-    printf "\n miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${} -o ${signal_graph} \n "
-    miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${} -o ${signal_graph}
+    printf "\n miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph} \n "
+    miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph}
 else
     printf "\n Virus signal connectivity graph already computed at this depth \n"
 fi
@@ -657,8 +657,8 @@ for dog_sigma in ${dog//,/ }; do
             if [[ ! -f ${tract_graph} ]]; then
                 printf " \n Generating virus signal connectivity graph with the following command: \n "
 
-                printf "\n miracl sta conn_graph -l ${dens_stats} -s ${hemi} -o ${tract_graph} \n "
-                miracl sta conn_graph -l ${dens_stats} -s ${hemi} -o ${tract_graph}
+                printf "\n miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph} \n "
+                miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph}
             else
                 printf "\n Tract density connectivity graph already computed at this depth \n"
             fi
