@@ -216,9 +216,13 @@ def main(args):
     #                       stderr=subprocess.PIPE)
 
     print("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile))
-    subprocess.check_call("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile), shell=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
+    try:
+        subprocess.check_call("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile), shell=True)
+    except subprocess.CalledProcessError as err:
+        print("Error occurred during the function call. It is possible that %s and %s had different spacings" % (invol, lbls))
+        sys.exit(1)
+    except OSError:
+        sys.exit(1)
 
     # read fwf
     out_stats = pd.read_csv('%s' % outfile)

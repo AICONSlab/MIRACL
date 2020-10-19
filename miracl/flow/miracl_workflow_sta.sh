@@ -595,6 +595,18 @@ else
 
 fi
 
+# generate signal graph for virus signal connectivity
+signal_graph=virus_signal_connectivity_graph_depth_${depth}.html
+
+if [[ ! -f ${signal_graph} ]]; then
+    printf " \n Generating virus signal connectivity graph with the following command: \n "
+
+    printf "\n miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph} \n "
+    miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph}
+else
+    printf "\n Virus signal connectivity graph already computed at this depth \n"
+fi
+
 #---------------------------
 
 # gen tract density map
@@ -631,59 +643,29 @@ for dog_sigma in ${dog//,/ }; do
             dens_stats=${sta_dir}/sta_streamlines_density_stats_depth_${depth}_angle_${angle_val}.csv
 
             if [[ ! -f ${dens_stats} ]]; then
-
                 printf "\n Computing tract density statistics with the following command: \n"
 
                 printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
                 miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
-
             else
-
                 printf "\n Tract density statistics already computed at this depth \n"
-
             fi
 
+            # gen force graph for tract density
+            tract_graph=${sta_dir}/sta_streamlines_density_connectivity_graph_depth_${depth}_angle_${angle}.html
+
+            if [[ ! -f ${tract_graph} ]]; then
+                printf " \n Generating virus signal connectivity graph with the following command: \n "
+
+                printf "\n miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph} \n "
+                miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph}
+            else
+                printf "\n Tract density connectivity graph already computed at this depth \n"
+            fi
 
         done
     done
 done
-
-
-# gen force graph for signal stats
-signal_graph=virus_signal_connectivity_graph_depth_${depth}.html
-
-if [[ ! -f ${signal_graph} ]]; then
-
-   printf " \n Generating virus signal connectivity graph with the following command: \n "
-
-   printf "\n miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -o ${signal_graph} \n "
-   miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -o ${signal_graph}
-
-else
-
-   printf "\n Virus signal connectivity graph already computed at this depth \n"
-
-fi
-
-# gen force graph for tract density
-tract_graph=sta_streamlines_density_connectivity_graph_depth_${depth}.html
-
-if [[ ! -f ${tract_graph} ]]; then
-
-   printf " \n Generating virus signal connectivity graph with the following command: \n "
-
-   printf "\n miracl sta conn_graph -l ${dens_stats} -s ${hemi} -o ${tract_graph} \n "
-   miracl sta conn_graph -l ${dens_stats} -s ${hemi} -o ${tract_graph}
-
-else
-
-   printf "\n Tract density connectivity graph already computed at this depth \n"
-
-fi
-
-    #---------------------------
-    #---------------------------
-
 
 # get script timing
 END=$(date +%s)
