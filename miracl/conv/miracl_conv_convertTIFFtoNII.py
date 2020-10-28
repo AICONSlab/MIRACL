@@ -18,8 +18,7 @@ import cv2
 import nibabel as nib
 import numpy as np
 import scipy.ndimage
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt4.QtGui import *
 from joblib import Parallel, delayed
 
 from miracl.conv import miracl_conv_gui_options as gui_opts

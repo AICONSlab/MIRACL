@@ -5,15 +5,15 @@
 
 import sys
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtGui import *, QtWidgetsfrom PyQt5.QtWidgets import *
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import *
 
 
-class STAmenu(QtWidgets.QWidget):
+class STAmenu(QtGui.QWidget):
 
     def __init__(self):
         # create GUI
-        QtWidgets.QMainWindow.__init__(self)
+        QtGui.QMainWindow.__init__(self)
         # check
         super(STAmenu, self).__init__()
 
@@ -22,16 +22,16 @@ class STAmenu(QtWidgets.QWidget):
         # self.resize(500,200)
 
         # Create a label which displays the path to our chosen file
-        self.lbl = QtWidgets.QLabel('No CLARITY nii selected')
-        self.lbl2 = QtWidgets.QLabel('No Seed Mask selected')
-        self.lbl3 = QtWidgets.QLabel('No Brain Mask selected')
+        self.lbl = QtGui.QLabel('No CLARITY nii selected')
+        self.lbl2 = QtGui.QLabel('No Seed Mask selected')
+        self.lbl3 = QtGui.QLabel('No Brain Mask selected')
 
         # Create a push button labelled 'choose' and add it to our layout
-        btn = QtWidgets.QPushButton('Select CLARITY nii', self)
-        btn2 = QtWidgets.QPushButton('Select Seed Mask', self)
-        btn3 = QtWidgets.QPushButton('Select Brain Mask', self)
+        btn = QtGui.QPushButton('Select CLARITY nii', self)
+        btn2 = QtGui.QPushButton('Select Seed Mask', self)
+        btn3 = QtGui.QPushButton('Select Brain Mask', self)
 
-        run = QtWidgets.QPushButton('Run', self)
+        run = QtGui.QPushButton('Run', self)
 
         # Create inputs (line edts)
         self.dog = QLineEdit()
@@ -42,7 +42,7 @@ class STAmenu(QtWidgets.QWidget):
         self.angle.setAlignment(QtCore.Qt.AlignRight)
 
         # layout for widgets        
-        self.layout = QtWidgets.QFormLayout()
+        self.layout = QtGui.QFormLayout()
         self.layout.addRow(self.lbl, btn)
         self.layout.addRow(self.lbl2, btn2)
         self.layout.addRow(self.lbl3, btn3)
@@ -59,7 +59,7 @@ class STAmenu(QtWidgets.QWidget):
         self.connect(run, QtCore.SIGNAL('clicked()'), self.print_input)
 
     def get_fname(self):
-        clar = QtWidgets.QFileDialog.getOpenFileName(self, 'Select CLARITY nii')
+        clar = QtGui.QFileDialog.getOpenFileName(self, 'Select CLARITY nii')
         if clar:
             clarstr = "CLARITY nii: " + clar
             self.lbl.setText(clarstr)
@@ -68,7 +68,7 @@ class STAmenu(QtWidgets.QWidget):
             self.lbl.setText('No file selected')
 
     def get_fname2(self):
-        seed = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Seed Mask')
+        seed = QtGui.QFileDialog.getOpenFileName(self, 'Select Seed Mask')
         if seed:
             seedstr = "Seed Mask: " + seed
             self.lbl2.setText(seedstr)
@@ -77,7 +77,7 @@ class STAmenu(QtWidgets.QWidget):
             self.lbl2.setText('No file selected')
 
     def get_fname3(self):
-        brainmask = QtWidgets.QFileDialog.getOpenFileName(self, 'Select Brain Mask')
+        brainmask = QtGui.QFileDialog.getOpenFileName(self, 'Select Brain Mask')
         if brainmask:
             brainstr = "Brain Mask: " + brainmask
             self.lbl3.setText(brainstr)

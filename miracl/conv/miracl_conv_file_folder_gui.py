@@ -6,7 +6,7 @@
 import argparse
 import sys
 
-from PyQt5.QtWidgets import *
+from PyQt4.QtGui import *
 
 
 # ---------
