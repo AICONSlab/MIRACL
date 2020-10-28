@@ -14,7 +14,8 @@ from datetime import datetime
 import nibabel as nib
 import scipy.ndimage
 import tifffile as tiff
-from PyQt4.QtGui import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from miracl.conv import miracl_conv_gui_options as gui_opts
 

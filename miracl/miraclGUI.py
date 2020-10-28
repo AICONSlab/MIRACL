@@ -7,25 +7,25 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 
 # from collections import defaultdict
 
-class HorzTabBarWidget(QtGui.QTabBar):
+class HorzTabBarWidget(QtWidgets.QTabBar):
     def __init__(self, parent=None, *args, **kwargs):
         self.tabSize = QtCore.QSize(kwargs.pop('width', 100), kwargs.pop('height', 25))
-        QtGui.QTabBar.__init__(self, parent, *args, **kwargs)
+        QtWidgets.QTabBar.__init__(self, parent, *args, **kwargs)
 
     def paintEvent(self, event):
-        painter = QtGui.QStylePainter(self)
-        option = QtGui.QStyleOptionTab()
+        painter = QtWidgets.QStylePainter(self)
+        option = QtWidgets.QStyleOptionTab()
 
         for index in range(self.count()):
             self.initStyleOption(option, index)
             tabRect = self.tabRect(index)
             tabRect.moveLeft(10)
-            painter.drawControl(QtGui.QStyle.CE_TabBarTabShape, option)
+            painter.drawControl(QtWidgets.QStyle.CE_TabBarTabShape, option)
             painter.drawText(tabRect, QtCore.Qt.AlignVCenter | \
                              QtCore.Qt.TextDontClip,
                              self.tabText(index))
@@ -35,9 +35,9 @@ class HorzTabBarWidget(QtGui.QTabBar):
         return self.tabSize
 
 
-class HorzTabWidget(QtGui.QTabWidget):
+class HorzTabWidget(QtWidgets.QTabWidget):
     def __init__(self, parent, *args):
-        QtGui.QTabWidget.__init__(self, parent, *args)
+        QtWidgets.QTabWidget.__init__(self, parent, *args)
         self.setTabBar(HorzTabBarWidget(self))
 
 
@@ -281,7 +281,7 @@ nestedict = {
 
 def funbutton(miracl_home, nestedictionary, module, btnnum):
     funname = nestedictionary[module]['functions'][btnnum]['name']
-    btn = QtGui.QPushButton(funname)
+    btn = QtWidgets.QPushButton(funname)
     btn.clicked.connect(lambda: runfunc(miracl_home, nestedictionary, module, btnnum))
     btn.setToolTip(nestedict[module]['functions'][btnnum]['helpmsg'])
 
@@ -305,15 +305,15 @@ def runfunc(miracl_home, nestedictionary, module, btnnum):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
-    mainwidget = QtGui.QWidget()
+    mainwidget = QtWidgets.QWidget()
     mainwidget.resize(500, 725)
 
     font = QtGui.QFont('Mono', 10, QtGui.QFont.Light)
     mainwidget.setFont(font)
 
-    mainwidget.move(QtGui.QApplication.desktop().screen().rect().center() - mainwidget.rect().center())
+    mainwidget.move(QtWidgets.QApplication.desktop().screen().rect().center() - mainwidget.rect().center())
 
     gui_cli = os.path.realpath(__file__)
     miracl_home = Path(gui_cli).parents[1]
@@ -326,9 +326,9 @@ def main():
     p.setColor(mainwidget.backgroundRole(), QtCore.Qt.black)
     mainwidget.setPalette(p)
 
-    vbox = QtGui.QVBoxLayout(mainwidget)
+    vbox = QtWidgets.QVBoxLayout(mainwidget)
 
-    pic = QtGui.QLabel()
+    pic = QtWidgets.QLabel()
     pixmap = QtGui.QPixmap("%s/docs/gallery/icon.png" % miracl_home)
     pixmaps = pixmap.scaled(300, 200)  # QtCore.Qt.KeepAspectRatio
     pic.setPixmap(pixmaps)
@@ -336,13 +336,13 @@ def main():
 
     vbox.addWidget(pic)
 
-    tabs = QtGui.QTabWidget()
+    tabs = QtWidgets.QTabWidget()
     tabs.setTabBar(HorzTabBarWidget(width=150, height=50))
 
     for m, mod in enumerate(modules):
 
-        widget = QtGui.QWidget()
-        widget.layout = QtGui.QVBoxLayout()
+        widget = QtWidgets.QWidget()
+        widget.layout = QtWidgets.QVBoxLayout()
 
         for b in range(len(nestedict[mod]['functions'])):
             btn = funbutton(miracl_home, nestedict, mod, b)
@@ -359,7 +359,7 @@ def main():
 
         tabs.addTab(widget, mod)
 
-    tabs.setTabPosition(QtGui.QTabWidget.West)
+    tabs.setTabPosition(QtWidgets.QTabWidget.West)
 
     vbox.addWidget(tabs)
 

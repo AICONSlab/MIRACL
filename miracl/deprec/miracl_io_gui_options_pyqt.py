@@ -6,8 +6,8 @@
 import argparse
 import sys
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import *
+from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtGui import *, QtWidgetsfrom PyQt5.QtWidgets import *
 
 
 # Inputs #########
@@ -41,13 +41,13 @@ def parseargs():
 
 def optsmenu(title, fields, helpfun):
     # create GUI
-    main = QtGui.QMainWindow()
+    main = QtWidgets.QMainWindow()
 
-    widget = QtGui.QWidget()
+    widget = QtWidgets.QWidget()
     widget.setWindowTitle('%s' % title)
 
     layout = QFormLayout()
-    layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+    layout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
 
     linedits = {}
 
@@ -60,8 +60,8 @@ def optsmenu(title, fields, helpfun):
         layout.addRow("%s" % field, linedits["%s" % field])
 
     # Create push button
-    helpbutton = QtGui.QPushButton('Help')
-    submit = QtGui.QPushButton('Submit')
+    helpbutton = QtWidgets.QPushButton('Help')
+    submit = QtWidgets.QPushButton('Submit')
 
     layout.addRow(helpbutton, submit)
     widget.setLayout(layout)
@@ -81,13 +81,13 @@ def print_input(linedits, fields):
 
 
 def print_help(main, helpfun):
-    helpwidget = QtGui.QDialog()
+    helpwidget = QtWidgets.QDialog()
     main.setCentralWidget(helpwidget)
     helpwidget.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
     main.setWindowTitle('Help function')
 
-    helplbl = QtGui.QLabel(helpfun)
+    helplbl = QtWidgets.QLabel(helpfun)
 
     scrollarea = QScrollArea()
     scrollarea.setWidgetResizable(False)

@@ -6,8 +6,8 @@
 import argparse
 import sys
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import *
+from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtGui import *, QtWidgetsfrom PyQt5.QtWidgets import *
 
 
 # Inputs #########
@@ -52,13 +52,13 @@ def parse_inputs(parser, args):
 
 def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None):
     # create GUI
-    main = QtGui.QMainWindow()
+    main = QtWidgets.QMainWindow()
 
-    widget = QtGui.QWidget()
+    widget = QtWidgets.QWidget()
     widget.setWindowTitle('%s' % title)
 
     layout = QFormLayout()
-    layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+    layout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
 
     linedits = {}
     buttons = {}
@@ -68,8 +68,8 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
 
         for v, vol in enumerate(vols):
             # Create buttons for vols
-            labels["%s" % vol] = QtGui.QLabel('No file selected')
-            buttons["%s" % vol] = QtGui.QPushButton('Select %s' % vol)
+            labels["%s" % vol] = QtWidgets.QLabel('No file selected')
+            buttons["%s" % vol] = QtWidgets.QPushButton('Select %s' % vol)
 
             # Layout for widgets
             layout.addRow(labels["%s" % vol], buttons["%s" % vol])
@@ -80,8 +80,8 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
 
         for d, dir in enumerate(dirs):
             # Create buttons for vols
-            labels["%s" % dir] = QtGui.QLabel('No Dir selected')
-            buttons["%s" % dir] = QtGui.QPushButton('Select %s' % dir)
+            labels["%s" % dir] = QtWidgets.QLabel('No Dir selected')
+            buttons["%s" % dir] = QtWidgets.QPushButton('Select %s' % dir)
 
             # Layout for widgets
             layout.addRow(labels["%s" % dir], buttons["%s" % dir])
@@ -98,7 +98,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
 
     if combo:
         combo_field = combo[0]
-        cb = QtGui.QComboBox()
+        cb = QtWidgets.QComboBox()
         cb.addItems(combo[1:])
         layout.addRow(combo_field, cb)
     else:
@@ -106,9 +106,9 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
         cb = None
 
     # Create push button
-    helpbutton = QtGui.QPushButton('Help')
-    enter = QtGui.QPushButton('Enter')
-    submit = QtGui.QPushButton('Run')
+    helpbutton = QtWidgets.QPushButton('Help')
+    enter = QtWidgets.QPushButton('Enter')
+    submit = QtWidgets.QPushButton('Run')
 
     layout.addRow(helpbutton, enter)
     layout.addWidget(submit)
@@ -123,7 +123,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
 
 
 def get_fname(main, labels, vol):
-    vfile = QtGui.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
+    vfile = QtWidgets.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
     if vfile:
         vfilestr = "%s : %s" % (vol, str(vfile).lstrip())
         labels["%s" % vol].setText(vfilestr)
@@ -150,14 +150,14 @@ def print_input(linedits, fields, combo_field=None, cb=None):
 
 
 def print_help(main, helpfun):
-    helpwidget = QtGui.QDialog()
+    helpwidget = QtWidgets.QDialog()
     main.setCentralWidget(helpwidget)
     helpwidget.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
     main.setWindowTitle('Help function')
 
     helplayout = QVBoxLayout()
-    helplbl = QtGui.QLabel(helpfun)
+    helplbl = QtWidgets.QLabel(helpfun)
     helplayout.addWidget(helplbl)
 
     helpwidget.setLayout(helplayout)
