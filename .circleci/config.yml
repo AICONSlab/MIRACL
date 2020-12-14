@@ -5,6 +5,44 @@ orbs:
   docker-publish: circleci/docker-publish@0.1.3
 
 jobs:
+  build_base:
+    environment:
+      - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+      - CONTAINER_NAME: "mgoubran/miracl:base"
+    docker:
+      - image: docker:18.06.3-ce-git
+    working_directory: /tmp/src/MIRACL/docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker base image
+          no_output_timeout: 60m
+          command: |
+            # Build docker image
+            MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
+            echo "miracl version is ${MIRACL_VERSION}"
+            e=1 && for i in {1..5}; do
+              docker build \
+                --rm=false \
+                -t ${CONTAINER_NAME} \
+                -f /tmp/src/MIRACL/docker/Dockerfile \
+                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+                --build-arg VCS_REF=`git rev-parse --short HEAD` \
+                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+      - run:
+          name: Run Tests
+          no_output_timeout: 2h
+          command: |
+             echo "Running tests:"
+             # docker run --entrypoint bash -it mgoubran/miracl bet
+             # docker run -it mgoubran/miracl conv tiff_nii -f /tmp/MIRACLextra/input -d 5
+             docker run -it mgoubran/miracl -h
+      - store_test_results:
+          path: /tmp/tests
+
 
   build:
     environment:
