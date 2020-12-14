@@ -93,6 +93,8 @@ workflows:
 
   build_without_publishing_job:
     jobs:
+      - build_base:
+          deploy: false
       - docker-publish/publish:
           image: mgoubran/miracl
           deploy: false
