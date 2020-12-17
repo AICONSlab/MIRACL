@@ -53,9 +53,9 @@ jobs:
           name: Run Tests
           no_output_timeout: 2h
           command: |
-             echo "Runing tests:"
-             # docker run --entrypoint bash -it mgoubran/miracl bet
-             # docker run -it mgoubran/miracl conv tiff_nii -f /tmp/MIRACLextra/input -d 5
+             echo "Running tests:"
+             docker run --entrypoint bash -it mgoubran/miracl bet
+             #docker run -it mgoubran/miracl conv tiff_nii -f /tmp/MIRACLextra/input -d 5
              docker run -it mgoubran/miracl -h
       - store_test_results:
           path: /tmp/tests
@@ -71,6 +71,22 @@ workflows:
 
   build_without_publishing_job:
     jobs:
+      - docker-publish/publish:
+          image: mgoubran/miracl
+          deploy: false
+          tag: base-latest
+          path: /tmp/src/MIRACL/docker/Dockerfile
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
+          after_build:
+            - run:
+                name: Preview Docker Tag for Build
+                command: |
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
       - docker-publish/publish:
           image: mgoubran/miracl
           deploy: false
@@ -91,6 +107,21 @@ workflows:
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
     jobs:
+      - docker-publish/publish:
+          image: mgoubran/miracl
+          tag: base-latest
+          path: /tmp/src/MIRACL/docker/Dockerfile
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
+          after_build:
+            - run:
+                name: Preview Docker Tag for Build
+                command: |
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
       - docker-publish/publish:
           image: mgoubran/miracl
           tag: latest
