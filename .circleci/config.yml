@@ -74,22 +74,6 @@ workflows:
       - docker-publish/publish:
           image: mgoubran/miracl
           deploy: false
-          tag: base-latest
-          path: /tmp/src/MIRACL/docker/Dockerfile
-          filters:
-            branches:
-              ignore: 
-                - master
-                - docs*
-          after_build:
-            - run:
-                name: Preview Docker Tag for Build
-                command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
-                   echo "Version for Docker tag is ${DOCKER_TAG}"
-      - docker-publish/publish:
-          image: mgoubran/miracl
-          deploy: false
           tag: latest
           filters:
             branches:
@@ -107,21 +91,6 @@ workflows:
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
     jobs:
-      - docker-publish/publish:
-          image: mgoubran/miracl
-          tag: base-latest
-          path: /tmp/src/MIRACL/docker/Dockerfile
-          filters:
-            branches:
-              ignore: 
-                - master
-                - docs*
-          after_build:
-            - run:
-                name: Preview Docker Tag for Build
-                command: |
-                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
-                   echo "Version for Docker tag is ${DOCKER_TAG}"
       - docker-publish/publish:
           image: mgoubran/miracl
           tag: latest
