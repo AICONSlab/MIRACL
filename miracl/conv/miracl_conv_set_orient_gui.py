@@ -10,9 +10,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.backend_bases import key_press_handler
 from matplotlib.figure import Figure
 
-import Tkinter as Tk
-import tkFileDialog
-import tkMessageBox as messagebox
+import tkinter
+from tkinter import *
+from tkinter import filedialog
+#import tkMessageBox as messagebox
+from tkinter import messagebox
 import glob
 import os
 import sys
@@ -25,15 +27,15 @@ class SelectOrientUI:
         self.indir = self.startup()
 
     def initUI():
-        indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
+        indir = filedialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
         assert isinstance(indir, str)
 
         if not os.path.exists(indir):
             sys.exit('%s does not exist ... please check path and rerun script' % indir)
 
-root = Tk.Tk()
+root = tkinter.Tk()
 root.withdraw()
-indir = tkFileDialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
+indir = filedialog.askdirectory(title='Open clarity dir (with .tif files) by double clicking then "Choose"')
 
 assert isinstance(indir, str)
 
@@ -53,13 +55,13 @@ root.wm_title("Input Tiff files")
 # -------------------------------
 
 def ortbutton():
-    ort = Tk.Menubutton(root, text="Orientation", justify=Tk.CENTER)
+    ort = tkinter.Menubutton(root, text="Orientation", justify=tkinter.CENTER)
     ort.grid()
-    ort.menu = Tk.Menu(ort, tearoff=0)
+    ort.menu = tkinter.Menu(ort, tearoff=0)
     ort["menu"] = ort.menu
-    AOVar = Tk.IntVar()
-    SOVar = Tk.IntVar()
-    COVar = Tk.IntVar()
+    AOVar = tkinter.IntVar()
+    SOVar = tkinter.IntVar()
+    COVar = tkinter.IntVar()
     ort.menu.add_checkbutton(label="Axial", variable=AOVar)
     ort.menu.add_checkbutton(label="Sagittal", variable=SOVar)
     ort.menu.add_checkbutton(label="Coronal", variable=COVar)
@@ -68,16 +70,16 @@ def ortbutton():
 
 
 def leftbutton():
-    mb = Tk.Menubutton(root, text="Annotation (Into Page)", justify=Tk.CENTER)
+    mb = tkinter.Menubutton(root, text="Annotation (Into Page)", justify=tkinter.CENTER)
     mb.grid(row=5, column=0)
-    mb.menu = Tk.Menu(mb, tearoff=0)
+    mb.menu = tkinter.Menu(mb, tearoff=0)
     mb["menu"] = mb.menu
-    SLVar = Tk.IntVar()
-    ILVar = Tk.IntVar()
-    RLVar = Tk.IntVar()
-    LLVar = Tk.IntVar()
-    ALVar = Tk.IntVar()
-    PLVar = Tk.IntVar()
+    SLVar = tkinter.IntVar()
+    ILVar = tkinter.IntVar()
+    RLVar = tkinter.IntVar()
+    LLVar = tkinter.IntVar()
+    ALVar = tkinter.IntVar()
+    PLVar = tkinter.IntVar()
     mb.menu.add_checkbutton(label="Superior", variable=SLVar)
     mb.menu.add_checkbutton(label="Inferior", variable=ILVar)
     mb.menu.add_checkbutton(label="Right", variable=RLVar)
@@ -89,16 +91,16 @@ def leftbutton():
 
 
 def topbutton():
-    mb2 = Tk.Menubutton(root, text="Annotation", justify=Tk.CENTER)
+    mb2 = tkinter.Menubutton(root, text="Annotation", justify=tkinter.CENTER)
     mb2.grid(row=0, column=1, pady=4)
-    mb2.menu = Tk.Menu(mb2, tearoff=0)
+    mb2.menu = tkinter.Menu(mb2, tearoff=0)
     mb2["menu"] = mb2.menu
-    STVar = Tk.IntVar()
-    ITVar = Tk.IntVar()
-    RTVar = Tk.IntVar()
-    LTVar = Tk.IntVar()
-    ATVar = Tk.IntVar()
-    PTVar = Tk.IntVar()
+    STVar = tkinter.IntVar()
+    ITVar = tkinter.IntVar()
+    RTVar = tkinter.IntVar()
+    LTVar = tkinter.IntVar()
+    ATVar = tkinter.IntVar()
+    PTVar = tkinter.IntVar()
     mb2.menu.add_checkbutton(label="Superior", variable=STVar)
     mb2.menu.add_checkbutton(label="Inferior", variable=ITVar)
     mb2.menu.add_checkbutton(label="Right", variable=RTVar)
@@ -110,16 +112,16 @@ def topbutton():
 
 
 def rightbutton():
-    mb3 = Tk.Menubutton(root, text="Annatation", justify=Tk.CENTER)
+    mb3 = tkinter.Menubutton(root, text="Annatation", justify=tkinter.CENTER)
     mb3.grid(row=5, column=3, padx=50)
-    mb3.menu = Tk.Menu(mb3, tearoff=0)
+    mb3.menu = tkinter.Menu(mb3, tearoff=0)
     mb3["menu"] = mb3.menu
-    SRVar = Tk.IntVar()
-    IRVar = Tk.IntVar()
-    RRVar = Tk.IntVar()
-    LRVar = Tk.IntVar()
-    ARVar = Tk.IntVar()
-    PRVar = Tk.IntVar()
+    SRVar = tkinter.IntVar()
+    IRVar = tkinter.IntVar()
+    RRVar = tkinter.IntVar()
+    LRVar = tkinter.IntVar()
+    ARVar = tkinter.IntVar()
+    PRVar = tkinter.IntVar()
     mb3.menu.add_checkbutton(label="Superior", variable=SRVar)
     mb3.menu.add_checkbutton(label="Inferior", variable=IRVar)
     mb3.menu.add_checkbutton(label="Right", variable=RRVar)
@@ -158,7 +160,7 @@ canvas = FigureCanvasTkAgg(f, master=root)
 canvas.show()
 
 # creating frame for toolbar
-frame = Tk.Frame(root)
+frame = tkinter.Frame(root)
 toolbar = NavigationToolbar2TkAgg(canvas, frame)
 toolbar.update()
 toolbar.grid(row=8, column=1, padx=4, pady=4, sticky="e")
@@ -234,29 +236,30 @@ def gotoimg(event=None):
     canvas.draw()
 
 
-fr = Tk.Frame(root)
+fr = tkinter.Frame(root)
 fr.grid(row=7, column=1, padx=4, pady=4)
 
-prevbutton = Tk.Button(master=root, text='Prev image', command=lambda: previmg())
+prevbutton = tkinter.Button(master=root, text='Prev image', command=lambda: previmg())
 prevbutton.grid(row=7, column=1, sticky="w", padx=4, pady=4)
 
-ilabel = Tk.Label(fr, text="image number:")
+ilabel = tkinter.Label(fr, text="image number:")
 ilabel.grid(row=7, column=2, padx=4, pady=4)
 
-evar = Tk.IntVar()
+evar = tkinter.IntVar()
 evar.set(index)
 
-entry = Tk.Entry(fr, textvariable=evar)
+entry = tkinter.Entry(fr, textvariable=evar)
 entry.grid(row=7, column=3, pady=4)
 entry.bind('<Return>', gotoimg)
 
-nxtbutton = Tk.Button(master=root, text='Next image', command=lambda: nextimg())
+nxtbutton = tkinter.Button(master=root, text='Next image', command=lambda: nextimg())
 nxtbutton.grid(row=7, column=1, sticky="e", padx=4, pady=4)
 
 
 def submit():
     orientation = ""
-    if messagebox.askokcancel("Quit", "Continue with this orientation: {}?".format())
+    if messagebox.askokcancel("Quit", "Continue with this orientation: {}?"):
+        root.format()
 
 
 def on_closing():

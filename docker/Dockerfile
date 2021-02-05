@@ -9,21 +9,25 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt-get install -y itksnap
 
 # Install miniconda
-RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda2-4.6.14-Linux-x86_64.sh && \
-    bash Miniconda2-4.6.14-Linux-x86_64.sh -p /opt/miniconda -b && \
-    rm Miniconda2-4.6.14-Linux-x86_64.sh
+RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh && \
+    bash Miniconda3-4.6.14-Linux-x86_64.sh -p /opt/miniconda -b && \
+    rm Miniconda3-4.6.14-Linux-x86_64.sh
 ENV PATH=/opt/miniconda/bin:${PATH}
 
 RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
+    apt-get install libatlas-base-dev libblas3 liblapack3 liblapack-dev libblas-dev && \
     pip install --upgrade pip && \
-    pip install matplotlib joblib scipy==1.2.1 && \
-    pip install tifffile && \
-    pip install menpo==0.8.0 opencv-python==4.2.0.32 && \
+    python3 -m pip install numpy && \
+    python3 -m pip install matplotlib joblib && \
+    python3 -m pip install scipy==1.2.1 && \
+    python3 -m pip install tifffile && \
+    conda install -c menpo menpo && \
+    python3 -m pip install opencv-python==4.2.0.32 && \
     apt remove -y cmake && \
-    pip install cmake
+    pip3 install cmake
 
 # Install ANTs
 ###   Install ANTs   ###
@@ -78,12 +82,12 @@ RUN wget https://github.com/ijpb/MorphoLibJ/releases/download/v1.4.0/MorphoLibJ_
 RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz && \
     tar -xzvf c3d-nightly-Linux-x86_64.tar.gz && mv c3d-1.1.0-Linux-x86_64 /opt/cd3 && \
     rm c3d-nightly-Linux-x86_64.tar.gz
-ENV PATH /opt/c3d/bin:${PATH}
+ENV PATH /opt/cd3/bin:${PATH}
 
 # Install FSL, cmake
 RUN apt-get update && apt-get install -y fsl && \
     apt remove cmake && \
-    pip install cmake --upgrade
+    pip3 install cmake --upgrade
 
 ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
@@ -97,8 +101,10 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
 ENV PATH="/usr/lib/fsl/5.0:${PATH}"
 
 WORKDIR /code
-RUN pip install scikit-image==0.14.2 && \
-    pip install cython h5py && \
-    pip install pandas==0.24.2
+RUN pip3 install scikit-image==0.14.2 && \
+    pip3 install cython h5py && \
+    pip3 install pandas==0.24.2
 
-RUN conda install -y --no-update-deps pyqt=4
+#RUN alias python=python3
+
+RUN conda install -y --no-update-deps pyqt=5

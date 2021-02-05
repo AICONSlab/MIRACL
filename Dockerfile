@@ -1,7 +1,9 @@
 ARG MIRACL_VERSION=latest
-FROM mgoubran/miracl:base-$MIRACL_VERSION
+#FROM mgoubran/miracl:base-$MIRACL_VERSION
+FROM mgoubran/miracl-modified:latest
 
 ADD . /code
+RUN ls /code
 RUN git clone https://github.com/sergivalverde/nifti_tools && \
     mv nifti_tools /code/depends/NIFTI_TOOLS && \
     pip install -e /code/
@@ -12,7 +14,9 @@ ENV MIRACL_HOME=/code/miracl
 
 WORKDIR /tmp
 RUN mkdir -p "/code/atlases/" && \
-	wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases http://web.stanford.edu/group/zeinehlab/MIRACLextra/
+    wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases http://web.stanford.edu/group/zeinehlab/MIRACLextra/
+
+# RUN conda install -y --no-update-deps pyqt=5
 
 ENV aradir "/code/atlases/ara"
 
@@ -46,4 +50,4 @@ ENV IN_DOCKER_CONTAINER Yes
 
 ################################################################################
 
-ENTRYPOINT ["/opt/miniconda/bin/miracl"]
+ENTRYPOINT ["/bin/bash"]

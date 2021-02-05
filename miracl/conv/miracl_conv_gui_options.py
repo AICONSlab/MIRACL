@@ -6,8 +6,8 @@
 import argparse
 import sys
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import *
 
 
 # Inputs #########
@@ -52,13 +52,13 @@ def parse_inputs(parser, args):
 
 def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None):
     # create GUI
-    main = QtGui.QMainWindow()
+    main = QtWidgets.QMainWindow()
 
-    widget = QtGui.QWidget()
+    widget = QtWidgets.QWidget()
     widget.setWindowTitle('%s' % title)
 
     layout = QFormLayout()
-    layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+    layout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
 
     linedits = {}
     buttons = {}
@@ -68,25 +68,25 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
 
         for v, vol in enumerate(vols):
             # Create buttons for vols
-            labels["%s" % vol] = QtGui.QLabel('No file selected')
-            buttons["%s" % vol] = QtGui.QPushButton('Select %s' % vol)
+            labels["%s" % vol] = QtWidgets.QLabel('No file selected')
+            buttons["%s" % vol] = QtWidgets.QPushButton('Select %s' % vol)
 
             # Layout for widgets
             layout.addRow(labels["%s" % vol], buttons["%s" % vol])
 
-            widget.connect(buttons["%s" % vol], QtCore.SIGNAL('clicked()'), lambda xv=vol: get_fname(main, labels, xv))
+            buttons["%s" % vol].clicked.connect(lambda xv=vol: get_fname(main, labels, xv))
 
     if dirs:
 
         for d, dir in enumerate(dirs):
             # Create buttons for vols
-            labels["%s" % dir] = QtGui.QLabel('No Dir selected')
-            buttons["%s" % dir] = QtGui.QPushButton('Select %s' % dir)
+            labels["%s" % dir] = QtWidgets.QLabel('No Dir selected')
+            buttons["%s" % dir] = QtWidgets.QPushButton('Select %s' % dir)
 
             # Layout for widgets
             layout.addRow(labels["%s" % dir], buttons["%s" % dir])
 
-            widget.connect(buttons["%s" % dir], QtCore.SIGNAL('clicked()'), lambda xd=dir: get_dname(main, labels, xd))
+            buttons["%s" % dir].clicked.connect(lambda xd=dir: get_dname(main, labels, xd))
 
     for f, field in enumerate(fields):
         # Create inputs (line edts)
@@ -98,7 +98,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
 
     if combo:
         combo_field = combo[0]
-        cb = QtGui.QComboBox()
+        cb = QtWidgets.QComboBox()
         cb.addItems(combo[1:])
         layout.addRow(combo_field, cb)
     else:
@@ -106,24 +106,24 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
         cb = None
 
     # Create push button
-    helpbutton = QtGui.QPushButton('Help')
-    enter = QtGui.QPushButton('Enter')
-    submit = QtGui.QPushButton('Run')
+    helpbutton = QtWidgets.QPushButton('Help')
+    enter = QtWidgets.QPushButton('Enter')
+    submit = QtWidgets.QPushButton('Run')
 
     layout.addRow(helpbutton, enter)
     layout.addWidget(submit)
 
     widget.setLayout(layout)
 
-    widget.connect(helpbutton, QtCore.SIGNAL('clicked()'), lambda: print_help(main, helpfun))
-    widget.connect(enter, QtCore.SIGNAL('clicked()'), lambda: print_input(linedits, fields, combo_field, cb))
+    helpbutton.clicked.connect(lambda: print_help(main, helpfun))
+    enter.clicked.connect(lambda: print_input(linedits, fields, combo_field, cb))
     submit.clicked.connect(QtCore.QCoreApplication.instance().quit)
 
     return widget, linedits, labels
 
 
 def get_fname(main, labels, vol):
-    vfile = QtGui.QFileDialog.getOpenFileName(main, 'Select %s' % vol)
+    vfile = QtWidgets.QFileDialog.getOpenFileName(main, 'Select %s' % vol)[0]
     if vfile:
         vfilestr = "%s : %s" % (vol, str(vfile).lstrip())
         labels["%s" % vol].setText(vfilestr)
@@ -150,14 +150,14 @@ def print_input(linedits, fields, combo_field=None, cb=None):
 
 
 def print_help(main, helpfun):
-    helpwidget = QtGui.QDialog()
+    helpwidget = QtWidgets.QDialog()
     main.setCentralWidget(helpwidget)
     helpwidget.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
     main.setWindowTitle('Help function')
 
     helplayout = QVBoxLayout()
-    helplbl = QtGui.QLabel(helpfun)
+    helplbl = QtWidgets.QLabel(helpfun)
     helplayout.addWidget(helplbl)
 
     helpwidget.setLayout(helplayout)

@@ -4,7 +4,7 @@
 # coding: utf-8
 
 import argparse
-import commands
+#import commands
 import os
 import subprocess
 import sys
@@ -138,7 +138,7 @@ def main(args):
 
     if viz == "itk":
         # check for itk
-        status, result = commands.getstatusoutput("which itksnap")
+        status, result = subprocess.getstatusoutput("which itksnap")
 
         if status == 256:
             print('\n itkSNAP is not installed or not in your path! \n')
@@ -171,7 +171,7 @@ def main(args):
 
     else:
 
-        status, result = commands.getstatusoutput("which freeview")
+        status, result = subprocess.getstatusoutput("which freeview")
 
         if status == 256:
             print('\n Freeview (from FREESURFER) is not installed or not in your path! \n')
