@@ -215,7 +215,6 @@ def main(args):
     #                       stdout=subprocess.PIPE,
     #                       stderr=subprocess.PIPE)
 
-    print("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile))
     try:
         subprocess.check_call("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile), shell=True)
     except subprocess.CalledProcessError as err:
