@@ -238,7 +238,7 @@ nestedict = {
         'functions': {
             0: {
                 'name': 'Paired-ttest ipsi/contra hemispheres',
-                'script': 'miracl stats paired',
+                'script': 'miracl stats paired_ttest',
                 'helpmsg': 'Computes paired_ttest test between both hemispheres for all labels across mice'
             }
         }
