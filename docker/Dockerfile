@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake curl clang && \
     apt-get install -y libfreetype6-dev apt-utils pkg-config vim gfortran && \
     apt-get install -y binutils make linux-source unzip && \
+    apt install libxcb-xinerama0 && \
     apt install -y libsm6 libxext6 libfontconfig1 libxrender1 && \
     apt-get install -y itksnap
 
@@ -101,10 +102,12 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
 ENV PATH="/usr/lib/fsl/5.0:${PATH}"
 
 WORKDIR /code
+ADD requirements.txt /code
 RUN pip3 install scikit-image==0.14.2 && \
     pip3 install cython h5py && \
-    pip3 install pandas==0.24.2
+    pip3 install pandas==0.24.2 && \
+    pip3 install -r requirements.txt
 
 #RUN alias python=python3
 
-RUN conda install -y --no-update-deps pyqt=5
+#RUN conda install -y --no-update-deps pyqt=5
