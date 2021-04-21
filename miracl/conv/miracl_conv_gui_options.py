@@ -74,7 +74,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
             # Layout for widgets
             layout.addRow(labels["%s" % vol], buttons["%s" % vol])
 
-            buttons["%s" % vol].clicked.connect(lambda xv=vol: get_fname(main, labels, xv))
+            buttons["%s" % vol].clicked.connect(lambda xv=vol: get_fname(main, labels, vol))
 
     if dirs:
 
@@ -86,7 +86,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
             # Layout for widgets
             layout.addRow(labels["%s" % dir], buttons["%s" % dir])
 
-            buttons["%s" % dir].clicked.connect(lambda xd=dir: get_dname(main, labels, xd))
+            buttons["%s" % dir].clicked.connect(lambda xd=dir: get_dname(main, labels, dir))
 
     for f, field in enumerate(fields):
         # Create inputs (line edts)
