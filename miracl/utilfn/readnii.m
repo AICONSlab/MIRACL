@@ -1,4 +1,6 @@
-function nii = readnii(fpNii)
+% return both the header and the image for a given nifti input
+function [hdr, img] = readnii(fpNii)
 tmp = load_nii(fpNii);
-nii = tmp.img;
+img = tmp.img;
+hdr = tmp.hdr;
 end
