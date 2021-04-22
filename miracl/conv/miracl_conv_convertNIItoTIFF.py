@@ -199,6 +199,14 @@ def scriptlog(logname):
     sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
 
+def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order):
+    nii = nib.load(input_nii).get_data()
+
+    hres_tiff = scipy.ndimage.interpolation.zoom(nii, upsample_ratio, order=spline_order)
+
+    tiff.imsave(out_tiff, hrestiff)
+
+
 # ---------
 
 # def converttiff2nii(d, i, x, newdata, tifx):
@@ -230,11 +238,7 @@ def main(args):
     # convert nii volume to tiff
     print("\n converting NII volume to TIFF")
 
-    nii = nib.load(input).get_data()
-
-    hrestiff = scipy.ndimage.interpolation.zoom(nii, u, order=s)
-
-    tiff.imsave(outtiff, hrestiff)
+    convert_nii_to_tiff(input, outtiff, u, s)
 
     print("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
