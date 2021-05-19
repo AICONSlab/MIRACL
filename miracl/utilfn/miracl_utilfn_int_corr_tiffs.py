@@ -19,7 +19,7 @@ import tifffile as tiff
 from joblib import Parallel, delayed
 
 from miracl.utilfn import miracl_utilfn_endstatement as statement
-from depends_manager import add_paths
+from .depends_manager import add_paths
 
 
 def helpmsg():
