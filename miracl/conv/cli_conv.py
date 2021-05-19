@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.conv import miracl_conv_convertTIFFtoNII, miracl_conv_gui_options, miracl_conv_convertNIItoTIFF
+from miracl.conv import miracl_conv_convertTIFFtoNII, miracl_conv_gui_options, miracl_conv_convertNIItoTIFF, miracl_conv_convertTRK
 
 
 def run_tiff_nii(parser, args):
@@ -12,6 +12,8 @@ def run_tiff_nii(parser, args):
 def run_nii_tiff(parser, args):
     miracl_conv_convertNIItoTIFF.main(args)
 
+def run_trk_conv(parser, args):
+    miracl_conv_convertTRK.main(args)
 
 def run_set_orient(parser, args=None):
     miracl_home = os.environ['MIRACL_HOME']
@@ -43,6 +45,12 @@ def get_parser():
                                             help='convert Nii volume to Tiff stack')
 
     parser_nii_tiff.set_defaults(func=run_nii_tiff)
+
+    # converting trk file
+    conv_trk_parser = miracl_conv_convertTRK.parsefn()
+    parser_conv_trk = subparsers.add_parser('trk', parents=[conv_trk_parser], add_help=False,
+                                            help='convert Nii volume to Tiff stack')
+    parser_conv_trk.set_defaults(func=run_trk_conv)
 
     # set orient
     parser_set_orient = subparsers.add_parser('set_orient', help="Set orientation tag with GUI", add_help=False)
