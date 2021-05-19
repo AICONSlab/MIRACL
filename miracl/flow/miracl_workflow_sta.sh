@@ -476,13 +476,13 @@ else
     printf "\n Chosen down-sample in z: $downz \n"
 
     dilationfx="$(echo -e "${arr[17]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    if [[ -z "${dilationf}" ]]; then dilationf=0; fi
+    if [[ -z "${dilationf}" ]]; then dilationfx=0; fi
     dilationfy="$(echo -e "${arr[18]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    if [[ -z "${dilationf}" ]]; then dilationf=0; fi    
+    if [[ -z "${dilationf}" ]]; then dilationfy=0; fi    
     dilationfz="$(echo -e "${arr[19]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    if [[ -z "${dilationf}" ]]; then dilationf=0; fi
+    if [[ -z "${dilationf}" ]]; then dilationfz=0; fi
 
-    if [[ "${dilationfx}" -gt 0 ]] || [[ "${dilationfy}" -gt 0 ]] || [[ "${dilationfz}" -gt 0 ]]; then
+    if [[ "${dilationfx}" -gt 0 ]] && [[ "${dilationfy}" -gt 0 ]] && [[ "${dilationfz}" -gt 0 ]]; then
         dilationf="${dilationfx}x${dilationfy}x${dilationfz}"
         printf "\n Chosen dilation factor (across all dimensions): $dilationf \n"
     else
@@ -552,21 +552,21 @@ fi
 deep_lbls=annotation_hemi_${hemi}_??um_clar_space_downsample_depth_${depth}.nii.gz
 #free_lbls=annotation_hemi_${hemi}_clar_space_downsample_depth_${depth}_freeview.nii.gz
 
-if [[ ! -f ${deep_lbls} ]]; then
+# if [[ ! -f ${deep_lbls} ]]; then
 
-    printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
+#     printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
-    echo "miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}"
-    miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
+#     echo "miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}"
+#     miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
 
-    echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
-    c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
+#     echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
+#     c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
-else
+# else
 
-    printf "\n Grand parent labels already created at this depth \n"
+#     printf "\n Grand parent labels already created at this depth \n"
 
-fi
+# fi
 
 if [[ -z ${lbl_mask} ]]; then
 
@@ -662,16 +662,16 @@ else
 fi
 
 # generate signal graph for virus signal connectivity
-signal_graph=virus_signal_connectivity_graph_depth_${depth}.html
+# signal_graph=virus_signal_connectivity_graph_depth_${depth}.html
 
-if [[ ! -f ${signal_graph} ]]; then
-    printf " \n Generating virus signal connectivity graph with the following command: \n "
+# if [[ ! -f ${signal_graph} ]]; then
+#     printf " \n Generating virus signal connectivity graph with the following command: \n "
 
-    printf "\n miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph} \n "
-    miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph}
-else
-    printf "\n Virus signal connectivity graph already computed at this depth \n"
-fi
+#     printf "\n miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph} \n "
+#     miracl sta conn_graph -l ${lbl_stats} -s ${hemi} -r ${lbl} -o ${signal_graph}
+# else
+#     printf "\n Virus signal connectivity graph already computed at this depth \n"
+# fi
 
 #---------------------------
 
@@ -742,6 +742,31 @@ for dog_sigma in ${dog//,/ }; do
 
                     printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
                     miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+                else
+                    printf "\n Tract density statistics already computed at this depth \n"
+                fi
+
+                tckmap=$( which tckmap )
+                tract_tck=${sta_dir}/fiber_ang${angle_val}.tck
+                endpoints="${sta_dir}/sta_endpoints_clar_space_angle_${angle_val}.nii.gz"
+                endpoints_stats="${sta_dir}/sta_endpoints_density_stats_depth_${depth}_angle_${angle_val}.csv"
+                if [[ ! -f endpoints_stats ]] && [[ -z tckmap ]]; then 
+                    # generate tck file for endpoints
+                    printf "\n Converting tracts from trk to tck using the following command: \n"
+
+                    printf "\n miracl conv trk -ot tck ${tracts} \n"
+                    miracl conv trk -ot tck "${tracts}"
+
+                    # generate endpoints
+                    printf "\n Using tck image to generate endpoints using the following command: \n"
+
+                    printf "\n miracl sta tract_endpoints -t ${tract_tck} -r ${ga_vol} -o ${endpoints} \n"
+                    miracl sta tract_endpoints -t "${tract_tck}" -r "${ga_vol}" -o "${endpoints}"
+
+                    printf "\n Computing tract density statistics with the following command: \n"
+
+                    printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+                    miracl lbls stats -i ${endpoints} -l ${deep_lbls} -o ${endpoints_stats} -m ${hemi} -d ${depth}
                 else
                     printf "\n Tract density statistics already computed at this depth \n"
                 fi
