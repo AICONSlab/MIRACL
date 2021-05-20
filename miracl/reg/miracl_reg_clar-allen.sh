@@ -485,9 +485,9 @@ function getbrainmask()
     cog=`fslstats ${otsu} -C`
 
     # bet
-    ifdsntexistrun ${mask} "Skull stripping" bet ${otsu} ${brain} -c ${cog} -R -r 25000 -m
+    # ifdsntexistrun ${mask} "Skull stripping" bet ${otsu} ${brain} -c ${cog} -R -r 25000 -m
 
-    c3d ${median} ${brain} -copy-transform -o ${brain}
+    # c3d ${median} ${brain} -copy-transform -o ${brain}
 
 
 }
@@ -785,7 +785,7 @@ function warpallenlbls()
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
     antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} ${initform} \
-    -o ${wrplbls} --float
+    -o ${wrplbls} -u int
 
     # get org tag
 	ortmatrix=`PrintHeader ${inclar} 4 | tr 'x' ' '`

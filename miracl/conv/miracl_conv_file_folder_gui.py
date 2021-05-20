@@ -4,9 +4,10 @@
 # coding: utf-8 
 
 import argparse
+from PyQt5.QtWidgets import *
 import sys
 
-from PyQt4.QtGui import *
+from PyQt5.QtGui import *
 
 
 # ---------
@@ -46,9 +47,9 @@ def showdialog(self, filfol, msg, ftypes):
     if filfol == 'file':
 
         if ftypes:
-            filename = QFileDialog.getOpenFileName(self, "%s" % msg, ".", "%s" % ftypes)
+            filename = QFileDialog.getOpenFileName(self, "%s" % msg, ".", "%s" % ftypes)[0]
         else:
-            filename = QFileDialog.getOpenFileName(self, "%s" % msg, ".")
+            filename = QFileDialog.getOpenFileName(self, "%s" % msg, ".")[0]
 
         if len(filename) > 0:
             print("\n File chosen for reading is: %s" % filename)

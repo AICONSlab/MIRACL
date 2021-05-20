@@ -7,7 +7,7 @@ import argparse
 import os
 import subprocess
 import sys
-from depends_manager import add_paths
+from .depends_manager import add_paths
 
 
 # import commands
