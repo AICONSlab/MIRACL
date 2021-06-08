@@ -202,7 +202,7 @@ def main(args):
 
     pastparents = getpastlabelsdepth(aragraph, lbls, d, lblsplit, maxannotlbl)
 
-    for pastlbl, pastparent in pastparents.iteritems():
+    for pastlbl, pastparent in pastparents.items():
         replacechildren(data, parentdata, pastlbl, pastparent)
 
     vx = img.header.get_zooms()[0]
