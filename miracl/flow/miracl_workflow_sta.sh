@@ -549,24 +549,25 @@ else
 
 fi
 
+
+# Generate label mask at depth of ROI
 deep_lbls=annotation_hemi_${hemi}_??um_clar_space_downsample_depth_${depth}.nii.gz
-#free_lbls=annotation_hemi_${hemi}_clar_space_downsample_depth_${depth}_freeview.nii.gz
 
-# if [[ ! -f ${deep_lbls} ]]; then
+if [[ ! -f ${deep_lbls} ]]; then
 
-#     printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
+    printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
-#     echo "miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}"
-#     miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
+    echo "miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}"
+    miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
 
-#     echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
-#     c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
+    echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
+    c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
-# else
+else
 
-#     printf "\n Grand parent labels already created at this depth \n"
+    printf "\n Grand parent labels already created at this depth \n"
 
-# fi
+fi
 
 if [[ -z ${lbl_mask} ]]; then
 
@@ -634,16 +635,6 @@ fi
 #---------------------------
 # Call STA
 
-# out_dir="clarity_sta_${lbl////_}_seed"
-
-# printf "\n Running STA with the following command: \n"
-
-# printf "\n miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask}  \
-#            -dog ${dog} -gauss ${gauss} -angle ${angle} -o ${out_dir} \n"
-# miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask} \
-#                                  -g ${dog} -k ${gauss} -a ${angle} -o ${out_dir}
-
-#---------------------------
 # Call lbl stats
 
 lbl_stats=virus_signal_stats_depth_${depth}.csv
@@ -675,6 +666,11 @@ fi
 
 #---------------------------
 
+# set output directory based on label seed if not done as initial input
+if [[ -z "${out_dir}" ]]; then
+    out_dir="clarity_sta_${lbl////_}_seed"
+fi
+
 # gen tract density map
 
 # loop over all derivative of gaussian and gaussian smoothing values
@@ -686,10 +682,6 @@ for dog_sigma in ${dog//,/ }; do
 
             for step in ${step_length//,/ }; do
             
-                # set output directory based on label seed if not done as initial input
-                if [[ -z "${out_dir}" ]]; then
-                    out_dir="clarity_sta_${lbl////_}_seed"
-                fi
                 sta_dir=${out_dir}/dog${dog_sigma}gau${gauss_sigma}step${step}
                 tracts=${sta_dir}/fiber_ang${angle_val}.trk
                 dens_map=${sta_dir}/sta_streamlines_density_map.nii.gz
