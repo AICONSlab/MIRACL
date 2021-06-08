@@ -90,14 +90,6 @@ for ii = 1 : length(dogsigs)
                 fpTrack = fullfile(dpTensor, ['fiber_ang' num2str(ang) '.trk']);
                 cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ];
                 [status, result] = system(cmd, '-echo');
-
-                fpTrack = fullfile(dpTensor, ['fiber_ang' num2str(ang) 'rseed5.trk']);
-                cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -rseed 5 -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ];
-                [status, result] = system(cmd, '-echo');
-
-                % fpTrack = fullfile(dpTensor, ['fiber_ang' num2str(ang) 'rseed10.trk']);
-                % cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -rseed 10 -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ];
-                % [status, result] = system(cmd, '-echo');
             end
             % [status, result] = system(cmd, '-echo');
         end
