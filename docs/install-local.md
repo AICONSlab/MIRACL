@@ -12,7 +12,7 @@ https://www.anaconda.com/distribution/#download-section,
 
 Then create the environment:
 
-    conda create --name miracl python=2.7.17 pip
+    conda create --name miracl python=3.7.4 pip
 
     conda activate miracl
 
@@ -20,11 +20,6 @@ install Dependencies
 
     pip install -e .
 
-
-#### PyQT
-install PyQt4 using anaconda, run:
-        
-    conda install pyqt=4 -c anaconda
 
 #### ANTS & c3d
 
@@ -119,7 +114,7 @@ To end session
 
 ## Update MIRACL
 
-To update the package
+To update MIRACL, run
 
     cd miracl
     git pull
@@ -128,4 +123,14 @@ ____________________________
 
 
 You should be good to go!
+
+
+## Troubleshooting
+
+### Q: I get the following error whenever I try to run the GUI: qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "{anaconda path}/envs/miracl_merge/lib/python3.7/site-packages/cv2/qt/plugins" even though it was found.
+
+
+If you know the path to the environment name, try running the following line to remove the specific file in question:
+
+    rm "{path_to_environment_name}/lib/python3.7/site-packages/cv2/qt/plugins/platforms/libqxcb.so"
 
