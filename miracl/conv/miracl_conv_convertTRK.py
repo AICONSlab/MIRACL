@@ -8,10 +8,17 @@ import argparse
 
 def parsefn():
     p = argparse.ArgumentParser(description="Convert tractograms from TRK to either TCK or VTK.")
-    p.add_argument('tractograms', metavar='bundle', nargs="+", help='list of tractograms.')
-    p.add_argument('-f', '--force', action="store_true", help='overwrite existing output files.')
+    p.add_argument('-t', '--tractogram', required=True, help='input tractogram file')
+    p.add_argument('-f', '--force', action="store_true", help='overwrite existing output files')
     p.add_argument('-ot', '--outtype', default='tck', choices=['tck', 'vtk'], help='filetype for output')
     return p
+
+def parse_inputs(parser, args):
+    tractogram = args.tractogram
+    force = args.force
+    outtype = args.outtype
+
+    return tractogram, force, outtype
 
 
 def convert_trk(tractogram, outtype='tck', force=False):
@@ -37,10 +44,8 @@ def convert_trk(tractogram, outtype='tck', force=False):
 
 def main(args):
     parser = parsefn()
-    args = parser.parse_args()
-    print(args)
-    for tractogram in args.tractograms:
-        convert_trk(tractogram, args.outtype, args.force)
+    tractogram, force, outtype = parse_inputs(parser, args)
+    convert_trk(tractogram, outtype, force)
 
 if __name__ == '__main__':
     main(sys.argv)
