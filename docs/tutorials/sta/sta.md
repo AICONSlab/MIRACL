@@ -1,5 +1,5 @@
-To run structural tensor analysis (STA) workflow for fiber quantification and
-tracking
+# Running the STA workflow
+To run the structural tensor analysis (STA) workflow for fiber quantification and tracking
 
 * after running the CLARITY-Allen registration
 
@@ -14,7 +14,7 @@ workflow for STA:
 
 executes:
 
-    io/miracl_io_convertTifftoNII.py
+    conv/miracl_conv_convertTIFFtoNII.py
     lbls/miracl_lbls_get_graph_info.py
     lbls/miracl_lbls_generate_parents_at_depth.py
     utils/miracl_extract_lbl.py
@@ -25,17 +25,17 @@ executes:
 
 # GUI
 
-from the main GUI OR run:
+from the main GUI, select `Workflows > CLARITY STA`, or run:
 
     miracl flow sta
 
-the following window will appear:
+The following window will appear:
 
-![](sta1.png)
+![](STA_flow_1.png)
 
 choose input tiff folder with virus channel:
 
-![](sta2.png)
+![](STA_flow_2.png)
 
 then choose the registered Allen labels inside the final registration folder (reg_final):
 
@@ -63,6 +63,8 @@ then the tracking parameters:
 
     - Tracking angle threshold, for example: **35**
 
+    - Whether or not to use 2nd order runge-kutta method for tracking
+
 and the tiff conversion parameters:
 
     - Down-sample ratio (default: 5)
@@ -72,7 +74,9 @@ and the tiff conversion parameters:
     - Original thickness (z-axis resolution / spacing between slices) in um (default: 5)
     - Down-sample in z dimension, binary argument, (default: 1) => yes
 
-after choosing the parameters press **Enter** to save them then **Run**
+Users can also input their own brain mask, as well as their own seeding mask. Both masks would respectively replace the automatically generated brain mask and regional mask used for the tractography. Users also have the option to dilate the seed mask across any of the three dimensions, by a value (indicated by the "Dilation factor" fields)
+
+After choosing the parameters, press **Enter** to save them, and then press **Run**
 
 ----
 

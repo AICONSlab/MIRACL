@@ -2,28 +2,12 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density
+from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density, miracl_sta_track_primary_eigen, miracl_sta_sta_track, miracl_sta_gen_tract_endpoints
 
 
 def run_sta_tensor(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-    args = vars(args)
-
-    if sys.argv[-2] == 'sta' and sys.argv[-1] == 'track_tensor':
-        subprocess.Popen('%s/sta/miracl_sta_track_primary_eigen.sh' % miracl_home,
-                         shell=True)
-    else:
-        if args['help']:
-            subprocess.Popen('%s/sta/miracl_sta_track_primary_eigen.sh -h' % miracl_home,
-                             shell=True)
-        else:
-            bash_args = '-i %s -g %s -k %s -a %s -s %s -b %s -o %s' % (args['in_nii'], args['dog'], args['sigma'],
-                                                                       args['angle'], args['seed_mask'], args['brain_mask'],
-                                                                       args['out_dir'])
-
-            subprocess.check_call('%s/sta/miracl_sta_track_primary_eigen.sh %s' % (miracl_home, bash_args),
-                                  shell=True,
-                                  stderr=subprocess.STDOUT)
+    miracl_sta_track_primary_eigen.main(args)
 
 
 def run_force_graph(parser, args):
@@ -33,30 +17,20 @@ def run_force_graph(parser, args):
 def run_tract_density(parser, args):
     miracl_sta_gen_tract_density.main(args)
 
+def run_tract_endpoints(parser, args):
+    miracl_sta_gen_tract_endpoints.main(args)
+
 
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
-    # sta
-    parser_sta = subparsers.add_parser('track_tensor', add_help=False, help="")
-    parser_sta.add_argument('-i', '--in_nii', metavar='',
-                            help="Input down-sampled clarity nifti")
-    parser_sta.add_argument('-g', '--dog', metavar='',
-                            help="Derivative of Gaussian (dog) sigma")
-    parser_sta.add_argument('-k', '--sigma', metavar='',
-                            help="Gaussian smoothing sigma")
-    parser_sta.add_argument('-a', '--angle', metavar='',
-                            help="Tracking angle threshold")
-    parser_sta.add_argument('-s', '--seed_mask', metavar='',
-                            help="Seed mask")
-    parser_sta.add_argument('-b', '--brain_mask', metavar='',
-                            help="Brain mask")
-    parser_sta.add_argument('-o', '--out_dir', metavar='',
-                            help="Output dir")
-    parser_sta.add_argument('-h', '--help', action='store_true')
-
-    parser_sta.set_defaults(func=run_sta_tensor)
+    # sta tensor
+    sta_tensor_parser = miracl_sta_track_primary_eigen.parsefn()
+    #sta_tensor_parser = miracl_sta_sta_track.parsefn()
+    parser_sta_tensor = subparsers.add_parser('track_tensor', parents=[sta_tensor_parser], add_help=False,
+        usage=sta_tensor_parser.usage, help='Perform Structure Tensor Analysis (STA) on CLARITY viral tracing or stains')
+    parser_sta_tensor.set_defaults(func=run_sta_tensor)
 
     # force graph
     force_graph_parser = miracl_sta_create_force_graph.parsefn()
@@ -71,6 +45,15 @@ def get_parser():
                                                  usage=tract_density_parser.usage,
                                                  help="Generate tract density map")
     parser_tract_density.set_defaults(func=run_tract_density)
+
+    # tract endpoints
+    tract_endpoints_parser = miracl_sta_gen_tract_endpoints.parsefn()
+    parser_tract_density = subparsers.add_parser('tract_endpoints', parents=[tract_endpoints_parser], add_help=False,
+                                                 usage=tract_endpoints_parser.usage,
+                                                 help="Generate tract endpoints map")
+    parser_tract_density.set_defaults(func=run_tract_endpoints)
+
+
 
     return parser
 

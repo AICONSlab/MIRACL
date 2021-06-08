@@ -117,37 +117,36 @@ def main(args):
 
     # in python
 
-    # mask = inlblsdata.copy()
-    #
-    # print(mask.shape)
-    # print(lblid)
-    #
-    # # extract lbl
-    # print("\n extracting label ...")
-    #
-    # mask[mask != lblid] = 0
-    # mask[mask > 0] = 1  # binarize
-    #
+    mask = inlblsdata.copy()
+    
+    # extract lbl
+    print("\n extracting label ...")
+    
+    mask[mask != lblid] = 0
+    mask[mask > 0] = 1  # binarize
+    
     # # assuming iso resolution
     # vx = inlblsnii.header.get_zooms()[0]
-    #
+    
     # outvox = vx * d
-    #
+    
     # mat = np.eye(4) * outvox
     # mat[3, 3] = 1
-    #
-    # outnii = "%s_mask.nii.gz" % outlbl
-    #
-    # # extract lbl
-    # print("\n saving label image ...")
-    #
-    # masknii = nib.Nifti1Image(mask, mat)
-    # nib.save(masknii, outnii)
-
+    
     outnii = "%s_mask.nii.gz" % outlbl
+    
+    # extract lbl
+    print("\n saving label image ...")
+    
+    masknii = nib.Nifti1Image(mask, inlblsnii.affine)
+    nib.save(masknii, outnii)
 
-    subprocess.check_call("c3d %s -threshold %s %s 1 0 -o %s" % (inlbls, lblid, lblid, outnii),
-                     shell=True, stderr=subprocess.STDOUT)
+    # outnii = "%s_mask.nii.gz" % outlbl
+
+    # print(lblid)
+
+    # subprocess.check_call("c3d %s -threshold %s %s 1 0 -o %s" % (inlbls, lblid, lblid, outnii),
+    #                  shell=True, stderr=subprocess.STDOUT)
 
 
 

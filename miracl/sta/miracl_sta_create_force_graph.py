@@ -130,14 +130,14 @@ def force(indf, dic, allengraph, lblid, thr, k, region, name):
 
         parents.append(parent)
 
-    #print(dfthr)
-    sizes = (dfthr[region].values + 1) * k 
-    sizes[-1] = np.max(sizes)
+    print(dfthr[region].values.shape)
+    sizes = (dfthr[region].values + 1) * k
+    sizes[-1] = np.max(sizes)  # what's the purpose of this line?
 
     #     return lgn.force(dfthr,group=parents,labels=dfthr.index.values,values=dfthr.max(),size=sizes,width=2000,height=1500,colormap=cmap)
 
     #f = lgn.force(dfthr, labels=dfthr.index.values, size=sizes, width=2500, height=1500)
-    f = lgn.force(dfthr, labels=dfthr.index.values, values=dfthr.max(), size=sizes, width=2500, height=1500)
+    f = lgn.force(dfthr, labels=dfthr.index.values, values=dfthr.max(), size=sizes[-1], width=2500, height=1500)
     f.save_html('%s_conn_force.html' % name, overwrite=True)
 
 

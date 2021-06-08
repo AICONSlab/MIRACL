@@ -116,7 +116,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
     widget.setLayout(layout)
 
     helpbutton.clicked.connect(lambda: print_help(main, helpfun))
-    enter.clicked.connect(lambda: print_input(linedits, fields, combo_field, cb))
+    enter.clicked.connect(lambda: print_input(labels, linedits, vols, dirs, fields, combo_field, cb))
     submit.clicked.connect(QtCore.QCoreApplication.instance().quit)
 
     return widget, linedits, labels
@@ -127,7 +127,7 @@ def get_fname(main, labels, vol):
     if vfile:
         vfilestr = "%s : %s" % (vol, str(vfile).lstrip())
         labels["%s" % vol].setText(vfilestr)
-        print('%s path: %s' % (vol, vfile))
+        ##print('%s path: %s' % (vol, vfile))
     else:
         labels["%s" % vol].setText('No file selected')
 
@@ -137,14 +137,31 @@ def get_dname(main, labels, dir):
     if dfile:
         dfilestr = "%s : %s" % (dir, dfile.lstrip())
         labels["%s" % dir].setText(dfilestr)
-        print('%s path: %s' % (dir, dfile))
+        #print('%s path: %s' % (dir, dfile))
     else:
         labels["%s" % dir].setText('No Dir selected')
 
 
-def print_input(linedits, fields, combo_field=None, cb=None):
-    for f, field in enumerate(fields):
-        print("%s :%s" % (field, str(linedits["%s" % field].text()).lstrip()))
+def print_input(labels, linedits, volumes=None, dirs=None, fields=None, combo_field=None, cb=None):
+    if volumes:
+        for v, volume in enumerate(volumes):
+            text = str(labels[volume].text()).lstrip()
+            if text == 'No file selected':
+                text = ''
+            if volume in text:
+                text = text.lstrip("%s :" % volume)
+            print("%s :%s" % (volume, text))
+    if dirs:
+        for d, directory in enumerate(dirs):
+            text = str(labels[directory].text()).lstrip()
+            if text == 'No Dir selected':
+                text = ''
+            if directory in text:
+                print(text)
+                text = text.lstrip("%s :" % directory)
+    if fields:
+        for f, field in enumerate(fields):
+            print("%s :%s" % (field, str(linedits["%s" % field].text()).lstrip()))
     if combo_field and cb:
         print("%s :%s" % (combo_field, cb.currentText()))
 

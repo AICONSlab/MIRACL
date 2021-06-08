@@ -79,7 +79,7 @@ def gen_dens(tracts, ref_vol, out_dens):
     nii = niihdr.get_data()
 
     print('generating density map from tracts')
-    dm = utils.density_map(streamlines, nii.shape, affine=niihdr.affine)
+    dm = utils.density_map(streamlines, affine=niihdr.affine, vol_dims=nii.shape)
     dm_img = nib.Nifti1Image(dm.astype("int16"), niihdr.affine)
 
     print('saving tracts map')

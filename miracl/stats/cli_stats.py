@@ -1,6 +1,6 @@
 import sys
 import argparse
-from miracl.stats import miracl_stats_paired_ttest_ipsi_contra, miracl_stats_voxel_wise
+from miracl.stats import miracl_stats_paired_ttest_ipsi_contra, miracl_stats_voxel_wise, miracl_stats_paired_ttest_group
 
 
 def run_paired_ttest(parser, args):
@@ -9,6 +9,10 @@ def run_paired_ttest(parser, args):
 
 def run_voxel_wise(parser, args):
     miracl_stats_voxel_wise.main(args)
+
+
+def run_group_ttest(parser, args):
+    miracl_stats_paired_ttest_group.main(args)
 
 
 def get_parser():
@@ -31,6 +35,15 @@ def get_parser():
 
     parser_voxel.set_defaults(func=run_voxel_wise)
 
+    # group wise t-test
+
+    group_parser = miracl_stats_paired_ttest_group.parsefn()
+    parser_group = subparsers.add_parser('group_ttest', parents=[group_parser], add_help=False,
+                                          usage=group_parser.usage,
+                                          help='run groupwise ttest stats')
+
+    parser_group.set_defaults(func=run_group_ttest)
+
     return parser
 
 
@@ -40,6 +53,7 @@ def main(args=None):
 
     parser = get_parser()
     args = parser.parse_args(args)
+    print(args)
     args.func(parser, args)
 
 
