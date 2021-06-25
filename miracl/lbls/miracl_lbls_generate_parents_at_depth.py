@@ -165,12 +165,54 @@ def saveniiparents(parentdata, vx, outnii):
     nii.header.set_data_dtype(np.int32)
     nib.save(nii, outnii)
 
+def get_parent_data(depth, inlbls='Allen', hemi='combined', res=25):
+    ''' The main method for this function.
+    '''
+    if inlbls == "Allen":
+
+        # load annotations
+        print("Reading ARA annotation with %s hemispheres and %d voxel size" % (hemi, res))
+
+        nii = '%s/ara/annotation/annotation_hemi_%s_%dum.nii.gz' % (ATLAS_DIR, hemi, res)
+        print(nii)
+
+    else:
+        print("Reading input labels")
+        nii = inlbls
+    pass
+
+    img = nib.load(nii)
+    data = img.get_data()
+
+    # load structure graph
+    print("Reading ARA ontology structure_graph")
+    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_split.csv" % ATLAS_DIR
+    aragraph = pd.read_csv(arastrctcsv)
+
+    # get lbls
+    lbls = getalllbls(data)
+
+    # loop over intensities
+    parentdata = np.copy(data)
+
+    print("Computing parent labels at depth %d" % depth)
+
+    pastparents = getpastlabelsdepth(aragraph, lbls, depth, lblsplit, maxannotlbl)
+
+    for pastlbl, pastparent in pastparents.items():
+        replacechildren(data, parentdata, pastlbl, pastparent)
+
+    return parentdata
+
 
 def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
     d, inlbls, hemi, res = parse_inputs(parser, args)
+
+    # return the parent data as an array
+    # parentdata = getparentdata(d, inlbls, hemi, res)
 
     if inlbls == "Allen":
 
