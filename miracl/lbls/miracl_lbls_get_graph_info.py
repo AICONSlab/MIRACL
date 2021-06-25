@@ -42,6 +42,30 @@ def parse_inputs(parser, args):
 
     return lbl
 
+def get_lbl_info(lbl):
+    ''' Given lbl, which is either an acronym, or a fully titled region in the Allen atlas, return a series of information
+    about the region. 
+    '''
+    # read graph
+    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_combined.csv" % ATLAS_DIR
+    aragraph = pd.read_csv(arastrctcsv)
+
+    try:  # get the data from the atlas, exit if the label doesnt match
+        if isinstance(lbl, int) and int(lbl) in aragraph.id.values:
+            lblinfo = aragraph[aragraph.id == int(lbl)]
+        elif lbl in aragraph.name.values:
+            lblinfo = aragraph[aragraph.name == lbl]
+        elif lbl in aragraph.acronym.values:
+            lblinfo = aragraph[aragraph.acronym == lbl]
+        else:
+            raise ValueError('Error: {} is not a label id, label name, OR label acronym. Please consult {} to see possible values\n'.format(lbl, arastrctcsv))
+    except Exception as e:
+        exit(e)
+        #exit('Could not complete request.')
+
+    return lblinfo.to_dict(orient='list')
+
+
 
 def main(args):
     parser = parsefn()

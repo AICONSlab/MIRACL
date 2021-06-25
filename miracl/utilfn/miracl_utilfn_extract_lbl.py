@@ -86,6 +86,58 @@ def parse_inputs(parser, args):
     return inlbls, outlbl, d, m
 
 
+def downsample_mask(atlas, down):
+    ''' Downsample the allen_atlas image by down, which indicates the downsampling factor
+    '''
+    # extract lbl
+    print("\n reading input labels ...")
+
+    # in python
+    inlblsnii = nib.load("%s" % atlas)
+    inlblsdata = inlblsnii.get_data()
+    
+    if down > 1:
+        print("\n down-sampling mask")
+    
+        down_factor = (1.0 / int(down))
+        inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down_factor, order=0)
+
+    return inlblsdata
+
+
+def get_label_id(label, side='combined'):
+    ''' Return the label id for a given Allen atlas label acronym. 
+    '''
+    # read Allen ontology
+    if side == "combined":
+        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % ATLAS_DIR)
+    else:
+        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
+
+    # outlbl to lblid
+    lbl_id = annot_csv.id[annot_csv.acronym == "%s" % label].values[0]
+
+    return lbl_id
+
+
+def mask_label(mask, lblid):
+    ''' Return all voxels in mask that have the same value as label
+    '''
+    # extract lbl
+    print("\n extracting label ...")
+    res = mask.copy()  # create a copy of the mask
+    res[res != lblid] = 0
+    res[res > 0] = 1  # binarize
+
+    return res
+
+def extract_label(atlas, down=1, side='combined'):
+    mask = downsample_mask(atlas, down)  # downsample the mask by the factor
+    lbl_id = get_label_id(lbl, side)  # extract the label id
+    res = mask_label(mask, lbl_id)
+
+    return res
+
 # ---------
 
 def main(args):
@@ -100,30 +152,7 @@ def main(args):
     inlblsnii = nib.load("%s" % inlbls)
     inlblsdata = inlblsnii.get_data()
     
-    if d > 1:
-        print("\n down-sampling mask")
-    
-        down = (1.0 / int(d))
-        inlblsdata = scipy.ndimage.interpolation.zoom(inlblsdata, down, order=0)
-
-    # read Allen ontology
-    if m == "combined":
-        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % ATLAS_DIR)
-    else:
-        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
-
-    # outlbl to lblid
-    lblid = annot_csv.id[annot_csv.acronym == "%s" % outlbl].values[0]
-
-    # in python
-
-    mask = inlblsdata.copy()
-    
-    # extract lbl
-    print("\n extracting label ...")
-    
-    mask[mask != lblid] = 0
-    mask[mask > 0] = 1  # binarize
+    mask = extract_label(inlblsdata, d, m)
     
     # # assuming iso resolution
     # vx = inlblsnii.header.get_zooms()[0]

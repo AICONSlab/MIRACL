@@ -15,6 +15,10 @@ import scipy.stats as stats
 from miracl.utilfn.depends_manager import add_paths
 from miracl import ATLAS_DIR
 
+from miracl.lbls.miracl_lbls_get_graph_info import get_lbl_info
+from miracl.utilfn.miracl_utilfn_extract_lbl import extract_label
+from miracl.lbls.miracl_lbls_generate_parents_at_depth import get_parent_data
+
 ### Inputs #########
 
 
@@ -35,14 +39,16 @@ def helpmsg(name=None):
 def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
     parser.add_argument('-i', '--input', type=str, help="Comma separate values (CSV) file with values", required=True)
+    parser.add_argument('-p', '--pval', help="p-value to threshold final figure by; default: 0.05", default=0.05)
 
     return parser
 
 
 def parse_inputs(parser, args):
     input = args.input
+    pval = args.pval
 
-    return input
+    return input, pval
 
 
 # -----------------
@@ -121,8 +127,11 @@ def savexlsx(savedf, outdir):
 
 # -----------------
 
-def projpvalonatlas(atlas, atlas_legend, pval_csv, outdir):
+def projpvalonatlas(atlas, atlas_legend, pval_csv, output, thresh=None):
     """ Project the pvalues from the analysis onto the labels of the Allen atlas"""
+    # if no threshold is given, set pvalue to 1.1
+    if not thresh:
+        thresh = 1.01
 
     # load atlas
     nii = nib.load('%s' % atlas)
@@ -132,26 +141,42 @@ def projpvalonatlas(atlas, atlas_legend, pval_csv, outdir):
     atlas_df = pd.read_csv(atlas_legend)
     pval_df = pd.read_csv(pval_csv)
 
+    # create dictionary that stores depth of each arrat
+    depth_arr_dict = {}
+
     # generate blank image
     res = np.zeros(atlas_img.shape)
     # for each region in the csv result file
     for index, row in pval_df.iterrows():
+        region = row['region'][1:]
         # get the corresponding atlas_id value in the split atlas
         # if the value isnt nan, extract and go
-        if pd.notna(row['pvalue']):
-            atlas_id = atlas_df.loc[atlas_df['acronym'] == row['region'], 'atlas_id'].iloc[0]
+        if pd.notna(row['pvalue']) and row['pvalue'] < thresh:
+            allen_id = atlas_df.loc[atlas_df['acronym'] == region, 'id'].iloc[0]
 
-            res[atlas_img == atlas_id] = row['pvalue']
+            name = atlas_df.loc[atlas_df['acronym'] == region, 'name'].iloc[0]
+
+            # extract the depth, use the information to get the voxels with the ROI
+            lbl_info = get_lbl_info(region)
+            depth = lbl_info['depth'][0]
+
+            # if allen atlas at depth doesnt exist, create it
+            if depth not in depth_arr_dict:
+                depth_arr_dict[depth] = get_parent_data(depth)
+            depth_arr = depth_arr_dict[depth]
+
+            # set all corresponding voxels to the p-value
+            res[depth_arr == allen_id] = row['pvalue']
 
     # store nifti as result
     newnii = nib.Nifti1Image(res, nii.affine)
-    niiname = os.path.join(outdir, 'groupwise_ttest_pval.nii.gz')
-    nib.save(newnii, niiname)
+    #niiname = os.path.join(outdir, 'groupwise_ttest_pval_2_thresh.nii.gz')
+    nib.save(newnii, output)
 
 
 def main(args):
     parser = parsefn()
-    input_file = parse_inputs(parser, args)
+    input_file, pval = parse_inputs(parser, args)
     outdir = os.path.dirname(input_file)
     if not outdir:
         outdir = os.getcwd()
@@ -175,46 +200,8 @@ def main(args):
     # generate final nifti
     niiname = os.path.join(outdir, 'groupwise_ttest_pval.nii.gz')
     atlas = '%s/ara/annotation/annotation_hemi_combined_25um.nii.gz' % ATLAS_DIR
-    atlas_legend = '%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR
-    projpvalonatlas(atlas, atlas_legend, outcsv, outdir)
-
-
-    # mkdir
-    # outdir = '%s/paired_ttest_ipsi_vs_contra' % dir
-
-    # if not os.path.exists(outdir):
-    #     os.makedirs(outdir)
-    # else:
-    #     print('Experiment folder exists.. overwriting old experiment!')
-
-    # # read csv
-    # print("\n Reading feature extraction csv files")
-
-    # # splitval = 20000
-
-    # [vals, df] = readcsvs(dir)
-
-    # # clean-up labels (for intersections between mices & dropping ones w only one hemi)
-    # ipsi = cleanuplbls(vals)
-
-    # # compute paired t-test
-    # print("\n Computing paired t-test between ipsi & contra hemispheres across all mice")
-    # [tt_stat, tt_pval] = computepairttest(vals, ipsi, pars)
-
-    # # save csv
-    # print("\n Saving stats as csv file")
-    # savedf = savecsv(df, ipsi, tt_stat, tt_pval, outdir)
-
-    # # save xlsx
-    # print("\n Saving stats as xlsx file with significant p-values as green cells")
-    # savexlsx(savedf, outdir)
-
-    # # project onto atlas labels
-    # print("\n Projecting stats onto atlas label and saving nifti file")
-
-    # atlas = '%s/ara/annotation/annotation_hemi_combined_25um.nii.gz' % ATLAS_DIR
-
-    # projpvalonatlas(atlas, pars, ipsi, tt_pval, outdir)
+    atlas_legend = '%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % ATLAS_DIR
+    projpvalonatlas(atlas, atlas_legend, outcsv, niiname, 0.05)
 
 
 if __name__ == "__main__":
