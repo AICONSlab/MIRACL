@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density, miracl_sta_track_primary_eigen, miracl_sta_sta_track, miracl_sta_gen_tract_endpoints
+from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density, miracl_sta_track_primary_eigen, miracl_sta_gen_tract_endpoints
 
 
 def run_sta_tensor(parser, args):
