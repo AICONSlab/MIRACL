@@ -9,6 +9,7 @@ import nibabel as nib
 from dipy.tracking import utils
 from nibabel import trackvis
 
+from miracl.sta import sta_gui
 
 def helpmsg():
     return '''
@@ -39,14 +40,24 @@ def helpmsg():
 def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
-    parser.add_argument('-t', '--tracts', type=str, help="Input tracts ", required=True)
-    parser.add_argument('-r', '--ref_vol', type=str, help="Reference nifti volume", required=True)
+    parser.add_argument('-t', '--tracts', type=str, help="Input tracts ")
+    parser.add_argument('-r', '--ref_vol', type=str, help="Reference nifti volume")
     parser.add_argument('-o', '--out_dens', type=str, help="Output tract density")
 
     return parser
 
 
 def parse_inputs(parser, args):
+    ''' Parse the inputs. If the 
+    '''
+    print(sys.argv)
+    if sys.argv[-2] == 'sta' and sys.argv[-1] == 'tract_density':
+
+        print("Running in GUI mode")
+
+        # pass the results of the gui here
+        args = sta_gui.tractDensityMain()
+
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
