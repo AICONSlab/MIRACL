@@ -479,17 +479,6 @@ function getbrainmask()
 #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
     ifdsntexistrun ${otsu} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsu} 1
 
-#    ifdsntexistrun ${otsu} "Copying transform" c3d ${median} ${otsucp} -copy-transform -o ${otsu}
-
-    # center of gravity
-    cog=`fslstats ${otsu} -C`
-
-    # bet
-    # ifdsntexistrun ${mask} "Skull stripping" bet ${otsu} ${brain} -c ${cog} -R -r 25000 -m
-
-    # c3d ${median} ${brain} -copy-transform -o ${brain}
-
-
 }
 # N4 bias correct
 
@@ -842,7 +831,7 @@ function warpallenlbls()
     zr=$(($zd/2))
 
     ifdsntexistrun ${lblsorgnii} "Extracting labels to original size" \
-     c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} ${lblsorgnii}
+     c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} -o ${lblsorgnii}
 
     c3d ${inclar} ${lblsorgnii} -copy-transform -o ${lblsorgnii}
 
