@@ -831,7 +831,7 @@ function warpallenlbls()
     zr=$(($zd/2))
 
     ifdsntexistrun ${lblsorgnii} "Extracting labels to original size" \
-     c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} ${lblsorgnii}
+     c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} -o ${lblsorgnii}
 
     c3d ${inclar} ${lblsorgnii} -copy-transform -o ${lblsorgnii}
 
