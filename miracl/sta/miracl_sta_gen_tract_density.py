@@ -50,7 +50,6 @@ def parsefn():
 def parse_inputs(parser, args):
     ''' Parse the inputs. If the 
     '''
-    print(sys.argv)
     if sys.argv[-2] == 'sta' and sys.argv[-1] == 'tract_density':
 
         print("Running in GUI mode")
