@@ -774,7 +774,7 @@ function warpallenlbls()
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
     antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} ${initform} \
-    -o ${wrplbls} -u int
+    -o ${wrplbls}
 
     # get org tag
 	ortmatrix=`PrintHeader ${inclar} 4 | tr 'x' ' '`
