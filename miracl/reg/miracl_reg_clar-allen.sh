@@ -436,7 +436,7 @@ function resampleclar()
 	local interp=$4
 	local resclar=$5
 	
-	ifdsntexistrun ${resclar} "Resmapling CLARITY input" \
+	ifdsntexistrun ${resclar} "Resampling CLARITY input" \
 	ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
 	c3d ${resclar} -type ushort -o ${resclar}
@@ -473,7 +473,8 @@ function getbrainmask()
 
     # create mask
 #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
-    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
+    # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
+	ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 1 6
 
     # get masked
 #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
@@ -765,16 +766,17 @@ function warpallenlbls()
     vres=`python -c "print (${vox}/1000.0)"`
 
     # res clar in
-    ifdsntexistrun ${smclarres} "Usampling reference image" \
+    ifdsntexistrun ${smclarres} "Upsampling reference image" \
      ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 0
 
     # convert to ushort
-    ConvertImagePixelType ${smclarres} ${smclarres} 3
+    # ConvertImagePixelType ${smclarres} ${smclarres} 3
+    c3d ${smclarres} -type ushort -o ${smclarres}
 
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
     antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} ${initform} \
-    -o ${wrplbls}
+    -o ${wrplbls} --float
 
     # get org tag
 	ortmatrix=`PrintHeader ${inclar} 4 | tr 'x' ' '`
