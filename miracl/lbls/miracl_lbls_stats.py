@@ -71,8 +71,8 @@ def parsefn():
     else:
         parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
-        parser.add_argument('-i', '--invol', type=str, help="In volume", required=True)
-        parser.add_argument('-l', '--lbls', type=str, help="Reg lbls", required=True)
+        parser.add_argument('-i', '--invol', type=str, help="In volume")
+        parser.add_argument('-l', '--lbls', type=str, help="Reg lbls")
         parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Mean')
         parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
         parser.add_argument('-d', '--depth', type=int, help="Labels depth")
@@ -86,7 +86,7 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    if sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
+    if sys.argv[-2] == 'lbls' and sys.argv[-1] == 'stats':
         print("Running in GUI mode")
 
         title = 'Label Statistics'
