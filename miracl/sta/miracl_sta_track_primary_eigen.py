@@ -120,7 +120,6 @@ def track_primary_eigen(input_clar, dog_sigmas, gauss_sigmas, brain_mask, seed_m
 
 
 def main(args):
-    print("here")
     parser = parsefn()
     filename, bmask, smask, angles, dog_sigmas, gauss_sigmas, step_lengths, rk2, output_dir = parse_inputs(parser, args)
 
