@@ -158,16 +158,6 @@ nestedict = {
                 'script': 'miracl lbls stats',
                 'helpmsg': 'Extract volumes of labels of interest and their subdivisions from input label file'
             },
-            1: {
-                'name': 'Warp to CLARITY',
-                'script': 'miracl lbls warp_clar',
-                'helpmsg': 'Warps Allen annotations to the original high-res CLARITY space'
-            },
-            2: {
-                'name': 'Warp to MRI',
-                'script': 'miracl lbls warp_mri',
-                'helpmsg': 'Warps Allen annotations to the MRI space'
-            },
             # 3: {
             #     'name': 'Generate Grand-parent at certain depth',
             #     'script': 'miracl lbls gp_at_depth',
