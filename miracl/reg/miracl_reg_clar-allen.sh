@@ -767,11 +767,11 @@ function warpallenlbls()
 
     # res clar in
     ifdsntexistrun ${smclarres} "Upsampling reference image" \
-     ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 0
+     ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 3
 
     # convert to ushort
     # ConvertImagePixelType ${smclarres} ${smclarres} 3
-    c3d ${smclarres} -type ushort -o ${smclarres}
+    # c3d ${smclarres} -type ushort -o ${smclarres}
 
 	# warp to registered clarity
 	ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
@@ -1003,11 +1003,12 @@ function main()
 	ortclar=${regdir}/clar_res0.05_ort.nii.gz
 	orientimg ${padclar} "${ort}" Cubic float ${ortclar}
 
-	# Smooth
+	# Smooth, convert datatype to ushort
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
 	smoothimg ${ortclar} 0.25 ${smclar}
+	c3d ${smclar} -type ushort -o ${smclar}
 
-	# make clarity copy
+	# make clarity copy, convert datatype to ushort
 	clarlnk=${regdir}/clar.nii.gz
 	if [[ ! -f "${clarlnk}" ]]; then cp ${smclar} ${clarlnk} ; fi
 
