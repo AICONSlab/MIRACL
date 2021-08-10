@@ -1,6 +1,6 @@
 import sys
 import argparse
-from miracl.stats import miracl_stats_paired_ttest_ipsi_contra, miracl_stats_voxel_wise, miracl_stats_paired_ttest_group
+from miracl.stats import miracl_stats_paired_ttest_ipsi_contra, miracl_stats_voxel_wise, miracl_stats_paired_ttest_group, miracl_plot_single_subj
 
 
 def run_paired_ttest(parser, args):
@@ -41,6 +41,15 @@ def get_parser():
     parser_group = subparsers.add_parser('group_ttest', parents=[group_parser], add_help=False,
                                           usage=group_parser.usage,
                                           help='run groupwise ttest stats')
+
+    parser_group.set_defaults(func=run_group_ttest)
+
+    # single subject, plotting results
+
+    group_parser = miracl_stats_paired_ttest_group.parsefn()
+    parser_group = subparsers.add_parser('plot_subj', parents=[group_parser], add_help=False,
+                                          usage=group_parser.usage,
+                                          help='plot results for one subject')
 
     parser_group.set_defaults(func=run_group_ttest)
 
