@@ -7,6 +7,7 @@ import subprocess
 
 from miracl.conv import miracl_conv_gui_options as gui_opts
 from miracl.sta import sta_gui
+from miracl.utilfn.misc import get_orient
 
 
 def helpmsg():
@@ -104,6 +105,7 @@ def parse_inputs(parser, args):
 
 def track_primary_eigen(input_clar, dog_sigmas, gauss_sigmas, brain_mask, seed_mask, angles, step_lengths, rk2, outdir):
 	rk = 1 if rk2 else 0
+	orient = get_orient(input_clar)
 
 	for dog_sigma in dog_sigmas:
 		for gauss_sigma in gauss_sigmas:
@@ -111,9 +113,9 @@ def track_primary_eigen(input_clar, dog_sigmas, gauss_sigmas, brain_mask, seed_m
 				for step_length in step_lengths:
 					print("\n Running Structure Tensor Analysis with the following command \n")
 
-					CMD = '{}/utilfn/runMatlabCmd sta_track "\'{}\'" "{}" "{}" "{}" "\'{}\'" "\'{}\'" "\'{}\'" "{}" "{}"'.format(
+					CMD = '{}/utilfn/runMatlabCmd sta_track "\'{}\'" "{}" "{}" "{}" "\'{}\'" "\'{}\'" "\'{}\'" "{}" "{}" "{}"'.format(
 						os.environ['MIRACL_HOME'], input_clar, dog_sigma, 
-						gauss_sigma, angle, brain_mask, seed_mask, outdir, step_length, rk)
+						gauss_sigma, angle, brain_mask, seed_mask, outdir, step_length, rk, orient)
 
 					print(CMD)
 					subprocess.check_call(CMD, shell=True, stderr=subprocess.STDOUT)
