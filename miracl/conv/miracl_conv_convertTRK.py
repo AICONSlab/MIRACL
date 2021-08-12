@@ -3,6 +3,7 @@ import sys
 from glob import glob
 import nibabel as nib
 import dipy
+from dipy.io.streamline import load_tractogram, save_tractogram
 import argparse
 
 
@@ -41,9 +42,11 @@ def convert_trk(tractogram, outtype='tck', output=None, force=False):
             return
 
     print("Converting file: {}\n".format(output_filename))
-    trk = nib.streamlines.load(tractogram)
+    # load tractogram, set origin to the corner
+    trk = load_tractogram(tractogram, reference='same')
+    trk.to_corner()  # set origin to the corner
     if  outtype == 'tck':
-        nib.streamlines.save(trk.tractogram, output_filename)
+        save_tractogram(trk, output_filename)
     else:
         dipy.io.vtk.save_vtk_streamlines(trk, output_filename)
 
