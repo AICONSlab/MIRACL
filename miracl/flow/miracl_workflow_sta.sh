@@ -694,12 +694,12 @@ for dog_sigma in ${dog//,/ }; do
                 printf "\n Running STA with the following command: \n"
                 if [[ ! -f "${tracts}" ]]; then
                     if [[ -n "${rk2}" ]]; then
-                        printf "\n miracl sta track_tensor_py -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask}  \
+                        printf "\n miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask}  \
                                    -dog ${dog_sigma} -gauss ${gauss_sigma} -angle ${angle_val} -sl ${step} -o ${out_dir} -sl -r \n"
                         miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask} \
                                                          -g ${dog_sigma} -k ${gauss_sigma} -a ${angle_val} -sl ${step} -o ${out_dir} -r
                     else
-                        printf "\n miracl sta track_tensor_py -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask}  \
+                        printf "\n miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask}  \
                                    -dog ${dog_sigma} -gauss ${gauss_sigma} -angle ${angle_val} -sl ${step} -o ${out_dir} \n"
                         miracl sta track_tensor -i ${nii_file} -b clarity_brain_mask.nii.gz -s ${lbl_mask} \
                                                          -g ${dog_sigma} -k ${gauss_sigma} -a ${angle_val} -sl ${step} -o ${out_dir}
