@@ -15,6 +15,10 @@ def run_group_ttest(parser, args):
     miracl_stats_paired_ttest_group.main(args)
 
 
+def plot_subj(parser, args):
+    miracl_plot_single_subj.main(args)
+
+
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -46,12 +50,12 @@ def get_parser():
 
     # single subject, plotting results
 
-    group_parser = miracl_stats_paired_ttest_group.parsefn()
-    parser_group = subparsers.add_parser('plot_subj', parents=[group_parser], add_help=False,
-                                          usage=group_parser.usage,
+    subj_parser = miracl_plot_single_subj.parsefn()
+    parser_subj = subparsers.add_parser('plot_subj', parents=[subj_parser], add_help=False,
+                                          usage=subj_parser.usage,
                                           help='plot results for one subject')
 
-    parser_group.set_defaults(func=run_group_ttest)
+    parser_subj.set_defaults(func=plot_subj)
 
     return parser
 
