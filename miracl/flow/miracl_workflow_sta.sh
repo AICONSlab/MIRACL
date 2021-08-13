@@ -756,16 +756,19 @@ for dog_sigma in ${dog//,/ }; do
                     printf "\n miracl conv trk -ot tck ${tracts} \n"
                     miracl conv trk -t "${tracts}"
 
-                    # generate endpoints
-                    printf "\n Using tck image to generate endpoints using the following command: \n"
+                    if [[ ! -f "${endpoints}" ]]; then
+                        # generate endpoints
+                        printf "\n Using tck image to generate endpoints using the following command: \n"
 
-                    printf "\n miracl sta tract_endpoints -t ${tract_tck} -r ${ga_vol} -o ${endpoints} \n"
-                    miracl sta tract_endpoints -t "${tract_tck}" -r "${ga_vol}" -o "${endpoints}"
 
+                        printf "\n miracl sta tract_endpoints -t ${tract_tck} -r ${ga_vol} -o ${endpoints} \n"
+                        miracl sta tract_endpoints -t "${tract_tck}" -r "${ga_vol}" -o "${endpoints}"
+
+                    fi
                     printf "\n Computing tract endpoints statistics with the following command: \n"
 
                     printf "\n miracl lbls stats -i ${endpoints} -l ${deep_lbls} -o ${endpoints_stats} -m ${hemi} -d ${depth} \n"
-                    miracl stats -i ${endpoints} -l ${deep_lbls} -o ${endpoints_stats} -m ${hemi} -d ${depth}
+                    miracl lbls stats -i ${endpoints} -l ${deep_lbls} -o ${endpoints_stats} -m ${hemi} -d ${depth}
 
                     printf "\n Generating figure of tract endpoint statistics with the following command: \n"
 
