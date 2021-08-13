@@ -12,11 +12,9 @@ import os
 def helpmsg():
     return '''
 
-    Generate a tract density map from input STA tractography streamlines
+    Generate a tract endpoints map from input STA tractography streamlines. Uses mrtrix
 
-    Usage: miracl_sta_gen_tract_density.py -t [ input tracts (.tck) ]  -r [ reference volume ] -o [ output tract density ]
-
-    Example: miracl_sta_gen_tract_density.py -t  -r  -o
+    Usage: miracl_sta_gen_tract_endpoints.py -t [ input tracts (.tck) ]  -r [ reference volume ] -o [ output tract density ]
 
         '''
 
@@ -54,16 +52,6 @@ def gen_endpoints(input_tck, ref_vol, out_endpoints=None):
     CMD = "tckmap -ends_only -template {} {} {}".format(ref_vol, input_tck, out_endpoints)
     print(CMD)
     subprocess.check_call(CMD, shell=True, stderr=subprocess.STDOUT)
-
-    # image for some reason ends up in the wrong space -- flip it
-    CMD = "c3d {} -flip xy -o {}".format(out_endpoints, out_endpoints)
-    print(CMD)
-    subprocess.check_call(CMD, shell=True, stderr=subprocess.STDOUT)
-
-    # image for some reason ends up in the wrong space -- flip it
-    CMD = "c3d {} {} -copy-transform -o {}".format(ref_vol, out_endpoints, out_endpoints)
-    print(CMD)
-    subprocess.check_call(CMD, shell=True, stderr=subprocess.STDOUT)    
 
 # ---------
 
