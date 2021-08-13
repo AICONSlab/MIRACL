@@ -74,7 +74,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
             # Layout for widgets
             layout.addRow(labels["%s" % vol], buttons["%s" % vol])
 
-            buttons["%s" % vol].clicked.connect(lambda xv=vol: get_fname(main, labels, vol))
+            buttons["%s" % vol].clicked.connect(lambda state, vol=vol: get_fname(main, labels, vol))
 
     if dirs:
 
@@ -86,7 +86,7 @@ def OptsMenu(title, vols=None, dirs=None, fields=None, combo=None, helpfun=None)
             # Layout for widgets
             layout.addRow(labels["%s" % dir], buttons["%s" % dir])
 
-            buttons["%s" % dir].clicked.connect(lambda xd=dir: get_dname(main, labels, dir))
+            buttons["%s" % dir].clicked.connect(lambda state, dir=dir: get_dname(main, labels, dir))
 
     for f, field in enumerate(fields):
         # Create inputs (line edts)
@@ -127,7 +127,7 @@ def get_fname(main, labels, vol):
     if vfile:
         vfilestr = "%s : %s" % (vol, str(vfile).lstrip())
         labels["%s" % vol].setText(vfilestr)
-        ##print('%s path: %s' % (vol, vfile))
+        # print('%s path: %s' % (vol, vfile))
     else:
         labels["%s" % vol].setText('No file selected')
 
@@ -137,7 +137,7 @@ def get_dname(main, labels, dir):
     if dfile:
         dfilestr = "%s : %s" % (dir, dfile.lstrip())
         labels["%s" % dir].setText(dfilestr)
-        #print('%s path: %s' % (dir, dfile))
+        # print('%s path: %s' % (dir, dfile))
     else:
         labels["%s" % dir].setText('No Dir selected')
 
