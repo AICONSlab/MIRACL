@@ -734,6 +734,12 @@ for dog_sigma in ${dog//,/ }; do
 
                     printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
                     miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth}
+
+                    printf "\n Generating figure of tract density statistics with the following command: \n"
+
+                    printf "\n miracl stats plot_subj -i ${dens_stats} \n"
+                    miracl stats plot_subj -i ${dens_stats}
+
                 else
                     printf "\n Tract density statistics already computed at this depth \n"
                 fi
@@ -742,25 +748,34 @@ for dog_sigma in ${dog//,/ }; do
                 tract_tck=${sta_dir}/fiber_ang${angle_val}.tck
                 endpoints="${sta_dir}/sta_endpoints_clar_space_angle_${angle_val}.nii.gz"
                 endpoints_stats="${sta_dir}/sta_endpoints_density_stats_depth_${depth}_angle_${angle_val}.csv"
-                if [[ ! -f endpoints_stats ]] && [[ -z tckmap ]]; then 
+                # generate endpoints, stats and chart iff tckmap exists, and 
+                if [[ ! -f "${endpoints_stats}" ]] && [[ -n "${tckmap}" ]]; then
                     # generate tck file for endpoints
                     printf "\n Converting tracts from trk to tck using the following command: \n"
 
                     printf "\n miracl conv trk -ot tck ${tracts} \n"
-                    miracl conv trk -ot tck "${tracts}"
+                    miracl conv trk -t "${tracts}"
 
-                    # generate endpoints
-                    printf "\n Using tck image to generate endpoints using the following command: \n"
+                    if [[ ! -f "${endpoints}" ]]; then
+                        # generate endpoints
+                        printf "\n Using tck image to generate endpoints using the following command: \n"
 
-                    printf "\n miracl sta tract_endpoints -t ${tract_tck} -r ${ga_vol} -o ${endpoints} \n"
-                    miracl sta tract_endpoints -t "${tract_tck}" -r "${ga_vol}" -o "${endpoints}"
 
-                    printf "\n Computing tract density statistics with the following command: \n"
+                        printf "\n miracl sta tract_endpoints -t ${tract_tck} -r ${ga_vol} -o ${endpoints} \n"
+                        miracl sta tract_endpoints -t "${tract_tck}" -r "${ga_vol}" -o "${endpoints}"
 
-                    printf "\n miracl lbls stats -i ${dens_map_clar} -l ${deep_lbls} -o ${dens_stats} -m ${hemi} -d ${depth} \n"
+                    fi
+                    printf "\n Computing tract endpoints statistics with the following command: \n"
+
+                    printf "\n miracl lbls stats -i ${endpoints} -l ${deep_lbls} -o ${endpoints_stats} -m ${hemi} -d ${depth} \n"
                     miracl lbls stats -i ${endpoints} -l ${deep_lbls} -o ${endpoints_stats} -m ${hemi} -d ${depth}
+
+                    printf "\n Generating figure of tract endpoint statistics with the following command: \n"
+
+                    printf "\n miracl stats plot_subj -i ${endpoints_stats} \n"
+                    miracl stats plot_subj -i ${endpoints_stats}
                 else
-                    printf "\n Tract density statistics already computed at this depth \n"
+                    printf "\n Tract endpoints statistics already computed at this depth. Otherwise, you may not have tckmap. \n"
                 fi
 
                 # gen force graph for tract density

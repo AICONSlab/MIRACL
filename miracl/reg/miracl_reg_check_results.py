@@ -78,7 +78,8 @@ def parse_inputs(parser, args):
             stderr=subprocess.PIPE)
 
         # put args in args dict iff the user has input a value
-        gui_sts = indirstr.split('\n')
+        gui_sts = indirstr.decode()
+        gui_sts = gui_sts.split('\n')
         gui_args = {}
         for st in gui_sts:
             if st:
@@ -86,10 +87,10 @@ def parse_inputs(parser, args):
                 if st_split[1]:
                     gui_args[st_split[0]] = st_split[1]
 
-        if 'Final registration directory path' not in gui_args:
+        if 'Final registration directory ' not in gui_args:
             sys.exit("Please provide location for final registration directory")
         else:
-            indir = gui_args['Final registration directory path'][1:]
+            indir = gui_args['Final registration directory '][1:]
 
         space = gui_args.get('Registration Space (def = clarity) ', 'clarity')
         hemi = gui_args.get('Hemisphere (def = combined) ', 'combined')

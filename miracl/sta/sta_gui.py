@@ -55,7 +55,7 @@ class STAmenu(QtWidgets.QWidget):
         self.layout.addRow("Derivative of Gaussian sigma (ex: 1 or 0.5 1 1.5)", self.dog)
         self.layout.addRow("Gaussian smoothing sigma (ex: 1 or 0.5 1 1.5)", self.gauss)
         self.layout.addRow("Tracking angle threshold (ex: 25 or 25 35 45)", self.angle)
-        self.layout.addRow("Step length (ex: 0.1 or 0.1 0.01 0.05)", self.angle)
+        self.layout.addRow("Step length (ex: 0.1 or 0.1 0.01 0.05)", self.step_length)
         self.layout.addRow(run)
         self.setLayout(self.layout)
 

@@ -1,4 +1,4 @@
-function sta_track(img, dogsigs, gausigs, angs, fpBmask, fpSmask, dpResult, stepLength, rk2)
+function sta_track(img, dogsigs, gausigs, angs, fpBmask, fpSmask, dpResult, stepLength, rk2, img_orient)
 
 [ref_hdr, stack] = readnii(img);
 
@@ -85,10 +85,13 @@ for ii = 1 : length(dogsigs)
             % if rk2, else
             if rk2 == 1
                 fpTrack = fullfile(dpTensor, ['fiber_ang' num2str(ang) '.trk']);
-                cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ' -rk2'];
+                cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ' -rk2 -vorder ' img_orient ];
             else
                 fpTrack = fullfile(dpTensor, ['fiber_ang' num2str(ang) '.trk']);
-                cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ];
+                cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -v3 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ' -vorder ' img_orient ];
+                [status, result] = system(cmd, '-echo');
+                fpTrack = fullfile(dpTensor, ['fiber_ang' num2str(ang) 'rseed5.trk']);
+                cmd = ['dti_tracker ' fpDtkTensor ' ' fpTrack ' -at ' num2str(ang) ' -v3 -rseed 5 -m ' fpBmaskCrop ' 0.1 1.1 -sm ' fpSmaskCrop ' 0.1 1.1 -l ' stepLength ' -vorder ' img_orient ];
                 [status, result] = system(cmd, '-echo');
             end
             % [status, result] = system(cmd, '-echo');

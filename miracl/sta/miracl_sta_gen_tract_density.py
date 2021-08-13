@@ -50,7 +50,6 @@ def parsefn():
 def parse_inputs(parser, args):
     ''' Parse the inputs. If the 
     '''
-    print(sys.argv)
     if sys.argv[-2] == 'sta' and sys.argv[-1] == 'tract_density':
 
         print("Running in GUI mode")
@@ -91,7 +90,7 @@ def gen_dens(tracts, ref_vol, out_dens):
 
     print('generating density map from tracts')
     dm = utils.density_map(streamlines, affine=niihdr.affine, vol_dims=nii.shape)
-    dm_img = nib.Nifti1Image(dm.astype("int16"), niihdr.affine)
+    dm_img = nib.Nifti1Image(dm.astype("uint16"), niihdr.affine)
 
     print('saving tracts map')
     dm_img.to_filename(out_dens)
