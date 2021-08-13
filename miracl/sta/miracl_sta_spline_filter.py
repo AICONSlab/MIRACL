@@ -6,7 +6,7 @@ import nipype.interfaces.diffusion_toolkit as dtk
 
 
 def parsefn():
-	parser = argparse.ArgumentParser(description='', usage=helpmsg())
+	parser = argparse.ArgumentParser(description='')
 
 	parser.add_argument('-i', '--input_track', type=str, help="Input down-sampled clarity nifti (.nii/.nii.gz)", required=True)
 	parser.add_argument('-sl', '--step_length', type=str, help="Unit of minimum voxel size", required=True)
