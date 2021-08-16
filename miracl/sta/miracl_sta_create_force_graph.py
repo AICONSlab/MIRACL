@@ -61,7 +61,7 @@ def parse_inputs(parser, args):
     side = args.side
 
     if not args.graph:
-        out_graph = 'clarity_brain_mask'
+        out_graph = 'clarity_brain_mask_conn_force.html'
     else:
         assert isinstance(args.graph, str)
         out_graph = args.graph
@@ -138,7 +138,7 @@ def force(indf, dic, allengraph, lblid, thr, k, region, name):
 
     #f = lgn.force(dfthr, labels=dfthr.index.values, size=sizes, width=2500, height=1500)
     f = lgn.force(dfthr, labels=dfthr.index.values, values=dfthr.max(), size=sizes[-1], width=2500, height=1500)
-    f.save_html('%s_conn_force.html' % name, overwrite=True)
+    f.save_html(name, overwrite=True)
 
 
 # ---------

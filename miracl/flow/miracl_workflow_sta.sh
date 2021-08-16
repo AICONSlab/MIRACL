@@ -778,17 +778,17 @@ for dog_sigma in ${dog//,/ }; do
                     printf "\n Tract endpoints statistics already computed at this depth. Otherwise, you may not have tckmap. \n"
                 fi
 
-                # gen force graph for tract density
-                tract_graph=${sta_dir}/sta_streamlines_density_connectivity_graph_depth_${depth}_angle_${angle_val}.html
+                # # gen force graph for tract density
+                # tract_graph=${sta_dir}/sta_streamlines_density_connectivity_graph_depth_${depth}_angle_${angle_val}.html
 
-                if [[ ! -f ${tract_graph} ]]; then
-                    printf " \n Generating virus signal connectivity graph with the following command: \n "
+                # if [[ ! -f ${tract_graph} ]]; then
+                #     printf " \n Generating virus signal connectivity graph with the following command: \n "
 
-                    printf "\n miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph} \n "
-                    miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph}
-                else
-                    printf "\n Tract density connectivity graph already computed at this depth \n"
-                fi
+                #     printf "\n miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph} \n "
+                #     miracl sta conn_graph -l ${dens_stats} -s ${hemi} -r ${lbl} -o ${tract_graph}
+                # else
+                #     printf "\n Tract density connectivity graph already computed at this depth \n"
+                # fi
 
             done
 

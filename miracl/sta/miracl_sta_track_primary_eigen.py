@@ -113,7 +113,7 @@ def track_primary_eigen(input_clar, dog_sigmas, gauss_sigmas, brain_mask, seed_m
 				for step_length in step_lengths:
 					print("\n Running Structure Tensor Analysis with the following command \n")
 
-					CMD = '{}/utilfn/runMatlabCmd sta_track "\'{}\'" "{}" "{}" "{}" "\'{}\'" "\'{}\'" "\'{}\'" "{}" "{}" "{}"'.format(
+					CMD = '{}/utilfn/runMatlabCmd sta_track "\'{}\'" "{}" "{}" "{}" "\'{}\'" "\'{}\'" "\'{}\'" "{}" "{}" "\'{}\'"'.format(
 						os.environ['MIRACL_HOME'], input_clar, dog_sigma, 
 						gauss_sigma, angle, brain_mask, seed_mask, outdir, step_length, rk, orient)
 
