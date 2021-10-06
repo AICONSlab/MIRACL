@@ -1,9 +1,7 @@
 ARG MIRACL_VERSION=latest
-#FROM mgoubran/miracl:base-$MIRACL_VERSION
-FROM mgoubran/miracl-modified:latest
+FROM mgoubran/miracl:base-$MIRACL_VERSION
 
 ADD . /code
-RUN ls /code
 RUN git clone https://github.com/sergivalverde/nifti_tools && \
     mv nifti_tools /code/depends/NIFTI_TOOLS && \
     pip install -e /code/
