@@ -2,7 +2,7 @@
 
 Example and atlases data are found here:
 
-https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
+[Dropbox Data Link](https://www.dropbox.com/sh/i9swdedx7bsz1s8/AABpDmmN1uqPz6qpBLYLtt8va)
 
 The **Atlases** folder contains templates, annotations, histology, ontology graph info & LUT/label description of the Allen reference atlas (ARA)
 
