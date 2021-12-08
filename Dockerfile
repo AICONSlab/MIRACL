@@ -48,4 +48,5 @@ ENV IN_DOCKER_CONTAINER Yes
 
 ################################################################################
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/opt/miniconda/bin/miracl"]
+
