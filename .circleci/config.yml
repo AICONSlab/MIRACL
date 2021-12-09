@@ -6,7 +6,7 @@ orbs:
 
 jobs:
   build:
-    parallelism: 2
+    resource_class: xlarge
     environment:
       - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
       - CONTAINER_NAME: "mgoubran/miracl"
