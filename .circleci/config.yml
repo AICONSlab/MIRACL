@@ -14,7 +14,8 @@ jobs:
     working_directory: /tmp/src/MIRACL
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Build Docker base image
           no_output_timeout: 60m
