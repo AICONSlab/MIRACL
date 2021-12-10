@@ -6,7 +6,6 @@ orbs:
 
 jobs:
   build:
-    resource_class: xlarge
     environment:
       - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
       - CONTAINER_NAME: "mgoubran/miracl"
@@ -17,23 +16,6 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - run:
-          name: Build Docker base image
-          no_output_timeout: 60m
-          command: |
-            # Build docker image
-            MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
-            echo "miracl version is ${MIRACL_VERSION}"
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                -t ${CONTAINER_NAME}:base \
-                -f /tmp/src/MIRACL/docker/Dockerfile \
-                --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-                --build-arg VCS_REF=`git rev-parse --short HEAD` \
-                --build-arg VERSION="${CIRCLE_TAG:-$THISVERSION}" . \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
       - run:
           name: Build Docker image
           no_output_timeout: 60m
