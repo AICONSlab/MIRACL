@@ -260,9 +260,9 @@ else
 
     printf "\n Chosen side option: $side \n"
 
-    field=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    prebias=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
-    printf "\n Chosen extra intensity correct: $field \n"
+    printf "\n Chosen extra intensity correct: $prebias \n"
 
 
 fi
