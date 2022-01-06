@@ -87,14 +87,13 @@ def parse_inputs(parser, args):
 
 
 def downsample_mask(atlas, down):
-    ''' Downsample the allen_atlas image by down, which indicates the downsampling factor
+    ''' Downsample the atlas image by down, which indicates the downsampling factor
     '''
     # extract lbl
     print("\n reading input labels ...")
 
     # in python
-    inlblsnii = nib.load("%s" % atlas)
-    inlblsdata = inlblsnii.get_data()
+    inlblsdata = atlas.copy()
     
     if down > 1:
         print("\n down-sampling mask")
@@ -115,7 +114,7 @@ def get_label_id(label, side='combined'):
         annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
 
     # outlbl to lblid
-    lbl_id = annot_csv.id[annot_csv.acronym == "%s" % label].values[0]
+    lbl_id = annot_csv.atlas_id[annot_csv.acronym == "%s" % label].values[0]
 
     return lbl_id
 
@@ -125,15 +124,18 @@ def mask_label(mask, lblid):
     '''
     # extract lbl
     print("\n extracting label ...")
-    res = mask.copy()  # create a copy of the mask
+    res = mask.copy()  # create a copy of the mask, set the type as uint8 to match the lbl id
+    res = res.astype(np.uint8)
+
     res[res != lblid] = 0
     res[res > 0] = 1  # binarize
 
     return res
 
-def extract_label(atlas, down=1, side='combined'):
+def extract_label(atlas, lbl, down=1, side='combined'):
     mask = downsample_mask(atlas, down)  # downsample the mask by the factor
     lbl_id = get_label_id(lbl, side)  # extract the label id
+    print(lbl_id)
     res = mask_label(mask, lbl_id)
 
     return res
@@ -151,8 +153,8 @@ def main(args):
     # in python
     inlblsnii = nib.load("%s" % inlbls)
     inlblsdata = inlblsnii.get_data()
-    
-    mask = extract_label(inlblsdata, d, m)
+
+    mask = extract_label(inlblsdata, outlbl, d, m)
     
     # # assuming iso resolution
     # vx = inlblsnii.header.get_zooms()[0]
