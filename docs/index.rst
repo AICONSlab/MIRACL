@@ -42,6 +42,7 @@ local install instructions.
    install-local
    install-docker
    install-singularity
+   install-windows
    modules
    tutorials
    full-documentation
