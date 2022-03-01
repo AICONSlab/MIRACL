@@ -2,8 +2,8 @@ ARG MIRACL_VERSION=latest
 FROM mgoubran/miracl:base-$MIRACL_VERSION
 
 ADD . /code
-RUN git clone https://github.com/sergivalverde/nifti_tools && \
-    mv nifti_tools /code/depends/NIFTI_TOOLS && \
+# delete ruamel pkg
+RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
     pip install -e /code/
 ENV MIRACL_HOME=/code/miracl
 
