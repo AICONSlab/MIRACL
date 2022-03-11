@@ -2,12 +2,13 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density, miracl_sta_track_primary_eigen, miracl_sta_gen_tract_endpoints
+from miracl.sta import miracl_sta_create_force_graph, miracl_sta_gen_tract_density, miracl_sta_track_primary_eigen, miracl_sta_gen_tract_endpoints, miracl_sta_track
 
 
 def run_sta_tensor(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
-    miracl_sta_track_primary_eigen.main(args)
+    miracl_sta_track.main(args)
+    # miracl_sta_track_primary_eigen.main(args)
 
 
 def run_force_graph(parser, args):
@@ -26,7 +27,7 @@ def get_parser():
     subparsers = parser.add_subparsers()
 
     # sta tensor
-    sta_tensor_parser = miracl_sta_track_primary_eigen.parsefn()
+    sta_tensor_parser = miracl_sta_track.parsefn()
     #sta_tensor_parser = miracl_sta_sta_track.parsefn()
     parser_sta_tensor = subparsers.add_parser('track_tensor', parents=[sta_tensor_parser], add_help=False,
         usage=sta_tensor_parser.usage, help='Perform Structure Tensor Analysis (STA) on CLARITY viral tracing or stains')
