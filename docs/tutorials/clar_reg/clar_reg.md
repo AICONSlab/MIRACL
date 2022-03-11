@@ -13,7 +13,7 @@ This workflow performs the following tasks:
 
 # Test data
 A test dataset (CLARITY autofluorescence channel) for registration is found here under **data**:
-https://stanfordmedicine.app.box.com/s/6kx5tfgbqd6ruk7uo0u64agn4oqpg39i
+https://www.dropbox.com/sh/i9swdedx7bsz1s8/AABpDmmN1uqPz6qpBLYLtt8va
 
 # GUI
 
