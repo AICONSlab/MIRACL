@@ -12,8 +12,9 @@ ENV MIRACL_HOME=/code/miracl
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
-RUN mkdir -p "/code/atlases/" && \
-    wget -nH -r --cut-dirs 3 --no-parent -A txt,json,csv,nii.gz -P /code/atlases http://web.stanford.edu/group/zeinehlab/MIRACLextra/
+RUN mkdir -p /code/atlases/ara && \
+    wget -P /code/atlases https://www.dropbox.com/sh/j31vurlp6h4lvod/AAAIKpYJQizkAte3Ju5DZYj8a --content-disposition && \
+    unzip /code/atlases/ara.zip -x / -d /code/atlases/ara
 
 # RUN conda install -y --no-update-deps pyqt=5
 
