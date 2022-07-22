@@ -1,4 +1,4 @@
-# Intalling on Windows
+# Installing on Windows
 
 To install MIRACL on your Windows system, Windows Subsystem for Linux (WSL) must be installed. WSL2 is [preferred](https://docs.microsoft.com/en-us/windows/wsl/compare-versions). From there, the usual steps to install MIRACL on a Linux based system will be used, with a few tweaks.
 
@@ -14,7 +14,7 @@ A Linux distribution (distro) is an operating system based on the Linux kernel.
 
 Now that WSL (either 1 or 2) is installed, the Ubuntu 20.04 distro can be installed. To install Ubuntu, open the Windows Store app, search for "Ubuntu 20.04", and select the "Get" button. The following [link](https://www.microsoft.com/en-gb/p/ubuntu-2004-lts/9n6svws3rx71) can also be used.
 
-# Install Python and pip
+## Install Python and pip
 
 The Ubuntu distro should have Python 3 installed. To ensure that this is the case, update all packages installed on WSL
 
@@ -33,11 +33,11 @@ The output in the terminal window will show the version number.
 
 Anaconda can also be installed, but we found that installing and using `pip` was more straightforward.
 
-# Install MIRACL using local installation instructions
+## Install MIRACL using local installation instructions
 
 To install MIRACL, the local installation instructions can be followed [here](install-local.md).
 
-# Installing Xming
+## Installing Xming
 
 To use MIRACL's graphical user interface (GUI), Xming must be installed. Xming is a display server for Windows computers, that is available for use by anyone. It can be downloaded [here](https://www.google.com/url?q=https://sourceforge.net/projects/xming/&source=gmail&ust=1641769602186000&usg=AOvVaw2MoTURhTsyCk_-56M3Qljj).
 
@@ -45,14 +45,13 @@ Before running MIRACL's GUI, run Xming. In the terminal window where MIRACL's GU
 
     export DISPLAY=$DISPLAY:localhost:0
 
-
-# Running MIRACL with WSL 2
+## Running MIRACL with WSL 2
 
 Now that everything is installed, MIRACL can be run via WSL. To run,
 
 1. Open WSL via terminal
 2. Navigate to the folder where you would like to run MIRACL from
-3. Activate the environment containing miracl
+3. Activate the environment containing `miracl`
 
-        source activate miracl
-        miraclGUI
+    source activate miracl
+    miraclGUI
