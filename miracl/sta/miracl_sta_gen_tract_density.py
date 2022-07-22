@@ -7,7 +7,6 @@ import argparse
 import sys
 import nibabel as nib
 from dipy.tracking import utils
-from nibabel import trackvis
 
 from miracl.sta import sta_gui
 
@@ -81,7 +80,7 @@ def parse_inputs(parser, args):
 
 def gen_dens(tracts, ref_vol, out_dens):
     print('reading sta streamlines')
-    streams, hdr = trackvis.read(tracts)
+    streams, hdr = nib.trackvis.read(tracts)
     streamlines = [s[0] for s in streams]
 
     print('reading reference volume')
