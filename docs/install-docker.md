@@ -42,3 +42,19 @@ docker run -it mgoubran/miracl bash
 ```
 
 (this will be lost when you shell out)
+
+## Troubleshooting
+
+### Q: I get the following error whenever I try to run the GUI:
+
+Run the following to mount an X11 socket from the host system in the Docker container:
+
+    docker run --rm -ti -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix mgoubran/miracl bash
+
+If you still receive the above error, you may have to change your `xhost` access control:
+
+    xhost +
+
+This will disable access control for `xhost`. However, after exiting the container access control should be enabled again:
+
+    xhost -
