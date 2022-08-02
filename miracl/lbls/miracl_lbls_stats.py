@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import QApplication
 from miracl.conv import miracl_conv_gui_options as gui_opts
 from miracl.utilfn.depends_manager import add_paths
 
+import nibabel as nib
+
 from miracl import ATLAS_DIR
 
 def helpmsg():
@@ -76,6 +78,7 @@ def parsefn():
         parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Mean')
         parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
         parser.add_argument('-d', '--depth', type=int, help="Labels depth")
+        parser.add_argument('-ratio', '--ratio', type=str, help="Tractography (.trk) file used to generate tract ratio")
         parser.add_argument('-o', '--outfile', type=str, help="Output file",
                             default='clarity_label_statistics.csv')
 
@@ -119,6 +122,7 @@ def parse_inputs(parser, args):
         sort = args.sort
         hemi = args.hemi if args.hemi is not None else "combined"
         label_depth = args.depth if args.depth is not None else None
+        ratio = args.ratio if args.ratio is not None else None
 
         # check if pars given
 
@@ -129,7 +133,7 @@ def parse_inputs(parser, args):
         assert isinstance(outfile, str)
         assert isinstance(sort, str)
 
-    return invol, lbls, outfile, sort, hemi, label_depth
+    return invol, lbls, outfile, sort, hemi, ratio, label_depth
 
 
 # ---------
@@ -201,12 +205,56 @@ def upsampleswplbls(seg, lbls):
     return reslbls
 
 
+def get_count_stats(invol, lbls):
+    ''' Given an input volume and a label mask, generate a table of statistics for each label in the label mask.
+    Unlike c3d's "lstat", this method extracts the following statistics:
+
+    "intensity count": within a label, the number of voxels in the input with an intensity greater than 0
+
+    invol (str): path to a medical image
+    lbls (str): path to a label image
+    '''
+    # load images
+    invol_img = nib.load(invol)
+    invol_arr = invol_img.get_data()
+    
+    lbls_img = nib.load(lbls)
+    lbls_arr = lbls_img.get_data()
+
+    # create list to store results
+    res = []
+
+    # for each intensity value in lbl array
+    ids = list(np.unique(lbls_arr))
+    for label_id in ids:
+        masked_arr = invol_arr[lbls_arr == label_id]
+
+        intensity_count = masked_arr > 0
+        intensity_count = intensity_count.sum()
+
+        # create dict that stores {intensity_value, count, total}
+        res.append({'LabelID': int(label_id), "intensity_count": intensity_count})
+
+    # convert list to pandas dataframe, return
+    return pd.DataFrame(res)
+
+def get_tract_count(tract_file):
+    """ Given a tractography file, return the number of tracts
+    
+    Args: tract_file - trk file
+    """
+    print('reading sta streamlines')
+    streams, hdr = nib.trackvis.read(tract_file)
+
+    return len(streams)
+
+
 # ---------
 
 def main(args):
     # parse in args
     parser = parsefn()
-    invol, lbls, outfile, sort, hemi, label_depth = parse_inputs(parser, args)
+    invol, lbls, outfile, sort, hemi, ratio, label_depth = parse_inputs(parser, args)
 
     # extract stats
     print(" Extracting stats from input volume using registered labels ...\n")
@@ -235,6 +283,16 @@ def main(args):
     # extract labels at certain depth only
     if label_depth is not None:
         annot_csv = annot_csv[annot_csv.depth == label_depth]
+
+    # generate additional stats, merge into output file
+    count_stats = get_count_stats(invol, lbls)
+    out_stats = out_stats.merge(count_stats, on="LabelID", how="left")
+    # out_stats = pd.concat([out_stats, count_stats], axis=1, join="inner")
+
+    # generate tract ratio
+    if ratio:
+        tract_count = get_tract_count(ratio)
+        out_stats["tract_ratio"] = out_stats["Max"] / tract_count
 
     # Add label Name, Abrv, PathID
 
