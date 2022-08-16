@@ -661,15 +661,18 @@ function initclarallenreg()
 
 
 	# Init reg
+	#ifdsntexistrun ${initform} "Initializing registration ..." \
+	# antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
+
+    ## kill after 3 min (gcc issue)
+    #if [[ ! -f "${initallen}" ]] ; then
+    #    sleep 180
+
+    #    kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
+    #fi
+
 	ifdsntexistrun ${initform} "Initializing registration ..." \
-	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
-
-    # kill after 3 min (gcc issue)
-    if [[ ! -f "${initallen}" ]] ; then
-        sleep 180
-
-        kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
-    fi
+	 antsAI -d 3 -m MI[ ${clarroi} , ${allenref} ] -o ${initform} -s [ ${deg} , ${radfrac} ] -p ${useprincax} -c ${localiter}
 
 	# Warp Allen
 	ifdsntexistrun ${initallen} "initializing Allen template" \
