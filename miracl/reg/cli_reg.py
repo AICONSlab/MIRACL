@@ -38,7 +38,7 @@ def run_mri_allen_ants(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_mri-allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -o %s -m %s -v %s -l %s -b %s -s % -f %s' \
+            bash_args = '-i %s -o %s -m %s -v %s -l %s -b %s -s %s -f %s' \
                         % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'], args['lbls'], args['bulb'],
                            args['skull'], args['bet'])
 
@@ -58,7 +58,7 @@ def run_mri_allen_nifty(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_mri-allen_niftyreg.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -o %s -m %s -v %s -l %s -b %s -s % -f %s' \
+            bash_args = '-i %s -o %s -m %s -v %s -l %s -b %s -s %s -f %s' \
                         % (args['in_nii'], args['ort'], args['hemi'], args['vox_res'], args['lbls'], args['bulb'],
                            args['skull'], args['bet'])
 
