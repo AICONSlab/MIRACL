@@ -9,12 +9,13 @@ This workflow performs the following tasks:
 
 from the main GUI OR run:
 
-    miracl reg mri_allen_ants
+    miracl reg mri_allen_nifty
 
 this window will open to choose the input MRI nii (preferable T2-w):
 
+![](reg_options.png)
 
-then choose registration options
+then choose registration options:
 
     -  orient code (default: RSP)
         to orient nifti from original orientation to "standard/Allen" orientation
@@ -26,25 +27,22 @@ then choose registration options
     -  labels voxel size/Resolution in um (default: 10)
         accepted inputs are: 10, 25 or 50
 
-    -  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
-        input labels could be at a different depth than default labels
-
-        If l. is specified (m & v cannot be specified)
-
     -  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
     -  skull strip or not, binary option (default: 1 -> skull-strip)
+
+    -  no orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
 
 
 # Command-line
 
 Usage:
 
-    miracl reg mri_allen_ants -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+    miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
 Example:
 
-    miracl reg mri_allen_ants -i inv_mri.nii.gz -o RSP -m combined -v 25
+    miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
 arguments (required):
 
