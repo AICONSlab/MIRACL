@@ -80,7 +80,8 @@ def parse_inputs(parser, args):
 
 def gen_dens(tracts, ref_vol, out_dens):
     print('reading sta streamlines')
-    streams, hdr = nib.trackvis.read(tracts)
+    streamlines_file = nib.streamlines.load(tracts)
+    streams, hdr = streamlines_file.streamlines, streamlines_file.header
     streamlines = [s[0] for s in streams]
 
     print('reading reference volume')
