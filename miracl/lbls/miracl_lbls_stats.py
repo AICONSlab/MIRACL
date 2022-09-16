@@ -244,7 +244,8 @@ def get_tract_count(tract_file):
     Args: tract_file - trk file
     """
     print('reading sta streamlines')
-    streams, hdr = nib.trackvis.read(tract_file)
+    streamlines_file = nib.streamlines.load(tract_file)
+    streams, hdr = streamlines_file.streamlines, streamlines_file.header
 
     return len(streams)
 
