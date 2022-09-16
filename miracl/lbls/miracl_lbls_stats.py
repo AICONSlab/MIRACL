@@ -78,7 +78,7 @@ def parsefn():
         parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Mean')
         parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
         parser.add_argument('-d', '--depth', type=int, help="Labels depth")
-        parser.add_argument('-ratio', '--ratio', type=str, help="Tractography (.trk) file used to generate tract ratio")
+        parser.add_argument('-r', '--ratio', type=str, help="Tractography (.trk) file used to generate tract ratio")
         parser.add_argument('-o', '--outfile', type=str, help="Output file",
                             default='clarity_label_statistics.csv')
 
