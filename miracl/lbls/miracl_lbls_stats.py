@@ -293,7 +293,7 @@ def main(args):
     # generate tract ratio
     if ratio:
         tract_count = get_tract_count(ratio)
-        out_stats["tract_ratio"] = out_stats["Max"] / tract_count
+        out_stats["tract_ratio"] = out_stats["Mean"] / tract_count
 
     # Add label Name, Abrv, PathID
 
