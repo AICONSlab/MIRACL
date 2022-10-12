@@ -597,7 +597,8 @@ if [[ ! -f ${lbl_mask} ]]; then
         c3d "${lbl_mask}" -dilate 1 ${dilationf}vox -o "${lbl_mask}"
     fi
 
-    fslcpgeom "${nii_file}" "${lbl_mask}"
+    # fslcpgeom "${nii_file}" "${lbl_mask}"
+    c3d "${nii_file}" "${lbl_mask}" -copy-transform -o "${lbl_mask}"
 
 else
 
