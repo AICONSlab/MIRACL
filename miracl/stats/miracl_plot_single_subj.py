@@ -106,13 +106,13 @@ def generate_plot(input_csv, sort, threshold):
     
     # generate two plots, based on whether or not an acronym should be used
     sns.set(font_scale=1.2)
-    f = sns.barplot(sort,"acronym",data=in_df_sort_thresh, palette="Blues_r")
+    f = sns.barplot(x=sort,y="acronym",data=in_df_sort_thresh, palette="Blues_r")
     f.set(xlabel=f'{sort}', ylabel='Region acronym')
     plt.tight_layout()
     f.figure.savefig(f'{filename_no_ext}_barplot_acronyms.png', dpi=300)
 
     plt.figure(figsize=(20,20))
-    f = sns.barplot(sort,"name",data=in_df_sort_thresh, palette="Blues_r")
+    f = sns.barplot(x=sort,y="name",data=in_df_sort_thresh, palette="Blues_r")
     f.set(xlabel=f'{sort}', ylabel='Region')
     plt.yticks(rotation=30)
     plt.tight_layout()
