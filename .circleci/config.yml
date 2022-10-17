@@ -67,6 +67,10 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - build-singularity:
+          filters:
+            tags:
+              only: /.*/
 
   build_without_publishing_job:
     jobs:
