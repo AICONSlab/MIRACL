@@ -41,7 +41,24 @@ jobs:
              docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
-
+  build-singularity:
+    environment:
+      - TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+      - CONTAINER_NAME: "mgoubran/miracl"
+    docker:
+      - image: docker:18.06.3-ce-git
+    working_directory: /tmp/src/MIRACL
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build Singularity image
+          no_output_timeout: 60m
+          command: |
+            # Build Singularity image
+            pwd 
+            ls -la
 
 workflows:
   build_and_test:
@@ -87,3 +104,14 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
+  test-singularity:
+    jobs:
+      - build-singularity:
+          image: mgoubran/miracl
+          deploy: false
+          tag: latest
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
