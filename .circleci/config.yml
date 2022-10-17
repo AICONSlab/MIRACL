@@ -67,10 +67,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build-singularity:
-          filters:
-            tags:
-              only: /.*/
 
   build_without_publishing_job:
     jobs:
@@ -111,11 +107,8 @@ workflows:
   test-singularity:
     jobs:
       - build-singularity:
-          image: mgoubran/miracl
-          deploy: false
-          tag: latest
           filters:
             branches:
-              ignore: 
+              ignore:
                 - master
                 - docs*
