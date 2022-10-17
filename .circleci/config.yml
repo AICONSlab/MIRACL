@@ -47,9 +47,10 @@ jobs:
           command: |
             # Build Singularity image
             docker images
-            ls -la /
-            pwd
+            docker rmi `docker images | grep "<none>" | awk {'print $3'}`
+            docker images
             docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
+            ls -la /tmp/src/MIRACL
 
 workflows:
   build_and_test:
