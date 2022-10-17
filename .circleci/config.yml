@@ -87,7 +87,14 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
-
+      - build-singularity:
+          requires:
+            - docker-publish/publish
+          filters:
+            branches:
+              ignore:
+                - master
+                - docs*
 
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
@@ -106,13 +113,3 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
-  test-singularity:
-    jobs:
-      - build-singularity:
-          requires:
-            - docker-publish/publish
-          filters:
-            branches:
-              ignore:
-                - master
-                - docs*
