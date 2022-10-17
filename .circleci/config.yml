@@ -110,7 +110,7 @@ workflows:
     jobs:
       - build-singularity:
           requires:
-            - build
+            - docker-publish/publish
           filters:
             branches:
               ignore:
