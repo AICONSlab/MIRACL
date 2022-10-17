@@ -59,6 +59,8 @@ jobs:
             # Build Singularity image
             pwd 
             ls -la
+            docker ps -a
+            docker images
 
 workflows:
   build_and_test:
@@ -107,6 +109,8 @@ workflows:
   test-singularity:
     jobs:
       - build-singularity:
+          requires:
+            - build
           filters:
             branches:
               ignore:
