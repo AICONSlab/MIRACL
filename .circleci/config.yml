@@ -48,8 +48,9 @@ jobs:
             # Build Singularity image
             docker ps -a
             docker images
-            docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
+            #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
             ls -la /tmp
+            df -h
 
 workflows:
   build_and_test:
