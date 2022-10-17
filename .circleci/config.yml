@@ -46,10 +46,10 @@ jobs:
           no_output_timeout: 60m
           command: |
             # Build Singularity image
-            pwd 
-            ls -la
             docker ps -a
             docker images
+            docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
+            ls -la /tmp
 
 workflows:
   build_and_test:
