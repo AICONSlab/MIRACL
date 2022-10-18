@@ -56,8 +56,8 @@ jobs:
             #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
             #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 pull --dir "/test" docker://ubuntu:latest
             ls -la /tmp/src/MIRACL
-            docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
-            ls -la /tmp/src/MIRACL
+            #docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
+            #ls -la /tmp/src/MIRACL
 
 workflows:
   build_and_test:
