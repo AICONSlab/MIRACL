@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   # https://circleci.com/orbs/registry/orb/circleci/docker-publish
   docker-publish: circleci/docker-publish@0.1.3
+  singularity: singularity/singularity@1.0.0
 
 jobs:
   build:
@@ -41,24 +42,42 @@ jobs:
             docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
+  install_alpine_docker_3:
+    executor: alpine-docker
+    parameters:
+      singularity-version:
+        type: string
+        default: 3.8.3
+      machine-type:
+        type: string
+        default: docker
+    steps:
+      - alpine-install-3:
+          singularity-version: <<parameters.singularity-version>>
       - run:
-          name: Build Singularity image
-          no_output_timeout: 60m
+          name: Check install version
           command: |
-            # Build Singularity image
-            echo "Running tests:"
-            docker run -it mgoubran/miracl echo "Docker run test"
-            docker images
-            docker rmi `docker images | grep "<none>" | awk {'print $3'}`
-            docker images
-            IMAGE_ID=$(docker images --filter="reference=${CONTAINER_NAME}:latest" --quiet)
-            echo ${IMAGE_ID}
-            #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
-            #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 pull --dir "/test" docker://ubuntu:latest
-            ls -la /tmp/src/MIRACL
-            docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
-            docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 build /test/test.sif /test/test.tar 
-            ls -la /tmp/src/MIRACL
+            if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
+            singularity --version
+      #- run:
+      #    name: Build Singularity image
+      #    no_output_timeout: 60m
+      #    command: |
+      #      # Build Singularity image
+      #      echo "Running tests:"
+      #      docker run -it mgoubran/miracl echo "Docker run test"
+      #      docker images
+      #      docker rmi `docker images | grep "<none>" | awk {'print $3'}`
+      #      docker images
+      #      IMAGE_ID=$(docker images --filter="reference=${CONTAINER_NAME}:latest" --quiet)
+      #      echo ${IMAGE_ID}
+      #      #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
+      #      #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 pull --dir "/test" docker://ubuntu:latest
+      #      ls -la /tmp/src/MIRACL
+      #      docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
+      #      ls -la /tmp/src/MIRACL
+      #      docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 build /test/test.sif /test/test.tar 
+      #      ls -la /tmp/src/MIRACL
 
 workflows:
   build_and_test:
