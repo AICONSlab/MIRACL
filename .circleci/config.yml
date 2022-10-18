@@ -37,8 +37,8 @@ jobs:
           name: Run Tests
           no_output_timeout: 2h
           command: |
-             echo "Running tests:"
-             docker run -it mgoubran/miracl echo "Docker run test"
+            echo "Running tests:"
+            docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
       - run:
@@ -46,13 +46,17 @@ jobs:
           no_output_timeout: 60m
           command: |
             # Build Singularity image
+            echo "Running tests:"
+            docker run -it mgoubran/miracl echo "Docker run test"
             docker images
             docker rmi `docker images | grep "<none>" | awk {'print $3'}`
             docker images
+            IMAGE_ID=$(docker images --filter="reference=${CONTAINER_NAME}:latest" --quiet)
+            echo ${IMAGE_ID}
             #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
             #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 pull --dir "/test" docker://ubuntu:latest
             ls -la /tmp/src/MIRACL
-            docker save mgoubrn/miracl:latest -o /tmp/src/MIRACL/test.tar
+            docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
             ls -la /tmp/src/MIRACL
 
 workflows:
