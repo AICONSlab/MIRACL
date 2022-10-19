@@ -53,12 +53,16 @@ jobs:
             docker images
             IMAGE_ID=$(docker images --filter="reference=${CONTAINER_NAME}:latest" --quiet)
             echo ${IMAGE_ID}
+            pwd
+            ls -l /tmp/tests
             #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
             #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 pull --dir "/test" docker://ubuntu:latest
-            ls -la /tmp/src/MIRACL
-            docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
-            ls -la /tmp/src/MIRACL
-            docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 build /test/test.sif /test/test.tar 
+            #ls -la /tmp/src/MIRACL
+            #docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
+            #ls -la /tmp/src/MIRACL
+            #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 build /test/test.sif /test/test.tar 
+            pwd
+            docker run -it --rm quay.io/singularity/singularity:v3.10.3 pull docker://ubuntu:latest 
             ls -la /tmp/src/MIRACL
 
 workflows:
