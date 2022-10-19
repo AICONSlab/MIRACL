@@ -90,6 +90,8 @@ workflows:
             tags:
               only: /.*/
       - build-singularity:
+          requires:
+            build
           filters:
             branches:
               ignore: 
