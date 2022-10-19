@@ -91,7 +91,7 @@ workflows:
               only: /.*/
       - build-singularity:
           requires:
-            build
+            - build
           filters:
             branches:
               ignore: 
