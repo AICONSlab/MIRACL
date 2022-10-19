@@ -41,36 +41,46 @@ jobs:
             docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
-  build-singularity:
+  test-singularity-container:
     docker:
-      - image: ubuntu:latest
+      - image: quay.io/singularity/singularity:v3.10.3
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: Install dependencies
+          name: Test if possible
           command: |
-            echo "Setting up Singularity"
-            echo "Installing dependencies"
-            apt-get update && apt-get install -y \
-            build-essential \
-            uuid-dev \
-            libgpgme-dev \
-            squashfs-tools \
-            libseccomp-dev \
-            wget \
-            pkg-config \
-            git \
-            cryptsetup-bin
-            echo "Installing GO"
-            export VERSION=1.17.6 OS=linux ARCH=amd64 && \
-            wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz && \
-            tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz && \
-            rm go$VERSION.$OS-$ARCH.tar.gz
-            echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
-            echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
-            source ~/.bashrc
-            which go
+            singularity --help
+  #build-singularity:
+  #  docker:
+  #    - image: ubuntu:latest
+  #  steps:
+  #    - setup_remote_docker:
+  #        docker_layer_caching: true
+  #    - run:
+  #        name: Install dependencies
+  #        command: |
+  #          echo "Setting up Singularity"
+  #          echo "Installing dependencies"
+  #          apt-get update && apt-get install -y \
+  #          build-essential \
+  #          uuid-dev \
+  #          libgpgme-dev \
+  #          squashfs-tools \
+  #          libseccomp-dev \
+  #          wget \
+  #          pkg-config \
+  #          git \
+  #          cryptsetup-bin
+  #          echo "Installing GO"
+  #          export VERSION=1.17.6 OS=linux ARCH=amd64 && \
+  #          wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz && \
+  #          tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz && \
+  #          rm go$VERSION.$OS-$ARCH.tar.gz
+  #          echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
+  #          echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
+  #          source ~/.bashrc
+  #          which go
       #- run:
       #    name: Build Singularity image
       #    no_output_timeout: 60m
@@ -99,7 +109,15 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build-singularity:
+      #- build-singularity:
+      #    requires:
+      #      - build
+      #    filters:
+      #      branches:
+      #        ignore: 
+      #          - master
+      #          - docs*
+      - test-singularity-container:
           requires:
             - build
           filters:
