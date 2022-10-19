@@ -60,6 +60,7 @@ jobs:
             pkg-config \
             git \
             cryptsetup-bin
+            echo "SUCCESS"
       #- run:
       #    name: Build Singularity image
       #    no_output_timeout: 60m
@@ -124,3 +125,7 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
+
+  build_and_test:
+    jobs:
+      - build-singularity:
