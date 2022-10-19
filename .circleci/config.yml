@@ -64,10 +64,9 @@ jobs:
           name: Test if possible
           command: |
             ls -la
-            singularity --help
-            pwd
+            singularity build local_tar_miracl.sif workspace/test.tar
             ls -la
-            singularity pull test.sif alpine:latest
+            singularity pull docker_miracl.sif docker://mgoubran/miracl:latest
             ls -la
   #build-singularity:
   #  docker:
