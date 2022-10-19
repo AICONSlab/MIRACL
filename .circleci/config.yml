@@ -89,6 +89,12 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - build-singularity:
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
 
   build_without_publishing_job:
     jobs:
@@ -126,7 +132,3 @@ workflows:
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
 
-  singularity_install:
-    jobs:
-      - build-singularity:
-          filters:
