@@ -39,6 +39,17 @@ jobs:
           command: |
             echo "Running tests:"
             docker run -it mgoubran/miracl echo "Docker run test"
+      - run: mkdir -p /tmp/workspace
+      - run:
+          name: Create tar
+          no_output_timeout: 2h
+          command: |
+            echo "Creating tar"
+            docker save ${CONTAINER_NAME}:latest -o /tmp/workspace/test.tar
+          - persist_to_workspace:
+              root: /tmp/workspace
+              paths:
+                - test.tar
       - store_test_results:
           path: /tmp/tests
   test-singularity-container:
@@ -47,9 +58,12 @@ jobs:
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
+      - attach_workspace:
+          at: /root/project/workspace
       - run:
           name: Test if possible
           command: |
+            ls -la
             singularity --help
             pwd
             ls -la
