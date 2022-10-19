@@ -39,19 +39,19 @@ jobs:
           command: |
             echo "Running tests:"
             docker run -it mgoubran/miracl echo "Docker run test"
-      - run: mkdir -p /tmp/workspace
+      - store_test_results:
+          path: /tmp/tests
       - run:
           name: Create tar
           no_output_timeout: 2h
           command: |
+            mkdir -p /tmp/workspace
             echo "Creating tar"
             docker save ${CONTAINER_NAME}:latest -o /tmp/workspace/test.tar
-          - persist_to_workspace:
-              root: /tmp/workspace
-              paths:
-                - test.tar
-      - store_test_results:
-          path: /tmp/tests
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - test.tar
   test-singularity-container:
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
