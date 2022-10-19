@@ -70,7 +70,7 @@ jobs:
             echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
             echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
             source ~/.bashrc
-            go version
+            which go
       #- run:
       #    name: Build Singularity image
       #    no_output_timeout: 60m
