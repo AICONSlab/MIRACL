@@ -62,6 +62,7 @@ jobs:
       #    at: /root/project/workspace
       - run:
           name: Test if possible
+          no_output_timeout: 2h
           command: |
             ls -la
             #singularity build local_tar_miracl.sif workspace/test.tar
@@ -160,6 +161,14 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
+      #- pull_push_singularity:
+      #    requires:
+      #      - docker-publish/publish
+      #    filters:
+      #      branches:
+      #        ignore: 
+      #          - master
+      #          - docs*
 
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
