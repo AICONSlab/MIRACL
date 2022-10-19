@@ -46,26 +46,26 @@ jobs:
           no_output_timeout: 2h
           command: |
             mkdir -p /tmp/workspace
-            echo "Creating tar"
-            docker save ${CONTAINER_NAME}:latest -o /tmp/workspace/test.tar
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - test.tar
+            #echo "Creating tar"
+            #docker save ${CONTAINER_NAME}:latest -o /tmp/workspace/test.tar
+      #- persist_to_workspace:
+      #    root: /tmp/workspace
+      #    paths:
+      #      - test.tar
   test-singularity-container:
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
     steps:
       - setup_remote_docker:
           docker_layer_caching: true
-      - attach_workspace:
-          at: /root/project/workspace
+      #- attach_workspace:
+      #    at: /root/project/workspace
       - run:
           name: Test if possible
           command: |
             ls -la
-            singularity build local_tar_miracl.sif workspace/test.tar
-            ls -la
+            #singularity build local_tar_miracl.sif workspace/test.tar
+            #ls -la
             singularity pull docker_miracl.sif docker://mgoubran/miracl:latest
             ls -la
   #build-singularity:
