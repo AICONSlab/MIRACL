@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt-get update && apt-get install -y \
+            apk update && apk add -y \
             build-essential \
             uuid-dev \
             libgpgme-dev \
