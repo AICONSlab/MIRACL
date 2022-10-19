@@ -51,6 +51,10 @@ jobs:
           name: Test if possible
           command: |
             singularity --help
+            pwd
+            ls -la
+            singularity pull test.sif alpine:latest
+            ls -la
   #build-singularity:
   #  docker:
   #    - image: ubuntu:latest
