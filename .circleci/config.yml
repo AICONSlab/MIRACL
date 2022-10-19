@@ -129,3 +129,4 @@ workflows:
   singularity_install:
     jobs:
       - build-singularity:
+          filters:
