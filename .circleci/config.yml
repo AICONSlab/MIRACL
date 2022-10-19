@@ -126,6 +126,6 @@ workflows:
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
 
-  build_and_test:
+  singularity_install:
     jobs:
       - build-singularity:
