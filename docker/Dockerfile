@@ -1,4 +1,4 @@
-FROM neurodebian:xenial
+FROM neurodebian:focal
 
 ENV DEBIAN_FRONTEND noninteractive
 
