@@ -19,7 +19,7 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
-    apt-get install libatlas-base-dev libblas3 liblapack3 liblapack-dev libblas-dev && \
+    apt-get install -y libatlas-base-dev libblas3 liblapack3 liblapack-dev libblas-dev && \
     pip install --upgrade pip && \
     python3 -m pip install numpy && \
     python3 -m pip install matplotlib joblib && \
