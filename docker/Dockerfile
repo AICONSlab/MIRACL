@@ -85,10 +85,13 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
     rm c3d-nightly-Linux-x86_64.tar.gz
 ENV PATH /opt/cd3/bin:${PATH}
 
-# Install FSL, cmake
-RUN apt-get update && apt-get install -y fsl && \
-    apt remove cmake && \
-    pip3 install cmake --upgrade
+WORKDIR /code
+RUN pip3 install scikit-image==0.14.2 && \
+    pip3 install cython h5py && \
+    pip3 install pandas==0.24.2
+
+# Install FSL
+RUN apt-get update && apt-get install fsl -y
 
 ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
@@ -100,11 +103,6 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     POSSUMDIR="/usr/share/fsl/5.0"
 
 ENV PATH="/usr/lib/fsl/5.0:${PATH}"
-
-WORKDIR /code
-RUN pip3 install scikit-image==0.14.2 && \
-    pip3 install cython h5py && \
-    pip3 install pandas==0.24.2
 
 #RUN alias python=python3
 
