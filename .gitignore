@@ -55,6 +55,7 @@ Thumbs.db
 MIRACL.egg-info/
 .idea/*
 /miracl/deprec/
+*.swp
 
 /build/
 /dist/
