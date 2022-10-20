@@ -65,9 +65,9 @@ jobs:
           name: Test if possible
           no_output_timeout: 2h
           command: |
-            ls -la
-            cat workspace/miracl_compile_test
-            ls -la workspace
+            if [[ $(cat /workspace/miracl_compile_test) -eq "0" ]]; \
+            then echo "Compiling"; \
+            else echo "Error"; fi
             #singularity build local_tar_miracl.sif workspace/test.tar
             #ls -la
             #singularity pull docker_miracl.sif docker://mgoubran/miracl:latest

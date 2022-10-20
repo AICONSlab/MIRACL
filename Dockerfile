@@ -3,7 +3,7 @@ FROM mgoubran/miracl:base-$MIRACL_VERSION
 
 ADD . /code
 # delete ruamel pkg
-RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
+RUN rmm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
     pip install markupsafe==2.0.1 && \
     pip install -e /code/
 ENV MIRACL_HOME=/code/miracl
