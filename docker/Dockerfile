@@ -85,11 +85,6 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
     rm c3d-nightly-Linux-x86_64.tar.gz
 ENV PATH /opt/cd3/bin:${PATH}
 
-WORKDIR /code
-RUN pip3 install scikit-image==0.14.2 && \
-    pip3 install cython h5py && \
-    pip3 install pandas==0.24.2
-
 # Install FSL
 RUN apt-get update && apt-get install fsl -y
 
@@ -103,6 +98,33 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     POSSUMDIR="/usr/share/fsl/5.0"
 
 ENV PATH="/usr/lib/fsl/5.0:${PATH}"
+
+# Install MRtrix
+RUN apt-get install -y git \
+    g++ \
+    python \
+    python-numpy \
+    libeigen3-dev \
+    zlib1g-dev \
+    libqt5opengl5-dev \
+    libqt5svg5-dev \
+    libgl1-mesa-dev \
+    libfftw3-dev \
+    libtiff5-dev \
+    libpng-dev
+
+WORKDIR /opt
+RUN git clone https://github.com/MRtrix3/mrtrix3.git
+RUN cd mrtrix3 && \
+    ./configure && \
+    ./build
+
+ENV PATH="/opt/mrtrix3/bin:${PATH}"
+
+WORKDIR /code
+RUN pip3 install scikit-image==0.14.2 && \
+    pip3 install cython h5py && \
+    pip3 install pandas==0.24.2
 
 #RUN alias python=python3
 
