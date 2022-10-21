@@ -9,6 +9,34 @@ RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(ge
 ENV MIRACL_HOME=/code/miracl
 
 ###############################################################################
+#--- Install NiftyReg ---
+ARG NR_INSTALL_DIR=/opt/niftyreg 
+RUN mkdir -p /tmp/niftyreg_source && \
+    git clone https://github.com/SuperElastix/niftyreg.git /tmp/niftyreg_source && \
+    mkdir -p /tmp/niftyreg && \
+    mkdir -p $NR_INSTALL_DIR
+WORKDIR /tmp/niftyreg
+RUN cmake \
+    -D BUILD_ALL_DEP=ON \
+    -D BUILD_SHARED_LIBS=OFF \
+    -D BUILD_TESTING=OFF \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D CMAKE_INSTALL_PREFIX=/opt/niftyreg \
+    -D M_LIBRARY=/opt/miniconda/include \
+    -D PNG_INCLUDE_DIR=/opt/miniconda/lib/libpng.so \
+    -D USE_CUDA=OFF \
+    -D USE_OPENCL=OFF \
+    -D USE_OPENMP=ON \
+    -D USE_SSE=ON \
+    /tmp/niftyreg_source && \
+    make && \
+    make install && \
+    rm -r /tmp/niftyreg && \
+    rm -r /tmp/niftyreg_source
+ENV PATH=$NR_INSTALL_DIR/bin:$PATH
+ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATH
+
+###############################################################################
 #--- Allen atlas alias ----
 
 WORKDIR /tmp
