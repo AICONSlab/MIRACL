@@ -48,6 +48,18 @@ ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
 
+# Setup host user as container user
+# Variables are importet from .env
+ARG USER_ID=$USER_ID
+ARG GROUP_ID=$GROUP_ID
+ARG USER=$USER
+
+RUN addgroup --gid $GROUP_ID $USER
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
+
+USER $USER
+WORKDIR /home/$USER
+
 ################################################################################
 
 # Temporarily uncommented to allow interactive shell access to Docker container
