@@ -56,7 +56,9 @@ jobs:
   test-singularity-container:
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
+    working_directory: /root/project/MIRACL
     steps:
+      - checkout
       - setup_remote_docker:
           docker_layer_caching: true
       - attach_workspace:
