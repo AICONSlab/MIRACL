@@ -75,9 +75,7 @@ jobs:
             pip3 install spython && \
             pwd
             ls -la
-            spython recipe Dockerfile $> test.def
-            pwd
-            ls -la
+            spython recipe Dockerfile &> test.def
             singularity build def_test.sif test.def
             #ls -la
             #singularity build local_tar_miracl.sif workspace/test.tar

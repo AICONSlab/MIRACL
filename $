@@ -1,0 +1,81 @@
+Bootstrap: docker
+From: mgoubran/miracl:base-latest
+Stage: spython-base
+
+%files
+. /code
+%post
+MIRACL_VERSION=latest
+
+# delete ruamel pkg
+rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
+pip install markupsafe==2.0.1 && \
+pip install -e /code/
+MIRACL_HOME=/code/miracl
+
+###############################################################################
+#--- Allen atlas alias ----
+
+cd /tmp
+mkdir -p /code/atlases/ara && \
+wget -P /code/atlases https://www.dropbox.com/sh/j31vurlp6h4lvod/AAAIKpYJQizkAte3Ju5DZYj8a --content-disposition && \
+unzip /code/atlases/ara.zip -x / -d /code/atlases/ara
+
+# RUN conda install -y --no-update-deps pyqt=5
+
+aradir="/code/atlases/ara"
+
+# Templates (atlas images)
+allen10="/code/atlases/ara/template/average_template_10um.nii.gz"
+allen25="/code/atlases/ara/template/average_template_25um.nii.gz"
+allen50="/code/atlases/ara/template/average_template_50um.nii.gz"
+
+# Annotations (labels)
+lbls10="/code/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz"
+lbls25="/code/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz"
+lbls50="/code/atlases/ara/annotation/annotation_hemi_combined_50um.nii.gz"
+
+# Grand-parents labels
+gplbls25="/code/atlases/ara/annotation/annotation_hemi_combined_25um_parent-level_3.nii.gz"
+gplbls50="/code/atlases/ara/annotation/annotation_hemi_combined_50um_parent-level_3.nii.gz"
+
+# ITK-snap LUT
+snaplut="/code/atlases/ara/ara_snaplabels_lut.txt"
+# Freeview LUT
+freelut="/code/atlases/ara/ara_freeviewlabels_lut.txt"
+
+# ANTs commands
+ln -sf "/code/depends/ants/antsRegistrationMIRACL.sh" /usr/bin/ants_miracl_clar && \
+chmod +x /usr/bin/ants_miracl_clar
+ln -sf "/code/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_miracl_mr && \
+chmod +x /usr/bin/ants_miracl_mr
+ANTSPATH="${ANTSPATH}:/code/depends/ants"
+
+IN_DOCKER_CONTAINER=Yes
+
+################################################################################
+
+# Temporarily uncommented to allow interactive shell access to Docker container
+#ENTRYPOINT ["/opt/miniconda/bin/miracl"]
+
+%environment
+export MIRACL_HOME=/code/miracl
+export aradir="/code/atlases/ara"
+export allen10="/code/atlases/ara/template/average_template_10um.nii.gz"
+export allen25="/code/atlases/ara/template/average_template_25um.nii.gz"
+export allen50="/code/atlases/ara/template/average_template_50um.nii.gz"
+export lbls10="/code/atlases/ara/annotation/annotation_hemi_combined_10um.nii.gz"
+export lbls25="/code/atlases/ara/annotation/annotation_hemi_combined_25um.nii.gz"
+export lbls50="/code/atlases/ara/annotation/annotation_hemi_combined_50um.nii.gz"
+export gplbls25="/code/atlases/ara/annotation/annotation_hemi_combined_25um_parent-level_3.nii.gz"
+export gplbls50="/code/atlases/ara/annotation/annotation_hemi_combined_50um_parent-level_3.nii.gz"
+export snaplut="/code/atlases/ara/ara_snaplabels_lut.txt"
+export freelut="/code/atlases/ara/ara_freeviewlabels_lut.txt"
+export ANTSPATH="${ANTSPATH}:/code/depends/ants"
+export IN_DOCKER_CONTAINER=Yes
+%runscript
+cd /tmp
+exec /bin/bash "$@"
+%startscript
+cd /tmp
+exec /bin/bash "$@"
