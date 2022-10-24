@@ -81,7 +81,7 @@ jobs:
             echo $SYLABS_TOKEN > tokenfile
             singularity remote login -u josmann --tokenfile tokenfile 
             singularity remote status
-            singularity build --remote remote_test.sif test.def
+            singularity build --remote library://josmann/miracl/miracl:latest test.def
             ls -la
             #singularity pull miracl.sif docker://mgoubran/miracl:latest
             #ls -la
