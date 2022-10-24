@@ -70,17 +70,17 @@ jobs:
             if [[ $(cat /workspace/miracl_compile_test) -eq "0" ]]; \
             then echo "Compiling"; \
             else echo "Error"; fi
-            apk update && \
-            apk add py3-pip && \
-            pip3 install spython && \
-            pwd
-            ls -la
-            spython recipe Dockerfile &> test.def
-            ls -la
-            singularity build --fix-perms --force def_test.sif test.def
-            ls -la
-            #singularity pull docker_miracl.sif docker://mgoubran/miracl:latest
+            #apk update && \
+            #apk add py3-pip && \
+            #pip3 install spython && \
+            #pwd
             #ls -la
+            #spython recipe Dockerfile &> test.def
+            #ls -la
+            #singularity build --fix-perms --force def_test.sif test.def
+            ls -la
+            singularity pull docker_miracl.sif docker://mgoubran/miracl:latest
+            ls -la
             #singularity build local_tar_miracl.sif workspace/test.tar
             #ls -la
   #build-singularity:
