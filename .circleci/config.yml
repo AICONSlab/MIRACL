@@ -77,7 +77,7 @@ jobs:
             ls -la
             spython recipe Dockerfile &> test.def
             ls -la
-            singularity build def_test.sif test.def
+            singularity build --fix-perms --force def_test.sif test.def
             ls -la
             #singularity pull docker_miracl.sif docker://mgoubran/miracl:latest
             #ls -la
