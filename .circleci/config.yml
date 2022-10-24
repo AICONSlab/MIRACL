@@ -76,7 +76,8 @@ jobs:
             spython recipe Dockerfile &> miracl.def
             echo $SYLABS_TOKEN > tokenfile
             singularity remote login -u josmann --tokenfile tokenfile 
-            singularity build --force --remote library://josmann/miracl/miracl:latest miracl.def
+            singularity delete --force library://josmann/miracl/miracl:latest
+            singularity build --remote library://josmann/miracl/miracl:latest miracl.def
             #singularity build --force --remote library://josmann/miracl/miracl:latest docker://mgoubran/miracl:latest
             #singularity pull miracl.sif docker://mgoubran/miracl:latest
             #ls -la
