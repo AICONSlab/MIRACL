@@ -177,7 +177,7 @@ workflows:
           context:
             - miracl_singularity
           requires:
-            - build
+            - docker-publish/publish
           filters:
             branches:
               ignore: 
