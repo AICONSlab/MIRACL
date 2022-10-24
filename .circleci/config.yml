@@ -76,7 +76,12 @@ jobs:
             pwd
             ls -la
             spython recipe Dockerfile &> test.def
-            singularity build --fakeroot --fix-perms --force --writable-tmpfs def_test.sif test.def
+            singularity build \
+            #--fakeroot \
+            --fix-perms \
+            --force \
+            --writable-tmpfs \
+            def_test.sif test.def
             #ls -la
             #singularity build local_tar_miracl.sif workspace/test.tar
             #ls -la
