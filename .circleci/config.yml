@@ -77,13 +77,11 @@ jobs:
             ls -la
             spython recipe Dockerfile &> test.def
             ls -la
-            ls -la
             echo $SYLABS_TOKEN > tokenfile
             singularity remote login -u josmann --tokenfile tokenfile 
-            singularity remote status
+            #echo "$SYLABS_TOKEN" | singularity remote login -u josmann --password-stdin
             #singularity build --remote library://josmann/miracl/miracl:latest test.def
-            singularity build --remote library://josmann/miracl/miracl:latest docker://mgoubran/miracl:latest
-            ls -la
+            singularity build --force --remote library://josmann/miracl/miracl:latest docker://mgoubran/miracl:latest
             #singularity pull miracl.sif docker://mgoubran/miracl:latest
             #ls -la
             #singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
@@ -147,7 +145,9 @@ workflows:
           filters:
             tags:
               only: /.*/
-      #- build-singularity:
+      #- test-singularity-container:
+      #    context:
+      #      - miracl_singularity
       #    requires:
       #      - build
       #    filters:
@@ -155,16 +155,6 @@ workflows:
       #        ignore: 
       #          - master
       #          - docs*
-      - test-singularity-container:
-          context:
-            - miracl_singularity
-          requires:
-            - build
-          filters:
-            branches:
-              ignore: 
-                - master
-                - docs*
 
   build_without_publishing_job:
     jobs:
@@ -183,6 +173,16 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
+      - test-singularity-container:
+          context:
+            - miracl_singularity
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
       #- pull_push_singularity:
       #    requires:
       #      - docker-publish/publish
