@@ -79,9 +79,9 @@ jobs:
             singularity \
             build \
             #--fakeroot \
-            --fix-perms \
-            --force \
-            --writable-tmpfs \
+            #--fix-perms \
+            #--force \
+            #--writable-tmpfs \
             def_test.sif test.def
             #ls -la
             #singularity build local_tar_miracl.sif workspace/test.tar
