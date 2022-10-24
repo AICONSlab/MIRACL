@@ -54,12 +54,12 @@ jobs:
             #echo "Creating tar"
             #docker save ${CONTAINER_NAME}:latest -o /tmp/workspace/test.tar
   test-singularity-container:
-    context: miracl_singularity
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
     working_directory: /root/project/MIRACL
     steps:
       - checkout
+      - context: miracl_singularity
       - setup_remote_docker:
           docker_layer_caching: true
       - attach_workspace:
