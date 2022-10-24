@@ -59,7 +59,6 @@ jobs:
     working_directory: /root/project/MIRACL
     steps:
       - checkout
-      - context: miracl_singularity
       - setup_remote_docker:
           docker_layer_caching: true
       - attach_workspace:
@@ -155,6 +154,8 @@ workflows:
       #          - master
       #          - docs*
       - test-singularity-container:
+          context:
+            - miracl_singularity
           requires:
             - build
           filters:
