@@ -47,6 +47,12 @@ jobs:
           root: /tmp/workspace
           paths:
             - miracl_compile_test
+      - run:
+          name: Create tar
+          no_output_timeout: 2h
+          command: |
+            #echo "Creating tar"
+            #docker save ${CONTAINER_NAME}:latest -o /tmp/workspace/test.tar
   test-singularity-container:
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
@@ -61,25 +67,73 @@ jobs:
           name: Test if possible
           no_output_timeout: 2h
           command: |
-            if [[ $(cat workspace/miracl_compile_test) -eq "0" ]]; \
+            if [[ $(cat /workspace/miracl_compile_test) -eq "0" ]]; \
             then echo "Compiling"; \
             else echo "Error"; fi
-            # Install spython for def file creation
             apk update && \
             apk add py3-pip && \
             pip3 install spython && \
-            # Create def file with spython
             spython recipe Dockerfile &> miracl.def
-            # Replace Docker parts that must be excluded for Singularity
-            gawk -i inplace '/#STOPUNCOMMENT#/{f=0} f{$0="#" $0} /#STARTUNCOMMENT#/{f=1} 1' miracl.def
-            cat miracl.def
-            ### # Log in to cloud.sylabs.io
-            ### echo $SYLABS_TOKEN > tokenfile
-            ### singularity remote login -u josmann --tokenfile tokenfile 
-            ### # Remove current Singularity container
-            ### singularity delete --force library://josmann/miracl/miracl:latest
-            ### # Create Singularity container remotely and push to cloud
-            ### singularity build --remote library://josmann/miracl/miracl:latest miracl.def
+            echo $SYLABS_TOKEN > tokenfile
+            singularity remote login -u josmann --tokenfile tokenfile 
+            singularity delete --force library://josmann/miracl/miracl:latest
+            singularity build --remote library://josmann/miracl/miracl:latest miracl.def
+            #singularity build --force --remote library://josmann/miracl/miracl:latest docker://mgoubran/miracl:latest
+            #singularity pull miracl.sif docker://mgoubran/miracl:latest
+            #ls -la
+            #singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
+            #singularity build local_tar_miracl.sif workspace/test.tar
+            #ls -la
+  #build-singularity:
+  #  docker:
+  #    - image: ubuntu:latest
+  #  steps:
+  #    - setup_remote_docker:
+  #        docker_layer_caching: true
+  #    - run:
+  #        name: Install dependencies
+  #        command: |
+  #          echo "Setting up Singularity"
+  #          echo "Installing dependencies"
+  #          apt-get update && apt-get install -y \
+  #          build-essential \
+  #          uuid-dev \
+  #          libgpgme-dev \
+  #          squashfs-tools \
+  #          libseccomp-dev \
+  #          wget \
+  #          pkg-config \
+  #          git \
+  #          cryptsetup-bin
+  #          echo "Installing GO"
+  #          export VERSION=1.17.6 OS=linux ARCH=amd64 && \
+  #          wget https://dl.google.com/go/go$VERSION.$OS-$ARCH.tar.gz && \
+  #          tar -C /usr/local -xzvf go$VERSION.$OS-$ARCH.tar.gz && \
+  #          rm go$VERSION.$OS-$ARCH.tar.gz
+  #          echo 'export GOPATH=${HOME}/go' >> ~/.bashrc && \
+  #          echo 'export PATH=/usr/local/go/bin:${PATH}:${GOPATH}/bin' >> ~/.bashrc && \
+  #          source ~/.bashrc
+  #          which go
+      #- run:
+      #    name: Build Singularity image
+      #    no_output_timeout: 60m
+      #    command: |
+      #      # Build Singularity image
+      #      echo "Running tests:"
+      #      docker run -it mgoubran/miracl echo "Docker run test"
+      #      docker images
+      #      docker rmi `docker images | grep "<none>" | awk {'print $3'}`
+      #      docker images
+      #      IMAGE_ID=$(docker images --filter="reference=${CONTAINER_NAME}:latest" --quiet)
+      #      echo ${IMAGE_ID}
+      #      #pwd
+      #      #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 pull --dir "/test" docker://ubuntu:latest
+      #      #ls -la /tmp/src/MIRACL
+      #      #ls -la /tmp/src/MIRACL
+      #      #docker save ${CONTAINER_NAME}:latest -o /tmp/src/MIRACL/test.tar
+      #      #ls -la /tmp/src/MIRACL
+      #      #docker run -it --rm -v "/tmp/src/MIRACL:/test" quay.io/singularity/singularity:v3.10.3 build /test/test.sif /test/test.tar 
+      #      #docker run -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/src/MIRACL:/output --privileged -t --rm singularityware/docker2singularity mgoubran/miracl:latest
 
 workflows:
   build_and_test:
@@ -126,6 +180,14 @@ workflows:
               ignore: 
                 - master
                 - docs*
+      #- pull_push_singularity:
+      #    requires:
+      #      - docker-publish/publish
+      #    filters:
+      #      branches:
+      #        ignore: 
+      #          - master
+      #          - docs*
 
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
