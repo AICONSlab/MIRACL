@@ -1,14 +1,16 @@
 # Docker Install
 
-Docker is well suited if you want to run it locally. If you need to run on a cluster,
+Docker is well suited if you want to run it on a local machine or local server. If you need to run MIRACL on a cluster,
 see the [Singularity install](install-singularity.md). If you don't have Docker installed on
-your computer, [do that first](https://docs.docker.com/engine/installation/).
+your computer, [do that first](https://docs.docker.com/engine/installation/) (make sure your installation includes Docker Compose as it is needed to run the build script we provide. Docker Compose is included in the Docker Desktop installation by default).
+
+<!--MAKE SURE TO INSTALL DOCKER-COMPOSE AS WELL?-->
 
 ## Getting Started
 
-First, you should understand how the container is built. There is a base image
-in the [docker](../docker) folder that installs Python and dependencies,
-and then the [Dockerfile](../Dockerfile) in the base of the repository builds
+First, it is important to understand how the container is built. There is a base image
+in the [docker](../docker) folder that installs Python and dependencies.
+Then the [Dockerfile](../Dockerfile) in the base of the repository builds
 the [mgoubran/miracl](https://hub.docker.com/r/mgoubran/miracl) image from
 that base. When the build happens, it cats the [version.txt](../miracl/version.txt)
 file in the repository in the repo to save a versioned base, but then the build
@@ -20,32 +22,112 @@ in that folder and push new images.
 
 ## Build from scratch
 
-```
-git clone https://www.github.com/mgoubran/MIRACL
-cd MIRACL
-```
-Build the image using the Dockerfile
+Clone the MIRACL repo to your machine:
 
 ```
-docker build -t mgoubran/miracl .
+$ git clone https://www.github.com/mgoubran/MIRACL
+$ cd MIRACL
 ```
 
-(notice the `.` at the end)
+Build the image using the build script we provide:
 
+```
+$ ./build.sh
+```
+
+(make sure that the script can be executed. If it can't and you are the owner of the file, use `chmod u+x build.sh` to make it executable. Prefix with `sudo` if you are not the owner of the file.)
+
+Once the image has successfully been built, run the container using Docker Compose:
+
+```
+$ docker-compose up -d
+```
+
+The container is now running and ready to be used.
   
-### Using the image
+## Using the container
 
 Interactively shell inside
 
 ```
-docker run -it mgoubran/miracl bash
+$ docker exec -it mgoubran/miracl bash
 ```
 
-(this will be lost when you shell out)
+Files that are saved while using MIRACL should be saved to volumes mounted into the container in order to make them persistent. To mount volumes, just add them to the `docker-compose.yml` in the base directory under `volumes` (do not delete the volume that is already mounted which mounts your `.Xauthority`):
+
+```
+volumes:
+      - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+      - /mydata:/home/josmann/mydata
+```
+
+## Stopping the container
+
+Exit your container and navigate to your MIRACL folder. Use Docker Compose to stop the container:
+
+```
+$ docker-compose down
+```
 
 ## Troubleshooting
 
-### Q: I get either or both of the following errors whenever I try to run the GUI from within the Docker container:
+### Q: The GUI (`miraclGUI`) is not working:
+
+Access control might be enabled on your host machine. Change your `xhost` access control on your host machine (**not** within your Docker container). Exit the running Docker container and type:
+
+```
+xhost +
+```
+
+Log back in to your container. Reset `xhost` after you are done with using the MIRACL GUI using:
+
+```
+xhost -
+```
+
+Alternative, you could [manually add only your user](https://www.x.org/archive/X11R6.8.1/doc/xhost.1.html) to the list of authorized clients:
+
+```
+$ xhost +SI:localuser:youruser
+```
+
+(replace `youruser` with your user name)
+
+### Q: I need to install or makes changes to apps in the MIRACL container but my user is not authorized to do so:
+
+The user in the container is the user of your host machine. This is done to avoid issues with the MIRACL GUI and X11. If you need to make changes that require sudo privileges, just log out of your container and log back in as root:
+
+```
+$ docker exec -it -u root mgoubran/miracl bash
+```
+
+After making your changes, log out and log back in with your regular user:
+
+```
+$ docker exec -it mgoubran/miracl bash
+```
+
+### Q: I do not want to create the image using the provided script:
+
+You can build the image yourself, not using the script we provide. However, the build script makes sure that the GUI version of MIRACL works with Docker and it is therefore recommended to use it.
+
+If you want to build the image yourself, first uncomment all lines in the Dockerfile between `#STARTUNCOMMENT#` and `#STOPUNCOMMENT#`. Now run:
+
+```
+$ docker build -t mgoubran/miracl .
+```
+
+(notice the . at the end)
+
+To run the container use:
+
+```
+$ docker run -it mgoubran/miracl bash
+```
+
+All changes will be lost when you shell out. The MIRACL GUI will be unlikely to work but you can try the troubleshooting steps in the following section to make it work.
+
+### Q: I get either or both of the following errors whenever I try to run the GUI from within a Docker container that I built not using the build script:
 
 ```
 Authorization required, but no authorization protocol specified
@@ -70,13 +152,13 @@ docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix mgoubran/mir
 If you still receive the above error, you may have to change your `xhost` access control on your host machine (**not** within your Docker container). Exit the running Docker container and type:
 
 ```
-xhost +
+$ xhost +
 ```
 
-This will disable access control for `xhost`. Start a new Docker container with the above command.
+This will disable access control for `xhost`. Start a new Docker container or log back in to a running container.
 
 Once you are done with working in the container, exit it and enable access control again on the host machine:
 
 ```
-xhost -
+$ xhost -
 ```
