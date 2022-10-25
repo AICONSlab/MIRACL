@@ -76,8 +76,9 @@ ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
 
+#STARTUNCOMMENT#
 # Setup host user as container user
-# Variables are importet from .env
+# Variables are imported from .env
 ARG USER_ID=$USER_ID
 ARG GROUP_ID=$GROUP_ID
 ARG USER=$USER
@@ -91,6 +92,7 @@ RUN chown -R $USER:$USER /code
 # Change to $USER
 USER $USER
 WORKDIR /home/$USER
+#STOPUNCOMMENT#
 
 ################################################################################
 
