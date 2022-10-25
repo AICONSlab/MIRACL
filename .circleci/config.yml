@@ -40,13 +40,8 @@ jobs:
             mkdir -p /tmp/workspace
             echo "Running tests:"
             docker run -it mgoubran/miracl echo "Docker run test"
-            echo $? > /tmp/workspace/miracl_compile_test
       - store_test_results:
           path: /tmp/tests
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - miracl_compile_test
   test-singularity-container:
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
@@ -55,31 +50,28 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - attach_workspace:
-          at: /root/project/workspace
       - run:
-          name: Test if possible
+          name: Compile and push Singularity image
           no_output_timeout: 2h
           command: |
-            if [[ $(cat workspace/miracl_compile_test) -eq "0" ]]; \
-            then echo "Compiling"; \
-            else echo "Error"; fi
             # Install spython for def file creation
             apk update && \
             apk add py3-pip && \
             pip3 install spython && \
             # Create def file with spython
-            spython recipe Dockerfile &> miracl.def
+            spython recipe Dockerfile &> miracl.def && \
             # Replace Docker parts that must be excluded for Singularity
-            gawk -i inplace '/#STOPUNCOMMENT#/{f=0} f{$0="#" $0} /#STARTUNCOMMENT#/{f=1} 1' miracl.def
-            cat miracl.def
-            ### # Log in to cloud.sylabs.io
-            ### echo $SYLABS_TOKEN > tokenfile
-            ### singularity remote login -u josmann --tokenfile tokenfile 
-            ### # Remove current Singularity container
-            ### singularity delete --force library://josmann/miracl/miracl:latest
-            ### # Create Singularity container remotely and push to cloud
-            ### singularity build --remote library://josmann/miracl/miracl:latest miracl.def
+            gawk -i inplace '/#STOPUNCOMMENT#/{f=0} f{$0="#" $0} /#STARTUNCOMMENT#/{f=1} 1' miracl.def && \
+            # Change permissions for code directory for any Singularity user
+            sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
+            cat miracl.def && \
+            # Log in to cloud.sylabs.io
+            echo $SYLABS_TOKEN > tokenfile && \
+            singularity remote login -u josmann --tokenfile tokenfile && \
+            # Remove current Singularity container
+            singularity delete --force library://josmann/miracl/miracl:latest && \
+            # Create Singularity container remotely and push to cloud
+            singularity build --remote library://josmann/miracl/miracl:latest miracl.def
 
 workflows:
   build_and_test:

@@ -48,6 +48,22 @@ ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
 
+#STARTUNCOMMENT#
+
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+# These are test comments
+
+#STOPUNCOMMENT#
+
 ################################################################################
 
 # Temporarily uncommented to allow interactive shell access to Docker container
