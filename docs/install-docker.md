@@ -13,7 +13,7 @@ in the [docker](../docker) folder that installs Python and dependencies.
 Then the [Dockerfile](../Dockerfile) in the base of the repository builds
 the [mgoubran/miracl](https://hub.docker.com/r/mgoubran/miracl) image from
 that base. When the build happens, it cats the [version.txt](../miracl/version.txt)
-file in the repository in the repo to save a versioned base, but then the build
+file in the repository to save a versioned base, but then the build
 uses the tag `base-latest` that is always the latest base.
 The base container is built from this folder and pushed manually, while the
 main container is built and pushed automatically via the [CircleCI Recipe](../.circleci/config.yml).

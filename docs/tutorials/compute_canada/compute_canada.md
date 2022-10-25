@@ -24,17 +24,17 @@ The generated image takes up a large amount of space, so move to the scratch dir
 
 	$ cd $SCRATCH
 
-Although MIRACL is stored as a Docker image, an image can be built in Singularity by calling
+Pull (download) the Singularity container:
 
-	$ singularity build miracl.sif docker://mgoubran/miracl
+    $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 
 Start singularity with binded data
 
-    $ singularity shell miracl.sif
+    $ singularity shell miracl_latest.sif
 
 Within the shell, load the GUI
 
-	> miraclGUI
+    > miraclGUI
 
 Or use command line, for example run miracl's CLARITY registration workflow on the directory that was copied over
 

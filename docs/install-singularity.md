@@ -6,7 +6,7 @@ Unlike Docker, Singularity is well suited to run in a cluster environment (like 
 
 `cluster` could be "sherlock.stanford.edu" or "cedar.computecanada.ca" for example.
 
-Once logged in, change the directory to your scratch space and pull the image:
+Once logged in, change the directory to your scratch space and pull (download) the Singularity container:
 
     $ cd $SCRATCH
     $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
@@ -21,7 +21,7 @@ Use the `-B` flag to bind a data directory to the container:
 
     $ singularity shell -B data:/data miracl_latest.sif
 
-**For running functions on clusters please check our tutorials.**
+**For running functions on clusters please check our [tutorials](tutorials.md).**
 
 ## Troubleshooting
 
