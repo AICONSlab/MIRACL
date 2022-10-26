@@ -68,8 +68,13 @@ jobs:
             # Log in to cloud.sylabs.io
             echo $SYLABS_TOKEN_OCT_26 > tokenfile && \
             singularity remote login -u aiconslab --tokenfile tokenfile && \
+            # Setting trap in case image cannot be deleted
+            set -e
+            trap "echo 'Image doesn't exist - catching error!'; if [ $? == 255 ]; then echo 'Error 255'; fi" ERR
             # Remove current Singularity container
             singularity delete --force library://aiconslab/miracl/miracl:latest && \
+            # Unset trap
+            trap - ERR
             # Create Singularity container remotely and push to cloud
             singularity build --remote library://aiconslab/miracl/miracl:latest miracl.def
 
