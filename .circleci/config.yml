@@ -42,7 +42,7 @@ jobs:
             docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
-  test-singularity-container:
+  singularity-publish:
     docker:
       - image: quay.io/singularity/singularity:v3.10.3
     working_directory: /root/project/MIRACL
@@ -66,12 +66,12 @@ jobs:
             sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
             cat miracl.def && \
             # Log in to cloud.sylabs.io
-            echo $SYLABS_TOKEN > tokenfile && \
-            singularity remote login -u josmann --tokenfile tokenfile && \
+            echo $SYLABS_TOKEN_OCT_26 > tokenfile && \
+            singularity remote login -u aicons --tokenfile tokenfile && \
             # Remove current Singularity container
-            singularity delete --force library://josmann/miracl/miracl:latest && \
+            singularity delete --force library://aicons/miracl/miracl:latest && \
             # Create Singularity container remotely and push to cloud
-            singularity build --remote library://josmann/miracl/miracl:latest miracl.def
+            singularity build --remote library://aicons/miracl/miracl:latest miracl.def
 
 workflows:
   build_and_test:
@@ -108,7 +108,7 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
-      - test-singularity-container:
+      - singularity-publish:
           context:
             - miracl_singularity
           requires:
