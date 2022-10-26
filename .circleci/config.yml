@@ -67,11 +67,11 @@ jobs:
             cat miracl.def && \
             # Log in to cloud.sylabs.io
             echo $SYLABS_TOKEN_OCT_26 > tokenfile && \
-            singularity remote login -u aicons --tokenfile tokenfile && \
+            singularity remote login -u aiconslab --tokenfile tokenfile && \
             # Remove current Singularity container
-            #singularity delete --force library://aicons/miracl/miracl:latest && \
+            singularity delete --force library://aiconslab/miracl/miracl:latest && \
             # Create Singularity container remotely and push to cloud
-            singularity build --remote library://aicons/miracl/miracl:latest miracl.def
+            singularity build --remote library://aiconslab/miracl/miracl:latest miracl.def
 
 workflows:
   build_and_test:
