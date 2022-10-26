@@ -69,7 +69,7 @@ jobs:
             echo $SYLABS_TOKEN_OCT_26 > tokenfile && \
             singularity remote login -u aicons --tokenfile tokenfile && \
             # Remove current Singularity container
-            singularity delete --force library://aicons/miracl/miracl:latest && \
+            #singularity delete --force library://aicons/miracl/miracl:latest && \
             # Create Singularity container remotely and push to cloud
             singularity build --remote library://aicons/miracl/miracl:latest miracl.def
 
