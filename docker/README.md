@@ -4,7 +4,7 @@ This folder provides the recipe and instructions for building the base image
 to support `mgoubran/miracl`. The dependencies take quite some time to install,
 and so this base speeds things up by providing them most in the base.
 Since this image is unexpected to change, the maintainer has built it locally
-and then will push manally. Instructions are provided here to reproduce this.
+and then will push manually. Instructions are provided here to reproduce this.
 
 ## Build the base
 
