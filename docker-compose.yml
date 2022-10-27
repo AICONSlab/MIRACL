@@ -10,5 +10,3 @@ services:
     container_name: miracl
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
-      - /data:/data
-      - /data2:/data2
