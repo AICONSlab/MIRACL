@@ -25,7 +25,7 @@ Use the `-B` flag to bind a data directory to the container:
 
 ## Troubleshooting
 
-### Q: Can I build a Singularity container from the latest MIRACL image on Docker Hub?
+### Q: Can I build a Singularity container from the latest MIRACL image on Docker Hub:
 
 Absolutely! To do so, however, you will need to grab a development node after logging in to the cluster. If you try pulling from the login node, you will use a ton of memory building the SIF image,
 and the process will be killed (in other words, it won't work).
@@ -40,6 +40,10 @@ Once you have your node, you can then build the container:
 
     $ cd $SCRATCH
     $ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
+
+### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
+
+Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Singularity container directly. Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
 
 ### Q: I get the following error whenever I try to run the GUI from within the Singularity container on Compute Canada:
 

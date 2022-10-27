@@ -95,7 +95,11 @@ $ xhost +SI:localuser:youruser
 
 (replace `youruser` with your user name)
 
-### Q: I need to install or makes changes to apps in the MIRACL container but my user is not authorized to do so:
+### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
+
+Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Docker image directly. Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
+
+### Q: I need to install or make changes to apps in the MIRACL container but my user is not authorized to do so:
 
 The user in the container is the user of your host machine. This is done to avoid issues with the MIRACL GUI and X11. If you need to make changes that require sudo privileges, just log out of your container and log back in as root:
 
