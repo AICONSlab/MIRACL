@@ -53,12 +53,14 @@ Interactively shell inside
 $ docker exec -it mgoubran/miracl bash
 ```
 
-Files that are saved while using MIRACL should be saved to volumes mounted into the container in order to make them persistent. To mount volumes, just add them to the `docker-compose.yml` in the base directory under `volumes` (do not delete the volume that is already mounted which mounts your `.Xauthority`):
+Files that are saved while using MIRACL should be saved to volumes mounted into the container in order to make them persistent. To mount volumes, just add them to the `docker-compose.yml` in the base directory under `volumes` (do not delete the volume that is already mounted which mounts your `.Xauthority`).
+
+Example:
 
 ```
 volumes:
-      - /home/josmann/.Xauthority:/home/josmann/.Xauthority
-      - /mydata:/home/josmann/mydata
+      - /home/mgoubran/.Xauthority:/home/mgoubran/.Xauthority
+      - /home/mgoubran/mydata:/home/mgoubran/mydata
 ```
 
 ## Stopping the container
