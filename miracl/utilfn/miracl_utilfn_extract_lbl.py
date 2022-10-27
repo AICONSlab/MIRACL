@@ -114,7 +114,7 @@ def get_label_id(label, side='combined'):
         annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
 
     # outlbl to lblid
-    lbl_id = annot_csv.atlas_id[annot_csv.acronym == "%s" % label].values[0]
+    lbl_id = annot_csv.id[annot_csv.acronym == "%s" % label].values[0]
 
     return lbl_id
 
@@ -124,8 +124,7 @@ def mask_label(mask, lblid):
     '''
     # extract lbl
     print("\n extracting label ...")
-    res = mask.copy()  # create a copy of the mask, set the type as uint8 to match the lbl id
-    res = res.astype(np.uint8)
+    res = mask.copy()  # create a copy of the mask
 
     res[res != lblid] = 0
     res[res > 0] = 1  # binarize
@@ -135,7 +134,6 @@ def mask_label(mask, lblid):
 def extract_label(atlas, lbl, down=1, side='combined'):
     mask = downsample_mask(atlas, down)  # downsample the mask by the factor
     lbl_id = get_label_id(lbl, side)  # extract the label id
-    print(lbl_id)
     res = mask_label(mask, lbl_id)
 
     return res
