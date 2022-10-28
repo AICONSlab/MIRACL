@@ -128,6 +128,7 @@ workflows:
             - docker-publish/publish
           filters:
             branches:
-              ignore: 
-                - master
-                - docs*
+              only: master
+             # ignore: 
+             #   - master
+             #   - docs*
