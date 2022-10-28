@@ -78,7 +78,6 @@ ENV IN_DOCKER_CONTAINER Yes
 
 #STARTUNCOMMENT#
 # Setup host user as container user
-# Variables are imported from .env
 ARG USER_ID=$USER_ID
 ARG GROUP_ID=$GROUP_ID
 ARG USER=$USER
