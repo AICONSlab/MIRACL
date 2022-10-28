@@ -23,6 +23,9 @@ jobs:
             # Build docker image
             MIRACL_VERSION=$(cat /tmp/src/MIRACL/miracl/version.txt)
             echo "miracl version is ${MIRACL_VERSION}"
+            # Replace Docker parts that must be excluded for CircleCI build
+            gawk -i inplace '/#STOPUNCOMMENT#/{f=0} f{$0="#" $0} /#STARTUNCOMMENT#/{f=1} 1' Dockerfile && \
+            cat Dockerfile
             e=1 && for i in {1..5}; do
               docker build \
                 --rm=false \
@@ -85,16 +88,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-      #- test-singularity-container:
-      #    context:
-      #      - miracl_singularity
-      #    requires:
-      #      - build
-      #    filters:
-      #      branches:
-      #        ignore: 
-      #          - master
-      #          - docs*
 
   build_without_publishing_job:
     jobs:
@@ -113,16 +106,6 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
-      - singularity-publish:
-          context:
-            - miracl_singularity
-          requires:
-            - docker-publish/publish
-          filters:
-            branches:
-              ignore: 
-                - master
-                - docs*
 
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
@@ -141,4 +124,13 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
-
+      - singularity-publish:
+          context:
+            - miracl_singularity
+          requires:
+            - docker-publish/publish
+          filters:
+            branches:
+              ignore: 
+                - master
+                - docs*
