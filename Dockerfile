@@ -36,7 +36,7 @@ RUN cmake \
     rm -r /tmp/niftyreg && \
     rm -r /tmp/niftyreg_source
 ENV PATH=$NR_INSTALL_DIR/bin:$PATH
-ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATHRUN
+ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATH
 
 # Point back to latest GNU compiler (g++-9)
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
