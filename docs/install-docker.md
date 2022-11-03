@@ -2,9 +2,8 @@
 
 Docker is well suited if you want to run it on a local machine or local server. If you need to run MIRACL on a cluster,
 see the [Singularity install](install-singularity.md). If you don't have Docker installed on
-your computer, [do that first](https://docs.docker.com/engine/installation/) (make sure your installation includes Docker Compose as it is needed to run the build script we provide. Docker Compose is included in the Docker Desktop installation by default).
-
-<!--MAKE SURE TO INSTALL DOCKER-COMPOSE AS WELL?-->
+your computer, [do that first](https://docs.docker.com/engine/installation/). Make sure your installation includes Docker Compose as it is needed to run the build script we provide.
+Docker Compose is included as part of the Docker Desktop installation by default.
 
 ## Getting Started
 
@@ -47,10 +46,10 @@ The container is now running and ready to be used.
   
 ## Using the container
 
-Interactively shell inside
+Interactively shell inside:
 
 ```
-$ docker exec -it mgoubran/miracl bash
+$ docker exec -it miracl bash
 ```
 
 Files that are saved while using MIRACL should be saved to volumes mounted into the container in order to make them persistent. To mount volumes, just add them to the `docker-compose.yml` in the base directory under `volumes` (do not delete the volume that is already mounted which mounts your `.Xauthority`).
@@ -87,37 +86,45 @@ Log back in to your container. Reset `xhost` after you are done with using the M
 xhost -
 ```
 
-Alternative, you could [manually add only your user](https://www.x.org/archive/X11R6.8.1/doc/xhost.1.html) to the list of authorized clients:
+The above will enable/disable access for all users. If this is not the desired behavior, access can be granted in a more [fine grained manner](https://www.x.org/archive/X11R6.8.1/doc/xhost.1.html).
+
+Example:
 
 ```
-$ xhost +SI:localuser:youruser
+xhost +SI:localsuer:<yourusername>
 ```
 
-(replace `youruser` with your user name)
+(replace `<yourusername>` with the actual user name of your host system)
+
+### Q: I cannot run X or Y with Docker because of permission denied errors:
+
+If you have not set up a Docker user you might need to run Docker commands with `sudo`.
 
 ### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Docker image directly. Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
+Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Docker image directly.
+Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
+After they have been successfully installed, mount a volume to your MIRACL Docker container that contains the binary folder for TackVis and Diffusion Toolkit.
+The last step is to add the binaries to your `$PATH` within your MIRACL Docker container.
 
 ### Q: I need to install or make changes to apps in the MIRACL container but my user is not authorized to do so:
 
 The user in the container is the user of your host machine. This is done to avoid issues with the MIRACL GUI and X11. If you need to make changes that require sudo privileges, just log out of your container and log back in as root:
 
 ```
-$ docker exec -it -u root mgoubran/miracl bash
+$ docker exec -it -u root miracl bash
 ```
 
 After making your changes, log out and log back in with your regular user:
 
 ```
-$ docker exec -it mgoubran/miracl bash
+$ docker exec -it miracl bash
 ```
 
 ### Q: I do not want to create the image using the provided script:
 
 You can build the image yourself, not using the script we provide. However, the build script makes sure that the GUI version of MIRACL works with Docker and it is therefore recommended to use it.
-
-If you want to build the image yourself, first uncomment all lines in the Dockerfile between `#STARTUNCOMMENT#` and `#STOPUNCOMMENT#`. Now run:
+Build the image with:
 
 ```
 $ docker build -t mgoubran/miracl .
@@ -149,22 +156,11 @@ This application failed to start because no Qt platform plugin could be initiali
 Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, wayland-egl, wayland, wayland-xcomposite-egl, wayland-xcomposite-glx, webgl, xcb.
 ```
 
-Exit your running Docker container and run the following to mount an X11 socket from the host system in a new Docker container:
+If this happened without using the build script i.e. you build the image yourself, exit your running Docker container and run the following
+to mount an X11 socket from the host system in a new Docker container:
 
 ```
 docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix mgoubran/miracl bash
 ```
 
-If you still receive the above error, you may have to change your `xhost` access control on your host machine (**not** within your Docker container). Exit the running Docker container and type:
-
-```
-$ xhost +
-```
-
-This will disable access control for `xhost`. Start a new Docker container or log back in to a running container.
-
-Once you are done with working in the container, exit it and enable access control again on the host machine:
-
-```
-$ xhost -
-```
+If you still receive the above error, you may have to change your `xhost` access control ([see previous troubleshooting step](#q-the-gui-miraclgui-is-not-working)).
