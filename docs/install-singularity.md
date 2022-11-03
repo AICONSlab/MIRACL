@@ -43,7 +43,10 @@ Once you have your node, you can then build the container:
 
 ### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Singularity container directly. Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
+Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Singularity container directly.
+Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
+After they have been successfully installed, mount a volume to your MIRACL Singularity container that contains the binary folder for TackVis and Diffusion Toolkit.
+The last step is to add the binaries to your `$PATH` within your MIRACL Singularity container.
 
 ### Q: I get the following error whenever I try to run the GUI from within the Singularity container on Compute Canada:
 
