@@ -50,20 +50,20 @@ ENV IN_DOCKER_CONTAINER Yes
 
 #STARTUNCOMMENT#
 
-# Setup host user as container user
-ARG USER_ID=$USER_ID
-ARG GROUP_ID=$GROUP_ID
-ARG USER=$USER
-
-RUN addgroup --gid $GROUP_ID $USER
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
-
-# Change owner of /code directory
-RUN chown -R $USER:$USER /code
-
-# Change to $USER
-USER $USER
-WORKDIR /home/$USER
+## Setup host user as container user
+#ARG USER_ID=$USER_ID
+#ARG GROUP_ID=$GROUP_ID
+#ARG USER=$USER
+#
+#RUN addgroup --gid $GROUP_ID $USER
+#RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
+#
+## Change owner of /code directory
+#RUN chown -R $USER:$USER /code
+#
+## Change to $USER
+#USER $USER
+#WORKDIR /home/$USER
 
 #STOPUNCOMMENT#
 
