@@ -7,6 +7,6 @@ services:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: mgoubran/miracl
+    container_name: miracl
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
