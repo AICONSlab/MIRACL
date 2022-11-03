@@ -1,16 +1,18 @@
 ARG MIRACL_VERSION=latest
-FROM mgoubran/miracl:base-$MIRACL_VERSION
+FROM mgoubran/miracl:revised-base-$MIRACL_VERSION
 
 ADD . /code
 # delete ruamel pkg
 RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
     pip install markupsafe==2.0.1 && \
-    pip install -e /code/
+    pip install -e /code/ "botocore >= 1.20.110"
 ENV MIRACL_HOME=/code/miracl
 
-###############################################################################
+# Point to g++-5 for NiftyReg compilation
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+
 #--- Install NiftyReg ---
-ARG NR_INSTALL_DIR=/opt/niftyreg 
+ARG NR_INSTALL_DIR=/opt/niftyreg
 RUN mkdir -p /tmp/niftyreg_source && \
     git clone https://github.com/SuperElastix/niftyreg.git /tmp/niftyreg_source && \
     mkdir -p /tmp/niftyreg && \
@@ -21,7 +23,7 @@ RUN cmake \
     -D BUILD_SHARED_LIBS=OFF \
     -D BUILD_TESTING=OFF \
     -D CMAKE_BUILD_TYPE=Release \
-    -D CMAKE_INSTALL_PREFIX=/opt/niftyreg \
+    -D CMAKE_INSTALL_PREFIX=$NR_INSTALL_DIR \
     -D M_LIBRARY=/opt/miniconda/include \
     -D PNG_INCLUDE_DIR=/opt/miniconda/lib/libpng.so \
     -D USE_CUDA=OFF \
@@ -34,7 +36,10 @@ RUN cmake \
     rm -r /tmp/niftyreg && \
     rm -r /tmp/niftyreg_source
 ENV PATH=$NR_INSTALL_DIR/bin:$PATH
-ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATHRUN
+
+# Point back to latest GNU compiler (g++-9)
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 ###############################################################################
 #--- Allen atlas alias ----
@@ -77,20 +82,6 @@ ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 ENV IN_DOCKER_CONTAINER Yes
 
 #STARTUNCOMMENT#
-# Setup host user as container user
-ARG USER_ID=$USER_ID
-ARG GROUP_ID=$GROUP_ID
-ARG USER=$USER
-
-RUN addgroup --gid $GROUP_ID $USER
-RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USER
-
-# Change owner of /code directory
-RUN chown -R $USER:$USER /code
-
-# Change to $USER
-USER $USER
-WORKDIR /home/$USER
 #STOPUNCOMMENT#
 
 ################################################################################
