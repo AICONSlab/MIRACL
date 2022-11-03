@@ -60,11 +60,11 @@ jobs:
             pip3 install spython && \
             # Create def file with spython
             spython recipe Dockerfile &> miracl.def && \
-            # Replace Docker parts that must be excluded for Singularity
-            gawk -i inplace '/#STOPUNCOMMENT#/{f=0} f{$0="#" $0} /#STARTUNCOMMENT#/{f=1} 1' miracl.def && \
+            # Uncomment Docker parts that must be excluded for Singularity
+            #gawk -i inplace '/#STOPUNCOMMENT#/{f=0} f{$0="#" $0} /#STARTUNCOMMENT#/{f=1} 1' miracl.def && \
             # Change permissions for code directory for any Singularity user
             sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
-            cat miracl.def && \
+            #cat miracl.def && \
             # Log in to cloud.sylabs.io
             echo $SYLABS_TOKEN_OCT_26 > tokenfile && \
             singularity remote login -u aiconslab --tokenfile tokenfile && \
