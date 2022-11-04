@@ -140,7 +140,7 @@ $ docker run -it mgoubran/miracl bash
 
 All changes will be lost when you shell out. The MIRACL GUI will be unlikely to work but you can try the troubleshooting steps in the following section to make it work.
 
-### Q: I get either or both of the following errors whenever I try to run the GUI from within a Docker container that I built not using the build script:
+### Q: I get either or both of the following errors whenever I try to run the GUI from within a Docker container that was build without the provided build script:
 
 ```
 Authorization required, but no authorization protocol specified
@@ -156,7 +156,7 @@ This application failed to start because no Qt platform plugin could be initiali
 Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, wayland-egl, wayland, wayland-xcomposite-egl, wayland-xcomposite-glx, webgl, xcb.
 ```
 
-If this happened without using the build script i.e. you build the image yourself, exit your running Docker container and run the following
+Exit your running Docker container and run the following
 to mount an X11 socket from the host system in a new Docker container:
 
 ```
