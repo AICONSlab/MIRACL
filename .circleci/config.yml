@@ -37,11 +37,42 @@ jobs:
           name: Run Tests
           no_output_timeout: 2h
           command: |
-             echo "Running tests:"
-             docker run -it mgoubran/miracl echo "Docker run test"
+            echo "Running tests:"
+            docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
-
+  singularity-publish:
+    docker:
+      - image: quay.io/singularity/singularity:v3.10.3
+    working_directory: /root/project/MIRACL
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Compile and push Singularity image
+          no_output_timeout: 2h
+          command: |
+            # Install spython for def file creation
+            apk update && \
+            apk add py3-pip && \
+            pip3 install spython && \
+            # Create def file with spython
+            spython recipe Dockerfile &> miracl.def && \
+            # Change permissions for code directory for any Singularity user
+            sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
+            # Log in to cloud.sylabs.io
+            echo $SYLABS_TOKEN_OCT_26 > tokenfile && \
+            singularity remote login -u aiconslab --tokenfile tokenfile && \
+            # Setting trap in case image cannot be deleted
+            set -e
+            trap "echo 'Image doesn't exist - catching error!'; if [ $? == 255 ]; then echo 'Error 255'; fi" ERR
+            # Remove current Singularity container
+            singularity delete --force library://aiconslab/miracl/miracl:latest && \
+            # Unset trap
+            trap - ERR
+            # Create Singularity container remotely and push to cloud
+            singularity build --remote library://aiconslab/miracl/miracl:latest miracl.def
 
 workflows:
   build_and_test:
@@ -69,7 +100,6 @@ workflows:
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
-
   # This workflow will deploy images on merge to master only
   docker_with_lifecycle:
     jobs:
@@ -87,3 +117,14 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
+      - singularity-publish:
+          context:
+            - miracl_singularity
+          requires:
+            - docker-publish/publish
+          filters:
+            branches:
+              only: master
+             # ignore: 
+             #   - master
+             #   - docs*
