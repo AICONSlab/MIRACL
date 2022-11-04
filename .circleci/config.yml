@@ -101,6 +101,9 @@ workflows:
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
   # This workflow will deploy images on merge to master only
+  # Should only push MIRACL Docker image and not base-image
+  # If base-image needs to be pushed as well add the following line:
+  # docker tag mgoubran/miracl:revised-base-latest mgoubran/miracl:revised-base-${DOCKER_TAGs}
   docker_with_lifecycle:
     jobs:
       - docker-publish/publish:
@@ -115,7 +118,6 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
-                   docker tag mgoubran/miracl:base-latest mgoubran/miracl:base-${DOCKER_TAGs}
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
       - singularity-publish:
           context:
