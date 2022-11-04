@@ -1,4 +1,4 @@
-FROM neurodebian:xenial
+FROM neurodebian:focal
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -19,7 +19,7 @@ RUN mkdir -p /code/atlases /data
 WORKDIR /code
 
 RUN apt install -y libhdf5-serial-dev && \
-    apt-get install libatlas-base-dev libblas3 liblapack3 liblapack-dev libblas-dev && \
+    apt-get install -y libatlas-base-dev libblas3 liblapack3 liblapack-dev libblas-dev && \
     pip install --upgrade pip && \
     python3 -m pip install numpy && \
     python3 -m pip install matplotlib joblib && \
@@ -85,10 +85,8 @@ RUN wget https://downloads.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-L
     rm c3d-nightly-Linux-x86_64.tar.gz
 ENV PATH /opt/cd3/bin:${PATH}
 
-# Install FSL, cmake
-RUN apt-get update && apt-get install -y fsl && \
-    apt remove cmake && \
-    pip3 install cmake --upgrade
+# Install FSL
+RUN apt-get update && apt-get install fsl -y
 
 ENV FSLDIR="/usr/share/fsl/5.0" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
@@ -100,6 +98,53 @@ ENV FSLDIR="/usr/share/fsl/5.0" \
     POSSUMDIR="/usr/share/fsl/5.0"
 
 ENV PATH="/usr/lib/fsl/5.0:${PATH}"
+
+# Install MRtrix
+RUN apt-get install -y git \
+    g++ \
+    python \
+    python-numpy \
+    libeigen3-dev \
+    zlib1g-dev \
+    libqt5opengl5-dev \
+    libqt5svg5-dev \
+    libgl1-mesa-dev \
+    libfftw3-dev \
+    libtiff5-dev \
+    libpng-dev
+
+WORKDIR /opt
+RUN git clone https://github.com/MRtrix3/mrtrix3.git
+RUN cd mrtrix3 && \
+    ./configure && \
+    ./build
+
+ENV PATH="/opt/mrtrix3/bin:${PATH}"
+
+# Install g++-5
+# Required for NiftyReg installation
+RUN mkdir /tmp/gcc_downloads
+WORKDIR /tmp/gcc_downloads
+RUN wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/gcc-5-base_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/i/isl-0.18/libisl15_0.18-4_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/cpp-5_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/libasan2_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/libmpx0_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/libgcc-5-dev_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/gcc-5_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/libstdc++-5-dev_5.5.0-12ubuntu1_amd64.deb && \
+    wget -c http://archive.ubuntu.com/ubuntu/pool/universe/g/gcc-5/g++-5_5.5.0-12ubuntu1_amd64.deb
+
+RUN apt-get install -y ./g++-5_5.5.0-12ubuntu1_amd64.deb \
+    ./gcc-5_5.5.0-12ubuntu1_amd64.deb \
+    ./gcc-5-base_5.5.0-12ubuntu1_amd64.deb \
+    ./cpp-5_5.5.0-12ubuntu1_amd64.deb \
+    ./libisl15_0.18-4_amd64.deb \
+    ./libgcc-5-dev_5.5.0-12ubuntu1_amd64.deb \
+    ./libasan2_5.5.0-12ubuntu1_amd64.deb  \
+    ./libmpx0_5.5.0-12ubuntu1_amd64.deb  \
+    ./libstdc++-5-dev_5.5.0-12ubuntu1_amd64.deb && \
+    rm -r /tmp/gcc_downloads
 
 WORKDIR /code
 RUN pip3 install scikit-image==0.14.2 && \

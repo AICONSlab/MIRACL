@@ -18,9 +18,9 @@ Move to your scratch folder
 
     $ cd SCRATCH
 
-Build singularity container 
+Pull (download) Singularity container 
 
-    $ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
+    $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 
 ### Copying your data to Sherlock 
 For example a folder called `input_clar` with tiff files for registration to Allen atlas:
@@ -49,7 +49,7 @@ Start interactive session
 
 Within the shell, load the GUI  
 
-	> miraclGUI
+    > miraclGUI
 
 Or use command line
 

@@ -1,12 +1,45 @@
 ARG MIRACL_VERSION=latest
-FROM mgoubran/miracl:base-$MIRACL_VERSION
+FROM mgoubran/miracl:revised-base-$MIRACL_VERSION
 
 ADD . /code
 # delete ruamel pkg
 RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
     pip install markupsafe==2.0.1 && \
-    pip install -e /code/
+    pip install -e /code/ "botocore >= 1.20.110"
 ENV MIRACL_HOME=/code/miracl
+
+# Point to g++-5 for NiftyReg compilation
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50 --slave /usr/bin/g++ g++ /usr/bin/g++-5
+
+#--- Install NiftyReg ---
+ARG NR_INSTALL_DIR=/opt/niftyreg
+RUN mkdir -p /tmp/niftyreg_source && \
+    git clone https://github.com/SuperElastix/niftyreg.git /tmp/niftyreg_source && \
+    mkdir -p /tmp/niftyreg && \
+    mkdir -p $NR_INSTALL_DIR
+WORKDIR /tmp/niftyreg
+RUN cmake \
+    -D BUILD_ALL_DEP=ON \
+    -D BUILD_SHARED_LIBS=OFF \
+    -D BUILD_TESTING=OFF \
+    -D CMAKE_BUILD_TYPE=Release \
+    -D CMAKE_INSTALL_PREFIX=$NR_INSTALL_DIR \
+    -D M_LIBRARY=/opt/miniconda/include \
+    -D PNG_INCLUDE_DIR=/opt/miniconda/lib/libpng.so \
+    -D USE_CUDA=OFF \
+    -D USE_OPENCL=OFF \
+    -D USE_OPENMP=ON \
+    -D USE_SSE=ON \
+    /tmp/niftyreg_source && \
+    make && \
+    make install && \
+    rm -r /tmp/niftyreg && \
+    rm -r /tmp/niftyreg_source
+ENV PATH=$NR_INSTALL_DIR/bin:$PATH
+ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATH
+
+# Point back to latest GNU compiler (g++-9)
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 ###############################################################################
 #--- Allen atlas alias ----
@@ -47,6 +80,9 @@ RUN ln -sf "/code/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_mira
 ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
+
+#STARTUNCOMMENT#
+#STOPUNCOMMENT#
 
 ################################################################################
 

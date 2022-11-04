@@ -1,14 +1,33 @@
 # Singularity Install for SLURM clusters 
 
-Unlike Docker, Singularity is well suited to run in a cluster environment (like Sherlock at Stanford or Compute Canada). In fact, if
-the Docker image for this repository is provided on Docker hub, you could just pull
-and use it. First, log in to the cluster:
+Unlike Docker, Singularity is well suited to run in a cluster environment (like Sherlock at Stanford or Compute Canada). We provide the latest version of MIRACL as a Singularity container that can be conveniently pulled from cloud storage. First, log in to the cluster:
 
     ssh -Y username@cluster
 
-cluster could be "sherlock.stanford.edu" or "cedar.computecanada.ca" for example.
+`cluster` could be "sherlock.stanford.edu" or "cedar.computecanada.ca" for example.
 
-Then grab a development node. If you try pulling from the login node, you will use a ton of memory building the SIF image,
+Once logged in, change the directory to your scratch space and pull (download) the Singularity container:
+
+    $ cd $SCRATCH
+    $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
+
+### Interaction
+
+To shell into the container use:
+
+    $ singularity shell miracl_latest.sif
+
+Use the `-B` flag to bind a data directory to the container:
+
+    $ singularity shell -B data:/data miracl_latest.sif
+
+**For running functions on clusters please check our [tutorials](tutorials.md).**
+
+## Troubleshooting
+
+### Q: Can I build a Singularity container from the latest MIRACL image on Docker Hub:
+
+Absolutely! To do so, however, you will need to grab a development node after logging in to the cluster. If you try pulling from the login node, you will use a ton of memory building the SIF image,
 and the process will be killed (in other words, it won't work).
 
     $ sdev
@@ -22,22 +41,12 @@ Once you have your node, you can then build the container:
     $ cd $SCRATCH
     $ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
 
+### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-## Interaction
-
-To shell into the image:
-
-
-    $ singularity shell miracl.sif
-
-
-Bind a data directory to it
-
-    $ singularity shell -B data:/data miracl.sif
-
-#### For running functions on clusters please check our tutorials
-
-## Troubleshooting
+Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Singularity container directly.
+Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
+After they have been successfully installed, mount a volume to your MIRACL Singularity container that contains the binary folder for TackVis and Diffusion Toolkit.
+The last step is to add the binaries to your `$PATH` within your MIRACL Singularity container.
 
 ### Q: I get the following error whenever I try to run the GUI from within the Singularity container on Compute Canada:
 
@@ -48,7 +57,7 @@ This application failed to start because no Qt platform plugin could be initiali
 Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, wayland-egl, wayland, wayland-xcomposite-egl, wayland-xcomposite-glx, webgl, xcb.
 ```
 
-**If you want to use X11 follow the below troubleshooting steps. However, using VNC instead of X11 should solve this issue and result in performance improvements. Instructions on how to use VNC on Compute Canada can be found [here](https://docs.alliancecan.ca/wiki/VNC).**
+**If you want to use X11 follow the below workarounds. However, using VNC instead of X11 should solve this issue and result in performance improvements. Instructions on how to use VNC on Compute Canada can be found [here](https://docs.alliancecan.ca/wiki/VNC).**
 
 ### Login Nodes
 
