@@ -46,6 +46,7 @@ local install instructions.
    install-windows
    modules
    tutorials
+   troubleshooting
    full-documentation
    data
    gallery
