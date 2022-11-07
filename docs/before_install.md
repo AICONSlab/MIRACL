@@ -22,7 +22,8 @@ Some of our functions build on or use these tools (please cite their work if you
  - [Fiji](https://imagej.nih.gov/ij/index.html) (for segmentation)
  - [c3d](https://sourceforge.net/projects/c3d) (for image processing)
  - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (for diffusion MRI processing)
- - [MRtri3](https://mrtrix.readthedocs.io/en/latest/) (for tractography)
+ - [MRtrix3](https://mrtrix.readthedocs.io/en/latest/) (for tractography)
+ - [TrackVis/DTK](http://trackvis.org/) (for tractography)
 
 ## Acknowledgements
 Huge thank you to:
