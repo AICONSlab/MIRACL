@@ -133,7 +133,7 @@ Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, 
 
 **If you want to use X11 follow the below workarounds. However, using VNC instead of X11 should solve this issue and result in performance improvements. Instructions on how to use VNC on Compute Canada can be found [here](https://docs.alliancecan.ca/wiki/VNC).**
 
-### Login Nodes
+#### Login Nodes
 
 Exit your Singularity container and start a VNC server (for 3600sec or more as required) on your login node:
 
@@ -151,7 +151,7 @@ ls -la /tmp/.X11-unix/
 
 Start another Singularity container and try to run `miraclGUI` again from within it.
 
-### Compute Nodes
+#### Compute Nodes
 
 Exit your Singularity container and set an environment variable on your allocated compute node:
 
