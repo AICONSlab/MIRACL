@@ -39,9 +39,10 @@ local install instructions.
    :hidden:
 
    before_install
-   install-local
+   install-recommendations
    install-docker
    install-singularity
+   install-local
    install-windows
    modules
    tutorials
