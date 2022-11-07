@@ -59,3 +59,7 @@ Now that everything is installed, MIRACL can be run via WSL. To run,
 source activate miracl
 miraclGUI
 ```
+
+## Troubleshooting
+
+Please refer to our [Troubleshooting](troubleshooting.md) section.
