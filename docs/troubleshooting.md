@@ -1,6 +1,6 @@
 # Troubleshooting
 
-If you cannot find an answer to your problem here, please open an issue on our [offical Github page](https://github.com/AICONSlab/MIRACL).
+If you cannot find an answer to your problem here, please open an issue on our [offical GitHub page](https://github.com/AICONSlab/MIRACL).
 
 ## Docker
 
