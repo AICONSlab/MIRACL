@@ -10,7 +10,7 @@ setup(
     version=version,
     description='General-purpose pipeline for MRI / CLARITY brain & connectivity analysis',
     author='Maged Goubran',
-    author_email='mgoubran@stanford.edu',
+    author_email='maged.goubran@utoronto.ca',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,

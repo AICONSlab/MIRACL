@@ -51,8 +51,8 @@ function usage()
 
 	-----------------------------------
 	
-	(c) Maged Goubran @ Stanford University, 2016
-	mgoubran@stanford.edu
+	(c) Maged Goubran @ AICONSlab, 2022
+	maged.goubran@utoronto.ca
 	
 	-----------------------------------
 

@@ -60,8 +60,8 @@ Optional arguments:
 
 	-----------------------------------
 
-	(c) Maged Goubran @ Stanford University, 2017
-	mgoubran@stanford.edu
+	(c) Maged Goubran @ AICONSlab, 2022
+	maged.goubran@utoronto.ca
 	
 	-----------------------------------
 	
