@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'MIRACL'
-copyright = '2018, BrainLab'
+copyright = '2022, AICONSlab'
 author = 'Maged Goubran'
 
 # The short X.Y version
