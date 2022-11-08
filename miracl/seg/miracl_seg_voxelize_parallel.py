@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Maged Goubran @ Stanford 2022, maged.goubran@utoronto.ca 
+# Maged Goubran @ AICONSlab 2022, maged.goubran@utoronto.ca 
 
 # coding: utf-8
 
