@@ -60,7 +60,7 @@ Optional arguments:
 
 	-----------------------------------
 
-	(c) Maged Goubran @ Stanford University, 2017
+	(c) Maged Goubran @ Stanford University, 2022
 	maged.goubran@utoronto.ca
 	
 	-----------------------------------
