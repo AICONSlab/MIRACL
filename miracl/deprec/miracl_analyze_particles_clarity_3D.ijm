@@ -4,7 +4,7 @@
 // Extracts features from segmented clarity data using 3D partcile analysis
 // & summarizes the data per label (Allen atlas label)
 //
-// (c) Maged Goubran, maged.goubran@utoronto.ca, 2016
+// (c) Maged Goubran, maged.goubran@utoronto.ca, 2022
 // 
 // dependencies:
 //
