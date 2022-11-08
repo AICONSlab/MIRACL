@@ -57,9 +57,9 @@ def helpmsg():
         - Diffusion Toolkit
 
     -----------------------------------
-    (c) Qiyuan Tian @ Stanford University, 2022
+    (c) Qiyuan Tian @ AICONSlab, 2022
     qytian@stanford.edu
-    (c) Maged Goubran @ Stanford University, 2022
+    (c) Maged Goubran @ AICONSlab, 2022
     maged.goubran@utoronto.ca
     -----------------------------------
     '''
@@ -103,7 +103,7 @@ def parse_inputs(parser, args):
 def doggen(sigma=None, X=None, Y=None, Z=None):
     """Function to generate derivative of Gaussian kernels, in 1D, 2D and 3D.
     
-    (c) Qiyuan Tian, McNab Lab, Stanford University, September 2015
+    (c) Qiyuan Tian, McNab Lab, AICONSlab, September 2015
 
     Args:
         sigma ():
@@ -138,7 +138,7 @@ def doggen(sigma=None, X=None, Y=None, Z=None):
 def gaussgen(sigma):
     """ Function to generate Gaussian kernels, in 1D, 2D and 3D.
     
-    (c) Qiyuan Tian, McNab Lab, Stanford University, September 2015
+    (c) Qiyuan Tian, McNab Lab, AICONSlab, September 2015
 
     Args:
         sigma:

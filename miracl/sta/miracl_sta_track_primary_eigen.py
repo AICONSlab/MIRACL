@@ -51,9 +51,9 @@ def helpmsg():
 		- Diffusion Toolkit
 
 	-----------------------------------
-	(c) Qiyuan Tian @ Stanford University, 2022
+	(c) Qiyuan Tian @ AICONSlab, 2022
 	qytian@stanford.edu
-	(c) Maged Goubran @ Stanford University, 2022
+	(c) Maged Goubran @ AICONSlab, 2022
 	maged.goubran@utoronto.ca
 	-----------------------------------
 	'''

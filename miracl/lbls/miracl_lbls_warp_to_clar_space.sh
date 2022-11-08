@@ -53,7 +53,7 @@ function usage()
 
 	-----------------------------------
 	
-	(c) Maged Goubran @ Stanford University, 2022
+	(c) Maged Goubran @ AICONSlab, 2022
 	maged.goubran@utoronto.ca
 	
 	-----------------------------------
