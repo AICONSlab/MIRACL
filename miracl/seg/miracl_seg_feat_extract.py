@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Maged Goubran @ 2017, mgoubran@stanford.edu
+# Maged Goubran @ 2017, maged.goubran@utoronto.ca
 
 # coding: utf-8
 

@@ -3,7 +3,7 @@
 // Macro for Fiji/ImageJ 
 // Segments neurons in cleared mouse brain of virus stains in 3D
 // 
-// (c) Maged Goubran, mgoubran@stanford.edu, 2018
+// (c) Maged Goubran, maged.goubran@utoronto.ca, 2018
 //
 // based on plugins from:
 // 

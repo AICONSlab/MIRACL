@@ -33,7 +33,7 @@ function usage()
     -----------------------------------
 
 	(c) Maged Goubran @ Stanford University, 2016
-	mgoubran@stanford.edu
+	maged.goubran@utoronto.ca
 
     -----------------------------------
 

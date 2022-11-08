@@ -60,7 +60,7 @@ def helpmsg():
     (c) Qiyuan Tian @ Stanford University, 2016
     qytian@stanford.edu
     (c) Maged Goubran @ Stanford University, 2016
-    mgoubran@stanford.edu
+    maged.goubran@utoronto.ca
     -----------------------------------
     '''
 

@@ -3,7 +3,7 @@
 // Macro for Fiji/ImageJ
 // Segments cFos positive nuclei in cleared mouse brain in 3D using CLARITY/iDISCO+ and immunolabelling
 //
-// (c) Maged Goubran, mgoubran@stanford.edu, 2018
+// (c) Maged Goubran, maged.goubran@utoronto.ca, 2018
 // 	   Newton Cho, newton.cho@epfl.ch,
 // 	   Jordan Squair, jordansquair@gmail.com
 //
