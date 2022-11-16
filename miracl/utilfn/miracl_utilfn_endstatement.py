@@ -55,7 +55,7 @@ def main(args):
 
     try:
         if sys.platform == "linux" or sys.platform == "linux2":
-            if re.search('^([^,])+', real_name) is None:
+            if re.search('^([^,])+', real_name) is not None:
                 user = real_name.split(" ")[0].title()
             elif getpass_user_name:
                 user = getpass_user_name
