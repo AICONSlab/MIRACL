@@ -7,6 +7,7 @@ import argparse
 import sys
 import os
 import pwd
+import getpass
 import re
 from argparse import RawTextHelpFormatter
 
@@ -16,8 +17,7 @@ from datetime import datetime
 def helpmsg():
     return '''
     Generates end statement based on function/task and time difference
-    
-        '''
+    '''
 
 
 def parsefn():
@@ -48,28 +48,26 @@ def main(args):
     parser = parsefn()
     task, timediff = parse_inputs(parser, args)
 
-    # try:
-    #     fing = subprocess.Popen("finger $(whoami)",
-    #                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #
-    #     string = fing.communicate()[0]
-    #     sub = string.split("Name: ", 1)[1]
-    #     user = sub.split(" ", 1)[0]
-    #
-    #     if user is None:
-    #         user = os.environ['USER']
-    #
-    # except:
-    #     user = os.environ['USER']
-    #     # user = subprocess.Popen('whoami',
-    #     #         shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    real_name = pwd.getpwuid(os.getuid()).pw_gecos
+    getpass_user_name = getpass.getuser()
+    environ_user_name = os.environ.get("USER")
+    anon_user_name = "dear user of MIRACL"
 
-    name = pwd.getpwuid(os.getuid())[4]
+    try:
+        if sys.platform == "linux" or sys.platform == "linux2":
+            if re.search('^([^,])+', real_name) is None:
+                user = real_name.split(" ")[0].title()
+            elif getpass_user_name:
+                user = getpass_user_name
+            elif environ_user_name:
+                user = os.environ.get("USER")
+            else:
+                user = os.popen('whoami').readline().rstrip('\n')
+        else:
+            user = anon_user_name
 
-    if re.search('[a-zA-Z]', name):
-        user = name.split(" ")[0]
-    else:
-        user = os.environ['USER']
+    except Exception:
+        user = anon_user_name
 
     if 6 < datetime.now().hour < 12:
         timeday = 'morning'
@@ -80,7 +78,7 @@ def main(args):
     else:
         timeday = 'night'
 
-    print("\n Good job %s! %s done in %s ... Have a good %s!\n" % (user, task, timediff, timeday))
+    print(f"\n Good job {user}! {task} done in {timediff} ... Have a good {timeday}!\n")
 
 
 if __name__ == "__main__":
