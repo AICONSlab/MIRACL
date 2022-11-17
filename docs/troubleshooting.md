@@ -131,7 +131,11 @@ This application failed to start because no Qt platform plugin could be initiali
 Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, wayland-egl, wayland, wayland-xcomposite-egl, wayland-xcomposite-glx, webgl, xcb.
 ```
 
-**If you want to use X11 follow the below workarounds. However, using VNC instead of X11 should solve this issue and result in performance improvements. Instructions on how to use VNC on Compute Canada can be found [here](https://docs.alliancecan.ca/wiki/VNC).**
+Don't bother trying to make X11 forwarding work directly from the terminal. Just use VNC instead. Follow the instructions [here](https://docs.alliancecan.ca/wiki/VNC).
+Once you are connected to your login or compute node with VNC, you will see a desktop environment. Open a terminal there and follow [our tutorials](./tutorials/compute_canada/compute_canada.md)
+on how to use MIRACL with Singularity on clusters.
+
+**If you insist on running the MIRACL GUI directly in the terminal, using a Singularity container and X11, try the following workarounds:**
 
 #### Login Nodes
 
