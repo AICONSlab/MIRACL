@@ -2,7 +2,7 @@
 
 Docker is well suited if you want to run it on a local machine or local server. If you need to run MIRACL on a cluster,
 see the [Singularity install](install-singularity.md). If you don't have Docker installed on
-your computer, [do that first](https://docs.docker.com/engine/installation/). Make sure your installation includes Docker Compose as it is needed to run the build script we provide.
+your computer, [do that first](https://docs.docker.com/engine/installation/). Make sure your installation includes [Docker Compose](https://docs.docker.com/compose/install/) as it is needed to run the build script we provide.
 Docker Compose is included as part of the Docker Desktop installation by default.
 
 ## Getting Started
@@ -39,8 +39,10 @@ $ ./build.sh
 Once the image has successfully been built, run the container using Docker Compose:
 
 ```
-$ docker-compose up -d
+$ docker compose up -d
 ```
+
+(note that the Docker Compose syntax is different if you installed it using the standalone method. Compose standalone uses the `-compose` syntax instead of the current standard syntax `compose`. The above command would thus be `docker-compose up -d` when using Compose standalone.)
 
 The container is now running and ready to be used.
   
@@ -67,8 +69,10 @@ volumes:
 Exit your container and navigate to your MIRACL folder. Use Docker Compose to stop the container:
 
 ```
-$ docker-compose down
+$ docker compose down
 ```
+
+(note that the Docker Compose syntax is different if you installed it using the standalone method. Compose standalone uses the `-compose` syntax instead of the current standard syntax `compose`. The above command would thus be `docker-compose up -d` when using Compose standalone.)
 
 ## Troubleshooting
 
