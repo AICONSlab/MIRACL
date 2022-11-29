@@ -59,11 +59,12 @@ def run_sta(parser, args):
             subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s -q %s -b %s -u %s' % (
+            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s -q %s -b %s -u %s -s %s' % (
                 args['folder'], args['out_nii'], args['seed_label'],
                 args['clar_reg'], args['hemi'], args['dog'],
                 args['sigma'], args['angle'], args['down'], args['chan'],
-                args['out_dir'], args['brain_mask'], args['lbl_mask'])
+                args['out_dir'], args['brain_mask'], args['lbl_mask'],
+                args['step_length'])
 
             subprocess.check_call('%s/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
@@ -130,6 +131,8 @@ def get_parser():
                             help="Brain mask")
     parser_sta.add_argument('-u', '--lbl_mask', metavar='',
                             help="Seed mask")
+    parser_sta.add_argument('-s', '--step_length', metavar='',
+                            help="Step length")
     parser_sta.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta)
