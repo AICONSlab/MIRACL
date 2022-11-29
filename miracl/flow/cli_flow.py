@@ -59,10 +59,11 @@ def run_sta(parser, args):
             subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s' % (
+            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s -q %s -b %s -u %s' % (
                 args['folder'], args['out_nii'], args['seed_label'],
                 args['clar_reg'], args['hemi'], args['dog'],
-                args['sigma'], args['angle'])
+                args['sigma'], args['angle'], args['down'], args['chan'],
+                args['out_dir'], args['brain_mask'], args['lbl_mask'])
 
             subprocess.check_call('%s/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
@@ -119,6 +120,16 @@ def get_parser():
                             help="Gaussian smoothing sigma")
     parser_sta.add_argument('-a', '--angle', metavar='',
                             help="Tracking angle threshold")
+    parser_sta.add_argument('-d', '--down', metavar='',
+                            help="Downsample ratio")
+    parser_sta.add_argument('-c', '--chan', metavar='',
+                            help="Output channel name")
+    parser_sta.add_argument('-q', '--out_dir', metavar='',
+                            help="Output directory")
+    parser_sta.add_argument('-b', '--brain_mask', metavar='',
+                            help="Brain mask")
+    parser_sta.add_argument('-u', '--lbl_mask', metavar='',
+                            help="Seed mask")
     parser_sta.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta)
