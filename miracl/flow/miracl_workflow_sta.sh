@@ -268,7 +268,7 @@ if [[ "$#" -gt 1 ]]; then
                 rk2=1
                 ;;
 
-            sl)
+            s)
                 step_length="${OPTARG}"
                 ;;
             q)
@@ -370,14 +370,19 @@ if [[ "$#" -gt 1 ]]; then
         dilationf="${dilationfx}x${dilationfy}x${dilationfz}"
     fi
 
-    if [[ -z "${step_length}" ]];
+    if [[ "${step_length}" == "None" ]];
     then
         step_length=0.1
     fi
 
-    if [[ -z "${out_dir}" ]];
+  if [[ "${out_dir}" == "None" ]]; then
+      #out_dir="clarity_sta_${lbl////_}_seed"
+      out_dir=""
+  fi
+
+    if [[ "${lbl_mask}" == "None" ]];
 	then
-		out_dir=""
+		lbl_mask=""
 	fi
 
 else
@@ -518,7 +523,7 @@ else
 
 fi
 
-printf "Chosen variables are:\nfolder: ${indir}\nOuput nifti: ${nii}\nSeed label: ${lbl}\nReg folder: ${regdir}\nHemi: ${hemi}\nDownsample ratio: ${down}\nChannel name: ${chan}\nOutput directory: ${out_dir}\nStep length: ${step_length}"
+printf "Chosen variables are:\nfolder: ${indir}\nOuput nifti: ${nii}\nSeed label: ${lbl}\nReg folder: ${regdir}\nHemi: ${hemi}\nDownsample ratio: ${down}\nChannel name: ${chan}\nOutput directory: ${out_dir}\nStep length: ${step_length}\nSeed mask: ${lbl_mask}"
 
 # start processing steps
 
