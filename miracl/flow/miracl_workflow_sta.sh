@@ -567,8 +567,20 @@ if [[ "${hemi}" == "combined" ]]; then
 else
 
     clbl=${lbl:1:${#lbl}}
-    echo "miracl lbls graph_info -l ${clbl} | grep depth | tr -dc '0-9'"
-    depth=`miracl lbls graph_info -l ${clbl} | grep depth | tr -dc '0-9'`
+    if [[ $(miracl lbls graph_info -l $clbl 2>/dev/null) ]];
+    then
+            echo "miracl lbls graph_info -l ${clbl} | grep depth | tr -dc '0-9'"
+            depth=$(miracl lbls graph_info -l $clbl | grep depth | tr -dc '0-9' 2>/dev/null)
+   
+    elif [[ $(miracl lbls graph_info -l $lbl 2>/dev/null) ]];
+    then
+            echo "miracl lbls graph_info -l ${lbl} | grep depth | tr -dc '0-9'"
+            depth=$(miracl lbls graph_info -l $lbl | grep depth | tr -dc '0-9' 2>/dev/null)
+   
+    else
+            printf "Error: $lbl is not a label id, label name, OR label acronym. Please consult /code/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv to see possible values\n"
+            exit 1
+    fi
 
 fi
 
