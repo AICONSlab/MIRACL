@@ -556,9 +556,6 @@ fi
 
 reg_lbls=${regdir}/annotation_hemi_${hemi}_??um_clar_space_downsample.nii.gz
 
-printf "THIS IS THE LABEL: ${lbl}\n"
-printf "THIS IS HEMI: ${hemi}\n"
-
 if [[ "${hemi}" == "combined" ]]; then
     # get chosen depth
     echo "miracl lbls graph_info -l ${lbl} | grep depth | tr -dc '0-9'"
@@ -578,7 +575,7 @@ else
             depth=$(miracl lbls graph_info -l $lbl | grep depth | tr -dc '0-9' 2>/dev/null)
    
     else
-            printf "Error: $lbl is not a label id, label name, OR label acronym. Please consult /code/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv to see possible values\n"
+            printf "Error: $lbl is not a label id, label name, OR label acronym. Please consult /code/atlases/ara/ara_mouse_structure_graph_hemi_${hemi}.csv to see possible values\n"
             exit 1
     fi
 
