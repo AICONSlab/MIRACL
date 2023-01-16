@@ -126,7 +126,7 @@ function choose_file_gui()
 
 # Select Mode : GUI or script
 
-if [[ "$#" -gt 1 ]]; then
+if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is used
 
 	printf "\n Running in script mode \n"
 
@@ -203,7 +203,7 @@ if [[ "$#" -gt 1 ]]; then
 
 else
 
-	# call gui
+	# call gui if no arguments are provided i.e. miraclGUI
 
 	printf "\n No inputs given ... running in GUI mode \n"
 
