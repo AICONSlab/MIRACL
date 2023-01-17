@@ -9,7 +9,7 @@ def run_clar_allen(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'clar_allen':
+    if len(sys.argv) == 3 and sys.argv[-2] == 'reg' and sys.argv[-1] == 'clar_allen':
         subprocess.Popen('%s/reg/miracl_reg_clar-allen.sh' % miracl_home,
                          shell=True)
     else:
