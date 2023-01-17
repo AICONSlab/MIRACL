@@ -130,61 +130,61 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:w:l:m:v:a:s:b:f:p:h:" opt; do
+	while getopts ":i:r:o:m:v:b:s:a:l:p:f:w:" opt; do
     
 	    case "${opt}" in
 
 	        i)
-            	inclar="${OPTARG}"
-            	;;
+           inclar="${OPTARG}"
+           ;;
 
-            o)
-            	ort="${OPTARG}"
-            	;;
+          r)
+          	work_dir="${OPTARG}"
+          	;;
 
-            w)
-            	work_dir="${OPTARG}"
-            	;;
-
-        	l)
-            	lbls="${OPTARG}"
-            	;;
+          o)
+          	ort="${OPTARG}"
+          	;;
 
         	m)
-            	hemi="${OPTARG}"
-            	;;
+            hemi="${OPTARG}"
+            ;;
 
         	v)
-            	vox="${OPTARG}"
-            	;;
+            vox="${OPTARG}"
+            ;;
 
-            a)
-            	atlas="${OPTARG}"
-            	;;
+          b)
+          	bulb="${OPTARG}"
+          	;;
 
-            s)
-            	side="${OPTARG}"
-            	;;
+          s)
+          	side="${OPTARG}"
+          	;;
 
-            b)
-            	bulb="${OPTARG}"
-            	;;
+          a)
+          	atlas="${OPTARG}"
+          	;;
 
-            f)
-            	savefig="${OPTARG}"
-            	;;
+        	l)
+          	lbls="${OPTARG}"
+          	;;
 
-            p)
-                prebias="${OPTARG}"
-                ;;
+          p)
+            prebias="${OPTARG}"
+            ;;
 
-            h)
-                warphres="${OPTARG}"
-                ;;
+          f)
+          	savefig="${OPTARG}"
+          	;;
+
+          w)
+            warphres="${OPTARG}"
+            ;;
 
         	*)
-            	usage            	
-            	;;
+            usage            	
+            ;;
 
 		esac
 	
