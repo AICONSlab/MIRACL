@@ -36,7 +36,7 @@ function usage()
             [this should be accurate as it is used for allen label upsampling to clarity]
 
     optional arguments:
-        w.  output (results) directory (default: working directory)
+        r.  output (results) directory (default: working directory)
         o.  orient code (default: ALS)
             to orient nifti from original orientation to "standard/Allen" orientation
         m.  hemisphere mirror (default: combined)
@@ -53,7 +53,7 @@ function usage()
         f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
-        h.  warp high-res clarity to Allen space (default: 0)
+        w.  warp high-res clarity to Allen space (default: 0)
 
 	----------
 	Main Outputs
