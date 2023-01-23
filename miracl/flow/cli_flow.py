@@ -59,12 +59,15 @@ def run_sta(parser, args):
             subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s -q %s -b %s -u %s -s %s' % (
+            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s -q %s -b %s -u %s -s %s -i %s -n %s -p %s -x %s -z %s --downz %s --dilationfx %s --dilationfy %s --dilationfz %s --rk %s' % (
                 args['folder'], args['out_nii'], args['seed_label'],
                 args['clar_reg'], args['hemi'], args['dog'],
                 args['sigma'], args['angle'], args['down'], args['chan'],
                 args['out_dir'], args['brain_mask'], args['lbl_mask'],
-                args['step_length'])
+                args['step_length'], args['conv_opts'], args['channel'],
+                args['chanp'], args['vx'], args['vz'], args['downz'], 
+                args['dilationfx'], args['dilationfy'], args['dilationfz'],
+                args['rk'])
 
             subprocess.check_call('%s/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
@@ -133,6 +136,26 @@ def get_parser():
                             help="Seed mask")
     parser_sta.add_argument('-s', '--step_length', metavar='',
                             help="Step length")
+    parser_sta.add_argument('-i', '--conv_opts', metavar='',
+                            help="Conv opts")
+    parser_sta.add_argument('-n', '--channel', metavar='',
+                            help="Extracting single channel")
+    parser_sta.add_argument('-p', '--chanp', metavar='',
+                            help="Channel prefix")
+    parser_sta.add_argument('-x', '--vx', metavar='',
+                            help="Original res in x-z plane")
+    parser_sta.add_argument('-z', '--vz', metavar='',
+                            help="Original thickness")
+    parser_sta.add_argument('--downz', metavar='',
+                            help="Original thickness")
+    parser_sta.add_argument('--dilationfx', metavar='',
+                            help="Dilation factor x")
+    parser_sta.add_argument('--dilationfy', metavar='',
+                            help="Dilation factor y")
+    parser_sta.add_argument('--dilationfz', metavar='',
+                            help="Dilation factor z")
+    parser_sta.add_argument('--rk', metavar='',
+                            help="rk2")
     parser_sta.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta)

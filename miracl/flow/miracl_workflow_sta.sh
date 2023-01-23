@@ -180,108 +180,308 @@ if [[ "$#" -gt 1 ]]; then
 
     printf "\n Reading input parameters \n"
 
-	while getopts ":f:o:l:r:d:n:m:g:k:a:c:n:p:x:z:dfx:dfy:dfz:b:u:rk:s:q:" opt; do
+  # Initialize all option variables
+  indir=
+  nii=
+  lbl=
+  regdir=
+  hemi=
+  dog=
+  gauss=
+  angle=
+  down=
+  chan=
+  out_dir=
+  brain_mask=
+  lbl_mask=
+  step_length=
+  convopts=
+  chann=
+  chanp=
+  vx=
+  vz=
+  downz=
+  dilationfx=
+  dilationfy=
+  dilationfz=
+  rk2=
 
-	    case "${opt}" in
+  while :; do
+    case $1 in
 
-            f)
-            	indir="${OPTARG}"
-            	;;
+      -h|-\?|--help)
+        usage
+        exit 0
+        ;;
 
-            o)
-                nii="${OPTARG}"
-                ;;
+      -f|--folder)
+          indir="$2"
+          shift
+        ;;
 
-            l)
-                lbl="${OPTARG}"
-                ;;
+      -o|--out_nii)
+          nii="$2"
+          shift
+        ;;
 
-            r)
-                regdir="${OPTARG}"
-                ;;
+      -l|--seed_label)
+          lbl="$2"
+          shift
+        ;;
 
-            d)
-                down="${OPTARG}"
-                ;;
+      -r|--clar_reg)
+          regdir="$2"
+          shift
+        ;;
 
-            n)
-            	convopts="${OPTARG}"
-            	;;
+      -m|--hemi)
+          hemi="$2"
+          shift
+        ;;
 
-            a)
-            	angle="${OPTARG}"
-            	;;
+      -g|--dog)
+        dog="$2"
+          shift
+        ;;
 
-            g)
-            	dog="${OPTARG}"
-            	;;
+      -k|--sigma)
+        gauss="$2"
+          shift
+        ;;
 
-            k)
-            	gauss="${OPTARG}"
-            	;;
+      -a|--angle)
+        angle="$2"
+          shift
+        ;;
 
-            m)
-            	hemi="${OPTARG}"
-            	;;
+      -d|--down)
+      down="$2"
+          shift
+        ;;
 
-            c)
-            	chan="${OPTARG}"
-            	;;
+      -c|--chan)
+        chan="$2"
+          shift
+        ;;
 
-            n)
-            	chann="${OPTARG}"
-            	;;
+      -q|--out_dir)
+        out_dir="$2"
+          shift
+        ;;
 
-            p)
-            	chanp="${OPTARG}"
-            	;;
+      -b|--brain_mask)
+        brain_mask="$2"
+          shift
+        ;;
 
-            x)
-            	vx="${OPTARG}"
-            	;;
+      -u|--lbl_mask)
+        lbl_mask="$2"
+          shift
+        ;;
 
-            z)
-            	vz="${OPTARG}"
-            	;;
+      -s|--step_length)
+        step_length="$2"
+          shift
+        ;;
 
-            dfx)
-                dilationfx="${OPTARG}"
-                ;;
+      -i|--conv_opts)
+        convopts="$2"
+          shift
+        ;;
 
-            dfy)
-                dilationfy="${OPTARG}"
-                ;;
+      -n|--channel)
+        chann="$2"
+          shift
+        ;;
 
-            dfz)
-                dilationfz="${OPTARG}"
-                ;;
+      -p|--chanp)
+        chanp="$2"
+          shift
+        ;;
 
-            b)
-                brain_mask="${OPTARG}"
-                ;;
+      -x|--vx)
+        vx="$2"
+          shift
+        ;;
 
-            u)
-                lbl_mask="${OPTARG}"
-                ;;
+      -z|--vz)
+        vz="$2"
+          shift
+        ;;
 
-            rk)
-                rk2=1
-                ;;
+      --downz)
+      downz="$2"
+          shift
+        ;;
 
-            s)
-                step_length="${OPTARG}"
-                ;;
-            q)
-                out_dir="${OPTARG}"
-                ;;
-        	*)
-            	usage
-            	;;
+      --dilationfx)
+      dilationfx="$2"
+          shift
+        ;;
 
-		esac
+      --dilationfy)
+      dilationfy="$2"
+          shift
+        ;;
 
-	done
+      --dilationfz)
+      dilationfz="$2"
+          shift
+        ;;
 
+      --rk)
+      rk2="$2"
+          shift
+        ;;
+
+      *)
+        break 
+    esac
+    shift
+  done
+
+
+
+
+
+
+
+
+	# while getopts ":f:o:l:r:m:g:k:a:d:c:q:b:u:s:i:n:p:x:z:dz:dfx:dfy:dfz:rk:" opt; do
+
+	#     case "${opt}" in
+
+ #            f)
+ #            	indir="${OPTARG}"
+ #            	;;
+
+ #            o)
+ #              nii="${OPTARG}"
+ #              ;;
+
+ #            l)
+ #              lbl="${OPTARG}"
+ #              ;;
+
+ #            r)
+ #              regdir="${OPTARG}"
+ #              ;;
+
+ #            m)
+ #            	hemi="${OPTARG}"
+ #            	;;
+
+ #            g)
+ #            	dog="${OPTARG}"
+ #            	;;
+
+ #            k)
+ #            	gauss="${OPTARG}"
+ #            	;;
+
+ #            a)
+ #            	angle="${OPTARG}"
+ #            	;;
+
+ #            d)
+ #              down="${OPTARG}"
+ #              ;;
+
+ #            c)
+ #            	chan="${OPTARG}"
+ #            	;;
+
+ #            q)
+ #              out_dir="${OPTARG}"
+ #              ;;
+
+ #            b)
+ #              brain_mask="${OPTARG}"
+ #              ;;
+
+ #            u)
+ #              lbl_mask="${OPTARG}"
+ #              ;;
+
+ #            s)
+ #              step_length="${OPTARG}"
+ #              ;;
+
+ #            i)
+ #            	convopts="${OPTARG}"
+ #            	;;
+
+ #            n)
+ #            	chann="${OPTARG}"
+ #            	;;
+
+ #            p)
+ #            	chanp="${OPTARG}"
+ #            	;;
+
+ #            x)
+ #            	vx="${OPTARG}"
+ #            	;;
+
+ #            z)
+ #            	vz="${OPTARG}"
+ #            	;;
+
+ #            dz)
+ #              downz="${OPTARG}"
+ #              ;;
+
+ #            dfx)
+ #                dilationfx="${OPTARG}"
+ #                ;;
+
+ #            dfy)
+ #                dilationfy="${OPTARG}"
+ #                ;;
+
+ #            dfz)
+ #                dilationfz="${OPTARG}"
+ #                ;;
+
+ #            rk)
+ #               rk2=1
+ #               ;;
+
+ #        	  *)
+ #            	usage
+ #            	;;
+
+	# 	esac
+
+	# done
+
+  ### TEST PARSED ARGS ###
+  printf "TEST PARSE ARGS\n"
+  printf "f, indir: ${indir}\n"
+  printf "o, nii: ${nii}\n"
+  printf "l, lbl: ${lbl}\n"
+  printf "r, regdir: ${regdir}\n"
+  printf "m, hemi: ${hemi}\n"
+  printf "g, dog: ${dog}\n"
+  printf "k, gauss: ${gauss}\n"
+  printf "a, angle: ${angle}\n"
+  printf "d, down: ${down}\n"
+  printf "c, chan: ${chan}\n"
+  printf "q, out_dir: ${out_dir}\n"
+  printf "b, brain_mask: ${brain_mask}\n"
+  printf "u, lbl_mask: ${lbl_mask}\n"
+  printf "s, step_length: ${step_length}\n"
+  printf "i (no), convopts: ${convopts}\n"
+  printf "n, chann: ${chann}\n"
+  printf "p, chanp: ${chanp}\n"
+  printf "x, vx: ${vx}\n"
+  printf "z, vz: ${vz}\n"
+  printf "downz: ${downz}\n"
+  printf "dilationfx: ${dilationfx}\n"
+  printf "dilationfy: ${dilationfy}\n"
+  printf "dilationfz: ${dilationfz}\n"
+  printf "rk: ${rk2}\n"
+  exit 0
 
 	# check required input arguments
 
