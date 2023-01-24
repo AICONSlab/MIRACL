@@ -395,16 +395,31 @@ if [[ "$#" -gt 1 ]]; then
 	then
 		chan="virus"
 	fi
+  if [[ "${dog}" == None ]] || ! [[ "${dog}" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]];
+  then
+    printf '\nNOTE: Derivative of Gaussian sigma (-g) not recognized. Defaulting to "0.5,1.5".\n'
+    dog="0.5,1.5"
+  fi
 
     if [[ -z "${chann}" ]];
 	then
 		chann=0
 	fi
+  if [[ "${gauss}" == None ]] || ! [[ "${gauss}" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]];
+  then
+    printf '\nNOTE: Gaussian smoothing sigma (-k) not recognized. Defaulting to "0.5,2".\n'
+    gauss="0.5,2"
+  fi
 
     if [[ -z "${chanp}" ]];
 	then
 		chanp=""
 	fi
+  if [[ "${angle}" == None ]] || ! [[ "${angle}" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]];
+  then
+    printf '\nNOTE: Tracking angle threshold (-a) not recognized. Defaulting to "25,35".\n'
+    angle="25,35"
+  fi
 
     if [[ -z "${vx}" ]];
 	then
