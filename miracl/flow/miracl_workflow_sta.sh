@@ -184,71 +184,71 @@ if [[ "$#" -gt 1 ]]; then
 
   # Custom arg parser
   while :; do
-    case $1 in
+    case "$1" in
 
-      -h|-\?|--help)
+      -h|--help)
         usage
         exit 0
         ;;
 
       -f|--folder)
-          indir="$2"
-          shift
+        indir="$2"
+        shift
         ;;
 
       -o|--out_nii)
-          nii="$2"
-          shift
+        nii="$2"
+        shift
         ;;
 
       -l|--seed_label)
-          lbl="$2"
-          shift
+        lbl="$2"
+        shift
         ;;
 
       -r|--clar_reg)
-          regdir="$2"
-          shift
+        regdir="$2"
+        shift
         ;;
 
       -m|--hemi)
-          hemi="$2"
-          shift
+        hemi="$2"
+        shift
         ;;
 
       -g|--dog)
         dog="$2"
-          shift
+        shift
         ;;
 
       -k|--sigma)
         gauss="$2"
-          shift
+        shift
         ;;
 
       -a|--angle)
         angle="$2"
-          shift
+        shift
         ;;
 
       -d|--down)
-      down="$2"
-          shift
+        down="$2"
+        shift
         ;;
 
       -c|--chan)
         chan="$2"
-          shift
+        shift
         ;;
 
       --out_dir)
         out_dir="$2"
-          shift
+        shift
         ;;
 
       -b|--brain_mask)
         brain_mask="$2"
-          shift
+        shift
         ;;
 
       -u|--lbl_mask)
@@ -258,54 +258,52 @@ if [[ "$#" -gt 1 ]]; then
 
       -s|--step_length)
         step_length="$2"
-          shift
-        ;;
-
+        shift
         ;;
 
       -n|--chan_num)
         chann="$2"
-          shift
+        shift
         ;;
 
       -p|--chan_pre)
         chanp="$2"
-          shift
+        shift
         ;;
 
       -x|--vx)
         vx="$2"
-          shift
+        shift
         ;;
 
       -z|--vz)
         vz="$2"
-          shift
+        shift
         ;;
 
       --downz)
-      downz="$2"
-          shift
+        downz="$2"
+        shift
         ;;
 
       --dilationfx)
-      dilationfx="$2"
-          shift
+        dilationfx="$2"
+        shift
         ;;
 
       --dilationfy)
-      dilationfy="$2"
-          shift
+        dilationfy="$2"
+        shift
         ;;
 
       --dilationfz)
-      dilationfz="$2"
-          shift
+        dilationfz="$2"
+        shift
         ;;
 
       --rk)
-      rk2="$2"
-          shift
+        rk2="$2"
+        shift
         ;;
 
       *)
@@ -340,7 +338,6 @@ if [[ "$#" -gt 1 ]]; then
   printf "dilationfy: ${dilationfy}\n"
   printf "dilationfz: ${dilationfz}\n"
   printf "rk: ${rk2}\n"
-  exit 0
 
 	# Check required input arguments
   
