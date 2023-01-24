@@ -55,7 +55,7 @@ function usage()
             -l: Seed label abbreviation (from Allen atlas ontology)
             -r: CLARITY final registration folder
             -m: Labels hemi
-            -g: [ Derivative of Gaussion (dog) sigma ]
+            -g: [ Derivative of Gaussian (dog) sigma ]
             -k: [ Gaussian smoothing sigma ]
             -a: [ Tracking angle threshold ]
 
@@ -461,6 +461,16 @@ if [[ "$#" -gt 1 ]]; then
   if [[ "${step_length}" == "None" ]];
   then
     step_length=0.1
+  fi
+
+  if [[ "${downz}" == "None" ]];
+  then
+    downz=1
+  fi
+
+  if [[ "${rk2}" == "None" ]];
+  then
+    rk2=0
   fi
 
   if [[ "${out_dir}" == "None" ]];
