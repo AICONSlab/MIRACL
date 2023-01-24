@@ -127,7 +127,7 @@ def get_parser():
                             help="Downsample ratio")
     parser_sta.add_argument('-c', '--chan', metavar='',
                             help="Output channel name")
-    parser_sta.add_argument('-q', '--out_dir', metavar='',
+    parser_sta.add_argument('--out_dir', metavar='',
                             help="Output directory")
     parser_sta.add_argument('-b', '--brain_mask', metavar='',
                             help="Brain mask")
@@ -135,9 +135,9 @@ def get_parser():
                             help="Seed mask")
     parser_sta.add_argument('-s', '--step_length', metavar='',
                             help="Step length")
-    parser_sta.add_argument('-n', '--channel', metavar='',
+    parser_sta.add_argument('-n', '--chan_num', metavar='',
                             help="Extracting single channel")
-    parser_sta.add_argument('-p', '--chanp', metavar='',
+    parser_sta.add_argument('-p', '--chan_pre', metavar='',
                             help="Channel prefix")
     parser_sta.add_argument('-x', '--vx', metavar='',
                             help="Original res in x-z plane")

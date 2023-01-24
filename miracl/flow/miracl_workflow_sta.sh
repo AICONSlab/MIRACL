@@ -241,7 +241,7 @@ if [[ "$#" -gt 1 ]]; then
           shift
         ;;
 
-      -q|--out_dir)
+      --out_dir)
         out_dir="$2"
           shift
         ;;
@@ -263,12 +263,12 @@ if [[ "$#" -gt 1 ]]; then
 
         ;;
 
-      -n|--channel)
+      -n|--chan_num)
         chann="$2"
           shift
         ;;
 
-      -p|--chanp)
+      -p|--chan_pre)
         chanp="$2"
           shift
         ;;
