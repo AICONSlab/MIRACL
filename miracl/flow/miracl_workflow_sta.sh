@@ -379,6 +379,10 @@ if [[ "$#" -gt 1 ]]; then
     exit $ERRCODE
   fi
 
+  # Check remaining required variables that can be substituted if
+  # not provided as arguments
+    
+  if [[ "${down}" == None ]];
 	then
 		down=5
   else
@@ -392,79 +396,84 @@ if [[ "$#" -gt 1 ]]; then
 		hemi="combined"
   fi
 
-    if [[ -z "${chan}" ]];
-	then
-		chan="virus"
-	fi
   if [[ "${dog}" == None ]] || ! [[ "${dog}" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]];
   then
     printf '\nNOTE: Derivative of Gaussian sigma (-g) not recognized. Defaulting to "0.5,1.5".\n'
     dog="0.5,1.5"
   fi
 
-    if [[ -z "${chann}" ]];
-	then
-		chann=0
-	fi
   if [[ "${gauss}" == None ]] || ! [[ "${gauss}" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]];
   then
     printf '\nNOTE: Gaussian smoothing sigma (-k) not recognized. Defaulting to "0.5,2".\n'
     gauss="0.5,2"
   fi
 
-    if [[ -z "${chanp}" ]];
-	then
-		chanp=""
-	fi
   if [[ "${angle}" == None ]] || ! [[ "${angle}" =~ ^[+-]?[0-9]+([.][0-9]+)?$ ]];
   then
     printf '\nNOTE: Tracking angle threshold (-a) not recognized. Defaulting to "25,35".\n'
     angle="25,35"
   fi
 
-    if [[ -z "${vx}" ]];
-	then
-		vx=5
-	fi
-
-    if [[ -z "${vz}" ]];
-	then
-		vz=5
-	fi
-
-    if ! [[ "$dilationfx" =~ ^[0-9]+$ ]];
-    then
-        dilationfx=0
-    fi
-
-    if ! [[ "$dilationfy" =~ ^[0-9]+$ ]];
-    then
-        dilationfy=0
-    fi
-
-    if ! [[ "$dilationfz" =~ ^[0-9]+$ ]];
-    then
-        dilationfz=0
-    fi
-
-    if [[ "$dilationfx" -gt 0 ]] && [[ "$dilationfy" -gt 0 ]] && [[ "$dilationfz" -gt 0 ]]; then
-        dilationf="${dilationfx}x${dilationfy}x${dilationfz}"
-    fi
-
-    if [[ "${step_length}" == "None" ]];
-    then
-        step_length=0.1
-    fi
-
-  if [[ "${out_dir}" == "None" ]]; then
-      #out_dir="clarity_sta_${lbl////_}_seed"
-      out_dir=""
+  if [[ "${chan}" == None ]];
+  then
+    chan="virus"
   fi
 
-    if [[ "${lbl_mask}" == "None" ]];
-	then
-		lbl_mask=""
-	fi
+  if [[ "${chann}" == None ]];
+  then
+    chann=0
+  fi
+
+  if [[ "${chanp}" == None ]];
+  then
+    chanp=""
+  fi
+
+  if [[ "${vx}" == None ]] || ! [[ "${vx}" =~ ^[0-9]+$ ]];
+  then
+    vx=5
+  fi
+
+  if [[ "${vz}" == None ]] || ! [[ "${vz}" =~ ^[0-9]+$ ]];
+  then
+    vz=5
+  fi
+
+  if [[ "${dilationfx}" == None ]] || ! [[ "${dilationfx}" =~ ^[0-9]+$ ]];
+  then
+      dilationfx=0
+  fi
+
+  if [[ "${dilationfy}" == None ]] || ! [[ "${dilationfy}" =~ ^[0-9]+$ ]];
+  then
+      dilationfy=0
+  fi
+
+  if [[ "${dilationfz}" == None ]] || ! [[ "${dilationfz}" =~ ^[0-9]+$ ]];
+  then
+      dilationfz=0
+  fi
+
+  if [[ "${dilationfx}" -gt 0 ]] && [[ "${dilationfy}" -gt 0 ]] && [[ "${dilationfz}" -gt 0 ]];
+  then
+      dilationf="${dilationfx}x${dilationfy}x${dilationfz}"
+  fi
+
+  if [[ "${step_length}" == "None" ]];
+  then
+    step_length=0.1
+  fi
+
+  if [[ "${out_dir}" == "None" ]];
+  then
+    #out_dir="clarity_sta_${lbl////_}_seed"
+    out_dir=""
+  fi
+
+  if [[ "${lbl_mask}" == "None" ]];
+  then
+    lbl_mask=""
+  fi
 
 else
 
