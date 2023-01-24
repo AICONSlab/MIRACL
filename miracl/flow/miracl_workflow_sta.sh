@@ -341,36 +341,44 @@ if [[ "$#" -gt 1 ]]; then
 
 	# Check required input arguments
   
+  # If any of the required arguments are missing print an error message
+  if [[ "${indir}" == None ]] || [[ "${nii}" == None ]] || [[ "${lbl}" == None ]] || [[ "${regdir}" == None ]];
+  then
+    usage
+    printf "\n---------------------------------\n"
+    printf "\nRequired arguments are missing!\n"
+  fi
+  
+  # List which required arguments are missing
+	if [[ "${indir}" == None ]];
+  then
+    printf "\nERROR: input folder (-f) with clarity tifs not specified.\n"
+  fi
 
-	if [[ -z "${indir}" ]];
+  if [[ "${nii}" == None ]];
+  then
+    printf "\nERROR: output nii (-o) not specified.\n"
+  fi
+
+  if [[ "${lbl}" == None ]];
+  then
+    printf "\nERROR: Input seed label (-l) not specified.\n"
+  fi
+
+  if [[ "${regdir}" == None ]];
 	then
-		usage
-		echo "ERROR: < -f => input folder with clarity tifs> not specified"
-		exit 1
+    printf "\nERROR: Input reg dir (-r) not specified.\n"
 	fi
 
-    if [[ -z "${nii}" ]];
-	then
-		usage
-		echo "ERROR: < -o => output nii> not specified"
-		exit 1
-	fi
+  # Print fix to error message and exit with exit code message.
+  if [[ "${indir}" == None ]] || [[ "${nii}" == None ]] || [[ "${lbl}" == None ]] || [[ "${regdir}" == None ]];
+  then
+    ERRCODE=$?
+    printf "\nPlease fix the above error(s) by providing the missing arguments. Exiting with code $ERRCODE.\n"
+    printf "\n---------------------------------\n\n"
+    exit $ERRCODE
+  fi
 
-	if [[ -z "${lbl}" ]];
-	then
-		usage
-		echo "ERROR: < -l => input seed label> not specified"
-		exit 1
-	fi
-
-    if [[ -z "${regdir}" ]];
-	then
-		usage
-		echo "ERROR: < -r => input reg dir> not specified"
-		exit 1
-	fi
-
-    if [[ -z "${down}" ]];
 	then
 		down=5
   else
