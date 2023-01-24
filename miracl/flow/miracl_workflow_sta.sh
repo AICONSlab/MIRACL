@@ -386,10 +386,11 @@ if [[ "$#" -gt 1 ]]; then
     printf -v down "%02d" $down
 	fi
 
-    if [[ -z "${hemi}" ]];
-	then
+  if [[ "${hemi}" == None ]] || ([[ "${hemi}" != "split" ]] && [[ "${hemi}" != "combined" ]]);
+  then
+    printf '\nNOTE: Hemisphere argument (-m) not recognized. Defaulting to "combined".\n'
 		hemi="combined"
-	fi
+  fi
 
     if [[ -z "${chan}" ]];
 	then
