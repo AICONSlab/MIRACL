@@ -144,7 +144,7 @@ def get_parser():
     parser_sta.add_argument('-z', '--vz', metavar='',
                             help="Original thickness")
     parser_sta.add_argument('--downz', metavar='',
-                            help="Original thickness")
+                            help="Downsample in z")
     parser_sta.add_argument('--dilationfx', metavar='',
                             help="Dilation factor x")
     parser_sta.add_argument('--dilationfy', metavar='',
