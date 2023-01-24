@@ -180,33 +180,6 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-    printf "\n Reading input parameters \n"
-
-  # Initialize all option variables
-  indir=
-  nii=
-  lbl=
-  regdir=
-  hemi=
-  dog=
-  gauss=
-  angle=
-  down=
-  chan=
-  out_dir=
-  brain_mask=
-  lbl_mask=
-  step_length=
-  convopts=
-  chann=
-  chanp=
-  vx=
-  vz=
-  downz=
-  dilationfx=
-  dilationfy=
-  dilationfz=
-  rk2=
   printf "\n Reading input parameters \n"
 
   # Custom arg parser
