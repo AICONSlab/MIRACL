@@ -261,9 +261,6 @@ if [[ "$#" -gt 1 ]]; then
           shift
         ;;
 
-      -i|--conv_opts)
-        convopts="$2"
-          shift
         ;;
 
       -n|--channel)

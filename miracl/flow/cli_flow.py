@@ -64,10 +64,9 @@ def run_sta(parser, args):
                 args['clar_reg'], args['hemi'], args['dog'],
                 args['sigma'], args['angle'], args['down'], args['chan'],
                 args['out_dir'], args['brain_mask'], args['lbl_mask'],
-                args['step_length'], args['conv_opts'], args['channel'],
-                args['chanp'], args['vx'], args['vz'], args['downz'], 
-                args['dilationfx'], args['dilationfy'], args['dilationfz'],
-                args['rk'])
+                args['step_length'], args['chan_num'], args['chan_pre'],
+                args['vx'], args['vz'], args['downz'], args['dilationfx'],
+                args['dilationfy'], args['dilationfz'], args['rk'])
 
             subprocess.check_call('%s/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
@@ -136,8 +135,6 @@ def get_parser():
                             help="Seed mask")
     parser_sta.add_argument('-s', '--step_length', metavar='',
                             help="Step length")
-    parser_sta.add_argument('-i', '--conv_opts', metavar='',
-                            help="Conv opts")
     parser_sta.add_argument('-n', '--channel', metavar='',
                             help="Extracting single channel")
     parser_sta.add_argument('-p', '--chanp', metavar='',
