@@ -59,7 +59,7 @@ def run_sta(parser, args):
             subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s -q %s -b %s -u %s -s %s -i %s -n %s -p %s -x %s -z %s --downz %s --dilationfx %s --dilationfy %s --dilationfz %s --rk %s' % (
+            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s --out_dir %s -b %s -u %s -s %s -n %s -p %s -x %s -z %s --downz %s --dilationfx %s --dilationfy %s --dilationfz %s --rk %s' % (
                 args['folder'], args['out_nii'], args['seed_label'],
                 args['clar_reg'], args['hemi'], args['dog'],
                 args['sigma'], args['angle'], args['down'], args['chan'],
