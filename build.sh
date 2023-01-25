@@ -46,7 +46,7 @@ do
   if [ "$*" = "-h" ] || [ "$*" = "--help" ];
   then
     usage
-    exit
+    exit 0
   elif [ "$*" = "-l" ] || [ "$*" = "--log" ];
   then
     write_log=true
@@ -137,4 +137,5 @@ else
     di_status_code=$?
     printf "\nDocker installation not found. Please install Docker first.\n"
     printf "Exiting with status code $di_status_code\n"
+    exit di_status_code
 fi
