@@ -486,32 +486,6 @@ if [[ "$#" -gt 1 ]]; then
     lbl_mask=""
   fi
 
-  # Display provided/default arguments
-  printf "  \nThe following arguments will be used in the script:\n\n"
-  printf "  Input folder tifs: ${indir}\n"
-  printf "  Nifti folder: ${nii}\n"
-  printf "  Seed label abbreviation: ${lbl}\n"
-  printf "  Final registration folder: ${regdir}\n"
-  printf "  Hemisphere: ${hemi}\n"
-  printf "  Derivative of Gaussian: ${dog}\n"
-  printf "  Gaussian smooting sigma: ${gauss}\n"
-  printf "  Tracking angle threshold: ${angle}\n"
-  printf "  Downsample factor: ${down}\n"
-  printf "  Output channel name: ${chan}\n"
-  printf "  Output folder: ${out_dir}\n"
-  printf "  Brain mask: ${brain_mask}\n"
-  printf "  Seed mask: ${lbl_mask}\n"
-  printf "  Step length: ${step_length}\n"
-  printf "  Channel #: ${chann}\n"
-  printf "  Channel prefix: ${chanp}\n"
-  printf "  Original res x-y plane: ${vx}\n"
-  printf "  Original thickness: ${vz}\n"
-  printf "  Downsample in z: ${downz}\n"
-  printf "  Dilation factor for x: ${dilationfx}\n"
-  printf "  Dilation factor for y: ${dilationfy}\n"
-  printf "  Dilation factor for z: ${dilationfz}\n"
-  printf "  2nd order range-kutta method: ${rk2}\n\n"
-
 else
 
 	# call gui
@@ -650,7 +624,31 @@ else
 
 fi
 
-printf "Chosen variables are:\nfolder: ${indir}\nOuput nifti: ${nii}\nSeed label: ${lbl}\nReg folder: ${regdir}\nHemi: ${hemi}\nDownsample ratio: ${down}\nChannel name: ${chan}\nOutput directory: ${out_dir}\nStep length: ${step_length}\nSeed mask: ${lbl_mask}"
+  # Display provided/default arguments
+  printf "  \nThe following arguments will be used in the script:\n\n"
+  printf "  Input folder tifs: ${indir}\n"
+  printf "  Nifti folder: ${nii}\n"
+  printf "  Seed label abbreviation: ${lbl}\n"
+  printf "  Final registration folder: ${regdir}\n"
+  printf "  Hemisphere: ${hemi}\n"
+  printf "  Derivative of Gaussian: ${dog}\n"
+  printf "  Gaussian smooting sigma: ${gauss}\n"
+  printf "  Tracking angle threshold: ${angle}\n"
+  printf "  Downsample factor: ${down}\n"
+  printf "  Output channel name: ${chan}\n"
+  printf "  Output folder: ${out_dir}\n"
+  printf "  Brain mask: ${brain_mask}\n"
+  printf "  Seed mask: ${lbl_mask}\n"
+  printf "  Step length: ${step_length}\n"
+  printf "  Channel #: ${chann}\n"
+  printf "  Channel prefix: ${chanp}\n"
+  printf "  Original res x-y plane: ${vx}\n"
+  printf "  Original thickness: ${vz}\n"
+  printf "  Downsample in z: ${downz}\n"
+  printf "  Dilation factor for x: ${dilationfx}\n"
+  printf "  Dilation factor for y: ${dilationfy}\n"
+  printf "  Dilation factor for z: ${dilationfz}\n"
+  printf "  2nd order range-kutta method: ${rk2}\n\n"
 
 # start processing steps
 
