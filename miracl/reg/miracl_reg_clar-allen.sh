@@ -391,6 +391,22 @@ if [[ -z ${warphres} ]] || [[ "${warphres}" == "None" ]]; then
     warphres=0
 fi
 
+# Print final args to screen for user
+printf "\n######################################################\n\n"
+printf "The following arguments will be used for registration:\n\n"
+printf "i: Down-sampled nii folder: ${inclar}\n"
+printf "r: Output directory: ${work_dir}\n"
+printf "o: Orientation code: ${ort}\n"
+printf "m: Hemisphere: ${hemi}\n"
+printf "v: Labels voxel: size${vox}\n"
+printf "b: Olfactory bulb included: ${bulb}\n"
+printf "s: Side: ${side}\n"
+printf "a: Custom Allen atlas: ${atlas}\n"
+printf "l: Allen labels to warp: ${lbls}\n"
+printf "p: Prebias: ${prebias}\n"
+printf "f: Sace Mosaic figure: ${savefig}\n"
+printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
+printf "\n######################################################\n"
 
 # get time
 
