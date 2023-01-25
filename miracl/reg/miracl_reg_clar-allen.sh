@@ -130,7 +130,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:o:m:v:b:s:a:l:p:f:w:" opt; do
+	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:" opt; do
     
 	    case "${opt}" in
 
@@ -154,6 +154,26 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
             vox="${OPTARG}"
             ;;
 
+        	l)
+          	lbls="${OPTARG}"
+          	;;
+
+          f)
+          	savefig="${OPTARG}"
+          	;;
+
+          p)
+            prebias="${OPTARG}"
+            ;;
+
+          a)
+          	atlas="${OPTARG}"
+          	;;
+
+          w)
+            warphres="${OPTARG}"
+
+            ;;
           b)
           	bulb="${OPTARG}"
           	;;
@@ -161,26 +181,6 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
           s)
           	side="${OPTARG}"
           	;;
-
-          a)
-          	atlas="${OPTARG}"
-          	;;
-
-        	l)
-          	lbls="${OPTARG}"
-          	;;
-
-          p)
-            prebias="${OPTARG}"
-            ;;
-
-          f)
-          	savefig="${OPTARG}"
-          	;;
-
-          w)
-            warphres="${OPTARG}"
-            ;;
 
         	*)
             usage            	
