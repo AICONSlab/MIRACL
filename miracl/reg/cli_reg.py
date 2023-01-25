@@ -17,9 +17,20 @@ def run_clar_allen(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_clar-allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -r %s -o %s -m %s -v %s -f %s -p %s -a %s -w %s -l %s' \
-                        % (args['in_nii'], args['reg_out'], args['ort'], args['hemi'], args['vox_res'], args['fig'],
-                           args['pass_int'], args['atlas'], args['warp'], args['lbls'])
+            bash_args = '-i %s -r %s -o %s -m %s -v %s -l %s -f %s -p %s -a %s -w %s -b %s -s %s' \
+                        % (args['in_nii'],   # -i
+                           args['reg_out'],  # -r
+                           args['ort'],      # -o
+                           args['hemi'],     # -m
+                           args['vox_res'],  # -v
+                           args['lbls'],     # -l
+                           args['fig'],      # -f
+                           args['pass_int'], # -p
+                           args['atlas'],    # -a
+                           args['warp'],     # -w
+                           args['bulb'],     # -b
+                           args['side']      # -s
+                           )
 
             subprocess.check_call('%s/reg/miracl_reg_clar-allen.sh %s' % (miracl_home, bash_args),
                                   shell=True,
