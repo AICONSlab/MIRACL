@@ -811,15 +811,24 @@ function warpallenlbls()
 	# upsample to img dimensions
     df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
+    # Print calculated downsampling factor
+    printf "\nUsing downsampling factor $df.\n"
+
     # get img dim
     alldim=`PrintHeader ${inclar} 2`
     x=${alldim%%x*} ;
     yz=${alldim#*x} ; y=${yz%x*} ;
     z=${alldim##*x} ;
 
+    # Print header dimensions
+    printf "\nHeader dimensions:\nx = $x\ny = $y\nyz = $yz\nz = $z\n"
+
     ox=$(($y*$df)) ;
     oy=$(($x*$df)) ;
     oz=$(($z*$df)) ;
+
+    # Print upsamle dimensions
+    printf "\nUpsample dimensions:\nox = $ox\noy = $oy\noz = $oz\n"
 
     # create hres tif lbls
     ifdsntexistrun ${restif} "Converting high res lbls to tif" \
