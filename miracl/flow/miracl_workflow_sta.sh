@@ -468,9 +468,11 @@ if [[ "$#" -gt 1 ]]; then
     downz=1
   fi
 
+  # This is a temporary fix as the range-kutta method does not currently work
+  # Ticket has been opened for the issue
   if [[ "${rk2}" == "None" ]];
   then
-    rk2=0
+    rk2=""
   fi
 
   if [[ "${out_dir}" == "None" ]];
