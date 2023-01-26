@@ -2,7 +2,7 @@
 
 # Build MIRACL Docker image with user information from host system
 #
-# - Checks if Docker and Docker-Compose are installed
+# - Checks if Docker and Docker Compose are installed
 # - Dynamically adds and removes user information to
 #   prevent errors in Singularity container creation
 # - Container user is the same as host user to prevent
@@ -46,7 +46,7 @@ do
   if [ "$*" = "-h" ] || [ "$*" = "--help" ];
   then
     usage
-    exit
+    exit 0
   elif [ "$*" = "-l" ] || [ "$*" = "--log" ];
   then
     write_log=true
@@ -113,16 +113,18 @@ if [ -x "$(command -v docker)" ]; then
       # Check if build process exited without errors
       build_status_code=$?
       if [ $build_status_code -eq 0 ]; then
-        printf "\nBuild was successful! Checking docker-compose installation.\n"
+        printf "\nBuild was successful! Checking Docker Compose installation.\n"
         # Remove $USER_TEXT from Dockerfile
         rm_USER_TEXT
 
         # Test if docker-compose is installed
         # Should come by default with Docker-Desktop
         if [ -x "$(command -v docker-compose)" ]; then
-          printf "Docker-Compose installation found. Run 'docker-compose up -d' to start the MIRACL container in background.\n"
+          printf "Docker Compose installation found <<$(docker-compose --version)>>). Run 'docker-compose up -d' to start the MIRACL container in background.\n"
+        elif dcex=$(docker compose --version); then
+          printf "Docker Compose installation found (<<%s>>). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
         else
-          printf "Docker-Compose installation not found. Please install docker-compose to run the MIRACL container.\n"
+          printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
         fi
       else
         # Return error code if build was not successful
@@ -135,4 +137,5 @@ else
     di_status_code=$?
     printf "\nDocker installation not found. Please install Docker first.\n"
     printf "Exiting with status code $di_status_code\n"
+    exit di_status_code
 fi

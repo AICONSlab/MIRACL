@@ -59,10 +59,14 @@ def run_sta(parser, args):
             subprocess.Popen('%s/flow/miracl_workflow_sta.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s' % (
+            bash_args = '-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s --out_dir %s -b %s -u %s -s %s -n %s -p %s -x %s -z %s --downz %s --dilationfx %s --dilationfy %s --dilationfz %s --rk %s' % (
                 args['folder'], args['out_nii'], args['seed_label'],
                 args['clar_reg'], args['hemi'], args['dog'],
-                args['sigma'], args['angle'])
+                args['sigma'], args['angle'], args['down'], args['chan'],
+                args['out_dir'], args['brain_mask'], args['lbl_mask'],
+                args['step_length'], args['chan_num'], args['chan_pre'],
+                args['vx'], args['vz'], args['downz'], args['dilationfx'],
+                args['dilationfy'], args['dilationfz'], args['rk'])
 
             subprocess.check_call('%s/flow/miracl_workflow_sta.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
@@ -119,6 +123,36 @@ def get_parser():
                             help="Gaussian smoothing sigma")
     parser_sta.add_argument('-a', '--angle', metavar='',
                             help="Tracking angle threshold")
+    parser_sta.add_argument('-d', '--down', metavar='',
+                            help="Downsample ratio")
+    parser_sta.add_argument('-c', '--chan', metavar='',
+                            help="Output channel name")
+    parser_sta.add_argument('--out_dir', metavar='',
+                            help="Output directory")
+    parser_sta.add_argument('-b', '--brain_mask', metavar='',
+                            help="Brain mask")
+    parser_sta.add_argument('-u', '--lbl_mask', metavar='',
+                            help="Seed mask")
+    parser_sta.add_argument('-s', '--step_length', metavar='',
+                            help="Step length")
+    parser_sta.add_argument('-n', '--chan_num', metavar='',
+                            help="Extracting single channel")
+    parser_sta.add_argument('-p', '--chan_pre', metavar='',
+                            help="Channel prefix")
+    parser_sta.add_argument('-x', '--vx', metavar='',
+                            help="Original res in x-z plane")
+    parser_sta.add_argument('-z', '--vz', metavar='',
+                            help="Original thickness")
+    parser_sta.add_argument('--downz', metavar='',
+                            help="Downsample in z")
+    parser_sta.add_argument('--dilationfx', metavar='',
+                            help="Dilation factor x")
+    parser_sta.add_argument('--dilationfy', metavar='',
+                            help="Dilation factor y")
+    parser_sta.add_argument('--dilationfz', metavar='',
+                            help="Dilation factor z")
+    parser_sta.add_argument('--rk', metavar='',
+                            help="rk2")
     parser_sta.add_argument('-h', '--help', action='store_true')
 
     parser_sta.set_defaults(func=run_sta)

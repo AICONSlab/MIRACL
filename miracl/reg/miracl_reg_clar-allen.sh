@@ -4,7 +4,7 @@
 function getversion()
 {
 	ver=`cat ${MIRACL_HOME}/version.txt`
-	printf "\n MIRACL pipeline v. $ver \n"
+	printf "\n MIRACL pipeline v$ver \n"
 }
 
 
@@ -36,7 +36,7 @@ function usage()
             [this should be accurate as it is used for allen label upsampling to clarity]
 
     optional arguments:
-        w.  output (results) directory (default: working directory)
+        r.  output (results) directory (default: working directory)
         o.  orient code (default: ALS)
             to orient nifti from original orientation to "standard/Allen" orientation
         m.  hemisphere mirror (default: combined)
@@ -53,7 +53,7 @@ function usage()
         f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
-        h.  warp high-res clarity to Allen space (default: 0)
+        w.  warp high-res clarity to Allen space (default: 0)
 
 	----------
 	Main Outputs
@@ -126,65 +126,65 @@ function choose_file_gui()
 
 # Select Mode : GUI or script
 
-if [[ "$#" -gt 1 ]]; then
+if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is used
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:w:l:m:v:a:s:b:f:p:h:" opt; do
+	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:" opt; do
     
 	    case "${opt}" in
 
 	        i)
-            	inclar="${OPTARG}"
-            	;;
+           inclar="${OPTARG}"
+           ;;
 
-            o)
-            	ort="${OPTARG}"
-            	;;
+          r)
+          	work_dir="${OPTARG}"
+          	;;
 
-            w)
-            	work_dir="${OPTARG}"
-            	;;
-
-        	l)
-            	lbls="${OPTARG}"
-            	;;
+          o)
+          	ort="${OPTARG}"
+          	;;
 
         	m)
-            	hemi="${OPTARG}"
-            	;;
+            hemi="${OPTARG}"
+            ;;
 
         	v)
-            	vox="${OPTARG}"
-            	;;
+            vox="${OPTARG}"
+            ;;
 
-            a)
-            	atlas="${OPTARG}"
-            	;;
+        	l)
+          	lbls="${OPTARG}"
+          	;;
 
-            s)
-            	side="${OPTARG}"
-            	;;
+          f)
+          	savefig="${OPTARG}"
+          	;;
 
-            b)
-            	bulb="${OPTARG}"
-            	;;
+          p)
+            prebias="${OPTARG}"
+            ;;
 
-            f)
-            	savefig="${OPTARG}"
-            	;;
+          a)
+          	atlas="${OPTARG}"
+          	;;
 
-            p)
-                prebias="${OPTARG}"
-                ;;
+          w)
+            warphres="${OPTARG}"
 
-            h)
-                warphres="${OPTARG}"
-                ;;
+            ;;
+          b)
+          	bulb="${OPTARG}"
+          	;;
+
+          s)
+          	side="${OPTARG}"
+          	;;
 
         	*)
-            	usage            	
-            	;;
+            usage            	
+            ;;
 
 		esac
 	
@@ -203,7 +203,7 @@ if [[ "$#" -gt 1 ]]; then
 
 else
 
-	# call gui
+	# call gui if no arguments are provided i.e. miraclGUI
 
 	printf "\n No inputs given ... running in GUI mode \n"
 
@@ -391,6 +391,22 @@ if [[ -z ${warphres} ]] || [[ "${warphres}" == "None" ]]; then
     warphres=0
 fi
 
+# Print final args to screen for user
+printf "\n######################################################\n\n"
+printf "The following arguments will be used for registration:\n\n"
+printf "i: Down-sampled nii folder: ${inclar}\n"
+printf "r: Output directory: ${work_dir}\n"
+printf "o: Orientation code: ${ort}\n"
+printf "m: Hemisphere: ${hemi}\n"
+printf "v: Labels voxel: size${vox}\n"
+printf "b: Olfactory bulb included: ${bulb}\n"
+printf "s: Side: ${side}\n"
+printf "a: Custom Allen atlas: ${atlas}\n"
+printf "l: Allen labels to warp: ${lbls}\n"
+printf "p: Prebias: ${prebias}\n"
+printf "f: Sace Mosaic figure: ${savefig}\n"
+printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
+printf "\n######################################################\n"
 
 # get time
 
@@ -795,15 +811,24 @@ function warpallenlbls()
 	# upsample to img dimensions
     df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
+    # Print calculated downsampling factor
+    printf "\nUsing downsampling factor $df.\n"
+
     # get img dim
     alldim=`PrintHeader ${inclar} 2`
     x=${alldim%%x*} ;
     yz=${alldim#*x} ; y=${yz%x*} ;
     z=${alldim##*x} ;
 
+    # Print header dimensions
+    printf "\nHeader dimensions:\nx = $x\ny = $y\nyz = $yz\nz = $z\n"
+
     ox=$(($y*$df)) ;
     oy=$(($x*$df)) ;
     oz=$(($z*$df)) ;
+
+    # Print upsamle dimensions
+    printf "\nUpsample dimensions:\nox = $ox\noy = $oy\noz = $oz\n"
 
     # create hres tif lbls
     ifdsntexistrun ${restif} "Converting high res lbls to tif" \
