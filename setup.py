@@ -43,7 +43,7 @@ setup(
         'opencv-python==4.2.0.32',
         'tifffile==2021.11.2',
         'nibabel==4.0.2',
-        'argparse=1.4.0',
+        'argparse==1.4.0',
         'tables==3.7.0',
         'statsmodels==0.13.0',
         'allensdk==2.15.1',
