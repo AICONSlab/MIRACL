@@ -5,6 +5,10 @@ ADD . /code
 # delete ruamel pkg
 RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")/ruamel* && \
     pip install markupsafe==2.0.1 && \
+    # Install setuptools v65.6.0 as latest version (v67.0.0)
+    # breaks parsing. Temporary fix only. In the long run,
+    # scripts should be refactored to work with current version!
+    pip install setuptools==65.6.0 && \
     pip install -e /code/ "botocore >= 1.20.110"
 ENV MIRACL_HOME=/code/miracl
 
