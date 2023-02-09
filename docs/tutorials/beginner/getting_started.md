@@ -108,4 +108,4 @@ To get the GUI of a specific function, run it without arguments, for example:
 
 **\*\*Warning not all functions have GUIs yet...working on it!\*\***
 
-#### Please check the rest of the tutorials for more detailed documentation
+### Please check the rest of the [tutorials](../../tutorials.md) for more detailed documentation
