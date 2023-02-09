@@ -3,8 +3,8 @@
 Here is some representative work!
 
 ## Graphical User Interface (GUI)
-![miracl_gui1.png](gallery/miracl_gui1.png)
 ![miracl_gui2.png](gallery/miracl_gui2.png)
+![Main menu](gallery/menus/MIRACL_main-menu.png)
 
 ### Brain Graph
 ![brain_graph.png](gallery/brain_graph.png)
