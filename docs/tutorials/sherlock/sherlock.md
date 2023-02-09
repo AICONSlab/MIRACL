@@ -45,7 +45,7 @@ Start interactive session
     
  Start singularity with binded data
 
-    $ singularity shell miracl_latest.sif
+    $ singularity shell miracl_latest.sif bash
 
 Within the shell, load the GUI  
 
@@ -89,8 +89,8 @@ Create an sbatch script, for example `reg_job.sbatch` with the following lines:
 #SBATCH --job-name=clar_reg
 #SBATCH --ntasks=1
 #SBATCH --time=05:00:00
-#SBATCH  --cpus-per-task=12
-#SBATCH  --mem=32G
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=32G
 
 module load singularity
 

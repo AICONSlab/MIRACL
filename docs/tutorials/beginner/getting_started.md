@@ -1,16 +1,16 @@
 # Getting started
 
-## command line
+## Command line
 
-activate miracl
+Activate miracl:
 
     $ source activate miracl
 
-to look at available modules, check the help
+To look at available modules, check the help:
 
     $ miracl -h
 
-you should get this in the terminal:
+You should get this in the terminal:
 
     usage: miracl [-h] {connect,conv,flow,lbls,reg,seg,sta,utils} ...
     
@@ -30,11 +30,11 @@ you should get this in the terminal:
       -h, --help            show this help message and exit
 
 
-let’s say you want the workflows *conv* module, check its help
+Let's say you want the workflows `conv` module, check its help:
 
     $ miracl flow -h
     
-you should get:
+You should get:
 
     usage: miracl conv [-h] {tiff_nii,nii_tiff,set_orient,gui_opts} ...
     
@@ -48,11 +48,11 @@ you should get:
     optional arguments:
       -h, --help            show this help message and exit
 
-for the help of a specific function in the *conv* module, say *tiff_nii*, type:
+For the help of a specific function in the `conv` module, say `tiff_nii`, type:
 
     $ miracl conv tiff_nii -h
 
-you should get:
+You should get:
 
     usage:  Converts Tiff images to Nifti 
 
@@ -64,9 +64,9 @@ you should get:
 
     For command-line / scripting
 
-    Usage: miracl_conv_convertTIFFtoNII.py -f [Tiff folder]
+    Usage: miracl conv tiff_nii -f [Tiff folder]
 
-    Example: miracl_conv_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+    Example: miracl conv tiff_nii -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
     required arguments:
       -f dir, --folder dir  Input CLARITY TIFF folder/dir
@@ -87,7 +87,7 @@ you should get:
 
     miracl tiff_nii: error: argument -f/--folder is required
     
-To run the function with an input dir called *input_tiff_dir*, a down-sampling factor of *5* and an output called *test*,
+To run the function with an input dir called `input_tiff_dir`, a down-sampling factor of `5` and an output called `test`,
 you would type:
 
     $ miracl conv tiff_nii -f input_tiff_dir -d 5 -o test
@@ -98,14 +98,14 @@ To run the main GUI:
 
     $ miraclGUI
     
-the gui should open:
+The GUI should open:
 
-![](../../gallery/miracl_gui1.png)
+![](../../gallery/menus/MIRACL_main-menu.png)
 
 To get the GUI of a specific function, run it without arguments, for example:
 
     $ miracl conv tiff_nii
 
-** warning not all functions have GUIs yet.. working on it!**
+**\*\*Warning not all functions have GUIs yet...working on it!\*\***
 
-#### Please check the rest of the tutorials for more detailed documentation
+### Please check the rest of the [tutorials](../../tutorials.md) for more detailed documentation
