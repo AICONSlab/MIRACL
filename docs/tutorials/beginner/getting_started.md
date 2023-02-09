@@ -64,9 +64,9 @@ you should get:
 
     For command-line / scripting
 
-    Usage: miracl_conv_convertTIFFtoNII.py -f [Tiff folder]
+    Usage: miracl conv tiff_nii -f [Tiff folder]
 
-    Example: miracl_conv_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+    Example: miracl conv tiff_nii -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
     required arguments:
       -f dir, --folder dir  Input CLARITY TIFF folder/dir
