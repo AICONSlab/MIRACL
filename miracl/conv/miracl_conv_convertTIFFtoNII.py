@@ -38,15 +38,15 @@ def helpmsg(name=None):
 
     For command-line / scripting
 
-    Usage: miracl_conv_convertTIFFtoNII.py -f [Tiff folder]
+    Usage: miracl conv tiff_nii -f [Tiff folder]
 
-    Example: miracl_conv_convertTIFFtoNII.py -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
+    Example: miracl conv tiff_nii -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
     required arguments:
       -f dir, --folder dir  Input CLARITY TIFF folder/dir
 
     optional arguments:
-      -w,  --work_dir        Output directory (default: working directory)
+      -w,  --work_dir       Output directory (default: working directory)
       -d , --down           Down-sample ratio (default: 5)
       -cn , --channum       Chan # for extracting single channel from multiple channel data (default: 0)
       -cp , --chanprefix    Chan prefix (string before channel number in file name). ex: C00
