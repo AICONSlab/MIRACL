@@ -100,7 +100,7 @@ To run the main GUI:
     
 The GUI should open:
 
-![](../../gallery/miracl_gui1.png)
+![](../../gallery/menus/MIRACL_main-menu.png)
 
 To get the GUI of a specific function, run it without arguments, for example:
 
