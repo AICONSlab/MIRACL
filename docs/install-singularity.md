@@ -15,11 +15,11 @@ Once logged in, change the directory to your scratch space and pull (download) t
 
 To shell into the container use:
 
-    $ singularity shell miracl_latest.sif
+    $ singularity shell miracl_latest.sif bash
 
 Use the `-B` flag to bind a data directory to the container:
 
-    $ singularity shell -B data:/data miracl_latest.sif
+    $ singularity shell -B /data:/data miracl_latest.sif bash
 
 **For running functions on clusters please check our [tutorials](tutorials.md).**
 
