@@ -43,6 +43,10 @@ Please download and install them on you host machine using their [installation g
 After they have been successfully installed, mount a volume to your MIRACL Docker container that contains the binary folder for TackVis and Diffusion Toolkit.
 The last step is to add the binaries to your `$PATH` within your MIRACL Docker container.
 
+### Q: STA workflow fails when trying to create tracts
+
+Make sure that the TrackVis and Diffusion Toolkit binaries are available to MIRACL. See [the previous question](#q-processes-that-require-trackvis-or-diffusion-toolkit-are-not-working) for details.
+
 ### Q: I need to install or make changes to apps in the MIRACL container but my user is not authorized to do so:
 
 The user in the container is the user of your host machine. This is done to avoid issues with the MIRACL GUI and X11. If you need to make changes that require sudo privileges, just log out of your container and log back in as root:
