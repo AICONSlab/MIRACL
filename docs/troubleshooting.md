@@ -57,6 +57,12 @@ After making your changes, log out and log back in with your regular user:
 $ docker exec -it miracl bash
 ```
 
+### Q: The GUI (`miraclGUI`) does not work anymore after my ssh connection has been broken:
+
+Assuming you logged back in with ssh and are in the container, exit the container and restart it
+using `docker compose down` and `docker compose up -d` (make sure to do that in the directory that
+contains your `docker-compose.yml`). Shell back into the container and the GUI should work again.
+
 ### Q: I do not want to create the image using the provided script:
 
 You can build the image yourself, not using the script we provide. However, the build script makes sure that the GUI version of MIRACL works with Docker and it is therefore recommended to use it.
