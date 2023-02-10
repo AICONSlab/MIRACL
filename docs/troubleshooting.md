@@ -28,6 +28,10 @@ xhost +SI:localsuer:<yourusername>
 
 (replace `<yourusername>` with the actual user name of your host system)
 
+### Q: The GUI worked before but does not work anymore:
+
+In the directory that contains your `docker-compose.yml`, restart the container with `docker compose down` followed by `docker compose up -d`. The GUI should work again.
+
 ### Q: I cannot run X or Y with Docker because of permission denied errors:
 
 If you have not set up a Docker user you might need to run Docker commands with `sudo`.
