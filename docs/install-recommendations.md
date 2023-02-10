@@ -9,7 +9,7 @@ require a manual installation of MIRACL and works on Linux, Mac OS X and Windows
 running MIRACL on local machines and servers.**
 
 - [Singularity install](install-singularity.md): Run MIRACL inside a Singularity container. We provide a
-compiled Singularity container that can be downloaded directly and does not require manual installing MIRACL.
+compiled Singularity container that can be downloaded directly and does not require manually installing MIRACL.
 Singularity runs natively on Linux and can be used on Mac OS X or Windows using virtual machines. **This is
 our recommended method for running MIRACL on SLURM clusters.** 
 

@@ -1,21 +1,25 @@
 # Docker Install
 
-Docker is well suited if you want to run it on a local machine or local server. If you need to run MIRACL on a cluster,
-see the [Singularity install](install-singularity.md). If you don't have Docker installed on
-your computer, [do that first](https://docs.docker.com/engine/installation/). Make sure your installation includes [Docker Compose](https://docs.docker.com/compose/install/) as it is needed to run the build script we provide.
-Docker Compose is included as part of the Docker Desktop installation by default.
+Docker is well suited if you want to run it on a local machine or local server.
+If you need to run MIRACL on a cluster, see our instructions for
+[installing Singularity](install-singularity.md). If you don't have Docker 
+installed on your computer, 
+[do that first](https://docs.docker.com/engine/installation/). Make sure your 
+installation includes [Docker Compose](https://docs.docker.com/compose/install/)
+as it is needed to run the build script we provide. Note that Docker Compose 
+is included as part of the Docker Desktop installation by default.
 
 ## Getting Started
 
-First, it is important to understand how the container is built. There is a base image
-in the [docker](../docker) folder that installs Python and dependencies.
-Then the [Dockerfile](../Dockerfile) in the base of the repository builds
-the [mgoubran/miracl](https://hub.docker.com/r/mgoubran/miracl) image from
-that base. When the build happens, it cats the [version.txt](../miracl/version.txt)
-file in the repository to save a versioned base, but then the build
-uses the tag `base-latest` that is always the latest base.
-The base container is built from this folder and pushed manually, while the
-main container is built and pushed automatically via the [CircleCI Recipe](../.circleci/config.yml).
+First, it is important to understand how the container is built. There is a 
+base image in the [docker](../docker) folder that installs Python and 
+dependencies. Then the [Dockerfile](../Dockerfile) in the base of the
+repository builds the [mgoubran/miracl](https://hub.docker.com/r/mgoubran/miracl)
+image from that base. When the build happens, it cats the [version.txt](../miracl/version.txt)
+file in the repository to save a versioned base, but then the build uses the
+tag `revised-base-latest` that is always the latest base. The base container is
+built from this folder and pushed manually, while the main container is built
+and pushed automatically via the [CircleCI Recipe](../.circleci/config.yml).
 Thus, if you want to update the base, you will need to [see the README.md](../docker)
 in that folder and push new images.
 

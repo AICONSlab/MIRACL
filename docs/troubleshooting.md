@@ -28,16 +28,24 @@ xhost +SI:localsuer:<yourusername>
 
 (replace `<yourusername>` with the actual user name of your host system)
 
+### Q: The GUI worked before but does not work anymore:
+
+In the directory that contains your `docker-compose.yml`, restart the container with `docker compose down` followed by `docker compose up -d`. The GUI should work again.
+
 ### Q: I cannot run X or Y with Docker because of permission denied errors:
 
 If you have not set up a Docker user you might need to run Docker commands with `sudo`.
 
 ### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Docker image directly.
+Because of their respective licenses, we could not include TrackVis or Diffusion Toolkit in our Docker image directly.
 Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
-After they have been successfully installed, mount a volume to your MIRACL Docker container that contains the binary folder for TackVis and Diffusion Toolkit.
-The last step is to add the binaries to your `$PATH` within your MIRACL Docker container.
+After they have been successfully installed, mount a volume to your MIRACL Docker container that contains the binary folder for TrackVis and
+Diffusion Toolkit and add the binaries to your `$PATH` within your MIRACL Docker container.
+
+### Q: STA workflow fails when trying to create tracts
+
+Make sure that the TrackVis and Diffusion Toolkit binaries are available to MIRACL. See [the previous question](#q-processes-that-require-trackvis-or-diffusion-toolkit-are-not-working) for details.
 
 ### Q: I need to install or make changes to apps in the MIRACL container but my user is not authorized to do so:
 
@@ -52,6 +60,12 @@ After making your changes, log out and log back in with your regular user:
 ```
 $ docker exec -it miracl bash
 ```
+
+### Q: The GUI (`miraclGUI`) does not work anymore after my ssh connection has been broken:
+
+Assuming you logged back in with ssh and are in the container, exit the container and restart it
+using `docker compose down` and `docker compose up -d` (make sure to do that in the directory that
+contains your `docker-compose.yml`). Shell back into the container and the GUI should work again.
 
 ### Q: I do not want to create the image using the provided script:
 
@@ -70,7 +84,13 @@ To run the container use:
 $ docker run -it mgoubran/miracl bash
 ```
 
-All changes will be lost when you shell out. The MIRACL GUI will be unlikely to work but you can try the troubleshooting steps in the following section to make it work.
+If you make changes in the container that are not stored on a volume, make sure to use the same container
+the next time you run MIRACL as changes made to a container will only apply to this specific container.
+If you run MIRACL again from the same image using `docker run -it mgoubran/miracl bash`,
+a new container will be created that does not contain the changes you made to the first container.
+
+The MIRACL GUI will be unlikely to work out-of-the-box but you can try the troubleshooting steps
+in the following section to make it work.
 
 ### Q: I get either or both of the following errors whenever I try to run the GUI from within a Docker container that was build without the provided build script:
 
@@ -117,10 +137,10 @@ Once you have your node, you can then build the container:
 
 ### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Singularity container directly.
+Because of their respective licenses, we could not include TrackVis or Diffusion Toolkit in our Singularity container directly.
 Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
-After they have been successfully installed, mount a volume to your MIRACL Singularity container that contains the binary folder for TackVis and Diffusion Toolkit.
-The last step is to add the binaries to your `$PATH` within your MIRACL Singularity container.
+After they have been successfully installed, mount a volume to your MIRACL Singularity container that contains the binary folder for TrackVis 
+and Diffusion Toolkit and add the binaries to your `$PATH` within your MIRACL Singularity container.
 
 ### Q: I get the following error whenever I try to run the GUI from within the Singularity container on Compute Canada:
 

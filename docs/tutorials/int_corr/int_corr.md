@@ -1,26 +1,27 @@
-Intensity correction for data with inhomogeneity issues
+# Intensity correction
 
-    Performs correction on CLARITY tiff data in parallel using N4
+Intensity correction for data with inhomogeneity issues.
+Performs correction on CLARITY tiff data in parallel using N4.
 
-    Creates a downsampled nifti from the tiff data
-    Runs N4 'bias field' / intensity correction on the nifti
-    Up-samples the output bias field and applies it to the tiff data
+1. Creates a downsampled nifti from the tiff data
+2. Runs N4 'bias field' / intensity correction on the nifti
+3. Up-samples the output bias field and applies it to the tiff data
 
-# Command-line
+## Command-line
 
-usage:
+Usage:
 
     miracl utils int_corr -f [input tiff folder] -o [ output folder ] -s [ shrink factor] -cn [ channel num ] -cp [ channel prefix ] -p [ power ]
 
-example:
+Example:
 
     miracl utils int_corr -f tiff_folder -od bias_corr_folder
 
-required arguments:
+Required arguments:
 
     -f dir, --folder dir  Input CLARITY TIFF folder/dir
 
-optional arguments:
+Optional arguments:
 
     -od , --outdir        Output folder name (default: int_corr_tiffs)
     -cn , --channum       Chan # for extracting single channel from multiple channel data (default: 1)
