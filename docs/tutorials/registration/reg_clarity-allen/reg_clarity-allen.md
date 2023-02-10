@@ -26,7 +26,7 @@ $ miracl reg clar_allen
 
 The main registration window will look like this:
 
-![Main registration menu](../../../gallery/menus/MIRACL_registration_main-window.png)
+![Main registration menu](../../../gallery/menus/MIRACL_registration_main-menu.png)
 
 From here you can select `CLARITY-Allen` from the `Registration` tab on the
 left to start the registration. The `CLARITY-Allen` menu will open:
