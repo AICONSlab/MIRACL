@@ -62,13 +62,13 @@ Allen labels with hemisphere split (L differ from R labels) or combined
 - *-v*, **Labels resolution [vox]**: labels voxel size/resolution in $\mu$m
 accepted inputs are: `10`, `25` or `50` (default: `10`).
 
-- *-s*, **Side**: provide this parameter if you are only registering one
-hemisphere instead of the whole brain. Accepted inputs are `rh`
-(right hemisphere) or `lh` (left hemisphere) (default: `None`).
-
 - *-b*, **Olfactory bulb included**: specify whether the olfactory bulb is
 included in brain. Accepted inputs are `0` (not included) and `1` (included)
 (default: `0`).
+
+- *-s*, **Side**: provide this parameter if you are only registering one
+hemisphere instead of the whole brain. Accepted inputs are `rh`
+(right hemisphere) or `lh` (left hemisphere) (default: `None`).
 
 - *-p*, **Extra int correct**: if utilfn intensity correction has already been
 run, skip correction inside registration (default: `0`).
