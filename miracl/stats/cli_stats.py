@@ -1,7 +1,6 @@
 import sys
 import argparse
-from miracl.stats import miracl_stats_paired_ttest_ipsi_contra, miracl_stats_voxel_wise, miracl_stats_paired_ttest_group, miracl_plot_single_subj
-
+from miracl.stats import miracl_stats_paired_ttest_ipsi_contra, miracl_stats_voxel_wise, miracl_stats_paired_ttest_group, miracl_plot_single_subj, miracl_stats_heatmap_group
 
 def run_paired_ttest(parser, args):
     miracl_stats_paired_ttest_ipsi_contra.main(args)
@@ -18,10 +17,19 @@ def run_group_ttest(parser, args):
 def plot_subj(parser, args):
     miracl_plot_single_subj.main(args)
 
+def heatmap_group(parser, args):
+    miracl_stats_heatmap_group.main(args)
 
 def get_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
+
+    #heatmap
+    heatmap_parser = miracl_stats_heatmap_group.parsefn()
+    parser_heat = subparsers.add_parser('heatmap_group', parents=[heatmap_parser], add_help=False,
+                                          usage=heatmap_parser.usage,
+                                          help='run heatmap group stats')
+    parser_heat.set_defaults(func=heatmap_group)
 
     # paired t-test
     paired_parser = miracl_stats_paired_ttest_ipsi_contra.parsefn()
