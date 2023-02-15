@@ -23,7 +23,11 @@ and pushed automatically via the [CircleCI Recipe](../.circleci/config.yml).
 Thus, if you want to update the base, you will need to [see the README.md](../docker)
 in that folder and push new images.
 
-## Build from scratch
+## Build MIRACL from scratch
+
+> This will build a Docker image of MIRACL based on its latest version using 
+our default naming scheme. For custom names and specific versions see our 
+[Additional build options section](#additional-build-options)
 
 Clone the MIRACL repo to your machine:
 
@@ -32,13 +36,15 @@ $ git clone https://www.github.com/mgoubran/MIRACL
 $ cd MIRACL
 ```
 
-Build the image using the build script we provide:
+Build the latest MIRACL image using the build script we provide:
 
 ```
 $ ./build.sh
 ```
 
-(make sure that the script can be executed. If it can't and you are the owner of the file, use `chmod u+x build.sh` to make it executable. Prefix with `sudo` if you are not the owner of the file.)
+> Make sure that the script can be executed. If it can't and you are the owner
+of the file, use `chmod u+x build.sh` to make it executable. Prefix with `sudo`
+if you are not the owner of the file or change permissions for `g` and/or `o`.
 
 Once the image has successfully been built, run the container using Docker Compose:
 
@@ -46,7 +52,10 @@ Once the image has successfully been built, run the container using Docker Compo
 $ docker compose up -d
 ```
 
-(note that the Docker Compose syntax is different if you installed it using the standalone method. Compose standalone uses the `-compose` syntax instead of the current standard syntax `compose`. The above command would thus be `docker-compose up -d` when using Compose standalone.)
+> Note that the Docker Compose syntax is different if you installed it using
+the standalone method. Compose standalone uses the `-compose` syntax instead of
+the current standard syntax `compose`. The above command would thus be
+`docker-compose up -d` when using Compose standalone.
 
 The container is now running and ready to be used.
   
@@ -58,7 +67,10 @@ Interactively shell inside:
 $ docker exec -it miracl bash
 ```
 
-Files that are saved while using MIRACL should be saved to volumes mounted into the container in order to make them persistent. To mount volumes, just add them to the `docker-compose.yml` in the base directory under `volumes` (do not delete the volume that is already mounted which mounts your `.Xauthority`).
+Files that are saved while using MIRACL should be saved to volumes mounted
+into the container in order to make them persistent. To mount volumes, just
+add them to the `docker-compose.yml` in the base directory under `volumes`
+(do not delete the volume that is already mounted which mounts your `.Xauthority`).
 
 Example:
 
@@ -76,7 +88,77 @@ Exit your container and navigate to your MIRACL folder. Use Docker Compose to st
 $ docker compose down
 ```
 
-(note that the Docker Compose syntax is different if you installed it using the standalone method. Compose standalone uses the `-compose` syntax instead of the current standard syntax `compose`. The above command would thus be `docker-compose up -d` when using Compose standalone.)
+> Note that the Docker Compose syntax is different if you installed it using
+the standalone method. Compose standalone uses the `-compose` syntax instead of
+the current standard syntax `compose`. The above command would thus be
+`docker-compose up -d` when using Compose standalone.
+
+## Additional build options
+
+### Image and container naming
+
+Naming is done automatically when using our build script which includes a 
+default naming scheme. By default, the image is named `mgoubran/miracl:latest`
+and the container is tagged with `miracl`.
+
+You can easily change the defaults if your usecase requires it by running our 
+build script with the following options:
+
+```
+$ ./build -i <image_name> -c <container_name>
+```
+
+```
+Options:
+
+  -i, Specify image name (default: mgroubran/miracl)
+  -c, Specify container name (default: miracl)
+```
+
+Example:
+
+```
+$ ./build -i josmann/miracl -c miracl_dev_version
+```
+
+> Use `./build -h` to show additional options.
+
+## MIRACL versions
+
+By default, Docker images will be built using the latest version of MIRACL. 
+If you need to build a Docker image based on a specific version of MIRACL, 
+do the following:
+
+1. Clone the MIRACL repository and navigate to the MIRACL folder:
+
+```
+$ git clone https://www.github.com/mgoubran/MIRACL
+$ cd MIRACL
+```
+
+2. Cloning the repository will download all tags/versions. List them with:
+
+```
+$ git tag -l
+```
+
+3. Decide which tag/version of MIRACL you want to use and check it out as a 
+new branch:
+
+```
+$ git checkout tags/<tag_name> -b <branch_name>
+```
+
+Example:
+
+```
+$ git checkout tags/v2.2.1 -b miracl_v2.2.1
+```
+
+4. From here you can follow our instructions for 
+[building MIRACL from scratch](#build-miracl-from-scratch) starting with 
+running the build script we provide. Our script will automatically detect the 
+version of the branch you are on and tag the image accordingly.
 
 ## Troubleshooting
 
