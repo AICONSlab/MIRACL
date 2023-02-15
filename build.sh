@@ -11,11 +11,21 @@
 # Current maintainer of script: Jonas Osmann @ github.com/jono3030
 # MIRACL (C) Maged Groubran @ maged.goubran@utoronto.ca
 
+# Set variable base state
 # Script version
-version="1.1.1-beta"
+version="1.1.2-beta"
 
-# Set log variable
+# Set default log state
 write_log=false
+
+# Set default image name
+img_name="mgoubran/miracl"
+
+# Set default container name
+cont_name="miracl"
+
+# Set default image version
+miracl_version=$(cat ./miracl/version.txt)
 
 # Usage function
 function usage()
@@ -23,40 +33,68 @@ function usage()
 
  cat <<usage
 
- Automatically build MIRACL Docker image with pseudo host user
+ Usage: ./build.sh [OPTIONS] [ARG] ...
+
+   Automatically build MIRACL Docker image with pseudo host user
+
+ Options:
+
+   -i, Specify image name (default: mgroubran/miracl)
+   -c, Specify container name (default: miracl)
+   -l, Write logfile of build process to build.log (default: false )
+   -v, Print version of build script and exit
+   -h, Print this help menu and exit
 
  Version: $version
-
- Usage: ./build.sh
-
- Arguments:
-
-   -h,--help: Prints this help menu
-
-   -l, --log: Writes logfile of build process to build.log
 
 usage
 
 }
 
-# Basic flags function
-# Will be expanded in next iteration of MIRACL
-while [ ! $# -eq 0 ]
-do
-  if [ "$*" = "-h" ] || [ "$*" = "--help" ];
-  then
-    usage
-    exit 0
-  elif [ "$*" = "-l" ] || [ "$*" = "--log" ];
-  then
-    write_log=true
-  else
-    printf "\'$*\' is not a valid argument\n"
-    exit 1
-  fi
-  shift
-done 
+# Parser for args and options
+while getopts ':i:c:m:lvh' opt; do
+  case "$opt" in
 
+    i)
+      if [ "${OPTARG}" != "$img_name" ]; then
+      img_name=${OPTARG}
+      fi
+      ;;
+
+    c)
+      if [ "${OPTARG}" != "$cont_name" ]; then
+      cont_name=${OPTARG}
+      fi
+      ;;
+
+    l)
+      write_log=true
+      ;;
+
+    v)
+      echo -e "v$version"
+      exit 0
+      ;;
+
+    h)
+      usage
+      exit 0
+      ;;
+
+    :)
+      echo -e "Option requires an argument.\nUsage: $(basename $0) [-i arg] [-c arg]"
+      exit 1
+      ;;
+
+    ?)
+      echo -e "Invalid command option.\nUsage: $(basename $0) [-i arg] [-c arg] [-l] [-v] [-h]"
+      exit 1
+      ;;
+
+    esac
+  done
+  shift "$(($OPTIND -1))"
+    
 # Information that needs to be added to Dockerfile
 # to create pseudo host user. This is required to
 # make X11 work correclty with miraclGUI
@@ -74,6 +112,12 @@ USER \$USER\n\
 WORKDIR /home/\$USER
 END
 )
+
+# Replace Docker image name and version
+sed -i "s|\ \ \ \ image:.*|\ \ \ \ image: $img_name:$miracl_version|" docker-compose.yml
+
+# Replace Docker container name
+sed -i "s|\ \ \ \ container_name:.*|\ \ \ \ container_name: $cont_name|" docker-compose.yml
 
 function rm_USER_TEXT () {
   sed -i '/STARTUNCOMMENT/,/STOPUNCOMMENT/{//!d}' Dockerfile
@@ -99,7 +143,7 @@ if [ -x "$(command -v docker)" ]; then
 	      --build-arg USER_ID=$(id -u) \
 	      --build-arg GROUP_ID=$(id -g) \
 	      --build-arg USER=$HOST_USER \
-	      -t mgoubran/miracl .
+	      -t $img_name:$miracl_version .
       }
 
       # Check for log flag
@@ -120,9 +164,9 @@ if [ -x "$(command -v docker)" ]; then
         # Test if docker-compose is installed
         # Should come by default with Docker-Desktop
         if [ -x "$(command -v docker-compose)" ]; then
-          printf "Docker Compose installation found <<$(docker-compose --version)>>). Run 'docker-compose up -d' to start the MIRACL container in background.\n"
-        elif dcex=$(docker compose --version); then
-          printf "Docker Compose installation found (<<%s>>). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
+          printf "Docker Compose installation found ($(docker-compose --version)). Run 'docker-compose up -d' to start the MIRACL container in background.\n"
+        elif dcex=$(docker compose version); then
+          printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
         else
           printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
         fi
@@ -131,11 +175,14 @@ if [ -x "$(command -v docker)" ]; then
         printf "\nBuild not successful! An error occured with exit code: $build_status_code\n"
         # Remove $USER_TEXT from Dockerfile
         rm_USER_TEXT
+        # Exit with custom status code
+        exit $build_status_code
       fi
 
 else
     di_status_code=$?
     printf "\nDocker installation not found. Please install Docker first.\n"
     printf "Exiting with status code $di_status_code\n"
-    exit di_status_code
+    # Exit with custom status code
+    exit $di_status_code
 fi
