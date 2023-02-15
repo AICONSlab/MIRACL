@@ -126,7 +126,7 @@ $ ./build -i josmann/miracl -c miracl_dev_version
 ## MIRACL versions
 
 By default, Docker images will be built using the latest version of MIRACL. 
-If you need to build a Docker images based on a specific version of MIRACL, 
+If you need to build a Docker image based on a specific version of MIRACL, 
 do the following:
 
 1. Clone the MIRACL repository and navigate to the MIRACL folder:
