@@ -1,4 +1,4 @@
-# Miracl Gallery
+# Gallery
 
 Here is some representative work!
 
@@ -6,7 +6,7 @@ Here is some representative work!
 ![Main menu](gallery/menus/MIRACL_main-menu.png)
 ![Label statistics](gallery/miracl_gui2.png)
 
-### Brain Graph
+## Brain Graph
 ![](gallery/brain_graph.png)
 
 ## Clarity Registration
@@ -25,4 +25,3 @@ Here is some representative work!
 ![Projection map along graph with 25 labels](gallery/projection_map_along_graph_25_labels.png)
 ![Registration result visualized in ITK-SNAP](gallery/registration_result_in_itksnap.png)
 ![Segmentation](gallery/segmentation_example.png)
-
