@@ -35,7 +35,11 @@ left to start the registration. The `CLARITY-Allen` menu will open:
 
 The registration will be run on down-sampled CLARITY Nii images:
 
-    *-i*, **Input down-sampled CLARITY Nii**: preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan). File name should have `##x_down` like `05x_down` (meaning 5x downsampled) -> ex.: `stroke13_05x_down_Ref_chan.nii.gz` (this should be accurate as it is used for Allen label upsampling to clarity).
+- *-i*,  **Input down-sampled CLARITY Nii**: preferably auto-fluorescence
+channel data (or Thy1_EYFP if no auto chan). File name should have `##x_down`
+like `05x_down` (meaning 5x downsampled) -> ex.:
+`stroke13_05x_down_Ref_chan.nii.gz` (this should be accurate as it is used for
+Allen label upsampling to clarity).
 
 You can provide the folder containing these files in the first field. **This
 parameter is required to run the registration.** If you do not yet have the 
@@ -44,13 +48,30 @@ down-sampled files you can use MIRACL's conversion methods to create them.
 All remaining parameters are optional. If left blank, their respective default
 values will be used:
 
-    *-r*, **Output directory**: directory the output (results) will be written to (default: `<working_directory>/reg_final`). \
-    *-o*, **Orient code**: code to orient nifti from original orientation to 'standard/Allen' orientation (default: `ALS`). \
-    *-m*, **Labels hemi**: chose to register to one or both hemispheres. Warps Allen labels with hemisphere split (L differ from R labels) or combined (L and R have the same labels i.e. are mirrored). Accepted inputs are `combined` or `split` (default: `combined`). \
-    *-v*, **Labels resolution [vox]**: labels voxel size/resolution in $\mu$m accepted inputs are: `10`, `25` or `50` (default: `10`). \
-    *-b*, **Olfactory bulb included**: specify whether the olfactory bulb is included in brain. Accepted inputs are `0` (not included) and `1` (included) (default: `0`). \
-    *-s*, **Side**: provide this parameter if you are only registering one hemisphere instead of the whole brain. Accepted inputs are `rh` (right hemisphere) or `lh` (left hemisphere) (default: `None`). \
-    *-p*, **Extra int correct**: if utilfn intensity correction has already been run, skip correction inside registration (default: `0`).
+- *-r*, **Output directory**: directory the output (results) will be written to
+(default: `<working_directory>/reg_final`).
+
+- *-o*, **Orient code**: code to orient nifti from original orientation to
+'standard/Allen' orientation (default: `ALS`).
+
+- *-m*, **Labels hemi**: chose to register to one or both hemispheres. Warps
+Allen labels with hemisphere split (L differ from R labels) or combined
+(L and R have the same labels i.e. are mirrored). Accepted inputs are
+`combined` or `split` (default: `combined`).
+
+- *-v*, **Labels resolution [vox]**: labels voxel size/resolution in $\mu$m
+accepted inputs are: `10`, `25` or `50` (default: `10`).
+
+- *-b*, **Olfactory bulb included**: specify whether the olfactory bulb is
+included in brain. Accepted inputs are `0` (not included) and `1` (included)
+(default: `0`).
+
+- *-s*, **Side**: provide this parameter if you are only registering one
+hemisphere instead of the whole brain. Accepted inputs are `rh`
+(right hemisphere) or `lh` (left hemisphere) (default: `None`).
+
+- *-p*, **Extra int correct**: if utilfn intensity correction has already been
+run, skip correction inside registration (default: `0`).
 
 After providing the parameters click `Enter` to save them and `Run` to 
 start the registration process.
@@ -66,10 +87,16 @@ steps will be located in a folder called `clar_allen_reg`.
 The command-line version has additional functionality that is not included in 
 the GUI version:
 
-    *-l*, **Input Allen labels to warp**: input labels could be at a different depth than default labels. `-m` and `-v` flags cannot be used if this parameter is specified manually (default: `annotation_hemi_combined_10um.nii.gz`).
-    *-a*, **Input custom Allen atlas**: for example for registering sections. \
-    *-f*, Save mosaic figure (`.png`) of Allen labels registered to CLARITY (default: 1). \
-    *-w*, Warp high-res clarity to Allen space (default: 0).
+- *-l*, **Input Allen labels to warp**: input labels could be at a different depth
+than default labels. `-m` and `-v` flags cannot be used if this parameter is 
+specified manually (default: `annotation_hemi_combined_10um.nii.gz`).
+
+- *-a*, **Input custom Allen atlas**: for example for registering sections.
+
+- *-f*, Save mosaic figure (`.png`) of Allen labels registered to
+CLARITY (default: 1).
+
+- *-w*, Warp high-res clarity to Allen space (default: 0).
 
 **Note that the above listed `-i` parameter (input down-sampled CLARITY Nii) is 
 required.**
