@@ -52,7 +52,7 @@ usage
 }
 
 # Parser for args and options
-while getopts ':i:c:m:lvh' opt; do
+while getopts ':i:c:lvh' opt; do
   case "$opt" in
 
     i)
