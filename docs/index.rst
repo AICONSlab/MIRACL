@@ -38,6 +38,7 @@ local install instructions.
    :caption: Contents:
    :hidden:
 
+   about
    before_install
    install-recommendations
    install-docker
