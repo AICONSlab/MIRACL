@@ -39,16 +39,10 @@ local install instructions.
    :hidden:
 
    about
-   before_install
-   install-recommendations
-   install-docker
-   install-singularity
-   install-local
-   install-windows
-   modules
+   installation
+   user-guide
    tutorials
    troubleshooting
-   full-documentation
    data
    gallery
 
