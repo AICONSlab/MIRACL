@@ -4,7 +4,7 @@ MIRACL is structured into [Modules](#modules) and [Workflows](#workflows).
 
 ## Modules
 
-The pipeline is combined of different "Modules" depending on their 
+The pipeline is comprised of different "Modules" depending on their 
 respective functionality. Functions for each module are grouped together:
 
 - connect -> Connectivity
@@ -23,7 +23,8 @@ example, to show all functions of the `reg` module run:
 $ miracl reg -h
 ```
 
-To show all options for e.g. the `clar_allen` function you can run:
+To show all options for an individual function, e.g. the `clar_allen` function,
+you can run:
 
 ```
 $ miracl reg clar_allen -h
@@ -43,10 +44,10 @@ specify the orientation of the image, `-m` to register to both hemispheres and
 
 ## Workflows
 
-The workflow (`flow`) module combines multiple functions for ease of use to 
-preform a desired task.
+The workflow (`flow`) module combines multiple functions from the above modules 
+for ease of use to preform a desired task.
 
-For example, a standard reg/seg analysis could work like this: 
+For example, a standard reg/seg analysis could look like this: 
   
 ```
 # First perform registration of whole-brain clarity data to ARA
