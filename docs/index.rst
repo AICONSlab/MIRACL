@@ -23,7 +23,7 @@ MIRACL (Multi-modal Image Registration And Connectivity anaLysis) is a general-p
 6) Statistical analysis of CLARITY & Imaging data
 7) Atlas generation & Label manipulation
 
-Copyright (c) 2022 Maged Goubran @ AICONSlab ([maged.goubran@utoronto.ca](mailto:maged.goubran@sri.utoronto.ca))
+Copyright (c) 2022 Maged Goubran @ AICONSlab, [maged.goubran@utoronto.ca](mailto:maged.goubran@sri.utoronto.ca)
 
 All Rights Reserved.
 
