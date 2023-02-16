@@ -1,31 +1,31 @@
 # About
 
-Useful information about MIRACL.
+Find useful information about MIRACL
 
-## [Introduction](./about/introduction.md)
+## [Introduction](./index.rst)
 
-What is MIRACL?
+General overview of MIRACL
 
-## [AICONs Lab](./about/aicons.md)
+## [Citations](./about/cited.md)
 
-Learn about the team behind MIRACL.
-
-## [Cited](./about/cited.md)
-
-A list of publications that cited MIRACL.
+A selection of publications that cited MIRACL
 
 ## [Collaborators](./about/collaborators.md)
 
-A list of labs that use MIRACL for their research.
+A list of research labs that use MIRACL for their work
 
 ## [License](./about/license.md)
 
-MIRACL's licencing agreement.
+MIRACL's licencing agreement
 
 ## [Referencing](./about/referencing.md)
 
-You use MIRACL in your work? Go here for citation guidelines.
+Citation guidelines for using MIRACL in your work
 
 ## [Acknowledgements](./about/acknowledgements.md)
 
-Acknowledments and list of GitHub contributers.
+Acknowledgements and list of GitHub contributers
+
+## [AICONs Lab](./about/aicons.md)
+
+Learn more about the team behind MIRACL
