@@ -20,8 +20,6 @@ The code is released for academic research use only. For
 commercial use, please contact 
 [maged.goubran@sri.utoronto.ca](mailto:maged.goubran@sri.utoronto.ca).
 
----
-
 ## Referencing MIRACL
 
 Citation guidelines for using MIRACL in your work.
@@ -68,8 +66,6 @@ their work if you are using them):
  - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (for diffusion MRI processing)
  - [MRtrix3](https://mrtrix.readthedocs.io/en/latest/) (for tractography)
  - [TrackVis/DTK](http://trackvis.org/) (for tractography)
-
----
 
 ## Citations
 
