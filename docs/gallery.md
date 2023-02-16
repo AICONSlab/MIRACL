@@ -1,4 +1,4 @@
-# Miracl Gallery
+# Gallery
 
 Here is some representative work!
 
