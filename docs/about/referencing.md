@@ -16,6 +16,7 @@ connectomic data from microscopy to MRI. Nature communications,
 
 BibTeX:
 
+```
 @article{goubran2019multimodal,
   title={Multimodal image registration and connectivity analysis for integration of connectomic data from microscopy to MRI},
   author={Goubran, Maged and Leuze, Christoph and Hsueh, Brian and Aswendt, Markus and Ye, Li and Tian, Qiyuan and Cheng, Michelle Y and Crow, Ailey and Steinberg, Gary K and McNab, Jennifer A and Deisseroth, Karl and Zeineh, Michael},
@@ -26,6 +27,7 @@ BibTeX:
   year={2019},
   publisher={Nature Publishing Group UK London}
 }
+```
 
 ## Tools used by MIRACL
 
