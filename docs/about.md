@@ -69,7 +69,37 @@ their work if you are using them):
 
 ## Citations
 
-A selection of publications that cited MIRACL:
+A selection of publications that used or referenced MIRACL:
+
+- Boillat, M., Hammoudi, P. M., Dogga, S. K., Pages, S., Goubran, M.,
+Rodriguez, I., & Soldati-Favre, D. (2020). Neuroinflammation-associated 
+aspecific manipulation of mouse predator fear by Toxoplasma gondii. Cell 
+reports, 30(2), 320-334.
+
+- Pallast, N., Wieters, F., Nill, M., Fink, G. R., & Aswendt, M. (2020).
+[Graph theoretical quantification of white matter reorganization after cortical
+stroke in mice](https://www.sciencedirect.com/science/article/pii/S1053811920303591).
+NeuroImage, 217, 116873.
+
+- Qu, L., Li, Y., Xie, P., Liu, L., Wang, Y., Wu, J., ... & Peng, H. (2022). 
+Cross-modal coherent registration of whole mouse brains. Nature Methods, 
+19(1), 111-118.
+
+- Ito, M., Aswendt, M., Lee, A. G., Ishizaka, S., Cao, Z., Wang, E. H., ... &
+Steinberg, G. K. (2018). [RNA-sequencing analysis revealed a distinct motor 
+cortex transcriptome in spontaneously recovered mice after stroke](https://www.ahajournals.org/doi/full/10.1161/STROKEAHA.118.021508).
+Stroke, 49(9), 2191-2199.
+
+- Georgiadis, M., Schroeter, A., Gao, Z., Guizar-Sicairos, M., Liebi, M., 
+Leuze, C., ... & Rudin, M. (2021). [Nanostructure-specific X-ray tomography 
+reveals myelin levels, integrity and axon orientations in mouse and human 
+nervous tissue](https://www.nature.com/articles/s41467-021-22719-7). Nature 
+communications, 12(1), 2941.
+
+- Wang, X., Zeng, W., Yang, X., Zhang, Y., Fang, C., Zeng, S., ... & Fei, P.
+(2021). [Bi-channel image registration and deep-learning segmentation (BIRDS)
+for efficient, versatile 3D mapping of mouse brain](https://elifesciences.org/articles/63455.pdf). 
+Elife, 10, e63455.
 
 ## Collaborators
 
