@@ -13,6 +13,7 @@ Welcome to MIRACL's documentation!
     :alt: Icon
     :align: center
 
+
 MIRACL (Multi-modal Image Registration And Connectivity anaLysis) is a general-purpose, open-source pipeline for automated:
 
 1) Registration of mice clarity data to the Allen reference atlas
@@ -23,14 +24,14 @@ MIRACL (Multi-modal Image Registration And Connectivity anaLysis) is a general-p
 6) Statistical analysis of CLARITY & Imaging data
 7) Atlas generation & Label manipulation
 
-Copyright (c) 2022 Maged Goubran @ AICONSlab (maged.goubran@utoronto.ca)
+Copyright © 2022 Maged Goubran @ AICONSlab (maged.goubran@utoronto.ca)
 
 All Rights Reserved.
 
-____________________________
+---
 
-We provide containers for using the software (Docker and Singularity) as well as
-local install instructions.
+We provide containers for using the software ([Docker](./installation.md) and 
+[Singularity](./installation.md)) as well as [local install instructions](./installation.md).
 
 
 .. toctree::
@@ -39,7 +40,7 @@ local install instructions.
    :hidden:
 
    about
-   installation
+   Installation <installation>
    user-guide
    tutorials
    troubleshooting
