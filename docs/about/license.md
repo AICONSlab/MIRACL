@@ -1,0 +1,14 @@
+# License
+
+MIRACL is licensed under the terms of the *GNU General
+Public License v3.0*.
+
+MIRACL is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+You should have received a copy of GNU General Public 
+License v3.0 along with HippMapp3r. 
+
+The code is released for academic research use only. For 
+commercial use, please contact 
+[maged.goubran@sri.utoronto.ca](mailto:maged.goubran@sri.utoronto.ca).
