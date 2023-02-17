@@ -25,7 +25,7 @@ img_name="mgoubran/miracl"
 cont_name="miracl"
 
 # Set default image version
-miracl_version=$(cat ./miracl/version.txt)
+miracl_version="latest"
 
 # Usage function
 function usage()
@@ -41,6 +41,7 @@ function usage()
 
    -i, Specify image name (default: mgroubran/miracl)
    -c, Specify container name (default: miracl)
+   -s, Set when using specific MIRACL tag/version (parses from miracl/version.txt)
    -l, Write logfile of build process to build.log (default: false )
    -v, Print version of build script and exit
    -h, Print this help menu and exit
@@ -52,7 +53,7 @@ usage
 }
 
 # Parser for args and options
-while getopts ':i:c:lvh' opt; do
+while getopts ':i:c:lsvh' opt; do
   case "$opt" in
 
     i)
@@ -69,6 +70,10 @@ while getopts ':i:c:lvh' opt; do
 
     l)
       write_log=true
+      ;;
+
+    s)
+      miracl_version=$(cat ./miracl/version.txt)
       ;;
 
     v)
