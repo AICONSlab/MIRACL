@@ -98,8 +98,8 @@ CLARITY (default: 1).
 
 - *-w*, Warp high-res clarity to Allen space (default: 0).
 
-**Note that the above listed `-i` parameter (input down-sampled CLARITY Nii) is 
-required.**
+> Note that the above listed `-i` parameter (input down-sampled CLARITY Nii) is 
+required.
 
 Usage:
 
