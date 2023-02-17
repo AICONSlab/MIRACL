@@ -33,7 +33,7 @@ All Rights Reserved.
 ---
 
 We provide containers for using the software (`Docker <./installation.md>`_) and 
-[Singularity](./installation.md)) as well as [local install instructions](./installation.md).
+`Singularity <./installation.md>`_) as well as `local install instructions <./installation.md>`_.
 
 
 .. toctree::
