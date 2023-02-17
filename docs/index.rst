@@ -32,7 +32,7 @@ All Rights Reserved.
 
 ---
 
-We provide containers for using the software (:ref:`Docker <./installation.md>`:) and 
+We provide containers for using the software (`Docker <./installation.md>`:) and 
 [Singularity](./installation.md)) as well as [local install instructions](./installation.md).
 
 
