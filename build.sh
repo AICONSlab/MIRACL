@@ -13,7 +13,7 @@
 
 # Set variable base state
 # Script version
-version="1.1.2-beta"
+version="1.1.3-beta"
 
 # Set default log state
 write_log=false

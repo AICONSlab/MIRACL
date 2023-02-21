@@ -30,6 +30,8 @@ be installed in WSL 2 locally using the local install instructions.
 
 > We do not recommend this method.
 
+---
+
 ## Docker installation
 
 Docker is well suited if you want to run it on a local machine or local server.
@@ -192,14 +194,25 @@ Example:
 $ git checkout tags/v2.2.1 -b miracl_v2.2.1
 ```
 
-4. From here you can follow our instructions for 
+4. If you are reverting to a version of MIRACL >= `2.2.4`, you can build the 
+image for your chosen version by running the build script with the `-s` flag:
+
+```
+$ ./build.sh -s
+```
+
+> If you want to build an image for a version of MIRACL <= `2.2.4` either 
+follow the build instructions of the particular version or download the latest 
+build script using e.g. 
+`wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh` 
+(overwrites current build script if present) to run it with the `-s` flag.
+
+5. From here you can follow our instructions for 
 [building MIRACL from scratch](#build-miracl-from-scratch) starting with 
-running the build script we provide. Our script will automatically detect the 
+`docker compose up -d`. Our script will automatically detect the 
 version of the branch you checked out and tag the image accordingly.
 
-### Troubleshooting
-
-Please refer to our [Troubleshooting](./troubleshooting.md) section.
+---
 
 ## Singularity installation
 
@@ -245,9 +258,7 @@ $ singularity shell -B /data:/data miracl_latest.sif bash
 [Compute Canada](./tutorials/compute_canada/compute_canada.md) and
 [Sherlock](./tutorials/sherlock/sherlock.md)
 
-### Troubleshooting
-
-Please refer to our [Troubleshooting](./troubleshooting.md) section.
+---
 
 ## Local installation
 
@@ -394,13 +405,9 @@ $ cd miracl
 $ git pull
 ```
 
----
-
 You should be good to go!
 
-### Troubleshooting
-
-Please refer to our [Troubleshooting](../troubleshooting.md) section.
+---
 
 ## Windows installation
 
@@ -501,6 +508,8 @@ $ source activate miracl
 $ miraclGUI
 ```
 
-### Troubleshooting
+---
+
+## Troubleshooting
 
 Please refer to our [Troubleshooting](../troubleshooting.md) section.
