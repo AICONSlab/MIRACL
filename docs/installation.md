@@ -30,6 +30,8 @@ be installed in WSL 2 locally using the local install instructions.
 
 > We do not recommend this method.
 
+---
+
 ## Docker installation
 
 Docker is well suited if you want to run it on a local machine or local server.
@@ -210,9 +212,7 @@ build script using e.g.
 `docker compose up -d`. Our script will automatically detect the 
 version of the branch you checked out and tag the image accordingly.
 
-### Troubleshooting
-
-Please refer to our [Troubleshooting](./troubleshooting.md) section.
+---
 
 ## Singularity installation
 
@@ -258,9 +258,7 @@ $ singularity shell -B /data:/data miracl_latest.sif bash
 [Compute Canada](./tutorials/compute_canada/compute_canada.md) and
 [Sherlock](./tutorials/sherlock/sherlock.md)
 
-### Troubleshooting
-
-Please refer to our [Troubleshooting](./troubleshooting.md) section.
+---
 
 ## Local installation
 
@@ -407,13 +405,9 @@ $ cd miracl
 $ git pull
 ```
 
----
-
 You should be good to go!
 
-### Troubleshooting
-
-Please refer to our [Troubleshooting](../troubleshooting.md) section.
+---
 
 ## Windows installation
 
@@ -514,6 +508,8 @@ $ source activate miracl
 $ miraclGUI
 ```
 
-### Troubleshooting
+---
+
+## Troubleshooting
 
 Please refer to our [Troubleshooting](../troubleshooting.md) section.
