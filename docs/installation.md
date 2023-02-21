@@ -192,9 +192,22 @@ Example:
 $ git checkout tags/v2.2.1 -b miracl_v2.2.1
 ```
 
-4. From here you can follow our instructions for 
+4. If you are reverting to a version of MIRACL >= `2.2.4`, you can build the 
+image for your chosen version by running the build script with the `-s` flag:
+
+```
+$ ./build.sh -s
+```
+
+> If you want to build an image for a version of MIRACL <= `2.2.4` either 
+follow the build instructions of the particular version or download the latest 
+build script using e.g. 
+`wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh` 
+(overwrites current build script if present) to run it with the `-s` flag.
+
+5. From here you can follow our instructions for 
 [building MIRACL from scratch](#build-miracl-from-scratch) starting with 
-running the build script we provide. Our script will automatically detect the 
+`docker compose up -d`. Our script will automatically detect the 
 version of the branch you checked out and tag the image accordingly.
 
 ### Troubleshooting
