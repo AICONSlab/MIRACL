@@ -3,7 +3,74 @@
 This is the place to get useful information about MIRACL. Jump to a topic you 
 are interested in by chosing it from the sidebar menu.
 
-## Introduction
+## MIRACL in a nutshell
+
+MIRACL (Multi-modal Image Registration And Connectivity anaLysis) is a 
+general-purpose, open-source pipeline for automated:
+
+1) Registration of mice clarity data to the Allen reference atlas
+2) Segmentation & feature extraction of mice clarity data in 3D (Sparse & nuclear staining)
+3) Registration of mice multimodal imaging data (MRI & CT, in-vivo & ex-vivo) to Allen reference atlas
+4) Tract or label specific connectivity analysis based on the Allen connectivity atlas
+5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY &
+   Allen connectivity atlas
+6) Statistical analysis of CLARITY & Imaging data
+7) Atlas generation & Label manipulation
+
+### Program structure
+
+MIRACL is structured into [Modules](#modules) and [Workflows](#workflows).
+
+#### Modules
+
+The pipeline is comprised of different "Modules" depending on their 
+respective functionality. Functions for each module are grouped together:
+
+- connect -> Connectivity
+- conv -> Conversion (Input/Output)
+- reg -> Registration
+- seg -> Segmentation
+- lbls -> Labels
+- utilfn -> Utilities
+- sta -> Structure Tensor Analysis
+- stats -> Statistics
+
+An example of using a module would be to run the `clar_allen` function 
+which performs a CLARITY whole-brain registration to Allen Atlas on a `nifti` 
+image (down-sampled by a factor of five):
+
+```
+$ miracl reg clar_allen -i niftis/SHIELD_05x_down_autoflor_chan.nii.gz -o ARI -m combined -b 1
+```
+
+The above command uses the `-i` option to select the `nifti` file, `-o` to 
+specify the orientation of the image, `-m` to register to both hemispheres and 
+`-b` to include the olfactory bulb.
+
+#### Workflows
+
+The workflow (`flow`) module combines multiple functions from the above modules 
+for ease of use to preform a desired task.
+
+For example, a standard reg/seg analysis could look like this: 
+  
+1. First perform registration of whole-brain clarity data to ARA:
+
+```
+$ miracl flow reg_clar -h
+```
+    
+2. Then perform segmentation & feature extraction of full resolution clarity data:
+
+```
+$ miracl flow seg -h
+```
+
+Or structure tensor analysis:
+
+```
+$ miracl flow sta -h
+```
 
 ## License
 
