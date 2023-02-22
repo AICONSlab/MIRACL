@@ -44,7 +44,7 @@ Next choose the segmentation parameters:
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
-| seg type | Channel type: <ul><li>`virus`</li><li>`cFos`</li></ul></li><li>`cFos`</li></ul>`sparse` (like `Thy1 YFP`)</li><li>`nuclear` (like `PI`)</li></ul> | `sparse` |
+| seg type | Channel type: <ul><li>`virus`</li><li>`cFos`</li><li>`sparse` (like `Thy1 YFP`)</li><li>`nuclear` (like `PI`)</li></ul> | `sparse` |
 | channel prefix | Channel prefix and number if multiple channels (e.g. `Filter0001`) | |
 
 Then choose the registered labels `annotation_hemi\__side_\_**um_clar_vox.tif` to summarize segmentation features where:
