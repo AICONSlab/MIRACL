@@ -50,7 +50,7 @@ Next choose the segmentation parameters:
 Then choose the registered labels `annotation_hemi\__side_\_**um_clar_vox.tif` to summarize segmentation features where:
 
 * side -> `combined` or `split`
-* `**um` is the resolution -> `10`, `25` or `50`
+* `**` is the resolution -> `10`, `25` or `50`
 
 ![](seg3.png)
 
@@ -88,8 +88,8 @@ optional arguments (don't forget the quotes):
 
 | File | Description |
 | ---  | ---         |
-| `segmentation/seg.tif` (`.mhd`) or `seg_nuclear.tif` (`.mhd`) | Segmentation image with all labels (cells) |
-| `segmentation/seg_bin.tif` (`.mhd`) or `seg_bin_nuclear.tif` (`.mhd`) | Binarized segmentation image |
+| `segmentation/seg.{tif,mhd}`<br><br>or<br><br>`seg_nuclear.{tif,mhd}` | Segmentation image with all labels (cells) |
+| `segmentation/seg_bin.{tif,mhd}`<br><br>or<br><br>`seg_bin_nuclear.{tif,mhd}` | Binarized segmentation image |
 | `voxelized_seg.{tif,nii}` | Segmentation results voxelized to ARA resolution |
 | `voxelized_seg_bin.{tif,nii}` | Binarized version |
 | `clarity_segmentation_features_ara_labels.csv` | segmentation features summarized per ARA labels |
