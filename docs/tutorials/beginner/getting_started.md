@@ -1,17 +1,17 @@
 # Getting started
 
-## Command line
+## Command-line
 
-> If you have installed MIRACL locally, run the `source activate miracl` first 
+> If you have installed MIRACL locally, run `source activate miracl` first 
 to start its virtual environment.
 
-To look at available modules, check the help:
+To look at available modules, invoke the help menu:
 
 ```
 $ miracl -h
 ```
 
-You should get this in the terminal:
+The following menu should be printed to the terminal:
 
 ```
 usage: miracl [-h] {connect,conv,flow,lbls,reg,seg,sta,utils} ...
@@ -32,10 +32,11 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-Let's say you want the workflows `conv` module, check its help:
+If you want information about a particular module you can call it with `-h`.
+Let's use the `conv` module as an example. Invoke its help menu using:
 
 ```
-$ miracl flow -h
+$ miracl conv -h
 ```
 
 You should get:
@@ -54,7 +55,8 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-For the help of a specific function in the `conv` module, say `tiff_nii`, type:
+For accessing the help menu of a specific function in the `conv` module, 
+say `tiff_nii`, type:
 
 ```
 $ miracl conv tiff_nii -h
