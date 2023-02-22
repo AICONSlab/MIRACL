@@ -205,7 +205,7 @@ $ ./build.sh -s
 follow the build instructions of the particular version or download the latest 
 build script using e.g. 
 `wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh` 
-(overwrites current build script if present) to run it with the `-s` flag.
+(overwrites current build script if present) and run it with the `-s` flag.
 
 5. From here you can follow our instructions for 
 [building MIRACL from scratch](#build-miracl-from-scratch) starting with 
