@@ -78,11 +78,11 @@ Conversion parameters description:
 | ---       | ---         | ---     |
 | out nii   | Output nifti name | `clarity` |
 | downsample ratio | Downsample factor for conversion | `5` |
-| Channel # | Number for extracting single channel from multiple channel data (leave blank if single channel data/tiff files) | `1` |
+| channel # | Number for extracting single channel from multiple channel data (leave blank if single channel data/tiff files) | `1` |
 | channel prefix | String before channel number in file name (leave blank if single channel). <br><br>For example, if tiff file name has `_C001_.tif` for channel 1 and `_C002_.tif` for channel 2, to choose channel 1 if it's the auto fluorescence channel: <ul><li>Chan number would be: `1`</li><li>Chan prefix would be: `C00`</li></ul> |
 | channel name | Output channel name | `eyfp` |
-| in-plane res | Original resolution in x-y plane in $\mu$m | `5` |
-| z res | Thickness (z-axis resolution/spacing between slices) in $\mu$m | `5` |
+| in-plane res | Original resolution in x-y plane in um | `5` |
+| z res | Thickness (z-axis resolution/spacing between slices) in um | `5` |
 | center | C of nifti file | `0 0 0` |
 
 <!--
@@ -114,12 +114,12 @@ Next, choose the registration options:
 
 Registration parameters description:
 
-| Parameter         | Description                                                                                                                                                                                                            | Default    |
-| ---               | ---                                                                                                                                                                                                                    | ---        |
-| Hemisphere        | Warp Allen labels with hemisphere split (Left labels are different from Right labels) or combined (Left and Right lables are the same i.e. mirrored). Accepted inputs are: <ul><li>`combined`</li><li>`split`</li></ul> | `combined` |
-| Labels resolution | Voxel size/Resolution of labels in um accepted inputs are: `10`, `25` or `50` | `10` |
-| Olfactory bulb    | If bulb is included in the dataset. Accepted inputs are: <ul><li>`0` -> not included</li><li>`1` -> included</li></ul> | `0` |
-| Side              | **Only if registering hemisphere, else leave blank**. Accepted inputs are: <ul><li>`rh` -> right hemisphere</li><li>`lh` -> left hemisphere</li></ul> | `None` |
+| Parameter | Description | Default    |
+| ---       | ---         | ---        |
+| Hemi | Warp Allen labels with hemisphere split (Left labels are different from Right labels) or combined (Left and Right lables are the same i.e. mirrored). Accepted inputs are: <ul><li>`combined`</li><li>`split`</li></ul> | `combined` |
+| Labels resolution [vox] | Voxel size/resolution of labels in um accepted inputs are: `10`, `25` or `50` | `10` |
+| olfactory bulb | If olfactory bulb is included in the dataset. Accepted inputs are: <ul><li>`0` -> not included</li><li>`1` -> included</li></ul> | `0` |
+| Side | **Only if registering hemisphere, else leave blank**. Accepted inputs are: <ul><li>`rh` -> right hemisphere</li><li>`lh` -> left hemisphere</li></ul> | `None` |
 
 <!--
 - **Hemi**: warp allen labels with hemisphere split (Left different than Right 
