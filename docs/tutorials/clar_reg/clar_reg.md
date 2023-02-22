@@ -1,4 +1,4 @@
-CLARITY whole-brain registration to Allen atlas
+# CLARITY whole-brain registration to Allen atlas
 
 The registration workflow relies on an autofluorescence channel input 
 (tiff files), and can perform whole-brain or hemisphere registrations to 
@@ -12,11 +12,11 @@ This workflow performs the following tasks:
 4) Warps Allen annotations to the original high-res CLARITY space
 5) Warps the higher-resolution CLARITY to Allen space (if chosen)
 
-# Test data
+## Test data
 A test dataset (CLARITY autofluorescence channel) for registration is found 
 here under `data`: https://www.dropbox.com/sh/i9swdedx7bsz1s8/AABpDmmN1uqPz6qpBLYLtt8va
 
-# GUI
+## GUI
 
 Run:
 
@@ -24,7 +24,7 @@ Run:
 $ miraclGUI
 ```
 
-and and choose `CLARITY-Allen Registration` from the `Workflows` tab:
+and choose `CLARITY-Allen Registration` from the `Workflows` tab:
 
 ![](../../gallery/menus/MIRACL_main-menu.png)
 
@@ -34,9 +34,8 @@ Or run:
 $ miracl flow reg_clar
 ```
 
----
-
-First choose the input tiff folder with the auto fluorescence channel:
+Choose the input tiff folder with the auto fluorescence channel from the 
+pop-up menu:
 
 ![](../tiff_to_nii/tiff_to_nii2.png)
 
@@ -58,7 +57,7 @@ Then choose the orientation at the top and right of the image:
 
 ![reg](reg4.png)
 
-Then choose the orientation for scrolling through the slices (going into 
+Next, choose the orientation for scrolling through the slices (going into 
 the page), can confirm the orientation by changing the image number at the 
 bottom (enter higher number and press Enter), or using the Next or Prev image 
 buttons:
@@ -102,12 +101,18 @@ Next, choose the registration options:
 
 Registration parameters description:
 
+| Parameter         | Description                                                                                                                                                      | Default    |
+| ---               | ---                                                                                                                                                              | ---        |
+| Hemi              | Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored) accepted inputs are: <split> or <combined> | `combined` |
+| Labels resolution | Voxel size/Resolution of labels in um accepted inputs are: 10, 25 or 50                                                                                          | `10`       |
+| Olfactory bulb    | If bulb is included in the dataset accepted inputs are: 0 -> not included; 1 -> included                                                                         | `0`        |
+
 - **Hemi**: warp allen labels with hemisphere split (Left different than Right 
 labels) or combined (L & R same labels / Mirrored) accepted inputs are: 
-<split> or <combined>  (default: `combined`)
+<split> or <combined> (default: `combined`)
 
 - **Labels resolution:** voxel size/Resolution of labels in um accepted inputs 
-are: 10, 25 or 50  (default: `10`)
+are: 10, 25 or 50 (default: `10`)
 
 - **Olfactory bulb:** if bulb is included in the dataset accepted inputs are: 
 0 -> not included; 1 -> included (default: `0`)
@@ -115,7 +120,7 @@ are: 10, 25 or 50  (default: `10`)
 - **Side**: (only if registering hemisphere, else leave blank) accepted inputs are: 
 `rh` (right hemisphere) or `lh` (left)
 
-# Command-line
+## Command-line
 
 ```
 Usage:
