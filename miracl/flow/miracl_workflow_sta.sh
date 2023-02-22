@@ -626,8 +626,8 @@ fi
 
   # Display provided/default arguments
   printf "  \nThe following arguments will be used in the script:\n\n"
-  printf "  Input folder tifs: ${indir}\n"
-  printf "  Nifti folder: ${nii}\n"
+  printf "  Input folder tifs or niftis: ${indir}\n"
+  printf "  Output nifti name: ${nii}\n"
   printf "  Seed label abbreviation: ${lbl}\n"
   printf "  Final registration folder: ${regdir}\n"
   printf "  Hemisphere: ${hemi}\n"
@@ -648,7 +648,7 @@ fi
   printf "  Dilation factor for x: ${dilationfx}\n"
   printf "  Dilation factor for y: ${dilationfy}\n"
   printf "  Dilation factor for z: ${dilationfz}\n"
-  printf "  2nd order range-kutta method: ${rk2}\n\n"
+  printf "  2nd order range-kutta method: ${rk2}\n"
 
 # start processing steps
 
