@@ -101,11 +101,12 @@ Next, choose the registration options:
 
 Registration parameters description:
 
-| Parameter         | Description                                                                                                                                                      | Default    |
-| ---               | ---                                                                                                                                                              | ---        |
-| Hemi              | Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored) accepted inputs are: <split> or <combined> | `combined` |
-| Labels resolution | Voxel size/Resolution of labels in um accepted inputs are: 10, 25 or 50                                                                                          | `10`       |
-| Olfactory bulb    | If bulb is included in the dataset accepted inputs are: 0 -> not included; 1 -> included                                                                         | `0`        |
+| Parameter         | Description                                                                                                                                                                                     | Default    |
+| ---               | ---                                                                                                                                                                                             | ---        |
+| Hemisphere        | Warp Allen labels with hemisphere split (Left labels are different from Right labels) or combined (Left and Right lables are the same i.e. mirrored) accepted inputs are: `split` or `combined` | `combined` |
+| Labels resolution | Voxel size/Resolution of labels in um accepted inputs are: `10`, `25` or `50`                                                                                                                   | `10`       |
+| Olfactory bulb    | If bulb is included in the dataset accepted inputs are: <ul><li>`0` -> not included</li><li>`1` -> included</li></ul>                                                                           | `0`        |
+| Side              | **Only if registering hemisphere, else leave blank** Accepted inputs are: <ul><li>`rh` -> right hemisphere</li><li>`lh` -> left hemisphere</li></ul> 
 
 - **Hemi**: warp allen labels with hemisphere split (Left different than Right 
 labels) or combined (L & R same labels / Mirrored) accepted inputs are: 
