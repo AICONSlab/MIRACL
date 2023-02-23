@@ -195,7 +195,7 @@ $ git checkout tags/v2.2.1 -b miracl_v2.2.1
 ```
 
 4. If you are reverting to a version of MIRACL >= `2.2.4`, you can build the 
-image for your chosen version by running the build script with the `-s` flag:
+image for your chosen version by running the build script with the `-t` flag:
 
 ```
 $ ./build.sh -s
@@ -205,7 +205,7 @@ $ ./build.sh -s
 follow the build instructions of the particular version or download the latest 
 build script using e.g. 
 `wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh` 
-(overwrites current build script if present) and run it with the `-s` flag.
+(overwrites current build script if present) and run it with the `-t` flag.
 
 5. From here you can follow our instructions for 
 [building MIRACL from scratch](#build-miracl-from-scratch) starting with 
