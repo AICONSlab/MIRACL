@@ -167,29 +167,21 @@ optional arguments (remember the quotes):
 
     o. Orient code (default: ALS)
     to orient nifti from original orientation to "standard/Allen" orientation
-
     m. Warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
     accepted inputs are: <split> or <combined>  (default: combined)
-
     v. Labels voxel size/Resolution of labels in um
         accepted inputs are: 10, 25 or 50  (default: 10)
-
     l. image of input Allen Labels to warp (default: annotation_hemi_split_10um.nii.gz - which are at a resolution of 0.01mm/10um)
         input could be at a different depth than default labels
-
         If l. is specified (m & v cannot be specified)
 
 
 # Main Outputs
 
 reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
-
 reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
-
 reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
-
 reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
-
 reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif: Allen labels registered to original (full-resolution) Clarity
 
 
@@ -217,3 +209,13 @@ Optional arguments:
     -v Visualization software: itkSNAP 'itk' (default) or freeview 'free'
     -s Registration Space of results: clarity (default) or allen
 ```
+
+## Main outputs
+
+| File | Description |
+| ---  | ---         |
+| `reg_final/clar_allen_space.nii.gz` | CLARITY data in Allen reference space |
+| `reg_final/clar_downsample_res(vox)um.nii.gz` | CLARITY data downsampled and oriented to 'standard' |
+| `reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz`  | Allen labels registered to downsampled CLARITY |
+| `reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif` | Allen labels registered to oriented CLARITY |
+| `reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif` | Allen labels registered to original (full-resolution) CLARITY |
