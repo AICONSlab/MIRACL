@@ -84,8 +84,13 @@ and regional mask used for the tractography. Users also have the option to
 dilate the seed mask across any of the three dimensions, by a value (indicated 
 by the `Dilation factor` fields).
 
-After choosing the parameters, press `Enter` to save them, and then `Run` to 
-start the workflow.
+> Note that `tiff folder`, `output nii name`, `Seed label abbreviation`,
+`CLARITY final registration folder`, `hemi`, `Derivative of Gaussian`,
+`Gaussian smoothing sigma` and `Tracking angle threshold` are required
+parameters
+
+After choosing the parameters, first press `Enter` to save them and then `Run`
+to start the workflow.
 
 ## Command-line
 
