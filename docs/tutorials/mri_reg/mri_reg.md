@@ -17,8 +17,8 @@ The following window will open:
 
 ![](reg_options.png)
 
-First choose the input MRI nii (preferable T2-w) by clicking on
-`Select In-vivo or Ex-vivo MRI`. Then set the registration options:
+First click on `Select In-vivo or Ex-vivo MRI` and choose the input MRI nii 
+(preferable T2-w) using the dialog window. Then set the registration options:
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
@@ -55,24 +55,16 @@ optional arguments:
 
     o.  orient code (default: RSP)
         to orient nifti from original orientation to "standard/Allen" orientation
-
     m.  hemisphere mirror (default: combined)
         warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
         accepted inputs are: <split> or <combined>
-
     v.  labels voxel size/Resolution in um (default: 10)
         accepted inputs are: 10, 25 or 50
-
     l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
         input labels could be at a different depth than default labels
-
         If l. is specified (m & v cannot be specified)
-
     b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
-
     s.  skull strip or not, binary option (default: 1 -> skull-strip)
-
     f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
-
     n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
 ```
