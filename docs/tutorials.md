@@ -57,20 +57,20 @@ for a general introduction tutorial on how to use MIRACL.
 
 ## Conversion
 
-- [Tiff to Nii](./tutorials/tiff_to_nii/tiff_to_nii.md)
+#### [Tiff to Nii](./tutorials/tiff_to_nii/tiff_to_nii.md)
 
 ## Registration
 
-- [CLARITY-Allen](./tutorials/registration/reg_clarity-allen/reg_clarity-allen.md)
+#### [CLARITY-Allen](./tutorials/registration/reg_clarity-allen/reg_clarity-allen.md)
 
 ## Utilities
 
-- [Intensity correction](./tutorials/int_corr/int_corr.md)
+#### [Intensity correction](./tutorials/int_corr/int_corr.md)
 
 ---
 
 ## HPC
 
-- [Using MIRACL on Sherlock @ Stanford](./tutorials/sherlock/sherlock.md)
+#### [Using MIRACL on Sherlock @ Stanford](./tutorials/sherlock/sherlock.md)
 
-- [Using MIRACL on Compute Canada (Digital Research Alliance of Canada)](./tutorials/compute_canada/compute_canada.md)
+#### [Using MIRACL on Compute Canada (Digital Research Alliance of Canada)](./tutorials/compute_canada/compute_canada.md)
