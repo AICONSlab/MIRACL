@@ -38,6 +38,8 @@ Load the specific Singularity module you would like to use (e.g. Singularity 3.5
 $ module load singularity/3.5
 ```
 
+> Not specifying the version will load the latest version available on your node
+
 Since MIRACL will take up a significant amount of space, it is recommended to
 download and work with the MIRACL Singularity container in the scratch
 directory. First, navigate there:
@@ -72,7 +74,7 @@ Once you are logged in to the container, load the GUI from the shell:
 $ miraclGUI
 ```
 
-> Please consult our [Troubleshooting](../../troubleshooting.md) section if you experience problems with 
+> Please consult our [Troubleshooting](../../../troubleshooting.md) section if you experience problems with 
 opening MIRACL's GUI on Compute Canada
 
 Or use MIRACL from the command line. For example, run MIRACL's CLARITY 
@@ -81,3 +83,12 @@ registration workflow on the folder that you copied over previously:
 ```
 $ miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 ```
+
+> If you have a particular Singularity container of MIRACL that you want to use
+on Compute Canada, just copy it to the servers directly using e.g. `scp` or `rsync`
+instead of pulling (downloading) the latest version of MIRACL from the 
+Singularity registry
+
+---
+
+[<- back to tutorials](../../../tutorials.md)

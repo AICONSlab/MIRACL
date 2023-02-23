@@ -1,6 +1,6 @@
-# About
+# About MIRACL
 
-This is the place to get useful information about MIRACL. Jump to a topic you 
+This is the place to get information about MIRACL. Jump to a topic you 
 are interested in by chosing it from the sidebar menu.
 
 ## MIRACL in a nutshell
@@ -54,13 +54,13 @@ for ease of use to preform a desired task.
 
 For example, a standard reg/seg analysis could look like this: 
   
-1. First perform registration of whole-brain clarity data to ARA:
+First perform registration of whole-brain clarity data to ARA:
 
 ```
 $ miracl flow reg_clar -h
 ```
     
-2. Then perform segmentation & feature extraction of full resolution clarity data:
+Then perform segmentation & feature extraction of full resolution clarity data:
 
 ```
 $ miracl flow seg -h
