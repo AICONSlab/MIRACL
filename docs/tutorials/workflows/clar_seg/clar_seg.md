@@ -27,7 +27,7 @@ seg/miracl_seg_feat_extract.py
 
 ## GUI
 
-Select from the main GUI menu (`miraclGUI`) or run:
+Select from the main GUI menu (invoked from the cli: `$ miraclGUI`) or run:
 
 ```
 $ miracl flow seg
@@ -45,26 +45,32 @@ Next choose the segmentation parameters:
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
 | seg type | Channel type: <ul><li>`virus`</li><li>`cFos`</li><li>`sparse` (like `Thy1 YFP`)</li><li>`nuclear` (like `PI`)</li></ul> | `sparse` |
-| channel prefix | Channel prefix and number if multiple channels (e.g. `Filter0001`) | |
+| channel prefix | Channel prefix and number if multiple channels. Example: `Filter0001`) | `None` |
 
-Then choose the registered labels `annotation_hemi_side_**um_clar_vox.tif` to summarize segmentation features where:
+Then choose the registered labels `annotation_hemi_{side}_**um_clar_vox.tif` to summarize segmentation features where:
 
-* side -> `combined` or `split`
-* `**` is the resolution -> `10`, `25` or `50`
+- `{side}` -> `combined` or `split`
+- `**` is the resolution -> `10`, `25` or `50`
 
 ![](seg3.png)
 
 ## Command-line
 
-```
 Usage:
 
-    miracl flow seg -f [ Tiff folder ]
+```
+$ miracl flow seg -f [ Tiff_folder ]
+```
 
 Example:
 
-    miracl flow seg -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
+```
+$ miracl flow seg -f my_tifs -t nuclear -s "-p C001" -e "-l reg_final/annotation_hemi_combined_25um_clar_vox.tif"
+```
 
+Arguments:
+
+```
 arguments (required):
 
     f. Input Clarity tif folder/dir [folder name without spaces]
@@ -77,7 +83,7 @@ optional arguments (don't forget the quotes):
 
     Feature extraction (invoked by -e " "):
         l. Allen labels (registered to clarity) used to summarize features
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
+        reg_final/annotation_hemi_{hemi}_{vox}um_clar_vox.tif
 ```
 
 ## Main outputs
@@ -91,3 +97,7 @@ optional arguments (don't forget the quotes):
 | `clarity_segmentation_features_ara_labels.csv` | segmentation features summarized per ARA labels |
 
 > Results can be opened in Fiji for visualization.
+
+---
+
+[<- back to tutorials](../../../tutorials.md)
