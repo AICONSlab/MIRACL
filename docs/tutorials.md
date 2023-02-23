@@ -41,7 +41,7 @@ for a general introduction tutorial on how to use MIRACL.
 
 ## General
 
-- [Getting started](./tutorials/beginner/getting_started.md)
+### - [Getting started](./tutorials/beginner/getting_started.md)
 
 ---
 
