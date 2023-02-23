@@ -42,46 +42,41 @@ The following window will appear:
 ![](../../gallery/menus/MIRACL_flow_STA-menu.png)
 ![](./STA_flow_2.png)
 
-Choose input tiff folder with virus channel:
+Click on `Select Input tiff folder` and choose the folder that contains the 
+virus channel:
 
-Next choose the registered Allen labels inside the final registration folder (reg_final):
+<!--DIALOG IMAGE HERE-->
 
-<img src="sta2.png" alt="alt text" width="600" height="500"/>
+Next choose the registered Allen labels inside the final registration folder 
+(`reg_final`) by clicking on `Select CLARITY final registration folder`:
 
-Choose the output file name
+<!--DIALOG IMAGE HERE-->
 
-* Output nii name, for example: Mouse05
+Next choose the output file name (`Output nii name`). For example: `Mouse05`
+(our script will automatically append downsample ratio & channel info to 
+given name)
 
-   (script will append downsample ratio & channel info to given name)
+Set the tracking parameters:
 
-the tracking parameters:
-
-```
-- Seed label abbreviation (from Allen atlas ontology) for the seed region:
-
-    for example: **CP** for _Caudoputamen_ or **PL** for _Prelimbic Area_ for combined hemispheres
-
-    **RCP** for _Right Caudoputamen_ for the right hemisphere
-
-- Labels hemisphere (combined -> both or split -> for left or right label)
-
-- Derivative of Gaussion (dog) sigma, for example: **1**
-
-- Gaussian smoothing sigma, for example: **0.5**
-
-- Tracking angle threshold, for example: **35**
-
-- Whether or not to use 2nd order runge-kutta method for tracking
-```
+| Parameter | Description | Default |
+| ---       | ---         | ---     |
+| Seed label abbreviation | From Allen atlas ontology, for the seed region. <br>Examples:<br>Combined hemispheres: <ul><li>`CP` for _Caudoputamen_</li><li>`PL` for _Prelimbic Area_</li></ul><br>Right hemisphere:<ul><li>`RCP` for _Right Caudoputamen_</li><li>`RPL` for _Right Prelimbic Area_</li></ul> | |
+| hemi | Labels hemisphere:<ul><li>`combined` -> both</li><li>`split` -> left or right</li></ul>
+| Derivative of Gaussian (dog) sigma | Example: `1` | |
+| Gaussian smoothing sigma | Example: `0.5` | |
+| Tracking angle threshold | Example: `35` | |
+| Use 2nd order runge-kutta method for tracking | Use 2nd order runge-kutta:<ul><li>`0` -> don't use</li><li>`1` -> use</li></ul> | `0` |
 
 and the tiff conversion parameters:
 
-    - Down-sample ratio (default: 5)
-    - Chan # for extracting single channel from multiple channel data (default: 1)
-    - Chan prefix (string before channel number in file name). ex: C00
-    - Original resolution in x-y plane in um (default: 5)
-    - Original thickness (z-axis resolution / spacing between slices) in um (default: 5)
-    - Down-sample in z dimension, binary argument, (default: 1) => yes
+| Parameter | Description | Default |
+| ---       | ---         | ---     |
+| Downsample ratio | Set the downsample ratio | `5` |
+| chan # | For extracting single channel from multiple channel data | `1` |
+| chan prefix | String before channel number in file name. Example: `C00` | |
+| Resolution (x,y) | Original resolution in x-y plane in um | `5` |
+| Thickness | Original thickness (z-axis resolution/spacing between slices) in um | `5` |
+| Downsample in z | Downsample in z dimension.<br>Binary:<ul><li>`0` -> no</li><li>`1` -> yes</li></ul> | `1` |
 
 Users can also input their own brain mask, as well as their own seeding mask. Both masks would respectively replace the automatically generated brain mask and regional mask used for the tractography. Users also have the option to dilate the seed mask across any of the three dimensions, by a value (indicated by the "Dilation factor" fields)
 
