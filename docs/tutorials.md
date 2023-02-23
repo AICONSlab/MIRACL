@@ -41,27 +41,27 @@ for a general introduction tutorial on how to use MIRACL.
 
 ## General
 
-### - [Getting started](./tutorials/beginner/getting_started.md)
+### [Getting started](./tutorials/beginner/getting_started.md)
 
 ---
 
 ## Workflows
 
-### - [CLARITY whole-brain registration to Allen](./tutorials/clar_reg/clar_reg.md)
+#### [CLARITY whole-brain registration to Allen](./tutorials/clar_reg/clar_reg.md)
 
-### - [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/sta/sta.md)
+#### [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/sta/sta.md)
 
-### - [CLARITY whole-brain segmentation](./tutorials/clar_seg/clar_seg.md)
+#### [CLARITY whole-brain segmentation](./tutorials/clar_seg/clar_seg.md)
 
-### - [MRI whole-brain registration to Allen](./tutorials/mri_reg/mri_reg.md)
+#### [MRI whole-brain registration to Allen](./tutorials/mri_reg/mri_reg.md)
 
 ## Conversion
 
-#### [Tiff to Nii](./tutorials/tiff_to_nii/tiff_to_nii.md)
+#### - [Tiff to Nii](./tutorials/tiff_to_nii/tiff_to_nii.md)
 
 ## Registration
 
-#### [CLARITY-Allen](./tutorials/registration/reg_clarity-allen/reg_clarity-allen.md)
+#### - [CLARITY-Allen](./tutorials/registration/reg_clarity-allen/reg_clarity-allen.md)
 
 ## Utilities
 
