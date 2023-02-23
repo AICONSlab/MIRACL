@@ -13,7 +13,7 @@
 
 # Set variable base state
 # Script version
-version="1.1.3-beta"
+version="1.1.4-beta"
 
 # Set default log state
 write_log=false
@@ -41,7 +41,7 @@ function usage()
 
    -i, Specify image name (default: mgroubran/miracl)
    -c, Specify container name (default: miracl)
-   -s, Set when using specific MIRACL tag/version (parses from miracl/version.txt)
+   -t, Set when using specific MIRACL tag/version (parses from miracl/version.txt)
    -l, Write logfile of build process to build.log (default: false )
    -v, Print version of build script and exit
    -h, Print this help menu and exit
@@ -53,7 +53,7 @@ usage
 }
 
 # Parser for args and options
-while getopts ':i:c:lsvh' opt; do
+while getopts ':i:c:ltvh' opt; do
   case "$opt" in
 
     i)
@@ -72,7 +72,7 @@ while getopts ':i:c:lsvh' opt; do
       write_log=true
       ;;
 
-    s)
+    t)
       miracl_version=$(cat ./miracl/version.txt)
       ;;
 
