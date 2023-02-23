@@ -33,9 +33,15 @@ Important notes are marked as follows:
 
 > The above -h flag can be used with each of MIRACL's modules/functions
 
+- `{}`: Used for variabels. Example: `niftis/downsample{factor}x.nii.gz`
+- `<>`: Used for placeholder text in examples that you need to replace with 
+your own information. Example: `ssh <username>@cedar.computecanada.ca`
+- `[]`: Placeholders for flag arguments used in command-line scripting.
+Example: `miracl flow sta -f [ Tiff folder ] -o [ output nifti ]`
+
 Click on the links below to access the tutorial for the function you are 
 interested in or click on [Getting started](./tutorials/beginner/getting_started.md)
-for a general introduction tutorial on how to use MIRACL.
+for a introduction tutorial on how to use MIRACL in general.
 
 > Note that not all functions have tutorials yet...we are working on it!
 
