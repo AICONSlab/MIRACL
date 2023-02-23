@@ -40,8 +40,7 @@ $ miracl flow sta
 The following window will appear:
 
 ![](../../gallery/menus/MIRACL_flow_STA-menu.png)
-![](../../gallery/menus/MIRACL_main-menu.png)
-![](../../gallery/menus/MIRACL_registration_main-menu.png)
+![](./STA_flow_2.png)
 
 Choose input tiff folder with virus channel:
 
