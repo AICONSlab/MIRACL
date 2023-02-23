@@ -48,9 +48,9 @@ Then choose the registered Allen labels inside the final registration folder
 (`reg_final`) from the dialog window by clicking on 
 `Select CLARITY final registration folder`.
 
-Next choose the output file name (`Output nii name`). For example: `Mouse05`
-(our script will automatically append downsample ratio & channel info to 
-given name).
+Next choose the output file name (`Output nii name`), e.g. `Mouse05`.
+Our script will automatically append downsample ratio and channel info to the 
+given name.
 
 Set the tracking parameters:
 
