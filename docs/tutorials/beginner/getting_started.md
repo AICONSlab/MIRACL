@@ -1,6 +1,6 @@
 # Getting started
 
-## Command line
+## Command-line
 
 > If you have installed MIRACL locally, run `source activate miracl` first 
 to start its virtual environment.
