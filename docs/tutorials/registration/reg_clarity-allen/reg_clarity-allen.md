@@ -80,7 +80,7 @@ also required for the command-line.
 Usage:
 
 ```
-$ miracl reg clar_allen -i <input_clarity_nii_folder> -o <orientation_code> -m <hemispheres> -v <labels_resolution> -l <input_labels> -s <side_if_hemisphere_only> -b <olfactory_buld_included>
+$ miracl reg clar_allen -i [ input_clarity_nii_folder ] -o [ orientation_code ] -m [ hemispheres ] -v [ labels_resolution ] -l [ input_labels ] -s [ side_if_hemisphere_only ] -b [ olfactory_buld_included ]
 ```
 
 Example:

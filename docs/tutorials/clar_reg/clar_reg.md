@@ -141,7 +141,7 @@ are: 10, 25 or 50 (default: `10`)
 ```
 Usage:
 
-    $ miracl flow reg_clar -f [Tiff folder]
+    $ miracl flow reg_clar -f [ Tiff folder ]
 
 Example:
 

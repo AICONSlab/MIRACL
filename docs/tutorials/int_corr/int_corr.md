@@ -11,7 +11,7 @@ Performs correction on CLARITY tiff data in parallel using N4.
 
 Usage:
 
-    miracl utils int_corr -f [input tiff folder] -o [ output folder ] -s [ shrink factor] -cn [ channel num ] -cp [ channel prefix ] -p [ power ]
+    miracl utils int_corr -f [ input tiff folder ] -o [ output folder ] -s [ shrink factor] -cn [ channel num ] -cp [ channel prefix ] -p [ power ]
 
 Example:
 

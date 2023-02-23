@@ -59,7 +59,7 @@ Then choose the registered labels `annotation_hemi_side_**um_clar_vox.tif` to su
 ```
 Usage:
 
-    miracl flow seg -f [Tiff folder]
+    miracl flow seg -f [ Tiff folder ]
 
 Example:
 
@@ -68,19 +68,15 @@ Example:
 arguments (required):
 
     f. Input Clarity tif folder/dir [folder name without spaces]
-
     t. Channel type: sparse (like Thy1 YFP) or nuclear (like PI)
 
 optional arguments (don't forget the quotes):
 
     Segmentation (invoked by -s " "):
-
         p. Channel prefix & number if multiple channels (like Filter0001)
 
     Feature extraction (invoked by -e " "):
-
         l. Allen labels (registered to clarity) used to summarize features
-
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif
 ```
 

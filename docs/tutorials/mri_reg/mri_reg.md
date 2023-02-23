@@ -17,7 +17,7 @@ The following window will open:
 
 ![](reg_options.png)
 
-First click on `Select In-vivo or Ex-vivo MRI` and choose the input MRI nii 
+Click on `Select In-vivo or Ex-vivo MRI` and choose the input MRI nii 
 (preferable T2-w) using the dialog window. Then set the registration options:
 
 | Parameter | Description | Default |
