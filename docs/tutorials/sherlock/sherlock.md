@@ -1,88 +1,130 @@
-## Running MIRACL commands on Sherlock (Stanford supercomputer)
+# Running MIRACL commands on Sherlock (Stanford supercomputer)
 
-This tutorial highlights the registration workflow but 
-a similar approach applies to other commands 
+This tutorial highlights the registration workflow but a similar approach 
+applies to other commands.
 
-### Setting up MIRACL (first time) 
-You can skip this section if you ran through the Singularity install
-
-Login to Sherlock
-
-    $ ssh -Y username@sherlock.stanford.edu
-
-Start interactive session
-
-    $ sdev
-
-Move to your scratch folder
-
-    $ cd SCRATCH
-
-Pull (download) Singularity container 
-
-    $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
-
-### Copying your data to Sherlock 
-For example a folder called `input_clar` with tiff files for registration to Allen atlas:
-(replace username with your sherlock username)
-    
-    $ scp -r input_clar sherlock.stanford.edu:/scratch/users/username/clarity_registration/.
-
-### Running MIRACL in an interactive session
-For quick jobs that don't require much resources
+## Setting up MIRACL (first time) 
 
 Login to Sherlock
 
-    $ ssh -Y username@sherlock.stanford.edu
+```
+$ ssh -Y username@sherlock.stanford.edu
+```
 
-Move to your scratch folder
+Start interactive session:
 
-    $ cd SCRATCH
+```
+$ sdev
+```
 
-Start interactive session
+Move to your scratch folder:
 
-    $ sdev
+```
+$ cd SCRATCH
+```
+
+Pull (download) Singularity container:
+
+```
+$ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
+```
+
+## Copying your data to Sherlock 
+
+Copy a folder called, e.g. `input_clar` with tiff files that you want to 
+register to Allen Atlas using `scp`:
     
- Start singularity with binded data
+```
+$ scp -r input_clar sherlock.stanford.edu:/scratch/users/<username>/clarity_registration/.
+```
 
-    $ singularity shell miracl_latest.sif bash
+or `rsync`:
 
-Within the shell, load the GUI  
+```
+$ rsync -avPhz input_clar sherlock.stanford.edu:/scratch/users/<username>/clarity_registration/.
+```
 
-    > miraclGUI
+> Make sure to replace <username> with your Sherlock username
 
-Or use command line
+## Running MIRACL in an interactive session
 
-    > miracl lbls stats -h
+For quick jobs that don't require much resources you can login to Sherlock:
 
-### Running SBATCH jobs
-If you want to run jobs with specific resources for larger, longer jobs
+```
+$ ssh -Y username@sherlock.stanford.edu
+```
 
-For example if you want to run the registration workflow, first get the data orientation 
-(please check the registration tutorial for setting orientation)
+Move to your scratch folder:
 
-    > miracl conv set_orient
+```
+$ cd SCRATCH
+```
 
-After setting the orientation a file called ``ort2std.txt`` will be created that might look like this:
+Start interactive session:
 
-    > cat ort2std.txt
+```
+$ sdev
+```
+    
+Start Singularity with binded data:
 
-```text
+```
+$ singularity shell miracl_latest.sif bash
+```
+
+Within the shell, load the GUI:
+
+```
+$ miraclGUI
+```
+
+Or use command line:
+
+```
+$ miracl lbls stats -h
+```
+
+> Please consult our [Troubleshooting](../../troubleshooting.md) section if you experience problems with 
+opening MIRACL's GUI on Sherlock
+
+## Running SBATCH jobs
+
+If you want to run jobs with specific resources for larger, longer jobs (e.g. 
+running the registration workflow) you can do the following:
+
+First get the data orientation (please check the registration tutorial for 
+setting orientation):
+
+```
+$ miracl conv set_orient
+```
+
+After setting the orientation, a file called `ort2std.txt` will be created that 
+might look like this:
+
+```
+$ cat ort2std.txt
 tifdir=/scratch/users/username/clarity_registration/input_clar
 ortcode=ARS
 ```
 
-Use that orientation code `ARS` in your registration workflow 
+Use that orientation code (`ARS`) in your registration workflow.
 
-First check the workflow arguments
+First check the workflow arguments:
 
-    > miracl flow reg_clar -h
+```
+$ miracl flow reg_clar -h
+```
 
-Assuming you wanted to run this command with the following arguments for example on your data:
+Assuming you wanted to run this command with the following arguments, for 
+example on your data:
 
-    miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
+```
+$ miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
+```
 
-Create an sbatch script, for example `reg_job.sbatch` with the following lines:
+Create an sbatch script named, for example `reg_job.sbatch` and paste the 
+following lines:
 
 ```bash
 #!/bin/bash
@@ -95,27 +137,29 @@ Create an sbatch script, for example `reg_job.sbatch` with the following lines:
 module load singularity
 
 singularity exec ${SCRATCH}/miracl_latest.sif miracl flow reg_clar -f ${SCRATCH}/clarity_registration/input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
-
 ```
 
-Notice the miracl function call came after: `singularity exec ${SCRATCH}/miracl_latest.sif`
+> Note that the miracl function call comes after invoking the Singularity call
+`singularity exec ${SCRATCH}/miracl_latest.sif` and that full file paths were 
+used for the `.sif` container and the the input data
 
-And we added full path of the input data
+This sample job (called: `clar_reg`) asks for 5 hours, 12 cpus and 32G of 
+memory on one node. Adjust the requested resources based on the job you are 
+submitting.
 
-This sample job (called: clar_reg) asks for 5 hours, 12 cpus and 32G of memory in one node.
-Adjust the requested resources based on the job you are submitting.
+Next submit the sbatch script:
 
-Then submit the sbatch script
+```
+$ sbatch reg_job.sbatch
+```
 
-    $ sbatch reg_job.sbatch
+To check on the status of your submitted job use:
 
-Check on submitted job
-
-    $ squeue -u $USER
+```
+$ squeue -u $USER
+```
     
-    
-#### For more resources on slurm sbatch jobs check these pages
-
-[sherlock submitting jobs](https://www.sherlock.stanford.edu/docs/getting-started/submitting/)
-
-[sherlock running jobs](https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/)
+> For more resources on SLURM sbatch jobs check Stanford's tutorials on
+[submitting](https://www.sherlock.stanford.edu/docs/getting-started/submitting/)
+and [running](https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/)
+jobs on Sherlock
