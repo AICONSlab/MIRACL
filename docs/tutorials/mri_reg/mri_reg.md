@@ -17,7 +17,8 @@ The following window will open:
 
 ![](reg_options.png)
 
-Choose the input MRI nii (preferable T2-w) and registration options:
+First choose the input MRI nii (preferable T2-w) by clicking on
+`Select In-vivo or Ex-vivo MRI`. Then set the registration options:
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
@@ -27,6 +28,8 @@ Choose the input MRI nii (preferable T2-w) and registration options:
 | Olfactory bulb included | Specify whether the olfactory bulb is included in brain. <br>Accepted inputs are: <ul><li>`0` (not included)</li><li>`1` (included)</li></ul> | `0` |
 | skull strip | Strip skull. Accepted inputs are: <ul><li>`0` (don't strip)</li><li>`1` (strip)</li></ul> | `1` |
 | No orient | No orientation needed (input image in "standard" orientation). Accepted inputs are: <ul><li>`0` (orient)</li><li>`1` (don't orient)</li></ul> | `0` |
+
+Click `Enter` and `Run` to start the registration process.
 
 ## Command-line
 
