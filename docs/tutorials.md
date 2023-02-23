@@ -1,8 +1,43 @@
 # Tutorials
 
-The tutorial structure generally matches the category structure of MIRACL.
+The tutorial structure generally matches the module/function structure of MIRACL.
 
-Click on the corresponding tutorial for instructions.
+In the tutorials, code examples are written as follows:
+
+```
+$ miracl -h
+```
+
+Code blocks look like this:
+
+```
+usage: miracl [-h] {connect,conv,flow,lbls,reg,seg,sta,stats,utils} ...
+
+positional arguments:
+  {connect,conv,flow,lbls,reg,seg,sta,stats,utils}
+    connect             connectivity functions
+    conv                conversion functions
+    flow                workflows to run
+    lbls                label manipulation functions
+    reg                 registration functions
+    seg                 segmentation functions
+    sta                 structure tensor analysis functions
+    stats               statistical functions
+    utils               utility functions
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+Important notes are marked as follows:
+
+> The above -h flag can be used with each of MIRACL's modules/functions
+
+Click on the links below to access the tutorial for the function you are 
+interested in or click on [Getting started](./tutorials/beginner/getting_started.md)
+for a general introduction tutorial on how to use MIRACL.
+
+> Note that not all functions have tutorials yet...we are working on it!
 
 ## General
 
