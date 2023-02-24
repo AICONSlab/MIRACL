@@ -545,11 +545,14 @@ class STATSHeatmapMenu(QtWidgets.QWidget):
 
 def main():
     # Create an PyQT5 application object.
+    global app_stats
     app_stats = QtWidgets.QApplication(sys.argv)
     stats_arg = STATSHeatmapMenu()
     stats_arg.show()
     app_stats.exec_()
-    return stats_arg.inputs
+    arg_heatmap=stats_arg.inputs
+    del stats_arg, app_stats
+    return arg_heatmap
 
 if __name__ == "__main__":
     sys.exit(main())
