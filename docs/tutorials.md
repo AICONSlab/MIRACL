@@ -85,5 +85,6 @@ your own information.
     - Example: `miracl flow sta -f [ Tiff folder ] -o [ output nifti ]`
 - `[]`: Denotes flags in the command-line help menus.
     - Example: `miracl [-h]`
-- Code related words or phrases (e.g. file or directory names) are denoted as 
+
+Code related words or phrases (e.g. file or directory names) are denoted as 
 follows: `example_dir/example_file.nii.gz` 

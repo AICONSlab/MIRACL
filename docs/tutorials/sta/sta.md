@@ -1,7 +1,7 @@
 # Running the STA workflow
 
 To run the structural tensor analysis (STA) workflow for fiber quantification 
-and tracking
+and tracking.
 
 > Run workflow **after** running the CLARITY-Allen registration first
 
@@ -56,7 +56,7 @@ Set the tracking parameters:
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
-| Seed label abbreviation | From Allen atlas ontology, for the seed region. Examples:<br>Combined hemispheres: <ul><li>`CP` for _Caudoputamen_</li><li>`PL` for _Prelimbic Area_</li></ul>Right hemisphere:<ul><li>`RCP` for _Right Caudoputamen_</li><li>`RPL` for _Right Prelimbic Area_</li></ul> | |
+| Seed label abbreviation | From Allen atlas ontology, for the seed region. Examples:<br><br>Combined hemispheres: <ul><li>`CP` for _Caudoputamen_</li><li>`PL` for _Prelimbic Area_</li></ul>Right hemisphere:<ul><li>`RCP` for _Right Caudoputamen_</li><li>`RPL` for _Right Prelimbic Area_</li></ul> | |
 | hemi | Labels hemisphere. Accepted inputs are:<ul><li>`combined` -> both</li><li>`split` -> left or right</li></ul>
 | Derivative of Gaussian (dog) sigma | Example: `1` | |
 | Gaussian smoothing sigma | Example: `0.5` | |
@@ -72,7 +72,7 @@ and the tiff conversion parameters:
 | chan prefix | String before channel number in file name. Example: `C00` | |
 | Resolution (x,y) | Original resolution in x-y plane in um | `5` |
 | Thickness | Original thickness (z-axis resolution/spacing between slices) in um | `5` |
-| Downsample in z | Downsample in z dimension.<br>Binary:<ul><li>`0` -> no</li><li>`1` -> yes</li></ul> | `1` |
+| Downsample in z | Downsample in z dimension. Binary:<ul><li>`0` -> no</li><li>`1` -> yes</li></ul> | `1` |
 
 Users can also input their own brain mask, as well as their own seeding mask. 
 Both masks would respectively replace the automatically generated brain mask 
@@ -117,9 +117,9 @@ arguments (required):
   -l: Seed label abbreviation (from Allen atlas ontology)
   -r: CLARITY final registration folder
   -m: Labels hemi
-  -g: [ Derivative of Gaussian (dog) sigma ]
-  -k: [ Gaussian smoothing sigma ]
-  -a: [ Tracking angle threshold ]
+  -g: Derivative of Gaussian (dog) sigma
+  -k: Gaussian smoothing sigma
+  -a: Tracking angle threshold
 
 optional arguments:
   -d: Downsample ratio (default: 5)
@@ -146,3 +146,7 @@ optional arguments:
 | `clarity_sta_{label}_seed/dog{dog}_gauss{gauss}/filter_ang{angle}.trk` | Tract file |
 | `virus_signal_stats_depth_{depth}.csv` | Virus stats csv |
 | `sta_streamlines_density_stats_depth_{depth}.csv` | Streamline density stats csv |
+
+---
+
+[<- back to tutorials](../../tutorials.md)

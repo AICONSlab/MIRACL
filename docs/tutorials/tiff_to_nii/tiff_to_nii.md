@@ -1,63 +1,60 @@
-To convert Tiff images to Nifti format for analysis or visualization
+# Tiff to Nifti
 
-# GUI
+To convert Tiff images to Nifti format for analysis or visualization.
 
-run:
+## GUI
 
-    miracl conv tiff_nii
+Run:
 
-the following window will appear:
+```
+$ miracl conv tiff_nii
+```
+
+The following window will open:
 
 ![](tiff_to_nii1.png)
 
-choose input tiff folder:
+From it, choose the input tiff folder:
 
 ![](tiff_to_nii2.png)
 
-then choose the desired parameters, if default value is ok you can leave it blank
+Next choose the desired parameters or use the default by using the fields blank:
 
+| Parameters | Description | Default |
+| ---        | ---         | ---     |
+| Out nii name | Output file name | `clarity` |
+| Downsample ratio | Downsample factor for nifti images | `5` |
+| chan # and prefix | Use if tiff files have more than one channel. For example, given the names `10-04-06_R923_06R1ca_647_100p350_na144_UltraII_**C001**_xyz-Table Z1284.ome.tif` for channel 1 and `10-04-06_R923_06R1ca_647_100p350_na144_UltraII_**C002**_xyz-Table Z1284.ome.tif` for channel 2 with the latter being the desired channel for conversion, `chan #` would be `2` and `chan prefix` would be `C00`. | |
+| Out chan name | Output channel name | `eyfp` |
+| Resolution (x,y) | Original resolution in x-y plane in um | `5` |
+| Thickness | Original thickness (z-axis resolution/spacing between slices) in um | `5` |
+| center | Center of Nifti file | `0 0 0` |
+| Downsample in z | Down-sample in z dimension. Binary:<ul><li>`0` -> no</li><li>`1` -> yes</li></ul> | `1` |
+| Prev Downsampling | Previous downsample ratio if already downsampled:<ul><li>`0` -> downsampled</li><li>`1` -> not downsampled</li></ul> | `1` |
 
-* if the tiff files have more than one channel, for example with the name:
+After choosing the parameters press `Enter` to save them then `Run` to start 
+conversion process.
 
-    10-04-06_R923_06R1ca_647_100p350_na144_UltraII_**C001**_xyz-Table Z1284.ome.tif for channel 1 and
-
-    10-04-06_R923_06R1ca_647_100p350_na144_UltraII_**C002**_xyz-Table Z1284.ome.tif for channel 2
-
-    and channel 2 is the desired channel for conversion,
-
-    then **chan #** would be _2_
-
-    and **chan prefix** would be _C00_
-
-and the tiff converstion parameters:
-
-    - Down-sample ratio (default: 5)
-    - Original resolution in x-y plane in um (default: 5)
-    - Original thickness (z-axis resolution / spacing between slices) in um (default: 5)
-    - Down-sample in z dimension, binary argument, (default: 1) => yes
-
-after choosing the parameters press **Enter** to save them then **Run**
-
-After conversion is done, nifti (nii/nii.gz) files can be visualized in ITKsnap
+> After the conversion is done, nifti (`nii/nii.gz`) files can be visualized in 
+`ITKsnap`
 
 ----
 
-
 # Command-line
 
-usage:
+Usage:
 
     miracl conv tiff_nii -f [Tiff folder]
 
-example:
+Example:
 
     miracl conv tiff_nii -f my_tifs -o stroke2 -cn 1 -cp C00 -ch Thy1YFP -vx 2.5 -vz 5
 
-required arguments:
+Required arguments:
 
       -f dir, --folder dir  Input CLARITY TIFF folder/dir
 
-optional arguments:
+Optional arguments:
 
       -d , --down           Down-sample ratio (default: 5)
       -cn , --channum       Chan # for extracting single channel from multiple channel data (default: 1)
@@ -71,3 +68,7 @@ optional arguments:
       -dz , --downzdim      Down-sample in z dimension, binary argument, (default: 1) => yes
       -pd , --prevdown      Previous down-sample ratio, if already down-sampled
       -h, --help            Show this help message and exit
+
+---
+
+[<- back to tutorials](../../tutorials.md)

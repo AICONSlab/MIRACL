@@ -88,3 +88,7 @@ Example:
 ```
 $ miracl reg clar_allen -i downsampled_niftis/SHIELD_03x_down_autoflor_chan.nii.gz -o ARI -m combined -b 1
 ```
+
+---
+
+[<- back to tutorials](../../tutorials.md)

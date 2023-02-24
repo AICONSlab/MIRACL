@@ -79,11 +79,11 @@ Conversion parameters description:
 | out nii   | Output nifti name | `clarity` |
 | downsample ratio | Downsample factor for conversion | `5` |
 | channel # | Number for extracting single channel from multiple channel data (leave blank if single channel data/tiff files) | `1` |
-| channel prefix | String before channel number in file name (leave blank if single channel). <br><br>For example, if tiff file name has `_C001_.tif` for channel 1 and `_C002_.tif` for channel 2, to choose channel 1 if it's the auto fluorescence channel: <ul><li>Chan number would be: `1`</li><li>Chan prefix would be: `C00`</li></ul> |
+| channel prefix | String before channel number in file name (leave blank if single channel). <br><br>For example, if tiff file name has `_C001_.tif` for channel 1 and `_C002_.tif` for channel 2, to choose channel 1 if it's the auto fluorescence channel: <ul><li>Chan number would be: `1`</li><li>Chan prefix would be: `C00`</li></ul> | |
 | channel name | Output channel name | `eyfp` |
 | in-plane res | Original resolution in x-y plane in um | `5` |
 | z res | Thickness (z-axis resolution/spacing between slices) in um | `5` |
-| center | C of nifti file | `0 0 0` |
+| center | Center of nifti file | `0 0 0` |
 
 <!--
 - **out nii**: Output nifti name

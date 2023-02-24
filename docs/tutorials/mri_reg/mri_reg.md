@@ -22,10 +22,10 @@ Click on `Select In-vivo or Ex-vivo MRI` and choose the input MRI nii
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
-| Orient code | Orient nifti from original orientation to "standard/Allen" orientation | `RSP` |
+| Orient code | Orient nifti from original orientation to "standard/Allen" orientation. | `RSP` |
 | Labels Hemi | Warp allen labels with hemisphere split (Left different than Right labels) or combined (Left and Right labels are the same/mirrored). Accepted inputs are: <ul><li>`split`</li><li>`combined`</li></ul> | `combined` |
-| Labels resolution [vox] | Labels voxel size/resolution in um accepted inputs are: <ul><li>`10`</li><li>`25`</li><li>`50`</li></ul> | `10` |
-| Olfactory bulb included | Specify whether the olfactory bulb is included in brain. <br>Accepted inputs are: <ul><li>`0` (not included)</li><li>`1` (included)</li></ul> | `0` |
+| Labels resolution [vox] | Labels voxel size/resolution in um. Accepted inputs are: <ul><li>`10`</li><li>`25`</li><li>`50`</li></ul> | `10` |
+| Olfactory bulb included | Specify whether the olfactory bulb is included in brain. Accepted inputs are: <ul><li>`0` (not included)</li><li>`1` (included)</li></ul> | `0` |
 | skull strip | Strip skull. Accepted inputs are: <ul><li>`0` (don't strip)</li><li>`1` (strip)</li></ul> | `1` |
 | No orient | No orientation needed (input image in "standard" orientation). Accepted inputs are: <ul><li>`0` (orient)</li><li>`1` (don't orient)</li></ul> | `0` |
 
@@ -44,6 +44,8 @@ Example:
 ```
 $ miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 ```
+
+Arguments:
 
 ```
 arguments (required):
@@ -68,3 +70,7 @@ optional arguments:
     f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
     n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
 ```
+
+---
+
+[<- back to tutorials](../../tutorials.md)

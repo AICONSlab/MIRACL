@@ -121,6 +121,7 @@ To get the GUI of a specific function, run it without arguments, for example:
 $ miracl conv tiff_nii
 ```
 
-> Warning not all functions have GUIs yet...working on it!
+> Warning not all functions have GUIs yet...we are working on it!
 
-> Please check the rest of the [tutorials](../../tutorials.md) for more detailed documentation
+> Please check the rest of the [tutorials](../../tutorials.md) for more 
+detailed documentation on modules and functions
