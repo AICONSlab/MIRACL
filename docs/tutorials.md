@@ -1,6 +1,47 @@
 # Tutorials
 
-The tutorial structure generally matches the module/function structure of MIRACL.
+The tutorial structure generally matches the module/function structure of MIRACL. 
+Refer to our tutorials/docs [legend](#legend) for syntax information.
+
+Click on the links below to access the tutorial for the function you are 
+interested in or go to our [Getting started](./tutorials/beginner/getting_started.md)
+section for a tutorial on MIRACL's general usage.
+
+> Note that not all functions have tutorials yet...we are working on it!
+
+## General
+
+#### [Getting started](./tutorials/beginner/getting_started.md)
+
+## Workflows
+
+#### [CLARITY whole-brain registration to Allen](./tutorials/clar_reg/clar_reg.md)
+
+#### [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/sta/sta.md)
+
+#### [CLARITY whole-brain segmentation](./tutorials/clar_seg/clar_seg.md)
+
+#### [MRI whole-brain registration to Allen](./tutorials/mri_reg/mri_reg.md)
+
+## Conversion
+
+#### [Tiff to Nii](./tutorials/tiff_to_nii/tiff_to_nii.md)
+
+## Registration
+
+#### [CLARITY-Allen](./tutorials/registration/reg_clarity-allen/reg_clarity-allen.md)
+
+## Utilities
+
+#### [Intensity correction](./tutorials/int_corr/int_corr.md)
+
+## HPC
+
+#### [Using MIRACL on Sherlock @ Stanford](./tutorials/sherlock/sherlock.md)
+
+#### [Using MIRACL on Compute Canada (Digital Research Alliance of Canada)](./tutorials/compute_canada/compute_canada.md)
+
+## Legend
 
 In the tutorials, code examples are written as follows:
 
@@ -31,52 +72,16 @@ optional arguments:
 
 Important notes are marked as follows:
 
-> The above -h flag can be used with each of MIRACL's modules/functions
+> The above `-h` flag can be used with each of MIRACL's modules/functions
 
-- `{}`: Used for variabels. Example: `niftis/downsample{factor}x.nii.gz`
+We use brackets to denote text as follows:
+
+- `{}`: Used for variabels.
+    - Example: `niftis/downsample{factor}x.nii.gz`
 - `<>`: Used for placeholder text in examples that you need to replace with 
-your own information. Example: `ssh <username>@cedar.computecanada.ca`
-- `[]`: Placeholders for flag arguments used in command-line scripting.
-Example: `miracl flow sta -f [ Tiff folder ] -o [ output nifti ]`
-
-Click on the links below to access the tutorial for the function you are 
-interested in or click on [Getting started](./tutorials/beginner/getting_started.md)
-for a introduction tutorial on how to use MIRACL in general.
-
-> Note that not all functions have tutorials yet...we are working on it!
-
-## General
-
-#### [Getting started](./tutorials/beginner/getting_started.md)
-
----
-
-## Workflows
-
-#### [CLARITY whole-brain registration to Allen](./tutorials/clar_reg/clar_reg.md)
-
-#### [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/sta/sta.md)
-
-#### [CLARITY whole-brain segmentation](./tutorials/clar_seg/clar_seg.md)
-
-#### [MRI whole-brain registration to Allen](./tutorials/mri_reg/mri_reg.md)
-
-## Conversion
-
-#### [Tiff to Nii](./tutorials/tiff_to_nii/tiff_to_nii.md)
-
-## Registration
-
-#### [CLARITY-Allen](./tutorials/registration/reg_clarity-allen/reg_clarity-allen.md)
-
-## Utilities
-
-#### [Intensity correction](./tutorials/int_corr/int_corr.md)
-
----
-
-## HPC
-
-#### [Using MIRACL on Sherlock @ Stanford](./tutorials/sherlock/sherlock.md)
-
-#### [Using MIRACL on Compute Canada (Digital Research Alliance of Canada)](./tutorials/compute_canada/compute_canada.md)
+your own information.
+    - Example: `ssh <username>@cedar.computecanada.ca`
+- `[ ]`: Placeholders for flag arguments used in command-line scripting.
+    - Example: `miracl flow sta -f [ Tiff folder ] -o [ output nifti ]`
+- `[]`: Denotes flags in the cli help menus.
+    - Example: `miracl [-h]`
