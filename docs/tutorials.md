@@ -70,7 +70,7 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-Important notes are marked as follows:
+Important notes are marked as blockquotes:
 
 > The above `-h` flag can be used with each of MIRACL's modules/functions
 
@@ -83,5 +83,7 @@ your own information.
     - Example: `ssh <username>@cedar.computecanada.ca`
 - `[ ]`: Placeholders for flag arguments used in command-line scripting.
     - Example: `miracl flow sta -f [ Tiff folder ] -o [ output nifti ]`
-- `[]`: Denotes flags in the cli help menus.
+- `[]`: Denotes flags in the command-line help menus.
     - Example: `miracl [-h]`
+- Code related words or phrases (e.g. file or directory names) are denoted as 
+follows: `example_dir/example_file.nii.gz` 
