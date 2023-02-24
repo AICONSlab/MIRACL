@@ -63,15 +63,15 @@ Set the tracking parameters:
 | Tracking angle threshold | Example: `35` | |
 | Use 2nd order runge-kutta method for tracking | Use 2nd order runge-kutta:<ul><li>`0` -> don't use</li><li>`1` -> use</li></ul> | `0` |
 
-and the tiff conversion parameters:
+And the tiff conversion parameters:
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
-| Downsample ratio | Set the downsample ratio | `5` |
-| chan # | For extracting single channel from multiple channel data | `1` |
+| Downsample ratio | Set the downsample ratio. | `5` |
+| chan # | For extracting single channel from multiple channel data. | `1` |
 | chan prefix | String before channel number in file name. Example: `C00` | |
-| Resolution (x,y) | Original resolution in x-y plane in um | `5` |
-| Thickness | Original thickness (z-axis resolution/spacing between slices) in um | `5` |
+| Resolution (x,y) | Original resolution in x-y plane in um. | `5` |
+| Thickness | Original thickness (z-axis resolution/spacing between slices) in um. | `5` |
 | Downsample in z | Downsample in z dimension. Binary:<ul><li>`0` -> no</li><li>`1` -> yes</li></ul> | `1` |
 
 Users can also input their own brain mask, as well as their own seeding mask. 
