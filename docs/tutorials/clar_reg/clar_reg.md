@@ -220,4 +220,6 @@ Optional arguments:
 | `reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif` | Allen labels registered to oriented CLARITY |
 | `reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif` | Allen labels registered to original (full-resolution) CLARITY |
 
+---
+
 [<- back to tutorials](../../tutorials.md)
