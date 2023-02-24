@@ -42,9 +42,8 @@ We provide containers (`Docker <./installation.md>`_ and
    :caption: Contents:
    :hidden:
 
-   about
+   About <about>
    Installation <installation>
-   user-guide
    tutorials
    troubleshooting
    data
