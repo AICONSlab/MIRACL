@@ -88,3 +88,5 @@ your own information.
 
 Code related words or phrases (e.g. file or directory names) are denoted as 
 follows: `example_dir/example_file.nii.gz` 
+
+Lastly, links are highlight in blue: [link to MIRACL's README](../README.md)
