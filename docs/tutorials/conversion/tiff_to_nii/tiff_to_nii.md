@@ -12,11 +12,11 @@ $ miracl conv tiff_nii
 
 The following window will open:
 
-![](tiff_to_nii1.png)
+![](./tiff_to_nii1.png)
 
 From it, choose the input tiff folder:
 
-![](tiff_to_nii2.png)
+![](./tiff_to_nii2.png)
 
 Next choose the desired parameters or use the default by leaving the fields blank:
 
@@ -79,4 +79,4 @@ Optional arguments:
 
 ---
 
-[<- back to tutorials](../../tutorials.md)
+[<- back to tutorials](../../../tutorials.md)

@@ -74,7 +74,7 @@ Once you are logged in to the container, load the GUI from the shell:
 $ miraclGUI
 ```
 
-> Please consult our [Troubleshooting](../../troubleshooting.md) section if you experience problems with 
+> Please consult our [Troubleshooting](../../../troubleshooting.md) section if you experience problems with 
 opening MIRACL's GUI on Compute Canada
 
 Or use MIRACL from the command line. For example, run MIRACL's CLARITY 
@@ -91,4 +91,4 @@ Singularity registry
 
 ---
 
-[<- back to tutorials](../../tutorials.md)
+[<- back to tutorials](../../../tutorials.md)

@@ -89,7 +89,7 @@ Or use the command-line:
 $ miracl lbls stats -h
 ```
 
-> Please consult our [Troubleshooting](../../troubleshooting.md) section if you experience problems with 
+> Please consult our [Troubleshooting](../../../troubleshooting.md) section if you experience problems with 
 opening MIRACL's GUI on Sherlock
 
 ## Running SBATCH jobs
@@ -171,4 +171,4 @@ jobs on Sherlock
 
 ---
 
-[<- back to tutorials](../../tutorials.md)
+[<- back to tutorials](../../../tutorials.md)
