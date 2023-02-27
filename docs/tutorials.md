@@ -15,7 +15,7 @@ section for a tutorial on MIRACL's general usage.
 
 ## Workflows
 
-#### [CLARITY whole-brain registration to Allen](./tutorials/clar_reg/clar_reg.md)
+#### [CLARITY whole-brain registration to Allen](./tutorials/workflows/clar_reg/clar_reg.md)
 
 #### [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/sta/sta.md)
 
