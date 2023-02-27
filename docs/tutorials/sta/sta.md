@@ -27,19 +27,15 @@ lbls/miracl_lbls_stats.py
 
 ## GUI
 
-From the main GUI (`miraclGUI`), select `Workflows -> CLARITY STA`:
+From the main GUI (invoked with: `$ miraclGUI`), select `Workflows -> CLARITY STA`:
 
 ![](../../gallery/menus/MIRACL_main-menu.png)
-
-Or run:
-
-```
-$ miracl flow sta
-```
 
 The following window will appear:
 
 ![](../../gallery/menus/MIRACL_flow_STA-menu.png)
+
+> To open the STA workflow menu directly use: `$ miracl flow sta`
 
 Click on `Select Input tiff folder` and choose the folder that contains the 
 virus channel from the dialog window.
@@ -56,11 +52,11 @@ Set the tracking parameters:
 
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
-| Seed label abbreviation | From Allen atlas ontology, for the seed region. Examples:<br><br>Combined hemispheres: <ul><li>`CP` for _Caudoputamen_</li><li>`PL` for _Prelimbic Area_</li></ul>Right hemisphere:<ul><li>`RCP` for _Right Caudoputamen_</li><li>`RPL` for _Right Prelimbic Area_</li></ul> | |
-| hemi | Labels hemisphere. Accepted inputs are:<ul><li>`combined` -> both</li><li>`split` -> left or right</li></ul>
-| Derivative of Gaussian (dog) sigma | Example: `1` | |
-| Gaussian smoothing sigma | Example: `0.5` | |
-| Tracking angle threshold | Example: `35` | |
+| Seed label abbreviation | From Allen atlas ontology, for the seed region. Examples:<br><br>Combined hemispheres: <ul><li>`CP` for _Caudoputamen_</li><li>`PL` for _Prelimbic Area_</li></ul>Right hemisphere:<ul><li>`RCP` for _Right Caudoputamen_</li><li>`RPL` for _Right Prelimbic Area_</li></ul> | Required. Function will exit with error 1 if not provided. |
+| hemi | Labels hemisphere. Accepted inputs are:<ul><li>`combined` -> both</li><li>`split` -> left or right</li></ul> | `combiend` |
+| Derivative of Gaussian (dog) sigma | Example: `1` | `0.5,1.5` |
+| Gaussian smoothing sigma | Example: `0.5` | `0.5,2` |
+| Tracking angle threshold | Example: `35` | `25,35` |
 | Use 2nd order runge-kutta method for tracking | Use 2nd order runge-kutta:<ul><li>`0` -> don't use</li><li>`1` -> use</li></ul> | `0` |
 
 And the tiff conversion parameters:
