@@ -26,7 +26,7 @@ $ miraclGUI
 
 and choose `CLARITY-Allen Registration` from the `Workflows` tab:
 
-![](../../gallery/menus/MIRACL_main-menu.png)
+![](../../../gallery/menus/MIRACL_main-menu.png)
 
 Or run:
 
@@ -38,39 +38,40 @@ Choose the input tiff folder with the auto fluorescence channel from the
 pop-up menu:
 
 ![](../tiff_to_nii/tiff_to_nii2.png)
+![](../../tiff_to_nii/tiff_to_nii2.png)
 
 The following GUI will appear which opens the data and lets you set its
 orientation manually:
 
-![](reg1.png)
+![](./reg1.png)
 
 You can navigate through the data using the bar bellow, by specifying the slice number
 or using the arrows:
 
-![](reg2.png)
+![](./reg2.png)
 
 First choose the data plane (axial, coronal or sagittal):
 
-![](reg3.png)
+![](./reg3.png)
 
 Then choose the orientation at the top and right of the image:
 
-![reg](reg4.png)
+![reg](./reg4.png)
 
 Next, choose the orientation for scrolling through the slices (going into 
 the page), can confirm the orientation by changing the image number at the 
 bottom (enter higher number and press Enter), or using the `Next` or `Prev` image 
 buttons:
 
-![](reg5.png)
+![](./reg5.png)
 
 Finally close the GUI:
 
-![](reg6.png)
+![](./reg6.png)
 
 Next, set the tiff conversion parameters:
 
-![](reg7.png)
+![](./reg7.png)
 
 Conversion parameters description:
 
@@ -87,7 +88,7 @@ Conversion parameters description:
 
 Next, choose the registration options:
 
-![](reg8.png)
+![](./reg8.png)
 
 Registration parameters description:
 

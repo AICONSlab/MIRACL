@@ -29,11 +29,11 @@ lbls/miracl_lbls_stats.py
 
 From the main GUI (invoked with: `$ miraclGUI`), select `Workflows -> CLARITY STA`:
 
-![](../../gallery/menus/MIRACL_main-menu.png)
+![](../../../gallery/menus/MIRACL_main-menu.png)
 
 The following window will appear:
 
-![](../../gallery/menus/MIRACL_flow_STA-menu.png)
+![](../../../gallery/menus/MIRACL_flow_STA-menu.png)
 
 > To open the STA workflow menu directly use: `$ miracl flow sta`
 
@@ -145,4 +145,4 @@ optional arguments:
 
 ---
 
-[<- back to tutorials](../../tutorials.md)
+[<- back to tutorials](../../../tutorials.md)

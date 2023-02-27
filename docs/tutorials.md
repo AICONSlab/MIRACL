@@ -17,11 +17,11 @@ section for a tutorial on MIRACL's general usage.
 
 #### [CLARITY whole-brain registration to Allen](./tutorials/workflows/clar_reg/clar_reg.md)
 
-#### [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/sta/sta.md)
+#### [Structural tensor analysis (STA) on CLARITY-Allen](./tutorials/workflows/sta/sta.md)
 
-#### [CLARITY whole-brain segmentation](./tutorials/clar_seg/clar_seg.md)
+#### [CLARITY whole-brain segmentation](./tutorials/workflows/clar_seg/clar_seg.md)
 
-#### [MRI whole-brain registration to Allen](./tutorials/mri_reg/mri_reg.md)
+#### [MRI whole-brain registration to Allen](./tutorials/workflows/mri_reg/mri_reg.md)
 
 ## Conversion
 

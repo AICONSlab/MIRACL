@@ -15,7 +15,7 @@ $ miracl reg mri_allen_nifty
 
 The following window will open:
 
-![](reg_options.png)
+![](./reg_options.png)
 
 Click on `Select In-vivo or Ex-vivo MRI` and choose the input MRI nii 
 (preferable T2-w) using the dialog window. Then set the registration options:
@@ -73,4 +73,4 @@ optional arguments:
 
 ---
 
-[<- back to tutorials](../../tutorials.md)
+[<- back to tutorials](../../../tutorials.md)
