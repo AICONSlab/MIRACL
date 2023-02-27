@@ -53,7 +53,7 @@ Set the tracking parameters:
 | Parameter | Description | Default |
 | ---       | ---         | ---     |
 | Seed label abbreviation | From Allen atlas ontology, for the seed region. Examples:<br><br>Combined hemispheres: <ul><li>`CP` for _Caudoputamen_</li><li>`PL` for _Prelimbic Area_</li></ul>Right hemisphere:<ul><li>`RCP` for _Right Caudoputamen_</li><li>`RPL` for _Right Prelimbic Area_</li></ul> | Required. Function will exit with error 1 if not provided. |
-| hemi | Labels hemisphere. Accepted inputs are:<ul><li>`combined` -> both</li><li>`split` -> left or right</li></ul> | `combiend` |
+| hemi | Labels hemisphere. Accepted inputs are:<ul><li>`combined` -> both</li><li>`split` -> left or right</li></ul> | `combined` |
 | Derivative of Gaussian (dog) sigma | Example: `1` | `0.5,1.5` |
 | Gaussian smoothing sigma | Example: `0.5` | `0.5,2` |
 | Tracking angle threshold | Example: `35` | `25,35` |
