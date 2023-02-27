@@ -29,6 +29,11 @@ Pull (download) Singularity container:
 $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 ```
 
+> If you have a particular Singularity container of MIRACL that you want to use
+on Sherlock, just copy it to the servers directly using e.g. `scp` or `sync`
+instead of pulling (downloading) the latest version of MIRACL from the 
+Singularity registry
+
 ## Copying your data to Sherlock 
 
 Copy a folder called, e.g. `input_clar` with tiff files that you want to 
@@ -44,7 +49,7 @@ or `rsync`:
 $ rsync -avPhz input_clar sherlock.stanford.edu:/scratch/users/<username>/clarity_registration/.
 ```
 
-> Make sure to replace <username> with your Sherlock username
+> Make sure to replace \<username\> with your Sherlock username
 
 ## Running MIRACL in an interactive session
 
@@ -78,7 +83,7 @@ Within the shell, load the GUI:
 $ miraclGUI
 ```
 
-Or use command line:
+Or use the command-line:
 
 ```
 $ miracl lbls stats -h
