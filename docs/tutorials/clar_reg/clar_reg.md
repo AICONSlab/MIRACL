@@ -59,7 +59,7 @@ Then choose the orientation at the top and right of the image:
 
 Next, choose the orientation for scrolling through the slices (going into 
 the page), can confirm the orientation by changing the image number at the 
-bottom (enter higher number and press Enter), or using the Next or Prev image 
+bottom (enter higher number and press Enter), or using the `Next` or `Prev` image 
 buttons:
 
 ![](reg5.png)
@@ -78,8 +78,8 @@ Conversion parameters description:
 | ---       | ---         | ---     |
 | out nii   | Output nifti name | `clarity` |
 | downsample ratio | Downsample factor for conversion | `5` |
-| channel # | Number for extracting single channel from multiple channel data (leave blank if single channel data/tiff files) | `1` |
-| channel prefix | String before channel number in file name (leave blank if single channel). <br><br>For example, if tiff file name has `_C001_.tif` for channel 1 and `_C002_.tif` for channel 2, to choose channel 1 if it's the auto fluorescence channel: <ul><li>Chan number would be: `1`</li><li>Chan prefix would be: `C00`</li></ul> | |
+| channel # | Number for extracting single channel from multiple channel data (leave blank if single channel data/tiff files) | `0` |
+| channel prefix | String before channel number in file name (leave blank if single channel). <br><br>For example, if tiff file name has `_C001_.tif` for channel 1 and `_C002_.tif` for channel 2, to choose channel 1 if it's the auto fluorescence channel: <ul><li>Chan number would be: `1`</li><li>Chan prefix would be: `C00`</li></ul> | Channel prefix not invoked if not provided |
 | channel name | Output channel name | `eyfp` |
 | in-plane res | Original resolution in x-y plane in um | `5` |
 | z res | Thickness (z-axis resolution/spacing between slices) in um | `5` |
@@ -97,8 +97,6 @@ Registration parameters description:
 | Labels resolution [vox] | Voxel size/resolution of labels in um accepted inputs are: `10`, `25` or `50` | `10` |
 | olfactory bulb | If olfactory bulb is included in the dataset. Accepted inputs are: <ul><li>`0` -> not included</li><li>`1` -> included</li></ul> | `0` |
 | Side | **Only if registering hemisphere, else leave blank**. Accepted inputs are: <ul><li>`rh` -> right hemisphere</li><li>`lh` -> left hemisphere</li></ul> | `None` |
-
----
 
 ## Command-line
 
