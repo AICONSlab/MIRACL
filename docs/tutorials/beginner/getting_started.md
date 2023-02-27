@@ -1,5 +1,7 @@
 # Getting started
 
+MIRACL can be run in the [command-line](#command-line) or by using its [GUI](#gui).
+
 ## Command-line
 
 > If you have installed MIRACL locally, run `source activate miracl` first 
@@ -103,6 +105,8 @@ factor of `5` and an output called `test`, you would type:
 $ miracl conv tiff_nii -f input_tiff_dir -d 5 -o test
 ```
 
+---
+
 ## GUI
 
 To run the main GUI:
@@ -123,5 +127,7 @@ $ miracl conv tiff_nii
 
 > Warning not all functions have GUIs yet...we are working on it!
 
-> Please check the rest of the [tutorials](../../tutorials.md) for more 
+---
+
+Please check the rest of the [tutorials](../../tutorials.md) for more 
 detailed documentation on modules and functions
