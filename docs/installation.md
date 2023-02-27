@@ -4,7 +4,7 @@ We provide instructions on how to install and run MIRACL using either of the
 following methods:
 
 - **[Docker](#docker-installation)**: Install and run MIRACL using Docker. We provide a build script to automatically 
-create a Docker image for you that can be run using Docker-Compose. This method 
+create a Docker image for you that can be run using Docker Compose. This method 
 does not require a manual installation of MIRACL and works on Linux, macOS 
 and Windows (using [WSL 2](https://learn.microsoft.com/en-us/windows/wsl/)).
 
@@ -34,7 +34,7 @@ be installed in WSL 2 locally using the local install instructions.
 
 ## Docker installation
 
-Docker is well suited if you want to run it on a local machine or local server.
+Docker is well suited if you want to run MIRACL on a local machine or local server.
 If you need to run MIRACL on a cluster, see our instructions for
 [installing Singularity](install-singularity.md). If you don't have Docker 
 installed on your computer, 
@@ -103,8 +103,9 @@ $ docker exec -it miracl bash
 
 Files that are saved while using MIRACL should be saved to volumes mounted
 into the container in order to make them persistent. To mount volumes, just
-add them to the `docker-compose.yml` in the base directory under `volumes`
-(do not delete the volume that is already mounted which mounts your `.Xauthority`).
+add them to the `docker-compose.yml` in the base directory under `volumes`.
+
+> Do not delete the volume that is already mounted which mounts your `.Xauthority`!
 
 Example:
 
@@ -142,8 +143,12 @@ build script with the following options:
 $ ./build -i <image_name> -c <container_name>
 ```
 
--  *-i*, Specify image name (default: mgroubran/miracl)
--  *-c*, Specify container name (default: miracl)
+Options:
+
+```
+-i, Specify image name (default: mgroubran/miracl)
+-c, Specify container name (default: miracl)
+```
 
 Example:
 
