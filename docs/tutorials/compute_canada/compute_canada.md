@@ -81,3 +81,7 @@ registration workflow on the folder that you copied over previously:
 ```
 $ miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 ```
+
+---
+
+[<- back to tutorials](../../tutorials.md)

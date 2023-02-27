@@ -91,4 +91,4 @@ $ miracl reg clar_allen -i downsampled_niftis/SHIELD_03x_down_autoflor_chan.nii.
 
 ---
 
-[<- back to tutorials](../../tutorials.md)
+[<- back to tutorials](../../../tutorials.md)

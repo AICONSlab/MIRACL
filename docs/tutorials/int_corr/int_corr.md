@@ -41,4 +41,6 @@ Optional arguments:
     -t , --thresh         Threshold per iteration for convergence (default: 0)
     -p , --mulpower       Use the bias field raised to a power of 'p' to enhance its effects(default: 1.0)
 
+---
 
+[<- back to tutorials](../../tutorials.md)

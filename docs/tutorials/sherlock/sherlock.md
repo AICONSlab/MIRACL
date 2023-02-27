@@ -163,3 +163,7 @@ $ squeue -u $USER
 [submitting](https://www.sherlock.stanford.edu/docs/getting-started/submitting/)
 and [running](https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/)
 jobs on Sherlock
+
+---
+
+[<- back to tutorials](../../tutorials.md)
