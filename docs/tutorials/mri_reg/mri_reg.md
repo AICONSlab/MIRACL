@@ -7,7 +7,7 @@ This workflow performs the following tasks:
 
 ## GUI
 
-from the main GUI OR run:
+Invoke with `$ miraclGUI` and select from main menu or run:
 
 ```
 $ miracl reg mri_allen_nifty
