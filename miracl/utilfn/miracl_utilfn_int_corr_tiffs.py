@@ -37,7 +37,7 @@ def helpmsg():
 
 def parsefn():
     parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
-                                     usage='%(prog)s -f [input tiff folder] -o [ output folder ] -s [ shrink factor] '
+                                     usage='%(prog)s -f [input tiff folder] -od [ output folder ] -s [ shrink factor] '
                                            '-cn [ channel num ] -cp [ channel prefix ] -p [ power ]')
 
     required = parser.add_argument_group('required arguments')
