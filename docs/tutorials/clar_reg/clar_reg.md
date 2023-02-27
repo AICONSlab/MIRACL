@@ -124,7 +124,7 @@ Optional arguments (remember the quotes):
 conversion to nii (invoked by -n " "):
 
 d.  [ Downsample ratio (default: 5) ]
-cn. [ chan # for extracting single channel from multiple channel data (default: 1) ]
+cn. [ chan # for extracting single channel from multiple channel data (default: 0) ]
 cp. [ chan prefix (string before channel number in file name). ex: C00 ]
 ch. [ output chan name (default: eyfp) ]
 vx. [ original resolution in x-y plane in um (default: 5) ]
@@ -182,10 +182,10 @@ Optional arguments:
 | File | Description |
 | ---  | ---         |
 | `reg_final/clar_allen_space.nii.gz` | CLARITY data in Allen reference space |
-| `reg_final/clar_downsample_res(vox)um.nii.gz` | CLARITY data downsampled and oriented to 'standard' |
-| `reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz`  | Allen labels registered to downsampled CLARITY |
-| `reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif` | Allen labels registered to oriented CLARITY |
-| `reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif` | Allen labels registered to original (full-resolution) CLARITY |
+| `reg_final/clar_downsample_res{vox}um.nii.gz` | CLARITY data downsampled and oriented to 'standard' |
+| `reg_final/annotation_hemi_{hemi}_{vox}um_clar_downsample.nii.gz`  | Allen labels registered to downsampled CLARITY |
+| `reg_final/annotation_hemi_{hemi}_{vox}um_clar_vox.tif` | Allen labels registered to oriented CLARITY |
+| `reg_final/annotation_hemi_{hemi}_{vox}um_clar.tif` | Allen labels registered to original (full-resolution) CLARITY |
 
 ---
 
