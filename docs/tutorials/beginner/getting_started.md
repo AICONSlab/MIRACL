@@ -1,6 +1,7 @@
 # Getting started
 
-MIRACL can be run in the [command-line](#command-line) or by using its [GUI](#gui).
+MIRACL can be run in the [command-line](#command-line) or by using its 
+[GUI](#gui).
 
 ## Command-line
 
