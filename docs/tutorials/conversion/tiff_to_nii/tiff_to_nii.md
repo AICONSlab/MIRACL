@@ -36,7 +36,7 @@ After choosing the parameters press `Enter` to save them then `Run` to start
 conversion process.
 
 > After the conversion is done, nifti (`nii/nii.gz`) files can be visualized 
-with `ITKsnap`
+using the `ITKsnap` software
 
 ---
 
