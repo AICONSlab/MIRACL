@@ -85,7 +85,7 @@ $ miracl flow reg_clar -f input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combin
 ```
 
 > If you have a particular Singularity container of MIRACL that you want to use
-on Compute Canada, just copy it to the servers directly using e.g. `scp` or `sync`
+on Compute Canada, just copy it to the servers directly using e.g. `scp` or `rsync`
 instead of pulling (downloading) the latest version of MIRACL from the 
 Singularity registry
 

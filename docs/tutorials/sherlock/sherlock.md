@@ -30,7 +30,7 @@ $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 ```
 
 > If you have a particular Singularity container of MIRACL that you want to use
-on Sherlock, just copy it to the servers directly using e.g. `scp` or `sync`
+on Sherlock, just copy it to the servers directly using e.g. `scp` or `rsync`
 instead of pulling (downloading) the latest version of MIRACL from the 
 Singularity registry
 
