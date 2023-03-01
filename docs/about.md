@@ -125,23 +125,25 @@ BibTeX:
 Some of our functions build on or use these tools (please cite 
 their work if you are using them):
 
- - [Allen Regional Atlas](http://mouse.brain-map.org/static/atlas) (for atlas registration)
- - [Allen Connectivity Atlas](http://connectivity.brain-map.org/) (for connectivity analyses)
- - [ANTs](https://github.com/stnava/ANTs) (for registration)
- - [Fiji](https://imagej.nih.gov/ij/index.html) (for segmentation)
- - [c3d](https://sourceforge.net/projects/c3d) (for image processing)
- - [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) (for diffusion MRI processing)
- - [MRtrix3](https://mrtrix.readthedocs.io/en/latest/) (for tractography)
- - [TrackVis/DTK](http://trackvis.org/) (for tractography)
+| Tool | Function |
+| ---  | ---      |
+| [Allen Regional Atlas](http://mouse.brain-map.org/static/atlas) | Atlas registration |
+| [Allen Connectivity Atlas](http://connectivity.brain-map.org/) | Connectivity analyses |
+| [ANTs](https://github.com/stnava/ANTs) | Registration |
+| [Fiji](https://imagej.nih.gov/ij/index.html) | Segmentation |
+| [c3d](https://sourceforge.net/projects/c3d) | Image processing |
+| [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki) | Diffusion MRI processing |
+| [MRtrix3](https://mrtrix.readthedocs.io/en/latest/) | Tractography |
+| [TrackVis/DTK](http://trackvis.org/) | Tractography |
 
 ## Citations
 
 A selection of publications that used or referenced MIRACL:
 
 - Boillat, M., Hammoudi, P. M., Dogga, S. K., Pages, S., Goubran, M.,
-Rodriguez, I., & Soldati-Favre, D. (2020). Neuroinflammation-associated 
-aspecific manipulation of mouse predator fear by Toxoplasma gondii. Cell 
-reports, 30(2), 320-334.
+Rodriguez, I., & Soldati-Favre, D. (2020). [Neuroinflammation-associated 
+aspecific manipulation of mouse predator fear by Toxoplasma gondii](https://www.sciencedirect.com/science/article/pii/S2211124719316699).
+Cell reports, 30(2), 320-334.
 
 - Pallast, N., Wieters, F., Nill, M., Fink, G. R., & Aswendt, M. (2020).
 [Graph theoretical quantification of white matter reorganization after cortical
@@ -149,8 +151,8 @@ stroke in mice](https://www.sciencedirect.com/science/article/pii/S1053811920303
 NeuroImage, 217, 116873.
 
 - Qu, L., Li, Y., Xie, P., Liu, L., Wang, Y., Wu, J., ... & Peng, H. (2022). 
-Cross-modal coherent registration of whole mouse brains. Nature Methods, 
-19(1), 111-118.
+[Cross-modal coherent registration of whole mouse brains](https://www.nature.com/articles/s41592-021-01334-w).
+Nature Methods, 19(1), 111-118.
 
 - Ito, M., Aswendt, M., Lee, A. G., Ishizaka, S., Cao, Z., Wang, E. H., ... &
 Steinberg, G. K. (2018). [RNA-sequencing analysis revealed a distinct motor 

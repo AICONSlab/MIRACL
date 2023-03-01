@@ -29,6 +29,11 @@ Pull (download) Singularity container:
 $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 ```
 
+> `singularity pull` requires Singularity version `3.0.0` or higher. Please refer
+to our [Troubleshooting](../../../troubleshooting.md) section ("Q: Can I build a 
+Singularity container from the latest MIRACL image on Docker Hub") if you are
+using an older version of Singularity.
+
 > If you have a particular Singularity container of MIRACL that you want to use
 on Sherlock, just copy it to the servers directly using e.g. `scp` or `rsync`
 instead of pulling (downloading) the latest version of MIRACL from the 
