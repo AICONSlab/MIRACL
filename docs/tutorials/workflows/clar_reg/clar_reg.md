@@ -165,17 +165,17 @@ Example:
 $ miracl reg check -f reg_final -v itk -s clarity
 ```
 
-Arguments (required):
+Arguments:
 
 ```
--f, Input final registration folder
-```
+Required:
 
-Optional arguments:
+  -f, Input final registration folder
 
-```
--v, Visualization software: itkSNAP 'itk' (default) or freeview 'free'
--s, Registration Space of results: clarity (default) or allen
+Optional:
+
+  -v, Visualization software: itkSNAP 'itk' (default) or freeview 'free'
+  -s, Registration Space of results: clarity (default) or allen
 ```
 
 ## Main outputs
