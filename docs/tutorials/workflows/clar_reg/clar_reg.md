@@ -12,6 +12,16 @@ This workflow performs the following tasks:
 4) Warps Allen annotations to the original high-res CLARITY space
 5) Warps the higher-resolution CLARITY to Allen space (if chosen)
 
+## Workflow diagram
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
+
 ## Test data
 A test dataset (CLARITY autofluorescence channel) for registration is found 
 here under `data`: https://www.dropbox.com/sh/i9swdedx7bsz1s8/AABpDmmN1uqPz6qpBLYLtt8va
