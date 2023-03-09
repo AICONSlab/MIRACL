@@ -294,15 +294,17 @@ def main(args):
 
     print('\n Exporting features to csv file')
 
-    miracl_home = os.environ['MIRACL_HOME']
+    # This will extract '/code' from MIRACL_HOME variable ('/code/miracl')
+    # to set the correct path to the atlases
+    atlases_home = os.path.split(os.environ['MIRACL_HOME'])[0]
 
     if np.max(alllbls) > 20000:
 
-        graph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % miracl_home)
+        graph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_split.csv' % atlases_home)
 
     else:
 
-        graph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % miracl_home)
+        graph = pd.read_csv('%s/atlases/ara/ara_mouse_structure_graph_hemi_combined.csv' % atlases_home)
 
     # get attributes
     # names = graph.name[graph.id.isin(alllbls)]
