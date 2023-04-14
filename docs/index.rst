@@ -5,6 +5,8 @@
 
 Welcome to MIRACL's documentation!
 ==================================
+.. image:: https://img.shields.io/github/license/mgoubran/MIRACL
+    :alt: Github license
 .. image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=Docker%2FRelease%20Downloads
     :alt: Docker Pulls
 
@@ -13,24 +15,26 @@ Welcome to MIRACL's documentation!
     :alt: Icon
     :align: center
 
+
 MIRACL (Multi-modal Image Registration And Connectivity anaLysis) is a general-purpose, open-source pipeline for automated:
 
-    1) Registration of mice clarity data to the Allen reference atlas
-    2) Segmentation & feature extraction of mice clarity data in 3D (Sparse & nuclear staining)
-    3) Registration of mice multimodal imaging data (MRI & CT, in-vivo & ex-vivo) to Allen reference atlas
-    4) Tract or label specific connectivity analysis based on the Allen connectivity atlas
-    5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY & Allen connectivity atlas
-    6) Statistical analysis of CLARITY & Imaging data
-    7) Atlas generation & Label manipulation
+1) Registration of mice clarity data to the Allen reference atlas
+2) Segmentation & feature extraction of mice clarity data in 3D (Sparse & nuclear staining)
+3) Registration of mice multimodal imaging data (MRI & CT, in-vivo & ex-vivo) to Allen reference atlas
+4) Tract or label specific connectivity analysis based on the Allen connectivity atlas
+5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY & Allen connectivity atlas
+6) Statistical analysis of CLARITY & Imaging data
+7) Atlas generation & Label manipulation
 
-Copyright (c) 2022 Maged Goubran, maged.goubran@utoronto.ca
+Copyright © 2022 Maged Goubran @ AICONSlab (maged.goubran@utoronto.ca)
 
 All Rights Reserved.
 
-____________________________
+---
 
-We provide containers for using the software (Docker and Singularity) as well as
-local install instructions.
+We provide containers (`Docker <./installation.md>`_ and
+`Singularity <./installation.md>`_) for using MIRACL as well as 
+`local installation instructions <./installation.md>`_.
 
 
 .. toctree::
@@ -38,16 +42,9 @@ local install instructions.
    :caption: Contents:
    :hidden:
 
-   before_install
-   install-recommendations
-   install-docker
-   install-singularity
-   install-local
-   install-windows
-   modules
+   About <about>
+   Installation <installation>
    tutorials
    troubleshooting
-   full-documentation
    data
    gallery
-

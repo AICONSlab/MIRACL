@@ -1,24 +1,30 @@
 # Troubleshooting
 
-If you cannot find an answer to your problem here, please open an issue on our [offical GitHub page](https://github.com/AICONSlab/MIRACL).
+If you cannot find an answer to your problem here, please open an issue on our
+[offical GitHub page](https://github.com/AICONSlab/MIRACL).
 
 ## Docker
 
 ### Q: The GUI (`miraclGUI`) is not working:
 
-Access control might be enabled on your host machine. Change your `xhost` access control on your host machine (**not** within your Docker container). Exit the running Docker container and type:
+Access control might be enabled on your host machine. Change your `xhost` 
+access control on your host machine (**not** within your Docker container). 
+Exit the running Docker container and type:
 
 ```
 xhost +
 ```
 
-Log back in to your container. Reset `xhost` after you are done with using the MIRACL GUI using:
+Log back in to your container. Reset `xhost` after you are done with using the 
+MIRACL GUI using:
 
 ```
 xhost -
 ```
 
-The above will enable/disable access for all users. If this is not the desired behavior, access can be granted in a more [fine grained manner](https://www.x.org/archive/X11R6.8.1/doc/xhost.1.html).
+The above will enable/disable access for all users. If this is not the desired
+behavior, access can be granted in a more 
+[fine grained manner](https://www.x.org/archive/X11R6.8.1/doc/xhost.1.html).
 
 Example:
 
@@ -28,20 +34,39 @@ xhost +SI:localsuer:<yourusername>
 
 (replace `<yourusername>` with the actual user name of your host system)
 
+### Q: The GUI worked before but does not work anymore:
+
+Navigate to the directory that contains your `docker-compose.yml` and restart
+the container with `docker compose down` followed by `docker compose up -d`.
+The GUI should work again.
+
 ### Q: I cannot run X or Y with Docker because of permission denied errors:
 
-If you have not set up a Docker user you might need to run Docker commands with `sudo`.
+If you have not set up a Docker user you might need to run Docker commands 
+with `sudo`.
 
 ### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Docker image directly.
-Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
-After they have been successfully installed, mount a volume to your MIRACL Docker container that contains the binary folder for TackVis and Diffusion Toolkit.
-The last step is to add the binaries to your `$PATH` within your MIRACL Docker container.
+Because of their respective licenses, we could not include TrackVis or 
+Diffusion Toolkit in our Docker image directly. Please download and install 
+them on you host machine using their 
+[installation guide](http://trackvis.org/docs/?subsect=installation). After 
+they have been successfully installed, mount a volume to your MIRACL Docker 
+container that contains the binary folder for TrackVis and Diffusion Toolkit 
+and add the binaries to your `$PATH` within your MIRACL Docker container.
+
+### Q: STA workflow fails when trying to create tracts
+
+Make sure that the TrackVis and Diffusion Toolkit binaries are available to 
+MIRACL. See 
+[the previous question](#q-processes-that-require-trackvis-or-diffusion-toolkit-are-not-working)
+for details.
 
 ### Q: I need to install or make changes to apps in the MIRACL container but my user is not authorized to do so:
 
-The user in the container is the user of your host machine. This is done to avoid issues with the MIRACL GUI and X11. If you need to make changes that require sudo privileges, just log out of your container and log back in as root:
+The user in the container is the user of your host machine. This is done to
+avoid issues with the MIRACL GUI and X11. If you need to make changes that 
+require sudo privileges, just log out of your container and log back in as root:
 
 ```
 $ docker exec -it -u root miracl bash
@@ -53,10 +78,18 @@ After making your changes, log out and log back in with your regular user:
 $ docker exec -it miracl bash
 ```
 
+### Q: The GUI (`miraclGUI`) does not work anymore after my ssh connection has been broken:
+
+Assuming you logged back in with ssh and are in the container, exit the 
+container and restart it using `docker compose down` and `docker compose up -d` 
+(make sure to do that in the directory that contains your `docker-compose.yml`). 
+Shell back into the container and the GUI should work again.
+
 ### Q: I do not want to create the image using the provided script:
 
-You can build the image yourself, not using the script we provide. However, the build script makes sure that the GUI version of MIRACL works with Docker and it is therefore recommended to use it.
-Build the image with:
+You can build the image yourself, not using the script we provide. However, the 
+build script makes sure that the GUI version of MIRACL works with Docker and it 
+is therefore recommended to use it. Build the image with:
 
 ```
 $ docker build -t mgoubran/miracl .
@@ -70,7 +103,15 @@ To run the container use:
 $ docker run -it mgoubran/miracl bash
 ```
 
-All changes will be lost when you shell out. The MIRACL GUI will be unlikely to work but you can try the troubleshooting steps in the following section to make it work.
+If you make changes in the container that are not stored on a volume, make sure 
+to use the same container the next time you run MIRACL as changes made to a 
+container will only apply to this specific container. If you run MIRACL again 
+from the same image using `docker run -it mgoubran/miracl bash`, a new 
+container will be created that does not contain the changes you made to the 
+first container.
+
+The MIRACL GUI will be unlikely to work out-of-the-box but you can try the 
+troubleshooting steps in the following section to make it work.
 
 ### Q: I get either or both of the following errors whenever I try to run the GUI from within a Docker container that was build without the provided build script:
 
@@ -95,32 +136,45 @@ to mount an X11 socket from the host system in a new Docker container:
 docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix mgoubran/miracl bash
 ```
 
-If you still receive the above error, you may have to change your `xhost` access control ([see previous troubleshooting step](#q-the-gui-miraclgui-is-not-working)).
+If you still receive the above error, you may have to change your `xhost` 
+access control ([see previous troubleshooting step](#q-the-gui-miraclgui-is-not-working)).
 
 ## Singluarity
 
 ### Q: Can I build a Singularity container from the latest MIRACL image on Docker Hub:
 
-Absolutely! To do so, however, you will need to grab a development node after logging in to the cluster. If you try pulling from the login node, you will use a ton of memory building the SIF image,
-and the process will be killed (in other words, it won't work).
+Absolutely! To do so, however, you will need to grab a development node after 
+logging in to the cluster. If you try pulling from the login node, you will 
+use a ton of memory building the SIF image, and the process will be 
+killed (in other words, it won't work).
 
-    $ sdev
+```
+$ sdev
+```
 
 or 
    
-    $ salloc
+```
+$ salloc
+```
 
 Once you have your node, you can then build the container:
 
-    $ cd $SCRATCH
-    $ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
+```
+$ cd $SCRATCH
+$ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
+```
 
 ### Q: Processes that require TrackVis or Diffusion Toolkit are not working:
 
-Because of their respective licenses, we could not include TackVis or Diffusion Toolkit in our Singularity container directly.
-Please download and install them on you host machine using their [installation guide](http://trackvis.org/docs/?subsect=installation).
-After they have been successfully installed, mount a volume to your MIRACL Singularity container that contains the binary folder for TackVis and Diffusion Toolkit.
-The last step is to add the binaries to your `$PATH` within your MIRACL Singularity container.
+Because of their respective licenses, we could not include TrackVis or 
+Diffusion Toolkit in our Singularity container directly. Please download and 
+install them on you host machine using their 
+[installation guide](http://trackvis.org/docs/?subsect=installation). After 
+they have been successfully installed, mount a volume to your MIRACL 
+Singularity container that contains the binary folder for TrackVis and 
+Diffusion Toolkit and add the binaries to your `$PATH` within your MIRACL 
+Singularity container.
 
 ### Q: I get the following error whenever I try to run the GUI from within the Singularity container on Compute Canada:
 
@@ -131,8 +185,11 @@ This application failed to start because no Qt platform plugin could be initiali
 Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, wayland-egl, wayland, wayland-xcomposite-egl, wayland-xcomposite-glx, webgl, xcb.
 ```
 
-Don't bother trying to make X11 forwarding work directly from the terminal. Just use VNC instead. Follow the instructions [here](https://docs.alliancecan.ca/wiki/VNC).
-Once you are connected to your login or compute node with VNC, you will see a desktop environment. Open a terminal there and follow [our tutorials](./tutorials/compute_canada/compute_canada.md)
+Don't bother trying to make X11 forwarding work directly from the terminal. 
+Just use VNC instead. Follow the instructions 
+[here](https://docs.alliancecan.ca/wiki/VNC). Once you are connected to your 
+login or compute node with VNC, you will see a desktop environment. Open a 
+terminal there and follow [our tutorials](./tutorials/compute_canada/compute_canada.md)
 on how to use MIRACL with Singularity on clusters.
 
 **If you insist on running the MIRACL GUI directly in the terminal, using a Singularity container and X11, try the following workarounds:**
@@ -145,19 +202,24 @@ Exit your Singularity container and start a VNC server (for 3600sec or more as r
 vncserver -MaxConnectionTime 3600
 ```
 
-The first time the VNC server is started you will prompted for a password (do not leave this blank). Once done, check if a X11 socket is available for your username:
+The first time the VNC server is started you will prompted for a password 
+(do not leave this blank). Once done, check if a X11 socket is available 
+for your username:
 
 ```
 ls -la /tmp/.X11-unix/
 ```
 
-(If no socket is available for your username, log out and log back in to your login node)
+(If no socket is available for your username, log out and log back in to your 
+login node)
 
-Start another Singularity container and try to run `miraclGUI` again from within it.
+Start another Singularity container and try to run `miraclGUI` again from 
+within it.
 
 #### Compute Nodes
 
-Exit your Singularity container and set an environment variable on your allocated compute node:
+Exit your Singularity container and set an environment variable on your 
+allocated compute node:
 
 ```
 export XDG_RUNTIME_DIR=${SLURM_TMPDIR}
@@ -169,12 +231,16 @@ Start a VNC server:
 vncserver
 ```
 
-Start another Singularity container and try to run `miraclGUI` again from within it.
+Start another Singularity container and try to run `miraclGUI` again from 
+within it.
 
 ## Local install
 
 ### Q: I get the following error whenever I try to run the GUI: qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "{anaconda path}/envs/miracl_merge/lib/python3.7/site-packages/cv2/qt/plugins" even though it was found.
 
-If you know the path to the environment name, try running the following line to remove the specific file in question:
+If you know the path to the environment name, try running the following line 
+to remove the specific file in question:
 
-    rm "{path_to_environment_name}/lib/python3.7/site-packages/cv2/qt/plugins/platforms/libqxcb.so"
+```
+rm "{path_to_environment_name}/lib/python3.7/site-packages/cv2/qt/plugins/platforms/libqxcb.so"
+```

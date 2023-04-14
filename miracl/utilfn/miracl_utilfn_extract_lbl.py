@@ -10,6 +10,7 @@ import sys
 import pandas as pd
 import nibabel as nib
 import numpy as np
+import scipy
 
 from miracl import ATLAS_DIR
 
