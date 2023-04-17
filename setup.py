@@ -54,13 +54,7 @@ setup(
         'dipy==1.6.0',
         'seaborn==0.12.2',
         'pyqt5==5.15.8',
-        'nipype==1.8.5',
-        'sphinx-rtd-theme',
-        'sphinxcontrib-mermaid',
-        'sphinx-tabs',
-        'sphinx-copybutton',
-        'sphinxcontrib-email',
-        'sphinx-contributors'
+        'nipype==1.8.5'
         ],
     entry_points={'console_scripts': ['miracl=miracl.cli:main'],
                   'gui_scripts': ['miraclGUI=miracl.miraclGUI:main']},
