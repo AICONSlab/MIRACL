@@ -1,50 +1,43 @@
-.. MIRACL documentation master file, created by
-   sphinx-quickstart on Fri Dec 14 15:34:18 2018.
+.. miracl_docs documentation master file, created by
+   sphinx-quickstart on Thu Mar  9 18:38:07 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 Welcome to MIRACL's documentation!
 ==================================
-.. image:: https://img.shields.io/github/license/mgoubran/MIRACL
-    :alt: Github license
-.. image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=Docker%2FRelease%20Downloads
-    :alt: Docker Pulls
-
-.. image:: gallery/icon.png
-    :width: 550px
-    :alt: Icon
-    :align: center
-
-
-MIRACL (Multi-modal Image Registration And Connectivity anaLysis) is a general-purpose, open-source pipeline for automated:
-
-1) Registration of mice clarity data to the Allen reference atlas
-2) Segmentation & feature extraction of mice clarity data in 3D (Sparse & nuclear staining)
-3) Registration of mice multimodal imaging data (MRI & CT, in-vivo & ex-vivo) to Allen reference atlas
-4) Tract or label specific connectivity analysis based on the Allen connectivity atlas
-5) Comparison of diffusion tensort imaging (DTI)/tractography, virus tracing using CLARITY & Allen connectivity atlas
-6) Statistical analysis of CLARITY & Imaging data
-7) Atlas generation & Label manipulation
-
-Copyright © 2022 Maged Goubran @ AICONSlab (maged.goubran@utoronto.ca)
-
-All Rights Reserved.
-
----
-
-We provide containers (`Docker <./installation.md>`_ and
-`Singularity <./installation.md>`_) for using MIRACL as well as 
-`local installation instructions <./installation.md>`_.
-
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
    :hidden:
 
-   About <about>
-   Installation <installation>
-   tutorials
-   troubleshooting
-   data
-   gallery
+   about/index
+   Installation <installation/installation>
+   tutorials/index
+   troubleshooting/index
+   gallery/gallery
+   Data <data/example_and_atlases_data>
+
+.. |license_img| image:: https://img.shields.io/github/license/mgoubran/MIRACL
+   :width: 117px
+   :height: 23px
+
+.. |downloads_img| image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=Docker%2FRelease%20Downloads
+   :width: 230px
+   :height: 23px
+
+|license_img| |downloads_img|
+
+.. image:: ./images/MIRACL_icon.png
+    :width: 550px
+
+.. include:: ./directives/miracl_overview_directive.rst
+
+We recommend using MIRACL with the Docker or Singularity containers we provide 
+but it can also be installed locally. See our 
+:doc:`installation instructions <./installation/installation>` for more information.
+
+Copyright © 2023 :email:`Maged Goubran <maged.goubran@utoronto.ca>` @ 
+`AICONS Lab <https://aiconslab.github.io/>`_.
+
+All Rights Reserved.
