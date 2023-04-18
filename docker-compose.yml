@@ -1,12 +1,14 @@
 version: "3.3"
 services:
   miracl:
-    image: mgoubran/miracl
+    image: miracl_heatmap_integration_img:latest
     tty: true
     environment:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: miracl
+    container_name: miracl_heatmap_integration
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+      - /home/josmann/git/MIRACL_heatmap_integration/miracl:/code/miracl
+      - /data:/home/josmann/data
