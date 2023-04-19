@@ -1,0 +1,49 @@
+/* Increase maximum width of help document */
+.wy-nav-content {
+    max-width: 1100px !important;
+}
+
+/* override table width restrictions */
+@media screen and (min-width: 767px) {
+
+  .wy-table-responsive table td {
+    /* !important prevents the common CSS stylesheets from
+       overriding this as on RTD they are loaded after this stylesheet */
+    white-space: normal !important;
+  }
+
+  .wy-table-responsive {
+    overflow: visible !important;
+  }
+
+}
+
+/* Round borders of GitHub logos */
+.sphinx-contributors img {
+    border-radius: 50%;
+}
+
+/* Tests */
+
+/* .wy-nav-content { */
+/*     max-width: 125% !important; */
+/* } */
+
+/* .wy-nav-side { */
+/*     max-width: 25% !important; */
+/* } */
+
+/* @media screen and (max-width: 950px){ */
+/*     .wy-body-for-nav{background:#fcfcfc} */
+/*     .wy-nav-top{display:block} */
+/*     .wy-nav-side{left:-300px} */
+/*     .wy-nav-side.shift{width:85%;left:0} */
+/*     .wy-side-scroll{width:auto} */
+/*     .wy-side-nav-search{width:auto} */
+/*     .wy-menu.wy-menu-vertical{width:auto} */
+/*     .wy-nav-content-wrap{margin-left:0} */
+/*     .wy-nav-content-wrap */
+/*     .wy-nav-content{padding:1.618em} */
+/*     .wy-nav-content-wrap.shift{position:fixed;min-width:100%;left:85%;top:0;height:100%;overflow:hidden} */
+/* } */
+

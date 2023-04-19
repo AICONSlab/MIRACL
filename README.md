@@ -1,7 +1,7 @@
 [![GitHub license](https://img.shields.io/github/license/mgoubran/MIRACL)](https://github.com/mgoubran/MIRACL/blob/master/LICENSE.md) ![Docker Pulls](https://img.shields.io/docker/pulls/mgoubran/miracl)
 
 <p align="center">
-  <img src="docs/gallery/icon.png" alt="alt text" width="400" height="250"/>
+  <img src="docs/gallery/images/icon.png" alt="alt text" width="400" height="250"/>
 </p>
 
 ___
