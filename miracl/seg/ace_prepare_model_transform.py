@@ -114,10 +114,15 @@ def generate_model_transforms(chosen_model):
         if torch.cuda.is_available():
             model_unetr.load_state_dict(torch.load(model_path_unetr))
         else:
-            model_unetr.load_state_dict(torch.load(
-                model_path_unetr,
-                map_location='cpu'
-                ))
+            state_dict = torch.load(model_path_unet, map_location='cpu')
+            expected_keys = model_unetr.state_dict().keys()
+            print(f"State dict: {state_dict.items()}")
+            print(f"State dict: {state_dict.keys()}")
+            print(f"Expected UNETR keys: {expected_keys}")
+            # state_dict = {k: v for k, v in state_dict.keys() if k in expected_keys}
+            state_dict = {key: state_dict[key] for key in state_dict if key in expected_keys}
+            print("Loading state dict")
+            model_unetr.load_state_dict(state_dict)
         model_out = model_unetr
         print(f"Trained {model_name} model is initialized and loaded!\n")
 
@@ -163,32 +168,32 @@ def generate_model_transforms(chosen_model):
     # define transforms
     # -------------------------------------------------------
 
-    # return image_dict
-    class MyLoadImage(Transform):
-        def __call__(self, img_path):
-            # load the .tiff files they are HxWxD
-            image = tifffile.imread(img_path)
-            # change the order axis of the image from DHW to HWD
-            image = np.moveaxis(image, 0, 2)
-            image = np.moveaxis(image, 0, 1)
-            return image
-
-    val_transforms = Compose(
-        [
-            MyLoadImage(),
-            AddChannel(),
-            ScaleIntensityRangePercentiles(
-                keys=["image"],
-                lower=0.05,
-                upper=99.95,
-                b_min=0,
-                b_max=1,
-                clip=True,
-                relative=False,
-            ),
-            EnsureType(),
-        ]
-    )
-
-    return model_out, val_transforms
-    # return model_out
+    # # return image_dict
+    # class MyLoadImage(Transform):
+    #     def __call__(self, img_path):
+    #         # load the .tiff files they are HxWxD
+    #         image = tifffile.imread(img_path)
+    #         # change the order axis of the image from DHW to HWD
+    #         image = np.moveaxis(image, 0, 2)
+    #         image = np.moveaxis(image, 0, 1)
+    #         return image
+    #
+    # val_transforms = Compose(
+    #     [
+    #         MyLoadImage(),
+    #         AddChannel(),
+    #         ScaleIntensityRangePercentiles(
+    #             keys=["image"],
+    #             lower=0.05,
+    #             upper=99.95,
+    #             b_min=0,
+    #             b_max=1,
+    #             clip=True,
+    #             relative=False,
+    #         ),
+    #         EnsureType(),
+    #     ]
+    # )
+    #
+    # return model_out, val_transforms
+    return model_out
