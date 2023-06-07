@@ -22,7 +22,7 @@ output:
 
 import skimage.io as io
 import os
-import fnmatch
+# import fnmatch
 import numpy as np
 from math import floor
 import tifffile
@@ -77,11 +77,19 @@ def generate_patch_main(input_folder, output_folder):
     # batch size will be 512 * 512 * 512
     batch_size = 512
 
-    print(f"  Subject: {input_path} has been found!")
-    print(f"  Subject: {output_path} has been found!")
+    print(f"  \nSubject: {input_path} has been found!")
 
     # read all the slices in the input directory
-    img_list_name = fnmatch.filter(os.listdir(input_path), "*.tif*")
+    # img_list_name = fnmatch.filter(os.listdir(input_path), "*.tif*")
+    # img_list_name.sort()
+
+    img_list_name = []
+
+    with os.scandir(input_path) as entries:
+        for entry in entries:
+            if entry.is_file() and entry.name.lower().endswith((".tif", ".tiff")):
+                img_list_name.append(entry.name)
+
     img_list_name.sort()
 
     # create equal size image slices for third dimension of batch - the last stack might have size of less than batch_size
@@ -91,16 +99,19 @@ def generate_patch_main(input_folder, output_folder):
     ]
 
     # check last slice; if its length is less than 512; pick the last 512 as the final crop (overlapping)
-    if len(stack_index_img[-1]) < batch_size:
-        last_slice = img_list_name[-batch_size:]
-        stack_index_img = stack_index_img[:-1]
-        stack_index_img.append(last_slice)
+    # if len(stack_index_img[-1]) < batch_size:
+    #     last_slice = img_list_name[-batch_size:]
+    #     stack_index_img = stack_index_img[:-1]
+    #     stack_index_img.append(last_slice)
+
+    # def print_dim(idx):
+    #     return ["Z", "Y", "X"][idx]
 
     for idx1, stack in enumerate(stack_index_img):
         img_list = []
 
+        print(f"  \nProcessing image slices for Z-dim...\n")
         for idx2, file in enumerate(stack):
-            print("  Processing image slices:")
             print("  Slice: ", file)
             fname_input_img = os.path.join(input_path, file)
             img = io.imread(fname_input_img)
@@ -126,13 +137,16 @@ def generate_patch_main(input_folder, output_folder):
         img_batch = np.stack(img_list, axis=1)
 
         # save each data with size of 512 * 512 * 512
+        output_dir_subfolder = "generated_patches"
+        print(
+            f" \nSaving patches for Z-dim to '{output_folder}/{output_dir_subfolder}/'..."
+        )
         for i in range(img_batch.shape[0]):
-            print(" \nSaving patches!")
             img_batch_single = img_batch[i, :, :, :]
             # img_batch_single_normalized = (img_batch_single - img_batch_single.min()) / (img_batch_single.max() - img_batch_single.min())
             file_img = "patch_" + str(idx1) + "_" + str(i) + ".tiff"
 
-            output_dir_img = os.path.join(output_path, "generated_patches")
+            output_dir_img = os.path.join(output_path, output_dir_subfolder)
             isExist = os.path.exists(output_dir_img)
             if not isExist:
                 os.mkdir(output_dir_img)
@@ -151,4 +165,6 @@ def generate_patch_main(input_folder, output_folder):
                 },
             )
 
-    print(f"  \nIn total {img_batch.shape[0]} patches have been saved!")
+    print(
+        f"  \nIn total, {img_batch.shape[0]} patches have been saved to '{output_folder}/{output_dir_subfolder}/'!"
+    )
