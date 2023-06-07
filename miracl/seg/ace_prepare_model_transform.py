@@ -115,14 +115,14 @@ def generate_model_transforms(chosen_model):
             model_unetr.load_state_dict(torch.load(model_path_unetr))
         else:
             state_dict = torch.load(model_path_unet, map_location='cpu')
-            expected_keys = model_unetr.state_dict().keys()
-            print(f"State dict: {state_dict.items()}")
-            print(f"State dict: {state_dict.keys()}")
-            print(f"Expected UNETR keys: {expected_keys}")
-            # state_dict = {k: v for k, v in state_dict.keys() if k in expected_keys}
-            state_dict = {key: state_dict[key] for key in state_dict if key in expected_keys}
-            print("Loading state dict")
-            model_unetr.load_state_dict(state_dict)
+            # expected_keys = model_unetr.state_dict().keys()
+            # print(f"State dict: {state_dict.items()}")
+            # print(f"State dict: {state_dict.keys()}")
+            # print(f"Expected UNETR keys: {expected_keys}")
+            # # state_dict = {k: v for k, v in state_dict.keys() if k in expected_keys}
+            # state_dict = {key: state_dict[key] for key in state_dict if key in expected_keys}
+            # print("Loading state dict")
+            model_unetr.load_state_dict(state_dict, strict=False)
         model_out = model_unetr
         print(f"Trained {model_name} model is initialized and loaded!\n")
 
