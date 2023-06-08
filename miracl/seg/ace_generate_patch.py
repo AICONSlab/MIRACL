@@ -26,6 +26,7 @@ import os
 import numpy as np
 from math import floor
 import tifffile
+from pathlib import Path
 import logging
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ logger.setLevel(logging.DEBUG)
 def generate_patch_main(input_folder, output_folder):
     input_path = input_folder
     output_path = output_folder
+    output_dir_subfolder = "generated_patches"
 
     # return input_path, output_path
 
@@ -137,7 +139,6 @@ def generate_patch_main(input_folder, output_folder):
         img_batch = np.stack(img_list, axis=1)
 
         # save each data with size of 512 * 512 * 512
-        output_dir_subfolder = "generated_patches"
         print(
             f" \nSaving patches for Z-dim to '{output_folder}/{output_dir_subfolder}/'..."
         )
@@ -168,3 +169,6 @@ def generate_patch_main(input_folder, output_folder):
     print(
         f"  \nIn total, {img_batch.shape[0]} patches have been saved to '{output_folder}/{output_dir_subfolder}/'!"
     )
+
+    gen_patch_folder = Path(output_folder) / output_dir_subfolder
+    return gen_patch_folder
