@@ -13,10 +13,10 @@ Outputs:
 from monai.networks.nets import UNet, UNETR
 from monai.transforms import (
     Compose,
-    EnsureType,
-    AddChannel,
-    ScaleIntensityRangePercentiles,
-    Transform,
+    EnsureTyped,
+    AddChanneld,
+    ScaleIntensityRangePercentilesd,
+    Transform
 )
 import torch
 from monai.networks.layers import Norm
@@ -27,7 +27,7 @@ import os
 from pathlib import Path
 
 
-def generate_model_transforms(chosen_model):
+def generate_model_transforms(chosen_model, cfg_path_var):
     # -------------------------------------------------------
     # inputs
     # -------------------------------------------------------
@@ -36,14 +36,14 @@ def generate_model_transforms(chosen_model):
     model_name = chosen_model
     # print(os.getcwd())
     # print(model_name)
-    cfg_path = Path(os.environ["MIRACL_HOME"]) / "seg/config_unetr.yml"
+    CFG_PATH = cfg_path_var
     # print(f"cfg file path: {cfg_path}")
 
     # -------------------------------------------------------
     # load the config file
     # -------------------------------------------------------
 
-    with open(cfg_path, "r") as ymlfile:
+    with open(CFG_PATH, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # print(cfg)
@@ -59,7 +59,8 @@ def generate_model_transforms(chosen_model):
     if torch.cuda.is_available():
         print("INFO: CUDA is available! Torch device will be set to `GPU`.\n")
     else:
-        print("WARNING: CUDA is not available! Torch device will be set to 'CPU'.\n")
+        print("WARNING: CUDA is not available! Torch device will be set to \
+'CPU'.\n")
 
     # define the model
     def unet_creator(cfg):
@@ -102,10 +103,7 @@ def generate_model_transforms(chosen_model):
         if torch.cuda.is_available():
             model_unet.load_state_dict(torch.load(model_path_unet))
         else:
-            model_unet.load_state_dict(torch.load(
-                model_path_unet,
-                map_location='cpu'
-                ))
+            model_unet.load_state_dict(torch.load(model_path_unet, map_location="cpu"))
         model_out = model_unet
         print(f"Trained {model_name} model is initialized and loaded!\n")
 
@@ -114,7 +112,7 @@ def generate_model_transforms(chosen_model):
         if torch.cuda.is_available():
             model_unetr.load_state_dict(torch.load(model_path_unetr))
         else:
-            state_dict = torch.load(model_path_unet, map_location='cpu')
+            state_dict = torch.load(model_path_unet, map_location="cpu")
             # expected_keys = model_unetr.state_dict().keys()
             # print(f"State dict: {state_dict.items()}")
             # print(f"State dict: {state_dict.keys()}")
@@ -132,14 +130,12 @@ def generate_model_transforms(chosen_model):
             model_unet.load_state_dict(torch.load(model_path_unet))
             model_unetr.load_state_dict(torch.load(model_path_unetr))
         else:
-            model_unet.load_state_dict(torch.load(
-                model_path_unet,
-                map_location='cpu'
-                ))
-            model_unetr.load_state_dict(torch.load(
-                model_path_unetr,
-                map_location='cpu'
-                ))
+            model_unet.load_state_dict(torch.load(model_path_unet, map_location="cpu"))
+            model_unetr.load_state_dict(
+                torch.load(model_path_unetr, map_location="cpu")
+            )
+        # FIX: This cannot be returned as a list. Most likely it will have
+        # to be unpacked as a tuple?
         model_out = [model_unet, model_unetr]
         print("unet and unetr models are initialized and loaded!\n")
 
@@ -164,6 +160,43 @@ def generate_model_transforms(chosen_model):
     #     model_out = [model_unet, model_unetr]
 
     # print("Trained model(s) are loaded!")
+
+    # -------------------------------------------------------
+    # define transforms
+    # -------------------------------------------------------
+
+    # return image_dict
+    class MyLoadImage(Transform):
+        def __call__(self, image_dict):
+            # load the .tiff files they are HxWxD
+            # img_path = image_dict['image']
+            image_dict["image"] = tifffile.imread(image_dict["image"])
+            # print('img_path: ', img_path)
+            # change the order axis of the image from DHW to HWD
+            image_dict["image"] = np.moveaxis(image_dict["image"], 0, 2)
+            image_dict["image"] = np.moveaxis(image_dict["image"], 0, 1)
+            return image_dict
+
+    test_transforms = Compose(
+        [
+            MyLoadImage(),
+            AddChanneld(keys=["image"]),
+            # ScaleIntensityRangePercentilesd(keys=["image"], lower=0.001, upper=99.99, b_min=0, b_max=1, clip=True, relative=False),
+            ScaleIntensityRangePercentilesd(
+                keys=["image"],
+                lower=0.05,
+                upper=99.95,
+                b_min=0,
+                b_max=1,
+                clip=True,
+                relative=False,
+            ),
+            EnsureTyped(keys=["image"]),
+        ]
+    )
+
+    return model_out, test_transforms
+
     # -------------------------------------------------------
     # define transforms
     # -------------------------------------------------------
@@ -196,4 +229,4 @@ def generate_model_transforms(chosen_model):
     # )
     #
     # return model_out, val_transforms
-    return model_out
+    # return model_out
