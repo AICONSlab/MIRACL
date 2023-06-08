@@ -65,11 +65,24 @@ class aceParser:
             "-v",
             "--visualize_results",
             action="store_true",
+            default=False,
             help="enable visualization",
+        )
+        # Boolean to choose if whether it is needed to MC
+        parser.add_argument(
+            "-mc",
+            "--monte_dropout",
+            action="store_true",
+            default=False,
+            help="whether you need to MC",
         )
         # Boolean to choose if an uncertainty map is created
         parser.add_argument(
-            "-u", "--uncertainty_map", action="store_true", help="enable map"
+            "-u",
+            "--uncertainty_map",
+            action="store_true",
+            default=False,
+            help="enable map"
         )
         return parser
 
