@@ -1,33 +1,13 @@
 general:
-  model_name: 'unetr'
-  batch_size: 8
-  crop_size: 96
-  crop_number: 3
-  flag_newfilter: False
-  n_foreground_img_LB: 100000
-  data_dict_ready: True
-  borders_channel_flag: False
-  checkpoint_period: 10
-  max_epochs: 500
-  validation_interval: 1
-  early_stop_patience: 50
-  model_state: 'trained'
+  batch_size: 1
   model_unet_trained_path: '/code/miracl/seg/models/unet/best_metric_model.pth'
   model_unetr_trained_path: '/code/miracl/seg/models/unetr/best_metric_model.pth'
-  data_aug_prob: 0.5
-  cache_rate_train: 0.5
-  cache_rate_val: 0.5
   GPU: 'single'
 unet:
   n_encoder_layers: 5
   channels_initial: 16
   num_res_unit: 2
   dropout: 0.2
-dynunet:
-  n_layers: 5
-  filters_initial: 16
-  dropout: 0.25
-  res_block: True
 unetr:
   feature_size: 16
   hidden_size: 768
@@ -35,10 +15,3 @@ unetr:
   num_heads: 12
   dropout: 0.2
   res_block: True
-loss:
-  name: 'dicece'
-optimizer:
-  learning_rate: 0.0001
-  weight_decay: 0.0
-  
-  
