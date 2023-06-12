@@ -1,65 +1,172 @@
 #!/bin/bash
 
-# Default values
-image="my_image"
-name="8080"
-container="my_container"
-gpu=false
-volume="/path/to/volume"
+# Build MIRACL Docker image with user information from host system
+
+# - Checks if Docker and Docker Compose are installed
+# - Dynamically adds and removes user information to
+#   prevent errors in Singularity container creation
+# - Container user is the same as host user to prevent
+#   X11 issues with miraclGUI
+
+# Current maintainer of script: Jonas Osmann @ github.com/jono3030
+# MIRACL (C) Maged Groubran @ maged.goubran@utoronto.ca
+
+#############
+# VARIABLES #
+#############
+
+# Set variable base state
+# Script version
+version="2.0.0-beta"
+
+# Service name
+service_name="miracl"
+
+# Set default image name
+image_name="aicons/miracl"
+
+# Set default container name
+container_name="miracl"
+
+# Set default image version
+miracl_version="latest"
+
+# Version file version
+miracl_version_file=$(cat ./miracl/version.txt)
+
+# Set array to capture volumes
 volumes=()
 
+# Base usage
+base_usage="Usage: ./$(basename $0) [-n 'service_name'] [-i 'image_name'] [-c 'container_name'] [-t {'auto','x.x.x'}] [-g] [-v 'vol:vol'] [-l] [-s] [-m] [-h]"
+
+##########
+# PARSER #
+##########
+
+# Usage function
+function usage()
+{
+
+ cat <<usage
+
+ $base_usage
+
+   Automatically build MIRACL Docker image with pseudo host user
+
+ Options:
+
+   -n, name of the Docker service (default: 'miracl')
+   -i, specify image name (default: 'aicons/miracl')
+   -c, specify container name (default: 'miracl')
+   -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
+   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
+   -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
+   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
+   -s, print version of build script and exit
+   -m, print version of MIRACL on current Git branch and exit
+   -h, print this help menu and exit
+
+ Script version: $version
+ MIRACL version: $miracl_version_file
+
+usage
+
+}
+
 # Parse command line arguments
-while getopts ":n:i:c:v:gm:" opt; do
+while getopts ":n:i:c:t:gv:lsmh" opt; do
   case ${opt} in
-    n )
-      image=$OPTARG
+
+    n)
+      if [ "${OPTARG}" != "$service_name" ]; then
+      service_name=${OPTARG}
+      fi
       ;;
-    i )
-      name=$OPTARG
+     
+    i)
+      if [ "${OPTARG}" != "$image_name" ]; then
+      image_name=${OPTARG}
+      fi
       ;;
-    c )
-      container=$OPTARG
+
+    c)
+      if [ "${OPTARG}" != "$container_name" ]; then
+      container_name=${OPTARG}
+      fi
       ;;
-    v )
-      volume=$OPTARG
+
+    t)
+      if [[ "${OPTARG}" == "auto" ]]; then
+        miracl_version=$miracl_version_file
+      elif [[ "${OPTARG}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        miracl_version=${OPTARG}
+      else
+        echo 'Error: Version input is not a floating point number (format: x.x.x), "auto" or "latest"'
+        exit 1
+      fi
       ;;
-    g )
+
+    g)
       gpu=true
       ;;
-    m )
+
+    v)
       volumes+=("$OPTARG")
       ;;
-    \? )
+
+    l)
+      write_log=true
+      ;;
+
+    s)
+      echo -e "v$version"
+      exit 0
+      ;;
+
+    m)
+      echo -e "v$miracl_version_file"
+      exit 0
+      ;;
+
+    h)
+      usage
+      exit 0
+      ;;
+
+    \?)
       echo "Invalid option: -$OPTARG" 1>&2
+      printf "\n$base_usage\n"
       exit 1
       ;;
-    : )
+
+    :)
       echo "Option -$OPTARG requires an argument." 1>&2
+      printf "\n$base_usage\n"
       exit 1
       ;;
-  esac
-done
+
+    esac
+  done
+  shift "$(($OPTIND -1))"
+
+##################
+# DOCKER COMPOSE #
+##################
 
 # Generate docker-compose.yml file
 cat > docker-compose.yml <<EOF
 version: "3.3"
 services:
-  $name:
-    image: $image
+  $service_name:
+    image: $image_name:$miracl_version
     tty: true
     environment:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: $container
-    volumes:
-      - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+    container_name: $container_name
 EOF
-
-# Add additional volumes
-for v in "${volumes[@]}"; do
-  echo "      - $v" >> docker-compose.yml
-done
 
 if [[ $gpu ]]; then
 
@@ -73,9 +180,136 @@ cat >> docker-compose.yml <<EOF
               capabilities: [gpu]
 EOF
 
-else
-  
-  printf "No GPU selected\n"
-
 fi
 
+# Append required volumes
+cat >> docker-compose.yml <<EOF
+    volumes:
+      - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+EOF
+
+# Add additional volumes
+for v in "${volumes[@]}"; do
+  echo "      - $v" >> docker-compose.yml
+done
+
+##############
+# DOCKERFILE #
+##############
+
+# Information that needs to be added to Dockerfile
+# to create pseudo host user. This is required to
+# make X11 work correclty with miraclGUI
+USER_TEXT=$(cat <<END
+# Setup host user as container user\n\
+ARG USER_ID=\$USER_ID\n\
+ARG GROUP_ID=\$GROUP_ID\n\
+ARG USER=\$USER\n\n\
+RUN addgroup --gid \$GROUP_ID \$USER\n\
+RUN adduser --disabled-password --gecos '' --uid \$USER_ID --gid \$GROUP_ID \$USER\n\n\
+# Change owner of /code directory\n\
+RUN chown -R \$USER:\$USER /code\n\
+# Change to \$USER\n\
+USER \$USER\n\
+WORKDIR /home/\$USER
+END
+)
+
+# Function to remove user text in Dockerfile if it is already present
+function rm_USER_TEXT () {
+  sed -i '/STARTUNCOMMENT/,/STOPUNCOMMENT/{//!d}' Dockerfile
+}
+
+# Check if $USER_TEXT strings are already present and delete if true
+if [ "$(sed -n '/#STARTUNCOMMENT#/{n;p;}' Dockerfile)" != "#STOPUNCOMMENT#" ]; then
+       	rm_USER_TEXT
+fi
+
+#########
+# BUILD #
+#########
+
+# Check if Docker is installed
+if [ -x "$(command -v docker)" ]; then
+	    printf "\nDocker installation found.\n"
+      # Adding host user requirements to Dockerfile
+      sed -i "/#STARTUNCOMMENT#/a $USER_TEXT" Dockerfile
+	    # Change user in docker-compose.yml to host user
+	    export HOST_USER=$(whoami)
+	    sed -i "s/\(\/home\/\).*\(\/.Xauthority:\/home\/\).*\(\/.Xauthority\)/\1$HOST_USER\2$HOST_USER\3/g" docker-compose.yml
+
+      ######################################
+	    # Build MIRACL image from Dockerfile #
+      ######################################
+      
+      # Printing information about build process and docker-compose.yml to stdout
+      printf "\n[+] Building MIRACL and creating docker-compose.yml with the following parameters:\n"
+      printf " User: $HOST_USER\n"
+      printf " pid: $(id -u)\n"
+      printf " gid: $(id -g)\n"
+      printf " Service name: $service_name\n"
+      printf " Image name: $image_name:$miracl_version\n"
+      printf " Container name: $container_name\n"
+      if [[ $gpu ]]; then
+        printf " GPU passthrough: enabled\n"
+      else
+        printf " GPU passthrough: disabled\n"
+      fi
+      if [[ $write_log ]]; then
+        printf " Log file: enabled\n"
+      else
+        printf " Log file: disabled\n"
+      fi
+      for v in "${!volumes[@]}"; do
+        printf " Volume $v: ${volumes[$v]}\n"
+      done
+
+	    # Pass user name, UID and GID to Dockerfile
+      function docker_build () {
+	      docker build \
+	      --build-arg USER_ID=$(id -u) \
+	      --build-arg GROUP_ID=$(id -g) \
+	      --build-arg USER=$HOST_USER \
+	      -t $image_name:$miracl_version .
+      }
+
+      # Check for log flag
+      if [ $write_log ];
+      then
+        docker_build | tee build.log
+      else
+        docker_build
+      fi
+
+      # Check if build process exited without errors
+      build_status_code=$?
+      if [ $build_status_code -eq 0 ]; then
+        printf "\nBuild was successful! Checking Docker Compose installation.\n"
+        # Remove $USER_TEXT from Dockerfile
+        rm_USER_TEXT
+
+        # Test if docker-compose is installed
+        # Should come by default with Docker-Desktop
+        if [ -x "$(command -v docker-compose)" ]; then
+          printf "Docker Compose installation found ($(docker-compose --version)). Run 'docker-compose up -d' to start the MIRACL container in background.\n"
+        elif dcex=$(docker compose version); then
+          printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
+        else
+          printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
+        fi
+      else
+        # Return error code if build was not successful
+        printf "\nBuild not successful! An error occured with exit code: $build_status_code\n"
+        # Remove $USER_TEXT from Dockerfile
+        rm_USER_TEXT
+        # Exit with custom status code
+        exit $build_status_code
+      fi
+
+else
+    di_status_code=$?
+    printf "\nDocker installation not found. Please install Docker first.\n"
+    printf "Exiting with status code $di_status_code\n"
+    # Exit with custom status code
+    exit $di_status_code
+fi
