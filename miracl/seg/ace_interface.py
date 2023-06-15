@@ -1,16 +1,22 @@
-from miracl.seg import ace_generate_patch, ace_prepare_model_transform
+# from pathlib import Path
+# import os
+from miracl.seg import ace_generate_patch, ace_deploy_model, ace_patch_stacking
 
 
 def main(args):
     # args_parser = aceParser()
     # args = args_parser.parse_args()
     print("The following parameters will be used:\n")
-    print(f"  Input file:       {args.input_folder}")
-    print(f"  Output file:      {args.output_folder}")
-    print(f"  Model type:       {args.model_type}")
-    print(f"  Voxel dimensions: {args.voxel_size}")
-    print(f"  Visulize results: {args.visualize_results}")
-    print(f"  Uncertainty map:  {args.uncertainty_map}\n")
+    print(f"  Input file:        {args.input_folder}")
+    print(f"  Output file:       {args.output_folder}")
+    print(f"  Model type:        {args.model_type}")
+    print(f"  Voxel resolutions: {args.voxel_res}")
+    print(f"  Image sizes:       {args.image_size}")
+    print(f"  Number workers:    {args.nr_workers}")
+    print(f"  Cache rate:        {args.cache_rate}")
+    print(f"  Monte dropout:     {args.monte_dropout}")
+    print(f"  Visulize results:  {args.visualize_results}")
+    print(f"  Uncertainty map:   {args.uncertainty_map}\n")
 
     # TODO: Add program logic here
 
@@ -21,17 +27,33 @@ def main(args):
 
     # INFO: ace_generate_patch.py
 
-    # Pass input and output directory args to ace_generate_patch.py
-    # ace_generate_patch.generate_patch_main(
-    #         args.input_folder,
-    #         args.output_folder
-    #         )
+    patches_folder = ace_generate_patch.generate_patch_main(
+        input_folder=args.input_folder,
+        output_folder=args.output_folder
+    )
 
-    # INFO: ace_prepare_model_transform.py
+    print(f"Patches folder path is: {patches_folder}")
 
-    # Pass model type to ace_prepare_model_transform.py
-    model_out = ace_prepare_model_transform.generate_model_transforms(args.model_type)
-    # model_out, val_transforms = ace_prepare_model_transform.generate_model_transforms(args.model_type)
+    # INFO: ace_deploy_model.py
+    # INFO: ace_prepare_model_transform.py is called from within ace_deploy_model.py
+
+    ace_deploy_model.deploy_functions(
+        chosen_model=args.model_type,
+        patch_dir_var=args.output_folder,
+        monte_var=args.monte_dropout
+    )
+
+    # INFO: ace_patch_stacking.py
+
+    ace_patch_stacking.run_stacking(
+            patches_path=patches_folder,
+            main_input_folder_path=args.input_folder,
+            output_folder_path=args.output_folder,
+            monte_carlo=args.monte_dropout,
+            x=args.voxel_res[0],
+            y=args.voxel_res[1],
+            z=args.voxel_res[2]
+            )
 
 
 if __name__ == "__main__":

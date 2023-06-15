@@ -29,6 +29,14 @@ import tifffile
 from pathlib import Path
 import logging
 
+
+# def generate_patch_main(input_folder, output_folder):
+#     input_path = input_folder
+#     output_path = output_folder
+#     output_dir_subfolder = "generated_patches"
+#
+#     print("generate_patch_main called")
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -36,7 +44,6 @@ logger.setLevel(logging.DEBUG)
 #######################################
 # inputs
 #######################################
-
 
 def generate_patch_main(input_folder, output_folder):
     input_path = input_folder
@@ -169,6 +176,8 @@ def generate_patch_main(input_folder, output_folder):
     print(
         f"  \nIn total, {img_batch.shape[0]} patches have been saved to '{output_folder}/{output_dir_subfolder}/'!"
     )
+
+    logging.debug("generate_patch_main called")
 
     gen_patch_folder = Path(output_folder) / output_dir_subfolder
     return gen_patch_folder

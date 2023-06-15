@@ -52,21 +52,39 @@ class aceParser:
         )
         # Parser to select voxel size
         parser.add_argument(
-            "-s",
-            "--voxel_size",
+            "-r",
+            "--voxel_res",
             nargs=3,
-            type=self._validate_dims,
-            required=True,
-            metavar=("X-DIM", "Y-DIM", "Z-DIM"),
-            help="voxel dimensions (type: %(type)s)",
+            type=self._validate_vox_res,
+            required=False,
+            metavar=("X-res", "Y-res", "Z-res"),
+            help="voxel resolution (type: %(type)s)",
         )
-        # Boolean to choose if results are visualized
+        # Parser to select voxel size
         parser.add_argument(
-            "-v",
-            "--visualize_results",
-            action="store_true",
-            default=False,
-            help="enable visualization",
+            "-s",
+            "--image_size",
+            nargs=3,
+            type=self._validate_img_size,
+            required=False,
+            metavar=("height", "width", "depth"),
+            help="image size (type: %(type)s)",
+        )
+        # Parser for number of workers
+        parser.add_argument(
+            "-w",
+            "--nr_workers",
+            type=int,
+            required=False,
+            help="set number of workers (type: %(type)s)",
+        )
+        # Parser for cache rate
+        parser.add_argument(
+            "-c",
+            "--cache_rate",
+            type=float,
+            required=False,
+            help="set cache rate (type: %(type)s)",
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
@@ -74,7 +92,15 @@ class aceParser:
             "--monte_dropout",
             action="store_true",
             default=False,
-            help="whether you need to MC",
+            help="whether you need to MC (default: %(default)s)",
+        )
+        # Boolean to choose if results are visualized
+        parser.add_argument(
+            "-v",
+            "--visualize_results",
+            action="store_true",
+            default=False,
+            help="enable visualization (default: %(default)s)",
         )
         # Boolean to choose if an uncertainty map is created
         parser.add_argument(
@@ -82,7 +108,7 @@ class aceParser:
             "--uncertainty_map",
             action="store_true",
             default=False,
-            help="enable map"
+            help="enable map (default: %(default)s)"
         )
         return parser
 
@@ -122,7 +148,7 @@ class aceParser:
         if isinstance(choice, str):
             return choice.lower()
 
-    def _validate_dims(self, dim):
+    def _validate_vox_res(self, dim):
         """
         Validate the parsed arguments.
 
@@ -132,17 +158,42 @@ class aceParser:
             int_value = int(dim)
             if isinstance(int_value, int) and int_value <= 0:
                 raise argparse.ArgumentTypeError(
-                    f"'{int_value}' is an invalid integer. Voxel dimensions must be in set N*."
+                    f"'{int_value}' is an invalid integer. Voxel resolution must be in set N*."
                 )
         except ValueError:
             try:
                 float_value = float(dim)
                 raise argparse.ArgumentTypeError(
-                    f"'{float_value}' is an invalid float. Voxel dimensions must be in set N*."
+                    f"'{float_value}' is an invalid float. Voxel resolution must be in set N*."
                 )
             except ValueError:
                 raise argparse.ArgumentTypeError(
-                    f"'{dim}' is an invalid input. Voxel dimensions must be in set N*."
+                    f"'{dim}' is an invalid input. Voxel resolution must be in set N*."
+                )
+
+        return int(dim)
+
+    def _validate_img_size(self, dim):
+        """
+        Validate the parsed arguments.
+
+        :param args: The parsed arguments.
+        """
+        try:
+            int_value = int(dim)
+            if isinstance(int_value, int) and int_value <= 0:
+                raise argparse.ArgumentTypeError(
+                    f"'{int_value}' is an invalid integer. Image size must be in set N*."
+                )
+        except ValueError:
+            try:
+                float_value = float(dim)
+                raise argparse.ArgumentTypeError(
+                    f"'{float_value}' is an invalid float. Image size must be in set N*."
+                )
+            except ValueError:
+                raise argparse.ArgumentTypeError(
+                    f"'{dim}' is an invalid input. Image size must be in set N*."
                 )
 
         return int(dim)
