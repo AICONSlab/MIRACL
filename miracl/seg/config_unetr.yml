@@ -1,0 +1,17 @@
+general:
+  batch_size: 1
+  model_unet_trained_path: '/code/miracl/seg/models/unet/best_metric_model.pth'
+  model_unetr_trained_path: '/code/miracl/seg/models/unetr/best_metric_model.pth'
+  GPU: 'single'
+unet:
+  n_encoder_layers: 5
+  channels_initial: 16
+  num_res_unit: 2
+  dropout: 0.2
+unetr:
+  feature_size: 16
+  hidden_size: 768
+  mlp_dim: 3072
+  num_heads: 12
+  dropout: 0.2
+  res_block: True
