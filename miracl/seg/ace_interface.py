@@ -1,9 +1,15 @@
 # from pathlib import Path
 # import os
+import torch
 from miracl.seg import ace_generate_patch, ace_deploy_model, ace_patch_stacking
 
 
 def main(args):
+
+    if not torch.cuda.is_available():
+        print("TEST")
+    else:
+        raise ValueError("GPU support not available")
     # args_parser = aceParser()
     # args = args_parser.parse_args()
     print("The following parameters will be used:\n")
@@ -39,7 +45,7 @@ def main(args):
 
     ace_deploy_model.deploy_functions(
         chosen_model=args.model_type,
-        patch_dir_var=args.output_folder,
+        patch_dir_var=patches_folder,
         monte_var=args.monte_dropout
     )
 
