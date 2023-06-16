@@ -430,7 +430,7 @@ def generate_output_ensemble_of_ensembles(model_out):
 # -------------------------------------------------------
 # deployment of functions
 # -------------------------------------------------------
-def deploy_functions(chosen_model, patch_dir_var, monte_var):
+def deploy_functions(chosen_model, patch_dir_var, monte_var, cache_rate_var, num_workers_var):
     # Define global vars
     model_name = chosen_model
     input_path = patch_dir_var
@@ -452,9 +452,8 @@ def deploy_functions(chosen_model, patch_dir_var, monte_var):
     images_val.sort()
     images_val = [os.path.join(input_path, image) for image in images_val]
     data_dicts_test = [{"image": image_name} for image_name in images_val]
-    print(f"Type of data_dicts_test is: {type(data_dicts_test)}")
     print("data dicts are ready!")
-    print("some samples from data dicts: ", data_dicts_test[:3])
+    print(f"some samples from data dicts: {data_dicts_test[:3]}")
     print(f"in total we have {len(data_dicts_test)} data dicts")
 
     # -------------------------------------------------------
@@ -481,7 +480,10 @@ def deploy_functions(chosen_model, patch_dir_var, monte_var):
 
     # define dataloader
     val_ds = CacheDataset(
-        data=data_dicts_test, transform=test_transforms, cache_rate=0.0, num_workers=4
+        data=data_dicts_test,
+        transform=test_transforms,
+        cache_rate=cache_rate_var,
+        num_workers=num_workers_var
     )
     # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
     val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)

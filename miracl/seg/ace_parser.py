@@ -66,9 +66,9 @@ class aceParser:
             "--image_size",
             nargs=3,
             type=self._validate_img_size,
-            required=False,
+            required=True,
             metavar=("height", "width", "depth"),
-            help="image size (type: %(type)s)",
+            help="image size (type: %(type)s)"
         )
         # Parser for number of workers
         parser.add_argument(
@@ -76,7 +76,8 @@ class aceParser:
             "--nr_workers",
             type=int,
             required=False,
-            help="set number of workers (type: %(type)s)",
+            default=4,
+            help="set number of workers (type: %(type)s; default: %(default)s)"
         )
         # Parser for cache rate
         parser.add_argument(
@@ -84,7 +85,8 @@ class aceParser:
             "--cache_rate",
             type=float,
             required=False,
-            help="set cache rate (type: %(type)s)",
+            default=0.0,
+            help="set cache rate (type: %(type)s; default: %(default)s)"
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
