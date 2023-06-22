@@ -15,7 +15,7 @@
 # VARIABLES #
 #############
 
-# Set variable base state
+# Set variables base state
 # Script version
 version="2.0.0-beta"
 
@@ -38,7 +38,7 @@ miracl_version_file=$(cat ./miracl/version.txt)
 volumes=()
 
 # Base usage
-base_usage="Usage: ./$(basename $0) [-n 'service_name'] [-i 'image_name'] [-c 'container_name'] [-t {'auto','x.x.x'}] [-g] [-v 'vol:vol'] [-l] [-s] [-m] [-h]"
+base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-v vol:vol] [-l] [-s] [-m] [-h]"
 
 ##########
 # PARSER #
@@ -136,19 +136,19 @@ while getopts ":n:i:c:t:gv:lsmh" opt; do
 
     \?)
       echo "Invalid option: -$OPTARG" 1>&2
-      printf "\n$base_usage\n"
+      printf "\n%s\n" "$base_usage"
       exit 1
       ;;
 
     :)
       echo "Option -$OPTARG requires an argument." 1>&2
-      printf "\n$base_usage\n"
+      printf "\n%s\n" "$base_usage"
       exit 1
       ;;
 
     esac
   done
-  shift "$(($OPTIND -1))"
+  shift "$((OPTIND -1))"
 
 ##################
 # DOCKER COMPOSE #
@@ -235,7 +235,8 @@ if [ -x "$(command -v docker)" ]; then
       # Adding host user requirements to Dockerfile
       sed -i "/#STARTUNCOMMENT#/a $USER_TEXT" Dockerfile
 	    # Change user in docker-compose.yml to host user
-	    export HOST_USER=$(whoami)
+	    HOST_USER=$(whoami)
+      export HOST_USER
 	    sed -i "s/\(\/home\/\).*\(\/.Xauthority:\/home\/\).*\(\/.Xauthority\)/\1$HOST_USER\2$HOST_USER\3/g" docker-compose.yml
 
       ######################################
@@ -244,12 +245,12 @@ if [ -x "$(command -v docker)" ]; then
       
       # Printing information about build process and docker-compose.yml to stdout
       printf "\n[+] Building MIRACL and creating docker-compose.yml with the following parameters:\n"
-      printf " User: $HOST_USER\n"
-      printf " pid: $(id -u)\n"
-      printf " gid: $(id -g)\n"
-      printf " Service name: $service_name\n"
-      printf " Image name: $image_name:$miracl_version\n"
-      printf " Container name: $container_name\n"
+      printf " User: %s\n" "$HOST_USER"
+      printf " pid: %s\n" "$(id -u)"
+      printf " gid: %s\n" "$(id -g)"
+      printf " Service name: %s\n" "$service_name"
+      printf " Image name: %s\n" "$image_name:$miracl_version"
+      printf " Container name: %s\n" "$container_name"
       if [[ $gpu ]]; then
         printf " GPU passthrough: enabled\n"
       else
@@ -261,16 +262,16 @@ if [ -x "$(command -v docker)" ]; then
         printf " Log file: disabled\n"
       fi
       for v in "${!volumes[@]}"; do
-        printf " Volume $v: ${volumes[$v]}\n"
+        printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
       done
 
 	    # Pass user name, UID and GID to Dockerfile
       function docker_build () {
 	      docker build \
-	      --build-arg USER_ID=$(id -u) \
-	      --build-arg GROUP_ID=$(id -g) \
-	      --build-arg USER=$HOST_USER \
-	      -t $image_name:$miracl_version .
+	      --build-arg USER_ID="$(id -u)" \
+	      --build-arg GROUP_ID="$(id -g)" \
+	      --build-arg USER="$HOST_USER" \
+	      -t "$image_name":"$miracl_version" .
       }
 
       # Check for log flag
@@ -291,7 +292,7 @@ if [ -x "$(command -v docker)" ]; then
         # Test if docker-compose is installed
         # Should come by default with Docker-Desktop
         if [ -x "$(command -v docker-compose)" ]; then
-          printf "Docker Compose installation found ($(docker-compose --version)). Run 'docker-compose up -d' to start the MIRACL container in background.\n"
+          printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the MIRACL container in background.\n" "$(docker-compose --version)"
         elif dcex=$(docker compose version); then
           printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
         else
@@ -299,7 +300,7 @@ if [ -x "$(command -v docker)" ]; then
         fi
       else
         # Return error code if build was not successful
-        printf "\nBuild not successful! An error occured with exit code: $build_status_code\n"
+        printf "\nBuild not successful! An error occured with exit code: %s\n" $build_status_code
         # Remove $USER_TEXT from Dockerfile
         rm_USER_TEXT
         # Exit with custom status code
@@ -309,7 +310,7 @@ if [ -x "$(command -v docker)" ]; then
 else
     di_status_code=$?
     printf "\nDocker installation not found. Please install Docker first.\n"
-    printf "Exiting with status code $di_status_code\n"
+    printf "Exiting with status code %s\n" $di_status_code
     # Exit with custom status code
     exit $di_status_code
 fi
