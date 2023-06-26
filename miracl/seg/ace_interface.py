@@ -19,6 +19,7 @@ def main(args):
         print(f"  Image sizes:       {args.image_size}")
         print(f"  Number workers:    {args.nr_workers}")
         print(f"  Cache rate:        {args.cache_rate}")
+        print(f"  sw batch size:     {args.sw_batch_size}")
         print(f"  Monte dropout:     {args.monte_dropout}")
         print(f"  Visulize results:  {args.visualize_results}")
         print(f"  Uncertainty map:   {args.uncertainty_map}\n")

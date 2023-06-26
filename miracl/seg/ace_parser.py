@@ -52,16 +52,6 @@ class aceParser:
         )
         # Parser to select voxel size
         parser.add_argument(
-            "-r",
-            "--voxel_res",
-            nargs=3,
-            type=self._validate_vox_res,
-            required=False,
-            metavar=("X-res", "Y-res", "Z-res"),
-            help="voxel resolution (type: %(type)s)",
-        )
-        # Parser to select voxel size
-        parser.add_argument(
             "-s",
             "--image_size",
             nargs=3,
@@ -69,6 +59,16 @@ class aceParser:
             required=True,
             metavar=("height", "width", "depth"),
             help="image size (type: %(type)s)"
+        )
+        # Parser to select voxel size
+        parser.add_argument(
+            "-r",
+            "--voxel_res",
+            nargs=3,
+            type=self._validate_vox_res,
+            required=False,
+            metavar=("X-res", "Y-res", "Z-res"),
+            help="voxel resolution (type: %(type)s)",
         )
         # Parser for number of workers
         parser.add_argument(
@@ -87,6 +87,15 @@ class aceParser:
             required=False,
             default=0.0,
             help="set cache rate (type: %(type)s; default: %(default)s)"
+        )
+        # Parser for sw batch size
+        parser.add_argument(
+            "-sw",
+            "--sw_batch_size",
+            type=int,
+            required=False,
+            default=4,
+            help="set sw batch size (type: %(type)s; default: %(default)s)"
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
