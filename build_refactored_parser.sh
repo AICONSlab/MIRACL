@@ -34,6 +34,9 @@ miracl_version="latest"
 # Version file version
 miracl_version_file=$(cat ./miracl/version.txt)
 
+# Set default shared memory size
+shm="64mb"
+
 # Set array to capture volumes
 volumes=()
 
@@ -61,6 +64,7 @@ function usage()
    -c, specify container name (default: 'miracl')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
+   -d, set shared memory (shm) size which is important for some of MIRACL's scripts e.g. ACE segmentation (default: '64mb')
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
    -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
    -s, print version of build script and exit
@@ -75,7 +79,7 @@ usage
 }
 
 # Parse command line arguments
-while getopts ":n:i:c:t:gv:lsmh" opt; do
+while getopts ":n:i:c:t:gd:v:lsmh" opt; do
   case ${opt} in
 
     n)
@@ -109,6 +113,12 @@ while getopts ":n:i:c:t:gv:lsmh" opt; do
 
     g)
       gpu=true
+      ;;
+
+    d)
+      if [ "${OPTARG}" != "$shm" ]; then
+      shm=${OPTARG}
+      fi
       ;;
 
     v)
@@ -166,6 +176,7 @@ services:
     stdin_open: true
     network_mode: host
     container_name: $container_name
+    shm_size: $shm
 EOF
 
 if [[ $gpu ]]; then
