@@ -154,12 +154,12 @@ def generate_output_single(model_name, model_out):
     if model_name == "unet":
         # definde crop size / what is used during training
         roi_size = (128, 128, 128)
-        sw_batch_size = 4
+        sw_batch_size = sw_batch_size_internal
         model_loader(model_out, cfg["general"].get("model_unet_trained_path"))
     if model_name == "unetr":
         # definde crop size / what is used during training
         roi_size = (96, 96, 96)
-        sw_batch_size = 4
+        sw_batch_size = sw_batch_size_internal
         model_loader(model_out, cfg["general"].get("model_unetr_trained_path"))
 
     with torch.no_grad():
@@ -167,7 +167,7 @@ def generate_output_single(model_name, model_out):
 
         for i, val_data in enumerate(val_loader):
             print("Data #", RI_subj_id, ", ", data_dicts_test[RI_subj_id - 1])
-            val_inputs = val_data["image"].to(device)
+            val_inputs = val_data["image"].to(device).float()
 
             val_outputs = sliding_window_inference(
                 val_inputs, roi_size, sw_batch_size, model_out
@@ -209,12 +209,12 @@ def generate_output_MC(model_name, model_out):
     if model_name == "unet":
         # definde crop size / what is used during training
         roi_size = (128, 128, 128)
-        sw_batch_size = 4
+        sw_batch_size = sw_batch_size_internal
         model_loader(model_out, cfg["general"].get("model_unet_trained_path"))
     if model_name == "unetr":
         # definde crop size / what is used during training
         roi_size = (96, 96, 96)
-        sw_batch_size = 4
+        sw_batch_size = sw_batch_size_internal
         model_loader(model_out, cfg["general"].get("model_unetr_trained_path"))
 
     with torch.no_grad():
@@ -266,7 +266,7 @@ def generate_output_MC(model_name, model_out):
 
 # this function generates outputs using ensemble two models
 def generate_output_ensemble(model_out):
-    sw_batch_size = 4
+    sw_batch_size = sw_batch_size_internal
 
     def model_loader(model, trained_model_path):
         # move the models to gpu
@@ -332,7 +332,7 @@ def generate_output_ensemble_of_ensembles(model_out):
     # number of forward pass
     forward_passes = 50
 
-    sw_batch_size = 4
+    sw_batch_size = sw_batch_size_internal
 
     # this function only sets the model dropout layesrs to train
     def enable_dropout(model):
@@ -430,12 +430,15 @@ def generate_output_ensemble_of_ensembles(model_out):
 # -------------------------------------------------------
 # deployment of functions
 # -------------------------------------------------------
-def deploy_functions(chosen_model, patch_dir_var, monte_var, cache_rate_var, num_workers_var):
+def deploy_functions(chosen_model, patch_dir_var, sw_batch_size_var, monte_var, cache_rate_var, num_workers_var):
     # Define global vars
     model_name = chosen_model
+    global input_path
     input_path = patch_dir_var
     CFG_PATH = Path(os.environ["MIRACL_HOME"]) / "seg/config_unetr.yml"
     MC_flag = monte_var
+    global sw_batch_size_internal
+    sw_batch_size_internal = sw_batch_size_var
 
     # -------------------------------------------------------
     # Read generate_patch directory / created by generate_patch.py
@@ -451,6 +454,7 @@ def deploy_functions(chosen_model, patch_dir_var, monte_var, cache_rate_var, num
 
     images_val.sort()
     images_val = [os.path.join(input_path, image) for image in images_val]
+    global data_dicts_test
     data_dicts_test = [{"image": image_name} for image_name in images_val]
     print("data dicts are ready!")
     print(f"some samples from data dicts: {data_dicts_test[:3]}")
@@ -462,15 +466,19 @@ def deploy_functions(chosen_model, patch_dir_var, monte_var, cache_rate_var, num
     model_out, test_transforms = ace_prepare_model_transform.generate_model_transforms(
         model_name, CFG_PATH
     )
+    global post_pred
     post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
+    global post_label
     post_label = Compose([EnsureType(), AsDiscrete(to_onehot=2)])
 
     with open(CFG_PATH, "r") as ymlfile:
+        global cfg
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # GPU selection
     print(f"number of available gpus: {torch.cuda.device_count()}")
     gpu_opt = cfg["general"].get("GPU", "single")
+    global device
     if gpu_opt == "single":
         device = torch.device("cuda:0")
     else:
@@ -486,27 +494,28 @@ def deploy_functions(chosen_model, patch_dir_var, monte_var, cache_rate_var, num
         num_workers=num_workers_var
     )
     # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
+    global val_loader
     val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)
 
-    # # unet alone
-    # if model_name == "unet" and not MC_flag:
-    #     generate_output_single(model_name, model_out)
-    # # unetr alone
-    # elif model_name == "unetr" and not MC_flag:
-    #     generate_output_single(model_name, model_out)
-    # # unet alone + MC dropout
-    # elif model_name == "unet" and MC_flag:
-    #     generate_output_MC(model_name, model_out)
-    # # unetr alone + MC dropout
-    # elif model_name == "unetr" and MC_flag:
-    #     generate_output_MC(model_name, model_out)
-    # # unet + unetr
-    # elif model_name == "ensemble" and not MC_flag:
-    #     generate_output_ensemble(model_out)
-    # # unet + unetr + MC dropout
-    # elif model_name == "ensemble" and MC_flag:
-    #     generate_output_ensemble_of_ensembles(model_out)
-    # else:
-    #     raise ValueError("Selected model is invalid")
+    # unet alone
+    if model_name == "unet" and not MC_flag:
+        generate_output_single(model_name, model_out)
+    # unetr alone
+    elif model_name == "unetr" and not MC_flag:
+        generate_output_single(model_name, model_out)
+    # unet alone + MC dropout
+    elif model_name == "unet" and MC_flag:
+        generate_output_MC(model_name, model_out)
+    # unetr alone + MC dropout
+    elif model_name == "unetr" and MC_flag:
+        generate_output_MC(model_name, model_out)
+    # unet + unetr
+    elif model_name == "ensemble" and not MC_flag:
+        generate_output_ensemble(model_out)
+    # unet + unetr + MC dropout
+    elif model_name == "ensemble" and MC_flag:
+        generate_output_ensemble_of_ensembles(model_out)
+    else:
+        raise ValueError("Selected model is invalid")
 
     logging.debug("deploy_model called")
