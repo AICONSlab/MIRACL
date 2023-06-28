@@ -46,6 +46,7 @@ def main(args):
         ace_deploy_model.deploy_functions(
             chosen_model=args.model_type,
             patch_dir_var=patches_folder,
+            sw_batch_size_var=args.sw_batch_size,
             monte_var=args.monte_dropout,
             cache_rate_var=args.cache_rate,
             num_workers_var=args.nr_workers
@@ -58,8 +59,8 @@ def main(args):
                 main_input_folder_path=args.input_folder,
                 output_folder_path=args.output_folder,
                 monte_carlo=args.monte_dropout,
-                x=args.image_size[0],
-                y=args.image_size[1],
+                h=args.image_size[0],
+                w=args.image_size[1],
                 z=args.image_size[2]
                 )
 
