@@ -167,7 +167,7 @@ def generate_output_single(model_name, model_out):
 
         for i, val_data in enumerate(val_loader):
             print("Data #", RI_subj_id, ", ", data_dicts_test[RI_subj_id - 1])
-            val_inputs = val_data["image"].to(device)
+            val_inputs = val_data["image"].to(device).float()
 
             val_outputs = sliding_window_inference(
                 val_inputs, roi_size, sw_batch_size, model_out
@@ -224,7 +224,7 @@ def generate_output_MC(model_name, model_out):
             print("Data #", RI_subj_id, ", ", data_dicts_test[RI_subj_id - 1])
             val_outputs_list = []
             for f in range(forward_passes):
-                val_inputs = val_data["image"].to(device)
+                val_inputs = val_data["image"].to(device).float()
 
                 val_outputs = sliding_window_inference(
                     val_inputs, roi_size, sw_batch_size, model_out, 0.0
@@ -291,7 +291,7 @@ def generate_output_ensemble(model_out):
         for i, val_data in enumerate(val_loader):
             print("Data #", RI_subj_id, ", ", data_dicts_test[RI_subj_id - 1])
 
-            val_inputs = val_data["image"].to(device)
+            val_inputs = val_data["image"].to(device).float()
 
             val_outputs1 = sliding_window_inference(
                 val_inputs, roi_size_unet, sw_batch_size, model_unet, 0.0
@@ -367,7 +367,7 @@ def generate_output_ensemble_of_ensembles(model_out):
             val_outputs_list1 = []
             val_outputs_list2 = []
             for f in range(forward_passes):
-                val_inputs = val_data["image"].to(device)
+                val_inputs = val_data["image"].to(device).float()
 
                 val_outputs1 = sliding_window_inference(
                     val_inputs, roi_size_unet, sw_batch_size, model_unet, 0.0
