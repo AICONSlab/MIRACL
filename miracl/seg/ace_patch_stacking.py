@@ -130,7 +130,7 @@ def run_stacking(
                 img_main = img[z, :height, :width]
 
                 img_filename = os.path.join(
-                    output_path, image_mode, img_list_name[cnt_depth - 1]
+                    output_path, image_mode + img_list_name[cnt_depth - 1]
                 )
 
                 # print("saving img: ", img_filename)
