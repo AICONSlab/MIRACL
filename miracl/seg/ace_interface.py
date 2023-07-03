@@ -59,9 +59,7 @@ def main(args):
                 main_input_folder_path=args.input_folder,
                 output_folder_path=args.output_folder,
                 monte_carlo=args.monte_dropout,
-                h=args.image_size[0],
-                w=args.image_size[1],
-                z=args.image_size[2]
+                model_name_var=args.model_type
                 )
 
     else:

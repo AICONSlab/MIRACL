@@ -89,8 +89,8 @@ def run_stacking(
 
                     img[
                         :,
-                        h * PATCH_SIZE: h * PATCH_SIZE + PATCH_SIZE,
-                        w * PATCH_SIZE: w * PATCH_SIZE + PATCH_SIZE,
+                        h * PATCH_SIZE:h * PATCH_SIZE + PATCH_SIZE,
+                        w * PATCH_SIZE:w * PATCH_SIZE + PATCH_SIZE,
                     ] = img_temp
 
             for z in range(img_temp.shape[0]):
