@@ -6,7 +6,7 @@ from pathlib import Path
 
 class aceParser:
     """
-    Command-line argument parser for AI-based Cartography of neural Ensembles (ACE) segmentation method.
+    Command-line argument parser for AI-based Cartography of Ensembles (ACE) segmentation method.
 
     :param input: A required string argument that specifies the input file path.
     :param output: A required string argument that specifies the output file path.
@@ -23,7 +23,7 @@ class aceParser:
 
     def parsefn(self) -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser(
-            description="AI-based Cartography of neural Ensembles (ACE) segmentation method"
+            description="AI-based Cartography of Ensembles (ACE) segmentation method"
         )
         # Parser for input folder i.e. location of the data
         parser.add_argument(
@@ -31,7 +31,7 @@ class aceParser:
             "--input_folder",
             type=self._readable_file,
             required=True,
-            help="input file path",
+            help="path to raw tif/tiff data folder",
         )
         # Parser for output folder i.e. location where results are stored
         parser.add_argument(
@@ -39,7 +39,7 @@ class aceParser:
             "--output_folder",
             type=self._readable_file,
             required=True,
-            help="output file path",
+            help="path to output file folder",
         )
         # Parser to select model type
         parser.add_argument(
@@ -48,7 +48,7 @@ class aceParser:
             type=self._model_format,
             choices=["unet", "unetr", "ensemble"],
             required=True,
-            help="model type",
+            help="model architecture",
         )
         # Parser to select voxel size
         parser.add_argument(
@@ -56,19 +56,19 @@ class aceParser:
             "--image_size",
             nargs=3,
             type=self._validate_img_size,
-            required=True,
+            required=False,
             metavar=("height", "width", "depth"),
-            help="image size (type: %(type)s)"
+            help="image size (type: int; default: fetched from image header)"
         )
         # Parser to select voxel size
         parser.add_argument(
             "-r",
-            "--voxel_res",
+            "--resolution",
             nargs=3,
             type=self._validate_vox_res,
             required=False,
             metavar=("X-res", "Y-res", "Z-res"),
-            help="voxel resolution (type: %(type)s)",
+            help="voxel size (type: %(type)s)",
         )
         # Parser for number of workers
         parser.add_argument(
@@ -77,7 +77,7 @@ class aceParser:
             type=int,
             required=False,
             default=4,
-            help="set number of workers (type: %(type)s; default: %(default)s)"
+            help="number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)"
         )
         # Parser for cache rate
         parser.add_argument(
@@ -86,7 +86,7 @@ class aceParser:
             type=float,
             required=False,
             default=0.0,
-            help="set cache rate (type: %(type)s; default: %(default)s)"
+            help="percentage of raw data that is loaded into cpu during segmentation (type: %(type)s; default: %(default)s)"
         )
         # Parser for sw batch size
         parser.add_argument(
@@ -95,7 +95,7 @@ class aceParser:
             type=int,
             required=False,
             default=4,
-            help="set sw batch size (type: %(type)s; default: %(default)s)"
+            help="number of image patches being processed by the model in parallel on gpu (type: %(type)s; default: %(default)s)"
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
@@ -103,7 +103,7 @@ class aceParser:
             "--monte_dropout",
             action="store_true",
             default=False,
-            help="whether you need to MC (default: %(default)s)",
+            help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized
         parser.add_argument(
@@ -111,7 +111,7 @@ class aceParser:
             "--visualize_results",
             action="store_true",
             default=False,
-            help="enable visualization (default: %(default)s)",
+            help="visualizing model output after predictions (default: %(default)s)",
         )
         # Boolean to choose if an uncertainty map is created
         parser.add_argument(

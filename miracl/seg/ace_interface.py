@@ -15,7 +15,7 @@ def main(args):
         print(f"  Input file:        {args.input_folder}")
         print(f"  Output file:       {args.output_folder}")
         print(f"  Model type:        {args.model_type}")
-        print(f"  Voxel resolutions: {args.voxel_res}")
+        print(f"  Voxel resolutions: {args.resolution}")
         print(f"  Image sizes:       {args.image_size}")
         print(f"  Number workers:    {args.nr_workers}")
         print(f"  Cache rate:        {args.cache_rate}")
