@@ -60,6 +60,9 @@ def parsefn():
     parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
     parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
     parser.add_argument('-v', '--res', type=int, help="voxel size")
+    parser.add_argument('-vx', default=0.001, type=float, help="voxel size (x, y dims)")
+    parser.add_argument('-vz', default=0.001, type=float, help="voxel size (z dim)")
+    
 
     # parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -204,7 +207,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 # ---------
 # save to nifti
 
-def savenvoxnii(marray, outvoxnii, res):
+def savenvoxnii(marray, outvoxnii, res, vx, vz):
     '''
 	Saves voxelized tif output to nifti (nii.gz)
 	'''
@@ -212,11 +215,11 @@ def savenvoxnii(marray, outvoxnii, res):
     if not os.path.exists(outvoxnii):
         mat = np.eye(4)
 
-        vx = 0.001 * res
+        # vx = 0.001 * res
 
         mat[0, 0] = vx  # or vx/2
         mat[1, 1] = vx
-        mat[2, 2] = vx
+        mat[2, 2] = vz
 
         img = nib.Nifti1Image(marray, mat)
         nib.save(img, outvoxnii)
@@ -232,7 +235,7 @@ def main(args):
 
     parser = parsefn()
 
-    seg, res, down = parse_inputs(parser, args)
+    seg, res, down, vx, vz = parse_inputs(parser, args)
 
     segdir = os.path.dirname(os.path.realpath(seg))
 
@@ -257,6 +260,9 @@ def main(args):
 
     #     print('\n Voxelized map already created')
 
+    # set radius = downsample_ratio / 2
+    radius = down / 2
+
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
 
@@ -267,7 +273,7 @@ def main(args):
 
         marraybin = parcomputevox(segbin, radius, ncpus, down, outvoxbin)
 
-        savenvoxnii(marraybin, outvoxniibin, res)
+        savenvoxnii(marraybin, outvoxniibin, res, vx, vz)
 
         print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 
