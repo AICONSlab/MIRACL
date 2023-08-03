@@ -78,8 +78,10 @@ def parse_inputs(parser, args):
     res = 10 if args.res is None else args.res
     down = 2 if args.down is None else args.down
 
-    return seg, res, down
+    vx = args.vx
+    vz = args.vz
 
+    return seg, res, down, vx, vz
 
 # ---------
 # Parameters
@@ -238,6 +240,13 @@ def main(args):
     parser = parsefn()
 
     seg, res, down, vx, vz = parse_inputs(parser, args)
+
+    print("The following arguments are being used:")
+    print(f"  seg: {seg}")
+    print(f"  res: {res}")
+    print(f"  down: {down}")
+    print(f"  vx: {vx}")
+    print(f"  vz: {vz}")
 
     segdir = os.path.dirname(os.path.realpath(seg))
 
