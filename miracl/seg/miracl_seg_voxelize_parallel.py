@@ -58,10 +58,10 @@ def helpmsg(name=None):
 def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
     parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
-    parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
+    parser.add_argument('-d', '--down', type=int, help="down-sample ratio (should be the same as what used in registration")
     parser.add_argument('-v', '--res', type=int, help="voxel size")
-    parser.add_argument('-vx', default=0.001, type=float, help="voxel size (x, y dims)")
-    parser.add_argument('-vz', default=0.001, type=float, help="voxel size (z dim)")
+    parser.add_argument('-vx', default=1, type=float, help="voxel size (x, y dims) in um")
+    parser.add_argument('-vz', default=1, type=float, help="voxel size (z dim) in um")
     
 
     # parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
@@ -84,7 +84,7 @@ def parse_inputs(parser, args):
 # ---------
 # Parameters
 
-radius = 1
+# radius = 1
 cpuload = 0.95
 cpus = multiprocessing.cpu_count()
 ncpus = int(cpuload * cpus)  # 95% of cores used2
@@ -216,6 +216,8 @@ def savenvoxnii(marray, outvoxnii, res, vx, vz):
         mat = np.eye(4)
 
         # vx = 0.001 * res
+        vx = (vx/1000) * res
+        vz = (vz/1000) * res
 
         mat[0, 0] = vx  # or vx/2
         mat[1, 1] = vx
@@ -261,7 +263,7 @@ def main(args):
     #     print('\n Voxelized map already created')
 
     # set radius = downsample_ratio / 2
-    radius = down / 2
+    radius = floor(down / 2)
 
     segbasebin = base.replace("seg", "seg_bin")
     segbin = segdir + "/" + segbasebin
