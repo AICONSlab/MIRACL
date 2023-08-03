@@ -31,16 +31,18 @@ def helpmsg(name=None):
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: miracl seg voxelize -s seg_sparse.tif -v 10 -d 5
+	example: miracl seg voxelize -s seg_sparse.tif -v 10 -d 5 -vx 1 -vz 1
 
-        arguments (required):
+      arguments (required):
 
-        s. Segmentation tif file
+        s.  Segmentation tif file
 
-        optional arguments:
+      optional arguments:
 
-        v. Voxel size (10, 25, 50um) (def = 10)
-        d. Down sample ratio (def = 2) - recommend 2 =< ratio =< 5
+        v.  Voxel size (10, 25, 50um) (def = 10)
+        d.  Down sample ratio (def = 2) - recommend 2 =< ratio =< 5
+        vx. voxel size (x, y dims) in um
+        vz. voxel size (z dim) in um
 
     -----
 
