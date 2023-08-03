@@ -61,11 +61,9 @@ def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
     parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
     parser.add_argument('-d', '--down', type=int, help="down-sample ratio (should be the same as what used in registration")
-    parser.add_argument('-v', '--res', type=int, help="voxel size")
+    parser.add_argument('-v', '--res', type=int, choices=[10, 25, 50], help="voxel size")
     parser.add_argument('-vx', default=1, type=float, help="voxel size (x, y dims) in um")
     parser.add_argument('-vz', default=1, type=float, help="voxel size (z dim) in um")
-    
-
     # parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
@@ -84,6 +82,7 @@ def parse_inputs(parser, args):
     vz = args.vz
 
     return seg, res, down, vx, vz
+
 
 # ---------
 # Parameters
