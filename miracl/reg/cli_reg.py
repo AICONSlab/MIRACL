@@ -89,8 +89,8 @@ def run_warp_clar(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_warp_clar_data_to_allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -o %s -r %s -s %s' % (
-                args['in_nii'], args['ort_file'], args['reg_dir'], args['seg_chan'])
+            bash_args = '-i %s -o %s -r %s -s %s -v %s' % (
+                args['in_nii'], args['ort_file'], args['reg_dir'], args['seg_chan'], args['vox_res'])
 
             subprocess.check_call('%s/reg/miracl_reg_warp_clar_data_to_allen.sh %s' % (miracl_home, bash_args),
                                   shell=True,
@@ -212,6 +212,8 @@ def get_parser():
                                   help="file with ort tag")
     parser_warp_clar.add_argument('-s', '--seg_chan', metavar='',
                                   help="segmentation channel")
+    parser_warp_clar.add_argument('-v', '--vox_res', metavar='',
+                                  help="voxel resolution")
     parser_warp_clar.add_argument('-h', '--help', action='store_true')
 
     parser_warp_clar.set_defaults(func=run_warp_clar)
