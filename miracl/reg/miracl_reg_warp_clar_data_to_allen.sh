@@ -41,6 +41,7 @@ function usage()
 
         arguments (optional):
 			s. Segmentation channel (ex. green) - required if voxelized seg is input
+      v. Voxel resolution (10 or 25; default: 25um)
 
 	-----------------------------------
 
@@ -79,10 +80,6 @@ else
 fi
 
 #----------
-# Init atlas dir
-atlasdir=${MIRACL_HOME}/atlases
-
-
 # GUI for CLARITY input imgs
 function choose_folder_gui()
 {
@@ -115,7 +112,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:i:o:s:" opt; do
+	while getopts ":r:i:o:s:v:" opt; do
 
 	    case "${opt}" in
 
@@ -135,6 +132,9 @@ if [[ "$#" -gt 1 ]]; then
             	channel=${OPTARG}
             	;;
 
+            v)
+              voxres=${OPTARG}
+              ;;
         	*)
             	usage            	
             	;;
@@ -164,6 +164,16 @@ if [[ "$#" -gt 1 ]]; then
 		echo "ERROR: < -o=> ort file with code> not specified"
 		exit 1
 	fi
+
+  if [[ $voxres -eq 10 ]]; then
+    allenref=${ATLASES_HOME}/ara/template/average_template_10um.nii.gz
+  elif [[ $voxres -eq 25 ]]; then
+    allenref=${ATLASES_HOME}/ara/template/average_template_25um_OBmasked.nii.gz
+  else
+    usage
+    printf "\nVoxel resolution does not match 10 or 25! Exiting!\n\n"
+    exit 1
+  fi
 
 else
 
@@ -352,8 +362,7 @@ function main()
     base=`basename ${inimg}`
 	clarname=${base%%.*};
 
-	allenref=${atlasdir}/ara/template/average_template_25um_OBmasked.nii.gz
-
+	# allenref=${ATLASES_HOME}/ara/template/average_template_25um_OBmasked.nii.gz
 
     # Out img
 	ortclar=${regdir}/${clarname}_ort.nii.gz

@@ -11,6 +11,7 @@ RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(ge
     pip install setuptools==65.6.0 && \
     pip install -e /code/ "botocore >= 1.20.110"
 ENV MIRACL_HOME=/code/miracl
+ENV ATLASES_HOME=/code/atlases
 
 # Point to g++-5 for NiftyReg compilation
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50 --slave /usr/bin/g++ g++ /usr/bin/g++-5
