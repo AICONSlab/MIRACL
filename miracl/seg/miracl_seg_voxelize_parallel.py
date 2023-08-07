@@ -154,6 +154,7 @@ def vox(segflt, kernel, down, i, radius):
     local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((10, 10)), exclude_border=False,
                                 labels=circv)
     conncomp = ndimage.label(local_maxi)[0]
+    conncomp = np.multiply((conncomp > 0), circv)	
 
     return conncomp
 
