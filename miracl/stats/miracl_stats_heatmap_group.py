@@ -606,6 +606,15 @@ def main(args):
     # retrieve Atlas paths
     mask = os.path.join(ATLAS_DIR, 'ara/annotation/annotation_hemi_combined_%dum.nii.gz' % (vox))
     brain_template = os.path.join(ATLAS_DIR, 'ara/template/average_template_%dum.nii.gz' % (vox))
+    if vox == 10:
+       # os.system(f"c3d {ATLAS_DIR}/ara/template/average_template_{vox}um.nii.gz -binarize -o {outdir}/brain_mask.nii.gz")
+        mask_loaded = nib.load(mask)
+        mask_array = mask_loaded.get_fdata()
+        brain_mask = np.ones_like(mask_array)
+        brain_mask[mask_array == 0] = 0  # in annotation 1s are background values
+        nib.save(nib.Nifti1Image(brain_mask, mask_loaded.affine, mask_loaded.header), f"{outdir}/brain_mask_10um.nii.gz")
+    else:
+        brain_mask = nib.load(os.path.join(ATLAS_DIR, 'ara/template/average_template_%dum_OBmasked.nii.gz' % (vox))).get_fdata()
     cut_len, cut_coords = slice_display(mask, sagittal, coronal, axial, x, y, z)
     # extract Atlas slices for background and outline
     mask_slices = slice_extract(mask, cut_coords, x, y, z, mask.split("/")[-1])
@@ -615,6 +624,7 @@ def main(args):
     # calculate input slices with user specified axis.
     # Note:  Image array is formatted as img[P, I, L]. Order in accordance with LPI convention. x-position-> img[:,:,x], y-position-> img[y,:,:], z-position> img[:,z,:]
     img1, img_shape = grp_mean(g1, brain_template, outdir, x, y, z, percentile)
+    img1 = np.multiply(img1, brain_mask)
     print("Step 3/{} : Completed Group 1 Mean and QC Reg Check SVG File".format(4 + int(multi) * 3))
 
     # plot first heatmap
@@ -622,10 +632,10 @@ def main(args):
          cp, mask_slices, temp_slices,
          x, y, z, extension, dpi)
     print("Step 4/{} : Completed {} Heatmap Figure and Mean Nii File".format(4 + int(multi * 3), outfile[0]))
-
     # check if argument g2 was specified then plots heatmaps if True
     if multi == True:
         img2, img_shape = grp_mean(g2, brain_template, outdir, x, y, z, percentile)
+        img2 = np.multiply(img2, brain_mask)
         print("Step 5/7 : Completed Group 2 Mean and QC Reg Check SVG File".format(outfile[1]))
         plot(img2, mask, 1, vox, cut_coords, cut_len, sagittal, coronal, axial, figure_dim, outdir, outfile[1], sigma,
              cn, cp, mask_slices,
