@@ -20,6 +20,7 @@ from sklearn.preprocessing import binarize
 from miracl import ATLAS_DIR
 from miracl.stats import reg_svg, stats_gui_heatmap_group
 from math import ceil, nan
+from pathlib import Path
 
 # Log errors to file in current working directory
 logger.add(os.getcwd() + "/miracl_stats_heatmap_group_error.log", level='ERROR', mode="w")
@@ -220,6 +221,12 @@ def parse_inputs(parser, args):
             raise Exception(msg)
 
     # Validate paths
+
+    outdir = Path(outdir)
+    if not outdir.exists():
+        outdir.mkdir(parents=False, exist_ok=True)
+    outdir = str(outdir)
+
     if isinstance(g1, type(None)):
         raise Exception("-g1 group1 must be specified")
     path_check(g1)
@@ -412,6 +419,7 @@ def smooth_plot(temp, img, outdir, outfile, x, y, z, cut_coords, sigma, fig, axe
             c = axes[z][i].imshow(mean_img, norm=m_norm, cmap=cmap, zorder=2)
             axes[z][i].text(0.0, 1, 'a= {}'.format((cut_coords[z][i])), horizontalalignment='left',verticalalignment='top', fontsize=2, transform=axes[z][i].transAxes)
             axes[z][i].set_aspect(aspect=1, anchor="SW")
+
 
     # add and position colourbar
     cb_ax = fig.add_axes([0, 0.01, 0.02, 0.875])
