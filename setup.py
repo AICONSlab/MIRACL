@@ -37,7 +37,7 @@ setup(
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     install_requires=[
-        'numpy==1.21.6',
+        'numpy==1.22.0',
         'pandas==1.3.5',
         'scipy==1.6.2',
         'opencv-python==4.2.0.32',
