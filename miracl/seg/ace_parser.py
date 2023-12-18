@@ -27,24 +27,24 @@ class aceParser:
         )
         # Parser for input folder i.e. location of the data
         parser.add_argument(
-            "-i",
-            "--input_folder",
+            "-sai",
+            "--sa_input_folder",
             type=self._readable_file,
             required=True,
             help="path to raw tif/tiff data folder",
         )
         # Parser for output folder i.e. location where results are stored
         parser.add_argument(
-            "-o",
-            "--output_folder",
+            "-sao",
+            "--sa_output_folder",
             type=self._readable_file,
             required=True,
             help="path to output file folder",
         )
         # Parser to select model type
         parser.add_argument(
-            "-m",
-            "--model_type",
+            "-sam",
+            "--sa_model_type",
             type=self._model_format,
             choices=["unet", "unetr", "ensemble"],
             required=True,
@@ -52,8 +52,8 @@ class aceParser:
         )
         # Parser to select voxel size
         parser.add_argument(
-            "-s",
-            "--image_size",
+            "-sas",
+            "--sa_image_size",
             nargs=3,
             type=self._validate_img_size,
             required=False,
@@ -62,8 +62,8 @@ class aceParser:
         )
         # Parser to select voxel size
         parser.add_argument(
-            "-r",
-            "--resolution",
+            "-sar",
+            "--sa_resolution",
             nargs=3,
             type=self._validate_vox_res,
             required=False,
@@ -72,8 +72,8 @@ class aceParser:
         )
         # Parser for number of workers
         parser.add_argument(
-            "-w",
-            "--nr_workers",
+            "-saw",
+            "--sa_nr_workers",
             type=int,
             required=False,
             default=4,
@@ -81,8 +81,8 @@ class aceParser:
         )
         # Parser for cache rate
         parser.add_argument(
-            "-c",
-            "--cache_rate",
+            "-sac",
+            "--sa_cache_rate",
             type=float,
             required=False,
             default=0.0,
@@ -90,8 +90,8 @@ class aceParser:
         )
         # Parser for sw batch size
         parser.add_argument(
-            "-sw",
-            "--sw_batch_size",
+            "-sasw",
+            "--sa_sw_batch_size",
             type=int,
             required=False,
             default=4,
@@ -99,24 +99,24 @@ class aceParser:
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
-            "-mc",
-            "--monte_dropout",
+            "-samc",
+            "--sa_monte_dropout",
             action="store_true",
             default=False,
             help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized
         parser.add_argument(
-            "-v",
-            "--visualize_results",
+            "-sav",
+            "--sa_visualize_results",
             action="store_true",
             default=False,
             help="visualizing model output after predictions (default: %(default)s)",
         )
         # Boolean to choose if an uncertainty map is created
         parser.add_argument(
-            "-u",
-            "--uncertainty_map",
+            "-sau",
+            "--sa_uncertainty_map",
             action="store_true",
             default=False,
             help="enable map (default: %(default)s)"

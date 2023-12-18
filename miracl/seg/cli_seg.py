@@ -53,7 +53,7 @@ def run_voxelize(parser, args):
 
 
 def run_ace(parser, args):
-    ace_interface.main(args)
+    ace_interface.main(args=args)
 
 
 def get_parser():

@@ -12,7 +12,6 @@ import numpy as np
 import tifffile
 from math import floor
 
-
 def run_stacking(
     patches_path,
     main_input_folder_path,

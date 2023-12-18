@@ -47,7 +47,7 @@ logger.setLevel(logging.DEBUG)
 
 def generate_patch_main(input_folder, output_folder):
     input_path = input_folder
-    output_path = output_folder
+    output_path = Path(output_folder)
     output_dir_subfolder = "generated_patches"
 
     # return input_path, output_path
@@ -147,17 +147,20 @@ def generate_patch_main(input_folder, output_folder):
 
         # save each data with size of 512 * 512 * 512
         print(
-            f" \nSaving patches for Z-dim to '{output_folder}/{output_dir_subfolder}/'..."
+            f" \nSaving patches for Z-dim to '{output_path}/{output_dir_subfolder}/'..."
         )
         for i in range(img_batch.shape[0]):
             img_batch_single = img_batch[i, :, :, :]
             # img_batch_single_normalized = (img_batch_single - img_batch_single.min()) / (img_batch_single.max() - img_batch_single.min())
             file_img = "patch_" + str(idx1) + "_" + str(i) + ".tiff"
 
-            output_dir_img = os.path.join(output_path, output_dir_subfolder)
-            isExist = os.path.exists(output_dir_img)
-            if not isExist:
-                os.mkdir(output_dir_img)
+            # output_dir_img = os.path.join(output_path, output_dir_subfolder)
+            output_dir_img = Path(output_path) / output_dir_subfolder
+            # isExist = os.path.exists(output_dir_img)
+            if not output_dir_img.is_dir():
+                # os.mkdir(output_dir_img)
+                output_dir_img.mkdir(parents=True)
+                print(f"output_dir: {output_dir_img}")
             fname_output_img = os.path.join(output_dir_img, file_img)
 
             tifffile.imwrite(
@@ -174,10 +177,10 @@ def generate_patch_main(input_folder, output_folder):
             )
 
     print(
-        f"  \nIn total, {img_batch.shape[0]} patches have been saved to '{output_folder}/{output_dir_subfolder}/'!"
+        f"  \nIn total, {img_batch.shape[0]} patches have been saved to '{output_path}/{output_dir_subfolder}/'!"
     )
 
     logging.debug("generate_patch_main called")
 
-    gen_patch_folder = Path(output_folder) / output_dir_subfolder
+    gen_patch_folder = output_path / output_dir_subfolder
     return gen_patch_folder

@@ -53,6 +53,7 @@ setup(
         'argcomplete==2.0.0',
         'dipy==1.6.0',
         'seaborn==0.12.2',
+        'SimpleITK==2.2.1',
         'pyqt5==5.15.8',
         'nipype==1.8.5'
         ],

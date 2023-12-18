@@ -14,6 +14,7 @@ import sys
 import warnings
 from argparse import RawTextHelpFormatter
 from datetime import datetime
+from pathlib import Path
 
 import cv2
 import nibabel as nib
@@ -209,7 +210,9 @@ def parse_inputs(parser, args):
             if args.chanprefix is None:
                 sys.exit('-cp (channel prefix) not specified ')
 
-        chanp = args.chanprefix if args.chanprefix is not None else None
+        # chanp = args.chanprefix if args.chanprefix is not None else None
+        chanp = args.chanprefix if args.chanprefix != "None" else None if args.chanprefix is not None else None
+
 
         if args.channame is None:
             chan = 'eyfp'
@@ -375,6 +378,20 @@ def main(args):
     parser = parsefn()
     indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
 
+    print("\n Converting with the following settings:")
+    print(f"  indir:      {indir}")
+    print(f"  work_dir:   {work_dir}")
+    print(f"  outnii:     {outnii}")
+    print(f"  d:          {d}")
+    print(f"  chann:      {chann}")
+    print(f"  chanp:      {chanp}")
+    print(f"  chan:       {chan}")
+    print(f"  vx:         {vx}")
+    print(f"  vz:         {vz}")
+    print(f"  cent:       {cent}")
+    print(f"  downz:      {downz}")
+    print(f"  pd:         {pd}")
+
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)
@@ -388,7 +405,10 @@ def main(args):
         file_list = sorted(glob.glob("%s/*%s%01d*.tif*" % (indir, chanp, chann)), key=numericalsort)
 
     # make out dir
-    outdir = os.path.join(work_dir, 'niftis')
+    # If function is called as part of the ACE workflow, the output directory
+    # of the ACE workflow will be used
+    ace_flow_conv_output_folder = os.path.join(work_dir, 'conv_final')
+    outdir = ace_flow_conv_output_folder if Path(ace_flow_conv_output_folder).is_dir else os.path.join(work_dir, 'niftis')
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)

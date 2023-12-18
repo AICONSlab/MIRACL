@@ -1,7 +1,9 @@
 # from pathlib import Path
 # import os
 import torch
+from pathlib import Path
 from miracl.seg import ace_generate_patch, ace_deploy_model, ace_patch_stacking
+import sys
 
 
 def main(args):
@@ -9,20 +11,31 @@ def main(args):
     if torch.cuda.is_available():
         print("CUDA available!")
 
-        # args_parser = aceParser()
-        # args = args_parser.parse_args()
+        input_folder_arg = args.sa_input_folder
+        ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
+        output_folder_arg = ace_flow_seg_output_folder if ace_flow_seg_output_folder.is_dir() else Path(args.sa_output_folder)
+        model_type_arg = args.sa_model_type
+        voxel_resolutions_arg = args.sa_resolution
+        image_sizes_arg = args.sa_image_size
+        number_workers_arg = args.sa_nr_workers
+        cache_rate_arg = args.sa_cache_rate
+        sw_batch_size_arg = args.sa_sw_batch_size
+        monte_dropout_arg = args.sa_monte_dropout
+        visualize_results_arg = args.sa_visualize_results
+        uncertainty_map_arg = args.sa_uncertainty_map
+
         print("The following parameters will be used:\n")
-        print(f"  Input file:        {args.input_folder}")
-        print(f"  Output file:       {args.output_folder}")
-        print(f"  Model type:        {args.model_type}")
-        print(f"  Voxel resolutions: {args.resolution}")
-        print(f"  Image sizes:       {args.image_size}")
-        print(f"  Number workers:    {args.nr_workers}")
-        print(f"  Cache rate:        {args.cache_rate}")
-        print(f"  sw batch size:     {args.sw_batch_size}")
-        print(f"  Monte dropout:     {args.monte_dropout}")
-        print(f"  Visulize results:  {args.visualize_results}")
-        print(f"  Uncertainty map:   {args.uncertainty_map}\n")
+        print(f"  Input folder:      {input_folder_arg}")
+        print(f"  Output folder:     {output_folder_arg}")
+        print(f"  Model type:        {model_type_arg}")
+        print(f"  Voxel resolutions: {voxel_resolutions_arg}")
+        print(f"  Image sizes:       {image_sizes_arg}")
+        print(f"  Number workers:    {number_workers_arg}")
+        print(f"  Cache rate:        {cache_rate_arg}")
+        print(f"  sw batch size:     {sw_batch_size_arg}")
+        print(f"  Monte dropout:     {monte_dropout_arg}")
+        print(f"  Visualize results: {visualize_results_arg}")
+        print(f"  Uncertainty map:   {uncertainty_map_arg}\n")
 
         # TODO: Add program logic here
 
@@ -34,8 +47,8 @@ def main(args):
         # INFO: ace_generate_patch.py
 
         patches_folder = ace_generate_patch.generate_patch_main(
-            input_folder=args.input_folder,
-            output_folder=args.output_folder
+            input_folder=input_folder_arg,
+            output_folder=output_folder_arg
         )
 
         print(f"Patches folder path is: {patches_folder}")
@@ -44,22 +57,22 @@ def main(args):
         # INFO: ace_prepare_model_transform.py is called from within ace_deploy_model.py
 
         ace_deploy_model.deploy_functions(
-            chosen_model=args.model_type,
+            chosen_model=model_type_arg,
             patch_dir_var=patches_folder,
-            sw_batch_size_var=args.sw_batch_size,
-            monte_var=args.monte_dropout,
-            cache_rate_var=args.cache_rate,
-            num_workers_var=args.nr_workers
+            sw_batch_size_var=sw_batch_size_arg,
+            monte_var=monte_dropout_arg,
+            cache_rate_var=cache_rate_arg,
+            num_workers_var=number_workers_arg
         )
 
         # INFO: ace_patch_stacking.py
 
         ace_patch_stacking.run_stacking(
                 patches_path=patches_folder,
-                main_input_folder_path=args.input_folder,
-                output_folder_path=args.output_folder,
-                monte_carlo=args.monte_dropout,
-                model_name_var=args.model_type
+                main_input_folder_path=input_folder_arg,
+                output_folder_path=output_folder_arg,
+                monte_carlo=monte_dropout_arg,
+                model_name_var=model_type_arg
                 )
 
     else:
