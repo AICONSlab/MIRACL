@@ -15,6 +15,7 @@ click==8.0.3
 cycler==0.11.0
 dipy==1.4.1
 distro==1.6.0
+einops==0.6.1
 etelemetry==0.2.2
 filelock==3.4.0
 future==0.18.2
@@ -38,6 +39,7 @@ marshmallow==3.14.1
 matplotlib==3.4.2
 -e git+https://github.com/mgoubran/MIRACL.git@f0c07482ef7cdd6e9f52f6676e4d8bbc0d71e537#egg=MIRACL
 multidict==5.2.0
+monai-weekly==0.9.dev2202
 ndx-events==0.2.0
 nest-asyncio==1.2.0
 networkx==2.6.3
@@ -85,6 +87,9 @@ statsmodels==0.13.0
 tables==3.6.1
 tifffile==2021.11.2
 toml==0.10.2
+torch==1.13.1
+torchaudio==0.13.1
+torchvision==0.14.1
 tqdm==4.62.3
 traits==6.3.2
 typing_extensions==4.0.1
