@@ -40,8 +40,8 @@ class ACEWorkflowParser:
 
         # Define custom headers for args to separate required and optional
         required_args = parser.add_argument_group("required arguments")
-        conv_args = parser.add_argument_group("optional segmentation arguments")
-        seg_args = parser.add_argument_group("Optional conversion arguments")
+        seg_args = parser.add_argument_group("Optional segmentation arguments")
+        conv_args = parser.add_argument_group("optional conversion arguments")
         reg_args = parser.add_argument_group("Optional registration arguments")
         vox_args = parser.add_argument_group("Optional voxelization arguments")
         warp_args = parser.add_argument_group("Optional warping arguments")
