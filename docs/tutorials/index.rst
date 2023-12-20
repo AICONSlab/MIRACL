@@ -17,6 +17,7 @@ for a tutorial on :program:`MIRACL's` general usage.
 
    legend
    getting_started
+   ACE
    workflows/index
    conversion/index
    registration/index
