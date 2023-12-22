@@ -17,7 +17,7 @@ ___
 
 ___
 
-**NEW WORKFLOW/FEATURE RELEASE**
+\*\***NEW WORKFLOW/FEATURE RELEASE**\*\*
 
 We will be releasing our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning 
 segmentation models and advanced statistical methods to enable unbiased and generalizable brain-wide mapping of 3D alterations in neuronal activity, 
@@ -27,11 +27,11 @@ ACE will be available as part of MIRACL in **January 2024**.
 
 ___
 
-Copyright (c) 2023 Maged Goubran
-
-All Rights Reserved
+We recommend using MIRACL with the Docker or Singularity containers we provide but it can also be installed locally.  For more details, see our 
+[docs](https://miracl.readthedocs.io).
 
 ___
 
-We recommend using MIRACL with the Docker or Singularity containers we provide but it can also be installed locally.  For more details, see our 
-[docs](https://miracl.readthedocs.io).
+Copyright (c) 2023 Maged Goubran
+
+All Rights Reserved
