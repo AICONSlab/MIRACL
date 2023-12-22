@@ -19,16 +19,8 @@ ACE Workflow
    be available for download in version ``2.3.1`` which will be 
    released in **early January 2024**.
 
-ACE Workflow
+Main outputs
 ============
-
-.. note::
-
-   :program:`ACE's` workflow is currently only available on the command line. 
-   We are currently working on the GUI integration which will be integrated
-   in **early 2024**.
-
-Main outputs:
 
 .. code-block::
 
@@ -54,8 +46,16 @@ Executes:
    stats/miracl_workflow_ace_stats.py
    stats/miracl_summarize_clusters_corr.py
 
-The :program:`ACE workflow` can be found in :program:`MIRACL's` ``flow`` 
-section. To get more information about the workflow and its required arguments 
+.. note::
+
+   :program:`ACE's` workflow is currently only available on the command line. 
+   We are currently working on the GUI integration which will be integrated
+   in **early 2024**.
+
+CLI
+===
+
+To get more information about the workflow and its required arguments 
 use the following command on the cli:
 
 .. code-block::
@@ -88,8 +88,6 @@ The following information will be printed to the terminal:
      -pcsd PCS_DISEASE, --pcs_disease PCS_DISEASE
                            disease group directory (should contain warped
                            voxelized nifti files)
-     -pcso PCS_OUTPUT, --pcs_output PCS_OUTPUT
-                           path of output directory
 
 .. note::
 
@@ -108,5 +106,10 @@ The following information will be printed to the terminal:
    \-sam, \-\-sa_model_type     {unet,unetr,ensemble}  ``str``  model architecture              
    \-pcsw, \-\-pcs_wild_type    PCS_WILD_TYPE          ``str``  wild type group directory
    \-pcsd, \-\-pcs_disease      PCS_DISEASE            ``str``  disease group directory
-   \-pcso, \-\-pcs_output       PCS_OUTPUT             ``str``  path of output directory
    ===========================  =====================  =======  ================================
+
+Example usage:
+
+.. code-block::
+
+   $ miracl flow ace -sai /data/cells -sao /data/output -sam unet -pcsw /data/wild -pcsd /data/disease -pcso 

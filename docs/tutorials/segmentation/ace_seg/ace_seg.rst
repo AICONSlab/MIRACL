@@ -1,9 +1,14 @@
 ACE Segmentation Function
-=========================
+#########################
 
-The :program:`ACE segmentation` function can be found in :program:`MIRACL's` 
-``seg`` section. To look at the arguments that need to be provided to the 
-function, invoke the help menu using:
+Cutting edge vision transformer and CNN-based DL architectures trained on very 
+large LSFM datasets to map cFos brain-wide.
+
+CLI
+===
+
+To look at the arguments that need to be provided to the function, invoke the 
+help menu using:
 
 .. code-block::
 

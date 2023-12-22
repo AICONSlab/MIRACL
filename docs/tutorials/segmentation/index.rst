@@ -1,7 +1,7 @@
 Segmentation
 ############
 
-Functions segment to tiff image files.
+Functions to segment tiff image files.
 
 .. include:: ../../directives/missing_fns_tutorials_directive.rst
 
