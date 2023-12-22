@@ -204,7 +204,7 @@ class ACEWorkflowParser:
             "--ctn_outnii",
             type=str,
             metavar="",
-            default='clarity',
+            default="clarity",
             help="Output nii name (script will append downsample ratio & channel info to given name)",
         )
         conv_args.add_argument(
@@ -347,29 +347,66 @@ class ACEWorkflowParser:
 
         # INFO: Voxelization parser
 
+        # vox_args.add_argument(
+        #     "-rvas",
+        #     "--rva_seg",
+        #     type=str,
+        #     help="binary segmentation tif i.e. segmented tif file",
+        #     required=True,
+        # )
+        # Should be inherited from above -rcad (?) argument
+        # vox_args.add_argument(
+        #     "-rvad",
+        #     "--rva_downsample",
+        #     type=int,
+        #     help="downsample ratio from conversion",
+        # )
+        # Should be inherited from above -rcav argument
+        # vox_args.add_argument(
+        #     "-rvav",
+        #     "--rva_res",
+        #     type=int,
+        #     choices=[10, 25, 50],
+        #     default=10,
+        #     help="labels voxel size/Resolution in um (default: %(default)s)",
+        # )
         vox_args.add_argument(
-            "-rvas",
-            "--rva_input_tif",
-            type=str,
-            default=None,
-            help="segmented tif file",
-        )
-        # FIX: Should be inherited from above -rcav argument
-        vox_args.add_argument(
-            "-rvav",
-            "--rva_voxel_size",
-            type=int,
-            choices=[10, 25, 50],
-            default=10,
-            help="labels voxel size/Resolution in um (default: %(default)s)",
+            "-rvavx",
+            "-rva_vx_res",
+            default=1,
+            type=float,
+            help="voxel size (x, y dims) in um (default: %(default)s)",
         )
         vox_args.add_argument(
-            "-rvad",
-            "--rva_downsample",
-            type=int,
-            default=2,
-            help="down sample ratio, recommended: 2 <= ratio <= 5 (default: %(default)s)",
+            "-rvavz",
+            "-rva_vz_res",
+            default=1,
+            type=float,
+            help="voxel size (z dim) in um (default: %(default)s)",
         )
+
+        # vox_args.add_argument(
+        #     "-rvas",
+        #     "--rva_input_tif",
+        #     type=str,
+        #     default=None,
+        #     help="segmented tif file",
+        # )
+        # vox_args.add_argument(
+        #     "-rvav",
+        #     "--rva_voxel_size",
+        #     type=int,
+        #     choices=[10, 25, 50],
+        #     default=10,
+        #     help="labels voxel size/Resolution in um (default: %(default)s)",
+        # )
+        # vox_args.add_argument(
+        #     "-rvad",
+        #     "--rva_downsample",
+        #     type=int,
+        #     default=2,
+        #     help="down sample ratio, recommended: 2 <= ratio <= 5 (default: %(default)s)",
+        # )
 
         # INFO: Warping parser
 
