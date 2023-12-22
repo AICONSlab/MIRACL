@@ -9,6 +9,7 @@ import multiprocessing
 import os
 import sys
 import warnings
+from pathlib import Path
 from datetime import datetime
 
 warnings.simplefilter("ignore", UserWarning)
@@ -244,22 +245,24 @@ def main(args):
     seg, res, down, vx, vz = parse_inputs(parser, args)
 
     print("The following arguments are being used:")
-    print(f"  seg: {seg}")
-    print(f"  res: {res}")
+    print(f"  seg:  {seg}")
+    print(f"  res:  {res}")
     print(f"  down: {down}")
-    print(f"  vx: {vx}")
-    print(f"  vz: {vz}")
+    print(f"  vx:   {vx}")
+    print(f"  vz:   {vz}")
 
     segdir = os.path.dirname(os.path.realpath(seg))
+
 
     base = os.path.basename(seg)
 
     fstr = os.path.splitext(base)
 
-    type = fstr[0].split("_")[1]
+    # Check if string contains '_' and if False use 'undefined' as type
+    seg_type = fstr[0].split("_")[1] if "_" in fstr[0] else "undefined"
 
-    # outvox = '%s/voxelized_seg_%s.tiff' % (segdir, type)
-    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    # outvox = '%s/voxelized_seg_%s.tiff' % (segdir, seg_type)
+    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, seg_type)
 
     # if not os.path.exists(outvox):
 
@@ -276,11 +279,24 @@ def main(args):
     # set radius = downsample_ratio / 2
     radius = floor(down / 2)
 
-    segbasebin = base.replace("seg", "seg_bin")
+    # Check if a Fiji (.ijm) file exists in target directory. If True,
+    # voxelization is being run as part of the ACE flow so the segmented
+    # tif should not be renamed
+    segbasebin = base if list(Path(segdir).glob("*.ijm")) else base.replace("seg", "seg_bin")
+
     segbin = segdir + "/" + segbasebin
 
-    outvoxbin = '%s/voxelized_seg_%s.tiff' % (segdir, type)
-    outvoxniibin = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    outvoxbin = '%s/voxelized_seg_%s.tiff' % (segdir, seg_type)
+    outvoxniibin = '%s/voxelized_seg_%s.nii.gz' % (segdir, seg_type)
+
+    print(f"  seg_type: {seg_type}")
+    print(f"  segdir: {segdir}")
+    print(f"  base: {base}")
+    print(f"  fstr: {fstr}")
+    print(f"  segbasebin: {segbasebin}")
+    print(f"  segbin: {segbin}")
+    print(f"  outvoxbin: {outvoxbin}")
+    print(f"  outvoxniibin: {outvoxniibin}")
 
     if not os.path.exists(outvoxbin):
 
