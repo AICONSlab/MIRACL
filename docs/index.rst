@@ -33,6 +33,23 @@ Welcome to MIRACL's documentation!
 
 .. include:: ./directives/miracl_overview_directive.rst
 
+\*\*NEW FEATURE RELEASE IN EARLY 2024\*\*
+"""""""""""""""""""""""""""""""""""""""""
+
+**AI-based Cartography of Ensembles (ACE) segmentation method and workflow** 
+is an end-to-end, automated pipeline that seamlessly integrates cutting-edge 
+deep learning segmentation models (both Vision transformer and CNN-based 
+architectures), registration algorithms, and advanced statistical methods to 
+enable an unbiased and generalizable mapping of 3D alterations in neuronal 
+activity, morphology, or connectivity at the sub-regional and laminar levels 
+beyond atlas-defined regions.
+
+:program:`ACE` has been develop by `Ahmadreza Attarpour <https://github.com/AAttarpour>`_,
+`Maged Goubran <https://github.com/mgoubran>`_ and `Jonas Osmann <https://github.com/jono3030>`_
+and will be available as part of MIRACL in **early January 2024**.
+
+------
+
 We recommend using MIRACL with the Docker or Singularity containers we provide 
 but it can also be installed locally. See our 
 :doc:`installation instructions <./installation/installation>` for more information.
