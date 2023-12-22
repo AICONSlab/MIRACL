@@ -103,7 +103,9 @@ def main():
     ace_flow_warp_output_folder = Path(args.sa_output_folder) / "warp_final"
     ace_flow_warp_output_folder.mkdir(parents=True, exist_ok=True)
     clarity_reg_dir = Path(args.sa_output_folder) / "clar_allen_reg"
-    voxelized_segmented_tif = list(ace_flow_vox_output_folder.glob("voxelized_seg_*.nii.gz"))[0]
+    voxelized_segmented_tif = list(
+        ace_flow_vox_output_folder.glob("voxelized_seg_*.nii.gz")
+    )[0]
     orientation_file = ace_flow_warp_output_folder / "ort2std.txt"
 
     # Check if orientation file already exists and delete if True
@@ -111,8 +113,8 @@ def main():
         orientation_file.unlink()
 
     with open(orientation_file, "w") as file:
-        file.write(f'tifdir={ace_flow_vox_output_folder}\n')
-        file.write(f'ortcode={args.rca_orient_code}')
+        file.write(f"tifdir={ace_flow_vox_output_folder}\n")
+        file.write(f"ortcode={args.rca_orient_code}")
 
     print(f"warp_dir: {ace_flow_warp_output_folder}")
     print(f"reg_dir: {clarity_reg_dir}")
