@@ -20,5 +20,6 @@ for a tutorial on :program:`MIRACL's` general usage.
    workflows/index
    conversion/index
    registration/index
+   segmentation/index
    utilities/index
    slurm/index

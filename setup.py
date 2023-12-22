@@ -54,6 +54,7 @@ setup(
         'dipy==1.6.0',
         'seaborn==0.12.2',
         'pyqt5==5.15.8',
+        'SimpleITK==2.2.1',
         'nipype==1.8.5'
         ],
     entry_points={'console_scripts': ['miracl=miracl.cli:main'],

@@ -33,6 +33,15 @@ Welcome to MIRACL's documentation!
 
 .. include:: ./directives/miracl_overview_directive.rst
 
+\*\*NEW WORKFLOW/FEATURE RELEASE\*\*
+"""""""""""""""""""""""""""""""""""""""""
+
+We will be releasing our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning segmentation models and advanced statistical methods to enable unbiased and generalizable brain-wide mapping of 3D alterations in neuronal activity, morphology, or connectivity at the sub-regional and laminar levels beyond atlas-defined regions.
+
+:program:`ACE` will be available as part of MIRACL in January 2024.
+
+------
+
 We recommend using MIRACL with the Docker or Singularity containers we provide 
 but it can also be installed locally. See our 
 :doc:`installation instructions <./installation/installation>` for more information.

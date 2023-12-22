@@ -1,7 +1,7 @@
 Getting started
 ###############
 
-MIRACL can be run in the command-line or by using its GUI.
+:program:`MIRACL` can be run in the command-line or by using its GUI.
 
 Command-line
 ============
