@@ -31,7 +31,7 @@ Or structure tensor analysis:
    :maxdepth: 2
    :caption: Table of contents:
 
-   ACE **new feature** <ace/ace>
+   ACE **new feature** <ace_flow/ace_flow>
    CLARITY-Allen registration <clarity_registration/clar_reg>
    STA <sta/sta>
    CLARITY segmentation <clarity_segmentation/clar_seg>
