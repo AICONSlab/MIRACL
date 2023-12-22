@@ -1,16 +1,17 @@
 ACE Workflow
 ############
 
-:program:`ACE` stands for **A**\ I-based **C**\ artography of **E**\ nsembles
-(**ACE**) segmentation method and workflow. Some of its highlights are:
+**A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
-1. Cutting edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets to map cFos brain-wide
-2. Interfaces to MIRACL registration algorithms to warp segmentation maps to a 
-   study-specific atlas
-3. Optimized cluster-wise statistical analysis with a threshold-free 
-   enhancement approach to document and chart clusters of activation and their 
-   associations at the laminar and local level
+1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
+   very large LSFM datasets to map brain-wide neuronal activity
+2. Optimized cluster-wise statistical analysis with a threshold-free 
+   enhancement approach to chart subpopulation-specific effects at the laminar 
+   and local level, without restricting the analysis to atlas-defined regions.
+3. Modules for providing DL model uncertainty estimates and fine-tuning
+4. Interface with MIRACL registration to create study-specific atlases
+5. Ability to account for covariates at the cluster level and map the 
+   connectivity between clusters of activations.
 
 .. note::
 
