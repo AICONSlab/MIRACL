@@ -60,7 +60,11 @@ setup(
         'seaborn==0.12.2',
         'SimpleITK==2.2.1',
         'pyqt5==5.15.8',
-        'nipype==1.8.5'
+        'nipype==1.8.5',
+	    'nilearn==0.9.1',
+	    'scikit-learn==1.0.2',
+	    'svgwrite==1.4.3',
+	    'loguru==0.6.0'
         ],
     entry_points={'console_scripts': ['miracl=miracl.cli:main'],
                   'gui_scripts': ['miraclGUI=miracl.miraclGUI:main']},
