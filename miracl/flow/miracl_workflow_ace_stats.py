@@ -1,10 +1,10 @@
 """
-
-This code is written by Ahmadreza Attarpour (a.attarpour@mail.utoronto.ca), Maged Goubran (maged.goubran@utoronto.ca) and Jonas Osmann (j.osmann@mail.utoronto.ca)
-This function reads voxelized warped images & performs cluster based permutation tests
-
+This code is written by Ahmadreza Attarpour (a.attarpour@mail.utoronto.ca),
+Maged Goubran (maged.goubran@utoronto.ca) and Jonas Osmann
+(j.osmann@mail.utoronto.ca). This function reads voxelized warped images and
+performs cluster based permutation tests
 """
-import argparse
+
 from pathlib import Path
 import os
 import pickle
@@ -25,48 +25,13 @@ import scipy.ndimage as scp
 from scipy.stats import mannwhitneyu, ttest_ind, kruskal, f_oneway
 from miracl_workflow_ace_parser import ACEWorkflowParser
 
-# # Create the parser
-# my_parser = argparse.ArgumentParser(description="Working directory")
-#
-# # Add the arguments
-# my_parser.add_argument('-wild','--wild_type', help='wild type group directory (should contain warped voxelized nifti files)', required=True)
-# my_parser.add_argument('-dis','--disease', help='disease group directory (should contain warped voxelized nifti files)', required=True)
-# my_parser.add_argument('-out','--output', help='path of output directory', required=True)
-# my_parser.add_argument('-atl_dir','--atlas_dir', help='path of atlas directory', default='miracl_home')
-# my_parser.add_argument('-n', '--num_perm', type=int, help="number of permutations", default=100)
-# my_parser.add_argument('-res', '--img_resolution', type=int, help="resolution of images in um", default=25)
-# my_parser.add_argument('-fwhm', '--smoothing_fwhm', type=int, help="fwhm of Gaussian kernel in pixel", default=3)
-# my_parser.add_argument('-tfce_start', '--tfce_start', type=float, help="tfce threshold start", default=0.01)
-# my_parser.add_argument('-tfce_step', '--tfce_step', type=float, help="tfce threshold step", default=10)
-# my_parser.add_argument('-cpus', '--cpu_load', type=float, help="Percent of cpus used for parallelization", default=0.9)
-# my_parser.add_argument('-tfce_h', '--tfce_h', type=float, help="tfce H power", default=2)
-# my_parser.add_argument('-tfce_e', '--tfce_e', type=float, help="tfce E power", default=0.5)
-# my_parser.add_argument('-stp', '--step_down_p', type=float, help="step_down_p value", default=0.3)
-# my_parser.add_argument('-mask_thr', '--mask_thr', type=int, help="percentile to be used for binarizing difference of the mean", default=95)
-
 my_parser = ACEWorkflowParser()
-# Execute the parse_args() method
-# args = vars(my_parser.parse_args())
 args = my_parser.parse_args()
 
-# Get the arguments
-# wild_dir = args["_pcs_wild_type"]
-# dis_dir = args["_pcs_disease"]
-# out_dir = Path(args["_pcs_output"])
-# num_perm = args["_pcs_num_perm"]
-# atl_dir = args["_pcs_atlas_dir"]
-# img_res = args["_pcs_img_resolution"]
-# smoothing_fwhm = args["_pcs_smoothing_fwhm"]
-# tfce_start = args["_pcs_tfce_start"]
-# tfce_step = args["_pcs_tfce_step"]
-# tfce_h = args["_pcs_tfce_h"]
-# tfce_e = args["_pcs_tfce_e"]
-# cpuload = args["_pcs_cpu_load"]
-# stp = args["_pcs_step_down_p"]
-# mask_thr = args["_pcs_mask_thr"]
 
-
+# -------------------------------------------------------
 # function for preprocessing the images
+# -------------------------------------------------------
 def pre_processing_func(
     img_filename, input_dir, output_dir, grp, mask, smoothing_fwhm, img_res
 ):
@@ -100,7 +65,7 @@ def pre_processing_func(
 
 
 # -------------------------------------------------------
-# stat function
+# stat functions
 # -------------------------------------------------------
 def stat_fun_ttest(args1, args2):
     # get t-values only.
@@ -156,7 +121,7 @@ def cluster_fn(
     ncpus,
     stp,
     wild_imgs,
-    out_dir
+    out_dir,
 ):
     # sys.stdout.write("\r statistcal test on slice #%d ..." % slice)
     sys.stdout.flush()
@@ -631,7 +596,7 @@ def main(args):
             ncpus,
             stp,
             wild_imgs,
-            out_dir
+            out_dir,
         )
         for s in range(temp_img.shape[0])
     )
@@ -655,10 +620,7 @@ def main(args):
     os.remove(f_memap)
     os.remove(p_memap)
 
-    end_str = (
-        "\n Parallel cluster permutation-based stats done in %s ... Have a good day!\n"
-        % (datetime.now() - startTime)
-    )
+    end_str = f"\n  Parallel cluster permutation-based stats done in {datetime.now() - startTime} ... Have a good day!\n"
 
     print(end_str)
 
