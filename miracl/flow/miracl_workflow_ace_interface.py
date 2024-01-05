@@ -2,39 +2,45 @@
 import subprocess
 import sys
 import os
-import logging
+
+# import logging
+import argparse
 from pathlib import Path
 from miracl.flow import miracl_workflow_ace_parser, ace_test_interface
 from miracl.seg import ace_interface
+from miracl import miracl_logger
 
-# Create a logger
-logger = logging.getLogger("ace_flow_interface_logger")
-logger.setLevel(logging.DEBUG)
-
-# file_handler = logging.FileHandler("debug.log")
-# file_handler.setLevel(logging.WARNING)
-
-stream_handler = logging.StreamHandler(sys.stdout)
-stream_handler.setLevel(logging.WARNING)
-
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# file_handler.setFormatter(formatter)
-# logger.addHandler(file_handler)
-
-stream_handler.setFormatter(formatter)
-logger.addHandler(stream_handler)
+logger = miracl_logger.logger
 
 
-def test_none_args(sagittal, coronal, axial, dim):
+def test_none_args(
+    sagittal: argparse.Namespace,
+    coronal: argparse.Namespace,
+    axial: argparse.Namespace,
+    dim: argparse.Namespace,
+) -> str:
     """
     This function checks if arguments are provided for --sh_sagittal,
     --sh_coronal, --sh_axial and --sh_figure_dim and composes the
     'miracl stats heatmap_group' command accordingly. This is necessary
     because the heatmap fn requires nargs=5 for the axes and nargs=2 for
     the figure dimensions.
+
+    :param sagittal: Argument for sagittal axis.
+    :type sagittal: argparse.Namespace
+    :param coronal: Argument for coronal axis.
+    :type coronal: argparse.Namespace
+    :param axial: Argument for axial axis.
+    :type axial: argparse.Namespace
+    :param dim: Figure dimensions argument.
+    :type dim: argparse.Namespace
+    :return: A string with the appropriately crafted heatmap command.
+    :rtype: str
     """
 
-    def arg_checker(prev_cmd, arg, arg_name, flag):
+    def arg_checker(
+        prev_cmd: str, arg: argparse.Namespace, arg_name: str, flag: str
+    ) -> str:
         """
         This is a nested function that performs the actual checks for
         each provided argument.
