@@ -8,9 +8,10 @@ file_handler = logging.FileHandler("debug.log")
 file_handler.setLevel(logging.WARNING)
 
 stream_handler = logging.StreamHandler(sys.stdout)
-stream_handler.setLevel(logging.WARNING)
+stream_handler.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# INFO: Use %(name)s instead of %(filename)s to get logger script name
+formatter = logging.Formatter("%(asctime)s - %(filename)s - %(levelname)s - %(message)s")
 
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
