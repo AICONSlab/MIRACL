@@ -65,3 +65,6 @@ MIRACL.egg-info/
 #############
 *.pth
 
+# Docker Compose yaml files #
+#############################
+docker-compose.yml
