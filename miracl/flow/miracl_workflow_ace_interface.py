@@ -73,19 +73,16 @@ def main():
 
     # modified_dict = {re.sub(r'^seg_', '', key): value for key, value in args.__dict__.items()}
 
-    # INFO: Set output folders
-
-    # INFO: Call ACE interface -> returns path of seg_out
-
+    # INFO: Create ACE seg output folder -> returns path of seg_out
     ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
     ace_flow_seg_output_folder.mkdir(parents=True, exist_ok=True)
+    # Call ACE interface
     # ace_interface.main(args=args)
 
-    # INFO: Call conversion here
-    # INFO: Set output folder
-
+    # INFO: Call conversion here and set output folder -> returns path
     ace_flow_conv_output_folder = Path(args.sa_output_folder) / "conv_final"
     ace_flow_conv_output_folder.mkdir(parents=True, exist_ok=True)
+    # Construct conversion cmd
     conv_cmd = f"python {miracl_home}/conv/miracl_conv_convertTIFFtoNII.py \
     --folder {args.sa_input_folder} \
     --work_dir {args.sa_output_folder} \
@@ -99,6 +96,7 @@ def main():
     --center {' '.join(map(str, args.ctn_center))} \
     --downzdim {args.ctn_downzdim} \
     --prevdown {args.ctn_prevdown}"
+    # Call conversion fn
     # subprocess.Popen(conv_cmd, shell=True).wait()
 
     # INFO: Call registration here

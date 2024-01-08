@@ -22,6 +22,7 @@ from miracl.stats import reg_svg, stats_gui_heatmap_group
 from math import ceil, nan
 
 # Log errors to file in current working directory
+# FIX: Add output directory to path if provided as argument
 logger.add(os.getcwd() + "/miracl_stats_heatmap_group_error.log", level='ERROR', mode="w")
 
 
@@ -202,6 +203,8 @@ def parse_inputs(parser, args):
     outfile = args.outfile
     extension = args.extension
     dpi = args.dpi
+
+    sys.exit()
 
     # validation functions
 
