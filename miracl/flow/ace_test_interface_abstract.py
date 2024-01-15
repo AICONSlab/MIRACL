@@ -36,8 +36,15 @@ class Voxelization(ABC):
         pass
 
 
+class Warping(ABC):
+    @abstractmethod
+    def warp(self, args, stacked_tif):
+        pass
+
+
 class ACESegmentation(Segmentation):
     def segment(self, args):
+        print("  segmenting...")
         logger.debug("Calling ace_interface fn here")
         logger.debug(f"Example args: {args.sa_model_type}")
         # ace_interface.main(args=args)
@@ -45,6 +52,7 @@ class ACESegmentation(Segmentation):
 
 class ACEConversion(Conversion):
     def convert(self, args):
+        print("  converting...")
         # conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
         # --folder {args.sa_input_folder} \
         # --work_dir {args.sa_output_folder} \
@@ -65,32 +73,20 @@ class ACEConversion(Conversion):
 
 
 class ACERegistration(Registration):
-    def get_nifti_file(self, dir_path_var):
-        directory_path = Path(dir_path_var)
-        files = list(directory_path.glob("*"))
-        if not files:
-            raise FileNotFoundError(
-                f"No converted nifti files found in: {directory_path}"
-            )
-        elif len(files) > 1:
-            raise ValueError(f"More than one nifti found in: {directory_path}")
-        else:
-            return files[0]
-
     def register(self, args, **kwargs):
+        print("  registering...")
         if "dependent_folder" in kwargs:
             ace_flow_conv_output_folder = kwargs["dependent_folder"]
         else:
             raise FileNotFoundError("Output folder path variable not found!")
 
-        try:
-            # self.converted_nii_file = next(self.ace_flow_conv_output_folder.glob("*"))
-            self.converted_nii_file = self.get_nifti_file(ace_flow_conv_output_folder)
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+        if "converted_nii_file" in kwargs:
+            converted_nii_file = kwargs["converted_nii_file"]
+        else:
+            raise FileNotFoundError("Converted nifti file not found!")
 
         # reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
-        # -i {self.converted_nii_file} \
+        # -i {converted_nii_file} \
         # -r {args.sa_output_folder} \
         # -o {args.rca_orient_code} \
         # -m {args.rca_hemi} \
@@ -105,7 +101,8 @@ class ACERegistration(Registration):
         # subprocess.Popen(reg_cmd, shell=True).wait()
         logger.debug("Calling registration fn here")
         logger.debug(f"Example args: {args.rca_allen_atlas}")
-        logger.debug(f"nifti file: {self.converted_nii_file}")
+        logger.debug(f"dependent_folder: {ace_flow_conv_output_folder}")
+        logger.debug(f"nifti file: {converted_nii_file}")
 
 
 class ACEVoxelization(Voxelization):
@@ -122,6 +119,26 @@ class ACEVoxelization(Voxelization):
         logger.debug(f"ctn_down in voxelization: {args.ctn_down}")
 
 
+class ACEWarping(Warping):
+    def warp(
+        self,
+        args,
+        ace_flow_reg_output_folder,
+        voxelized_segmented_tif,
+        orientation_file,
+    ):
+        print("  warping stacked tif...")
+        warp_cmd = f"miracl reg warp_clar \
+                -r {ace_flow_reg_output_folder} \
+                -i {voxelized_segmented_tif} \
+                -o {orientation_file} \
+                -s {args.rwc_seg_channel} \
+                -v {args.rca_voxel_size}"
+        # subprocess.Popen(warp_cmd, shell=True).wait()
+        logger.debug("Calling warping here")
+        logger.debug(f"orientation_file: {orientation_file}")
+
+
 class ACEWorkflows:
     def __init__(
         self,
@@ -129,11 +146,13 @@ class ACEWorkflows:
         conversion: Conversion,
         registration: Registration,
         voxelization: Voxelization,
+        warping: Warping,
     ):
         self.segmentation = segmentation
         self.conversion = conversion
         self.registration = registration
         self.voxelization = voxelization
+        self.warping = warping
 
     def execute_comparison_workflow(self, args, **kwargs):
         ace_flow_seg_output_folder = FolderCreator.create_folder(
@@ -142,19 +161,45 @@ class ACEWorkflows:
         ace_flow_conv_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "conv_final"
         )
+        ace_flow_reg_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "reg_final"
+        )
         ace_flow_vox_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "vox_final"
+        )
+        ace_flow_warp_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "warp_final"
         )
 
         self.segmentation.segment(args)
         self.conversion.convert(args)
-        self.registration.register(args, dependent_folder=ace_flow_conv_output_folder)
+        converted_nii_file = GetConverterdNifti.get_nifti_file(
+            ace_flow_conv_output_folder
+        )
+        self.registration.register(
+            args,
+            dependent_folder=ace_flow_conv_output_folder,
+            converted_nii_file=converted_nii_file,
+        )
         # Stack tiff files for use in voxelization method
         fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
         stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
         StackTiffs.check_folders(fiji_file, stacked_tif)
         StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
         self.voxelization.voxelize(args, stacked_tif)
+
+        (
+            voxelized_segmented_tif,
+            orientation_file,
+        ) = GetVoxSegTif.check_warping_requirements(
+            ace_flow_vox_output_folder, ace_flow_warp_output_folder
+        )
+        GetVoxSegTif.create_orientation_file(
+            orientation_file, ace_flow_vox_output_folder
+        )
+        self.warping.warp(
+            args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
+        )
 
 
 class FolderCreator:
@@ -163,6 +208,22 @@ class FolderCreator:
         folder = Path(arg_var) / name_var
         folder.mkdir(parents=True, exist_ok=True)
         return folder
+
+
+class GetConverterdNifti:
+    @staticmethod
+    def get_nifti_file(dir_path_var):
+        directory_path = Path(dir_path_var)
+        files = list(directory_path.glob("*"))
+        if not files:
+            raise FileNotFoundError(
+                f"No converted nifti files found in: {directory_path}"
+            )
+        elif len(files) > 1:
+            raise ValueError(f"More than one nifti found in: {directory_path}")
+        else:
+            logger.debug(f"get_nifti_file: {files[0]}")
+            return files[0]
 
 
 class StackTiffs:
@@ -177,7 +238,7 @@ class StackTiffs:
 
     @staticmethod
     def stacking(fiji_file, stacked_tif, seg_output_dir):
-        print("  Stacking segmented tifs...")
+        print("  stacking segmented tifs...")
         with open(fiji_file, "w") as file:
             file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
@@ -191,6 +252,28 @@ class StackTiffs:
         # subprocess.Popen(fiji_stack_cmd, shell=True).wait()
 
 
+class GetVoxSegTif:
+    @staticmethod
+    def check_warping_requirements(
+        ace_flow_vox_output_folder, ace_flow_warp_output_folder
+    ):
+        voxelized_segmented_tif = list(
+            ace_flow_vox_output_folder.glob("voxelized_seg_*.nii.gz")
+        )[0]
+        orientation_file = ace_flow_warp_output_folder / "ort2std.txt"
+
+        return voxelized_segmented_tif, orientation_file
+
+    @staticmethod
+    def create_orientation_file(orientation_file, ace_flow_vox_output_folder):
+        if orientation_file.is_file():
+            orientation_file.unlink()
+
+        with open(orientation_file, "w") as file:
+            file.write(f"tifdir={ace_flow_vox_output_folder}\n")
+            file.write(f"ortcode={args.rca_orient_code}")
+
+
 if __name__ == "__main__":
     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
     args = args_parser.parse_args()
@@ -199,8 +282,11 @@ if __name__ == "__main__":
     conversion = ACEConversion()
     registration = ACERegistration()
     voxelization = ACEVoxelization()
+    warping = ACEWarping()
 
-    ace_workflow = ACEWorkflows(segmentation, conversion, registration, voxelization)
+    ace_workflow = ACEWorkflows(
+        segmentation, conversion, registration, voxelization, warping
+    )
     result = ace_workflow.execute_comparison_workflow(args)
 
 
