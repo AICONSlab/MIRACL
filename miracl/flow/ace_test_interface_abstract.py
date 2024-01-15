@@ -12,6 +12,7 @@ logger = miracl_logger.logger
 MIRACL_HOME = Path(os.environ["MIRACL_HOME"])
 
 
+# DECLARE ABSTRACT METHODS #
 class Segmentation(ABC):
     @abstractmethod
     def segment(self, args):
@@ -42,6 +43,19 @@ class Warping(ABC):
         pass
 
 
+class Clusterwise(ABC):
+    @abstractmethod
+    def cluster(self, args):
+        pass
+
+
+class Heatmap(ABC):
+    @abstractmethod
+    def create_heatmap(self, args):
+        pass
+
+
+# DECLARE CONCRETE METHODS #
 class ACESegmentation(Segmentation):
     def segment(self, args):
         print("  segmenting...")
@@ -139,6 +153,14 @@ class ACEWarping(Warping):
         logger.debug(f"orientation_file: {orientation_file}")
 
 
+class ACEHeatmap(Heatmap):
+    def create_heatmap(self, args, heatmap_cmd):
+        print("  creating heatmaps...")
+        # subprocess.Popen(heatmap_cmd, shell=True).wait()
+        logger.debug("Calling heatmap fn here")
+        logger.debug(f"heatmap_cmd: {heatmap_cmd}")
+
+
 class ACEWorkflows:
     def __init__(
         self,
@@ -147,12 +169,14 @@ class ACEWorkflows:
         registration: Registration,
         voxelization: Voxelization,
         warping: Warping,
+        heatmap: Heatmap,
     ):
         self.segmentation = segmentation
         self.conversion = conversion
         self.registration = registration
         self.voxelization = voxelization
         self.warping = warping
+        self.heatmap = heatmap
 
     def execute_comparison_workflow(self, args, **kwargs):
         ace_flow_seg_output_folder = FolderCreator.create_folder(
@@ -169,6 +193,9 @@ class ACEWorkflows:
         )
         ace_flow_warp_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "warp_final"
+        )
+        ace_flow_heatmap_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "heat_final"
         )
 
         self.segmentation.segment(args)
@@ -200,6 +227,14 @@ class ACEWorkflows:
         self.warping.warp(
             args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
         )
+
+        tested_heatmap_cmd = ConstructHeatmapCmd.test_none_args(
+            args.sh_sagittal, args.sh_coronal, args.sh_axial, args.sh_figure_dim
+        )
+        heatmap_cmd = ConstructHeatmapCmd.construct_final_heatmap_cmd(
+            args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
+        )
+        self.heatmap.create_heatmap(args, heatmap_cmd)
 
 
 class FolderCreator:
@@ -274,6 +309,67 @@ class GetVoxSegTif:
             file.write(f"ortcode={args.rca_orient_code}")
 
 
+class ConstructHeatmapCmd:
+    @staticmethod
+    def test_none_args(
+        sagittal: argparse.Namespace,
+        coronal: argparse.Namespace,
+        axial: argparse.Namespace,
+        dim: argparse.Namespace,
+    ) -> str:
+        """
+        This function checks if arguments are provided for --sh_sagittal,
+        --sh_coronal, --sh_axial and --sh_figure_dim and composes the
+        'miracl stats heatmap_group' command accordingly. This is necessary
+        because the heatmap fn requires nargs=5 for the axes and nargs=2 for
+        the figure dimensions.
+
+        :param sagittal: Argument for sagittal axis.
+        :type sagittal: argparse.Namespace
+        :param coronal: Argument for coronal axis.
+        :type coronal: argparse.Namespace
+        :param axial: Argument for axial axis.
+        :type axial: argparse.Namespace
+        :param dim: Figure dimensions argument.
+        :type dim: argparse.Namespace
+        :return: A string with the appropriately crafted heatmap command.
+        :rtype: str
+        """
+
+        def arg_checker(
+            prev_cmd: str, arg: argparse.Namespace, arg_name: str, flag: str
+        ) -> str:
+            """
+            This is a nested function that performs the actual checks for
+            each provided argument.
+            """
+            if arg is None:
+                logger.debug(f"No arguments for {arg_name} provided")
+            else:
+                logger.debug(f"Arguments for {arg_name} provided")
+                prev_cmd += f"-{flag} {' '.join(map(str, arg))} "
+
+            return prev_cmd
+
+        # Define base cmd to add on to
+        base_cmd = "miracl stats heatmap_group "
+
+        saggital_result = arg_checker(base_cmd, sagittal, "sagittal", "s")
+        coronal_result = arg_checker(saggital_result, coronal, "coronal", "c")
+        axial_result = arg_checker(coronal_result, axial, "axial", "a")
+        final_result = arg_checker(axial_result, dim, "figure dimensions", "f")
+
+        return final_result
+
+    @staticmethod
+    def construct_final_heatmap_cmd(
+        args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
+    ):
+        tested_heatmap_cmd += f"-g1 {args.sh_group1} -g2 {args.sh_group2} -v {args.sh_vox} -gs {args.sh_sigma} -p {args.sh_percentile} -cp {args.sh_colourmap_pos} -cn {args.sh_colourmap_neg} -d {ace_flow_heatmap_output_folder} -o {args.sh_outfile} -e {args.sh_extension} --dpi {args.sh_dpi}"
+
+        return tested_heatmap_cmd
+
+
 if __name__ == "__main__":
     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
     args = args_parser.parse_args()
@@ -283,9 +379,10 @@ if __name__ == "__main__":
     registration = ACERegistration()
     voxelization = ACEVoxelization()
     warping = ACEWarping()
+    heatmap = ACEHeatmap()
 
     ace_workflow = ACEWorkflows(
-        segmentation, conversion, registration, voxelization, warping
+        segmentation, conversion, registration, voxelization, warping, heatmap
     )
     result = ace_workflow.execute_comparison_workflow(args)
 
