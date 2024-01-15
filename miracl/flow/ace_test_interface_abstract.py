@@ -122,7 +122,7 @@ class ACEVoxelization(Voxelization):
         logger.debug(f"ctn_down in voxelization: {args.ctn_down}")
 
 
-class ACEWorkflow:
+class ACEWorkflows:
     def __init__(
         self,
         segmentation: Segmentation,
@@ -135,7 +135,7 @@ class ACEWorkflow:
         self.registration = registration
         self.voxelization = voxelization
 
-    def execute_workflow(self, args, **kwargs):
+    def execute_comparison_workflow(self, args, **kwargs):
         ace_flow_seg_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "seg_final"
         )
@@ -200,8 +200,8 @@ if __name__ == "__main__":
     registration = ACERegistration()
     voxelization = ACEVoxelization()
 
-    ace_workflow = ACEWorkflow(segmentation, conversion, registration, voxelization)
-    result = ace_workflow.execute_workflow(args)
+    ace_workflow = ACEWorkflows(segmentation, conversion, registration, voxelization)
+    result = ace_workflow.execute_comparison_workflow(args)
 
 
 # class ACEInterface(ABC):
