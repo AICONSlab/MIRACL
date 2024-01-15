@@ -9,62 +9,63 @@ from miracl.seg import ace_interface
 
 logger = miracl_logger.logger
 
+MIRACL_HOME = Path(os.environ["MIRACL_HOME"])
 
-class ACEInterface(ABC):
-    @abstractmethod
-    def ace_seg_method(self, args):
-        pass
 
+class Segmentation(ABC):
     @abstractmethod
-    def conv_method(self, args):
-        pass
-
-    @abstractmethod
-    def reg_method(self, args):
+    def segment(self, args):
         pass
 
 
-class ACEImplementation(ACEInterface):
-    MIRACL_HOME = Path(os.environ["MIRACL_HOME"])
+class Conversion(ABC):
+    @abstractmethod
+    def convert(self, args):
+        pass
 
-    def ace_seg_method(self, args):
-        # INFO: Create ACE seg output folder -> returns path of seg_out
-        self.ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
-        self.ace_flow_seg_output_folder.mkdir(parents=True, exist_ok=True)
-        # Call ACE interface
+
+class Registration(ABC):
+    @abstractmethod
+    def register(self, args, **kwargs):
+        pass
+
+
+class Voxelization(ABC):
+    @abstractmethod
+    def voxelize(self, args, stacked_tif):
+        pass
+
+
+class ACESegmentation(Segmentation):
+    def segment(self, args):
         logger.debug("Calling ace_interface fn here")
         logger.debug(f"Example args: {args.sa_model_type}")
         # ace_interface.main(args=args)
 
-        return self
 
-    def conv_method(self, args):
-        # INFO: Call conversion here and set output folder -> returns path
-        self.ace_flow_conv_output_folder = Path(args.sa_output_folder) / "conv_final"
-        self.ace_flow_conv_output_folder.mkdir(parents=True, exist_ok=True)
-        # Construct conversion cmd
-        conv_cmd = f"python {self.MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
-        --folder {args.sa_input_folder} \
-        --work_dir {args.sa_output_folder} \
-        --down {args.ctn_down} \
-        --channum {args.ctn_channum} \
-        --chanprefix {args.ctn_chanprefix} \
-        --channame {args.ctn_channame} \
-        --outnii {args.ctn_outnii} \
-        --resx {args.ctn_resx} \
-        --resz {args.ctn_resz} \
-        --center {' '.join(map(str, args.ctn_center))} \
-        --downzdim {args.ctn_downzdim} \
-        --prevdown {args.ctn_prevdown}"
-        # Call conversion fn
+class ACEConversion(Conversion):
+    def convert(self, args):
+        # conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
+        # --folder {args.sa_input_folder} \
+        # --work_dir {args.sa_output_folder} \
+        # --down {args.ctn_down} \
+        # --channum {args.ctn_channum} \
+        # --chanprefix {args.ctn_chanprefix} \
+        # --channame {args.ctn_channame} \
+        # --outnii {args.ctn_outnii} \
+        # --resx {args.ctn_resx} \
+        # --resz {args.ctn_resz} \
+        # --center {' '.join(map(str, args.ctn_center))} \
+        # --downzdim {args.ctn_downzdim} \
+        # --prevdown {args.ctn_prevdown}"
+        # # Call conversion fn
         # subprocess.Popen(conv_cmd, shell=True).wait()
         logger.debug("Calling conversion fn here")
         logger.debug(f"Example args: {args.ctn_down}")
-        logger.debug(f"ACE dir: {self.ace_flow_seg_output_folder}")
 
-        return self
 
-    def _search_dir_for_files(self, dir_path_var):
+class ACERegistration(Registration):
+    def get_nifti_file(self, dir_path_var):
         directory_path = Path(dir_path_var)
         files = list(directory_path.glob("*"))
         if not files:
@@ -76,51 +77,244 @@ class ACEImplementation(ACEInterface):
         else:
             return files[0]
 
-    def reg_method(self, args):
-        # INFO: Call registration here
-        # INFO: Pass args.seg_input_folder
-        # INFO: Set output folder
+    def register(self, args, **kwargs):
+        if "dependent_folder" in kwargs:
+            ace_flow_conv_output_folder = kwargs["dependent_folder"]
+        else:
+            raise FileNotFoundError("Output folder path variable not found!")
 
         try:
             # self.converted_nii_file = next(self.ace_flow_conv_output_folder.glob("*"))
-            self.converted_nii_file = self._search_dir_for_files(
-                self.ace_flow_conv_output_folder
-            )
+            self.converted_nii_file = self.get_nifti_file(ace_flow_conv_output_folder)
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
-        reg_cmd = f"{self.MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
-        -i {self.converted_nii_file} \
-        -r {args.sa_output_folder} \
-        -o {args.rca_orient_code} \
-        -m {args.rca_hemi} \
-        -v {args.rca_voxel_size} \
-        -l {args.rca_allen_label} \
-        -a {args.rca_allen_atlas} \
-        -s {args.rca_side} \
-        -f {args.rca_no_mosaic_fig} \
-        -b {args.rca_olfactory_bulb} \
-        -p {args.rca_skip_cor} \
-        -w {args.rca_warp}"
+        # reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
+        # -i {self.converted_nii_file} \
+        # -r {args.sa_output_folder} \
+        # -o {args.rca_orient_code} \
+        # -m {args.rca_hemi} \
+        # -v {args.rca_voxel_size} \
+        # -l {args.rca_allen_label} \
+        # -a {args.rca_allen_atlas} \
+        # -s {args.rca_side} \
+        # -f {args.rca_no_mosaic_fig} \
+        # -b {args.rca_olfactory_bulb} \
+        # -p {args.rca_skip_cor} \
+        # -w {args.rca_warp}"
         # subprocess.Popen(reg_cmd, shell=True).wait()
         logger.debug("Calling registration fn here")
         logger.debug(f"Example args: {args.rca_allen_atlas}")
-        logger.debug(f"ACE dir: {self.ace_flow_seg_output_folder}")
-        logger.debug(f"Glob: {self.converted_nii_file}")
+        logger.debug(f"nifti file: {self.converted_nii_file}")
 
-        return self
+
+class ACEVoxelization(Voxelization):
+    def voxelize(self, args, stacked_tif):
+        print("  voxelizing stacked tif...")
+        vox_cmd = f"miracl seg voxelize \
+        --seg {stacked_tif} \
+        --res {args.rca_voxel_size} \
+        --down {args.ctn_down}"
+        # -vx {args.} \
+        # -vz {args.}"
+        # subprocess.Popen(vox_cmd, shell=True).wait()
+        logger.debug("Calling voxelization fn here")
+        logger.debug(f"ctn_down in voxelization: {args.ctn_down}")
+
+
+class ACEWorkflow:
+    def __init__(
+        self,
+        segmentation: Segmentation,
+        conversion: Conversion,
+        registration: Registration,
+        voxelization: Voxelization,
+    ):
+        self.segmentation = segmentation
+        self.conversion = conversion
+        self.registration = registration
+        self.voxelization = voxelization
+
+    def execute_workflow(self, args, **kwargs):
+        ace_flow_seg_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "seg_final"
+        )
+        ace_flow_conv_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "conv_final"
+        )
+        ace_flow_vox_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "vox_final"
+        )
+
+        self.segmentation.segment(args)
+        self.conversion.convert(args)
+        self.registration.register(args, dependent_folder=ace_flow_conv_output_folder)
+        # Stack tiff files for use in voxelization method
+        fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
+        stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
+        StackTiffs.check_folders(fiji_file, stacked_tif)
+        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+        self.voxelization.voxelize(args, stacked_tif)
+
+
+class FolderCreator:
+    @staticmethod
+    def create_folder(arg_var, name_var):
+        folder = Path(arg_var) / name_var
+        folder.mkdir(parents=True, exist_ok=True)
+        return folder
+
+
+class StackTiffs:
+    @staticmethod
+    def check_folders(fiji_file, stacked_tif):
+        # Check if Fiji file already exists and delete if True
+        if fiji_file.is_file():
+            fiji_file.unlink()
+        # Check if stacked tif file already exists and delete if True
+        if stacked_tif.is_file():
+            stacked_tif.unlink()
+
+    @staticmethod
+    def stacking(fiji_file, stacked_tif, seg_output_dir):
+        print("  Stacking segmented tifs...")
+        with open(fiji_file, "w") as file:
+            file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
+            file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
+            file.write("close();\n")
+
+        fiji_stack_cmd = f"Fiji \
+                --headless \
+                --console \
+                -macro \
+                {fiji_file}"
+        # subprocess.Popen(fiji_stack_cmd, shell=True).wait()
 
 
 if __name__ == "__main__":
     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
     args = args_parser.parse_args()
 
-    # # Assign parsed arguments to constants
-    # X_CONSTANT = args.x
-    # Y_CONSTANT = args.y
-    #
-    # my_impl = MyImplementation()
-    ace_flow = ACEImplementation()
-    ace_flow.ace_seg_method(args).conv_method(args).reg_method(args)
-    # result1 = my_impl.method1(X_CONSTANT)
-    # result2 = my_impl.method2(Y_CONSTANT)
+    segmentation = ACESegmentation()
+    conversion = ACEConversion()
+    registration = ACERegistration()
+    voxelization = ACEVoxelization()
+
+    ace_workflow = ACEWorkflow(segmentation, conversion, registration, voxelization)
+    result = ace_workflow.execute_workflow(args)
+
+
+# class ACEInterface(ABC):
+#     @abstractmethod
+#     def ace_seg_method(self, args):
+#         pass
+#
+#     @abstractmethod
+#     def conv_method(self, args):
+#         pass
+#
+#     @abstractmethod
+#     def reg_method(self, args):
+#         pass
+#
+#
+# class ACEImplementation(ACEInterface):
+#     MIRACL_HOME = Path(os.environ["MIRACL_HOME"])
+#
+#     def ace_seg_method(self, args):
+#         # INFO: Create ACE seg output folder -> returns path of seg_out
+#         self.ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
+#         self.ace_flow_seg_output_folder.mkdir(parents=True, exist_ok=True)
+#         # Call ACE interface
+#         logger.debug("Calling ace_interface fn here")
+#         logger.debug(f"Example args: {args.sa_model_type}")
+#         # ace_interface.main(args=args)
+#
+#         return self
+#
+#     def conv_method(self, args):
+#         # INFO: Call conversion here and set output folder -> returns path
+#         self.ace_flow_conv_output_folder = Path(args.sa_output_folder) / "conv_final"
+#         self.ace_flow_conv_output_folder.mkdir(parents=True, exist_ok=True)
+#         # Construct conversion cmd
+#         conv_cmd = f"python {self.MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
+#         --folder {args.sa_input_folder} \
+#         --work_dir {args.sa_output_folder} \
+#         --down {args.ctn_down} \
+#         --channum {args.ctn_channum} \
+#         --chanprefix {args.ctn_chanprefix} \
+#         --channame {args.ctn_channame} \
+#         --outnii {args.ctn_outnii} \
+#         --resx {args.ctn_resx} \
+#         --resz {args.ctn_resz} \
+#         --center {' '.join(map(str, args.ctn_center))} \
+#         --downzdim {args.ctn_downzdim} \
+#         --prevdown {args.ctn_prevdown}"
+#         # Call conversion fn
+#         # subprocess.Popen(conv_cmd, shell=True).wait()
+#         logger.debug("Calling conversion fn here")
+#         logger.debug(f"Example args: {args.ctn_down}")
+#         logger.debug(f"ACE dir: {self.ace_flow_seg_output_folder}")
+#
+#         return self
+#
+#     def _search_dir_for_files(self, dir_path_var):
+#         directory_path = Path(dir_path_var)
+#         files = list(directory_path.glob("*"))
+#         if not files:
+#             raise FileNotFoundError(
+#                 f"No converted nifti files found in: {directory_path}"
+#             )
+#         elif len(files) > 1:
+#             raise ValueError(f"More than one nifti found in: {directory_path}")
+#         else:
+#             return files[0]
+#
+#     def reg_method(self, args):
+#         # INFO: Call registration here
+#         # INFO: Pass args.seg_input_folder
+#         # INFO: Set output folder
+#
+#         try:
+#             # self.converted_nii_file = next(self.ace_flow_conv_output_folder.glob("*"))
+#             self.converted_nii_file = self._search_dir_for_files(
+#                 self.ace_flow_conv_output_folder
+#             )
+#         except Exception as e:
+#             print(f"An unexpected error occurred: {e}")
+#
+#         reg_cmd = f"{self.MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
+#         -i {self.converted_nii_file} \
+#         -r {args.sa_output_folder} \
+#         -o {args.rca_orient_code} \
+#         -m {args.rca_hemi} \
+#         -v {args.rca_voxel_size} \
+#         -l {args.rca_allen_label} \
+#         -a {args.rca_allen_atlas} \
+#         -s {args.rca_side} \
+#         -f {args.rca_no_mosaic_fig} \
+#         -b {args.rca_olfactory_bulb} \
+#         -p {args.rca_skip_cor} \
+#         -w {args.rca_warp}"
+#         # subprocess.Popen(reg_cmd, shell=True).wait()
+#         logger.debug("Calling registration fn here")
+#         logger.debug(f"Example args: {args.rca_allen_atlas}")
+#         logger.debug(f"ACE dir: {self.ace_flow_seg_output_folder}")
+#         logger.debug(f"Glob: {self.converted_nii_file}")
+#
+#         return self
+#
+#
+# if __name__ == "__main__":
+#     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+#     args = args_parser.parse_args()
+#
+#     # # Assign parsed arguments to constants
+#     # X_CONSTANT = args.x
+#     # Y_CONSTANT = args.y
+#     #
+#     # my_impl = MyImplementation()
+#     ace_flow = ACEImplementation()
+#     ace_flow.ace_seg_method(args).conv_method(args).reg_method(args)
+#     # result1 = my_impl.method1(X_CONSTANT)
+#     # result2 = my_impl.method2(Y_CONSTANT)
