@@ -13,7 +13,7 @@ Huge thank you to:
 GitHub contributers (ordered by number of commits):
 
 .. contributors:: AICONSlab/MIRACL
-    :exclude: mgoubran,entiri,jono3030
+    :exclude: mgoubran,entiri,jono3030,AAttarpour
     :avatars:
     :order: DESC
 
