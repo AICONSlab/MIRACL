@@ -239,8 +239,10 @@ class ACEWorkflows:
 
 class FolderCreator:
     @staticmethod
-    def create_folder(arg_var, name_var):
-        folder = Path(arg_var) / name_var
+    def create_folder(arg_var, *name_vars):
+        folder = Path(arg_var)
+        for name_var in name_vars:
+            folder = folder / name_var
         folder.mkdir(parents=True, exist_ok=True)
         return folder
 
