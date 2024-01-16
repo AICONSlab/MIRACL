@@ -178,7 +178,58 @@ class ACEWorkflows:
         self.warping = warping
         self.heatmap = heatmap
 
-    def execute_comparison_workflow(self, args, **kwargs):
+    def execute_workflow(self, args, **kwargs):
+
+        # check for single or multi in the args
+        if args.single:
+            self._execute_single_workflow(args, **kwargs)
+        elif args.wild and args.disease:
+            self._execute_comparison_workflow(args, **kwargs)
+        else:
+            raise ValueError("Must specify either (-s/--single) or (-w/--wild and -d/--disease) in args.")
+        
+    def _execute_single_workflow(self, args, **kwargs):
+        # TODO: check it works w data
+        final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+
+        ace_flow_seg_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, final_folder, "seg_final",
+        )
+        ace_flow_conv_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, final_folder, "conv_final"
+        )
+        ace_flow_reg_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, final_folder, "reg_final"
+        )
+
+        self.segmentation.segment(args)
+        self.conversion.convert(args)
+        converted_nii_file = GetConverterdNifti.get_nifti_file(
+            ace_flow_conv_output_folder
+        )
+        self.registration.register(
+            args,
+            dependent_folder=ace_flow_conv_output_folder,
+            converted_nii_file=converted_nii_file,
+        )
+
+        return args.sa_output_folder
+    
+    def _execute_comparison_workflow(self, args, **kwargs):
+        return
+        args_dict = vars(args)
+        # TODO: make work over directory structure
+
+        for type_ in ['wild', 'disease']:
+            # TODO: get the general format of the tiff files
+            tiff_template = args_dict[type_][1]
+            subject_folders = [dir_ for dir_ in Path(args_dict[type_][0]).iterdir() if dir_.is_dir()]
+            
+
+        
+        final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+
+        # TODO: DO FOR EACH SUBJECT
         ace_flow_seg_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "seg_final"
         )
@@ -191,6 +242,8 @@ class ACEWorkflows:
         ace_flow_vox_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "vox_final"
         )
+
+        # TODO: OUTSIDE LOOP FOR ALL SUBJECTS
         ace_flow_warp_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "warp_final"
         )
@@ -386,7 +439,7 @@ if __name__ == "__main__":
     ace_workflow = ACEWorkflows(
         segmentation, conversion, registration, voxelization, warping, heatmap
     )
-    result = ace_workflow.execute_comparison_workflow(args)
+    result = ace_workflow.execute_workflow(args)
 
 
 # class ACEInterface(ABC):
