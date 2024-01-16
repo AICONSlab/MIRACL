@@ -36,10 +36,11 @@ class ACEWorkflowParser:
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
   4) Voxelizes segmentation results into density maps with Allen atlas resolution
   5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
-            usage="""%(prog)s -sai input_folder -sao output_folder -sam model_type -pcsw wild_type_dir -pcsd disease_group_dir -pcso output_directory""",
+            usage="""%(prog)s (-s single_dir | (-w wild_root_dir wild_tiff_file -d disease_root_dir disease_tiff_file)) -sao output_folder -sam model_type""",
         )
 
         # Define custom headers for args to separate required and optional
+        single_multi_args_group = parser.add_argument_group("Single or multi method arguments")
         required_args = parser.add_argument_group("required arguments")
         seg_args = parser.add_argument_group("Optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
@@ -51,15 +52,40 @@ class ACEWorkflowParser:
         optional_args = parser.add_argument_group("optional arguments")
 
         # INFO: ACE segmentation parser
+        single_multi_args_group.add_argument(
+            "-s",
+            "--single",
+            type=str,
+            metavar="SINGLE_TIFF_DIR",
+            help="path to single raw tif/tiff data folder",
+        )
+
+        single_multi_args_group.add_argument(
+            "-w",
+            "--wild",
+            type=str,
+            metavar=('WILD_BASE_DIR', 'WILD_TIFF_DIR_EXAMPLE'),
+            help="FIRST: path to base wild directory.\nSECOND: example path to wild subject tiff directory",
+            nargs=2,
+        )
+
+        single_multi_args_group.add_argument(
+            "-d",
+            "--disease",
+            type=str,
+            metavar=('DISEASE_BASE_DIR', 'DISEASE_TIFF_DIR_EXAMPLE'),
+            help="FIRST: path to base disease directory.\nSECOND: example path to disease subject tiff directory",
+            nargs=2,
+        )
 
         # Parser for input folder i.e. location of the data
-        required_args.add_argument(
-            "-sai",
-            "--sa_input_folder",
-            type=str,
-            required=True,
-            help="path to raw tif/tiff data folder",
-        )
+        # required_args.add_argument(
+        #     "-sai",
+        #     "--sa_input_folder",
+        #     type=str,
+        #     required=True,
+        #     help="path to raw tif/tiff data folder",
+        # )
         # Parser for output folder i.e. location where results are stored
         required_args.add_argument(
             "-sao",
@@ -426,14 +452,6 @@ class ACEWorkflowParser:
             default=None,
             help="path to downsampled CLARITY nii file to warp",
         )
-        # FIX: Maybe exclude? Should be coming from ACE?
-        warp_args.add_argument(
-            "-rwcf",
-            "--rwc_file",
-            type=str,
-            required=True,
-            help="path to downsampled CLARITY nii file to warp",
-        )
         # FIX: Will always be required as data is piped from voxelization fn
         warp_args.add_argument(
             "-rwcc",
@@ -445,21 +463,6 @@ class ACEWorkflowParser:
 
         # INFO: Permutation cluster stats parser
 
-        required_args.add_argument(
-            "-pcsw",
-            "--pcs_wild_type",
-            help="wild type group directory (should contain warped voxelized nifti files)",
-            required=True,
-        )
-        required_args.add_argument(
-            "-pcsd",
-            "--pcs_disease",
-            help="disease group directory (should contain warped voxelized nifti files)",
-            required=True,
-        )
-        required_args.add_argument(
-            "-pcso", "--pcs_output", help="path of output directory", required=True
-        )
         perm_args.add_argument(
             "-pcsa",
             "--pcs_atlas_dir",
@@ -649,6 +652,8 @@ class ACEWorkflowParser:
             _required_args = []            
             for arg in required_args._group_actions:
                 _required_args.extend(arg.option_strings)
+            for arg in single_multi_args_group._group_actions:
+                _required_args.extend(arg.option_strings)
 
             def __call__(self,
                         parser: argparse.ArgumentParser,
@@ -694,7 +699,22 @@ class ACEWorkflowParser:
         return parser
 
     def parse_args(self):
-        return self.parser.parse_args()
+        args = self.parser.parse_args()
+        
+        # check that wild and disease are not passed with single
+        if (args.wild and args.disease) and args.single:
+            raise argparse.ArgumentError(None, '-w/--wild and -d/--disease must be passed together without -s/--single')
+        # check that single is passed alone
+        elif args.single and (args.wild or args.disease):
+            raise argparse.ArgumentError(None, '-s/--single cannot be passed with either -w/--wild or -d/--disease')
+        # check that wild and disease are always passed together
+        elif (args.wild and not args.disease) or (args.disease and not args.wild):
+            raise argparse.ArgumentError(None, '-w/--wild and -d/--disease must be passed together')
+        # check that something is passed
+        elif not args.single and not args.wild and not args.disease:
+            raise argparse.ArgumentError(None, 'either [-s/--single] or [-w/--wild and -d/--disease] must be passed')
+        
+        return args
 
 
 if __name__ == "__main__":
