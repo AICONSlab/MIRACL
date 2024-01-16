@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import os
+import sys
 
 from numpy import require
 from miracl.seg import ace_parser
@@ -643,13 +644,51 @@ class ACEWorkflowParser:
             default=500,
         )
 
+        # INFO: help section
+        class _CustomHelpAction(argparse._HelpAction):
+            _required_args = []            
+            for arg in required_args._group_actions:
+                _required_args.extend(arg.option_strings)
+
+            def __call__(self,
+                        parser: argparse.ArgumentParser,
+                        namespace,
+                        values,
+                        options_string=None
+                        ):
+                args = sys.argv[1:]
+
+                opts = parser._option_string_actions
+
+                if "-h" in args or "--help" in args:
+                    for arg in opts:
+                        if arg not in self._required_args:
+                            setattr(opts[arg], "help", argparse.SUPPRESS)
+                    parser.print_help()
+                    print("\n" + "-"*50)
+                    print("\nUse -hv or --help_verbose flag for more verbose help\n")
+                elif "-hv" in args or "--help_verbose" in args:
+                    parser.print_help()
+
+                parser.exit()
+
+        parser.register("action", "help", _CustomHelpAction)
+
         # Add help back under optional args header
         optional_args.add_argument(
             "-h",
             "--help",
             action="help",
             default=argparse.SUPPRESS,
-            help="show this help message and exit",
+            help="show concise help message and exit",
+        )
+
+        optional_args.add_argument(
+            "-hv",
+            "--help_verbose",
+            action="help",
+            default=argparse.SUPPRESS,
+            help="show this verbose help message and exit",
         )
 
         return parser
