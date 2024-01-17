@@ -24,9 +24,10 @@ import mne
 import scipy.ndimage as scp
 from scipy.stats import mannwhitneyu, ttest_ind, kruskal, f_oneway
 from miracl_workflow_ace_parser import ACEWorkflowParser
+from collections import defaultdict
 
-my_parser = ACEWorkflowParser()
-args = my_parser.parse_args()
+# my_parser = ACEWorkflowParser()
+# args = my_parser.parse_args()
 
 
 # -------------------------------------------------------
@@ -293,28 +294,30 @@ def cluster_fn(
 
 
 def main(args):
-    # Assign args from ACE parser through ACE flow interface
-    wild_dir = Path(args.pcs_wild_type)
-    dis_dir = Path(args.pcs_disease)
-    out_dir = Path(args.pcs_output)
-    num_perm = args.pcs_num_perm
-    atl_dir = args.pcs_atlas_dir
-    img_res = args.pcs_img_resolution
-    smoothing_fwhm = args.pcs_smoothing_fwhm
-    tfce_start = args.pcs_tfce_start
-    tfce_step = args.pcs_tfce_step
-    tfce_h = args.pcs_tfce_h
-    tfce_e = args.pcs_tfce_e
-    cpuload = args.pcs_cpu_load
-    stp = args.pcs_step_down_p
-    mask_thr = args.pcs_mask_thr
+    # Convert list of sys.argv to dictionary for variable assignment
+    result_dict = {
+        args[i][2:]: args[i + 1]
+        for i in range(1, len(args), 2)
+        if args[i].startswith("--")
+    }
+
+    wild_dir = Path(result_dict["pcs_wild_type"])
+    dis_dir = Path(result_dict["pcs_disease"])
+    out_dir = Path(result_dict["pcs_output"])
+    num_perm = int(result_dict["pcs_num_perm"])
+    atl_dir = result_dict["pcs_atlas_dir"]
+    img_res = int(result_dict["pcs_img_resolution"])
+    smoothing_fwhm = int(result_dict["pcs_smoothing_fwhm"])
+    tfce_start = float(result_dict["pcs_tfce_start"])
+    tfce_step = float(result_dict["pcs_tfce_step"])
+    tfce_h = float(result_dict["pcs_tfce_h"])
+    tfce_e = float(result_dict["pcs_tfce_e"])
+    cpuload = float(result_dict["pcs_cpu_load"])
+    stp = float(result_dict["pcs_step_down_p"])
+    mask_thr = int(result_dict["pcs_mask_thr"])
 
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)  # 90% default of cores used
-
-    # Check if out_dir exists and create if False
-    out_dir = out_dir / "clust_final"
-    out_dir.mkdir(parents=True, exist_ok=True)
 
     print("Running clusterwise stats with the following arguments:")
     print(f"  wild_dir: {wild_dir}")
@@ -333,8 +336,6 @@ def main(args):
     print(f"  mask_thr: {mask_thr}")
     print(f"  cpus: {cpus}")
     print(f"  ncpus: {ncpus}")
-
-    # sys.exit()
 
     # -------------------------------------------------------
     # load and prepare atl
@@ -633,4 +634,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(args)
+    main(sys.argv)

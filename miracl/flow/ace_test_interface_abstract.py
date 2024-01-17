@@ -1,11 +1,13 @@
 import argparse
 import os
+import subprocess
 import sys
 from pathlib import Path
 from miracl import miracl_logger
 from abc import ABC, abstractmethod
 from miracl.flow import miracl_workflow_ace_parser
 from miracl.seg import ace_interface
+from miracl.flow import miracl_workflow_ace_stats
 
 logger = miracl_logger.logger
 
@@ -153,6 +155,30 @@ class ACEWarping(Warping):
         logger.debug(f"orientation_file: {orientation_file}")
 
 
+class ACEClusterwise(Clusterwise):
+    def cluster(self, args):
+        print("  clusterwise comparison...")
+        clusterwise_cmd = f"python {MIRACL_HOME}/flow/miracl_workflow_ace_stats.py \
+                --pcs_wild_type {args.pcs_wild_type} \
+                --pcs_disease {args.pcs_disease} \
+                --pcs_output {args.pcs_output} \
+                --pcs_num_perm {args.pcs_num_perm} \
+                --pcs_atlas_dir {args.pcs_atlas_dir} \
+                --pcs_img_resolution {args.pcs_img_resolution} \
+                --pcs_smoothing_fwhm {args.pcs_smoothing_fwhm} \
+                --pcs_tfce_start {args.pcs_tfce_start} \
+                --pcs_tfce_step {args.pcs_tfce_step} \
+                --pcs_cpu_load {args.pcs_cpu_load} \
+                --pcs_tfce_h {args.pcs_tfce_h} \
+                --pcs_tfce_e {args.pcs_tfce_e} \
+                --pcs_step_down_p {args.pcs_step_down_p} \
+                --pcs_mask_thr {args.pcs_mask_thr}"
+        # subprocess.Popen(clusterwise_cmd, shell=True).wait()
+        logger.debug("Calling clusterwise comparison fn here")
+        logger.debug(f"clusterwise_cmd: {clusterwise_cmd}")
+        logger.debug(f"sample arg: {args.pcs_wild_type}")
+
+
 class ACEHeatmap(Heatmap):
     def create_heatmap(self, args, heatmap_cmd):
         print("  creating heatmaps...")
@@ -169,6 +195,7 @@ class ACEWorkflows:
         registration: Registration,
         voxelization: Voxelization,
         warping: Warping,
+        clustering: Clusterwise,
         heatmap: Heatmap,
     ):
         self.segmentation = segmentation
@@ -176,6 +203,7 @@ class ACEWorkflows:
         self.registration = registration
         self.voxelization = voxelization
         self.warping = warping
+        self.clustering = clustering
         self.heatmap = heatmap
 
     def execute_comparison_workflow(self, args, **kwargs):
@@ -193,6 +221,9 @@ class ACEWorkflows:
         )
         ace_flow_warp_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "warp_final"
+        )
+        ace_flow_cluster_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "clust_final"
         )
         ace_flow_heatmap_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "heat_final"
@@ -227,6 +258,8 @@ class ACEWorkflows:
         self.warping.warp(
             args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
         )
+
+        self.clustering.cluster(args)
 
         tested_heatmap_cmd = ConstructHeatmapCmd.test_none_args(
             args.sh_sagittal, args.sh_coronal, args.sh_axial, args.sh_figure_dim
@@ -379,10 +412,17 @@ if __name__ == "__main__":
     registration = ACERegistration()
     voxelization = ACEVoxelization()
     warping = ACEWarping()
+    clustering = ACEClusterwise()
     heatmap = ACEHeatmap()
 
     ace_workflow = ACEWorkflows(
-        segmentation, conversion, registration, voxelization, warping, heatmap
+        segmentation,
+        conversion,
+        registration,
+        voxelization,
+        warping,
+        clustering,
+        heatmap,
     )
     result = ace_workflow.execute_comparison_workflow(args)
 
