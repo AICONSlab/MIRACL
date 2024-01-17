@@ -40,13 +40,14 @@ class ACEWorkflowParser:
 
         # Define custom headers for args to separate required and optional
         required_args = parser.add_argument_group("required arguments")
-        seg_args = parser.add_argument_group("Optional segmentation arguments")
+        utility_args = parser.add_argument_group("utility arguments")
+        seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
-        reg_args = parser.add_argument_group("Optional registration arguments")
-        vox_args = parser.add_argument_group("Optional voxelization arguments")
-        warp_args = parser.add_argument_group("Optional warping arguments")
-        heatmap_args = parser.add_argument_group("Optional heatmap arguments")
+        reg_args = parser.add_argument_group("optional registration arguments")
+        vox_args = parser.add_argument_group("optional voxelization arguments")
+        warp_args = parser.add_argument_group("optional warping arguments")
         perm_args = parser.add_argument_group("optional permutation arguments")
+        heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
 
         # INFO: ACE segmentation parser
@@ -650,6 +651,13 @@ class ACEWorkflowParser:
             action="help",
             default=argparse.SUPPRESS,
             help="show this help message and exit",
+        )
+
+        utility_args.add_argument(
+            "-ua",
+            "--u_atlas_dir",
+            default="miracl_home",
+            help="path of atlas directory (default: '/code/atlases/ara/')"
         )
 
         return parser
