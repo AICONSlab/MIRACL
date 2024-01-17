@@ -47,7 +47,7 @@ class Warping(ABC):
 
 class Clusterwise(ABC):
     @abstractmethod
-    def cluster(self, args):
+    def cluster(self, args, output_dir_arg):
         pass
 
 
@@ -161,24 +161,9 @@ class ACEWarping(Warping):
 
 
 class ACEClusterwise(Clusterwise):
-    def cluster(self, args):
+    def cluster(self, args, output_dir_arg):
         print("  clusterwise comparison...")
-        clusterwise_cmd = f"python {MIRACL_HOME}/flow/miracl_workflow_ace_stats.py \
-                --pcs_wild_type {args.pcs_wild_type} \
-                --pcs_disease {args.pcs_disease} \
-                --pcs_output {args.pcs_output} \
-                --pcs_num_perm {args.pcs_num_perm} \
-                --pcs_atlas_dir {args.u_atlas_dir} \
-                --pcs_img_resolution {args.rca_voxel_size} \
-                --pcs_smoothing_fwhm {args.pcs_smoothing_fwhm} \
-                --pcs_tfce_start {args.pcs_tfce_start} \
-                --pcs_tfce_step {args.pcs_tfce_step} \
-                --pcs_cpu_load {args.pcs_cpu_load} \
-                --pcs_tfce_h {args.pcs_tfce_h} \
-                --pcs_tfce_e {args.pcs_tfce_e} \
-                --pcs_step_down_p {args.pcs_step_down_p} \
-                --pcs_mask_thr {args.pcs_mask_thr}"
-        # subprocess.Popen(clusterwise_cmd, shell=True).wait()
+        # miracl_workflow_ace_stats.main(args, output_dir_arg)
         logger.debug("Calling clusterwise comparison fn here")
         logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
 
@@ -277,7 +262,7 @@ class ACEWorkflows:
             args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
         )
 
-        self.clustering.cluster(args)
+        self.clustering.cluster(args, ace_flow_cluster_output_folder)
 
         self.correlation.correlate(args, ace_flow_corr_output_folder)
 

@@ -293,28 +293,21 @@ def cluster_fn(
     cluster_pv_slices[slice, :, :] = pvals_unmasked
 
 
-def main(args):
-    # Convert list of sys.argv to dictionary for variable assignment
-    result_dict = {
-        args[i][2:]: args[i + 1]
-        for i in range(1, len(args), 2)
-        if args[i].startswith("--")
-    }
-
-    wild_dir = Path(result_dict["pcs_wild_type"])
-    dis_dir = Path(result_dict["pcs_disease"])
-    out_dir = Path(result_dict["pcs_output"])
-    num_perm = int(result_dict["pcs_num_perm"])
-    atl_dir = result_dict["pcs_atlas_dir"]
-    img_res = int(result_dict["pcs_img_resolution"])
-    smoothing_fwhm = int(result_dict["pcs_smoothing_fwhm"])
-    tfce_start = float(result_dict["pcs_tfce_start"])
-    tfce_step = float(result_dict["pcs_tfce_step"])
-    tfce_h = float(result_dict["pcs_tfce_h"])
-    tfce_e = float(result_dict["pcs_tfce_e"])
-    cpuload = float(result_dict["pcs_cpu_load"])
-    stp = float(result_dict["pcs_step_down_p"])
-    mask_thr = int(result_dict["pcs_mask_thr"])
+def main(args, output_dir_arg):
+    wild_dir = args.pcs_wild_type
+    dis_dir = args.pcs_disease
+    out_dir = output_dir_arg
+    num_perm = args.pcs_num_perm
+    atl_dir = args.u_atlas_dir
+    img_res = args.rca_voxel_size
+    smoothing_fwhm = args.pcs_smoothing_fwhm
+    tfce_start = args.pcs_tfce_start
+    tfce_step = args.pcs_tfce_step
+    tfce_h = args.pcs_tfce_h
+    tfce_e = args.pcs_tfce_e
+    cpuload = args.pcs_cpu_load
+    stp = args.pcs_step_down_p
+    mask_thr = args.pcs_mask_thr
 
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)  # 90% default of cores used
@@ -631,7 +624,3 @@ def main(args):
 
     with open(log_thread_file_path, "a") as f:
         f.write(end_str)
-
-
-if __name__ == "__main__":
-    main(sys.argv)
