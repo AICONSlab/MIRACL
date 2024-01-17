@@ -7,7 +7,7 @@ from miracl import miracl_logger
 from abc import ABC, abstractmethod
 from miracl.flow import miracl_workflow_ace_parser
 from miracl.seg import ace_interface
-from miracl.flow import miracl_workflow_ace_stats
+from miracl.flow import miracl_workflow_ace_stats, miracl_workflow_ace_correlation
 
 logger = miracl_logger.logger
 
@@ -51,9 +51,15 @@ class Clusterwise(ABC):
         pass
 
 
+class Correlation(ABC):
+    @abstractmethod
+    def correlate(self, args, corr_output_folder):
+        pass
+
+
 class Heatmap(ABC):
     @abstractmethod
-    def create_heatmap(self, args):
+    def create_heatmap(self, heatmap_cmd):
         pass
 
 
@@ -69,20 +75,19 @@ class ACESegmentation(Segmentation):
 class ACEConversion(Conversion):
     def convert(self, args):
         print("  converting...")
-        # conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
-        # --folder {args.sa_input_folder} \
-        # --work_dir {args.sa_output_folder} \
-        # --down {args.ctn_down} \
-        # --channum {args.ctn_channum} \
-        # --chanprefix {args.ctn_chanprefix} \
-        # --channame {args.ctn_channame} \
-        # --outnii {args.ctn_outnii} \
-        # --resx {args.ctn_resx} \
-        # --resz {args.ctn_resz} \
-        # --center {' '.join(map(str, args.ctn_center))} \
-        # --downzdim {args.ctn_downzdim} \
-        # --prevdown {args.ctn_prevdown}"
-        # # Call conversion fn
+        conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
+        --folder {args.sa_input_folder} \
+        --work_dir {args.sa_output_folder} \
+        --down {args.ctn_down} \
+        --channum {args.ctn_channum} \
+        --chanprefix {args.ctn_chanprefix} \
+        --channame {args.ctn_channame} \
+        --outnii {args.ctn_outnii} \
+        --resx {args.ctn_resx} \
+        --resz {args.ctn_resz} \
+        --center {' '.join(map(str, args.ctn_center))} \
+        --downzdim {args.ctn_downzdim} \
+        --prevdown {args.ctn_prevdown}"
         # subprocess.Popen(conv_cmd, shell=True).wait()
         logger.debug("Calling conversion fn here")
         logger.debug(f"Example args: {args.ctn_down}")
@@ -101,19 +106,19 @@ class ACERegistration(Registration):
         else:
             raise FileNotFoundError("Converted nifti file not found!")
 
-        # reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
-        # -i {converted_nii_file} \
-        # -r {args.sa_output_folder} \
-        # -o {args.rca_orient_code} \
-        # -m {args.rca_hemi} \
-        # -v {args.rca_voxel_size} \
-        # -l {args.rca_allen_label} \
-        # -a {args.rca_allen_atlas} \
-        # -s {args.rca_side} \
-        # -f {args.rca_no_mosaic_fig} \
-        # -b {args.rca_olfactory_bulb} \
-        # -p {args.rca_skip_cor} \
-        # -w {args.rca_warp}"
+        reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
+        -i {converted_nii_file} \
+        -r {args.sa_output_folder} \
+        -o {args.rca_orient_code} \
+        -m {args.rca_hemi} \
+        -v {args.rca_voxel_size} \
+        -l {args.rca_allen_label} \
+        -a {args.rca_allen_atlas} \
+        -s {args.rca_side} \
+        -f {args.rca_no_mosaic_fig} \
+        -b {args.rca_olfactory_bulb} \
+        -p {args.rca_skip_cor} \
+        -w {args.rca_warp}"
         # subprocess.Popen(reg_cmd, shell=True).wait()
         logger.debug("Calling registration fn here")
         logger.debug(f"Example args: {args.rca_allen_atlas}")
@@ -163,8 +168,8 @@ class ACEClusterwise(Clusterwise):
                 --pcs_disease {args.pcs_disease} \
                 --pcs_output {args.pcs_output} \
                 --pcs_num_perm {args.pcs_num_perm} \
-                --pcs_atlas_dir {args.pcs_atlas_dir} \
-                --pcs_img_resolution {args.pcs_img_resolution} \
+                --pcs_atlas_dir {args.u_atlas_dir} \
+                --pcs_img_resolution {args.rca_voxel_size} \
                 --pcs_smoothing_fwhm {args.pcs_smoothing_fwhm} \
                 --pcs_tfce_start {args.pcs_tfce_start} \
                 --pcs_tfce_step {args.pcs_tfce_step} \
@@ -175,12 +180,19 @@ class ACEClusterwise(Clusterwise):
                 --pcs_mask_thr {args.pcs_mask_thr}"
         # subprocess.Popen(clusterwise_cmd, shell=True).wait()
         logger.debug("Calling clusterwise comparison fn here")
-        logger.debug(f"clusterwise_cmd: {clusterwise_cmd}")
-        logger.debug(f"sample arg: {args.pcs_wild_type}")
+        logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
+
+
+class ACECorrelation(Correlation):
+    def correlate(self, args, corr_output_folder):
+        print("  correlating...")
+        miracl_workflow_ace_correlation.main(args, corr_output_folder, "p_value", "stats", "mean_diff")
+        logger.debug("Calling correlation fn here")
+        logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
 
 
 class ACEHeatmap(Heatmap):
-    def create_heatmap(self, args, heatmap_cmd):
+    def create_heatmap(self, heatmap_cmd):
         print("  creating heatmaps...")
         # subprocess.Popen(heatmap_cmd, shell=True).wait()
         logger.debug("Calling heatmap fn here")
@@ -196,6 +208,7 @@ class ACEWorkflows:
         voxelization: Voxelization,
         warping: Warping,
         clustering: Clusterwise,
+        correlation: Correlation,
         heatmap: Heatmap,
     ):
         self.segmentation = segmentation
@@ -204,6 +217,7 @@ class ACEWorkflows:
         self.voxelization = voxelization
         self.warping = warping
         self.clustering = clustering
+        self.correlation = correlation
         self.heatmap = heatmap
 
     def execute_comparison_workflow(self, args, **kwargs):
@@ -224,6 +238,9 @@ class ACEWorkflows:
         )
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"
+        )
+        ace_flow_corr_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "corr_final"
         )
         ace_flow_heatmap_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "heat_final"
@@ -252,6 +269,7 @@ class ACEWorkflows:
         ) = GetVoxSegTif.check_warping_requirements(
             ace_flow_vox_output_folder, ace_flow_warp_output_folder
         )
+
         GetVoxSegTif.create_orientation_file(
             orientation_file, ace_flow_vox_output_folder
         )
@@ -261,13 +279,15 @@ class ACEWorkflows:
 
         self.clustering.cluster(args)
 
+        self.correlation.correlate(args, ace_flow_corr_output_folder)
+
         tested_heatmap_cmd = ConstructHeatmapCmd.test_none_args(
             args.sh_sagittal, args.sh_coronal, args.sh_axial, args.sh_figure_dim
         )
         heatmap_cmd = ConstructHeatmapCmd.construct_final_heatmap_cmd(
             args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
         )
-        self.heatmap.create_heatmap(args, heatmap_cmd)
+        self.heatmap.create_heatmap(heatmap_cmd)
 
 
 class FolderCreator:
@@ -404,6 +424,7 @@ class ConstructHeatmapCmd:
 
 
 if __name__ == "__main__":
+    # FIX: Move logic in main() and call here
     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
     args = args_parser.parse_args()
 
@@ -413,6 +434,7 @@ if __name__ == "__main__":
     voxelization = ACEVoxelization()
     warping = ACEWarping()
     clustering = ACEClusterwise()
+    correlation = ACECorrelation()
     heatmap = ACEHeatmap()
 
     ace_workflow = ACEWorkflows(
@@ -422,6 +444,7 @@ if __name__ == "__main__":
         voxelization,
         warping,
         clustering,
+        correlation,
         heatmap,
     )
     result = ace_workflow.execute_comparison_workflow(args)

@@ -47,6 +47,7 @@ class ACEWorkflowParser:
         vox_args = parser.add_argument_group("optional voxelization arguments")
         warp_args = parser.add_argument_group("optional warping arguments")
         perm_args = parser.add_argument_group("optional permutation arguments")
+        corr_args = parser.add_argument_group("optional correlation arguments")
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
 
@@ -527,6 +528,16 @@ class ACEWorkflowParser:
             type=int,
             help="percentile to be used for binarizing difference of the mean",
             default=95,
+        )
+
+        # INFO: Corrlation parser
+
+        corr_args.add_argument(
+            "-cft",
+            "--cf_pvalue_thr",
+            type=float,
+            help="threshold for binarizing p value",
+            default=0.05,
         )
 
         # INFO: Heatmap parser
