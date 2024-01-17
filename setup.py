@@ -5,6 +5,22 @@ from setuptools import setup, find_packages
 version_file = open("miracl/version.txt")
 version = version_file.read().strip()
 
+
+def read_file_to_lists(req_file):
+    with open(req_file, "r") as file:
+        pin_links = []
+        pin_pkgs = []
+        for line in file:
+            stripped_line = line.strip()
+            if stripped_line.startswith('-e git+') or '@' in stripped_line:
+                pin_links.append(stripped_line)
+            else:
+                pin_pkgs.append(stripped_line)
+        return pin_links, pin_pkgs
+
+
+pin_links, pin_pkgs = read_file_to_lists("requirements.txt")
+
 setup(
     name="MIRACL",
     version=version,
@@ -66,6 +82,8 @@ setup(
         "svgwrite==1.4.3",
         "loguru==0.6.0",
     ],
+    dependency_links=pin_links,
+    install_requires=pin_pkgs,
     entry_points={
         "console_scripts": ["miracl=miracl.cli:main"],
         "gui_scripts": ["miraclGUI=miracl.miraclGUI:main"],
