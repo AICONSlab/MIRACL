@@ -11,7 +11,7 @@ def main(args):
     if torch.cuda.is_available():
         print("CUDA available!")
 
-        input_folder_arg = args.sa_input_folder
+        input_folder_arg = args.single
         ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
         output_folder_arg = ace_flow_seg_output_folder if ace_flow_seg_output_folder.is_dir() else Path(args.sa_output_folder)
         model_type_arg = args.sa_model_type
