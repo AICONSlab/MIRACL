@@ -70,7 +70,7 @@ class ACEConversion(Conversion):
     def convert(self, args):
         print("  converting...")
         # conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
-        # --folder {args.sa_input_folder} \
+        # --folder {args.single} \
         # --work_dir {args.sa_output_folder} \
         # --down {args.ctn_down} \
         # --channum {args.ctn_channum} \
@@ -217,17 +217,18 @@ class ACEWorkflows:
             raise ValueError("Must specify either (-s/--single) or (-w/--wild and -d/--disease) in args.")
         
     def _execute_single_workflow(self, args, **kwargs):
-        # TODO: check it works w data
+        
         final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+        args.sa_output_folder = str((Path(args.sa_output_folder) / final_folder))
 
         ace_flow_seg_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, final_folder, "seg_final",
+            args.sa_output_folder, "seg_final",
         )
         ace_flow_conv_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, final_folder, "conv_final"
+            args.sa_output_folder, "conv_final"
         )
         ace_flow_reg_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, final_folder, "reg_final"
+            args.sa_output_folder, "reg_final"
         )
 
         self.segmentation.segment(args)
