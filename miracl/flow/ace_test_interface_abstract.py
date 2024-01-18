@@ -321,7 +321,6 @@ class ACEWorkflows:
                     args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
                 )
             
-            # TODO: what data is input to cluster? THE OUTPUT OF THE WARP NIFTI FILES
             nifti_save_location[type_] = voxelized_segmented_tif # make sure this is the right file
         
         # reset the save folder to the original provided arg
