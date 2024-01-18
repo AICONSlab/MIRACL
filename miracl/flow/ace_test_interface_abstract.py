@@ -315,7 +315,7 @@ class ACEWorkflows:
                     orientation_file, ace_flow_warp_output_folder
                 )
                 self.warping.warp(
-                    args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
+                    args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
                 )
             
             # TODO: what data is input to cluster? THE OUTPUT OF THE WARP NIFTI FILES

@@ -26,13 +26,13 @@ function usage()
 	----------
 	For command-line / scripting
 
-	Usage: miracl reg warp_clar -r [ clarity registration dir ] -i [ nifti file to warp ] -o [ orient file ] -s [ seg channel ]
+	Usage: miracl reg warp_clar -r [ clar_allen registration dir ] -i [ nifti file to warp ] -o [ orient file ] -s [ seg channel ]
 
-	Example: miracl reg warp_clar -r clar_reg_allen -i control03_05xdown_PIchan.nii.gz -o ort2std.txt
+	Example: miracl reg warp_clar -r clar_allen_reg -i control03_05xdown_PIchan.nii.gz -o ort2std.txt
 
 	    OR
 
-	    miracl reg warp_clar -r clar_reg_allen -i voxelized_seg_virus.nii.gz -o ort2std.txt -s green
+	    miracl reg warp_clar -r clar_allen_reg -i voxelized_seg_virus.nii.gz -o ort2std.txt -s green
 
 		arguments (required):
 			r. Input clarity registration dir
