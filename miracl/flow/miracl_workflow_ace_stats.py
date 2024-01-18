@@ -293,28 +293,21 @@ def cluster_fn(
     cluster_pv_slices[slice, :, :] = pvals_unmasked
 
 
-def main(args):
-    # Convert list of sys.argv to dictionary for variable assignment
-    result_dict = {
-        args[i][2:]: args[i + 1]
-        for i in range(1, len(args), 2)
-        if args[i].startswith("--")
-    }
-
-    wild_dir = Path(result_dict["pcs_wild_type"])
-    dis_dir = Path(result_dict["pcs_disease"])
-    out_dir = Path(result_dict["pcs_output"])
-    num_perm = int(result_dict["pcs_num_perm"])
-    atl_dir = result_dict["pcs_atlas_dir"]
-    img_res = int(result_dict["pcs_img_resolution"])
-    smoothing_fwhm = int(result_dict["pcs_smoothing_fwhm"])
-    tfce_start = float(result_dict["pcs_tfce_start"])
-    tfce_step = float(result_dict["pcs_tfce_step"])
-    tfce_h = float(result_dict["pcs_tfce_h"])
-    tfce_e = float(result_dict["pcs_tfce_e"])
-    cpuload = float(result_dict["pcs_cpu_load"])
-    stp = float(result_dict["pcs_step_down_p"])
-    mask_thr = int(result_dict["pcs_mask_thr"])
+def main(args, output_dir_arg):
+    wild_dir = args.pcs_wild_type
+    dis_dir = args.pcs_disease
+    out_dir = output_dir_arg
+    num_perm = args.pcs_num_perm
+    atl_dir = args.u_atlas_dir
+    img_res = args.rca_voxel_size
+    smoothing_fwhm = args.pcs_smoothing_fwhm
+    tfce_start = args.pcs_tfce_start
+    tfce_step = args.pcs_tfce_step
+    tfce_h = args.pcs_tfce_h
+    tfce_e = args.pcs_tfce_e
+    cpuload = args.pcs_cpu_load
+    stp = args.pcs_step_down_p
+    mask_thr = args.pcs_mask_thr
 
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)  # 90% default of cores used
@@ -380,15 +373,15 @@ def main(args):
     startTime = datetime.now()
 
     # load wild images
-    # TODO: fix --> do this based on downsample and resolution and the cluster directory
-    if len(wild_dir.as_posix().split(",")) > 1:
-        wild_warp_tiff_template = Path(wild_dir.as_posix().split(",")[-1]) # TODO: make this handle args better
-        wild_base_dir = Path(wild_dir.as_posix().split(",")[0]) # TODO
+    if len(wild_dir) > 1:
+        wild_warp_tiff_template = Path(wild_dir[1])
+        wild_base_dir = Path(wild_dir[0])
         wild_warp_tiff_extension = Path(
             *wild_warp_tiff_template.relative_to(wild_base_dir).parts[1:]
         )
         wild_imgs_regex = "*/" + wild_warp_tiff_extension.as_posix()
         wild_imgs = wild_base_dir.glob(wild_imgs_regex)
+        wild_imgs = [str(file) for file in wild_imgs]
 
     else:
         wild_imgs = fnmatch.filter(os.listdir(wild_dir), "*.nii.gz")
@@ -407,15 +400,15 @@ def main(args):
     print("found #", len(wild_imgs), "pre-processed wild type images!")
 
     # load dis images
-    # TODO: fix --> do this based on downsample and resolution and the cluster directory
-    if len(dis_dir.as_posix().split(",")) > 1:
-        disease_warp_tiff_template = Path(dis_dir.as_posix().split(",")[-1])
-        disease_base_dir = Path(dis_dir.as_posix().split(",")[0])
+    if len(dis_dir) > 1:
+        disease_warp_tiff_template = Path(dis_dir[1])
+        disease_base_dir = Path(dis_dir[0])
         disease_warp_tiff_extension = Path(
             *disease_warp_tiff_template.relative_to(disease_base_dir).parts[1:]
         )
         dis_imgs_regex = "*/" + disease_warp_tiff_extension.as_posix()
         dis_imgs = disease_base_dir.glob(dis_imgs_regex)
+        dis_imgs = [str(file) for file in dis_imgs]
     else:
         dis_imgs = fnmatch.filter(os.listdir(dis_dir), "*.nii.gz")
         dis_imgs.sort()
@@ -652,7 +645,3 @@ def main(args):
 
     with open(log_thread_file_path, "a") as f:
         f.write(end_str)
-
-
-if __name__ == "__main__":
-    main(sys.argv)

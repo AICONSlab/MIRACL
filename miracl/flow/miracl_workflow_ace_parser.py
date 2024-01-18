@@ -42,13 +42,15 @@ class ACEWorkflowParser:
         # Define custom headers for args to separate required and optional
         single_multi_args_group = parser.add_argument_group("Single or multi method arguments")
         required_args = parser.add_argument_group("required arguments")
-        seg_args = parser.add_argument_group("Optional segmentation arguments")
+        utility_args = parser.add_argument_group("utility arguments")
+        seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
-        reg_args = parser.add_argument_group("Optional registration arguments")
-        vox_args = parser.add_argument_group("Optional voxelization arguments")
-        warp_args = parser.add_argument_group("Optional warping arguments")
-        heatmap_args = parser.add_argument_group("Optional heatmap arguments")
+        reg_args = parser.add_argument_group("optional registration arguments")
+        vox_args = parser.add_argument_group("optional voxelization arguments")
+        warp_args = parser.add_argument_group("optional warping arguments")
         perm_args = parser.add_argument_group("optional permutation arguments")
+        corr_args = parser.add_argument_group("optional correlation arguments")
+        heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
 
         # INFO: ACE segmentation parser
@@ -532,6 +534,16 @@ class ACEWorkflowParser:
             default=95,
         )
 
+        # INFO: Corrlation parser
+
+        corr_args.add_argument(
+            "-cft",
+            "--cf_pvalue_thr",
+            type=float,
+            help="threshold for binarizing p value",
+            default=0.05,
+        )
+
         # INFO: Heatmap parser
 
         heatmap_args.add_argument(
@@ -647,12 +659,23 @@ class ACEWorkflowParser:
             default=500,
         )
 
+
+        utility_args.add_argument(
+            "-ua",
+            "--u_atlas_dir",
+            default="miracl_home",
+            help="path of atlas directory (default: '/code/atlases/ara/')"
+        )
+
+
         # INFO: help section
         class _CustomHelpAction(argparse._HelpAction):
             _required_args = []            
             for arg in required_args._group_actions:
                 _required_args.extend(arg.option_strings)
             for arg in single_multi_args_group._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in utility_args._group_actions:
                 _required_args.extend(arg.option_strings)
 
             def __call__(self,
