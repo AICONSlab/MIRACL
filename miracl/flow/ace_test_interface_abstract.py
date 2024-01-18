@@ -325,8 +325,9 @@ class ACEWorkflows:
         
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
-        args.pcs_wild_type = nifti_save_location['wild']
-        args.pcs_disease = nifti_save_location['disease']
+        # TODO: make it so we can parse these better
+        args.pcs_wild_type = Path(args.wild[0]).as_posix() + "," + nifti_save_location['wild'].as_posix()
+        args.pcs_disease = Path(args.disease[0]).as_posix() + "," + nifti_save_location['disease'].as_posix()
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"
