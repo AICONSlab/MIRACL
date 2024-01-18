@@ -415,12 +415,12 @@ class GetVoxSegTif:
         return voxelized_segmented_tif, orientation_file
 
     @staticmethod
-    def create_orientation_file(orientation_file, ace_flow_vox_output_folder):
+    def create_orientation_file(orientation_file, ace_flow_warp_output_folder):
         if orientation_file.is_file():
             orientation_file.unlink()
 
         with open(orientation_file, "w") as file:
-            file.write(f"tifdir={ace_flow_vox_output_folder}\n")
+            file.write(f"tifdir={ace_flow_warp_output_folder}\n")
             file.write(f"ortcode={args.rca_orient_code}")
 
 # TODO: may have to change for our new usage
