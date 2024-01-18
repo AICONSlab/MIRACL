@@ -265,8 +265,10 @@ class ACEWorkflows:
 
             for subject in subject_folders:
 
-                save_folder = tiff_template.parent
-                save_folder = (save_folder / per_subject_final_folder).as_posix()
+                save_folder = (
+                    (subject / tiff_extension).parent
+                    / per_subject_final_folder
+                ).as_posix()
 
                 args.sa_output_folder = save_folder
 
