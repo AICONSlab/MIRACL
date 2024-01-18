@@ -416,8 +416,9 @@ def main(args):
         )
         dis_imgs_regex = "*/" + disease_warp_tiff_extension.as_posix()
         dis_imgs = disease_base_dir.glob(dis_imgs_regex)
-    # dis_imgs = fnmatch.filter(os.listdir(dis_dir), "*.nii.gz")
-    # dis_imgs.sort()
+    else:
+        dis_imgs = fnmatch.filter(os.listdir(dis_dir), "*.nii.gz")
+        dis_imgs.sort()
 
     # only keep a quarter of an image for testing
     print("pre processing group 2 ...")
