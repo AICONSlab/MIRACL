@@ -312,7 +312,7 @@ class ACEWorkflows:
                     ace_flow_vox_output_folder, ace_flow_warp_output_folder
                 )
                 GetVoxSegTif.create_orientation_file(
-                    orientation_file, ace_flow_vox_output_folder
+                    orientation_file, ace_flow_warp_output_folder
                 )
                 self.warping.warp(
                     args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
@@ -405,6 +405,12 @@ class GetVoxSegTif:
             ace_flow_vox_output_folder.glob("voxelized_seg_*.nii.gz")
         )[0]
         orientation_file = ace_flow_warp_output_folder / "ort2std.txt"
+        
+        # copy vox file to warp folder
+        shutil.copy(voxelized_segmented_tif, ace_flow_warp_output_folder)
+        voxelized_segmented_tif = list(
+            ace_flow_warp_output_folder.glob("voxelized_seg_*.nii.gz")
+        )[0]
 
         return voxelized_segmented_tif, orientation_file
 
