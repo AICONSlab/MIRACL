@@ -381,16 +381,18 @@ def main(args):
 
     # load wild images
     # TODO: fix --> do this based on downsample and resolution and the cluster directory
-    wild_warp_tiff_template = Path(wild_dir)
-    wild_base_dir = Path(args.wild[0])
-    wild_warp_tiff_extension = Path(
-        *wild_warp_tiff_template.relative_to(wild_base_dir).parts[1:]
-    )
-    wild_imgs_regex = "*/" + wild_warp_tiff_extension.as_posix()
-    wild_imgs = wild_base_dir.glob(wild_imgs_regex)
+    if len(wild_dir.as_posix().split(",")) > 1:
+        wild_warp_tiff_template = Path(wild_dir.as_posix().split(",")[-1]) # TODO: make this handle args better
+        wild_base_dir = Path(wild_dir.as_posix().split(",")[0]) # TODO
+        wild_warp_tiff_extension = Path(
+            *wild_warp_tiff_template.relative_to(wild_base_dir).parts[1:]
+        )
+        wild_imgs_regex = "*/" + wild_warp_tiff_extension.as_posix()
+        wild_imgs = wild_base_dir.glob(wild_imgs_regex)
 
-    # wild_imgs = fnmatch.filter(os.listdir(wild_dir), "*.nii.gz")
-    # wild_imgs.sort()
+    else:
+        wild_imgs = fnmatch.filter(os.listdir(wild_dir), "*.nii.gz")
+        wild_imgs.sort()
 
     # only keep a quarter of an image for testing
     print("pre processing group 1 ...")
@@ -406,13 +408,14 @@ def main(args):
 
     # load dis images
     # TODO: fix --> do this based on downsample and resolution and the cluster directory
-    disease_warp_tiff_template = Path(dis_dir)
-    disease_base_dir = Path(args.disease[0])
-    disease_warp_tiff_extension = Path(
-        *disease_warp_tiff_template.relative_to(disease_base_dir).parts[1:]
-    )
-    dis_imgs_regex = "*/" + disease_warp_tiff_extension.as_posix()
-    dis_imgs = disease_base_dir.glob(dis_imgs_regex)
+    if len(dis_dir.as_posix().split(",")) > 1:
+        disease_warp_tiff_template = Path(dis_dir.as_posix().split(",")[-1])
+        disease_base_dir = Path(dis_dir.as_posix().split(",")[0])
+        disease_warp_tiff_extension = Path(
+            *disease_warp_tiff_template.relative_to(disease_base_dir).parts[1:]
+        )
+        dis_imgs_regex = "*/" + disease_warp_tiff_extension.as_posix()
+        dis_imgs = disease_base_dir.glob(dis_imgs_regex)
     # dis_imgs = fnmatch.filter(os.listdir(dis_dir), "*.nii.gz")
     # dis_imgs.sort()
 
