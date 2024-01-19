@@ -53,7 +53,7 @@ class Clusterwise(ABC):
 
 class Correlation(ABC):
     @abstractmethod
-    def correlate(self, args, corr_output_folder):
+    def correlate(self, args, corr_output_folder, p_value, f_obs, mean_diff):
         pass
 
 
@@ -169,9 +169,11 @@ class ACEClusterwise(Clusterwise):
 
 
 class ACECorrelation(Correlation):
-    def correlate(self, args, corr_output_folder):
+    def correlate(self, args, corr_output_folder, p_value, f_obs, mean_diff):
         print("  correlating...")
-        miracl_workflow_ace_correlation.main(args, corr_output_folder, "p_value", "stats", "mean_diff")
+        miracl_workflow_ace_correlation.main(
+            args, corr_output_folder, p_value, f_obs, mean_diff
+        )
         logger.debug("Calling correlation fn here")
         logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
 
@@ -264,7 +266,23 @@ class ACEWorkflows:
 
         self.clustering.cluster(args, ace_flow_cluster_output_folder)
 
-        self.correlation.correlate(args, ace_flow_corr_output_folder)
+        p_value_input = GetCorrInput.check_corr_input_exists(
+            ace_flow_cluster_output_folder, "diff_mean.nii.gz"
+        )
+        f_obs_input = GetCorrInput.check_corr_input_exists(
+            ace_flow_cluster_output_folder, "f_obs.nii.gz"
+        )
+        mean_diff_input = GetCorrInput.check_corr_input_exists(
+            ace_flow_cluster_output_folder, "p_values.nii.gz"
+        )
+
+        self.correlation.correlate(
+            args,
+            ace_flow_corr_output_folder,
+            p_value_input,
+            f_obs_input,
+            mean_diff_input,
+        )
 
         tested_heatmap_cmd = ConstructHeatmapCmd.test_none_args(
             args.sh_sagittal, args.sh_coronal, args.sh_axial, args.sh_figure_dim
@@ -345,6 +363,17 @@ class GetVoxSegTif:
         with open(orientation_file, "w") as file:
             file.write(f"tifdir={ace_flow_vox_output_folder}\n")
             file.write(f"ortcode={args.rca_orient_code}")
+
+
+class GetCorrInput:
+    @staticmethod
+    def check_corr_input_exists(dir_var, nifti_name_var):
+        dir_path = Path(dir_var)
+        file_path = dir_path / nifti_name_var
+        if file_path.is_file():
+            return file_path
+        else:
+            raise FileNotFoundError(f"'{file_path}' does not exist at '{dir_path}'")
 
 
 class ConstructHeatmapCmd:
