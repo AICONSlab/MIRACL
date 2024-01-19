@@ -1,6 +1,7 @@
 import argparse
 import os
 import subprocess
+import shutil
 import sys
 from pathlib import Path
 from miracl import miracl_logger
@@ -76,7 +77,7 @@ class ACEConversion(Conversion):
     def convert(self, args):
         print("  converting...")
         conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
-        --folder {args.sa_input_folder} \
+        --folder {args.single} \
         --work_dir {args.sa_output_folder} \
         --down {args.ctn_down} \
         --channum {args.ctn_channum} \
@@ -207,30 +208,29 @@ class ACEWorkflows:
         self.correlation = correlation
         self.heatmap = heatmap
 
-    def execute_comparison_workflow(self, args, **kwargs):
+    def execute_workflow(self, args, **kwargs):
+
+        # check for single or multi in the args
+        if args.single:
+            self._execute_single_workflow(args, **kwargs)
+        elif args.control and args.experiment:
+            self._execute_comparison_workflow(args, **kwargs)
+        else:
+            raise ValueError("Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args.")
+        
+    def _execute_single_workflow(self, args, **kwargs):
+        
+        final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+        args.sa_output_folder = str((Path(args.sa_output_folder) / final_folder))
+
         ace_flow_seg_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "seg_final"
+            args.sa_output_folder, "seg_final",
         )
         ace_flow_conv_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "conv_final"
         )
         ace_flow_reg_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "reg_final"
-        )
-        ace_flow_vox_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "vox_final"
-        )
-        ace_flow_warp_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "warp_final"
-        )
-        ace_flow_cluster_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "clust_final"
-        )
-        ace_flow_corr_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "corr_final"
-        )
-        ace_flow_heatmap_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "heat_final"
         )
 
         self.segmentation.segment(args)
@@ -243,25 +243,107 @@ class ACEWorkflows:
             dependent_folder=ace_flow_conv_output_folder,
             converted_nii_file=converted_nii_file,
         )
-        # Stack tiff files for use in voxelization method
-        fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
-        stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
-        StackTiffs.check_folders(fiji_file, stacked_tif)
-        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
-        self.voxelization.voxelize(args, stacked_tif)
 
-        (
-            voxelized_segmented_tif,
-            orientation_file,
-        ) = GetVoxSegTif.check_warping_requirements(
-            ace_flow_vox_output_folder, ace_flow_warp_output_folder
+        return args.sa_output_folder
+    
+    def _execute_comparison_workflow(self, args, **kwargs):
+
+        overall_save_folder = args.sa_output_folder
+
+        args_dict = vars(args)
+
+        per_subject_final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+
+        nifti_save_location = {}
+
+        for type_ in ['control', 'experiment']:
+
+            tiff_template = Path(args_dict[type_][1])
+            base_dir = Path(args_dict[type_][0])
+
+            tiff_extension = Path(*tiff_template.relative_to(base_dir).parts[1:])
+            subject_folders = [dir_ for dir_ in base_dir.iterdir() if dir_.is_dir()]
+
+            for subject in subject_folders:
+
+                save_folder = (
+                    (subject / tiff_extension).parent
+                    / per_subject_final_folder
+                ).as_posix()
+
+                args.sa_output_folder = save_folder
+
+                ace_flow_seg_output_folder = FolderCreator.create_folder(
+                    args.sa_output_folder, "seg_final"
+                )
+                ace_flow_conv_output_folder = FolderCreator.create_folder(
+                    args.sa_output_folder, "conv_final"
+                )
+                ace_flow_reg_output_folder = FolderCreator.create_folder(
+                    args.sa_output_folder, "reg_final"
+                )
+                ace_flow_vox_output_folder = FolderCreator.create_folder(
+                    args.sa_output_folder, "vox_final"
+                )
+                ace_flow_warp_output_folder = FolderCreator.create_folder(
+                    args.sa_output_folder, "warp_final"
+                )
+
+                # TODO: make sure we're getting the right dir
+                args.single = base_dir / subject.stem / tiff_extension
+
+                self.segmentation.segment(args)
+                self.conversion.convert(args)
+                converted_nii_file = GetConverterdNifti.get_nifti_file(
+                    ace_flow_conv_output_folder
+                )
+                self.registration.register(
+                    args,
+                    dependent_folder=ace_flow_conv_output_folder,
+                    converted_nii_file=converted_nii_file,
+                )
+                # Stack tiff files for use in voxelization method
+                fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
+                stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
+                StackTiffs.check_folders(fiji_file, stacked_tif)
+                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+                self.voxelization.voxelize(args, stacked_tif)
+
+                (
+                    voxelized_segmented_tif,
+                    orientation_file,
+                ) = GetVoxSegTif.check_warping_requirements(
+                    ace_flow_vox_output_folder, ace_flow_warp_output_folder
+                )
+
+                GetVoxSegTif.create_orientation_file(
+                    orientation_file, ace_flow_warp_output_folder
+                )
+                self.warping.warp(
+                    args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
+                )
+            
+            nifti_save_location[type_] = voxelized_segmented_tif # make sure this is the right file
+        
+        # reset the save folder to the original provided arg
+        args.sa_output_folder = overall_save_folder
+        args.pcs_control = (
+            args.control[0],
+            nifti_save_location['control'].as_posix()
+        )
+        args.pcs_experiment = (
+            args.experiment[0],
+            nifti_save_location['experiment'].as_posix()
         )
 
-        GetVoxSegTif.create_orientation_file(
-            orientation_file, ace_flow_vox_output_folder
+        ace_flow_cluster_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "clust_final"
         )
-        self.warping.warp(
-            args, ace_flow_reg_output_folder, voxelized_segmented_tif, orientation_file
+        ace_flow_heatmap_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "heat_final"
+        )
+        ace_flow_corr_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "corr_final"
         )
 
         self.clustering.cluster(args, ace_flow_cluster_output_folder)
@@ -295,8 +377,10 @@ class ACEWorkflows:
 
 class FolderCreator:
     @staticmethod
-    def create_folder(arg_var, name_var):
-        folder = Path(arg_var) / name_var
+    def create_folder(arg_var, *name_vars):
+        folder = Path(arg_var)
+        for name_var in name_vars:
+            folder = folder / name_var
         folder.mkdir(parents=True, exist_ok=True)
         return folder
 
@@ -331,7 +415,7 @@ class StackTiffs:
     def stacking(fiji_file, stacked_tif, seg_output_dir):
         print("  stacking segmented tifs...")
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
+            file.write(f'File.openSequence("{seg_output_dir}/generated_pathches", "virtual");\n')
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
@@ -352,16 +436,22 @@ class GetVoxSegTif:
             ace_flow_vox_output_folder.glob("voxelized_seg_*.nii.gz")
         )[0]
         orientation_file = ace_flow_warp_output_folder / "ort2std.txt"
+        
+        # copy vox file to warp folder
+        shutil.copy(voxelized_segmented_tif, ace_flow_warp_output_folder)
+        voxelized_segmented_tif = list(
+            ace_flow_warp_output_folder.glob("voxelized_seg_*.nii.gz")
+        )[0]
 
         return voxelized_segmented_tif, orientation_file
 
     @staticmethod
-    def create_orientation_file(orientation_file, ace_flow_vox_output_folder):
+    def create_orientation_file(orientation_file, ace_flow_warp_output_folder):
         if orientation_file.is_file():
             orientation_file.unlink()
 
         with open(orientation_file, "w") as file:
-            file.write(f"tifdir={ace_flow_vox_output_folder}\n")
+            file.write(f"tifdir={ace_flow_warp_output_folder}\n")
             file.write(f"ortcode={args.rca_orient_code}")
 
 
@@ -376,6 +466,7 @@ class GetCorrInput:
             raise FileNotFoundError(f"'{file_path}' does not exist at '{dir_path}'")
 
 
+# TODO: may have to change for our new usage
 class ConstructHeatmapCmd:
     @staticmethod
     def test_none_args(
@@ -432,6 +523,7 @@ class ConstructHeatmapCmd:
     def construct_final_heatmap_cmd(
         args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
     ):
+        # TODO: fix the params this function recieves
         tested_heatmap_cmd += f"-g1 {args.sh_group1} -g2 {args.sh_group2} -v {args.sh_vox} -gs {args.sh_sigma} -p {args.sh_percentile} -cp {args.sh_colourmap_pos} -cn {args.sh_colourmap_neg} -d {ace_flow_heatmap_output_folder} -o {args.sh_outfile} -e {args.sh_extension} --dpi {args.sh_dpi}"
 
         return tested_heatmap_cmd
@@ -461,7 +553,7 @@ if __name__ == "__main__":
         correlation,
         heatmap,
     )
-    result = ace_workflow.execute_comparison_workflow(args)
+    result = ace_workflow.execute_workflow(args)
 
 
 # class ACEInterface(ABC):
