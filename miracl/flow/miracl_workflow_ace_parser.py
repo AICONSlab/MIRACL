@@ -36,7 +36,7 @@ class ACEWorkflowParser:
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
   4) Voxelizes segmentation results into density maps with Allen atlas resolution
   5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
-            usage="""%(prog)s (-s single_dir | (-w wild_root_dir wild_tiff_file -d disease_root_dir disease_tiff_file)) -sao output_folder -sam model_type""",
+            usage="""%(prog)s (-s single_dir | (-c control_root_dir control_tiff_file -e experiment_root_dir experiment_tiff_file)) -sao output_folder -sam model_type""",
         )
 
         # Define custom headers for args to separate required and optional
@@ -63,20 +63,20 @@ class ACEWorkflowParser:
         )
 
         single_multi_args_group.add_argument(
-            "-w",
-            "--wild",
+            "-c",
+            "--control",
             type=str,
-            metavar=('WILD_BASE_DIR', 'WILD_TIFF_DIR_EXAMPLE'),
-            help="FIRST: path to base wild directory.\nSECOND: example path to wild subject tiff directory",
+            metavar=('CONTROL_BASE_DIR', 'CONTROL_TIFF_DIR_EXAMPLE'),
+            help="FIRST: path to base control directory.\nSECOND: example path to control subject tiff directory",
             nargs=2,
         )
 
         single_multi_args_group.add_argument(
-            "-d",
-            "--disease",
+            "-e",
+            "--experiment",
             type=str,
-            metavar=('DISEASE_BASE_DIR', 'DISEASE_TIFF_DIR_EXAMPLE'),
-            help="FIRST: path to base disease directory.\nSECOND: example path to disease subject tiff directory",
+            metavar=('EXPERIMENT_BASE_DIR', 'EXPERIMENT_TIFF_DIR_EXAMPLE'),
+            help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject tiff directory",
             nargs=2,
         )
 
@@ -724,18 +724,18 @@ class ACEWorkflowParser:
     def parse_args(self):
         args = self.parser.parse_args()
         
-        # check that wild and disease are not passed with single
-        if (args.wild and args.disease) and args.single:
-            raise argparse.ArgumentError(None, '-w/--wild and -d/--disease must be passed together without -s/--single')
+        # check that control and experiment are not passed with single
+        if (args.control and args.experiment) and args.single:
+            raise argparse.ArgumentError(None, '-c/--control and -e/--experiment must be passed together without -s/--single')
         # check that single is passed alone
-        elif args.single and (args.wild or args.disease):
-            raise argparse.ArgumentError(None, '-s/--single cannot be passed with either -w/--wild or -d/--disease')
-        # check that wild and disease are always passed together
-        elif (args.wild and not args.disease) or (args.disease and not args.wild):
-            raise argparse.ArgumentError(None, '-w/--wild and -d/--disease must be passed together')
+        elif args.single and (args.control or args.experiment):
+            raise argparse.ArgumentError(None, '-s/--single cannot be passed with either -c/--control or -e/--experiment')
+        # check that control and experiment are always passed together
+        elif (args.control and not args.experiment) or (args.experiment and not args.control):
+            raise argparse.ArgumentError(None, '-c/--control and -e/--experiment must be passed together')
         # check that something is passed
-        elif not args.single and not args.wild and not args.disease:
-            raise argparse.ArgumentError(None, 'either [-s/--single] or [-w/--wild and -d/--disease] must be passed')
+        elif not args.single and not args.control and not args.experiment:
+            raise argparse.ArgumentError(None, 'either [-s/--single] or [-c/--control and -e/--experiment] must be passed')
         
         return args
 

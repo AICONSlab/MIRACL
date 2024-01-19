@@ -121,7 +121,7 @@ def cluster_fn(
     tfce_e,
     ncpus,
     stp,
-    wild_imgs,
+    control_imgs,
     out_dir,
 ):
     # sys.stdout.write("\r statistcal test on slice #%d ..." % slice)
@@ -191,27 +191,27 @@ def cluster_fn(
             mne.set_cache_dir(nilearn_cache_dir)
 
             ############ applying simple stats tests voxel-wise for debugging
-            # t_stats_temp, p_value_temp = ttest_ind(thresh_data[0:len(wild_imgs),], thresh_data[len(wild_imgs):,], equal_var=False)
+            # t_stats_temp, p_value_temp = ttest_ind(thresh_data[0:len(control_imgs),], thresh_data[len(control_imgs):,], equal_var=False)
             # print("applying voxelwise ttest: min: ",
             #       np.min(t_stats_temp),
             #       " max: ", np.max(t_stats_temp),
             #       " min p value: ", np.min(p_value_temp),
             #       " N voxels sig: ", np.sum(p_value_temp < 0.05))
 
-            # t_stats_temp, p_value_temp = mannwhitneyu(thresh_data[0:len(wild_imgs),], thresh_data[len(wild_imgs):,],
+            # t_stats_temp, p_value_temp = mannwhitneyu(thresh_data[0:len(control_imgs),], thresh_data[len(control_imgs):,],
             #                             alternative='two-sided')
             # print("applying voxelwise mannwhitneyu: min: ",
             #       np.min(t_stats_temp),
             #       " max: ", np.max(t_stats_temp),
             #       " min p value: ", np.min(p_value_temp),
             #       " N voxels sig: ", np.sum(p_value_temp < 0.05))
-            # t_stats_temp, p_value_temp = kruskal(thresh_data[0:len(wild_imgs),], thresh_data[len(wild_imgs):,])
+            # t_stats_temp, p_value_temp = kruskal(thresh_data[0:len(control_imgs),], thresh_data[len(control_imgs):,])
             # print("applying voxelwise kruskal: min: ",
             #        np.min(t_stats_temp),
             #        " max: ", np.max(t_stats_temp),
             #        " min p value: ", np.min(p_value_temp),
             #        " N voxels sig: ", np.sum(p_value_temp < 0.05))
-            # t_stats_temp, p_value_temp = f_oneway(thresh_data[0:len(wild_imgs),], thresh_data[len(wild_imgs):,])
+            # t_stats_temp, p_value_temp = f_oneway(thresh_data[0:len(control_imgs),], thresh_data[len(control_imgs):,])
             # print("applying voxelwise f_oneway: min: ",
             #       np.min(t_stats_temp),
             #       " max: ", np.max(t_stats_temp),
@@ -226,8 +226,8 @@ def cluster_fn(
                 e_power=tfce_e,
             )  # h=1 ans e = 1 to find more
             f_obs, clusters, cluster_pv, H0 = spatio_temporal_cluster_test(
-                [thresh_data[0 : len(wild_imgs),], thresh_data[len(wild_imgs) :,]],
-                # thresh_data[len(wild_imgs):,],
+                [thresh_data[0 : len(control_imgs),], thresh_data[len(control_imgs) :,]],
+                # thresh_data[len(control_imgs):,],
                 threshold=threshold_tfce,
                 adjacency=adj,
                 out_type="mask",
@@ -294,8 +294,8 @@ def cluster_fn(
 
 
 def main(args, output_dir_arg):
-    wild_dir = args.pcs_wild_type
-    dis_dir = args.pcs_disease
+    control_dir = args.pcs_control
+    exp_dir = args.pcs_experiment
     out_dir = output_dir_arg
     num_perm = args.pcs_num_perm
     atl_dir = args.u_atlas_dir
@@ -313,8 +313,8 @@ def main(args, output_dir_arg):
     ncpus = int(cpuload * cpus)  # 90% default of cores used
 
     print("Running clusterwise stats with the following arguments:")
-    print(f"  wild_dir: {wild_dir}")
-    print(f"  dis_dir: {dis_dir}")
+    print(f"  control_dir: {control_dir}")
+    print(f"  exp_dir: {exp_dir}")
     print(f"  out_dir: {out_dir}")
     print(f"  num_perm: {num_perm}")
     print(f"  atl_dir: {atl_dir}")
@@ -372,139 +372,139 @@ def main(args, output_dir_arg):
 
     startTime = datetime.now()
 
-    # load wild images
-    if len(wild_dir) > 1:
-        wild_warp_tiff_template = Path(wild_dir[1])
-        wild_base_dir = Path(wild_dir[0])
-        wild_warp_tiff_extension = Path(
-            *wild_warp_tiff_template.relative_to(wild_base_dir).parts[1:]
+    # load control images
+    if len(control_dir) > 1:
+        control_warp_tiff_template = Path(control_dir[1])
+        control_base_dir = Path(control_dir[0])
+        control_warp_tiff_extension = Path(
+            *control_warp_tiff_template.relative_to(control_base_dir).parts[1:]
         )
-        wild_imgs_regex = "*/" + wild_warp_tiff_extension.as_posix()
-        wild_imgs = wild_base_dir.glob(wild_imgs_regex)
-        wild_imgs = [str(file) for file in wild_imgs]
+        control_imgs_regex = "*/" + control_warp_tiff_extension.as_posix()
+        control_imgs = control_base_dir.glob(control_imgs_regex)
+        control_imgs = [str(file) for file in control_imgs]
 
     else:
-        wild_imgs = fnmatch.filter(os.listdir(wild_dir), "*.nii.gz")
-        wild_imgs.sort()
+        control_imgs = fnmatch.filter(os.listdir(control_dir), "*.nii.gz")
+        control_imgs.sort()
 
     # only keep a quarter of an image for testing
     print("pre processing group 1 ...")
-    for img in wild_imgs:
+    for img in control_imgs:
         pre_processing_func(
-            img, wild_dir, out_dir, "wild", mask_img_array, smoothing_fwhm, img_res
+            img, control_dir, out_dir, "control", mask_img_array, smoothing_fwhm, img_res
         )
 
-    # update the wild_images list after cropping
-    wild_imgs = fnmatch.filter(os.listdir(out_dir), "wild_processed*.nii.gz")
-    wild_imgs.sort()
-    print("found #", len(wild_imgs), "pre-processed wild type images!")
+    # update the control_images list after cropping
+    control_imgs = fnmatch.filter(os.listdir(out_dir), "control_processed*.nii.gz")
+    control_imgs.sort()
+    print("found #", len(control_imgs), "pre-processed control type images!")
 
-    # load dis images
-    if len(dis_dir) > 1:
-        disease_warp_tiff_template = Path(dis_dir[1])
-        disease_base_dir = Path(dis_dir[0])
-        disease_warp_tiff_extension = Path(
-            *disease_warp_tiff_template.relative_to(disease_base_dir).parts[1:]
+    # load exp images
+    if len(exp_dir) > 1:
+        experiment_warp_tiff_template = Path(exp_dir[1])
+        experiment_base_dir = Path(exp_dir[0])
+        experiment_warp_tiff_extension = Path(
+            *experiment_warp_tiff_template.relative_to(experiment_base_dir).parts[1:]
         )
-        dis_imgs_regex = "*/" + disease_warp_tiff_extension.as_posix()
-        dis_imgs = disease_base_dir.glob(dis_imgs_regex)
-        dis_imgs = [str(file) for file in dis_imgs]
+        exp_imgs_regex = "*/" + experiment_warp_tiff_extension.as_posix()
+        exp_imgs = experiment_base_dir.glob(exp_imgs_regex)
+        exp_imgs = [str(file) for file in exp_imgs]
     else:
-        dis_imgs = fnmatch.filter(os.listdir(dis_dir), "*.nii.gz")
-        dis_imgs.sort()
+        exp_imgs = fnmatch.filter(os.listdir(exp_dir), "*.nii.gz")
+        exp_imgs.sort()
 
     # only keep a quarter of an image for testing
     print("pre processing group 2 ...")
-    for img in dis_imgs:
+    for img in exp_imgs:
         pre_processing_func(
-            img, dis_dir, out_dir, "dis", mask_img_array, smoothing_fwhm, img_res
+            img, exp_dir, out_dir, "exp", mask_img_array, smoothing_fwhm, img_res
         )
 
-    # update the dis_images list after cropping
-    dis_imgs = fnmatch.filter(os.listdir(out_dir), "dis_processed*.nii.gz")
-    dis_imgs.sort()
-    print("found #", len(dis_imgs), "pre-processed disease type images!")
+    # update the exp_images list after cropping
+    exp_imgs = fnmatch.filter(os.listdir(out_dir), "exp_processed*.nii.gz")
+    exp_imgs.sort()
+    print("found #", len(exp_imgs), "pre-processed experiment type images!")
 
     # -------------------------------------------------------
-    # compute mean of disease and wild type images + differences of the mean
+    # compute mean of experiment and control type images + differences of the mean
     # -------------------------------------------------------
 
-    # compute the mean of wild type images
-    print("compute the mean of wild type images")
+    # compute the mean of control type images
+    print("compute the mean of control type images")
 
-    # load the wild images into an array
-    wild_img_list = []
+    # load the control images into an array
+    control_img_list = []
 
-    for img_name in wild_imgs:
+    for img_name in control_imgs:
         img = nib.load(os.path.join(out_dir, img_name))
-        wild_imgs_header = img.header
-        wild_imgs_affine = img.affine
+        control_imgs_header = img.header
+        control_imgs_affine = img.affine
         img = img.get_fdata()
         # print(img.dtype)
         # multiply with atlas
         img = np.multiply(img, mask_img_array)
-        wild_img_list.append(img)
+        control_img_list.append(img)
 
-    wild_imgs_array = np.stack(wild_img_list, axis=3)
-    print("wild_imgs_array shape: ", wild_imgs_array.shape)
+    control_imgs_array = np.stack(control_img_list, axis=3)
+    print("control_imgs_array shape: ", control_imgs_array.shape)
 
-    del wild_img_list  # to reduce memory usage
+    del control_img_list  # to reduce memory usage
 
-    wild_imgs_mean = np.mean(wild_imgs_array, axis=3)
-    wild_imgs_std = np.std(wild_imgs_array, axis=3)
+    control_imgs_mean = np.mean(control_imgs_array, axis=3)
+    control_imgs_std = np.std(control_imgs_array, axis=3)
 
-    print("wild_imgs_mean shape: ", wild_imgs_mean.shape)
+    print("control_imgs_mean shape: ", control_imgs_mean.shape)
 
-    # save the wild_imgs_mean and std
+    # save the control_imgs_mean and std
     nib.save(
-        nib.Nifti1Image(wild_imgs_mean, wild_imgs_affine, wild_imgs_header),
-        os.path.join(out_dir, "wild_imgs_mean.nii.gz"),
+        nib.Nifti1Image(control_imgs_mean, control_imgs_affine, control_imgs_header),
+        os.path.join(out_dir, "control_imgs_mean.nii.gz"),
     )
     nib.save(
-        nib.Nifti1Image(wild_imgs_std, wild_imgs_affine, wild_imgs_header),
-        os.path.join(out_dir, "wild_imgs_std.nii.gz"),
+        nib.Nifti1Image(control_imgs_std, control_imgs_affine, control_imgs_header),
+        os.path.join(out_dir, "control_imgs_std.nii.gz"),
     )
 
-    # compute the mean of disease type images
-    print("compute the mean of disease type images")
+    # compute the mean of experiment type images
+    print("compute the mean of experiment type images")
 
-    # load the wild images into an array
-    dis_img_list = []
+    # load the control images into an array
+    exp_img_list = []
 
-    for img_name in dis_imgs:
+    for img_name in exp_imgs:
         img = nib.load(os.path.join(out_dir, img_name))
-        dis_imgs_header = img.header
-        dis_imgs_affine = img.affine
+        exp_imgs_header = img.header
+        exp_imgs_affine = img.affine
         img = img.get_fdata()
         # multiply with atlas
         img = np.multiply(img, mask_img_array)
-        dis_img_list.append(img)
+        exp_img_list.append(img)
 
-    dis_imgs_array = np.stack(dis_img_list, axis=3)
-    print("dis_imgs_array shape: ", dis_imgs_array.shape)
-    del dis_img_list  # to reduce memory usage
+    exp_imgs_array = np.stack(exp_img_list, axis=3)
+    print("exp_imgs_array shape: ", exp_imgs_array.shape)
+    del exp_img_list  # to reduce memory usage
 
-    dis_imgs_mean = np.mean(dis_imgs_array, axis=3)
-    dis_imgs_std = np.std(dis_imgs_array, axis=3)
-    print("dis_imgs_mean shape: ", dis_imgs_mean.shape)
+    exp_imgs_mean = np.mean(exp_imgs_array, axis=3)
+    exp_imgs_std = np.std(exp_imgs_array, axis=3)
+    print("exp_imgs_mean shape: ", exp_imgs_mean.shape)
 
-    # save the dis_imgs_mean and std
+    # save the exp_imgs_mean and std
     nib.save(
-        nib.Nifti1Image(dis_imgs_mean, dis_imgs_affine, dis_imgs_header),
-        os.path.join(out_dir, "dis_imgs_mean.nii.gz"),
+        nib.Nifti1Image(exp_imgs_mean, exp_imgs_affine, exp_imgs_header),
+        os.path.join(out_dir, "exp_imgs_mean.nii.gz"),
     )
     nib.save(
-        nib.Nifti1Image(dis_imgs_std, dis_imgs_affine, dis_imgs_header),
-        os.path.join(out_dir, "dis_imgs_std.nii.gz"),
+        nib.Nifti1Image(exp_imgs_std, exp_imgs_affine, exp_imgs_header),
+        os.path.join(out_dir, "exp_imgs_std.nii.gz"),
     )
 
-    # compute the mean of disease type images
+    # compute the mean of experiment type images
     print("compute the difference of means")
-    diff_mean = np.subtract(dis_imgs_mean, wild_imgs_mean)
+    diff_mean = np.subtract(exp_imgs_mean, control_imgs_mean)
 
     # save the diff_mean
     nib.save(
-        nib.Nifti1Image(diff_mean, dis_imgs_affine, dis_imgs_header),
+        nib.Nifti1Image(diff_mean, exp_imgs_affine, exp_imgs_header),
         os.path.join(out_dir, "diff_mean.nii.gz"),
     )
     print("diff_mean shape: ", diff_mean.shape)
@@ -516,13 +516,13 @@ def main(args, output_dir_arg):
     # # save the diff_mean smooth version
     # nib.save(diff_mean_smooth, os.path.join(out_dir, 'diff_mean_smooth.nii'))
 
-    del wild_imgs_mean  # to reduce memory usage
-    del dis_imgs_mean  # to reduce memory usage
-    del wild_imgs_std  # to reduce memory usage
-    del dis_imgs_std  # to reduce memory usage
+    del control_imgs_mean  # to reduce memory usage
+    del exp_imgs_mean  # to reduce memory usage
+    del control_imgs_std  # to reduce memory usage
+    del exp_imgs_std  # to reduce memory usage
     # del diff_mean # to reduce memory usage
-    del wild_imgs_array  # to reduce memory usage
-    del dis_imgs_array  # to reduce memory usage
+    del control_imgs_array  # to reduce memory usage
+    del exp_imgs_array  # to reduce memory usage
 
     # -------------------------------------------------------
     # create a mask based on diff_mean
@@ -548,7 +548,7 @@ def main(args, output_dir_arg):
 
     # save the mask_diff_mean
     nib.save(
-        nib.Nifti1Image(mask_diff_mean_arr, dis_imgs_affine, dis_imgs_header),
+        nib.Nifti1Image(mask_diff_mean_arr, exp_imgs_affine, exp_imgs_header),
         os.path.join(out_dir, "mask_diff_mean.nii.gz"),
     )
     print("mask_diff_mean shape: ", mask_diff_mean_arr.shape)
@@ -558,13 +558,13 @@ def main(args, output_dir_arg):
     # start statistics
     # -------------------------------------------------------
     # concatenate two groups images
-    all_vols = wild_imgs + dis_imgs
+    all_vols = control_imgs + exp_imgs
     # print(all_vols)
     all_vols = [os.path.join(out_dir, file) for file in all_vols]
     all_vols_imgs = [nib.load(file) for file in all_vols]
     # all_vols = concat_imgs(all_vols)
 
-    temp_img = nib.load(os.path.join(out_dir, wild_imgs[0]))
+    temp_img = nib.load(os.path.join(out_dir, control_imgs[0]))
 
     # -------------------------------------------------------
     # Parallelize clustering function
@@ -610,7 +610,7 @@ def main(args, output_dir_arg):
             tfce_e,
             ncpus,
             stp,
-            wild_imgs,
+            control_imgs,
             out_dir,
         )
         for s in range(temp_img.shape[0])

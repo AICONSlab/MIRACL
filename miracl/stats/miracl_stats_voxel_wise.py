@@ -24,17 +24,17 @@ warnings.simplefilter("ignore", UserWarning)
 
 
 def helpmsg():
-    return '''miracl stats voxel_wise -w [wild-type dir] -d [disease dir] -t [type] -o [output dir]
+    return '''miracl stats voxel_wise -c [control dir] -e [experiment dir] -t [type] -o [output dir]
 
     Runs voxel-wise stats on segmented, voxelized and registered/warped CLARITY data to the Allen atlas space
     (after running: miracl flow seg & miracl reg warp_clar)
     
-    example: miracl stats voxel_wise -w wild_dir -d hunger_dir -t virus -o hunger_exp 
+    example: miracl stats voxel_wise -c control_dir -e experiment_dir -t virus -o hunger_exp 
 
         arguments (required):
 
-        w. wild type dir
-        d. disease dir
+        c. control dir
+        e. experiment dir
         t. segmentation type
         o. output dir
         
@@ -48,8 +48,8 @@ def helpmsg():
 
 def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
-    parser.add_argument('-w', '--wild_dir', type=str, help="wild dir", required=True)
-    parser.add_argument('-d', '--disease_dir', type=str, help="disease dir", required=True)
+    parser.add_argument('-c', '--control_dir', type=str, help="control dir", required=True)
+    parser.add_argument('-e', '--experiment_dir', type=str, help="experiment dir", required=True)
     parser.add_argument('-t', '--seg_type', type=str, help="segmentation type", required=True)
     parser.add_argument('-o', '--out_dir', type=str, help="output_dir", required=True)
     parser.add_argument('-s', '--sigma', type=int, help="resample sigma", default=2)
@@ -64,15 +64,15 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    wild_dir = args.wild_dir
-    disease_dir = args.disease_dir
+    control_dir = args.control_dir
+    experiment_dir = args.experiment_dir
     seg_type = args.seg_type
     out_dir = args.out_dir
     sigma = args.sigma
     param = args.param
     # num_perm = args.num_perm
 
-    return wild_dir, disease_dir, seg_type, out_dir, sigma, param
+    return control_dir, experiment_dir, seg_type, out_dir, sigma, param
 
 
 def smooth_vox(v, vox, seg_type, out_dir, sigma, nv, group):
@@ -94,96 +94,96 @@ def main(args):
     n_cpus = int(cpu_load * cpus)  # 95% of cores used2
 
     parser = parsefn()
-    wild_dir, disease_dir, seg_type, out_dir, sigma, param = parse_inputs(parser, args)
+    control_dir, experiment_dir, seg_type, out_dir, sigma, param = parse_inputs(parser, args)
 
     # create out dir
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    # find wild type voxelized segs (not bin)
-    wild_name = wild_dir
-    wild_dir = os.path.realpath(wild_dir)
-    wild_files = []
-    for root, dirnames, filenames in os.walk(wild_dir):
+    # find control voxelized segs (not bin)
+    control_name = control_dir
+    control_dir = os.path.realpath(control_dir)
+    control_files = []
+    for root, dirnames, filenames in os.walk(control_dir):
         for filename in fnmatch.filter(filenames, '*voxelized_seg_%s_*_allen_space.nii.gz' % seg_type):
-            wild_files.append(os.path.join(root, filename))
+            control_files.append(os.path.join(root, filename))
 
-    w = len(wild_files)
-    print('Found %02d wild-type voxelized segmentation files' % w)
+    w = len(control_files)
+    print('Found %02d control voxelized segmentation files' % w)
 
-    print('Generating mean wild-type voxelized image')
-    mean_wild = os.path.join(out_dir, 'mean_%s_vox.nii.gz' % wild_name)
-    in_wilds = os.path.join(wild_dir, '*voxelized_seg_%s_*_allen_space.nii.gz' % seg_type)
-    if not os.path.exists(mean_wild):
-        subprocess.check_call("c3d %s -mean -o %s" % (in_wilds, mean_wild), shell=True,
+    print('Generating mean control voxelized image')
+    mean_control = os.path.join(out_dir, 'mean_%s_vox.nii.gz' % control_name)
+    in_control = os.path.join(control_dir, '*voxelized_seg_%s_*_allen_space.nii.gz' % seg_type)
+    if not os.path.exists(mean_control):
+        subprocess.check_call("c3d %s -mean -o %s" % (in_control, mean_control), shell=True,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 
-    # find disease
-    disease_name = disease_dir
-    disease_dir = os.path.realpath(disease_dir)
-    disease_files = []
-    for root, dirnames, filenames in os.walk(disease_dir):
+    # find experiment
+    experiment_name = experiment_dir
+    experiment_dir = os.path.realpath(experiment_dir)
+    experiment_files = []
+    for root, dirnames, filenames in os.walk(experiment_dir):
         for filename in fnmatch.filter(filenames, '*voxelized_seg_%s_*_allen_space.nii.gz' % seg_type):
-            disease_files.append(os.path.join(root, filename))
-    # disease_files = glob.glob(os.path.join(disease_dir, '**', 'voxelized_seg_%snii.gz' % seg_type))
-    h = len(disease_files)
-    print('Found %02d disease voxelized segmentations' % h)
+            experiment_files.append(os.path.join(root, filename))
+    # experiment_files = glob.glob(os.path.join(experiment_dir, '**', 'voxelized_seg_%snii.gz' % seg_type))
+    h = len(experiment_files)
+    print('Found %02d experiment voxelized segmentations' % h)
 
-    print('Generating mean disease-type voxelized image')
-    mean_dis = os.path.join(out_dir, 'mean_%s_vox.nii.gz' % disease_name)
-    in_dis = os.path.join(disease_dir, '*voxelized_seg_%s_*_allen_space.nii.gz' % seg_type)
-    if not os.path.exists(mean_dis):
-        subprocess.check_call("c3d %s -mean -o %s" % (in_dis, mean_dis), shell=True,
+    print('Generating mean experiment voxelized image')
+    mean_exp = os.path.join(out_dir, 'mean_%s_vox.nii.gz' % experiment_name)
+    in_exp = os.path.join(experiment_dir, '*voxelized_seg_%s_*_allen_space.nii.gz' % seg_type)
+    if not os.path.exists(mean_exp):
+        subprocess.check_call("c3d %s -mean -o %s" % (in_exp, mean_exp), shell=True,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 
     print('Generating difference image')
     diff_img = os.path.join(out_dir, 'diff_group_means_vox.nii.gz')
     if not os.path.exists(diff_img):
-        subprocess.check_call("c3d %s %s -scale -1 -add -o %s" % (mean_wild, mean_dis, diff_img), shell=True,
+        subprocess.check_call("c3d %s %s -scale -1 -add -o %s" % (mean_control, mean_exp, diff_img), shell=True,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 
     # get brain mask
     print('Extracting resolution and generating brain mask')
-    voxel = int(nib.load(wild_files[0]).header.get_zooms()[0] * 1000)
+    voxel = int(nib.load(control_files[0]).header.get_zooms()[0] * 1000)
     miracl_home = os.environ['MIRACL_HOME']
     mask_file = os.path.join(miracl_home, 'atlases', 'ara', 'template',
                              'average_template_%sum_brainmask.nii.gz' % voxel)
-    # brain_mask.main(['-i', wild_files[0], '-o', '%s' % mask])
+    # brain_mask.main(['-i', control_files[0], '-o', '%s' % mask])
 
-    # smooth wild type and disease files
+    # smooth control and experiment files
     nv = (sigma * voxel) / 1000.0
-    # all_files = wild_files + disease_files
-    four_dim_wild = os.path.join(out_dir, '4D_%s_vox_stack_smooth_%svx.nii.gz' % (wild_name, sigma))
-    four_dim_dis = os.path.join(out_dir, '4D_%s_vox_stack_smooth_%svx.nii.gz' % (disease_name, sigma))
+    # all_files = control_files + experiment_files
+    four_dim_control = os.path.join(out_dir, '4D_%s_vox_stack_smooth_%svx.nii.gz' % (control_name, sigma))
+    four_dim_exp = os.path.join(out_dir, '4D_%s_vox_stack_smooth_%svx.nii.gz' % (experiment_name, sigma))
 
     print('Median filtering & Gaussian resampling voxelized segmentations')
-    if not os.path.exists(four_dim_wild):
+    if not os.path.exists(four_dim_control):
         Parallel(n_jobs=n_cpus, backend='threading')(
-            delayed(smooth_vox)(v, vox, seg_type, out_dir, sigma, nv, wild_name) for v, vox in enumerate(wild_files))
+            delayed(smooth_vox)(v, vox, seg_type, out_dir, sigma, nv, control_name) for v, vox in enumerate(control_files))
 
-    if not os.path.exists(four_dim_dis):
+    if not os.path.exists(four_dim_exp):
         Parallel(n_jobs=n_cpus, backend='threading')(
-            delayed(smooth_vox)(v, vox, seg_type, out_dir, sigma, nv, disease_name) for v, vox in enumerate(disease_files))
+            delayed(smooth_vox)(v, vox, seg_type, out_dir, sigma, nv, experiment_name) for v, vox in enumerate(experiment_files))
 
     # stack
-    print('Stacking all wild segmentation files')
-    in_wilds = os.path.join(out_dir, '*%s*smooth*%s*.nii.gz' % (wild_name, sigma))
-    if not os.path.exists(four_dim_wild):
-        subprocess.check_call("fslmerge -t %s %s" % (four_dim_wild, in_wilds), shell=True,
+    print('Stacking all control segmentation files')
+    in_control = os.path.join(out_dir, '*%s*smooth*%s*.nii.gz' % (control_name, sigma))
+    if not os.path.exists(four_dim_control):
+        subprocess.check_call("fslmerge -t %s %s" % (four_dim_control, in_control), shell=True,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 
-    print('Stacking all disease segmentation files')
-    in_dis = os.path.join(out_dir, '*%s*smooth*%s*.nii.gz' % (disease_name, sigma))
-    if not os.path.exists(four_dim_dis):
-        subprocess.check_call("fslmerge -t %s %s" % (four_dim_dis, in_dis), shell=True,
+    print('Stacking all experiment segmentation files')
+    in_exp = os.path.join(out_dir, '*%s*smooth*%s*.nii.gz' % (experiment_name, sigma))
+    if not os.path.exists(four_dim_exp):
+        subprocess.check_call("fslmerge -t %s %s" % (four_dim_exp, in_exp), shell=True,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 
-    def mann(stack_wild, stack_dis, mask, vl, param, xdim):
+    def mann(stack_control, stack_exp, mask, vl, param, xdim):
         sys.stdout.write("\rprocessing voxel %d %d %d ... " % (vl[0], vl[1], vl[2]))
         # rem = int((xdim - vl[0]/xdim) * 100)
         # sys.stdout.write("\r%d percent remaining..." % rem)
@@ -194,14 +194,14 @@ def main(args):
         mv = mask[vl[0], vl[1], vl[2]]
 
         if mv == 1:
-            wild_vals = stack_wild[vl[0], vl[1], vl[2], :]
-            disease_vals = stack_dis[vl[0], vl[1], vl[2], :]
+            control_vals = stack_control[vl[0], vl[1], vl[2], :]
+            experiment_vals = stack_exp[vl[0], vl[1], vl[2], :]
 
             try:
                 if param == 'ttest':
-                    t, p = stats.ttest_ind(wild_vals, disease_vals, equal_var=False)
+                    t, p = stats.ttest_ind(control_vals, experiment_vals, equal_var=False)
                 else:
-                    t, p = stats.mannwhitneyu(wild_vals, disease_vals)
+                    t, p = stats.mannwhitneyu(control_vals, experiment_vals)
             except ValueError:
                 p = 1.0
         else:
@@ -214,15 +214,15 @@ def main(args):
     ncpus = int(cpuload * cpus)  # 95% of cores used
 
     print('Reading 4D stack')
-    stack_wild_img = nib.load(four_dim_wild)
-    stack_wild = stack_wild_img.get_data()
-    stack_dis_img = nib.load(four_dim_dis)
-    stack_dis = stack_dis_img.get_data()
+    stack_control_img = nib.load(four_dim_control)
+    stack_control = stack_control_img.get_data()
+    stack_exp_img = nib.load(four_dim_exp)
+    stack_exp = stack_exp_img.get_data()
 
-    xdim = stack_wild_img.shape[0]
-    x_dim = range(stack_wild_img.shape[0])
-    y_dim = range(stack_wild_img.shape[1])
-    z_dim = range(stack_wild_img.shape[2])
+    xdim = stack_control_img.shape[0]
+    x_dim = range(stack_control_img.shape[0])
+    y_dim = range(stack_control_img.shape[1])
+    z_dim = range(stack_control_img.shape[2])
 
     mask_res = os.path.join(out_dir, 'mask_res.nii.gz')
     subprocess.check_call('ResampleImage 3 %s %s %s 0 0' % (mask_file, mask_res, nv),
@@ -240,7 +240,7 @@ def main(args):
 
     print('Computing voxel-wise stats')
     res = []
-    res = Parallel(n_jobs=ncpus, backend='threading')(delayed(mann)(stack_wild, stack_dis, mask, vl, param, xdim) for vl in vox_list)
+    res = Parallel(n_jobs=ncpus, backend='threading')(delayed(mann)(stack_control, stack_exp, mask, vl, param, xdim) for vl in vox_list)
     p_array = np.asarray(res, dtype=np.float64)
     p_array[np.isnan(p_array)] = 1.0
     print('Done voxel-wise stats')
@@ -252,11 +252,11 @@ def main(args):
     # corr_pvals = np.nan_to_num(corr_pvals, nan=1.0)
 
     print('Saving images')
-    p_arr = p_array.reshape((stack_wild_img.shape[0], stack_wild_img.shape[1], stack_wild_img.shape[2]))
+    p_arr = p_array.reshape((stack_control_img.shape[0], stack_control_img.shape[1], stack_control_img.shape[2]))
     p_arr = 1.0 - p_arr
     # p_arr = -np.log(p_arr)
 
-    corr_p_arr = corr_pvals.reshape((stack_wild_img.shape[0], stack_wild_img.shape[1], stack_wild_img.shape[2]))
+    corr_p_arr = corr_pvals.reshape((stack_control_img.shape[0], stack_control_img.shape[1], stack_control_img.shape[2]))
     corr_p_arr = 1.0 - corr_p_arr
     # corr_p_arr = -np.log(corr_p_arr)
 

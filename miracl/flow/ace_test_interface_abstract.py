@@ -211,10 +211,10 @@ class ACEWorkflows:
         # check for single or multi in the args
         if args.single:
             self._execute_single_workflow(args, **kwargs)
-        elif args.wild and args.disease:
+        elif args.control and args.experiment:
             self._execute_comparison_workflow(args, **kwargs)
         else:
-            raise ValueError("Must specify either (-s/--single) or (-w/--wild and -d/--disease) in args.")
+            raise ValueError("Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args.")
         
     def _execute_single_workflow(self, args, **kwargs):
         
@@ -254,7 +254,7 @@ class ACEWorkflows:
 
         nifti_save_location = {}
 
-        for type_ in ['wild', 'disease']:
+        for type_ in ['control', 'experiment']:
 
             tiff_template = Path(args_dict[type_][1])
             base_dir = Path(args_dict[type_][0])
@@ -325,13 +325,13 @@ class ACEWorkflows:
         
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
-        args.pcs_wild_type = (
-            args.wild[0],
-            nifti_save_location['wild'].as_posix()
+        args.pcs_control = (
+            args.control[0],
+            nifti_save_location['control'].as_posix()
         )
-        args.pcs_disease = (
-            args.disease[0],
-            nifti_save_location['disease'].as_posix()
+        args.pcs_experiment = (
+            args.experiment[0],
+            nifti_save_location['experiment'].as_posix()
         )
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
