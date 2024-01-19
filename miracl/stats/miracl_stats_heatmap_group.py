@@ -20,6 +20,7 @@ from sklearn.preprocessing import binarize
 from miracl import ATLAS_DIR
 from miracl.stats import reg_svg, stats_gui_heatmap_group
 from math import ceil, nan
+from pathlib import Path
 
 # Log errors to file in current working directory
 # FIX: Add output directory to path if provided as argument
@@ -95,12 +96,16 @@ def parsefn():
                         '--group1',
                         type=str,
                         help="path to group 1 directory",
-                        default=None)
+                        default=None,
+                        nargs='+',
+                        required=True)
     parser.add_argument('-g2',
                         '--group2',
                         type=str,
                         help="path to group 2 directory",
-                        default=None)
+                        default=None,
+                        nargs='+',
+                        required=True)
     parser.add_argument('-v',
                         '--vox',
                         type=int,
@@ -204,15 +209,13 @@ def parse_inputs(parser, args):
     extension = args.extension
     dpi = args.dpi
 
-    sys.exit()
+    # sys.exit()
 
     # validation functions
 
-    def path_check(path):
-        if os.path.exists(path) == False:
+    def path_check(*paths):
+        for path in paths:
             assert os.path.exists(path), '%s does not exist ... please check path and rerun script' % path
-        else:
-            return (path)
 
     def find_value(value, arr, exp_bool, msg):
         if (value in arr) == exp_bool:
@@ -223,19 +226,24 @@ def parse_inputs(parser, args):
             raise Exception(msg)
 
     # Validate paths
-    if isinstance(g1, type(None)):
-        raise Exception("-g1 group1 must be specified")
-    path_check(g1)
+    path_check(*g1)
+    path_check(*g2)
+    path_check(outdir)
 
-    for path in [g2, outdir]:
-        if isinstance(path, str):
-            path_check(path)
-            if path == g1:
-                raise Exception("g1, g2, and directory output must be different folders. g1: {}, g2: {}, dir_outfile {} ".format(g1, g2, outdir))
-            # validate matplotlib colourmap choices
-            cm.get_cmap(cp)
-            if isinstance(g2, str):
-                cm.get_cmap(cn)
+    # assert g1 and g2 are the same length
+    assert len(g1) == len(g2), "g1 and g2 must contain the same number of arguments"
+    assert len(g1) in [1, 2], "g1 and g2 must contain 1 or 2 arguments"
+
+    # assert g1, g2, outdir directories are all different
+    if len(g1) == 1:
+        assert g1 != g2 != outdir != g1, f"g1, g2, and directory output must be different folders. g1: {g1}, g2: {g2}, dir_outfile {outdir} "
+    else:
+        assert g1[0] != g2[0] != outdir != g1[0], f"g1[0], g2[0], and directory output must be different folders. g1[0]: {g1[0]}, g2[1]: {g2[1]}, dir_outfile {outdir} "
+        assert g1[1] != g2[1], f"the second argument of both g1 and g2 must be different. g1[1]: {g1[1]}, g2[1]: {g2[1]}"
+    
+    # validate matplotlib colourmap choices
+    cm.get_cmap(cp)
+    cm.get_cmap(cn)
 
     # validate vox, sigma, and percentile
     find_value(vox, [10, 25, 50], False,"".join(("-v vox resolution must either be 10, 25, 50. Current Value: {}".format(vox))))
@@ -309,27 +317,48 @@ def grp_mean(input_path, brain_template, outdir, x, y, z, percentile):
     img = 0
     max_val = 0
 
-    for root, dirnames, filenames in os.walk(input_path):
-        for filename in fnmatch.filter(filenames, '*.nii.gz'):
-            nib_file = nib.load(os.path.join(root, filename))
-            data = np.asanyarray(nib_file.dataobj).clip(min=0)
+    def _process_file(filename, root):
+        nonlocal sample, img, max_val
+        nib_file = nib.load(os.path.join(root, filename))
+        data = np.asanyarray(nib_file.dataobj).clip(min=0)
 
-            #smooth and square root image data for svg script to re-scale and account for positive-skewed data in visualization
-            smooth_img = gaussian_filter(np.sqrt(data), sigma=(2, 2, 2))
+        #smooth and square root image data for svg script to re-scale and account for positive-skewed data in visualization
+        smooth_img = gaussian_filter(np.sqrt(data), sigma=(2, 2, 2))
 
-            # check max of default slices (-45 , -30, -15, 0, 15, 30, 45 from center axis index) in each direction to be used for colourmap max value argument '-cr' in reg_svg script 
-            max_val=max(max_val, np.amax(smooth_img[:,:,list(range(nib_file.shape[2]//2-45,nib_file.shape[2]//2+46,15))]))
-            max_val=max(max_val, np.amax(smooth_img[list(range(nib_file.shape[0]//2-45,nib_file.shape[0]//2+46,15)),:,:]))
-            max_val=max(max_val, np.amax(smooth_img[:,list(range(nib_file.shape[1]//2-45,nib_file.shape[1]//2+46,15)), :]))
+        # check max of default slices (-45 , -30, -15, 0, 15, 30, 45 from center axis index) in each direction to be used for colourmap max value argument '-cr' in reg_svg script 
+        max_val=max(max_val, np.amax(smooth_img[:,:,list(range(nib_file.shape[2]//2-45,nib_file.shape[2]//2+46,15))]))
+        max_val=max(max_val, np.amax(smooth_img[list(range(nib_file.shape[0]//2-45,nib_file.shape[0]//2+46,15)),:,:]))
+        max_val=max(max_val, np.amax(smooth_img[:,list(range(nib_file.shape[1]//2-45,nib_file.shape[1]//2+46,15)), :]))
 
-            smooth_nifti=nib.Nifti1Image(smooth_img, affine=nib_file.affine)
-            nib.save(smooth_nifti, outdir +"/smooth_img.nii.gz")
-            #send to reg_svg script for registration quality check svg animation
-            reg_svg.main(['-f', brain_template, '-r', outdir + "/smooth_img.nii.gz", '-o',"".join((outdir,"/","reg_check_", filename.split(".nii.gz")[0])), '-cr', str(int(max_val*percentile/100)), str(int(max_val))])
-            os.remove(outdir + "/smooth_img.nii.gz")             
+        smooth_nifti=nib.Nifti1Image(smooth_img, affine=nib_file.affine)
+        nib.save(smooth_nifti, outdir +"/smooth_img.nii.gz")
+        #send to reg_svg script for registration quality check svg animation
+        reg_svg.main(['-f', brain_template, '-r', outdir + "/smooth_img.nii.gz", '-o',"".join((outdir,"/","reg_check_", filename.split(".nii.gz")[0])), '-cr', str(int(max_val*percentile/100)), str(int(max_val))])
+        os.remove(outdir + "/smooth_img.nii.gz")             
 
-            img = img + data
-            sample = sample + 1
+        img = img + data
+        sample = sample + 1
+
+    # get right input path based on number of args
+    if len(input_path) == 1:
+        input_path = input_path[0]
+        for root, dirnames, filenames in os.walk(input_path):
+            for filename in fnmatch.filter(filenames, "*.nii.gz"):
+                _process_file(filename, root)
+    
+    elif len(input_path) == 2:
+        input_path = Path(input_path[0])
+        tiff_template = Path(input_path[1])
+        tiff_extension = Path(
+            *tiff_template.relative_to(input_path).parts[1:]
+        )
+        imgs_regex = "*/" + tiff_extension.as_posix()
+        imgs = input_path.glob(imgs_regex)
+        for img in imgs:
+            _process_file(img.name, str(img.parent))
+    
+    else:
+        raise ValueError("input_path must be a list of 1 or 2 arguments")
 
     if sample == 0:
         raise Exception(
