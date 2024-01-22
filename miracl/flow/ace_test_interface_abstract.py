@@ -415,7 +415,7 @@ class StackTiffs:
     def stacking(fiji_file, stacked_tif, seg_output_dir):
         print("  stacking segmented tifs...")
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}/generated_pathches", "virtual");\n')
+            file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
@@ -524,7 +524,18 @@ class ConstructHeatmapCmd:
         args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
     ):
         # TODO: fix the params this function recieves
-        tested_heatmap_cmd += f"-g1 {args.sh_group1} -g2 {args.sh_group2} -v {args.sh_vox} -gs {args.sh_sigma} -p {args.sh_percentile} -cp {args.sh_colourmap_pos} -cn {args.sh_colourmap_neg} -d {ace_flow_heatmap_output_folder} -o {args.sh_outfile} -e {args.sh_extension} --dpi {args.sh_dpi}"
+        tested_heatmap_cmd += f"\
+            -g1 {args.pcs_control[0]} {args.pcs_control[1]} \
+            -g2 {args.pcs_experiment[0]} {args.pcs_experiment[0]} \
+            -v {args.sh_vox} \
+            -gs {args.sh_sigma} \
+            -p {args.sh_percentile} \
+            -cp {args.sh_colourmap_pos} \
+            -cn {args.sh_colourmap_neg} \
+            -d {ace_flow_heatmap_output_folder} \
+            -o {args.sh_outfile} \
+            -e {args.sh_extension} \
+            --dpi {args.sh_dpi}"
 
         return tested_heatmap_cmd
 
