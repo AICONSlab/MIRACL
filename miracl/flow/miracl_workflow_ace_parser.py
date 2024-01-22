@@ -87,7 +87,8 @@ class ACEWorkflowParser:
         )
         single_multi_args_group.add_argument(
             "--no-overwrite",
-            help="do not overwrite existing output files for comparison workflow",
+            help="do not overwrite existing output files for comparison workflow. "
+            "This flag can be used to run only the stats analysis (if the subject-only steps have already been run).",
             action="store_false",
             dest="overwrite",
         )
