@@ -1,14 +1,16 @@
 import argparse
 import os
-import subprocess
 import shutil
+import subprocess
 import sys
-from pathlib import Path
-from miracl import miracl_logger
 from abc import ABC, abstractmethod
-from miracl.flow import miracl_workflow_ace_parser
+from pathlib import Path
+from typing import List
+
+from miracl import miracl_logger
+from miracl.flow import (miracl_workflow_ace_correlation,
+                         miracl_workflow_ace_parser, miracl_workflow_ace_stats)
 from miracl.seg import ace_interface
-from miracl.flow import miracl_workflow_ace_stats, miracl_workflow_ace_correlation
 
 logger = miracl_logger.logger
 
@@ -256,6 +258,13 @@ class ACEWorkflows:
 
         nifti_save_location = {}
 
+        CheckOverwriteFlag.validate_args(
+            args.overwrite,
+            per_subject_final_folder,
+            args.experiment,
+            args.control
+        )
+
         for type_ in ['control', 'experiment']:
 
             tiff_template = Path(args_dict[type_][1])
@@ -289,39 +298,41 @@ class ACEWorkflows:
                     args.sa_output_folder, "warp_final"
                 )
 
-                # TODO: make sure we're getting the right dir
                 args.single = base_dir / subject.stem / tiff_extension
 
-                self.segmentation.segment(args)
-                self.conversion.convert(args)
-                converted_nii_file = GetConverterdNifti.get_nifti_file(
-                    ace_flow_conv_output_folder
-                )
-                self.registration.register(
-                    args,
-                    dependent_folder=ace_flow_conv_output_folder,
-                    converted_nii_file=converted_nii_file,
-                )
-                # Stack tiff files for use in voxelization method
-                fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
-                stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
-                StackTiffs.check_folders(fiji_file, stacked_tif)
-                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
-                self.voxelization.voxelize(args, stacked_tif)
-
+                if args.overwrite:
+                    self.segmentation.segment(args)
+                    self.conversion.convert(args)
+                    converted_nii_file = GetConverterdNifti.get_nifti_file(
+                        ace_flow_conv_output_folder
+                    )
+                    self.registration.register(
+                        args,
+                        dependent_folder=ace_flow_conv_output_folder,
+                        converted_nii_file=converted_nii_file,
+                    )
+                    # Stack tiff files for use in voxelization method
+                    fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
+                    stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
+                    StackTiffs.check_folders(fiji_file, stacked_tif)
+                    StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+                    self.voxelization.voxelize(args, stacked_tif)
+                
+                # need to do this step regardless of overwrite or not
                 (
                     voxelized_segmented_tif,
                     orientation_file,
                 ) = GetVoxSegTif.check_warping_requirements(
                     ace_flow_vox_output_folder, ace_flow_warp_output_folder
                 )
-
-                GetVoxSegTif.create_orientation_file(
-                    orientation_file, ace_flow_warp_output_folder
-                )
-                self.warping.warp(
-                    args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
-                )
+                
+                if args.overwrite:
+                    GetVoxSegTif.create_orientation_file(
+                        orientation_file, ace_flow_warp_output_folder
+                    )
+                    self.warping.warp(
+                        args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
+                    )
             
             nifti_save_location[type_] = voxelized_segmented_tif # make sure this is the right file
         
@@ -466,7 +477,6 @@ class GetCorrInput:
             raise FileNotFoundError(f"'{file_path}' does not exist at '{dir_path}'")
 
 
-# TODO: may have to change for our new usage
 class ConstructHeatmapCmd:
     @staticmethod
     def test_none_args(
@@ -523,7 +533,6 @@ class ConstructHeatmapCmd:
     def construct_final_heatmap_cmd(
         args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
     ):
-        # TODO: fix the params this function recieves
         tested_heatmap_cmd += f"\
             -g1 {args.pcs_control[0]} {args.pcs_control[1]} \
             -g2 {args.pcs_experiment[0]} {args.pcs_experiment[0]} \
@@ -538,6 +547,122 @@ class ConstructHeatmapCmd:
             --dpi {args.sh_dpi}"
 
         return tested_heatmap_cmd
+    
+class CheckOverwriteFlag:
+    @staticmethod
+    def validate_args(
+        overwrite: bool,
+        folder_name: str,
+        control: List[str],
+        experiment: List[str]
+    ):
+        """Validate the arguments for the save directories and the overwrite flag.
+
+        :param overwrite: Whether to overwrite existing results folders.
+        :type overwrite: bool
+        :param folder_name: Format of the results folder per subject.
+        :type folder_name: str
+        :param control: Base dir and tiff template for control subjects.
+        :type control: List[str]
+        :param experiment: Base dir and tiff template for experiment subjects.
+        :type experiment: List[str]
+        :raises ValueError: If not all subjects have existing results folders and overwrite is False.
+        """
+        # if we don't overwrite, check if the folder exists
+        if not overwrite:
+            folder_locations = CheckOverwriteFlag._get_dirs(
+                folder_name,
+                control,
+                experiment
+            )
+
+            # check that all the folders exist
+            if not all([folder.is_dir() for folder in folder_locations]):
+                raise ValueError(
+                    f"Not all subjects have existing results folder of the form \"{folder_name}\". "
+                    "Please specify --overwrite flag to create them."
+                )
+        
+        # clear the folders if we overwite
+        if overwrite:
+            CheckOverwriteFlag._clear_dirs(
+                folder_name,
+                control,
+                experiment
+            )
+            
+    @staticmethod
+    def _clear_dirs(
+        folder_name: str,
+        control: List[str],
+        experiment: List[str]
+    ):
+        """Clear the given directories for all subjects. This is used
+        when the overwrite flag is set to True.
+
+        :param folder_name: Directory name that must be removed for each subject.
+        :type folder_name: str
+        :param control: Base control dir and tiff template.
+        :type control: List[str]
+        :param experiment: Base experiment dir and tiff template.
+        :type experiment: List[str]
+        """
+        # clear the folders
+        folder_locations = CheckOverwriteFlag._get_dirs(
+            folder_name,
+            control,
+            experiment
+        )
+
+        for folder in folder_locations:
+            if folder.is_dir():
+                shutil.rmtree(folder)
+    
+    @staticmethod
+    def _get_dirs(
+        folder_name: str,
+        control: List[str],
+        experiment: List[str]
+    ) -> List[Path]:
+        """Get the folder locations for all subjects.
+        Uses the base directory and the tiff template to find the
+        folders.
+
+        :param folder_name: Per subject folder name to look for.
+        :type folder_name: str
+        :param control: Base control dir and tiff template.
+        :type control: List[str]
+        :param experiment: Base experiment dir and tiff template.
+        :type experiment: List[str]
+        :return: List of the folder locations for control and experiment subjects.
+        :rtype: List[Path]
+        """
+        folder_locations = []
+        # get the folder location for all subjects
+        control_tiff_template = Path(control[1])
+        control_base_dir = Path(control[0])
+
+        control_tiff_extension = Path(*control_tiff_template.relative_to(control_base_dir).parts[1:])
+        subject_folders = [dir_ for dir_ in control_base_dir.iterdir() if dir_.is_dir()]
+        save_folders = [
+            (subject / control_tiff_extension).parent / folder_name
+            for subject in subject_folders
+        ]
+        folder_locations.extend(save_folders)
+
+        experiment_tiff_template = Path(experiment[1])
+        experiment_base_dir = Path(experiment[0])
+
+        experiment_tiff_extension = Path(*experiment_tiff_template.relative_to(experiment_base_dir).parts[1:])
+        subject_folders = [dir_ for dir_ in experiment_base_dir.iterdir() if dir_.is_dir()]
+        save_folders = [
+            (subject / experiment_tiff_extension).parent / folder_name
+            for subject in subject_folders
+        ]
+        folder_locations.extend(save_folders)
+
+        return folder_locations
+        
 
 
 if __name__ == "__main__":
