@@ -615,7 +615,8 @@ class CheckOverwriteFlag:
         )
 
         for folder in folder_locations:
-            shutil.rmtree(folder)
+            if folder.is_dir():
+                shutil.rmtree(folder)
     
     @staticmethod
     def _get_dirs(
