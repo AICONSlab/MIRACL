@@ -415,7 +415,7 @@ class StackTiffs:
     def stacking(fiji_file, stacked_tif, seg_output_dir):
         print("  stacking segmented tifs...")
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}/generated_pathches", "virtual");\n')
+            file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
