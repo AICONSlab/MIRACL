@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import os
+import sys
 
 from numpy import require
 from miracl.seg import ace_parser
@@ -35,30 +36,72 @@ class ACEWorkflowParser:
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
   4) Voxelizes segmentation results into density maps with Allen atlas resolution
   5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
-            usage="""%(prog)s -sai input_folder -sao output_folder -sam model_type -pcsw wild_type_dir -pcsd disease_group_dir -pcso output_directory""",
+            usage="""%(prog)s (-s single_dir | (-c control_root_dir control_tiff_file -e experiment_root_dir experiment_tiff_file)) -sao output_folder -sam model_type""",
         )
 
         # Define custom headers for args to separate required and optional
+        single_multi_args_group = parser.add_argument_group("Single or multi method arguments")
         required_args = parser.add_argument_group("required arguments")
-        seg_args = parser.add_argument_group("Optional segmentation arguments")
+        utility_args = parser.add_argument_group("utility arguments")
+        seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
-        reg_args = parser.add_argument_group("Optional registration arguments")
-        vox_args = parser.add_argument_group("Optional voxelization arguments")
-        warp_args = parser.add_argument_group("Optional warping arguments")
-        heatmap_args = parser.add_argument_group("Optional heatmap arguments")
+        reg_args = parser.add_argument_group("optional registration arguments")
+        vox_args = parser.add_argument_group("optional voxelization arguments")
+        warp_args = parser.add_argument_group("optional warping arguments")
         perm_args = parser.add_argument_group("optional permutation arguments")
+        corr_args = parser.add_argument_group("optional correlation arguments")
+        heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
 
         # INFO: ACE segmentation parser
+        single_multi_args_group.add_argument(
+            "-s",
+            "--single",
+            type=str,
+            metavar="SINGLE_TIFF_DIR",
+            help="path to single raw tif/tiff data folder",
+        )
+
+        single_multi_args_group.add_argument(
+            "-c",
+            "--control",
+            type=str,
+            metavar=('CONTROL_BASE_DIR', 'CONTROL_TIFF_DIR_EXAMPLE'),
+            help="FIRST: path to base control directory.\nSECOND: example path to control subject tiff directory",
+            nargs=2,
+        )
+
+        single_multi_args_group.add_argument(
+            "-e",
+            "--experiment",
+            type=str,
+            metavar=('EXPERIMENT_BASE_DIR', 'EXPERIMENT_TIFF_DIR_EXAMPLE'),
+            help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject tiff directory",
+            nargs=2,
+        )
+
+        single_multi_args_group.add_argument(
+            "--overwrite",
+            help="overwrite existing output files for comparison workflow",
+            action="store_true",
+        )
+        single_multi_args_group.add_argument(
+            "--no-overwrite",
+            help="do not overwrite existing output files for comparison workflow. "
+            "This flag can be used to run only the stats analysis (if the subject-only steps have already been run).",
+            action="store_false",
+            dest="overwrite",
+        )
+        single_multi_args_group.set_defaults(overwrite=None)
 
         # Parser for input folder i.e. location of the data
-        required_args.add_argument(
-            "-sai",
-            "--sa_input_folder",
-            type=str,
-            required=True,
-            help="path to raw tif/tiff data folder",
-        )
+        # required_args.add_argument(
+        #     "-sai",
+        #     "--sa_input_folder",
+        #     type=str,
+        #     required=True,
+        #     help="path to raw tif/tiff data folder",
+        # )
         # Parser for output folder i.e. location where results are stored
         required_args.add_argument(
             "-sao",
@@ -425,14 +468,6 @@ class ACEWorkflowParser:
             default=None,
             help="path to downsampled CLARITY nii file to warp",
         )
-        # FIX: Maybe exclude? Should be coming from ACE?
-        warp_args.add_argument(
-            "-rwcf",
-            "--rwc_file",
-            type=str,
-            required=True,
-            help="path to downsampled CLARITY nii file to warp",
-        )
         # FIX: Will always be required as data is piped from voxelization fn
         warp_args.add_argument(
             "-rwcc",
@@ -444,21 +479,6 @@ class ACEWorkflowParser:
 
         # INFO: Permutation cluster stats parser
 
-        required_args.add_argument(
-            "-pcsw",
-            "--pcs_wild_type",
-            help="wild type group directory (should contain warped voxelized nifti files)",
-            required=True,
-        )
-        required_args.add_argument(
-            "-pcsd",
-            "--pcs_disease",
-            help="disease group directory (should contain warped voxelized nifti files)",
-            required=True,
-        )
-        required_args.add_argument(
-            "-pcso", "--pcs_output", help="path of output directory", required=True
-        )
         perm_args.add_argument(
             "-pcsa",
             "--pcs_atlas_dir",
@@ -526,6 +546,16 @@ class ACEWorkflowParser:
             type=int,
             help="percentile to be used for binarizing difference of the mean",
             default=95,
+        )
+
+        # INFO: Corrlation parser
+
+        corr_args.add_argument(
+            "-cft",
+            "--cf_pvalue_thr",
+            type=float,
+            help="threshold for binarizing p value",
+            default=0.05,
         )
 
         # INFO: Heatmap parser
@@ -643,19 +673,89 @@ class ACEWorkflowParser:
             default=500,
         )
 
+
+        utility_args.add_argument(
+            "-ua",
+            "--u_atlas_dir",
+            default="miracl_home",
+            help="path of atlas directory (default: '/code/atlases/ara/')"
+        )
+
+
+        # INFO: help section
+        class _CustomHelpAction(argparse._HelpAction):
+            _required_args = []            
+            for arg in required_args._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in single_multi_args_group._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in utility_args._group_actions:
+                _required_args.extend(arg.option_strings)
+
+            def __call__(self,
+                        parser: argparse.ArgumentParser,
+                        namespace,
+                        values,
+                        options_string=None
+                        ):
+                args = sys.argv[1:]
+
+                opts = parser._option_string_actions
+
+                if "-h" in args or "--help" in args:
+                    for arg in opts:
+                        if arg not in self._required_args:
+                            setattr(opts[arg], "help", argparse.SUPPRESS)
+                    parser.print_help()
+                    print("\n" + "-"*50)
+                    print("\nUse -hv or --help_verbose flag for more verbose help\n")
+                elif "-hv" in args or "--help_verbose" in args:
+                    parser.print_help()
+
+                parser.exit()
+
+        parser.register("action", "help", _CustomHelpAction)
+
         # Add help back under optional args header
         optional_args.add_argument(
             "-h",
             "--help",
             action="help",
             default=argparse.SUPPRESS,
-            help="show this help message and exit",
+            help="show concise help message and exit",
+        )
+
+        optional_args.add_argument(
+            "-hv",
+            "--help_verbose",
+            action="help",
+            default=argparse.SUPPRESS,
+            help="show this verbose help message and exit",
         )
 
         return parser
 
     def parse_args(self):
-        return self.parser.parse_args()
+        args = self.parser.parse_args()
+        
+        # check that control and experiment are not passed with single
+        if (args.control and args.experiment) and args.single:
+            raise argparse.ArgumentError(None, '-c/--control and -e/--experiment must be passed together without -s/--single')
+        # check that single is passed alone
+        elif args.single and (args.control or args.experiment):
+            raise argparse.ArgumentError(None, '-s/--single cannot be passed with either -c/--control or -e/--experiment')
+        # check that control and experiment are always passed together
+        elif (args.control and not args.experiment) or (args.experiment and not args.control):
+            raise argparse.ArgumentError(None, '-c/--control and -e/--experiment must be passed together')
+        # check that something is passed
+        elif not args.single and not args.control and not args.experiment:
+            raise argparse.ArgumentError(None, 'either [-s/--single] or [-c/--control and -e/--experiment] must be passed')
+        
+        # check that the overwrite flag is supplied when in the multi workflow
+        if (args.control and args.experiment) and args.overwrite is None:
+            raise argparse.ArgumentError(None, '--overwrite or --no-overwrite flag must be supplied when running multi workflow')
+        
+        return args
 
 
 if __name__ == "__main__":

@@ -236,6 +236,7 @@ def savenvoxnii(marray, outvoxnii, res, vx, vz):
 # main fn
 
 def main(args):
+    # FIX: log file needs full path to voxelization output directory
     scriptlog('parallel_voxelization.log')
 
     startTime = datetime.now()
