@@ -72,7 +72,7 @@ class ACESegmentation(Segmentation):
         print("  segmenting...")
         logger.debug("Calling ace_interface fn here")
         logger.debug(f"Example args: {args.sa_model_type}")
-        # ace_interface.main(args=args)
+        ace_interface.main(args=args)
 
 
 class ACEConversion(Conversion):
@@ -91,7 +91,7 @@ class ACEConversion(Conversion):
         --center {' '.join(map(str, args.ctn_center))} \
         --downzdim {args.ctn_downzdim} \
         --prevdown {args.ctn_prevdown}"
-        # subprocess.Popen(conv_cmd, shell=True).wait()
+        subprocess.Popen(conv_cmd, shell=True).wait()
         logger.debug("Calling conversion fn here")
         logger.debug(f"Example args: {args.ctn_down}")
 
@@ -122,7 +122,7 @@ class ACERegistration(Registration):
         -b {args.rca_olfactory_bulb} \
         -p {args.rca_skip_cor} \
         -w {args.rca_warp}"
-        # subprocess.Popen(reg_cmd, shell=True).wait()
+        subprocess.Popen(reg_cmd, shell=True).wait()
         logger.debug("Calling registration fn here")
         logger.debug(f"Example args: {args.rca_allen_atlas}")
         logger.debug(f"dependent_folder: {ace_flow_conv_output_folder}")
@@ -138,7 +138,7 @@ class ACEVoxelization(Voxelization):
         --down {args.ctn_down}"
         # -vx {args.} \
         # -vz {args.}"
-        # subprocess.Popen(vox_cmd, shell=True).wait()
+        subprocess.Popen(vox_cmd, shell=True).wait()
         logger.debug("Calling voxelization fn here")
         logger.debug(f"ctn_down in voxelization: {args.ctn_down}")
 
@@ -158,7 +158,7 @@ class ACEWarping(Warping):
                 -o {orientation_file} \
                 -s {args.rwc_seg_channel} \
                 -v {args.rca_voxel_size}"
-        # subprocess.Popen(warp_cmd, shell=True).wait()
+        subprocess.Popen(warp_cmd, shell=True).wait()
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
 
@@ -166,7 +166,7 @@ class ACEWarping(Warping):
 class ACEClusterwise(Clusterwise):
     def cluster(self, args, output_dir_arg):
         print("  clusterwise comparison...")
-        # miracl_workflow_ace_stats.main(args, output_dir_arg)
+        miracl_workflow_ace_stats.main(args, output_dir_arg)
         logger.debug("Calling clusterwise comparison fn here")
         logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
 
@@ -184,7 +184,7 @@ class ACECorrelation(Correlation):
 class ACEHeatmap(Heatmap):
     def create_heatmap(self, heatmap_cmd):
         print("  creating heatmaps...")
-        # subprocess.Popen(heatmap_cmd, shell=True).wait()
+        subprocess.Popen(heatmap_cmd, shell=True).wait()
         logger.debug("Calling heatmap fn here")
         logger.debug(f"heatmap_cmd: {heatmap_cmd}")
 
@@ -334,7 +334,7 @@ class ACEWorkflows:
                         args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
                     )
             
-            nifti_save_location[type_] = voxelized_segmented_tif # make sure this is the right file
+            nifti_save_location[type_] = voxelized_segmented_tif
         
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
@@ -435,7 +435,7 @@ class StackTiffs:
                 --console \
                 -macro \
                 {fiji_file}"
-        # subprocess.Popen(fiji_stack_cmd, shell=True).wait()
+        subprocess.Popen(fiji_stack_cmd, shell=True).wait()
 
 
 class GetVoxSegTif:
