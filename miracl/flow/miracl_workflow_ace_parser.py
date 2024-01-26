@@ -708,7 +708,7 @@ class ACEWorkflowParser:
                             setattr(opts[arg], "help", argparse.SUPPRESS)
                     parser.print_help()
                     print("\n" + "-"*50)
-                    print("\nUse -hv or --help_verbose flag for more verbose help\n")
+                    print("\nUse -hv or --help_verbose flag for more verbose help and view other ACE modules arguments\n")
                 elif "-hv" in args or "--help_verbose" in args:
                     parser.print_help()
 
