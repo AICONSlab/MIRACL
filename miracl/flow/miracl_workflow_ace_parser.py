@@ -48,7 +48,7 @@ class ACEWorkflowParser:
         reg_args = parser.add_argument_group("optional registration arguments")
         vox_args = parser.add_argument_group("optional voxelization arguments")
         warp_args = parser.add_argument_group("optional warping arguments")
-        perm_args = parser.add_argument_group("optional permutation arguments")
+        perm_args = parser.add_argument_group("optional cluster-wise arguments")
         corr_args = parser.add_argument_group("optional correlation arguments")
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
@@ -477,7 +477,7 @@ class ACEWorkflowParser:
             help="Segmentation channel (ex. green) - required if voxelized seg is input",
         )
 
-        # INFO: Permutation cluster stats parser
+        # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
             "-pcsa",
