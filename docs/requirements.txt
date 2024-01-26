@@ -1,0 +1,6 @@
+sphinx-rtd-theme
+sphinxcontrib-mermaid
+sphinx-tabs
+sphinx-copybutton
+sphinxcontrib-email
+sphinx-contributors
