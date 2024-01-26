@@ -83,7 +83,7 @@ html_context = {
   'display_github': True,
   'github_user': 'AICONSlab',
   'github_repo': 'MIRACL',
-  'github_version': 'master/docs/',
+  'github_version': 'master/',
 }
 
 # Output file base name for HTML help builder.
