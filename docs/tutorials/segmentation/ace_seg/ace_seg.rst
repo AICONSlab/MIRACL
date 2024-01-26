@@ -77,3 +77,12 @@ The following menu will be printed to the terminal:
 .. note::
 
    The ``-sa`` in the flag part stands for ``segmentation ACE``.
+
+Example usage:
+
+.. code-block::
+
+   $ miracl seg ace \
+      -sai ./walking/subject_01/cells/ \
+      -sao ./output_dir \
+      -sam unet
