@@ -116,7 +116,7 @@ class ACEWorkflowParser:
             "--sa_model_type",
             type=str,
             choices=["unet", "unetr", "ensemble"],
-            required=True,
+            default="unetr",
             help="model architecture",
         )
         # Parser to select voxel size
