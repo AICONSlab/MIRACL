@@ -62,7 +62,7 @@ jobs:
             # Change permissions for code directory for any Singularity user
             sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
             # Log in to cloud.sylabs.io
-            echo $SYLABS_TOKEN_DEC_22_2023 > tokenfile && \
+            echo $SYLABS_TOKEN_JAN_26_2024 > tokenfile && \
             singularity remote login -u aiconslab --tokenfile tokenfile && \
             # Setting trap in case image cannot be deleted
             set -e
