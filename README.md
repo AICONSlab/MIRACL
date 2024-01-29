@@ -19,11 +19,11 @@ ___
 
 \*\***NEW WORKFLOW/FEATURE RELEASE**\*\*
 
-We will be releasing our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning 
+We have released our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning 
 segmentation models and advanced statistical methods to enable unbiased and generalizable brain-wide mapping of 3D alterations in neuronal activity, 
 morphology, or connectivity at the sub-regional and laminar levels beyond atlas-defined regions.
 
-ACE will be available as part of MIRACL in **January 2024**.
+ACE is now available [here](https://github.com/AICONSlab/MIRACL/tree/ace). Tutorials and usage examples for ACE can be found in our [docs](https://miracl.readthedocs.io/en/latest/tutorials/workflows/ace_flow/ace_flow.html).
 
 ___
 
