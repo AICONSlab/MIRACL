@@ -381,8 +381,8 @@ def main(args, output_dir_arg):
         )
         control_imgs_regex = "*/" + control_warp_tiff_extension.as_posix()
         control_imgs = control_base_dir.glob(control_imgs_regex)
-        control_imgs = [str(file) for file in control_imgs]
-
+        control_imgs = [str(file.relative_to(control_base_dir)) for file in control_imgs]
+        control_dir = control_base_dir
     else:
         control_imgs = fnmatch.filter(os.listdir(control_dir), "*.nii.gz")
         control_imgs.sort()
@@ -408,7 +408,8 @@ def main(args, output_dir_arg):
         )
         exp_imgs_regex = "*/" + experiment_warp_tiff_extension.as_posix()
         exp_imgs = experiment_base_dir.glob(exp_imgs_regex)
-        exp_imgs = [str(file) for file in exp_imgs]
+        exp_imgs = [str(file.relative_to(control_base_dir)) for file in exp_imgs]
+        exp_dir = experiment_base_dir
     else:
         exp_imgs = fnmatch.filter(os.listdir(exp_dir), "*.nii.gz")
         exp_imgs.sort()
