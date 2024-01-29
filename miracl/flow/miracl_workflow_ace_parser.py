@@ -48,7 +48,7 @@ class ACEWorkflowParser:
         reg_args = parser.add_argument_group("optional registration arguments")
         vox_args = parser.add_argument_group("optional voxelization arguments")
         warp_args = parser.add_argument_group("optional warping arguments")
-        perm_args = parser.add_argument_group("optional permutation arguments")
+        perm_args = parser.add_argument_group("optional cluster-wise arguments")
         corr_args = parser.add_argument_group("optional correlation arguments")
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
@@ -116,7 +116,7 @@ class ACEWorkflowParser:
             "--sa_model_type",
             type=str,
             choices=["unet", "unetr", "ensemble"],
-            required=True,
+            default="unetr",
             help="model architecture",
         )
         # Parser to select voxel size
@@ -477,7 +477,7 @@ class ACEWorkflowParser:
             help="Segmentation channel (ex. green) - required if voxelized seg is input",
         )
 
-        # INFO: Permutation cluster stats parser
+        # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
             "-pcsa",
@@ -708,7 +708,7 @@ class ACEWorkflowParser:
                             setattr(opts[arg], "help", argparse.SUPPRESS)
                     parser.print_help()
                     print("\n" + "-"*50)
-                    print("\nUse -hv or --help_verbose flag for more verbose help\n")
+                    print("\nUse -hv or --help_verbose flag for more verbose help and view other ACE modules arguments\n")
                 elif "-hv" in args or "--help_verbose" in args:
                     parser.print_help()
 
