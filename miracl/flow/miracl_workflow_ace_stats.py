@@ -23,7 +23,7 @@ from datetime import datetime
 import mne
 import scipy.ndimage as scp
 from scipy.stats import mannwhitneyu, ttest_ind, kruskal, f_oneway
-from miracl_workflow_ace_parser import ACEWorkflowParser
+from miracl.flow.miracl_workflow_ace_parser import ACEWorkflowParser
 from collections import defaultdict
 
 # my_parser = ACEWorkflowParser()
