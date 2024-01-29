@@ -10,8 +10,8 @@ project = 'MIRACL'
 copyright = '2023, Maged Goubran @ AICONS Lab'
 author = 'Maged Goubran'
 # Version and release set to the same since no separation is needed
-version = '2.2.5'
-release = '2.2.5'
+version = '2.2.6'
+release = '2.2.6'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -83,7 +83,7 @@ html_context = {
   'display_github': True,
   'github_user': 'AICONSlab',
   'github_repo': 'MIRACL',
-  'github_version': 'master/docs/',
+  'github_version': 'master/',
 }
 
 # Output file base name for HTML help builder.

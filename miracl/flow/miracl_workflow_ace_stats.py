@@ -26,9 +26,6 @@ from scipy.stats import mannwhitneyu, ttest_ind, kruskal, f_oneway
 from miracl_workflow_ace_parser import ACEWorkflowParser
 from collections import defaultdict
 
-# my_parser = ACEWorkflowParser()
-# args = my_parser.parse_args()
-
 
 # -------------------------------------------------------
 # function for preprocessing the images
@@ -646,3 +643,8 @@ def main(args, output_dir_arg):
 
     with open(log_thread_file_path, "a") as f:
         f.write(end_str)
+
+if __name__ == "__main__":
+    args = ACEWorkflowParser().parse_args()
+
+    main(args, args.sa_output_folder)
