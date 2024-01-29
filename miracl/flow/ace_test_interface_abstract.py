@@ -5,7 +5,7 @@ import subprocess
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from miracl import miracl_logger
 from miracl.flow import (miracl_workflow_ace_correlation,
@@ -262,7 +262,8 @@ class ACEWorkflows:
             args.overwrite,
             per_subject_final_folder,
             args.experiment,
-            args.control
+            args.control,
+            args.sa_output_folder,
         )
 
         for type_ in ['control', 'experiment']:
@@ -558,7 +559,8 @@ class CheckOverwriteFlag:
         overwrite: bool,
         folder_name: str,
         control: List[str],
-        experiment: List[str]
+        experiment: List[str],
+        output_folder: str,
     ):
         """Validate the arguments for the save directories and the overwrite flag.
 
@@ -592,14 +594,16 @@ class CheckOverwriteFlag:
             CheckOverwriteFlag._clear_dirs(
                 folder_name,
                 control,
-                experiment
+                experiment,
+                output_folder,
             )
             
     @staticmethod
     def _clear_dirs(
         folder_name: str,
         control: List[str],
-        experiment: List[str]
+        experiment: List[str],
+        output_folder: Optional[str] = None,
     ):
         """Clear the given directories for all subjects. This is used
         when the overwrite flag is set to True.
@@ -610,6 +614,8 @@ class CheckOverwriteFlag:
         :type control: List[str]
         :param experiment: Base experiment dir and tiff template.
         :type experiment: List[str]
+        :param output_folder: Output folder to clear, defaults to None
+        :type output_folder: Optional[str], optional location of existing output folder
         """
         # clear the folders
         folder_locations = CheckOverwriteFlag._get_dirs(
@@ -621,6 +627,11 @@ class CheckOverwriteFlag:
         for folder in folder_locations:
             if folder.is_dir():
                 shutil.rmtree(folder)
+
+        if output_folder is not None:
+            output_folder = Path(output_folder)
+            if output_folder.is_dir():
+                shutil.rmtree(output_folder)
     
     @staticmethod
     def _get_dirs(
