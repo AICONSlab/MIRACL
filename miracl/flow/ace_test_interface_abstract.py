@@ -328,7 +328,7 @@ class ACEWorkflows:
                 
                 if args.overwrite:
                     GetVoxSegTif.create_orientation_file(
-                        orientation_file, ace_flow_warp_output_folder
+                        orientation_file, ace_flow_warp_output_folder, args.rca_orient_code
                     )
                     self.warping.warp(
                         args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
@@ -457,13 +457,17 @@ class GetVoxSegTif:
         return voxelized_segmented_tif, orientation_file
 
     @staticmethod
-    def create_orientation_file(orientation_file, ace_flow_warp_output_folder):
+    def create_orientation_file(
+        orientation_file,
+        ace_flow_warp_output_folder,
+        rca_orient_code
+    ):
         if orientation_file.is_file():
             orientation_file.unlink()
 
         with open(orientation_file, "w") as file:
             file.write(f"tifdir={ace_flow_warp_output_folder}\n")
-            file.write(f"ortcode={args.rca_orient_code}")
+            file.write(f"ortcode={rca_orient_code}")
 
 
 class GetCorrInput:
