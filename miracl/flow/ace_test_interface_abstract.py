@@ -535,7 +535,7 @@ class ConstructHeatmapCmd:
     ):
         tested_heatmap_cmd += f"\
             -g1 {args.pcs_control[0]} {args.pcs_control[1]} \
-            -g2 {args.pcs_experiment[0]} {args.pcs_experiment[0]} \
+            -g2 {args.pcs_experiment[0]} {args.pcs_experiment[1]} \
             -v {args.sh_vox} \
             -gs {args.sh_sigma} \
             -p {args.sh_percentile} \
