@@ -678,10 +678,7 @@ class CheckOverwriteFlag:
 
         return folder_locations
         
-
-
-if __name__ == "__main__":
-    # FIX: Move logic in main() and call here
+def main():
     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
     args = args_parser.parse_args()
 
@@ -705,3 +702,6 @@ if __name__ == "__main__":
         heatmap,
     )
     result = ace_workflow.execute_workflow(args)
+
+if __name__ == "__main__":
+    main()
