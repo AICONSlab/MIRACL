@@ -473,7 +473,6 @@ class ACEWorkflowParser:
             "-rwcc",
             "--rwc_seg_channel",
             type=str,
-            default="green",
             help="Segmentation channel (ex. green) - required if voxelized seg is input",
         )
 
