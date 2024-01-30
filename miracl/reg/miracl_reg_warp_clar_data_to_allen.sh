@@ -199,6 +199,12 @@ else
 
 fi
 
+printf "\n ${regdir} \n"
+printf "\n ${inimg} \n"
+printf "\n ${ortfile} \n"
+printf "\n ${channel} \n"
+printf "\n ${voxres} \n"
+
 # get time
 START=$(date +%s)
 
@@ -227,7 +233,10 @@ function ifdsntexistrun()
 
 	else  
 		
-		printf "\n $outfile already exists ... skipping \n"; 
+		printf "\n $outstr \n"; 
+		echo "$fun"; 
+		eval "$fun"; 
+		# printf "\n $outfile already exists ... skipping \n"; 
 
 	fi ; 
 
@@ -272,9 +281,37 @@ function warpclartoallen()
 	local swp_vox=${17}
 	local channel=${18}
 
-    # if warping seg
-    if [[ ! -z ${channel} ]]; then
+# printf "\nCheck input:\n"
+# printf "allenref: ${allenref}\n"
+# printf "inimg: ${inimg}\n"
+# printf "antswarp: ${antswarp}\n"
+# printf "antsaff: ${antsaff}\n"
+# printf "initform: ${initform}\n"
+# printf "wrpclar: ${wrpclar}\n"
+# printf "orttagclar: ${orttagclar}\n"
+# printf "ortintclar: ${ortintclar}\n"
+# printf "orttypeclar: ${orttypeclar}\n"
+# printf "ortclar: ${ortclar}\n"
+# printf "init_allen: ${init_allen}\n"
+# printf "comb_def: ${comb_def}\n"
+# printf "org_clar: ${org_clar}\n"
+# printf "res_org_clar: ${res_org_clar}\n"
+# printf "cp_clar: ${cp_clar}\n"
+# printf "res_vox: ${res_vox}\n"
+# printf "swp_vox: ${swp_vox}\n"
+# printf "channel: ${channel}\n"
 
+    # if warping seg
+
+    # printf "\n Channel inside: ${channel} \n"
+    # printf "\n res_vox inside: ${res_vox} \n"
+    # printf "\n swp_vox inside: ${swp_vox} \n"
+
+    if [[ -z "${channel}" ]]; then
+        # orient to org
+        ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+	    c3d ${inimg} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} -type ${orttypeclar} -o ${ortclar}
+    else
         ifdsntexistrun ${res_vox} "Resampling CLARITY to Allen resolution" \
         ResampleImage 3 ${inimg} ${res_vox} 0.025x0.025x0.025 0
 
@@ -285,13 +322,30 @@ function warpclartoallen()
         ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
         c3d ${swp_vox} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} \
          -type ${orttypeclar} -o ${ortclar}
-
-    else
-        # orient to org
-        ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
-	    c3d ${inimg} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} -type ${orttypeclar} -o ${ortclar}
-
     fi
+
+
+
+    # if [[ ! -z ${channel} ]]; then
+    # if [[ ${channel} != "None" ]]; then
+    #
+    #     ifdsntexistrun ${res_vox} "Resampling CLARITY to Allen resolution" \
+    #     ResampleImage 3 ${inimg} ${res_vox} 0.025x0.025x0.025 0
+    #
+    #     ifdsntexistrun ${swp_vox} "Orienting CLARITY to standard orientation" \
+    #     PermuteFlipImageOrientationAxes 3 ${res_vox} ${swp_vox}  1 2 0  0 0 0
+    #
+    #     # orient to org
+    #     ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+    #     c3d ${swp_vox} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} \
+    #      -type ${orttypeclar} -o ${ortclar}
+    #
+    # else
+    #     # orient to org
+    #     ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
+	   #  c3d ${inimg} -orient ${orttagclar} -pad 15% 15% 0 -interpolation ${ortintclar} -type ${orttypeclar} -o ${ortclar}
+    #
+    # fi
 
     org_dim=`PrintHeader ${ortclar} 2`
 
@@ -349,13 +403,29 @@ function main()
     # In files
     org_clar=${regdir}/clar.nii.gz
 
-    if [[ ! -z ${channel} ]]; then
-        res_org_clar=${regdir}/clar_res_org_seg.nii.gz
-        res_vos=${regdir}/vox_seg_${channel}_res.nii.gz
-        swp_vox=${regdir}/vox_seg_${channel}_swp.nii.gz
-    else
+
+
+    if [[ -z "${channel}" ]]; then
         res_org_clar=${regdir}/clar_res_org.nii.gz
+    else
+        if [[ "${channel}" == "ace_flow" ]]; then
+          res_org_clar=${regdir}/clar_res_org.nii.gz
+          res_vos=${regdir}/vox_seg_*_res.nii.gz
+          swp_vox=${regdir}/vox_seg_*_swp.nii.gz
+        else
+          res_org_clar=${regdir}/clar_res_org_seg.nii.gz
+          res_vos=${regdir}/vox_seg_${channel}_res.nii.gz
+          swp_vox=${regdir}/vox_seg_${channel}_swp.nii.gz
+        fi
     fi
+
+    # if [[ ! -z ${channel} ]]; then
+    #     res_org_clar=${regdir}/clar_res_org_seg.nii.gz
+    #     res_vos=${regdir}/vox_seg_${channel}_res.nii.gz
+    #     swp_vox=${regdir}/vox_seg_${channel}_swp.nii.gz
+    # else
+    #     res_org_clar=${regdir}/clar_res_org.nii.gz
+    # fi
 
     motherdir=$(dirname ${regdir})
 
@@ -368,15 +438,48 @@ function main()
 	ortclar=${regdir}/${clarname}_ort.nii.gz
 	cp_clar=${regdir}/${clarname}_ort_cp_org.nii.gz
 
-	if [[ ! -z ${channel} ]]; then
-	    wrpclar=${regdirfinal}/${clarname}_${channel}_channel_allen_space.nii.gz
-    else
-	    wrpclar=${regdirfinal}/${clarname}_allen_space.nii.gz
-    fi
+  if [[ -z "${channel}" ]]; then
+      wrpclar=${regdirfinal}/${clarname}_allen_space.nii.gz
+  else
+      if [[ "${channel}" == "ace_flow" ]]; then
+        wrpclar=${regdirfinal}/${clarname}_allen_space.nii.gz
+      else
+        wrpclar=${regdirfinal}/${clarname}_${channel}_channel_allen_space.nii.gz
+      fi
+  fi
+
+	# if [[ ! -z ${channel} ]]; then
+	#     wrpclar=${regdirfinal}/${clarname}_${channel}_channel_allen_space.nii.gz
+ #    else
+	#     wrpclar=${regdirfinal}/${clarname}_allen_space.nii.gz
+ #    fi
 
 #	smclarres=${regdirfinal}/clar_downsample_res??um.nii.gz
 
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
+
+  # printf "\nCheck args:\n"
+  # printf "ort: ${ort}\n"
+  # printf "allenref: ${allenref}\n"
+  # printf "inimg: ${inimg}\n"
+  # printf "antswarp: ${antswarp}\n"
+  # printf "antsaff: ${antsaff}\n"
+  # printf "initform: ${initform}\n"
+  # printf "wrpclar: ${wrpclar}\n"
+  # printf "orttagclar: ${orttagclar}\n"
+  # printf "ortintclar: ${ortintclar}\n"
+  # printf "orttypeclar: ${orttypeclar}\n"
+  # printf "ortclar: ${ortclar}\n"
+  # printf "init_allen: ${init_allen}\n"
+  # printf "comb_def: ${comb_def}\n"
+  # printf "org_clar: ${org_clar}\n"
+  # printf "res_org_clar: ${res_org_clar}\n"
+  # printf "cp_clar: ${cp_clar}\n"
+  # printf "res_vox: ${res_vos}\n"
+  # printf "swp_vox: ${swp_vox}\n"
+  # printf "channel: ${channel}\n"
+
+	printf "\n\nwarpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}\n\n"
 
 	warpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short \
 	 ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}
