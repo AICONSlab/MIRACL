@@ -8,8 +8,11 @@ from pathlib import Path
 from typing import List, Optional
 
 from miracl import miracl_logger
-from miracl.flow import (miracl_workflow_ace_correlation,
-                         miracl_workflow_ace_parser, miracl_workflow_ace_stats)
+from miracl.flow import (
+    miracl_workflow_ace_correlation,
+    miracl_workflow_ace_parser,
+    miracl_workflow_ace_stats,
+)
 from miracl.seg import ace_interface
 
 logger = miracl_logger.logger
@@ -131,16 +134,20 @@ class ACERegistration(Registration):
 
 class ACEVoxelization(Voxelization):
     def voxelize(self, args, stacked_tif):
+        x_vox, y_vox, z_vox = args.sa_resolution
         print("  voxelizing stacked tif...")
         vox_cmd = f"miracl seg voxelize \
         --seg {stacked_tif} \
         --res {args.rca_voxel_size} \
-        --down {args.ctn_down}"
-        # -vx {args.} \
-        # -vz {args.}"
+        --down {args.ctn_down} \
+        -vx {x_vox} \
+        -vz {z_vox}"
         subprocess.Popen(vox_cmd, shell=True).wait()
         logger.debug("Calling voxelization fn here")
         logger.debug(f"ctn_down in voxelization: {args.ctn_down}")
+        logger.debug(f"x_vox: {x_vox}")
+        logger.debug(f"y_vox: {y_vox}")
+        logger.debug(f"z_vox: {z_vox}")
 
 
 class ACEWarping(Warping):
@@ -156,7 +163,7 @@ class ACEWarping(Warping):
                 -r {ace_flow_reg_output_folder} \
                 -i {voxelized_segmented_tif} \
                 -o {orientation_file} \
-                -s {args.rwc_seg_channel} \
+                -s ace_flow \
                 -v {args.rca_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         logger.debug("Calling warping here")
@@ -211,22 +218,25 @@ class ACEWorkflows:
         self.heatmap = heatmap
 
     def execute_workflow(self, args, **kwargs):
-
         # check for single or multi in the args
         if args.single:
             self._execute_single_workflow(args, **kwargs)
         elif args.control and args.experiment:
             self._execute_comparison_workflow(args, **kwargs)
         else:
-            raise ValueError("Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args.")
-        
+            raise ValueError(
+                "Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args."
+            )
+
     def _execute_single_workflow(self, args, **kwargs):
-        
-        final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+        final_folder = (
+            f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+        )
         args.sa_output_folder = str((Path(args.sa_output_folder) / final_folder))
 
         ace_flow_seg_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "seg_final",
+            args.sa_output_folder,
+            "seg_final",
         )
         ace_flow_conv_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "conv_final"
@@ -247,14 +257,15 @@ class ACEWorkflows:
         )
 
         return args.sa_output_folder
-    
-    def _execute_comparison_workflow(self, args, **kwargs):
 
+    def _execute_comparison_workflow(self, args, **kwargs):
         overall_save_folder = args.sa_output_folder
 
         args_dict = vars(args)
 
-        per_subject_final_folder = f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+        per_subject_final_folder = (
+            f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+        )
 
         nifti_save_location = {}
 
@@ -266,8 +277,7 @@ class ACEWorkflows:
             args.sa_output_folder,
         )
 
-        for type_ in ['control', 'experiment']:
-
+        for type_ in ["control", "experiment"]:
             tiff_template = Path(args_dict[type_][1])
             base_dir = Path(args_dict[type_][0])
 
@@ -275,10 +285,8 @@ class ACEWorkflows:
             subject_folders = [dir_ for dir_ in base_dir.iterdir() if dir_.is_dir()]
 
             for subject in subject_folders:
-
                 save_folder = (
-                    (subject / tiff_extension).parent
-                    / per_subject_final_folder
+                    (subject / tiff_extension).parent / per_subject_final_folder
                 ).as_posix()
 
                 args.sa_output_folder = save_folder
@@ -316,9 +324,11 @@ class ACEWorkflows:
                     fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
                     stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
                     StackTiffs.check_folders(fiji_file, stacked_tif)
-                    StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+                    StackTiffs.stacking(
+                        fiji_file, stacked_tif, ace_flow_seg_output_folder
+                    )
                     self.voxelization.voxelize(args, stacked_tif)
-                
+
                 # need to do this step regardless of overwrite or not
                 (
                     voxelized_segmented_tif,
@@ -326,26 +336,30 @@ class ACEWorkflows:
                 ) = GetVoxSegTif.check_warping_requirements(
                     ace_flow_vox_output_folder, ace_flow_warp_output_folder
                 )
-                
+
                 if args.overwrite:
                     GetVoxSegTif.create_orientation_file(
-                        orientation_file, ace_flow_warp_output_folder, args.rca_orient_code
+                        orientation_file,
+                        ace_flow_warp_output_folder,
+                        args.rca_orient_code,
                     )
                     self.warping.warp(
-                        args, ace_flow_reg_output_folder.parent / "clar_allen_reg", voxelized_segmented_tif, orientation_file
+                        args,
+                        ace_flow_reg_output_folder.parent / "clar_allen_reg",
+                        voxelized_segmented_tif,
+                        orientation_file,
                     )
-            
-            nifti_save_location[type_] = voxelized_segmented_tif # make sure this is the right file
-        
+
+            nifti_save_location[
+                type_
+            ] = voxelized_segmented_tif  # make sure this is the right file
+
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
-        args.pcs_control = (
-            args.control[0],
-            nifti_save_location['control'].as_posix()
-        )
+        args.pcs_control = (args.control[0], nifti_save_location["control"].as_posix())
         args.pcs_experiment = (
             args.experiment[0],
-            nifti_save_location['experiment'].as_posix()
+            nifti_save_location["experiment"].as_posix(),
         )
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
@@ -448,7 +462,7 @@ class GetVoxSegTif:
             ace_flow_vox_output_folder.glob("voxelized_seg_*.nii.gz")
         )[0]
         orientation_file = ace_flow_warp_output_folder / "ort2std.txt"
-        
+
         # copy vox file to warp folder
         shutil.copy(voxelized_segmented_tif, ace_flow_warp_output_folder)
         voxelized_segmented_tif = list(
@@ -459,9 +473,7 @@ class GetVoxSegTif:
 
     @staticmethod
     def create_orientation_file(
-        orientation_file,
-        ace_flow_warp_output_folder,
-        rca_orient_code
+        orientation_file, ace_flow_warp_output_folder, rca_orient_code
     ):
         if orientation_file.is_file():
             orientation_file.unlink()
@@ -552,7 +564,8 @@ class ConstructHeatmapCmd:
             --dpi {args.sh_dpi}"
 
         return tested_heatmap_cmd
-    
+
+
 class CheckOverwriteFlag:
     @staticmethod
     def validate_args(
@@ -577,18 +590,16 @@ class CheckOverwriteFlag:
         # if we don't overwrite, check if the folder exists
         if not overwrite:
             folder_locations = CheckOverwriteFlag._get_dirs(
-                folder_name,
-                control,
-                experiment
+                folder_name, control, experiment
             )
 
             # check that all the folders exist
             if not all([folder.is_dir() for folder in folder_locations]):
                 raise ValueError(
-                    f"Not all subjects have existing results folder of the form \"{folder_name}\". "
+                    f'Not all subjects have existing results folder of the form "{folder_name}". '
                     "Please specify --overwrite flag to create them."
                 )
-        
+
         # clear the folders if we overwite
         if overwrite:
             CheckOverwriteFlag._clear_dirs(
@@ -597,7 +608,7 @@ class CheckOverwriteFlag:
                 experiment,
                 output_folder,
             )
-            
+
     @staticmethod
     def _clear_dirs(
         folder_name: str,
@@ -619,9 +630,7 @@ class CheckOverwriteFlag:
         """
         # clear the folders
         folder_locations = CheckOverwriteFlag._get_dirs(
-            folder_name,
-            control,
-            experiment
+            folder_name, control, experiment
         )
 
         for folder in folder_locations:
@@ -632,12 +641,10 @@ class CheckOverwriteFlag:
             output_folder = Path(output_folder)
             if output_folder.is_dir():
                 shutil.rmtree(output_folder)
-    
+
     @staticmethod
     def _get_dirs(
-        folder_name: str,
-        control: List[str],
-        experiment: List[str]
+        folder_name: str, control: List[str], experiment: List[str]
     ) -> List[Path]:
         """Get the folder locations for all subjects.
         Uses the base directory and the tiff template to find the
@@ -657,7 +664,9 @@ class CheckOverwriteFlag:
         control_tiff_template = Path(control[1])
         control_base_dir = Path(control[0])
 
-        control_tiff_extension = Path(*control_tiff_template.relative_to(control_base_dir).parts[1:])
+        control_tiff_extension = Path(
+            *control_tiff_template.relative_to(control_base_dir).parts[1:]
+        )
         subject_folders = [dir_ for dir_ in control_base_dir.iterdir() if dir_.is_dir()]
         save_folders = [
             (subject / control_tiff_extension).parent / folder_name
@@ -668,8 +677,12 @@ class CheckOverwriteFlag:
         experiment_tiff_template = Path(experiment[1])
         experiment_base_dir = Path(experiment[0])
 
-        experiment_tiff_extension = Path(*experiment_tiff_template.relative_to(experiment_base_dir).parts[1:])
-        subject_folders = [dir_ for dir_ in experiment_base_dir.iterdir() if dir_.is_dir()]
+        experiment_tiff_extension = Path(
+            *experiment_tiff_template.relative_to(experiment_base_dir).parts[1:]
+        )
+        subject_folders = [
+            dir_ for dir_ in experiment_base_dir.iterdir() if dir_.is_dir()
+        ]
         save_folders = [
             (subject / experiment_tiff_extension).parent / folder_name
             for subject in subject_folders
@@ -677,7 +690,8 @@ class CheckOverwriteFlag:
         folder_locations.extend(save_folders)
 
         return folder_locations
-        
+
+
 def main():
     args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
     args = args_parser.parse_args()
@@ -702,6 +716,7 @@ def main():
         heatmap,
     )
     result = ace_workflow.execute_workflow(args)
+
 
 if __name__ == "__main__":
     main()

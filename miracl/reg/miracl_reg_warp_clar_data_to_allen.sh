@@ -199,11 +199,11 @@ else
 
 fi
 
-printf "\n ${regdir} \n"
-printf "\n ${inimg} \n"
-printf "\n ${ortfile} \n"
-printf "\n ${channel} \n"
-printf "\n ${voxres} \n"
+# printf "\n ${regdir} \n"
+# printf "\n ${inimg} \n"
+# printf "\n ${ortfile} \n"
+# printf "\n ${channel} \n"
+# printf "\n ${voxres} \n"
 
 # get time
 START=$(date +%s)
@@ -479,7 +479,7 @@ function main()
   # printf "swp_vox: ${swp_vox}\n"
   # printf "channel: ${channel}\n"
 
-	printf "\n\nwarpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}\n\n"
+	# printf "\n\nwarpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}\n\n"
 
 	warpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short \
 	 ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}
