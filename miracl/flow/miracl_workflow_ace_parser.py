@@ -120,6 +120,16 @@ class ACEWorkflowParser:
             help="model architecture",
         )
         # Parser to select voxel size
+        required_args.add_argument(
+            "-sar",
+            "--sa_resolution",
+            nargs=3,
+            type=float,
+            required=True,
+            metavar=("X-res", "Y-res", "Z-res"),
+            help="voxel size (type: %(type)s)",
+        )
+        # Parser to select image size
         seg_args.add_argument(
             "-sas",
             "--sa_image_size",
@@ -128,16 +138,6 @@ class ACEWorkflowParser:
             required=False,
             metavar=("height", "width", "depth"),
             help="image size (type: int; default: fetched from image header)",
-        )
-        # Parser to select voxel size
-        seg_args.add_argument(
-            "-sar",
-            "--sa_resolution",
-            nargs=3,
-            type=str,
-            required=False,
-            metavar=("X-res", "Y-res", "Z-res"),
-            help="voxel size (type: %(type)s)",
         )
         # Parser for number of workers
         seg_args.add_argument(
