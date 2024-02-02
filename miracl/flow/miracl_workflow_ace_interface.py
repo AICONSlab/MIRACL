@@ -77,10 +77,8 @@ class ACESegmentation(Segmentation):
     :param Segmentation: base abstract class for segmentation
     :type Segmentation: ABC
     """
-    def segment(
-        self,
-        args: argparse.Namespace
-    ):
+
+    def segment(self, args: argparse.Namespace):
         """Main method for segmentation module. Calls the `miracl seg ace` module.
 
         :param args: command line arguments needed for MIRACL ACE seg module.
@@ -98,10 +96,8 @@ class ACEConversion(Conversion):
     :param Conversion: base abstract class for conversion
     :type Conversion: ABC
     """
-    def convert(
-        self,
-        args: argparse.Namespace
-    ):
+
+    def convert(self, args: argparse.Namespace):
         """Main method for conversion module. Calls `miracl conv tiff_nii` module.
 
         :param args: command line arguments needed for MIRACL conv module.
@@ -132,11 +128,8 @@ class ACERegistration(Registration):
     :param Registration: base abstract class for registration
     :type Registration: ABC
     """
-    def register(
-        self,
-        args: argparse.Namespace,
-        **kwargs
-    ):
+
+    def register(self, args: argparse.Namespace, **kwargs):
         """Main method for registration module. Calls `miracl reg clar_allen` module.
 
         :param args: command line arguments needed for MIRACL reg module.
@@ -181,11 +174,8 @@ class ACEVoxelization(Voxelization):
     :param Voxelization: base abstract class for voxelization
     :type Voxelization: ABC
     """
-    def voxelize(
-        self,
-        args: argparse.Namespace,
-        stacked_tif: pathlib.Path
-    ):
+
+    def voxelize(self, args: argparse.Namespace, stacked_tif: pathlib.Path):
         """Main method for voxelization module. Calls `miracl seg voxelize` module.
 
         :param args: command line arguments needed for MIRACL seg module.
@@ -215,6 +205,7 @@ class ACEWarping(Warping):
     :param Warping: base abstract class for warping
     :type Warping: ABC
     """
+
     def warp(
         self,
         args: argparse.Namespace,
@@ -251,11 +242,8 @@ class ACEClusterwise(Clusterwise):
     :param Clusterwise: base abstract class for clusterwise comparison
     :type Clusterwise: ABC
     """
-    def cluster(
-        self,
-        args: argparse.Namespace,
-        output_dir_arg: pathlib.Path
-    ):
+
+    def cluster(self, args: argparse.Namespace, output_dir_arg: pathlib.Path):
         """Main method for clusterwise comparison module. Calls `miracl stats ace` module.
 
         :param args: command line arguments needed for MIRACL stats module.
@@ -275,15 +263,16 @@ class ACECorrelation(Correlation):
     :param Correlation: base abstract class for correlation module
     :type Correlation: ABC
     """
+
     def correlate(
         self,
         args: argparse.Namespace,
         corr_output_folder: pathlib.Path,
         p_value: pathlib.Path,
         f_obs: pathlib.Path,
-        mean_diff: pathlib.Path
+        mean_diff: pathlib.Path,
     ):
-        """Main method for correlation module. Module is not directly 
+        """Main method for correlation module. Module is not directly
         callable through MIRACL CLI.
 
         :param args: arguments needed for correlation module.
@@ -311,10 +300,8 @@ class ACEHeatmap(Heatmap):
     :param Heatmap: base abstract class for heatmap module
     :type Heatmap: ABC
     """
-    def create_heatmap(
-        self,
-        heatmap_cmd: str
-    ):
+
+    def create_heatmap(self, heatmap_cmd: str):
         """Main method for heatmap module. Calls `miracl stats heatmap_group` module.
 
         :param heatmap_cmd: miracl stats heatmap_group command with args.
@@ -346,6 +333,7 @@ class ACEWorkflows:
     :param heatmap: Module to be used for heatmap
     :type heatmap: Heatmap
     """
+
     def __init__(
         self,
         segmentation: Segmentation,
@@ -357,8 +345,7 @@ class ACEWorkflows:
         correlation: Correlation,
         heatmap: Heatmap,
     ):
-        """Constructor method
-        """
+        """Constructor method"""
         self.segmentation = segmentation
         self.conversion = conversion
         self.registration = registration
@@ -368,16 +355,12 @@ class ACEWorkflows:
         self.correlation = correlation
         self.heatmap = heatmap
 
-    def execute_workflow(
-        self,
-        args: argparse.Namespace, 
-        **kwargs
-    ):
+    def execute_workflow(self, args: argparse.Namespace, **kwargs):
         """Method that handles logic for single or comparison workflow.
 
         :param args: command line arguments from ACE parser
         :type args: argparse.Namespace
-        :raises ValueError: If insufficient arguments are passed to handle single 
+        :raises ValueError: If insufficient arguments are passed to handle single
             or comparison workflow
         """
 
@@ -392,15 +375,13 @@ class ACEWorkflows:
             )
 
     def _execute_single_workflow(
-        self,
-        args: argparse.Namespace,
-        **kwargs
+        self, args: argparse.Namespace, **kwargs
     ) -> pathlib.Path:
         """Private method for executing the single workflow.
 
         :param args: command line arguments needed for single workflow
         :type args: argparse.Namespace
-        :return: path to the final output folder at the same level as the 
+        :return: path to the final output folder at the same level as the
             directory containing input tiff files
         :rtype: pathlib.Path
         """
@@ -432,12 +413,8 @@ class ACEWorkflows:
         )
 
         return args.sa_output_folder
-    
-    def _execute_comparison_workflow(
-        self,
-        args: argparse.Namespace,
-        **kwargs
-    ):
+
+    def _execute_comparison_workflow(self, args: argparse.Namespace, **kwargs):
         """Private method for executing the comparison workflow.
 
         :param args: arguments needed for comparison workflow
@@ -500,9 +477,7 @@ class ACEWorkflows:
                 fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
                 stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
                 StackTiffs.check_folders(fiji_file, stacked_tif)
-                StackTiffs.stacking(
-                    fiji_file, stacked_tif, ace_flow_seg_output_folder
-                )
+                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
                 self.voxelization.voxelize(args, stacked_tif)
 
                 (
@@ -576,8 +551,8 @@ class ACEWorkflows:
 
 
 class FolderCreator:
-    """Class used for creating folders.
-    """
+    """Class used for creating folders."""
+
     @staticmethod
     def create_folder(arg_var: str, *name_vars: typing.Iterable[str]) -> pathlib.Path:
         """Static method for creating folders of arbitrary depth.
@@ -595,8 +570,8 @@ class FolderCreator:
 
 
 class GetConverterdNifti:
-    """Class used for finding the converted nifti file.
-    """
+    """Class used for finding the converted nifti file."""
+
     @staticmethod
     def get_nifti_file(dir_path_var: str) -> pathlib.Path:
         """Static method for finding the converted nifti file.
@@ -622,8 +597,8 @@ class GetConverterdNifti:
 
 
 class StackTiffs:
-    """Class for checking stacking requirements and stacking tiff files.
-    """
+    """Class for checking stacking requirements and stacking tiff files."""
+
     @staticmethod
     def check_folders(fiji_file: pathlib.Path, stacked_tif: pathlib.Path):
         """Checks if folders exist and deletes them if they do.
@@ -641,7 +616,9 @@ class StackTiffs:
             stacked_tif.unlink()
 
     @staticmethod
-    def stacking(fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path):
+    def stacking(
+        fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path
+    ):
         """Writes a Fiji macro and runs it to stack the segmented tif files.
         Needed to run before voxelization.
 
@@ -670,9 +647,11 @@ class GetVoxSegTif:
     """Class for checking warping requirements and creating orientation file
     before warping.
     """
+
     @staticmethod
     def check_warping_requirements(
-        ace_flow_vox_output_folder: pathlib.Path, ace_flow_warp_output_folder: pathlib.Path
+        ace_flow_vox_output_folder: pathlib.Path,
+        ace_flow_warp_output_folder: pathlib.Path,
     ) -> typing.Tuple[pathlib.Path, pathlib.Path]:
         """Check that the voxelized segmented tif file exists, copy it to the
         warp folder and rget the path of the orientation file.
@@ -681,7 +660,7 @@ class GetVoxSegTif:
         :type ace_flow_vox_output_folder: pathlib.Path
         :param ace_flow_warp_output_folder: path to the warp folder ('warp_final/')
         :type ace_flow_warp_output_folder: pathlib.Path
-        :return: path to the voxelized segmented tif file (in the warp dir) 
+        :return: path to the voxelized segmented tif file (in the warp dir)
             and path to the orientation file
         :rtype: typing.Tuple[pathlib.Path, pathlib.Path]
         """
@@ -702,7 +681,7 @@ class GetVoxSegTif:
     def create_orientation_file(
         orientation_file: pathlib.Path,
         ace_flow_warp_output_folder: pathlib.Path,
-        rca_orient_code: str
+        rca_orient_code: str,
     ):
         """Check if orientation file exists and delete if it does. Then create
         the orientation file.
@@ -723,8 +702,8 @@ class GetVoxSegTif:
 
 
 class GetCorrInput:
-    """Class for checking correlation input files.
-    """
+    """Class for checking correlation input files."""
+
     @staticmethod
     def check_corr_input_exists(dir_var: str, nifti_name_var: str) -> pathlib.Path:
         """Check a file exists in a given folder and return its path.
@@ -746,9 +725,10 @@ class GetCorrInput:
 
 
 class ConstructHeatmapCmd:
-    """Class for constructing the heatmap command used by 
+    """Class for constructing the heatmap command used by
     `miracl stats heatmap_group`.
     """
+
     @staticmethod
     def test_none_args(
         sagittal: argparse.Namespace,
@@ -802,7 +782,9 @@ class ConstructHeatmapCmd:
 
     @staticmethod
     def construct_final_heatmap_cmd(
-        args: argparse.Namespace, ace_flow_heatmap_output_folder: pathlib.Path, tested_heatmap_cmd: str
+        args: argparse.Namespace,
+        ace_flow_heatmap_output_folder: pathlib.Path,
+        tested_heatmap_cmd: str,
     ) -> str:
         """Take existing heatmap command and add additional arguments to it.
 
