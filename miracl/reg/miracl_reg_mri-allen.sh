@@ -836,3 +836,7 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 # TODOs
 
 # TODOlp: add stroke mask later
+
+# create output file for successful completion
+command="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
+echo $command >> "reg_command.log"
