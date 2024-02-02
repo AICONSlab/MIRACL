@@ -80,20 +80,6 @@ class ACEWorkflowParser:
             nargs=2,
         )
 
-        single_multi_args_group.add_argument(
-            "--overwrite",
-            help="overwrite existing output files for comparison workflow",
-            action="store_true",
-        )
-        single_multi_args_group.add_argument(
-            "--no-overwrite",
-            help="do not overwrite existing output files for comparison workflow. "
-            "This flag can be used to run only the stats analysis (if the subject-only steps have already been run).",
-            action="store_false",
-            dest="overwrite",
-        )
-        single_multi_args_group.set_defaults(overwrite=None)
-
         # Parser for input folder i.e. location of the data
         # required_args.add_argument(
         #     "-sai",
@@ -749,10 +735,6 @@ class ACEWorkflowParser:
         # check that something is passed
         elif not args.single and not args.control and not args.experiment:
             raise argparse.ArgumentError(None, 'either [-s/--single] or [-c/--control and -e/--experiment] must be passed')
-        
-        # check that the overwrite flag is supplied when in the multi workflow
-        if (args.control and args.experiment) and args.overwrite is None:
-            raise argparse.ArgumentError(None, '--overwrite or --no-overwrite flag must be supplied when running multi workflow')
         
         return args
 
