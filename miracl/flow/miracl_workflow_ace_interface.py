@@ -559,13 +559,13 @@ class ACEWorkflows:
 
         self.clustering.cluster(args, ace_flow_cluster_output_folder)
 
-        p_value_input = GetCorrInput.check_corr_input_exists(
+        mean_diff_input = GetCorrInput.check_corr_input_exists(
             ace_flow_cluster_output_folder, "diff_mean.nii.gz"
         )
         f_obs_input = GetCorrInput.check_corr_input_exists(
             ace_flow_cluster_output_folder, "f_obs.nii.gz"
         )
-        mean_diff_input = GetCorrInput.check_corr_input_exists(
+        p_value_input = GetCorrInput.check_corr_input_exists(
             ace_flow_cluster_output_folder, "p_values.nii.gz"
         )
 
