@@ -802,6 +802,7 @@ class RegistrationChecker:
     registration.
     """
 
+    @staticmethod
     def check_registration(
         args: argparse.Namespace,
         reg_folder: Path,
@@ -852,6 +853,7 @@ class RegistrationChecker:
                 f"Expected args (rca_voxel_size, rca_orient_code): {expected_command} does not match received args: {received_cmd}"
             )
 
+    @staticmethod
     def get_registration_cmd(args: argparse.Namespace, **kwargs) -> str:
         """Generates the command to be run by the MIRACL registration module.
 
@@ -883,7 +885,7 @@ class RegistrationChecker:
 
         return reg_cmd
 
-    def _clear_reg_folders(args: argparse.Namespace, reg_folder: Path):
+    @staticmethod
         """Clears the results from the registration folder.
 
         :param args: command line args from ACE parser
