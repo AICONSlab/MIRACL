@@ -669,5 +669,5 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 #--------------------
 
 # create output file for successful completion
-command="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
-echo $command >> "reg_command.log"
+command="${vox}\n${ort}"
+echo -e $command >> "reg_command.log"
