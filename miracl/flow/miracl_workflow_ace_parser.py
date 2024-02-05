@@ -7,6 +7,18 @@ from numpy import require
 from miracl.seg import ace_parser
 
 
+def parser_true_or_false(arg: str) -> bool:
+    upper_arg = str(arg).upper()
+    if upper_arg == "TRUE" or upper_arg == "T":
+        return True
+    elif upper_arg == "FALSE" or upper_arg == "F":
+        return False
+    else:
+        raise argparse.ArgumentError(
+            None, "Argument must be either 'True'/'T' or 'False'/'F'"
+        )
+
+
 class ACEWorkflowParser:
     """
     Command-line argument parser for AI-based Cartography of Ensembles (ACE) segmentation method workflow.
@@ -668,6 +680,15 @@ class ACEWorkflowParser:
             help="path of atlas directory (default: '/code/atlases/ara/')"
         )
 
+
+        # Parser to select the registration skipping
+        useful_args.add_argument(
+            "--rerun-registration",
+            default="false",
+            help="Whether to rerun registration step of flow",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
 
         # INFO: help section
         class _CustomHelpAction(argparse._HelpAction):
