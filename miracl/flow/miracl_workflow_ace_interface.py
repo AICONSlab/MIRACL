@@ -448,8 +448,7 @@ class ACEWorkflows:
                 )
 
                 rerun_subject = RegistrationChecker.check_registration(
-                    args,
-                    ace_flow_reg_output_folder
+                    args, ace_flow_reg_output_folder
                 )
                 if rerun_subject:
                     reg_cmd = RegistrationChecker.get_registration_cmd(
@@ -819,7 +818,7 @@ class RegistrationChecker:
         :rtype: bool
         """
         if args.rerun_registration:
-            # RegistrationChecker._clear_reg_folders(args, reg_folder)
+            # RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check for reg_final/ and clar_allen_reg/
@@ -827,17 +826,17 @@ class RegistrationChecker:
             not reg_folder.is_dir()
             or not (reg_folder.parent / "clar_allen_reg").is_dir()
         ):
-            # RegistrationChecker._clear_reg_folders(args, reg_folder)
+            # RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check in the directory if there is a file that contains this command
         if not (reg_folder / "reg_command.log").is_file():
-            # RegistrationChecker._clear_reg_folders(args, reg_folder) # TODO: do we always clear the dir if we re-run?
+            # RegistrationChecker._clear_reg_folders(reg_folder) # TODO: do we always clear the dir if we re-run?
             return True
 
         # check that *_clar*.tif exists
         if not reg_folder.glob("*_clar*.tif"):
-            # RegistrationChecker._clear_reg_folders(args, reg_folder)
+            # RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         with open(reg_folder / "reg_command.log", "r") as f:
@@ -845,7 +844,7 @@ class RegistrationChecker:
 
         received_cmd = received_cmd.split("\n")
         # clean the expected command
-        expected_command = [args.rca_voxel_size, args.rca_orient_code]
+        expected_command = [str(args.rca_voxel_size), str(args.rca_orient_code)]
         if expected_command == received_cmd:
             return False
         else:
@@ -886,10 +885,9 @@ class RegistrationChecker:
         return reg_cmd
 
     @staticmethod
+    def _clear_reg_folders(reg_folder: Path):
         """Clears the results from the registration folder.
 
-        :param args: command line args from ACE parser
-        :type args: argparse.Namespace
         :param reg_folder: path to the registration output folder ('reg_final/')
         :type reg_folder: Path
         """
