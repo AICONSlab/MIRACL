@@ -1,6 +1,7 @@
 import argparse
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import typing
@@ -129,43 +130,20 @@ class ACERegistration(Registration):
     :type Registration: ABC
     """
 
-    def register(self, args: argparse.Namespace, **kwargs):
+    def register(self, args: argparse.Namespace, reg_cmd: str):
         """Main method for registration module. Calls `miracl reg clar_allen` module.
 
         :param args: command line arguments needed for MIRACL reg module.
         :type args: argparse.Namespace
-        :raises FileNotFoundError: if no kwarg for 'depndent_folder' is passed
-        :raises FileNotFoundError: if no kwarg for 'converted_nii_file' is passed
+        :param reg_cmd: registration command with args.
+        :type reg_cmd: str
         """
-        print("  registering...")
-        if "dependent_folder" in kwargs:
-            ace_flow_conv_output_folder = kwargs["dependent_folder"]
-        else:
-            raise FileNotFoundError("Output folder path variable not found!")
 
-        if "converted_nii_file" in kwargs:
-            converted_nii_file = kwargs["converted_nii_file"]
-        else:
-            raise FileNotFoundError("Converted nifti file not found!")
-
-        reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
-        -i {converted_nii_file} \
-        -r {args.sa_output_folder} \
-        -o {args.rca_orient_code} \
-        -m {args.rca_hemi} \
-        -v {args.rca_voxel_size} \
-        -l {args.rca_allen_label} \
-        -a {args.rca_allen_atlas} \
-        -s {args.rca_side} \
-        -f {args.rca_no_mosaic_fig} \
-        -b {args.rca_olfactory_bulb} \
-        -p {args.rca_skip_cor} \
-        -w {args.rca_warp}"
         subprocess.Popen(reg_cmd, shell=True).wait()
         logger.debug("Calling registration fn here")
         logger.debug(f"Example args: {args.rca_allen_atlas}")
-        logger.debug(f"dependent_folder: {ace_flow_conv_output_folder}")
-        logger.debug(f"nifti file: {converted_nii_file}")
+        # logger.debug(f"dependent_folder: {ace_flow_conv_output_folder}")
+        # logger.debug(f"nifti file: {converted_nii_file}")
 
 
 class ACEVoxelization(Voxelization):
@@ -406,11 +384,11 @@ class ACEWorkflows:
         converted_nii_file = GetConverterdNifti.get_nifti_file(
             ace_flow_conv_output_folder
         )
-        self.registration.register(
+        reg_cmd = RegistrationChecker.get_registration_cmd(
             args,
-            dependent_folder=ace_flow_conv_output_folder,
             converted_nii_file=converted_nii_file,
         )
+        self.registration.register(args, reg_cmd)
 
         return args.sa_output_folder
 
@@ -468,11 +446,17 @@ class ACEWorkflows:
                 converted_nii_file = GetConverterdNifti.get_nifti_file(
                     ace_flow_conv_output_folder
                 )
-                self.registration.register(
+
+                rerun_subject = RegistrationChecker.check_registration(
                     args,
-                    dependent_folder=ace_flow_conv_output_folder,
-                    converted_nii_file=converted_nii_file,
+                    ace_flow_reg_output_folder
                 )
+                if rerun_subject:
+                    reg_cmd = RegistrationChecker.get_registration_cmd(
+                        args,
+                        converted_nii_file=converted_nii_file,
+                    )
+                    self.registration.register(args, reg_cmd)
                 # Stack tiff files for use in voxelization method
                 fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
                 stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
@@ -811,6 +795,112 @@ class ConstructHeatmapCmd:
             --dpi {args.sh_dpi}"
 
         return tested_heatmap_cmd
+
+
+class RegistrationChecker:
+    """Class for checking if each subject needs to re-run
+    registration.
+    """
+
+    def check_registration(
+        args: argparse.Namespace,
+        reg_folder: Path,
+    ) -> bool:
+        """Checks if registration needs to be run based on user input and the file structure.
+        If the user want to run registration, we run it. Otherwise we check that all the necessary
+        files are inplace before skipping. If they are not, we re-reun registration.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param reg_folder: path to reg output folder (reg_final/)
+        :type reg_folder: Path
+        :return: Whether or no registration needs to be re-run
+        :rtype: bool
+        """
+        if args.rerun_registration:
+            # RegistrationChecker._clear_reg_folders(args, reg_folder)
+            return True
+
+        # check for reg_final/ and clar_allen_reg/
+        if (
+            not reg_folder.is_dir()
+            or not (reg_folder.parent / "clar_allen_reg").is_dir()
+        ):
+            # RegistrationChecker._clear_reg_folders(args, reg_folder)
+            return True
+
+        # check in the directory if there is a file that contains this command
+        if not (reg_folder / "reg_command.log").is_file():
+            # RegistrationChecker._clear_reg_folders(args, reg_folder) # TODO: do we always clear the dir if we re-run?
+            return True
+
+        # check that *_clar*.tif exists
+        if not reg_folder.glob("*_clar*.tif"):
+            # RegistrationChecker._clear_reg_folders(args, reg_folder)
+            return True
+
+        with open(reg_folder / "reg_command.log", "r") as f:
+            received_cmd = f.read()
+
+        received_cmd = received_cmd.split("\n")
+        # clean the expected command
+        expected_command = [args.rca_voxel_size, args.rca_orient_code]
+        if expected_command == received_cmd:
+            return False
+        else:
+            raise ValueError(
+                f"Expected args (rca_voxel_size, rca_orient_code): {expected_command} does not match received args: {received_cmd}"
+            )
+
+    def get_registration_cmd(args: argparse.Namespace, **kwargs) -> str:
+        """Generates the command to be run by the MIRACL registration module.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :raises FileNotFoundError: If no converted_nii_file is supplied
+        :return: The command to run in the CLI
+        :rtype: str
+        """
+
+        if "converted_nii_file" in kwargs:
+            converted_nii_file = kwargs["converted_nii_file"]
+        else:
+            raise FileNotFoundError("Converted nifti file not found!")
+
+        reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
+        -i {converted_nii_file} \
+        -r {args.sa_output_folder} \
+        -o {args.rca_orient_code} \
+        -m {args.rca_hemi} \
+        -v {args.rca_voxel_size} \
+        -l {args.rca_allen_label} \
+        -a {args.rca_allen_atlas} \
+        -s {args.rca_side} \
+        -f {args.rca_no_mosaic_fig} \
+        -b {args.rca_olfactory_bulb} \
+        -p {args.rca_skip_cor} \
+        -w {args.rca_warp}"
+
+        return reg_cmd
+
+    def _clear_reg_folders(args: argparse.Namespace, reg_folder: Path):
+        """Clears the results from the registration folder.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param reg_folder: path to the registration output folder ('reg_final/')
+        :type reg_folder: Path
+        """
+
+        if reg_folder.is_dir():
+            shutil.rmtree(reg_folder)
+        reg_folder.mkdir(parents=True, exist_ok=True)
+
+        # TODO: do we also want to remove this dir?
+        clar_allen_reg = reg_folder.parent / "clar_allen_reg"
+        if clar_allen_reg.is_dir():
+            shutil.rmtree(clar_allen_reg)
+        clar_allen_reg.mkdir(parents=True, exist_ok=True)
 
 
 def main():
