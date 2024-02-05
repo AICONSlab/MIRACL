@@ -498,8 +498,3 @@ DIFF=$((DIFF/60))
 
 printf "\n Warping of CLARITY image to Allen space and generation of ${wrpclar} done in ${DIFF} minutes. \
 Have a good day! \n"
-
-
-# create output file for successful completion
-command="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
-echo $command >> "reg_command.log"

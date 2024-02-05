@@ -327,7 +327,3 @@ DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
 echo "Warping of MRI image to Allen space done in $DIFF minutes. Have a good day!"
-
-# create output file for successful completion
-command="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
-echo $command >> "reg_command.log"
