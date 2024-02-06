@@ -398,12 +398,13 @@ class ACEWorkflowParser:
         #     required=True,
         # )
         # Should be inherited from above -rcad (?) argument
-        # vox_args.add_argument(
-        #     "-rvad",
-        #     "--rva_downsample",
-        #     type=int,
-        #     help="downsample ratio from conversion",
-        # )
+        utility_args.add_argument( # TODO: add to useful args
+            "-rvad",
+            "--rva_downsample",
+            type=int,
+            default=10,
+            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10",
+        )
         # Should be inherited from above -rcav argument
         # vox_args.add_argument(
         #     "-rvav",

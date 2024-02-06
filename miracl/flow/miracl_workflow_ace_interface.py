@@ -139,7 +139,7 @@ class ACEVoxelization(Voxelization):
         vox_cmd = f"miracl seg voxelize \
         --seg {stacked_tif} \
         --res {args.rca_voxel_size} \
-        --down {args.ctn_down} \
+        --down {args.rva_downsample} \
         -vx {x_vox} \
         -vz {z_vox}"
         subprocess.Popen(vox_cmd, shell=True).wait()
