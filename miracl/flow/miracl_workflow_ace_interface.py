@@ -842,7 +842,7 @@ class RegistrationChecker:
         with open(reg_folder / "reg_command.log", "r") as f:
             received_cmd = f.read()
 
-        received_cmd = received_cmd.split("\n")
+        received_cmd = received_cmd.strip().split("\n")
         # clean the expected command
         expected_command = [str(args.rca_voxel_size), str(args.rca_orient_code)]
         if expected_command == received_cmd:
