@@ -1,13 +1,14 @@
 import argparse
-import sys
 import os
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
+
 from miracl import miracl_logger
-from miracl.flow import (
+from miracl.stats import (
+    miracl_stats_ace_clusterwise,
     miracl_stats_ace_correlation,
-    # miracl_workflow_ace_parser,
-    miracl_stats_ace_stats,
+    miracl_stats_ace_parser,
 )
 
 logger = miracl_logger.logger
@@ -30,7 +31,7 @@ class Correlation(ABC):
 class ACEClusterwise(Clusterwise):
     def cluster(self, args, output_dir_arg):
         print("  clusterwise comparison...")
-        miracl_stats_ace_stats.main(args, output_dir_arg)
+        miracl_stats_ace_clusterwise.main(args, output_dir_arg)
         logger.debug("Calling clusterwise comparison fn here")
         logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
 
@@ -51,6 +52,9 @@ class Interface:
         self.correlation = correlation
 
     def run_fns(self, args):
+        args.pcs_control = args.control
+        args.pcs_experiment = args.experiment
+
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"
         )
@@ -112,4 +116,5 @@ def main(args):
 
 
 if __name__ == "__main__":
+    args = miracl_stats_ace_parser.ACEStatsParser().parsefn().parse_args()
     main(args)
