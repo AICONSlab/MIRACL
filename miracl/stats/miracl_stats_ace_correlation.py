@@ -4,21 +4,24 @@ This function reads reads p value of clusters obtained by cluster-wise permutati
 
 """
 import argparse
+import fnmatch
 import os
-import sys
 import pickle
+import sys
+
+import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
-import scipy.ndimage as scp
-from skimage import measure
 import pandas as pd
-import fnmatch
+from pathlib import Path
+import scipy.ndimage as scp
+import scipy.stats as ss
+import seaborn as sns
+from scipy.spatial.distance import pdist, squareform
+
 # from scipy.stats import pearsonr, permutation_test
 from scipy.stats import pearsonr
-import scipy.stats as ss
-from scipy.spatial.distance import pdist, squareform
-import matplotlib.pyplot as plt
-import seaborn as sns
+from skimage import measure
 from sklearn.utils import resample
 
 # # -------------------------------------------------------
@@ -76,7 +79,8 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     atl_dir = args.u_atlas_dir
     img_res = args.rca_voxel_size
     thr = args.cf_pvalue_thr
-    # exp = args["experiment"]
+    control_dir = args.pcs_control
+    exp_dir = args.pcs_experiment
 
     print(f"p_value: {p_value_arg}")
     print(f"stats: {stats_arg}")
@@ -86,22 +90,19 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     print(f"img_res: {args.rca_voxel_size}")
     print(f"thr: {args.cf_pvalue_thr}")
 
-    sys.exit()
-
     # -------------------------------------------------------
     # load and prepare atl
     # -------------------------------------------------------
 
     # find the atl directory
     if atl_dir == "miracl_home":
-        atl_dir = "/data/projects/Ahmadreza/stats/scripts/Atl/Allen/template"
-        ann_dir = "/data/projects/Ahmadreza/stats/scripts/Atl/Allen/annotation"
-        lbl_dir = "/data/projects/Ahmadreza/stats/scripts/Atl/Allen"
-        # atl_dir = '/data3/projects/Ahmadreza/deepneuronseg/dataset/dataset3/walking_exp/cluster_test/atlas_sliced'
-        # ann_dir = '/data3/projects/Ahmadreza/deepneuronseg/dataset/dataset3/walking_exp/cluster_test/atlas_sliced'
+        atl_dir = "/code/atlases/ara/template/"  # TODO: are theses right?
+        ann_dir = "/code/atlases/ara/annotation/"  # TODO: are theses right?
 
-    mask_filename = f"average_template_{img_res}um_brainmask.nii.gz"
-    ann_filename = f"annotation_hemi_combined_{img_res}um.nii.gz"
+    mask_filename = f"average_template_{img_res}um.nii.gz"  # TODO: are theses right?
+    ann_filename = (
+        f"annotation_hemi_combined_{img_res}um.nii.gz"  # TODO: are theses right?
+    )
 
     # load the atlas
     if img_res == 10:
@@ -127,7 +128,7 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
 
     # load atlas label names
 
-    lbl_dir = "/data/projects/Ahmadreza/stats/scripts/Atl/Allen"
+    lbl_dir = os.environ["aradir"]
 
     annotation_lbls = pd.read_csv(
         os.path.join(lbl_dir, "ara_mouse_structure_graph_hemi_combined.csv"),
@@ -145,49 +146,44 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     # -------------------------------------------------------
     grp_treated = []
     grp_ctrl = []
-    if exp == "walking":
-        grp_treated_dir = "/data/projects/Ahmadreza/stats/walking_exp_warped_voxelized_imgs/seg_warp_25um_corrected/walking"
-        grp_ctrl_dir = "/data/projects/Ahmadreza/stats/walking_exp_warped_voxelized_imgs/seg_warp_25um_corrected/non_walking"
 
-        grp_treated_imgs_list = fnmatch.filter(os.listdir(grp_treated_dir), "*.nii.gz")
-        grp_ctrl_imgs_list = fnmatch.filter(os.listdir(grp_ctrl_dir), "*.nii.gz")
+    control_warp_tiff_template = Path(control_dir[1])
+    control_base_dir = Path(control_dir[0])
+    control_warp_tiff_extension = Path(
+        *control_warp_tiff_template.relative_to(control_base_dir).parts[1:]
+    )
+    control_imgs_regex = "*/" + control_warp_tiff_extension.as_posix()
+    grp_ctrl_imgs_list = control_base_dir.glob(control_imgs_regex)
+    grp_ctrl_imgs_list = [
+        str(file.relative_to(control_base_dir)) for file in grp_ctrl_imgs_list
+    ]
+    grp_ctrl_dir = control_base_dir
 
-        for img in grp_treated_imgs_list:
-            # normalize data similar strategy used in cluster analysis
-            img_ndarray = nib.load(os.path.join(grp_treated_dir, img)).get_fdata()
-            # masked_mean = np.mean(img_ndarray, where = mask_img_array.astype('bool'))
-            # img_ndarray = img_ndarray / masked_mean
+    experiment_warp_tiff_template = Path(exp_dir[1])
+    experiment_base_dir = Path(exp_dir[0])
+    experiment_warp_tiff_extension = Path(
+        *experiment_warp_tiff_template.relative_to(experiment_base_dir).parts[1:]
+    )
+    exp_imgs_regex = "*/" + experiment_warp_tiff_extension.as_posix()
+    grp_treated_imgs_list = experiment_base_dir.glob(exp_imgs_regex)
+    grp_treated_imgs_list = [
+        str(file.relative_to(experiment_base_dir)) for file in grp_treated_imgs_list
+    ]
+    grp_treated_dir = experiment_base_dir
 
-            grp_treated.append(img_ndarray)
-        for img in grp_ctrl_imgs_list:
-            # normalize data similar strategy used in cluster analysis
-            img_ndarray = nib.load(os.path.join(grp_ctrl_dir, img)).get_fdata()
-            # masked_mean = np.mean(img_ndarray, where = mask_img_array.astype('bool'))
-            # img_ndarray = img_ndarray / masked_mean
+    for img in grp_treated_imgs_list:
+        # normalize data similar strategy used in cluster analysis
+        img_ndarray = nib.load(os.path.join(grp_treated_dir, img)).get_fdata()
+        # masked_mean = np.mean(img_ndarray, where = mask_img_array.astype('bool'))
+        # img_ndarray = img_ndarray / masked_mean
+        grp_treated.append(img_ndarray)
 
-            grp_ctrl.append(img_ndarray)
-    else:
-        grp_treated_dir = "/data/projects/Ahmadreza/stats/cold_exp_warped_voxelized_imgs/seg_warp_25um_corrected/4c_25um_corrected"
-        grp_ctrl_dir = "/data/projects/Ahmadreza/stats/cold_exp_warped_voxelized_imgs/seg_warp_25um_corrected/30c_25um_corrected"
-
-        grp_treated_imgs_list = fnmatch.filter(os.listdir(grp_treated_dir), "*.nii.gz")
-        grp_ctrl_imgs_list = fnmatch.filter(os.listdir(grp_ctrl_dir), "*.nii.gz")
-
-        for img in grp_treated_imgs_list:
-            # normalize data similar strategy used in cluster analysis
-            img_ndarray = nib.load(os.path.join(grp_treated_dir, img)).get_fdata()
-            # masked_mean = np.mean(img_ndarray, where = mask_img_array.astype('bool'))
-            # img_ndarray = img_ndarray / masked_mean
-
-            grp_treated.append(img_ndarray)
-
-        for img in grp_ctrl_imgs_list:
-            # normalize data similar strategy used in cluster analysis
-            img_ndarray = nib.load(os.path.join(grp_ctrl_dir, img)).get_fdata()
-            # masked_mean = np.mean(img_ndarray, where = mask_img_array.astype('bool'))
-            # img_ndarray = img_ndarray / masked_mean
-
-            grp_ctrl.append(img_ndarray)
+    for img in grp_ctrl_imgs_list:
+        # normalize data similar strategy used in cluster analysis
+        img_ndarray = nib.load(os.path.join(grp_ctrl_dir, img)).get_fdata()
+        # masked_mean = np.mean(img_ndarray, where = mask_img_array.astype('bool'))
+        # img_ndarray = img_ndarray / masked_mean
+        grp_ctrl.append(img_ndarray)
 
     print("grp_treated_dir", grp_treated_dir)
     print("grp_ctrl_dir", grp_ctrl_dir)
