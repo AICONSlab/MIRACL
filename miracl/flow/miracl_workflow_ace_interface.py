@@ -206,7 +206,18 @@ class ACEWarping(Warping):
 
 
 class ACEStats(Stats):
-    def compute_stats(self, args):
+    """ACE Stats module used for computing statistics (clusterwise and correlation) on warp files.
+
+    :param Stats: base abstract class for stats
+    :type Stats: ABC
+    """
+
+    def compute_stats(self, args: argparse.Namespace):
+        """Main method for stats module. Calls `miracl stats ace` module.
+
+        :param args: command line arguments needed for MIRACL stats module.
+        :type args: argparse.Namespace
+        """
         print("  computing ace stats...")
         miracl_stats_ace_interface.main(args)
 
