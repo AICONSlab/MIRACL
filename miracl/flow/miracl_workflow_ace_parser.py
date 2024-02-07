@@ -7,6 +7,18 @@ from numpy import require
 from miracl.seg import ace_parser
 
 
+def parser_true_or_false(arg: str) -> bool:
+    upper_arg = str(arg).upper()
+    if upper_arg == "TRUE" or upper_arg == "T":
+        return True
+    elif upper_arg == "FALSE" or upper_arg == "F":
+        return False
+    else:
+        raise argparse.ArgumentError(
+            None, "Argument must be either 'True'/'T' or 'False'/'F'"
+        )
+
+
 class ACEWorkflowParser:
     """
     Command-line argument parser for AI-based Cartography of Ensembles (ACE) segmentation method workflow.
@@ -40,9 +52,11 @@ class ACEWorkflowParser:
         )
 
         # Define custom headers for args to separate required and optional
-        single_multi_args_group = parser.add_argument_group("Single or multi method arguments")
+        single_multi_args_group = parser.add_argument_group(
+            "Single or multi method arguments"
+        )
         required_args = parser.add_argument_group("required arguments")
-        utility_args = parser.add_argument_group("utility arguments")
+        useful_args = parser.add_argument_group("useful/imoprtant arguments")
         seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
         reg_args = parser.add_argument_group("optional registration arguments")
@@ -52,6 +66,7 @@ class ACEWorkflowParser:
         corr_args = parser.add_argument_group("optional correlation arguments")
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
+        stats_args = parser.add_argument_group("optional statistics arguments")
 
         # INFO: ACE segmentation parser
         single_multi_args_group.add_argument(
@@ -66,7 +81,7 @@ class ACEWorkflowParser:
             "-c",
             "--control",
             type=str,
-            metavar=('CONTROL_BASE_DIR', 'CONTROL_TIFF_DIR_EXAMPLE'),
+            metavar=("CONTROL_BASE_DIR", "CONTROL_TIFF_DIR_EXAMPLE"),
             help="FIRST: path to base control directory.\nSECOND: example path to control subject tiff directory",
             nargs=2,
         )
@@ -75,24 +90,10 @@ class ACEWorkflowParser:
             "-e",
             "--experiment",
             type=str,
-            metavar=('EXPERIMENT_BASE_DIR', 'EXPERIMENT_TIFF_DIR_EXAMPLE'),
+            metavar=("EXPERIMENT_BASE_DIR", "EXPERIMENT_TIFF_DIR_EXAMPLE"),
             help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject tiff directory",
             nargs=2,
         )
-
-        single_multi_args_group.add_argument(
-            "--overwrite",
-            help="overwrite existing output files for comparison workflow",
-            action="store_true",
-        )
-        single_multi_args_group.add_argument(
-            "--no-overwrite",
-            help="do not overwrite existing output files for comparison workflow. "
-            "This flag can be used to run only the stats analysis (if the subject-only steps have already been run).",
-            action="store_false",
-            dest="overwrite",
-        )
-        single_multi_args_group.set_defaults(overwrite=None)
 
         # Parser for input folder i.e. location of the data
         # required_args.add_argument(
@@ -210,13 +211,12 @@ class ACEWorkflowParser:
         #     default=os.path.abspath(os.getcwd()),
         #     help="Output directory (default: %(default)s)",
         # )
-        conv_args.add_argument(
+        useful_args.add_argument(
             "-ctnd",
             "--ctn_down",
             type=int,
-            metavar="",
             default=5,
-            help="Down-sample ratio (default: %(default)s)",
+            help="Down-sample ratio for conversion (default: %(default)s)",
         )
         conv_args.add_argument(
             "-ctncn",
@@ -310,7 +310,7 @@ class ACEWorkflowParser:
         #     required=True,
         #     help="path to results directory",
         # )
-        reg_args.add_argument(
+        useful_args.add_argument(
             "-rcao",
             "--rca_orient_code",
             type=str,
@@ -325,7 +325,7 @@ class ACEWorkflowParser:
             default="combined",
             help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
         )
-        reg_args.add_argument(
+        useful_args.add_argument(
             "-rcav",
             "--rca_voxel_size",
             type=int,
@@ -673,8 +673,8 @@ class ACEWorkflowParser:
             default=500,
         )
 
-
-        utility_args.add_argument(
+        # Extra arguments to view
+        stats_args.add_argument(
             "-ua",
             "--u_atlas_dir",
             default="miracl_home",
@@ -682,22 +682,32 @@ class ACEWorkflowParser:
         )
 
 
+        # Parser to select the registration skipping
+        useful_args.add_argument(
+            "--rerun-registration",
+            default="false",
+            help="Whether to rerun registration step of flow",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
         # INFO: help section
         class _CustomHelpAction(argparse._HelpAction):
-            _required_args = []            
+            _required_args = []
             for arg in required_args._group_actions:
                 _required_args.extend(arg.option_strings)
             for arg in single_multi_args_group._group_actions:
                 _required_args.extend(arg.option_strings)
-            for arg in utility_args._group_actions:
+            for arg in useful_args._group_actions:
                 _required_args.extend(arg.option_strings)
 
-            def __call__(self,
-                        parser: argparse.ArgumentParser,
-                        namespace,
-                        values,
-                        options_string=None
-                        ):
+            def __call__(
+                self,
+                parser: argparse.ArgumentParser,
+                namespace,
+                values,
+                options_string=None,
+            ):
                 args = sys.argv[1:]
 
                 opts = parser._option_string_actions
@@ -707,7 +717,7 @@ class ACEWorkflowParser:
                         if arg not in self._required_args:
                             setattr(opts[arg], "help", argparse.SUPPRESS)
                     parser.print_help()
-                    print("\n" + "-"*50)
+                    print("\n" + "-" * 50)
                     print("\nUse -hv or --help_verbose flag for more verbose help\n")
                 elif "-hv" in args or "--help_verbose" in args:
                     parser.print_help()
@@ -737,24 +747,33 @@ class ACEWorkflowParser:
 
     def parse_args(self):
         args = self.parser.parse_args()
-        
+
         # check that control and experiment are not passed with single
         if (args.control and args.experiment) and args.single:
-            raise argparse.ArgumentError(None, '-c/--control and -e/--experiment must be passed together without -s/--single')
+            raise argparse.ArgumentError(
+                None,
+                "-c/--control and -e/--experiment must be passed together without -s/--single",
+            )
         # check that single is passed alone
         elif args.single and (args.control or args.experiment):
-            raise argparse.ArgumentError(None, '-s/--single cannot be passed with either -c/--control or -e/--experiment')
+            raise argparse.ArgumentError(
+                None,
+                "-s/--single cannot be passed with either -c/--control or -e/--experiment",
+            )
         # check that control and experiment are always passed together
-        elif (args.control and not args.experiment) or (args.experiment and not args.control):
-            raise argparse.ArgumentError(None, '-c/--control and -e/--experiment must be passed together')
+        elif (args.control and not args.experiment) or (
+            args.experiment and not args.control
+        ):
+            raise argparse.ArgumentError(
+                None, "-c/--control and -e/--experiment must be passed together"
+            )
         # check that something is passed
         elif not args.single and not args.control and not args.experiment:
-            raise argparse.ArgumentError(None, 'either [-s/--single] or [-c/--control and -e/--experiment] must be passed')
-        
-        # check that the overwrite flag is supplied when in the multi workflow
-        if (args.control and args.experiment) and args.overwrite is None:
-            raise argparse.ArgumentError(None, '--overwrite or --no-overwrite flag must be supplied when running multi workflow')
-        
+            raise argparse.ArgumentError(
+                None,
+                "either [-s/--single] or [-c/--control and -e/--experiment] must be passed",
+            )
+
         return args
 
 
