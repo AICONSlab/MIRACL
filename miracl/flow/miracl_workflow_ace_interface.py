@@ -8,12 +8,9 @@ from pathlib import Path
 from typing import List, Optional
 
 from miracl import miracl_logger
-from miracl.flow import (
-    miracl_workflow_ace_correlation,
-    miracl_workflow_ace_parser,
-    miracl_workflow_ace_stats,
-)
+from miracl.flow import miracl_workflow_ace_parser
 from miracl.seg import ace_interface
+from miracl.stats import miracl_stats_ace_interface
 
 logger = miracl_logger.logger
 
@@ -51,15 +48,9 @@ class Warping(ABC):
         pass
 
 
-class Clusterwise(ABC):
+class Stats(ABC):
     @abstractmethod
-    def cluster(self, args, output_dir_arg):
-        pass
-
-
-class Correlation(ABC):
-    @abstractmethod
-    def correlate(self, args, corr_output_folder, p_value, f_obs, mean_diff):
+    def compute_stats(self, args):
         pass
 
 
@@ -170,22 +161,10 @@ class ACEWarping(Warping):
         logger.debug(f"orientation_file: {orientation_file}")
 
 
-class ACEClusterwise(Clusterwise):
-    def cluster(self, args, output_dir_arg):
-        print("  clusterwise comparison...")
-        miracl_workflow_ace_stats.main(args, output_dir_arg)
-        logger.debug("Calling clusterwise comparison fn here")
-        logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
-
-
-class ACECorrelation(Correlation):
-    def correlate(self, args, corr_output_folder, p_value, f_obs, mean_diff):
-        print("  correlating...")
-        miracl_workflow_ace_correlation.main(
-            args, corr_output_folder, p_value, f_obs, mean_diff
-        )
-        logger.debug("Calling correlation fn here")
-        logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
+class ACEStats(Stats):
+    def compute_stats(self, args):
+        print("  computing ace stats...")
+        miracl_stats_ace_interface.main(args)
 
 
 class ACEHeatmap(Heatmap):
@@ -204,8 +183,7 @@ class ACEWorkflows:
         registration: Registration,
         voxelization: Voxelization,
         warping: Warping,
-        clustering: Clusterwise,
-        correlation: Correlation,
+        stats: Stats,
         heatmap: Heatmap,
     ):
         self.segmentation = segmentation
@@ -213,8 +191,7 @@ class ACEWorkflows:
         self.registration = registration
         self.voxelization = voxelization
         self.warping = warping
-        self.clustering = clustering
-        self.correlation = correlation
+        self.stats = stats
         self.heatmap = heatmap
 
     def execute_workflow(self, args, **kwargs):
@@ -362,35 +339,11 @@ class ACEWorkflows:
             nifti_save_location["experiment"].as_posix(),
         )
 
-        ace_flow_cluster_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "clust_final"
-        )
         ace_flow_heatmap_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "heat_final"
         )
-        ace_flow_corr_output_folder = FolderCreator.create_folder(
-            args.sa_output_folder, "corr_final"
-        )
 
-        self.clustering.cluster(args, ace_flow_cluster_output_folder)
-
-        p_value_input = GetCorrInput.check_corr_input_exists(
-            ace_flow_cluster_output_folder, "diff_mean.nii.gz"
-        )
-        f_obs_input = GetCorrInput.check_corr_input_exists(
-            ace_flow_cluster_output_folder, "f_obs.nii.gz"
-        )
-        mean_diff_input = GetCorrInput.check_corr_input_exists(
-            ace_flow_cluster_output_folder, "p_values.nii.gz"
-        )
-
-        self.correlation.correlate(
-            args,
-            ace_flow_corr_output_folder,
-            p_value_input,
-            f_obs_input,
-            mean_diff_input,
-        )
+        self.stats.compute_stats(args)
 
         tested_heatmap_cmd = ConstructHeatmapCmd.test_none_args(
             args.sh_sagittal, args.sh_coronal, args.sh_axial, args.sh_figure_dim
@@ -481,17 +434,6 @@ class GetVoxSegTif:
         with open(orientation_file, "w") as file:
             file.write(f"tifdir={ace_flow_warp_output_folder}\n")
             file.write(f"ortcode={rca_orient_code}")
-
-
-class GetCorrInput:
-    @staticmethod
-    def check_corr_input_exists(dir_var, nifti_name_var):
-        dir_path = Path(dir_var)
-        file_path = dir_path / nifti_name_var
-        if file_path.is_file():
-            return file_path
-        else:
-            raise FileNotFoundError(f"'{file_path}' does not exist at '{dir_path}'")
 
 
 class ConstructHeatmapCmd:
@@ -701,8 +643,7 @@ def main():
     registration = ACERegistration()
     voxelization = ACEVoxelization()
     warping = ACEWarping()
-    clustering = ACEClusterwise()
-    correlation = ACECorrelation()
+    stats = ACEStats()
     heatmap = ACEHeatmap()
 
     ace_workflow = ACEWorkflows(
@@ -711,8 +652,7 @@ def main():
         registration,
         voxelization,
         warping,
-        clustering,
-        correlation,
+        stats,
         heatmap,
     )
     result = ace_workflow.execute_workflow(args)
