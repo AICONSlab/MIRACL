@@ -398,7 +398,7 @@ class ACEWorkflowParser:
         #     required=True,
         # )
         # Should be inherited from above -rcad (?) argument
-        utility_args.add_argument( # TODO: add to useful args
+        useful_args.add_argument(
             "-rvad",
             "--rva_downsample",
             type=int,
