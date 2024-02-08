@@ -1199,4 +1199,4 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 
 # create output file for successful completion
 command="${vox}\n${ort}"
-echo -e $command > "$work_dir/reg_command.log"
+echo -e $command > "$work_dir/reg_final/reg_command.log"
