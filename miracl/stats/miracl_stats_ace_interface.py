@@ -76,13 +76,13 @@ class Interface:
             ace_flow_cluster_output_folder, "diff_mean.nii.gz"
         )
 
-        self.correlation.correlate(
-            args,
-            ace_flow_corr_output_folder,
-            p_value_input,
-            f_obs_input,
-            mean_diff_input,
-        )
+        # self.correlation.correlate(
+        #     args,
+        #     ace_flow_corr_output_folder,
+        #     p_value_input,
+        #     f_obs_input,
+        #     mean_diff_input,
+        # )
 
 
 class FolderCreator:
