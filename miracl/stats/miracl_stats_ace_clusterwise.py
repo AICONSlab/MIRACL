@@ -299,7 +299,7 @@ def main(args, output_dir_arg):
     out_dir = output_dir_arg
     num_perm = args.pcs_num_perm
     atl_dir = args.u_atlas_dir
-    img_res = args.rca_voxel_size
+    img_res = args.rwc_voxel_size
     smoothing_fwhm = args.pcs_smoothing_fwhm
     tfce_start = args.pcs_tfce_start
     tfce_step = args.pcs_tfce_step
