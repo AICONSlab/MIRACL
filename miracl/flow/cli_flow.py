@@ -3,7 +3,7 @@ import sys
 import argparse
 import subprocess
 
-from .miracl_workflow_ace_parser import ACEWorkflowParser
+from miracl.flow.miracl_workflow_ace_parser import ACEWorkflowParser
 
 def run_reg_clar(parser, args):
     miracl_home = os.environ["MIRACL_HOME"]
@@ -276,10 +276,10 @@ def get_parser():
 
     parser_mul.set_defaults(func=run_mul)
 
-    ace_parser = ACEWorkflowParser()
+    ace_parser = ACEWorkflowParser().parsefn()
     parser_ace = subparsers.add_parser(
         "ace",
-        parents=[ace_parser.parser],
+        parents=[ace_parser],
         add_help=False,
         help="AI-based Cartography of Ensembles (ACE)",
     )

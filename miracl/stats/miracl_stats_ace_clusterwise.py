@@ -58,7 +58,7 @@ def pre_processing_func(
     # img_ndarray = img_ndarray - masked_mean / masked_std
     # print("image max: ", img_ndarray.max())
     # print("image min: ", img_ndarray.min())
-
+    img_filename = str(img_filename).replace("/", "_")
     nib.save(
         nib.Nifti1Image(img_ndarray, img.affine, img.header),
         os.path.join(output_dir, grp + "_processed_" + img_filename),
@@ -153,7 +153,7 @@ def cluster_fn(
         # create nifti masker
         print("Applying NiftiMasker")
         # nifti_masker = NiftiMasker(mask_img=mask_img.slicer[slice:slice+1, :, :], standardize=False, memory='nilearn_cache')
-        nilearn_cache_dir = Path(out_dir) / "nilearn_cache"
+        nilearn_cache_dir = str(Path(out_dir) / "nilearn_cache")
         nifti_masker = NiftiMasker(
             mask_img=mask_diff_mean.slicer[slice : slice + 1, :, :],
             standardize=True,
@@ -299,7 +299,7 @@ def main(args, output_dir_arg):
     out_dir = output_dir_arg
     num_perm = args.pcs_num_perm
     atl_dir = args.u_atlas_dir
-    img_res = args.rca_voxel_size
+    img_res = args.rwc_voxel_size
     smoothing_fwhm = args.pcs_smoothing_fwhm
     tfce_start = args.pcs_tfce_start
     tfce_step = args.pcs_tfce_step
@@ -408,7 +408,7 @@ def main(args, output_dir_arg):
         )
         exp_imgs_regex = "*/" + experiment_warp_tiff_extension.as_posix()
         exp_imgs = experiment_base_dir.glob(exp_imgs_regex)
-        exp_imgs = [str(file.relative_to(control_base_dir)) for file in exp_imgs]
+        exp_imgs = [str(file.relative_to(experiment_base_dir)) for file in exp_imgs]
         exp_dir = experiment_base_dir
     else:
         exp_imgs = fnmatch.filter(os.listdir(exp_dir), "*.nii.gz")

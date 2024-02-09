@@ -212,7 +212,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 # ---------
 # save to nifti
 
-def savenvoxnii(marray, outvoxnii, res, vx, vz):
+def savenvoxnii(marray, outvoxnii, down, vx, vz):
     '''
 	Saves voxelized tif output to nifti (nii.gz)
 	'''
@@ -221,8 +221,8 @@ def savenvoxnii(marray, outvoxnii, res, vx, vz):
         mat = np.eye(4)
 
         # vx = 0.001 * res
-        vx = (vx/1000) * res
-        vz = (vz/1000) * res
+        vx = (vx/1000) * down
+        vz = (vz/1000) * down
 
         mat[0, 0] = vx  # or vx/2
         mat[1, 1] = vx
@@ -303,7 +303,7 @@ def main(args):
 
         marraybin = parcomputevox(segbin, radius, ncpus, down, outvoxbin)
 
-        savenvoxnii(marraybin, outvoxniibin, res, vx, vz)
+        savenvoxnii(marraybin, outvoxniibin, down, vx, vz)
 
         print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 

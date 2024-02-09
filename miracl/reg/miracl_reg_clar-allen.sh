@@ -1196,3 +1196,7 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 
 # TODOs
 # TODOlp: add settings file to read for pars
+
+# create output file for successful completion
+command="${vox}\n${ort}"
+echo -e $command > "$work_dir/reg_final/reg_command.log"
