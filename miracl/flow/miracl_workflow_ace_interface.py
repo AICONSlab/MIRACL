@@ -189,7 +189,7 @@ class ACEWarping(Warping):
         :type args: argparse.Namespace
         :param ace_flow_reg_output_folder: path to the registration output folder ('clar_allen_reg')
         :type ace_flow_reg_output_folder: pathlib.Path
-        :param voxelized_segmented_tif: path to the voxelized segmented tif file ('warp_final/voxelized_seg_*.nii.gz')
+        :param voxelized_segmented_tif: path to the voxelized segmented tif file ('vox_final/voxelized_seg_*.nii.gz')
         :type voxelized_segmented_tif: pathlib.Path
         :param orientation_file: path to the orientation file ('warp_final/ort2std.txt')
         :type orientation_file: pathlib.Path
@@ -204,7 +204,7 @@ class ACEWarping(Warping):
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
         warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[0]
-        shutil.move(str(warp_file), str(voxelized_segmented_tif.parent))
+        shutil.move(str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final"))
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
 
