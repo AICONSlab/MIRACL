@@ -58,7 +58,7 @@ def pre_processing_func(
     # img_ndarray = img_ndarray - masked_mean / masked_std
     # print("image max: ", img_ndarray.max())
     # print("image min: ", img_ndarray.min())
-
+    img_filename = str(img_filename).replace("/", "_")
     nib.save(
         nib.Nifti1Image(img_ndarray, img.affine, img.header),
         os.path.join(output_dir, grp + "_processed_" + img_filename),
@@ -153,7 +153,7 @@ def cluster_fn(
         # create nifti masker
         print("Applying NiftiMasker")
         # nifti_masker = NiftiMasker(mask_img=mask_img.slicer[slice:slice+1, :, :], standardize=False, memory='nilearn_cache')
-        nilearn_cache_dir = Path(out_dir) / "nilearn_cache"
+        nilearn_cache_dir = str(Path(out_dir) / "nilearn_cache")
         nifti_masker = NiftiMasker(
             mask_img=mask_diff_mean.slicer[slice : slice + 1, :, :],
             standardize=True,
