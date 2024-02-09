@@ -254,27 +254,6 @@ class TestAceInterfaceGetVoxSegTif:
         assert "ortcode=" in open_mock().write.call_args_list[1][0][0]
 
 
-class TestAceInterfaceGetCorrInput:
-    @mock.patch(ACE_PATH + ".Path.is_file")
-    def test_ace_check_corr_input_exists_return(self, mock_is_file):
-        mock_is_file.return_value = True
-        dir_var = DIR
-        nifti_name_var = "diff_mean.nii.gz"
-        res = ACE.GetCorrInput.check_corr_input_exists(dir_var, nifti_name_var)
-
-        assert res == Path(dir_var) / nifti_name_var
-
-    @mock.patch(ACE_PATH + ".Path.is_file")
-    def test_ace_check_corr_input_exists_error(self, mock_is_file):
-        mock_is_file.return_value = False
-        dir_var = DIR
-        nifti_name_var = "diff_mean.nii.gz"
-        with pytest.raises(FileNotFoundError) as e:
-            res = ACE.GetCorrInput.check_corr_input_exists(dir_var, nifti_name_var)
-
-        assert f"does not exist at '{dir_var}'" in str(e)
-
-
 class TestAceInterfaceConstructHeatmapCmd:
     base_heatmap_cmd = "miracl stats heatmap_group "
     heatmap_cmd_expected = [
@@ -629,7 +608,9 @@ class TestAceInterfaceRegistrationChecker:
 class TestAceInterfaceACEVoxelization:
     @mock.patch(ACE_PATH + ".subprocess.Popen")
     def test_ace_voxelize_call(self, popen_mock):
-        args = Namespace(rca_voxel_size=5, ctn_down=1, sa_resolution=(1.4, 1.4, 5))
+        args = Namespace(
+            rca_voxel_size=5, ctn_down=1, sa_resolution=(1.4, 1.4, 5), rva_downsample=5
+        )
         ACE.ACEVoxelization().voxelize(args, "file.tif")
 
         assert popen_mock.called
@@ -647,35 +628,20 @@ class TestAceInterfaceACEWarping:
         assert popen_mock.called
 
 
-class TestAceInterfaceACEClusterwise:
-    @mock.patch("miracl.flow.miracl_workflow_ace_stats.main")
-    def test_ace_cluster_call(self, main_mock):
+class TestAceInterfaceACEStats:
+    @mock.patch("miracl.stats.miracl_stats_ace_interface.main")
+    def test_ace_stats_call(self, stats_main_mock):
         args = Namespace(
-            u_atlas_dir="allen",
+            rca_voxel_size=5,
+            rca_orient_code="1",
+            sh_sagittal="1",
+            sh_coronal="2",
+            sh_axial="3",
+            sh_figure_dim="5",
         )
-        ACE.ACEClusterwise().cluster(
-            args,
-            "sa_output_dir",
-        )
+        ACE.ACEStats().compute_stats(args)
 
-        assert main_mock.called
-
-
-class TestAceInterfaceACECorrelation:
-    @mock.patch("miracl.flow.miracl_workflow_ace_correlation.main")
-    def test_ace_correlate_call(self, main_mock):
-        args = Namespace(
-            u_atlas_dir="allen",
-        )
-        ACE.ACECorrelation().correlate(
-            args,
-            "corr_final",
-            0.05,
-            0.05,
-            0.05,
-        )
-
-        assert main_mock.called
+        assert stats_main_mock.called
 
 
 class TestAceInterfaceACEHeatmap:
@@ -704,7 +670,6 @@ class TestAceInterfaceACEWorkflows:
         ctn_down=5,
         rca_voxel_size=10,
         sa_output_folder="sa_output_dir/",
-        overwrite=True,
         control=["ctrl_dir/", "ctrl_dir/subj1/cells"],
         experiment=["exp_dir/", "exp_dir/subj1/cells"],
         rca_orient_code="1",
@@ -775,9 +740,7 @@ class TestAceInterfaceACEWorkflows:
         Path("exp_dir/subj10/")
         / f"final_ctn_down={comparison_args.ctn_down}_rca_voxel_size={comparison_args.rca_voxel_size}"
         / "warp_final",
-        Path("sa_output_dir/") / "clust_final",
         Path("sa_output_dir/") / "heat_final",
-        Path("sa_output_dir/") / "corr_final",
     ]
 
     mock_nifti_side_effect = [
@@ -842,21 +805,13 @@ class TestAceInterfaceACEWorkflows:
         ),
     ]
 
-    mock_corr_input_side_effect = [
-        Path("sa_output_dir/") / "clust_final" / "diff_mean.nii.gz",
-        Path("sa_output_dir/") / "clust_final" / "f_obs.nii.gz",
-        Path("sa_output_dir/") / "clust_final" / "p_values.nii.gz",
-    ]
-
     def combined_decorator(function):
         @functools.wraps(function)
         @mock.patch(ACE_PATH + ".RegistrationChecker")
         @mock.patch(ACE_PATH + ".ACEHeatmap.create_heatmap")
         @mock.patch(ACE_PATH + ".ConstructHeatmapCmd.construct_final_heatmap_cmd")
         @mock.patch(ACE_PATH + ".ConstructHeatmapCmd.test_none_args")
-        @mock.patch(ACE_PATH + ".ACECorrelation.correlate")
-        @mock.patch(ACE_PATH + ".GetCorrInput.check_corr_input_exists")
-        @mock.patch(ACE_PATH + ".ACEClusterwise.cluster")
+        @mock.patch(ACE_PATH + ".ACEStats.compute_stats")
         @mock.patch(ACE_PATH + ".ACEWarping.warp")
         @mock.patch(ACE_PATH + ".GetVoxSegTif.create_orientation_file")
         @mock.patch(ACE_PATH + ".GetVoxSegTif.check_warping_requirements")
@@ -880,9 +835,9 @@ class TestAceInterfaceACEWorkflows:
         args = Namespace(
             single="dir/",
         )
-        ACE.ACEWorkflows(
-            None, None, None, None, None, None, None, None
-        ).execute_workflow(args)
+        ACE.ACEWorkflows(None, None, None, None, None, None, None).execute_workflow(
+            args
+        )
 
         assert mock_method.called_once_with(args)
 
@@ -893,9 +848,9 @@ class TestAceInterfaceACEWorkflows:
             control="ctrl_dir/",
             experiment="exp_dir/",
         )
-        ACE.ACEWorkflows(
-            None, None, None, None, None, None, None, None
-        ).execute_workflow(args)
+        ACE.ACEWorkflows(None, None, None, None, None, None, None).execute_workflow(
+            args
+        )
 
         assert mock_method.called_once_with(args)
 
@@ -906,9 +861,9 @@ class TestAceInterfaceACEWorkflows:
             experiment=None,
         )
         with pytest.raises(ValueError) as e:
-            ACE.ACEWorkflows(
-                None, None, None, None, None, None, None, None
-            ).execute_workflow(args)
+            ACE.ACEWorkflows(None, None, None, None, None, None, None).execute_workflow(
+                args
+            )
 
         assert (
             "Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args."
@@ -944,8 +899,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -992,8 +946,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -1032,8 +985,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -1068,8 +1020,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -1104,8 +1055,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -1143,8 +1093,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -1179,8 +1128,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_single_workflow(args)
 
@@ -1204,9 +1152,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1225,8 +1171,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1237,12 +1181,11 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
-        assert mock_folder_creator.call_count == 23
+        assert mock_folder_creator.call_count == 21
 
     @combined_decorator
     def test_ace_comparison_workflow_segment_call(
@@ -1260,9 +1203,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1282,8 +1223,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1294,8 +1233,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1317,9 +1255,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1339,8 +1275,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1351,8 +1285,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1374,9 +1307,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1396,8 +1327,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1408,8 +1337,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1459,9 +1387,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1481,8 +1407,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1493,8 +1417,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1527,9 +1450,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1549,8 +1470,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1563,8 +1482,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1586,9 +1504,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1608,8 +1524,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1622,8 +1536,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1664,9 +1577,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1685,8 +1596,6 @@ class TestAceInterfaceACEWorkflows:
         mock_nifti.side_effect = self.mock_nifti_side_effect
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
-
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
 
         mock_test_none_args.return_value = ""
 
@@ -1707,8 +1616,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1733,9 +1641,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1755,8 +1661,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1769,8 +1673,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1792,9 +1695,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1814,8 +1715,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1826,8 +1725,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -1912,9 +1810,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -1934,8 +1830,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -1946,8 +1840,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2060,9 +1953,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2082,8 +1973,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -2094,8 +1983,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2148,9 +2036,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2169,8 +2055,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -2181,8 +2065,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2235,9 +2118,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2257,8 +2138,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -2269,8 +2148,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2347,9 +2225,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2369,8 +2245,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -2381,8 +2255,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2468,7 +2341,7 @@ class TestAceInterfaceACEWorkflows:
         )
 
     @combined_decorator
-    def test_ace_comparison_workflow_cluster(
+    def test_ace_comparison_workflow_stats(
         self,
         mock_iterdir,
         mock_is_dir,
@@ -2483,9 +2356,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2504,8 +2375,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -2516,153 +2385,11 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
-        assert (
-            mock_cluster.call_args_list[0][0][1]
-            == Path("sa_output_dir/") / "clust_final"
-        )
-
-    @combined_decorator
-    def test_ace_comparison_workflow_check_corr_input(
-        self,
-        mock_iterdir,
-        mock_is_dir,
-        mock_folder_creator,
-        mock_segment,
-        mock_convert,
-        mock_nifti,
-        mock_register,
-        mock_check_folders,
-        mock_stacking,
-        mock_voxelize,
-        mock_warping_req,
-        mock_orientation_file,
-        mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
-        mock_test_none_args,
-        mock_final_heatmap_cmd,
-        mock_create_heatmap,
-        mock_registration_checker,
-    ):
-        args = copy.deepcopy(self.comparison_args)
-
-        mock_is_dir.return_value = True
-        mock_iterdir.side_effect = [
-            [Path("ctrl_dir/subj1/"), Path("ctrl_dir/subj2/")],
-            [Path("exp_dir/subj1/"), Path("exp_dir/subj10/")],
-        ]
-
-        mock_folder_creator.side_effect = self.comparison_folder_creator_side_effect
-        mock_nifti.side_effect = self.mock_nifti_side_effect
-
-        mock_warping_req.side_effect = self.mock_warping_req_side_effect
-
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
-        mock_test_none_args.return_value = ""
-
-        mock_final_heatmap_cmd.return_value = ""
-
-        ACE.ACEWorkflows(
-            ACE.ACESegmentation(),
-            ACE.ACEConversion(),
-            ACE.ACERegistration(),
-            ACE.ACEVoxelization(),
-            ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
-            ACE.ACEHeatmap(),
-        )._execute_comparison_workflow(args)
-
-        assert mock_corr_input.call_args_list[0][0] == (
-            Path("sa_output_dir/") / "clust_final",
-            "diff_mean.nii.gz",
-        )
-        assert mock_corr_input.call_args_list[1][0] == (
-            Path("sa_output_dir/") / "clust_final",
-            "f_obs.nii.gz",
-        )
-        assert mock_corr_input.call_args_list[2][0] == (
-            Path("sa_output_dir/") / "clust_final",
-            "p_values.nii.gz",
-        )
-
-    @combined_decorator
-    def test_ace_comparison_workflow_correlate(
-        self,
-        mock_iterdir,
-        mock_is_dir,
-        mock_folder_creator,
-        mock_segment,
-        mock_convert,
-        mock_nifti,
-        mock_register,
-        mock_check_folders,
-        mock_stacking,
-        mock_voxelize,
-        mock_warping_req,
-        mock_orientation_file,
-        mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
-        mock_test_none_args,
-        mock_final_heatmap_cmd,
-        mock_create_heatmap,
-        mock_registration_checker,
-    ):
-        args = copy.deepcopy(self.comparison_args)
-
-        mock_is_dir.return_value = True
-        mock_iterdir.side_effect = [
-            [Path("ctrl_dir/subj1/"), Path("ctrl_dir/subj2/")],
-            [Path("exp_dir/subj1/"), Path("exp_dir/subj10/")],
-        ]
-
-        mock_folder_creator.side_effect = self.comparison_folder_creator_side_effect
-        mock_nifti.side_effect = self.mock_nifti_side_effect
-
-        mock_warping_req.side_effect = self.mock_warping_req_side_effect
-
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
-        mock_test_none_args.return_value = ""
-
-        mock_final_heatmap_cmd.return_value = ""
-
-        ACE.ACEWorkflows(
-            ACE.ACESegmentation(),
-            ACE.ACEConversion(),
-            ACE.ACERegistration(),
-            ACE.ACEVoxelization(),
-            ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
-            ACE.ACEHeatmap(),
-        )._execute_comparison_workflow(args)
-
-        assert (
-            mock_correlate.call_args_list[0][0][1]
-            == Path("sa_output_dir/") / "corr_final"
-        )
-        assert (
-            mock_correlate.call_args_list[0][0][2]
-            == Path("sa_output_dir/") / "clust_final" / "p_values.nii.gz"
-        )
-        assert (
-            mock_correlate.call_args_list[0][0][3]
-            == Path("sa_output_dir/") / "clust_final" / "f_obs.nii.gz"
-        )
-        assert (
-            mock_correlate.call_args_list[0][0][4]
-            == Path("sa_output_dir/") / "clust_final" / "diff_mean.nii.gz"
-        )
+        assert mock_compute_stats.call_count == 1
 
     @combined_decorator
     def test_ace_comparison_workflow_test_none_args(
@@ -2680,9 +2407,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2701,8 +2426,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = ""
 
         mock_final_heatmap_cmd.return_value = ""
@@ -2713,8 +2436,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2736,9 +2458,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2757,8 +2477,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = (
             "miracl stats heatmap_group -s 1 2 3 4 5 -f 10 10 "
         )
@@ -2771,10 +2489,11 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
+
+        print(mock_final_heatmap_cmd.call_args_list)
 
         assert (
             mock_final_heatmap_cmd.call_args_list[0][0][1]
@@ -2801,9 +2520,7 @@ class TestAceInterfaceACEWorkflows:
         mock_warping_req,
         mock_orientation_file,
         mock_warp,
-        mock_cluster,
-        mock_corr_input,
-        mock_correlate,
+        mock_compute_stats,
         mock_test_none_args,
         mock_final_heatmap_cmd,
         mock_create_heatmap,
@@ -2822,8 +2539,6 @@ class TestAceInterfaceACEWorkflows:
 
         mock_warping_req.side_effect = self.mock_warping_req_side_effect
 
-        mock_corr_input.side_effect = self.mock_corr_input_side_effect
-
         mock_test_none_args.return_value = (
             "miracl stats heatmap_group -s 1 2 3 4 5 -f 10 10 "
         )
@@ -2836,8 +2551,7 @@ class TestAceInterfaceACEWorkflows:
             ACE.ACERegistration(),
             ACE.ACEVoxelization(),
             ACE.ACEWarping(),
-            ACE.ACEClusterwise(),
-            ACE.ACECorrelation(),
+            ACE.ACEStats(),
             ACE.ACEHeatmap(),
         )._execute_comparison_workflow(args)
 
@@ -2851,8 +2565,7 @@ class TestAceInterfaceMain:
         @functools.wraps(function)
         @mock.patch(ACE_PATH + ".ACEWorkflows")
         @mock.patch(ACE_PATH + ".ACEHeatmap")
-        @mock.patch(ACE_PATH + ".ACECorrelation")
-        @mock.patch(ACE_PATH + ".ACEClusterwise")
+        @mock.patch(ACE_PATH + ".ACEStats")
         @mock.patch(ACE_PATH + ".ACEWarping")
         @mock.patch(ACE_PATH + ".ACEVoxelization")
         @mock.patch(ACE_PATH + ".ACERegistration")
@@ -2873,8 +2586,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2890,8 +2602,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2909,8 +2620,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2928,8 +2638,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2947,8 +2656,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2966,8 +2674,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2985,8 +2692,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -2996,7 +2702,7 @@ class TestAceInterfaceMain:
         assert mock_warping.call_count == 1
 
     @decorator
-    def test_ace_main_clusterwise(
+    def test_ace_main_stats(
         self,
         mock_parser,
         mock_segmentation,
@@ -3004,34 +2710,14 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
         mock_parser().parse_args.return_value = Namespace()
         ACE.main()
 
-        assert mock_clusterwise.call_count == 1
-
-    @decorator
-    def test_ace_main_correlation(
-        self,
-        mock_parser,
-        mock_segmentation,
-        mock_conversion,
-        mock_registration,
-        mock_voxelization,
-        mock_warping,
-        mock_clusterwise,
-        mock_correlation,
-        mock_heatmap,
-        mock_workflows,
-    ):
-        mock_parser().parse_args.return_value = Namespace()
-        ACE.main()
-
-        assert mock_correlation.call_count == 1
+        assert mock_stats.call_count == 1
 
     @decorator
     def test_ace_main_heatmap(
@@ -3042,8 +2728,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -3061,8 +2746,7 @@ class TestAceInterfaceMain:
         mock_registration,
         mock_voxelization,
         mock_warping,
-        mock_clusterwise,
-        mock_correlation,
+        mock_stats,
         mock_heatmap,
         mock_workflows,
     ):
@@ -3075,8 +2759,7 @@ class TestAceInterfaceMain:
             mock_registration(),
             mock_voxelization(),
             mock_warping(),
-            mock_clusterwise(),
-            mock_correlation(),
+            mock_stats(),
             mock_heatmap(),
         )
 
@@ -3088,8 +2771,7 @@ class TestAceInterfaceMain:
         mock_conversion,
         mock_registration,
         mock_voxelization,
-        mock_warping,
-        mock_clusterwise,
+        mock_stats,
         mock_correlation,
         mock_heatmap,
         mock_workflows,
