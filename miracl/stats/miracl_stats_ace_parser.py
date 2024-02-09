@@ -130,6 +130,15 @@ class ACEStatsParser:
             default=95,
         )
 
+        required_args.add_argument(
+            "-rwcv",
+            "--rwc_voxel_size",
+            type=int,
+            default=25,
+            choices=[10, 25, 50],
+            help="voxel size/Resolution in um for warping (default: %(default)s)",
+        )
+
         return parser
 
 
