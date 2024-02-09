@@ -477,6 +477,15 @@ class ACEWorkflowParser:
             help="Segmentation channel (ex. green) - required if voxelized seg is input",
         )
 
+        useful_args.add_argument(
+            "-rwcv",
+            "--rwc_voxel_size",
+            type=int,
+            default=25,
+            choices=[10, 25, 50],
+            help="voxel size/Resolution in um for warping (default: %(default)s)",
+        )
+
         # INFO: Permutation cluster stats parser
 
         perm_args.add_argument(

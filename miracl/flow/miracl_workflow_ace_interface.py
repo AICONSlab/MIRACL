@@ -196,11 +196,11 @@ class ACEWarping(Warping):
         """
         print("  warping stacked tif...")
         warp_cmd = f"miracl reg warp_clar \
-                -r {ace_flow_reg_output_folder} \
+                -r {ace_flow_reg_output_folder.as_posix()} \
                 -i {voxelized_segmented_tif} \
                 -o {orientation_file} \
                 -s ace_flow \
-                -v {args.rca_voxel_size}"
+                -v {args.rwc_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
         warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[0]
