@@ -499,7 +499,7 @@ class ACEWorkflowParser:
             "--pcs_num_perm",
             type=int,
             help="number of permutations",
-            default=100,
+            default=500,
         )
         perm_args.add_argument(
             "-pcsr",
@@ -527,7 +527,7 @@ class ACEWorkflowParser:
             "--pcs_tfce_step",
             type=float,
             help="tfce threshold step",
-            default=10,
+            default=5,
         )
         perm_args.add_argument(
             "-pcsc",
