@@ -202,6 +202,9 @@ class ACEWarping(Warping):
                 -s ace_flow \
                 -v {args.rca_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
+        # move the output file to the right folder
+        warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[0]
+        shutil.move(str(warp_file), str(voxelized_segmented_tif.parent))
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
 
@@ -577,11 +580,11 @@ class GetVoxSegTif:
         )[0]
         orientation_file = ace_flow_warp_output_folder / "ort2std.txt"
 
-        # copy vox file to warp folder
-        shutil.copy(voxelized_segmented_tif, ace_flow_warp_output_folder)
-        voxelized_segmented_tif = list(
-            ace_flow_warp_output_folder.glob("voxelized_seg_*.nii.gz")
-        )[0]
+        # # copy vox file to warp folder
+        # shutil.copy(voxelized_segmented_tif, ace_flow_warp_output_folder)
+        # voxelized_segmented_tif = list(
+        #     ace_flow_warp_output_folder.glob("voxelized_seg_*.nii.gz")
+        # )[0]
 
         return voxelized_segmented_tif, orientation_file
 
