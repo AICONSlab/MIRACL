@@ -667,3 +667,7 @@ DIFF=$((DIFF/60))
 miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minutes"
 
 #--------------------
+
+# create output file for successful completion
+command="${vox}\n${ort}"
+echo -e $command >> "reg_command.log"

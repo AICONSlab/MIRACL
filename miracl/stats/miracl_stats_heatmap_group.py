@@ -2,25 +2,31 @@
 
 ## This script take experimental data and plots heatmaps, qc registration, and exports mean nii files.
 
-import time
-from loguru import logger
 import argparse
 import fnmatch
 import os
+import time
+
+import matplotlib
 import matplotlib.cm as cm
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
+from loguru import logger
+
+matplotlib.use('Agg')
 import sys
-import numpy as np
-import nibabel as nib
-from skimage import filters, measure, feature, exposure
-from scipy.ndimage import gaussian_filter
-from numpy import float32, float64
-from sklearn.preprocessing import binarize
-from miracl import ATLAS_DIR
-from miracl.stats import reg_svg, stats_gui_heatmap_group
 from math import ceil, nan
 from pathlib import Path
+
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import nibabel as nib
+import numpy as np
+from numpy import float32, float64
+from scipy.ndimage import gaussian_filter
+from skimage import exposure, feature, filters, measure
+from sklearn.preprocessing import binarize
+
+from miracl import ATLAS_DIR
+from miracl.stats import reg_svg, stats_gui_heatmap_group
 
 # Log errors to file in current working directory
 # FIX: Add output directory to path if provided as argument
@@ -298,27 +304,21 @@ def parse_inputs(parser, args):
                                                     figure_dim[1], dpi, figure_dim[1] * dpi))))
     multi = False
     # validate outfile names
-    if isinstance(g2, str):
-        find_value(3, [len(outfile)], False,
-                   "-o Must enter three arguments. Detected {} Arguments: {} \n Names must use underscore instead of space. \n Ex. ACCEPTABLE -o control_group treated_group difference_group \n UNACCEPTABLE -o control group treated group difference group".format(
-                       len(outfile), outfile))
-        multi = True
-    else:
-        if outfile != ['group_1', 'group_2', 'group_difference']:
-            find_value(1, [len(outfile)], False,
-                       "-o Must enter one argument. Detected {} Arguments: {} \n Names must use underscore instead of space. \n Ex. ACCEPTABLE -o control_group \n UNACCEPTABLE -o control group ".format(
-                           len(outfile), outfile))
+    find_value(3, [len(outfile)], False,
+                "-o Must enter three arguments. Detected {} Arguments: {} \n Names must use underscore instead of space. \n Ex. ACCEPTABLE -o control_group treated_group difference_group \n UNACCEPTABLE -o control group treated group difference group".format(
+                    len(outfile), outfile))
+    multi = True
 
     return g1, g2, vox, sigma, percentile, cp, cn, sagittal, coronal, axial, x, y, z, figure_dim, outdir, outfile, extension, dpi, multi
 
 def grp_mean(input_path, brain_template, outdir, x, y, z, percentile):
     '''read input image files, return mean and shape. Calls reg_svg script to generate registration-to-input data check svg animation'''
     sample = 0
-    img = 0
+    img_val = 0
     max_val = 0
 
     def _process_file(filename, root):
-        nonlocal sample, img, max_val
+        nonlocal sample, img_val, max_val
         nib_file = nib.load(os.path.join(root, filename))
         data = np.asanyarray(nib_file.dataobj).clip(min=0)
 
@@ -336,7 +336,7 @@ def grp_mean(input_path, brain_template, outdir, x, y, z, percentile):
         reg_svg.main(['-f', brain_template, '-r', outdir + "/smooth_img.nii.gz", '-o',"".join((outdir,"/","reg_check_", filename.split(".nii.gz")[0])), '-cr', str(int(max_val*percentile/100)), str(int(max_val))])
         os.remove(outdir + "/smooth_img.nii.gz")             
 
-        img = img + data
+        img_val = img_val + data
         sample = sample + 1
 
     # get right input path based on number of args
@@ -347,8 +347,8 @@ def grp_mean(input_path, brain_template, outdir, x, y, z, percentile):
                 _process_file(filename, root)
     
     elif len(input_path) == 2:
-        input_path = Path(input_path[0])
         tiff_template = Path(input_path[1])
+        input_path = Path(input_path[0])
         tiff_extension = Path(
             *tiff_template.relative_to(input_path).parts[1:]
         )
@@ -365,7 +365,7 @@ def grp_mean(input_path, brain_template, outdir, x, y, z, percentile):
             '{} is empty or does not contain .nii.gz files ... please check path/file contents and rerun script'.format(
                 input_path))
 
-    return (img / sample, np.shape(img))
+    return (img_val / sample, np.shape(img_val))
 
 
 def mean_nii_export(smoothed_mean_img, outdir, outfile, mask_vt_filename):
@@ -625,6 +625,9 @@ def plot(mean_img, mask, group, vox, cut_coords, cut_len, sagittal, coronal, axi
     else:
         fig.savefig("".join((outdir, "/" + outfile, "_mean_plot.", extension)), bbox_inches="tight", pad_inches=0)
     print("".join((outfile, " mean plot saved")))
+
+    # need to close all images
+    plt.close('all')
 
 @logger.catch
 def main(args):

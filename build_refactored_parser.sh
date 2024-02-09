@@ -259,6 +259,7 @@ if [ -x "$(command -v docker)" ]; then
       printf " User: %s\n" "$HOST_USER"
       printf " pid: %s\n" "$(id -u)"
       printf " gid: %s\n" "$(id -g)"
+      printf " shm: %s\n" "$shm"
       printf " Service name: %s\n" "$service_name"
       printf " Image name: %s\n" "$image_name:$miracl_version"
       printf " Container name: %s\n" "$container_name"
