@@ -52,8 +52,9 @@ class Interface:
         self.correlation = correlation
 
     def run_fns(self, args):
-        args.pcs_control = args.control
-        args.pcs_experiment = args.experiment
+        if args.control is None or args.experiment is None:
+            args.pcs_control = args.control
+            args.pcs_experiment = args.experiment
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"
