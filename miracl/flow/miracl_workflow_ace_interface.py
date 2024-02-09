@@ -316,7 +316,7 @@ class ACEWorkflows:
         :rtype: pathlib.Path
         """
         final_folder = (
-            f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}" # TODO: fix
         )
         args.sa_output_folder = str((Path(args.sa_output_folder) / final_folder))
 
@@ -356,7 +356,7 @@ class ACEWorkflows:
         args_dict = vars(args)
 
         per_subject_final_folder = (
-            f"final_ctn_down={args.ctn_down}_rca_voxel_size={args.rca_voxel_size}"
+            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}" # TODO: fix
         )
 
         nifti_save_location = {}
