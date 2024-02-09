@@ -96,6 +96,7 @@ class ACEConversion(Conversion):
         :type args: argparse.Namespace
         """
         print("  converting...")
+        vx, vy, vz = args.sa_resolution
         conv_cmd = f"python {MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
         --folder {args.single} \
         --work_dir {args.sa_output_folder} \
@@ -104,8 +105,8 @@ class ACEConversion(Conversion):
         --chanprefix {args.ctn_chanprefix} \
         --channame {args.ctn_channame} \
         --outnii {args.ctn_outnii} \
-        --resx {args.ctn_resx} \
-        --resz {args.ctn_resz} \
+        --resx {vx} \
+        --resz {vz} \
         --center {' '.join(map(str, args.ctn_center))} \
         --downzdim {args.ctn_downzdim} \
         --prevdown {args.ctn_prevdown}"

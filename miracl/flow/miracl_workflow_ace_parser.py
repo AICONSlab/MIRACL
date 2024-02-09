@@ -250,22 +250,22 @@ class ACEWorkflowParser:
             default="clarity",
             help="Output nii name (script will append downsample ratio & channel info to given name)",
         )
-        conv_args.add_argument(
-            "-ctnvx",
-            "--ctn_resx",
-            type=float,
-            metavar="",
-            default=5,
-            help="Original resolution in x-y plane in um (default: %(default)s)",
-        )
-        conv_args.add_argument(
-            "-ctnvz",
-            "--ctn_resz",
-            type=float,
-            metavar="",
-            default=5,
-            help="Original thickness (z-axis resolution / spacing between slices) in um (default: %(default)s) ",
-        )
+        # conv_args.add_argument(
+        #     "-ctnvx",
+        #     "--ctn_resx",
+        #     type=float,
+        #     metavar="",
+        #     default=5,
+        #     help="Original resolution in x-y plane in um (default: %(default)s)",
+        # )
+        # conv_args.add_argument(
+        #     "-ctnvz",
+        #     "--ctn_resz",
+        #     type=float,
+        #     metavar="",
+        #     default=5,
+        #     help="Original thickness (z-axis resolution / spacing between slices) in um (default: %(default)s) ",
+        # )
         conv_args.add_argument(
             "-ctnc",
             "--ctn_center",
