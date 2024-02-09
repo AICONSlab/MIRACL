@@ -77,7 +77,7 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     mean_diff = mean_diff_arg
     out_dir = output_dir_arg
     atl_dir = args.u_atlas_dir
-    img_res = args.rca_voxel_size
+    img_res = args.rwc_voxel_size
     thr = args.cf_pvalue_thr
     control_dir = args.pcs_control
     exp_dir = args.pcs_experiment
@@ -87,7 +87,7 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     print(f"mean_diff: {mean_diff_arg}")
     print(f"out_dir: {output_dir_arg}")
     print(f"atl_dir: {args.u_atlas_dir}")
-    print(f"img_res: {args.rca_voxel_size}")
+    print(f"img_res: {args.rwc_voxel_size}")
     print(f"thr: {args.cf_pvalue_thr}")
 
     # -------------------------------------------------------
