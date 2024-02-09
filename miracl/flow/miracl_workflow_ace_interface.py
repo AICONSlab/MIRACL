@@ -436,7 +436,7 @@ class ACEWorkflows:
 
             nifti_save_location[
                 type_
-            ] = voxelized_segmented_tif  # make sure this is the right file
+            ] = list(ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz"))[0]   # make sure this is the right file
 
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
@@ -688,7 +688,7 @@ class ConstructHeatmapCmd:
         tested_heatmap_cmd += f"\
             -g1 {args.pcs_control[0]} {args.pcs_control[1]} \
             -g2 {args.pcs_experiment[0]} {args.pcs_experiment[1]} \
-            -v {args.sh_vox} \
+            -v {args.rwc_voxel_size} \
             -gs {args.sh_sigma} \
             -p {args.sh_percentile} \
             -cp {args.sh_colourmap_pos} \
