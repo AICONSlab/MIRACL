@@ -239,16 +239,16 @@ class ACEWorkflowParser:
             "--ctn_channame",
             type=str,
             metavar="",
-            default="eyfp",
-            help="Output chan name (default: %(default)s) ",
+            default="auto",
+            help="Output chan name (default: %(default)s). Channel used in registration.",
         )
         conv_args.add_argument(
             "-ctno",
             "--ctn_outnii",
             type=str,
             metavar="",
-            default="clarity",
-            help="Output nii name (script will append downsample ratio & channel info to given name)",
+            default="SHIELD",
+            help="Output nii name (script will append downsample ratio & channel info to given name). Method of tissue clearing.",
         )
         # conv_args.add_argument(
         #     "-ctnvx",
