@@ -60,3 +60,11 @@ MIRACL.egg-info/
 /build/
 /dist/
 /venv/
+
+# ML models #
+#############
+*.pth
+
+# Docker Compose yaml files #
+#############################
+docker-compose.yml

@@ -9,6 +9,7 @@ import multiprocessing
 import os
 import sys
 import warnings
+from pathlib import Path
 from datetime import datetime
 
 warnings.simplefilter("ignore", UserWarning)
@@ -21,7 +22,7 @@ import tifffile as tiff
 from joblib import Parallel, delayed
 from scipy import ndimage
 from skimage.feature import peak_local_max
-
+from math import floor
 
 # ---------
 # help fn
@@ -31,16 +32,18 @@ def helpmsg(name=None):
 
 	Voxelizes segmentation results into density maps with Allen atlas resolution
 
-	example: miracl seg voxelize -s seg_sparse.tif -v 10 -d 5
+	example: miracl seg voxelize -s seg_sparse.tif -v 10 -d 5 -vx 1 -vz 1
 
-        arguments (required):
+      arguments (required):
 
-        s. Segmentation tif file
+        s.  Segmentation tif file
 
-        optional arguments:
+      optional arguments:
 
-        v. Voxel size (10, 25, 50um) (def = 10)
-        d. Down sample ratio (def = 2) - recommend 2 =< ratio =< 5
+        v.  Voxel size (10, 25, 50um) (def = 10)
+        d.  Down sample ratio (def = 2) - recommend 2 =< ratio =< 5
+        vx. voxel size (x, y dims) in um
+        vz. voxel size (z dim) in um
 
     -----
 
@@ -58,9 +61,10 @@ def helpmsg(name=None):
 def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg(), add_help=False)
     parser.add_argument('-s', '--seg', type=str, help="binary segmentation tif", required=True)
-    parser.add_argument('-d', '--down', type=int, help="down-sample ratio")
-    parser.add_argument('-v', '--res', type=int, help="voxel size")
-
+    parser.add_argument('-d', '--down', type=int, help="down-sample ratio (should be the same as what used in registration")
+    parser.add_argument('-v', '--res', type=int, choices=[10, 25, 50], help="voxel size")
+    parser.add_argument('-vx', default=1, type=float, help="voxel size (x, y dims) in um")
+    parser.add_argument('-vz', default=1, type=float, help="voxel size (z dim) in um")
     # parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
     return parser
@@ -75,13 +79,16 @@ def parse_inputs(parser, args):
     res = 10 if args.res is None else args.res
     down = 2 if args.down is None else args.down
 
-    return seg, res, down
+    vx = args.vx
+    vz = args.vz
+
+    return seg, res, down, vx, vz
 
 
 # ---------
 # Parameters
 
-radius = 1
+# radius = 1
 cpuload = 0.95
 cpus = multiprocessing.cpu_count()
 ncpus = int(cpuload * cpus)  # 95% of cores used2
@@ -148,6 +155,7 @@ def vox(segflt, kernel, down, i, radius):
     local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((10, 10)), exclude_border=False,
                                 labels=circv)
     conncomp = ndimage.label(local_maxi)[0]
+    conncomp = np.multiply((conncomp > 0), circv)	
 
     return conncomp
 
@@ -204,7 +212,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 # ---------
 # save to nifti
 
-def savenvoxnii(marray, outvoxnii, res):
+def savenvoxnii(marray, outvoxnii, down, vx, vz):
     '''
 	Saves voxelized tif output to nifti (nii.gz)
 	'''
@@ -212,11 +220,13 @@ def savenvoxnii(marray, outvoxnii, res):
     if not os.path.exists(outvoxnii):
         mat = np.eye(4)
 
-        vx = 0.001 * res
+        # vx = 0.001 * res
+        vx = (vx/1000) * down
+        vz = (vz/1000) * down
 
         mat[0, 0] = vx  # or vx/2
         mat[1, 1] = vx
-        mat[2, 2] = vx
+        mat[2, 2] = vz
 
         img = nib.Nifti1Image(marray, mat)
         nib.save(img, outvoxnii)
@@ -226,24 +236,34 @@ def savenvoxnii(marray, outvoxnii, res):
 # main fn
 
 def main(args):
+    # FIX: log file needs full path to voxelization output directory
     scriptlog('parallel_voxelization.log')
 
     startTime = datetime.now()
 
     parser = parsefn()
 
-    seg, res, down = parse_inputs(parser, args)
+    seg, res, down, vx, vz = parse_inputs(parser, args)
+
+    print("The following arguments are being used:")
+    print(f"  seg:  {seg}")
+    print(f"  res:  {res}")
+    print(f"  down: {down}")
+    print(f"  vx:   {vx}")
+    print(f"  vz:   {vz}")
 
     segdir = os.path.dirname(os.path.realpath(seg))
+
 
     base = os.path.basename(seg)
 
     fstr = os.path.splitext(base)
 
-    type = fstr[0].split("_")[1]
+    # Check if string contains '_' and if False use 'undefined' as type
+    seg_type = fstr[0].split("_")[1] if "_" in fstr[0] else "undefined"
 
-    # outvox = '%s/voxelized_seg_%s.tiff' % (segdir, type)
-    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    # outvox = '%s/voxelized_seg_%s.tiff' % (segdir, seg_type)
+    # outvoxnii = '%s/voxelized_seg_%s.nii.gz' % (segdir, seg_type)
 
     # if not os.path.exists(outvox):
 
@@ -257,17 +277,33 @@ def main(args):
 
     #     print('\n Voxelized map already created')
 
-    segbasebin = base.replace("seg", "seg_bin")
+    # set radius = downsample_ratio / 2
+    radius = floor(down / 2)
+
+    # Check if a Fiji (.ijm) file exists in target directory. If True,
+    # voxelization is being run as part of the ACE flow so the segmented
+    # tif should not be renamed
+    segbasebin = base if list(Path(segdir).glob("*.ijm")) else base.replace("seg", "seg_bin")
+
     segbin = segdir + "/" + segbasebin
 
-    outvoxbin = '%s/voxelized_seg_%s.tiff' % (segdir, type)
-    outvoxniibin = '%s/voxelized_seg_%s.nii.gz' % (segdir, type)
+    outvoxbin = '%s/voxelized_seg_%s.tiff' % (segdir, seg_type)
+    outvoxniibin = '%s/voxelized_seg_%s.nii.gz' % (segdir, seg_type)
+
+    print(f"  seg_type: {seg_type}")
+    print(f"  segdir: {segdir}")
+    print(f"  base: {base}")
+    print(f"  fstr: {fstr}")
+    print(f"  segbasebin: {segbasebin}")
+    print(f"  segbin: {segbin}")
+    print(f"  outvoxbin: {outvoxbin}")
+    print(f"  outvoxniibin: {outvoxniibin}")
 
     if not os.path.exists(outvoxbin):
 
         marraybin = parcomputevox(segbin, radius, ncpus, down, outvoxbin)
 
-        savenvoxnii(marraybin, outvoxniibin, res)
+        savenvoxnii(marraybin, outvoxniibin, down, vx, vz)
 
         print("\n Voxelized maps generated in %s ... Have a good day!\n" % (datetime.now() - startTime))
 

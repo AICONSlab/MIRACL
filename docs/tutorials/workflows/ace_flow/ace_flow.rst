@@ -124,8 +124,7 @@ Executes:
    seg/miracl_seg_voxelize_parallel.py
    reg/miracl_reg_warp_clar_data_to_allen.sh
    stats/miracl_stats_heatmap_group.py
-   stats/miracl_workflow_ace_stats.py
-   stats/miracl_summarize_clusters_corr.py
+   stats/miracl_stats_ace_interface.py
 
 .. _example_anchor:
 
