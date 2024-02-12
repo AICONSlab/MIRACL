@@ -408,7 +408,8 @@ def main(args):
     # If function is called as part of the ACE workflow, the output directory
     # of the ACE workflow will be used
     ace_flow_conv_output_folder = os.path.join(work_dir, 'conv_final')
-    outdir = ace_flow_conv_output_folder if Path(ace_flow_conv_output_folder).is_dir else os.path.join(work_dir, 'niftis')
+    # outdir = ace_flow_conv_output_folder if Path(ace_flow_conv_output_folder).is_dir else os.path.join(work_dir, 'niftis')
+    outdir = ace_flow_conv_output_folder
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
