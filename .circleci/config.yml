@@ -123,11 +123,11 @@ workflows:
       - singularity-publish:
           context:
             - miracl_singularity
-          # requires:
-          #   - docker-publish/publish
-          # filters:
-          #   branches:
-          #     only: master
+          requires:
+            - docker-publish/publish
+          filters:
+            branches:
+              only: master
              # ignore: 
              #   - master
              #   - docs*
