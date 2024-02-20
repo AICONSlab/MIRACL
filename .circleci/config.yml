@@ -72,7 +72,8 @@ jobs:
             # Unset trap
             trap - ERR
             # Create Singularity container remotely and push to cloud
-            singularity build --remote library://aiconslab/miracl/miracl:latest miracl.def
+            singularity build miracl.sif docker://mgoubran/miracl
+            singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
 
 workflows:
   build_and_test:
@@ -122,11 +123,11 @@ workflows:
       - singularity-publish:
           context:
             - miracl_singularity
-          requires:
-            - docker-publish/publish
-          filters:
-            branches:
-              only: master
+          # requires:
+          #   - docker-publish/publish
+          # filters:
+          #   branches:
+          #     only: master
              # ignore: 
              #   - master
              #   - docs*
