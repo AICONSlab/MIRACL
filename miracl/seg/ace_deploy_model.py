@@ -175,6 +175,8 @@ def generate_output_single(model_name, model_out):
 
 # this function generates outputs using the trained model and MC dropout techniques
 def generate_output_MC(model_name, model_out):
+    batch_size = sw_batch_size_internal
+
     # number of forward pass
     forward_passes = 4
 
@@ -367,6 +369,7 @@ def generate_output_ensemble_of_ensembles(model_out):
     forward_passes = 50
 
     sw_batch_size = sw_batch_size_internal
+    batch_size = sw_batch_size_internal
 
     # this function only sets the model dropout layesrs to train
     def enable_dropout(model):
