@@ -342,11 +342,15 @@ class ACEWorkflows:
         converted_nii_file = GetConverterdNifti.get_nifti_file(
             ace_flow_conv_output_folder
         )
-        reg_cmd = RegistrationChecker.get_registration_cmd(
-            args,
-            converted_nii_file=converted_nii_file,
+        rerun_subject = RegistrationChecker.check_registration(
+            args, ace_flow_reg_output_folder
         )
-        self.registration.register(args, reg_cmd)
+        if rerun_subject:
+            reg_cmd = RegistrationChecker.get_registration_cmd(
+                args,
+                converted_nii_file=converted_nii_file,
+            )
+            self.registration.register(args, reg_cmd)
 
         # Stack tiff files for use in voxelization method
         fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
