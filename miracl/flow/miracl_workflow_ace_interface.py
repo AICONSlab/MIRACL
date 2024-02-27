@@ -341,7 +341,13 @@ class ACEWorkflows:
             args.sa_output_folder, "warp_final"
         )
 
-        self.segmentation.segment(args)
+        rerun_seg = SegmentationChecker.check_segmentation(
+            args, ace_flow_seg_output_folder
+        )
+
+        if rerun_seg:
+            self.segmentation.segment(args)
+
         self.conversion.convert(args)
         converted_nii_file = GetConverterdNifti.get_nifti_file(
             ace_flow_conv_output_folder
