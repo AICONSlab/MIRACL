@@ -203,8 +203,12 @@ class ACEWarping(Warping):
                 -v {args.rwc_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
-        warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[0]
-        shutil.move(str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final"))
+        warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[
+            0
+        ]
+        shutil.move(
+            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final")
+        )
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
 
@@ -316,7 +320,7 @@ class ACEWorkflows:
         :rtype: pathlib.Path
         """
         final_folder = (
-            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}" # TODO: fix
+            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}"
         )
         args.sa_output_folder = str((Path(args.sa_output_folder) / final_folder))
 
@@ -378,7 +382,6 @@ class ACEWorkflows:
             orientation_file,
         )
 
-
     def _execute_comparison_workflow(self, args: argparse.Namespace, **kwargs):
         """Private method for executing the comparison workflow.
 
@@ -391,7 +394,7 @@ class ACEWorkflows:
         args_dict = vars(args)
 
         per_subject_final_folder = (
-            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}" # TODO: fix
+            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}"
         )
 
         nifti_save_location = {}
@@ -428,7 +431,13 @@ class ACEWorkflows:
 
                 args.single = base_dir / subject.stem / tiff_extension
 
-                self.segmentation.segment(args)
+                rerun_seg = SegmentationChecker.check_segmentation(
+                    args, ace_flow_seg_output_folder
+                )
+
+                if rerun_seg:
+                    self.segmentation.segment(args)
+
                 self.conversion.convert(args)
                 converted_nii_file = GetConverterdNifti.get_nifti_file(
                     ace_flow_conv_output_folder
@@ -469,9 +478,9 @@ class ACEWorkflows:
                     orientation_file,
                 )
 
-            nifti_save_location[
-                type_
-            ] = list(ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz"))[0]   # make sure this is the right file
+            nifti_save_location[type_] = list(
+                ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz")
+            )[0]
 
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
@@ -840,6 +849,65 @@ class RegistrationChecker:
         if clar_allen_reg.is_dir():
             shutil.rmtree(clar_allen_reg)
         clar_allen_reg.mkdir(parents=True, exist_ok=True)
+
+
+class SegmentationChecker:
+    """Class for checking if each subject needs to re-run
+    segmentation.
+    """
+
+    @staticmethod
+    def check_segmentation(
+        args: argparse.Namespace,
+        seg_folder: Path,
+    ) -> bool:
+        """Checks if segmentation needs to be run based on user input and the file structure.
+        If the user wants to run seg, we run it. Otherwise, check that all the necessary files
+        are in place before skipping. If they are not, we re-run seg.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param seg_folder: path to seg output folder (seg_final/)
+        :type seg_folder: Path
+        :return: whether or not segmentation needs to be re-run
+        :rtype: bool
+        """
+
+        if args.rerun_segmentation:
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check for seg_final/
+        if not seg_folder.is_dir():
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check if generated_patches exists
+        if not (seg_folder / "generated_patches").is_dir():
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check if generated_patches is empty
+        if not sorted(seg_folder.glob("generated_patches/*.tiff")):  # doule check names
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check that the directory isn't empty
+        if not list(seg_folder.glob("*.tif")):
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+    @staticmethod
+    def _clear_seg_folders(seg_folder: Path):
+        """Clears the results from the segmentation folder.
+
+        :param seg_folder: path to the segmentation output folder ('seg_final/')
+        :type seg_folder: Path
+        """
+
+        if seg_folder.is_dir():
+            shutil.rmtree(seg_folder)
+        seg_folder.mkdir(parents=True, exist_ok=True)
 
 
 def main():

@@ -688,15 +688,23 @@ class ACEWorkflowParser:
             "-ua",
             "--u_atlas_dir",
             default="miracl_home",
-            help="path of atlas directory (default: '/code/atlases/ara/')"
+            help="path of atlas directory (default: '/code/atlases/ara/')",
         )
-
 
         # Parser to select the registration skipping
         useful_args.add_argument(
             "--rerun-registration",
             default="false",
             help="Whether to rerun registration step of flow",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        # Parser to select the segmentation skipping
+        useful_args.add_argument(
+            "--rerun-segmentation",
+            default="false",
+            help="Whether to rerun segmentation step of flow",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
