@@ -330,6 +330,12 @@ class ACEWorkflows:
         ace_flow_reg_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "reg_final"
         )
+        ace_flow_vox_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "vox_final"
+        )
+        ace_flow_warp_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "warp_final"
+        )
 
         self.segmentation.segment(args)
         self.conversion.convert(args)
@@ -342,7 +348,32 @@ class ACEWorkflows:
         )
         self.registration.register(args, reg_cmd)
 
-        return args.sa_output_folder
+        # Stack tiff files for use in voxelization method
+        fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
+        stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
+        StackTiffs.check_folders(fiji_file, stacked_tif)
+        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+        self.voxelization.voxelize(args, stacked_tif)
+
+        (
+            voxelized_segmented_tif,
+            orientation_file,
+        ) = GetVoxSegTif.check_warping_requirements(
+            ace_flow_vox_output_folder, ace_flow_warp_output_folder
+        )
+
+        GetVoxSegTif.create_orientation_file(
+            orientation_file,
+            ace_flow_warp_output_folder,
+            args.rca_orient_code,
+        )
+        self.warping.warp(
+            args,
+            ace_flow_reg_output_folder.parent / "clar_allen_reg",
+            voxelized_segmented_tif,
+            orientation_file,
+        )
+
 
     def _execute_comparison_workflow(self, args: argparse.Namespace, **kwargs):
         """Private method for executing the comparison workflow.
