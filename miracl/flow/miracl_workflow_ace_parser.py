@@ -337,7 +337,7 @@ class ACEWorkflowParser:
             "-rcal",
             "--rca_allen_label",
             type=str,
-            default="annotation_hemi_combined_10um.nii.gz",
+            default=None,
             help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
         )
         reg_args.add_argument(
