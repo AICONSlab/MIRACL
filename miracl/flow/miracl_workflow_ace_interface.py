@@ -758,7 +758,7 @@ class RegistrationChecker:
         :rtype: bool
         """
         if args.rerun_registration:
-            # RegistrationChecker._clear_reg_folders(reg_folder)
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check for reg_final/ and clar_allen_reg/
@@ -766,17 +766,17 @@ class RegistrationChecker:
             not reg_folder.is_dir()
             or not (reg_folder.parent / "clar_allen_reg").is_dir()
         ):
-            # RegistrationChecker._clear_reg_folders(reg_folder)
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check in the directory if there is a file that contains this command
         if not (reg_folder / "reg_command.log").is_file():
-            # RegistrationChecker._clear_reg_folders(reg_folder) # TODO: do we always clear the dir if we re-run?
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check that *_clar*.tif exists
         if not reg_folder.glob("*_clar*.tif"):
-            # RegistrationChecker._clear_reg_folders(reg_folder)
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         with open(reg_folder / "reg_command.log", "r") as f:
@@ -836,7 +836,6 @@ class RegistrationChecker:
             shutil.rmtree(reg_folder)
         reg_folder.mkdir(parents=True, exist_ok=True)
 
-        # TODO: do we also want to remove this dir?
         clar_allen_reg = reg_folder.parent / "clar_allen_reg"
         if clar_allen_reg.is_dir():
             shutil.rmtree(clar_allen_reg)
