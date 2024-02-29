@@ -109,7 +109,8 @@ class ACEConversion(Conversion):
         --resz {vz} \
         --center {' '.join(map(str, args.ctn_center))} \
         --downzdim {args.ctn_downzdim} \
-        --prevdown {args.ctn_prevdown}"
+        --prevdown {args.ctn_prevdown} \
+        --percentile_thr {args.ctn_percentile_thr}"
         subprocess.Popen(conv_cmd, shell=True).wait()
         logger.debug("Calling conversion fn here")
         logger.debug(f"Example args: {args.ctn_down}")

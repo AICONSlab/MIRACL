@@ -292,6 +292,15 @@ class ACEWorkflowParser:
             help="Previous down-sample ratio, if already downs-sampled",
         )
 
+        conv_args.add_argument(
+            "-ctnpct",
+            "--ctn_percentile_thr",
+            type=float,
+            metavar="",
+            default=0.01,
+            help="Percentile threshold for intensity correction (default: %(default)s)",
+        )
+
         # INFO: Registration parser
 
         # FIX: This should be the input folder from ACE?
