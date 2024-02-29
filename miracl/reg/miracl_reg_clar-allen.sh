@@ -54,7 +54,7 @@ function usage()
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
         w.  warp high-res clarity to Allen space (default: 0)
-		t.  percentile threshold for intensity correction after downsampling (default: 0)
+        t.  percentile threshold for intensity correction after downsampling (default: 0)
 
 	----------
 	Main Outputs
@@ -131,7 +131,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:" opt; do
+	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:t:" opt; do
     
 	    case "${opt}" in
 
@@ -427,6 +427,7 @@ printf "l: Allen labels to warp: ${lbls}\n"
 printf "p: Prebias: ${prebias}\n"
 printf "f: Sace Mosaic figure: ${savefig}\n"
 printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
+printf "t: Percentile threshold: ${percentile_thr}\n"
 printf "\n######################################################\n"
 
 # get time
@@ -712,7 +713,7 @@ function initclarallenreg()
 	initallen=$8
 
 	local percentile_thr=$9
-	local clarroi_final=$10
+	local clarroi_final=${10}
 
 	# percentile correction
 	percentile_intensity_correction ${clarroi} ${percentile_thr} ${clarroi_final}
@@ -1075,8 +1076,8 @@ function main()
 	c3d ${smclar} -type ushort -o ${smclar}
 
 	# make clarity copy, convert datatype to ushort
-	clarlnk=${regdir}/clar.nii.gz
-	clarlnk_final=${regdir}/clar_final.nii.gz
+	clarlnk=${regdir}/pre_clar.nii.gz
+	clarlnk_final=${regdir}/clar.nii.gz
 	if [[ ! -f "${clarlnk}" ]]; then cp ${smclar} ${clarlnk} ; fi
 
 
