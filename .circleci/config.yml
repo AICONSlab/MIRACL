@@ -53,17 +53,11 @@ jobs:
           name: Compile and push Singularity image
           no_output_timeout: 2h
           command: |
-            # Install spython for def file creation
-            apk update && \
-            apk add py3-pip && \
-            pip3 install spython && \
-            # Create def file with spython
-            spython recipe Dockerfile &> miracl.def && \
-            # Change permissions for code directory for any Singularity user
-            sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
             # Log in to cloud.sylabs.io
             echo $SYLABS_TOKEN_JAN_26_2024 > tokenfile && \
             singularity remote login -u aiconslab --tokenfile tokenfile && \
+            # Create Singularity container remotely and push to cloud
+            singularity build miracl.sif docker://mgoubran/miracl:latest
             # Setting trap in case image cannot be deleted
             set -e
             trap "echo 'Image doesn't exist - catching error!'; if [ $? == 255 ]; then echo 'Error 255'; fi" ERR
@@ -71,8 +65,6 @@ jobs:
             singularity delete --force library://aiconslab/miracl/miracl:latest && \
             # Unset trap
             trap - ERR
-            # Create Singularity container remotely and push to cloud
-            singularity build miracl.sif docker://mgoubran/miracl
             singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
 
 workflows:
