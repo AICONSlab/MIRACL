@@ -397,6 +397,14 @@ class ACEWorkflowParser:
             help="warp high-res clarity to Allen space (default: False)",
         )
 
+        reg_args.add_argument(
+            "-rcat",
+            "--rca_threshold",
+            type=int,
+            default=1,
+            help="threshold for percentile-based intensity correction of the input image (default: %(default)s)",
+        )
+
         # INFO: Voxelization parser
 
         # vox_args.add_argument(
