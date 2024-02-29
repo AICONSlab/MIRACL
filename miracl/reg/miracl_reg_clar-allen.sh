@@ -427,6 +427,7 @@ printf "l: Allen labels to warp: ${lbls}\n"
 printf "p: Prebias: ${prebias}\n"
 printf "f: Sace Mosaic figure: ${savefig}\n"
 printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
+printf "t: Percentile threshold: ${percentile_thr}\n"
 printf "\n######################################################\n"
 
 # get time
@@ -1075,8 +1076,8 @@ function main()
 	c3d ${smclar} -type ushort -o ${smclar}
 
 	# make clarity copy, convert datatype to ushort
-	clarlnk=${regdir}/clar.nii.gz
-	clarlnk_final=${regdir}/clar_final.nii.gz
+	clarlnk=${regdir}/pre_clar.nii.gz
+	clarlnk_final=${regdir}/clar.nii.gz
 	if [[ ! -f "${clarlnk}" ]]; then cp ${smclar} ${clarlnk} ; fi
 
 
