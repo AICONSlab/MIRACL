@@ -463,7 +463,7 @@ function resampleclar()
 	ifdsntexistrun ${resclar} "Resampling CLARITY input" \
 	ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
-	c3d ${resclar} -type ushort -o ${resclar}
+	c3d ${resclar} -type ushort -o final_${resclar}
 
 }
 
