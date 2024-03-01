@@ -836,8 +836,7 @@ class RegistrationChecker:
         -f {args.rca_no_mosaic_fig} \
         -b {args.rca_olfactory_bulb} \
         -p {args.rca_skip_cor} \
-        -w {args.rca_warp} \
-        -t {args.rca_threshold}"
+        -w {args.rca_warp}"
 
         return reg_cmd
 
