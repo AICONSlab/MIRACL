@@ -54,7 +54,7 @@ function usage()
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
         w.  warp high-res clarity to Allen space (default: 0)
-		t.  percentile threshold for intensity correction after downsampling (default: 0)
+        t.  percentile threshold for intensity correction after downsampling (default: 0)
 
 	----------
 	Main Outputs
@@ -131,7 +131,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:" opt; do
+	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:t:" opt; do
     
 	    case "${opt}" in
 
@@ -713,7 +713,7 @@ function initclarallenreg()
 	initallen=$8
 
 	local percentile_thr=$9
-	local clarroi_final=$10
+	local clarroi_final=${10}
 
 	# percentile correction
 	percentile_intensity_correction ${clarroi} ${percentile_thr} ${clarroi_final}
