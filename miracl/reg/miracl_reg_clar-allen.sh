@@ -54,7 +54,6 @@ function usage()
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
         w.  warp high-res clarity to Allen space (default: 0)
-        t.  percentile threshold for intensity correction after downsampling (default: 0)
 
 	----------
 	Main Outputs
@@ -131,7 +130,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:t:" opt; do
+	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:" opt; do
     
 	    case "${opt}" in
 
@@ -181,10 +180,6 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
           s)
           	side="${OPTARG}"
-          	;;
-
-		  t)
-		  	percentile_thr="${OPTARG}"
 			;;
 
         	*)
@@ -269,9 +264,6 @@ else
 
     printf "\n Chosen extra intensity correct: $prebias \n"
 
-	percentile_thr=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
-
-	printf "\n Chosen percentile threshold: $percentile_thr \n"
 
 fi
 
@@ -407,11 +399,6 @@ if [[ -z ${warphres} ]] || [[ "${warphres}" == "None" ]]; then
     warphres=0
 fi
 
-# percentile threshold
-if [[ -z ${percentile_thr} ]] || [[ "${percentile_thr}" == "None" ]]; then
-	percentile_thr=0
-fi
-
 # Print final args to screen for user
 printf "\n######################################################\n\n"
 printf "The following arguments will be used for registration:\n\n"
@@ -427,7 +414,6 @@ printf "l: Allen labels to warp: ${lbls}\n"
 printf "p: Prebias: ${prebias}\n"
 printf "f: Sace Mosaic figure: ${savefig}\n"
 printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
-printf "t: Percentile threshold: ${percentile_thr}\n"
 printf "\n######################################################\n"
 
 # get time
@@ -479,21 +465,6 @@ function resampleclar()
 
 	# c3d ${resclar} -type ushort -o ${resclar}
 
-}
-
-function percentile_intensity_correction()
-{
-	
-	local resclar=$1
-	local percentile_thr=$2
-	local resclarcorr=$3
-
-	# check if percentile is greater than 0
-	if [[ ${percentile_thr} -gt 0 ]]; then
-		# threshold
-		ifdsntexistrun ${resclarcorr} "Thresholding CLARITY image" \
-		c3d ${resclar} -clip ${percentile_thr}% $((100-$percentile_thr))% -o ${resclarcorr}
-	fi
 }
 
 # get brain mask (thresh & conn comp)
@@ -713,15 +684,10 @@ function initclarallenreg()
 	# Out imgs
 	initallen=$8
 
-	local percentile_thr=$9
-	local clarroi_final=${10}
-
-	# percentile correction
-	percentile_intensity_correction ${clarroi} ${percentile_thr} ${clarroi_final}
 
 	# Init reg
 	ifdsntexistrun ${initform} "Initializing registration ..." \
-	 antsAffineInitializer 3 ${clarroi_final} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
+	 antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2> /dev/null &
 
     # kill after 3 min (gcc issue)
     if [[ ! -f "${initallen}" ]] ; then
@@ -732,7 +698,7 @@ function initclarallenreg()
 
 	# Warp Allen
 	ifdsntexistrun ${initallen} "initializing Allen template" \
-	 antsApplyTransforms -i ${allenref} -r ${clarroi_final} -t ${initform} -o ${initallen}
+	 antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
 
 
 }
@@ -1077,8 +1043,7 @@ function main()
 	# c3d ${smclar} -type ushort -o ${smclar}
 
 	# make clarity copy, convert datatype to ushort
-	clarlnk=${regdir}/pre_clar.nii.gz
-	clarlnk_final=${regdir}/clar.nii.gz
+	clarlnk=${regdir}/clar.nii.gz
 	if [[ ! -f "${clarlnk}" ]]; then cp ${smclar} ${clarlnk} ; fi
 
 
@@ -1119,7 +1084,7 @@ function main()
 	initallen=${regdir}/init_allen.nii.gz
 
 
-	initclarallenreg ${clarlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen} ${percentile_thr} ${clarlnk_final}
+	initclarallenreg ${clarlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen}
 
 
 	#---------------------------
