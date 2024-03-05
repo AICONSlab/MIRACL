@@ -366,7 +366,7 @@ def generate_output_ensemble(model_out):
 # this function generates outputs using ensemble of ensembles (averaging two models + MC) technique
 def generate_output_ensemble_of_ensembles(model_out):
     # number of forward pass
-    forward_passes = 50
+    forward_passes = 5
 
     sw_batch_size = sw_batch_size_internal
     batch_size = sw_batch_size_internal

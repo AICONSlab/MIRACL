@@ -336,11 +336,11 @@ if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
 
     fi
 
-    # lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+    lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 
 fi
 
-lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+# lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 # printf "hemi: ${hemi}\n"
 # printf "vox: ${vox}\n"
 # printf "lbls: ${lbls}\n"
