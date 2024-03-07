@@ -90,8 +90,8 @@ class aceParser:
         )
         # Parser for sw batch size
         parser.add_argument(
-            "-sasw",
-            "--sa_sw_batch_size",
+            "-sab",
+            "--sa_batch_size",
             type=int,
             required=False,
             default=4,

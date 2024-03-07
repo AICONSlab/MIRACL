@@ -160,8 +160,8 @@ class ACEWorkflowParser:
         )
         # Parser for sw batch size
         seg_args.add_argument(
-            "-sasw",
-            "--sa_sw_batch_size",
+            "-sab",
+            "--sa_batch_size",
             type=int,
             required=False,
             default=4,
