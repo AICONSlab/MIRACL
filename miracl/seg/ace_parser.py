@@ -100,9 +100,9 @@ class aceParser:
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
             "-samc",
-            "--sa_monte_dropout",
-            action="store_true",
-            default=False,
+            "--sa_monte_carlo",
+            type=int,
+            default=0,
             help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized

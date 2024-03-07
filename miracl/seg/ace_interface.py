@@ -20,9 +20,9 @@ def main(args):
         number_workers_arg = args.sa_nr_workers
         cache_rate_arg = args.sa_cache_rate
         batch_size_arg = args.sa_batch_size
-        monte_dropout_arg = args.sa_monte_dropout
         visualize_results_arg = args.sa_visualize_results
         uncertainty_map_arg = args.sa_uncertainty_map
+        forward_passes_arg = args.sa_monte_carlo
 
         print("The following parameters will be used:\n")
         print(f"  Input folder:      {input_folder_arg}")
@@ -33,9 +33,9 @@ def main(args):
         print(f"  Number workers:    {number_workers_arg}")
         print(f"  Cache rate:        {cache_rate_arg}")
         print(f"  sw batch size:     {batch_size_arg}")
-        print(f"  Monte dropout:     {monte_dropout_arg}")
         print(f"  Visualize results: {visualize_results_arg}")
         print(f"  Uncertainty map:   {uncertainty_map_arg}\n")
+        print(f"  Forward passes:    {forward_passes_arg}\n")
 
         # TODO: Add program logic here
 
@@ -60,9 +60,9 @@ def main(args):
             chosen_model=model_type_arg,
             patch_dir_var=patches_folder,
             batch_size_var=batch_size_arg,
-            monte_var=monte_dropout_arg,
             cache_rate_var=cache_rate_arg,
-            num_workers_var=number_workers_arg
+            num_workers_var=number_workers_arg,
+            forward_passes_var=forward_passes_arg,
         )
 
         # INFO: ace_patch_stacking.py
@@ -71,7 +71,7 @@ def main(args):
                 patches_path=patches_folder,
                 main_input_folder_path=input_folder_arg,
                 output_folder_path=output_folder_arg,
-                monte_carlo=monte_dropout_arg,
+                monte_carlo=True if forward_passes_arg > 0 else False,
                 model_name_var=model_type_arg
                 )
 
