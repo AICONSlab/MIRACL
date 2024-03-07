@@ -178,7 +178,8 @@ def generate_output_MC(model_name, model_out):
     batch_size = batch_size_internal
 
     # number of forward pass
-    forward_passes = 4
+    # forward_passes = 4
+    forward_passes = forward_passes_internal
 
     # this function only sets the model dropout layesrs to train
     def enable_dropout(model):
@@ -366,7 +367,8 @@ def generate_output_ensemble(model_out):
 # this function generates outputs using ensemble of ensembles (averaging two models + MC) technique
 def generate_output_ensemble_of_ensembles(model_out):
     # number of forward pass
-    forward_passes = 5
+    # forward_passes = 5
+    forward_passes = forward_passes_internal
 
     sw_batch_size = sw_batch_size_internal
     batch_size = batch_size_internal
@@ -580,20 +582,22 @@ def deploy_functions(
     chosen_model,
     patch_dir_var,
     batch_size_var,
-    monte_var,
     cache_rate_var,
     num_workers_var,
+    forward_passes_var,
 ):
     # Define global vars
     model_name = chosen_model
     global input_path
     input_path = patch_dir_var
     CFG_PATH = Path(os.environ["MIRACL_HOME"]) / "seg/config_unetr.yml"
-    MC_flag = monte_var
+    MC_flag = True if forward_passes_var > 0 else False
     global batch_size_internal
     batch_size_internal = batch_size_var
     global sw_batch_size_internal
     sw_batch_size_internal = 4
+    global forward_passes_internal
+    forward_passes_internal = forward_passes_var
 
     # -------------------------------------------------------
     # Read generate_patch directory / created by generate_patch.py
