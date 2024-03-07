@@ -19,7 +19,7 @@ def main(args):
         image_sizes_arg = args.sa_image_size
         number_workers_arg = args.sa_nr_workers
         cache_rate_arg = args.sa_cache_rate
-        sw_batch_size_arg = args.sa_sw_batch_size
+        batch_size_arg = args.sa_batch_size
         monte_dropout_arg = args.sa_monte_dropout
         visualize_results_arg = args.sa_visualize_results
         uncertainty_map_arg = args.sa_uncertainty_map
@@ -32,7 +32,7 @@ def main(args):
         print(f"  Image sizes:       {image_sizes_arg}")
         print(f"  Number workers:    {number_workers_arg}")
         print(f"  Cache rate:        {cache_rate_arg}")
-        print(f"  sw batch size:     {sw_batch_size_arg}")
+        print(f"  sw batch size:     {batch_size_arg}")
         print(f"  Monte dropout:     {monte_dropout_arg}")
         print(f"  Visualize results: {visualize_results_arg}")
         print(f"  Uncertainty map:   {uncertainty_map_arg}\n")
@@ -59,7 +59,7 @@ def main(args):
         ace_deploy_model.deploy_functions(
             chosen_model=model_type_arg,
             patch_dir_var=patches_folder,
-            sw_batch_size_var=sw_batch_size_arg,
+            batch_size_var=batch_size_arg,
             monte_var=monte_dropout_arg,
             cache_rate_var=cache_rate_arg,
             num_workers_var=number_workers_arg

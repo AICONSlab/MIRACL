@@ -175,7 +175,7 @@ def generate_output_single(model_name, model_out):
 
 # this function generates outputs using the trained model and MC dropout techniques
 def generate_output_MC(model_name, model_out):
-    batch_size = sw_batch_size_internal
+    batch_size = batch_size_internal
 
     # number of forward pass
     forward_passes = 4
@@ -369,7 +369,7 @@ def generate_output_ensemble_of_ensembles(model_out):
     forward_passes = 5
 
     sw_batch_size = sw_batch_size_internal
-    batch_size = sw_batch_size_internal
+    batch_size = batch_size_internal
 
     # this function only sets the model dropout layesrs to train
     def enable_dropout(model):
@@ -579,7 +579,7 @@ def generate_output_ensemble_of_ensembles(model_out):
 def deploy_functions(
     chosen_model,
     patch_dir_var,
-    sw_batch_size_var,
+    batch_size_var,
     monte_var,
     cache_rate_var,
     num_workers_var,
@@ -590,8 +590,10 @@ def deploy_functions(
     input_path = patch_dir_var
     CFG_PATH = Path(os.environ["MIRACL_HOME"]) / "seg/config_unetr.yml"
     MC_flag = monte_var
+    global batch_size_internal
+    batch_size_internal = batch_size_var
     global sw_batch_size_internal
-    sw_batch_size_internal = sw_batch_size_var
+    sw_batch_size_internal = 4
 
     # -------------------------------------------------------
     # Read generate_patch directory / created by generate_patch.py
@@ -648,7 +650,7 @@ def deploy_functions(
     )
     # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
     global val_loader
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)
+    val_loader = DataLoader(val_ds, batch_size=batch_size_internal, num_workers=num_workers_var)
 
     # unet alone
     if model_name == "unet" and not MC_flag:
