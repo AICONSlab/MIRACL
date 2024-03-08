@@ -551,7 +551,7 @@ def generate_output_ensemble_of_ensembles(model_out):
                 )
 
                 # combine the MC_outputs together to get the average of the two models
-                val_outputs_stack = np.stack([MC_outputs1, MC_outputs2], axis=0)
+                val_outputs_stack = np.stack([MC_outputs1.detach().cpu(), MC_outputs2.detach().cpu()], axis=0)
 
                 val_outputs = torch.Tensor(np.mean(val_outputs_stack, axis=0)).to(
                     device
