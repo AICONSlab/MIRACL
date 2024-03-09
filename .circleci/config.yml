@@ -54,7 +54,7 @@ jobs:
           no_output_timeout: 2h
           command: |
             # Log in to cloud.sylabs.io
-            echo $SYLABS_TOKEN_JAN_26_2024 > tokenfile && \
+            echo $SYLABS_TOKEN_MAR_08_2024 > tokenfile && \
             singularity remote login -u aiconslab --tokenfile tokenfile && \
             # Create Singularity container remotely and push to cloud
             singularity build miracl.sif docker://mgoubran/miracl:latest
