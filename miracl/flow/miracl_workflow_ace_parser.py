@@ -192,6 +192,16 @@ class ACEWorkflowParser:
             help="enable map (default: %(default)s)",
         )
 
+        # Parser for GPU index
+        useful_args.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)"
+        )
+
         # INFO: Conversion parser
 
         # required_args.add_argument(

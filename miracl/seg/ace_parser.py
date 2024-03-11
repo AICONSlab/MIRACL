@@ -121,6 +121,15 @@ class aceParser:
             default=False,
             help="enable map (default: %(default)s)"
         )
+        # Parser for GPU index
+        parser.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)"
+        )
         return parser
 
     # def parse_args(self) -> argparse.Namespace:
