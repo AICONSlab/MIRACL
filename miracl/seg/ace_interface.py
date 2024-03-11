@@ -23,6 +23,7 @@ def main(args):
         visualize_results_arg = args.sa_visualize_results
         uncertainty_map_arg = args.sa_uncertainty_map
         forward_passes_arg = args.sa_monte_carlo
+        gpu_index_arg = args.sa_gpu_index
 
         print("The following parameters will be used:\n")
         print(f"  Input folder:      {input_folder_arg}")
@@ -36,6 +37,7 @@ def main(args):
         print(f"  Visualize results: {visualize_results_arg}")
         print(f"  Uncertainty map:   {uncertainty_map_arg}\n")
         print(f"  Forward passes:    {forward_passes_arg}\n")
+        print(f"  GPU index:         {gpu_index_arg}\n")
 
         # TODO: Add program logic here
 
@@ -63,6 +65,7 @@ def main(args):
             cache_rate_var=cache_rate_arg,
             num_workers_var=number_workers_arg,
             forward_passes_var=forward_passes_arg,
+            gpu_index=gpu_index_arg,
         )
 
         # INFO: ace_patch_stacking.py

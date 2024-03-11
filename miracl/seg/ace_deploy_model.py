@@ -585,6 +585,7 @@ def deploy_functions(
     cache_rate_var,
     num_workers_var,
     forward_passes_var,
+    gpu_index,
 ):
     # Define global vars
     model_name = chosen_model
@@ -639,8 +640,11 @@ def deploy_functions(
     gpu_opt = cfg["general"].get("GPU", "single")
     global device
     if gpu_opt == "single":
-        device = torch.device("cuda:0")
+        if torch.cuda.device_count() <= gpu_index:
+            raise ValueError(f"Selected GPU index ({gpu_index}) is not available. Available GPUs: {torch.cuda.device_count()}")
+        device = torch.device(f"cuda:{gpu_index}")
     else:
+        raise NotImplementedError("multi-gpu is not implemented yet")
         device = torch.device("cuda:0")
         # model = torch.nn.DataParallel(model)
         # model.to(device)
