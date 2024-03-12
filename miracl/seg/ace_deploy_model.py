@@ -342,11 +342,11 @@ def generate_output_ensemble(model_out):
             # also move it to cpu
             for j in range(len(val_outputs1)):
 
-                val_outputs1 = val_outputs1[j].detach().cpu()
-                val_outputs2 = val_outputs2[j].detach().cpu()
-
                 # stack them together --> (2, 2, 512, 512, 512)
-                val_outputs = np.stack([val_outputs1, val_outputs2], axis=0)
+                val_outputs = np.stack([
+                    val_outputs1[j].detach().cpu(),
+                    val_outputs2[j].detach().cpu()
+                ], axis=0)
 
                 # average them together ---> (2, 512, 512, 512)
                 # add one channel and change it to tensor ---> (1, 2, 512, 512, 512)
