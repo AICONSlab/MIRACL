@@ -165,7 +165,7 @@ def generate_output_single(model_name, model_out):
                 val_inputs, roi_size, sw_batch_size, model_out
             )
 
-            val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+            val_outputs = [post_pred(z) for z in decollate_batch(val_outputs)]
             # save the images as .tiff file readable by Fiji
             for j in range(len(val_outputs)):
                 img_list = [val_outputs[j][1, :, :, :].detach().cpu()]
@@ -285,7 +285,7 @@ def generate_output_MC(model_name, model_out):
 
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs = [
-                    post_pred(i) for i in decollate_batch(MC_outputs.unsqueeze(0))
+                    post_pred(z) for z in decollate_batch(MC_outputs.unsqueeze(0))
                 ]
 
                 # save the images as .tiff file readable by Fiji
@@ -354,7 +354,7 @@ def generate_output_ensemble(model_out):
                     torch.Tensor(np.mean(val_outputs, axis=0)).unsqueeze(0).to(device)
                 )
 
-                val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+                val_outputs = [post_pred(z) for z in decollate_batch(val_outputs)]
 
                 # save the images as .tiff file readable by Fiji
                 img_list = [val_outputs[0][1, :, :, :].detach().cpu()]
@@ -524,12 +524,12 @@ def generate_output_ensemble_of_ensembles(model_out):
                 # MC_outputs1_temp = torch.Tensor(MC_outputs1).to(device)
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs1_temp = [
-                    post_pred(i) for i in decollate_batch(MC_outputs1.unsqueeze(0))
+                    post_pred(z) for z in decollate_batch(MC_outputs1.unsqueeze(0))
                 ]
                 # MC_outputs2_temp = torch.Tensor(MC_outputs2).to(device)
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs2_temp = [
-                    post_pred(i) for i in decollate_batch(MC_outputs2.unsqueeze(0))
+                    post_pred(z) for z in decollate_batch(MC_outputs2.unsqueeze(0))
                 ]
 
                 # save the images as .tiff file readable by Fiji
