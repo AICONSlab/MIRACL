@@ -250,9 +250,6 @@ def generate_output_MC(model_name, model_out):
                         sum_squared_voxels[j], val_outputs[j].detach().cpu() ** 2
                     )
 
-            print(val_outputs.shape)
-            print(sum_voxels[j].shape)
-
             # stack all the forward passes together
             # use compute_variance function to calculate the uncertainty
             # the should be [N, C, H, W, D] or [N, C, H, W] or [N, C, H] where N is repeats,
@@ -272,13 +269,9 @@ def generate_output_MC(model_name, model_out):
                 )
                 uncertainty = uncertainty[1, :, :, :]
 
-                print(uncertainty.shape)
-
                 # get the average of MC_dropout and send it to GPU for calculating the new dice score
                 # MC_outputs = torch.Tensor(np.mean(val_outputs_stack, axis=0)).to(device)
                 MC_outputs = torch.Tensor(sum_voxels[j] / forward_passes).to(device)
-
-                print(MC_outputs.shape)
 
                 # clear val_outputs_stack for memory efficiency
                 # del val_outputs_stack
