@@ -349,7 +349,13 @@ class ACEWorkflows:
         if rerun_seg:
             self.segmentation.segment(args)
 
-        self.conversion.convert(args)
+        rerun_conv = ConversionChecker.check_conversion(
+            args, ace_flow_conv_output_folder
+        )
+
+        if rerun_conv:
+            self.conversion.convert(args)
+
         converted_nii_file = GetConverterdNifti.get_nifti_file(
             ace_flow_conv_output_folder
         )
@@ -445,7 +451,13 @@ class ACEWorkflows:
                 if rerun_seg:
                     self.segmentation.segment(args)
 
-                self.conversion.convert(args)
+                rerun_conv = ConversionChecker.check_conversion(
+                    args, ace_flow_conv_output_folder
+                )
+
+                if rerun_conv:
+                    self.conversion.convert(args)
+
                 converted_nii_file = GetConverterdNifti.get_nifti_file(
                     ace_flow_conv_output_folder
                 )
@@ -915,6 +927,55 @@ class SegmentationChecker:
         if seg_folder.is_dir():
             shutil.rmtree(seg_folder)
         seg_folder.mkdir(parents=True, exist_ok=True)
+
+
+class ConversionChecker:
+    """Class for checking if each subject needs to re-run
+    conversion.
+    """
+
+    @staticmethod
+    def check_conversion(
+        args: argparse.Namespace,
+        conv_folder: Path,
+    ) -> bool:
+        """Checks if conversion needs to be run based on user input and the file structure.
+        If the user wants to run conv, we run it. Otherwise, check that all the necessary files
+        are in place before skipping. If they are not, we re-run conv.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param conv_folder: path to conv output folder (conv_final/)
+        :type conv_folder: Path
+        :return: whether or not conversion needs to be re-run
+        :rtype: bool
+        """
+
+        if args.rerun_conversion:
+            ConversionChecker._clear_conv_folders(conv_folder)
+            return True
+
+        # check for conv_final/
+        if not conv_folder.is_dir():
+            ConversionChecker._clear_conv_folders(conv_folder)
+            return True
+
+        # check for the right downsample value
+        if not list(conv_folder.glob(f"*_{args.ctn_down}x_down_*.nii.gz")):
+            ConversionChecker._clear_conv_folders(conv_folder)
+            return True
+
+    @staticmethod
+    def _clear_conv_folders(conv_folder: Path):
+        """Clears the results from the conversion folder.
+
+        :param conv_folder: path to the conversion output folder ('conv_final/')
+        :type conv_folder: Path
+        """
+
+        if conv_folder.is_dir():
+            shutil.rmtree(conv_folder)
+        conv_folder.mkdir(parents=True, exist_ok=True)
 
 
 def main():

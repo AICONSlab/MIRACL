@@ -199,7 +199,7 @@ class ACEWorkflowParser:
             type=int,
             required=False,
             default=0,
-            help="index of the GPU to use (type: %(type)s; default: %(default)s)"
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
         )
 
         # INFO: Conversion parser
@@ -724,6 +724,14 @@ class ACEWorkflowParser:
             "--rerun-segmentation",
             default="false",
             help="Whether to rerun segmentation step of flow",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        useful_args.add_argument(
+            "--rerun-conversion",
+            default="false",
+            help="Whether to rerun conversion step of flow",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
