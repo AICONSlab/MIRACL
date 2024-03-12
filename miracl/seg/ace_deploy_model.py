@@ -340,28 +340,27 @@ def generate_output_ensemble(model_out):
 
             # change the shape of val_outputs from (1, 2, 512, 512, 512) to (2, 512, 512, 512)
             # also move it to cpu
-            val_outputs1 = val_outputs1.squeeze(0).detach().cpu()
-            val_outputs2 = val_outputs2.squeeze(0).detach().cpu()
+            for j in range(len(val_outputs1)):
 
-            # stack them together --> (2, 2, 512, 512, 512)
-            val_outputs = np.stack([val_outputs1, val_outputs2], axis=0)
+                val_outputs1 = val_outputs1[j].detach().cpu()
+                val_outputs2 = val_outputs2[j].detach().cpu()
 
-            # average them together ---> (2, 512, 512, 512)
-            # add one channel and change it to tensor ---> (1, 2, 512, 512, 512)
-            val_outputs = (
-                torch.Tensor(np.mean(val_outputs, axis=0)).unsqueeze(0).to(device)
-            )
+                # stack them together --> (2, 2, 512, 512, 512)
+                val_outputs = np.stack([val_outputs1, val_outputs2], axis=0)
 
-            val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+                # average them together ---> (2, 512, 512, 512)
+                # add one channel and change it to tensor ---> (1, 2, 512, 512, 512)
+                val_outputs = (
+                    torch.Tensor(np.mean(val_outputs, axis=0)).unsqueeze(0).to(device)
+                )
 
-            # save the images as .tiff file readable by Fiji
-            img_list = [
-                val_data["image"][0, 0, :, :, :],
-                val_outputs[0].detach().cpu()[1, :, :, :],
-            ]
-            save_tiff(img_list, input_path, data_dicts_test[RI_subj_id - 1])
+                val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
 
-            RI_subj_id += 1
+                # save the images as .tiff file readable by Fiji
+                img_list = [val_outputs[0][1, :, :, :].detach().cpu()]
+                save_tiff(img_list, input_path, data_dicts_test[RI_subj_id - 1])
+
+                RI_subj_id += 1
 
 
 # this function generates outputs using ensemble of ensembles (averaging two models + MC) technique
