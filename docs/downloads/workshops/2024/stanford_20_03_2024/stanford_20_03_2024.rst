@@ -1,0 +1,24 @@
+March 20th: MIRACL Workshop at Stanford
+#######################################
+
+Flyer
+=====
+
+.. image:: ./data/miracl_stanford_20_03_2024_flyer.png
+
+Slides
+======
+
+:download:`miracl_stanford_20_03_2024_slides.pdf <./data/miracl_stanford_20_03_2024_slides.pdf>`
+
+Notebooks
+=========
+
+.. line-block::
+   :download:`ACE <./data/miracl_stanford_20_03_2024_ace.ipynb>`
+   :download:`STA <./data/miracl_stanford_20_03_2024_sta.ipynb>`
+   :download:`Registration <./data/miracl_stanford_20_03_2024_registration.ipynb>`
+   :download:`Regional statistics and visualization <./data/miracl_stanford_20_03_2024_regional_statistics_and_visualization.ipynb>`
+   :download:`Installing MIRACL on Windows <./data/miracl_stanford_20_03_2024_installing_miracl_on_windows.ipynb>`
+   :download:`Singularity on Compute Canada and Sherlock <./data/miracl_stanford_20_03_2024_singularity_sherlock_cc.ipynb>`
+
