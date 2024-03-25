@@ -6,11 +6,6 @@ Flyer
 
 .. image:: ./data/miracl_stanford_20_03_2024_flyer.png
 
-Slides
-======
-
-:download:`miracl_stanford_20_03_2024_slides.pdf <./data/miracl_stanford_20_03_2024_slides.pdf>`
-
 Notebooks
 =========
 
