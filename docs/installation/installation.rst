@@ -598,7 +598,7 @@ either of the following methods:
 
          <h2>Jupyter notebook</h2>
 
-      .. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
+      .. |linktoworkshop| replace:: :doc:`here <../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
 
       .. include:: ../directives/tutorial_notebook_links.txt
 
