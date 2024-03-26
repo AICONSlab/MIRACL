@@ -16,7 +16,7 @@ Welcome to MIRACL's documentation!
    tutorials/index
    troubleshooting/index
    gallery/gallery
-   Data <data/example_and_atlases_data>
+   downloads/index
 
 .. |license_img| image:: https://img.shields.io/github/license/mgoubran/MIRACL
    :width: 117px
