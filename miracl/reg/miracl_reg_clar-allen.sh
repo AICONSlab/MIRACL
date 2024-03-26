@@ -180,7 +180,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
           s)
           	side="${OPTARG}"
-          	;;
+			;;
 
         	*)
             usage            	
@@ -336,11 +336,11 @@ if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
 
     fi
 
-    # lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+    lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 
 fi
 
-lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+# lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 # printf "hemi: ${hemi}\n"
 # printf "vox: ${vox}\n"
 # printf "lbls: ${lbls}\n"
@@ -463,7 +463,7 @@ function resampleclar()
 	ifdsntexistrun ${resclar} "Resampling CLARITY input" \
 	ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
 
-	c3d ${resclar} -type ushort -o ${resclar}
+	# c3d ${resclar} -type ushort -o ${resclar}
 
 }
 
@@ -654,7 +654,8 @@ function croptosmall()
 	local clarroi=$3
 
 	ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" \
-	c3d ${smclar} -trim ${trim}vox -type ushort -o ${clarroi}
+	c3d ${smclar} -trim ${trim}vox -o ${clarroi}
+	# c3d ${smclar} -trim ${trim}vox -type ushort -o ${clarroi}
 
 }
 
@@ -1039,7 +1040,7 @@ function main()
 	# Smooth, convert datatype to ushort
 	smclar=${regdir}/clar_res0.05_sm.nii.gz
 	smoothimg ${ortclar} 0.25 ${smclar}
-	c3d ${smclar} -type ushort -o ${smclar}
+	# c3d ${smclar} -type ushort -o ${smclar}
 
 	# make clarity copy, convert datatype to ushort
 	clarlnk=${regdir}/clar.nii.gz
@@ -1159,7 +1160,7 @@ function main()
     regorgclar=${regdirfinal}/clar_allen_space.nii.gz
 
     if [[ "${warphres}" == 1 ]]; then
-        warpinclarallen ${inclar} ${ort} Cubic ushort ${ortinclar} ${allenhres} \
+        warpinclarallen ${inclar} ${ort} Cubic uint ${ortinclar} ${allenhres} \
          ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
     fi
 

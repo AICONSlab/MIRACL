@@ -90,8 +90,8 @@ class aceParser:
         )
         # Parser for sw batch size
         parser.add_argument(
-            "-sasw",
-            "--sa_sw_batch_size",
+            "-sab",
+            "--sa_batch_size",
             type=int,
             required=False,
             default=4,
@@ -100,9 +100,9 @@ class aceParser:
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
             "-samc",
-            "--sa_monte_dropout",
-            action="store_true",
-            default=False,
+            "--sa_monte_carlo",
+            type=int,
+            default=0,
             help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized
@@ -120,6 +120,15 @@ class aceParser:
             action="store_true",
             default=False,
             help="enable map (default: %(default)s)"
+        )
+        # Parser for GPU index
+        parser.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)"
         )
         return parser
 

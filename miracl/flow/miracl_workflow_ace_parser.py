@@ -160,8 +160,8 @@ class ACEWorkflowParser:
         )
         # Parser for sw batch size
         seg_args.add_argument(
-            "-sasw",
-            "--sa_sw_batch_size",
+            "-sab",
+            "--sa_batch_size",
             type=int,
             required=False,
             default=4,
@@ -170,9 +170,9 @@ class ACEWorkflowParser:
         # Boolean to choose if whether it is needed to MC
         seg_args.add_argument(
             "-samc",
-            "--sa_monte_dropout",
-            action="store_true",
-            default=False,
+            "--sa_monte_carlo",
+            type=int,
+            default=0,
             help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized
@@ -190,6 +190,16 @@ class ACEWorkflowParser:
             action="store_true",
             default=False,
             help="enable map (default: %(default)s)",
+        )
+
+        # Parser for GPU index
+        useful_args.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
         )
 
         # INFO: Conversion parser
@@ -292,6 +302,15 @@ class ACEWorkflowParser:
             help="Previous down-sample ratio, if already downs-sampled",
         )
 
+        conv_args.add_argument(
+            "-ctnpct",
+            "--ctn_percentile_thr",
+            type=float,
+            metavar="",
+            default=0.01,
+            help="Percentile threshold for intensity correction (default: %(default)s)",
+        )
+
         # INFO: Registration parser
 
         # FIX: This should be the input folder from ACE?
@@ -337,7 +356,7 @@ class ACEWorkflowParser:
             "-rcal",
             "--rca_allen_label",
             type=str,
-            default="annotation_hemi_combined_10um.nii.gz",
+            default=None,
             help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
         )
         reg_args.add_argument(
@@ -688,15 +707,31 @@ class ACEWorkflowParser:
             "-ua",
             "--u_atlas_dir",
             default="miracl_home",
-            help="path of atlas directory (default: '/code/atlases/ara/')"
+            help="path of atlas directory (default: '/code/atlases/ara/')",
         )
-
 
         # Parser to select the registration skipping
         useful_args.add_argument(
             "--rerun-registration",
             default="false",
             help="Whether to rerun registration step of flow",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        # Parser to select the segmentation skipping
+        useful_args.add_argument(
+            "--rerun-segmentation",
+            default="false",
+            help="Whether to rerun segmentation step of flow",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        useful_args.add_argument(
+            "--rerun-conversion",
+            default="false",
+            help="Whether to rerun conversion step of flow",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
