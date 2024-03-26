@@ -112,3 +112,8 @@ over previously:
    want to use on Compute Canada, just copy it to the servers directly using 
    e.g. ``scp`` or ``rsync`` instead of pulling (downloading) the latest 
    version of :program:`MIRACL` from the :program:`Singularity` registry
+
+.. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
+
+.. include:: ../../../directives/tutorial_notebook_links.txt
+
