@@ -173,3 +173,7 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
       -c ./ctrl/ \
       -e ./treated/ \
       -sao ./output_dir \
+
+.. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
+
+.. include:: ../../../directives/tutorial_notebook_links.txt
