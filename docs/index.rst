@@ -14,6 +14,7 @@ Welcome to MIRACL's documentation!
    about/index
    Installation <installation/installation>
    tutorials/index
+   Notebooks <notebooks/notebooks>
    troubleshooting/index
    gallery/gallery
    downloads/index
