@@ -163,6 +163,34 @@ def generate_patch_main(input_folder, output_folder):
                 print(f"output_dir: {output_dir_img}")
             fname_output_img = os.path.join(output_dir_img, file_img)
 
+            # check if the image depth is less than 512 and zero-pad
+            if img_batch_single.shape[0] < batch_size:
+                img_batch_single = np.pad(
+                    img_batch_single,
+                    ((0, batch_size - img_batch_single.shape[0]), (0, 0), (0, 0)),
+                    mode="constant",
+                    constant_values=0,
+                )
+            
+            # check the image width is less than 512 and zero-pad
+            if img_batch_single.shape[1] < batch_size:
+                img_batch_single = np.pad(
+                    img_batch_single,
+                    ((0, 0), (0, batch_size - img_batch_single.shape[1]), (0, 0)),
+                    mode="constant",
+                    constant_values=0,
+                )
+            
+            # check the image width is less than 512 and zero-pad
+            if img_batch_single.shape[2] < batch_size:
+                img_batch_single = np.pad(
+                    img_batch_single,
+                    ((0, 0), (0, 0), (0, batch_size - img_batch_single.shape[2])),
+                    mode="constant",
+                    constant_values=0,
+                )
+
+
             tifffile.imwrite(
                 fname_output_img,
                 img_batch_single.astype("uint16"),
