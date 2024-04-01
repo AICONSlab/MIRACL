@@ -373,7 +373,7 @@ class ACEWorkflows:
         fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
         stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
         StackTiffs.check_folders(fiji_file, stacked_tif)
-        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo)
         self.voxelization.voxelize(args, stacked_tif)
 
         (
@@ -591,7 +591,7 @@ class StackTiffs:
 
     @staticmethod
     def stacking(
-        fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path
+        fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path, is_MC: bool
     ):
         """Writes a Fiji macro and runs it to stack the segmented tif files.
         Needed to run before voxelization.
@@ -602,10 +602,13 @@ class StackTiffs:
         :type stacked_tif: pathlib.Path
         :param seg_output_dir: path to the segmented tif files ('seg_final/')
         :type seg_output_dir: pathlib.Path
+        :param is_MC: flag for Monte Carlo or not
+        :type is_MC: bool
         """
         print("  stacking segmented tifs...")
+        filter = "out_" if not is_MC else "MC_"
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
+            file.write(f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n')
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
