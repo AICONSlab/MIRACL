@@ -762,7 +762,10 @@ class ConstructHeatmapCmd:
             -d {ace_flow_heatmap_output_folder} \
             -o {args.sh_outfile} \
             -e {args.sh_extension} \
-            --dpi {args.sh_dpi}"
+            --dpi {args.sh_dpi} \
+            -si {args.rca_side} \
+            -m {args.rca_hemi} \
+            -l {args.rca_allen_label}"
 
         return tested_heatmap_cmd
 
