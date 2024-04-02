@@ -180,7 +180,7 @@ if [[ "$#" -gt 1 ]]; then
     exit 1
   fi
 
-  if [[ ! -z ${lbls} ]]; then
+  if [[ ! -z ${lbls} && ${lbls} != "None" ]]; then
 	allenref=${lbls}
 	printf "\n Allen labels to warp: ${allenref} \n"
   fi
