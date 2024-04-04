@@ -17,6 +17,7 @@ class ACEStatsParser:
         utility_args = parser.add_argument_group("utility arguments")
         corr_args = parser.add_argument_group("optional correlation arguments")
         perm_args = parser.add_argument_group("optional permutation arguments")
+        pvalue_args = parser.add_argument_group("optional pvalue plot arguments")
 
         single_multi_args_group.add_argument(
             "-c",
@@ -27,7 +28,7 @@ class ACEStatsParser:
                 "CONTROL_VOXILIZED_SEGMENTED_TIF_EXAMPLE_PATH",
             ),
             help="FIRST: path to base control directory.\nSECOND: example path to control subject voxelized tif file (voxelized_seg_*.nii.gz)",
-            nargs=2,
+            nargs="+",
         )
 
         single_multi_args_group.add_argument(
@@ -39,7 +40,7 @@ class ACEStatsParser:
                 "EXPERIMENT_VOXILIZED_SEGMENTED_TIF_EXAMPLE_PATH",
             ),
             help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject voxelized tif file (voxelized_seg_*.nii.gz)",
-            nargs=2,
+            nargs="+",
         )
 
         required_args.add_argument(
@@ -64,6 +65,23 @@ class ACEStatsParser:
             choices=[10, 25, 50],
             default=10,
             help="labels voxel size/Resolution in um (default: %(default)s)",
+        )
+
+        utility_args.add_argument(
+            "-rcam",
+            "--rca_hemi",
+            type=str,
+            choices=["combined", "split"],
+            default="combined",
+            help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
+        )
+        utility_args.add_argument(
+            "-rcas",
+            "--rca_side",
+            type=str,
+            choices=["rh", "lh"],
+            default="rh",
+            help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
         )
 
         corr_args.add_argument(
@@ -137,6 +155,82 @@ class ACEStatsParser:
             default=25,
             choices=[10, 25, 50],
             help="voxel size/Resolution in um for warping (default: %(default)s)",
+        )
+
+        pvalue_args.add_argument(
+            "-shgs",
+            "--sh_sigma",
+            type=int,
+            help="Gaussian smoothing sigma (default: %(default)s)",
+            default=4,
+        )
+        pvalue_args.add_argument(
+            "-shcp",
+            "--sh_colourmap_pos",
+            type=str,
+            help="matplotlib colourmap for positive values (default: %(default)s)",
+            default="Reds",
+        )
+        pvalue_args.add_argument(
+            "-shcn",
+            "--sh_colourmap_neg",
+            type=str,
+            help="matplotlib colourmap for negative values (default: %(default)s)",
+            default="Blues",
+        )
+
+        pvalue_args.add_argument(
+            "-shs",
+            "--sh_sagittal",
+            nargs=5,
+            type=int,
+            help="slicing across sagittal axis. \n 5 Arguments: start_slice slice_interval number_of_slices number_of_rows number_of_columns",
+            default=None,
+        )
+        pvalue_args.add_argument(
+            "-shc",
+            "--sh_coronal",
+            nargs=5,
+            type=int,
+            help="slicing across coronal axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns",
+            default=None,
+        )
+        pvalue_args.add_argument(
+            "-sha",
+            "--sh_axial",
+            nargs=5,
+            type=int,
+            help="slicing across axial axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns",
+            default=None,
+        )
+        pvalue_args.add_argument(
+            "-shf",
+            "--sh_figure_dim",
+            type=float,
+            nargs=2,
+            help="figure width and height",
+            default=None,
+        )
+        pvalue_args.add_argument(
+            "-po",
+            "--p_outfile",
+            type=str,
+            help="Output filenames (default: %(default)s)",
+            default="pvalue_heatmap",
+        )
+        pvalue_args.add_argument(
+            "-she",
+            "--sh_extension",
+            type=str,
+            help="heatmap figure extension (default: %(default)s)",
+            default="tiff",
+        )
+        pvalue_args.add_argument(
+            "-shdpi",
+            "--sh_dpi",
+            type=int,
+            help="dots per inch (default: %(default)s)",
+            default=500,
         )
 
         return parser
