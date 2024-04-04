@@ -308,6 +308,9 @@ def main(args, output_dir_arg):
     cpuload = args.pcs_cpu_load
     stp = args.pcs_step_down_p
     mask_thr = args.pcs_mask_thr
+    hemi = args.rca_hemi
+    side = args.rca_side
+    side = {"rh": "right", "lh": "left"}.get(side, None)
 
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)  # 90% default of cores used
@@ -329,6 +332,8 @@ def main(args, output_dir_arg):
     print(f"  mask_thr: {mask_thr}")
     print(f"  cpus: {cpus}")
     print(f"  ncpus: {ncpus}")
+    print(f"  hemi: {hemi}")
+    print(f"  side: {side}")
 
     # -------------------------------------------------------
     # load and prepare atl
@@ -339,30 +344,34 @@ def main(args, output_dir_arg):
         atl_dir = Path("/code/atlases/ara/template")
         ann_dir = Path("/code/atlases/ara/annotation")
 
-    mask_filename = f"average_template_{img_res}um_brainmask.nii.gz"
-    ann_filename = f"annotation_hemi_combined_{img_res}um.nii.gz"
+    if hemi == "combined":
+        mask_filename = f"average_template_{img_res}um_brainmask.nii.gz"
+        ann_filename = f"annotation_hemi_combined_{img_res}um.nii.gz"
+    elif hemi == "split":
+        mask_filename = f"average_template_{img_res}um_brainmask_{side}.nii.gz"
+        ann_filename = f"annotation_hemi_{side}_{img_res}um.nii.gz"
 
     # load the atlas
-    if img_res == 10:
-        ann_img = nib.load(os.path.join(ann_dir, ann_filename))
-        ann_img_array = ann_img.get_fdata()
-        mask_img = np.ones_like(ann_img_array)
-        mask_img[ann_img_array == 0] = 0
-        nib.save(
-            nib.Nifti1Image(mask_img, ann_img.affine, ann_img.header),
-            os.path.join(out_dir, "brain_mask_10um.nii.gz"),
-        )
+    # if img_res == 10:
+    ann_img = nib.load(os.path.join(ann_dir, ann_filename))
+    ann_img_array = ann_img.get_fdata()
+    mask_img = np.ones_like(ann_img_array)
+    mask_img[ann_img_array == 0] = 0
+    nib.save(
+        nib.Nifti1Image(mask_img, ann_img.affine, ann_img.header),
+        os.path.join(out_dir, mask_filename),
+    )
 
-        mask_filename = os.path.join(out_dir, "brain_mask_10um.nii.gz")
-        mask_img = nib.load(mask_filename)
-        mask_img_array = mask_img.get_fdata()
+    mask_filename = os.path.join(out_dir, mask_filename)
+    mask_img = nib.load(mask_filename)
+    mask_img_array = mask_img.get_fdata()
 
-    else:
-        ann_img = nib.load(os.path.join(ann_dir, ann_filename))
-        ann_img_array = ann_img.get_fdata()
-        mask_filename = os.path.join(atl_dir, mask_filename)
-        mask_img = nib.load(mask_filename)
-        mask_img_array = mask_img.get_fdata()
+    # else:
+    #     ann_img = nib.load(os.path.join(ann_dir, ann_filename))
+    #     ann_img_array = ann_img.get_fdata()
+    #     mask_filename = os.path.join(atl_dir, mask_filename)
+    #     mask_img = nib.load(mask_filename)
+    #     mask_img_array = mask_img.get_fdata()
 
     print("mask shape: ", mask_img_array.shape)
 
@@ -384,6 +393,7 @@ def main(args, output_dir_arg):
         control_imgs = [str(file.relative_to(control_base_dir)) for file in control_imgs]
         control_dir = control_base_dir
     else:
+        control_dir = control_dir[0]
         control_imgs = fnmatch.filter(os.listdir(control_dir), "*.nii.gz")
         control_imgs.sort()
 
@@ -411,6 +421,7 @@ def main(args, output_dir_arg):
         exp_imgs = [str(file.relative_to(experiment_base_dir)) for file in exp_imgs]
         exp_dir = experiment_base_dir
     else:
+        exp_dir = exp_dir[0]
         exp_imgs = fnmatch.filter(os.listdir(exp_dir), "*.nii.gz")
         exp_imgs.sort()
 
