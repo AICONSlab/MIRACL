@@ -217,8 +217,9 @@ def generate_output_MC(model_name, model_out):
             # val_outputs_list = []
 
             # these are needed to calculate mean and var iteratively --> less memory needed
-            sum_voxels = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_squared_voxels = np.zeros((batch_size, 2, 512, 512, 512))
+            H, W, D = val_data["image"].shape[2], val_data["image"].shape[3], val_data["image"].shape[4]
+            sum_voxels = np.zeros((batch_size, 2, H, W, D))
+            sum_squared_voxels = np.zeros((batch_size, 2, H, W, D))
 
             for f in range(forward_passes):
                 val_inputs = (val_data["image"].to(device)).float()
@@ -403,10 +404,11 @@ def generate_output_ensemble_of_ensembles(model_out):
             # val_outputs_list2 = []
 
             # these are needed to calculate mean and var iteratively --> less memory needed
-            sum_voxels1 = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_squared_voxels1 = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_voxels2 = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_squared_voxels2 = np.zeros((batch_size, 2, 512, 512, 512))
+            H, W, D = val_data["image"].shape[2], val_data["image"].shape[3], val_data["image"].shape[4]
+            sum_voxels1 = np.zeros((batch_size, 2, H, W, D))
+            sum_squared_voxels1 = np.zeros((batch_size, 2, H, W, D))
+            sum_voxels2 = np.zeros((batch_size, 2, H, W, D))
+            sum_squared_voxels2 = np.zeros((batch_size, 2, H, W, D))
 
             for f in range(forward_passes):
                 val_inputs = (val_data["image"].to(device)).float()
