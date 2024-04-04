@@ -578,6 +578,7 @@ def deploy_functions(
     num_workers_var,
     forward_passes_var,
     gpu_index,
+    binarization_threshold,
 ):
     # Define global vars
     model_name = chosen_model
@@ -619,7 +620,7 @@ def deploy_functions(
         model_name, CFG_PATH
     )
     global post_pred
-    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
+    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2, threshold=binarization_threshold)])
     global post_label
     post_label = Compose([EnsureType(), AsDiscrete(to_onehot=2)])
 

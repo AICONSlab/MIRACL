@@ -191,6 +191,15 @@ class ACEWorkflowParser:
             default=False,
             help="enable map (default: %(default)s)",
         )
+        # Parser for binarization threshold
+        seg_args.add_argument(
+            "-sat",
+            "--sa_binarization_threshold",
+            type=float,
+            required=False,
+            default=0.5,
+            help="threshold value for binarization (type: %(type)s; default: %(default)s)"
+        )
 
         # Parser for GPU index
         useful_args.add_argument(

@@ -130,6 +130,15 @@ class aceParser:
             default=0,
             help="index of the GPU to use (type: %(type)s; default: %(default)s)"
         )
+        # Parser for binarization threshold
+        parser.add_argument(
+            "-sat",
+            "--sa_binarization_threshold",
+            type=float,
+            required=False,
+            default=0.5,
+            help="threshold value for binarization (type: %(type)s; default: %(default)s)"
+        )
         return parser
 
     # def parse_args(self) -> argparse.Namespace:
