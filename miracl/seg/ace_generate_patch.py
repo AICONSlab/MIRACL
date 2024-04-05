@@ -220,7 +220,7 @@ def generate_patch_main(input_folder, output_folder):
                 },
             )
 
-            percentage_brain_patch[fname_output_img] = 100 * img_batch_single_binary.sum() / (batch_size**3)
+            percentage_brain_patch[Path(fname_output_img).name] = 100 * img_batch_single_binary.sum() / (batch_size**3)
 
     # save percentage of brain in each patch as json
     with open(output_dir_img / "percentage_brain_patch.json", "w") as f:
