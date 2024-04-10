@@ -200,6 +200,15 @@ class ACEWorkflowParser:
             default=0.5,
             help="threshold value for binarization (type: %(type)s; default: %(default)s)"
         )
+        # Parser for percentage brain patch skip
+        parser.add_argument(
+            "-sap",
+            "--sa_percentage_brain_patch_skip",
+            type=float,
+            required=False,
+            default=0.0,
+            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)"
+        )
 
         # Parser for GPU index
         useful_args.add_argument(
@@ -717,6 +726,13 @@ class ACEWorkflowParser:
             "--u_atlas_dir",
             default="miracl_home",
             help="path of atlas directory (default: '/code/atlases/ara/')",
+        )
+        stats_args.add_argument(
+            "-po",
+            "--p_outfile",
+            type=str,
+            help="Output filenames (default: %(default)s)",
+            default="pvalue_heatmap",
         )
 
         # Parser to select the registration skipping

@@ -139,6 +139,15 @@ class aceParser:
             default=0.5,
             help="threshold value for binarization (type: %(type)s; default: %(default)s)"
         )
+        # Parser for percentage brain patch skip
+        parser.add_argument(
+            "-sap",
+            "--sa_percentage_brain_patch_skip",
+            type=float,
+            required=False,
+            default=0.0,
+            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)"
+        )
         return parser
 
     # def parse_args(self) -> argparse.Namespace:

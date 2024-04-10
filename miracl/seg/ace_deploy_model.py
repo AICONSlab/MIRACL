@@ -33,6 +33,7 @@ from monai.transforms import (
 )
 import torch
 from monai.data import CacheDataset, DataLoader, decollate_batch
+import json
 
 # from monai.handlers.utils import from_engine
 import numpy as np
@@ -581,6 +582,7 @@ def deploy_functions(
     forward_passes_var,
     gpu_index,
     binarization_threshold,
+    percentage_brain_patch_skip,
 ):
     # Define global vars
     model_name = chosen_model
@@ -607,8 +609,27 @@ def deploy_functions(
             if entry.is_file() and entry.name.lower().endswith((".tif", ".tiff")):
                 images_val.append(entry.name)
 
-    images_val.sort()
-    images_val = [os.path.join(input_path, image) for image in images_val]
+    # load in percentage_brain_patch.json
+    with open(os.path.join(input_path, "percentage_brain_patch.json")) as f:
+        percentage_brain_patch = json.load(f)
+
+    # filter through images val based on percentage threshold
+    images_val_non_empty = [
+        os.path.join(input_path, image)
+        for image in images_val
+        if percentage_brain_patch[image] > percentage_brain_patch_skip
+    ]
+    images_val_non_empty.sort()
+
+    images_val_empty = [
+        os.path.join(input_path, image)
+        for image in images_val
+        if percentage_brain_patch[image] <= percentage_brain_patch_skip
+    ]
+    images_val_empty.sort()
+
+    images_val = images_val_non_empty
+
     global data_dicts_test
     data_dicts_test = [{"image": image_name} for image_name in images_val]
     print("data dicts are ready!")
@@ -677,3 +698,49 @@ def deploy_functions(
         raise ValueError("Selected model is invalid")
 
     logging.debug("deploy_model called")
+
+    # for the images in images_val
+    # define dataloader
+    global data_dicts_test_empty
+    data_dicts_test_empty = [{"image": image_name} for image_name in images_val_empty]
+    val_ds_empty = CacheDataset(
+        data=data_dicts_test_empty,
+        transform=test_transforms,
+        cache_rate=cache_rate_var,
+        num_workers=num_workers_var,
+    )
+    # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
+    global val_loader_empty
+    val_loader_empty = DataLoader(val_ds_empty, batch_size=batch_size_internal, num_workers=num_workers_var)
+    RI_subj_id = 1
+    for i, val_data in enumerate(val_loader_empty):
+        H, W, D = val_data["image"].shape[2], val_data["image"].shape[3], val_data["image"].shape[4]
+        curr_batch_size = val_data["image"].shape[0]
+        val_outputs = [np.zeros((H, W, D)) for b in range(curr_batch_size)]
+
+        if MC_flag:
+            uncertainty = [np.zeros((H, W, D)) for b in range(curr_batch_size)]
+
+        # save the images as .tiff file readable by Fiji
+        for j in range(len(val_outputs)):
+            
+
+            if (model_name == "unet" or model_name == "unetr") and not MC_flag:
+                img_list = [val_outputs[j]]
+                save_tiff(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1])
+                RI_subj_id += 1
+
+            elif model_name == "ensemble" and not MC_flag:
+                img_list = [val_outputs[j]]
+                save_tiff(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1])
+                RI_subj_id += 1
+
+            elif model_name == "ensemble" and MC_flag:
+                img_list = [uncertainty[j], val_outputs[j]]
+                save_tiff_MC_dropout(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1], model_name+"_")
+                RI_subj_id += 1
+
+            elif (model_name == "unet" or model_name == "unetr") and MC_flag:
+                img_list = [uncertainty[j], val_outputs[j]]
+                save_tiff_MC_dropout(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1], model_name+"_")
+                RI_subj_id += 1
