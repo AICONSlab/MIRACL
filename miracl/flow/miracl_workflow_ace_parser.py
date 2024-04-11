@@ -56,7 +56,7 @@ class ACEWorkflowParser:
             "Single or multi method arguments"
         )
         required_args = parser.add_argument_group("required arguments")
-        useful_args = parser.add_argument_group("useful/imoprtant arguments")
+        useful_args = parser.add_argument_group("useful/important arguments")
         seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
         reg_args = parser.add_argument_group("optional registration arguments")
