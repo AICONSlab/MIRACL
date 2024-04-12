@@ -12,7 +12,8 @@ either of the following methods:
 .. attention::
    Support for installing :program:`MIRACL` locally (i.e. on your host 
    system directly without using :program:`Docker` or :program:`Singularity`) 
-   will be phased out in future versions of the software
+   has been deprecated. Please use :program:`Docker` or :program:`Singularity`
+   instead.
 
 .. tabs::
 
@@ -294,12 +295,111 @@ either of the following methods:
          For running functions on clusters please check our 
          :program:`Singularity` tutorials for Compute Canada and Sherlock
 
-   .. tab:: Local
+   .. tab:: Windows (WSL2)
+
+      The Windows Subsystem for Linux (:program:`WSL`) creates an environment 
+      that allows users to run versions of :program:`Linux` without having to 
+      set up a virtual machine or a different computer.
+      
+      .. important::
+         :program:`Docker Desktop` requires :program:`WSL` version ``1.1.3.0`` 
+         or later to be installed and turned on. To check open a command prompt 
+         in Windows (``cmd``) and type: ``wsl --status``.
+
+      To install WSL, users can follow the instructions from 
+      `Microsoft <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
+      More comprehensive instructions can be found
+      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`_.
+      Upgrading from :program:`WSL1` to :program:`WSL2` is recommended, due to 
+      :program:`WSL2`’s `benefits <https://docs.microsoft.com/en-us/windows/wsl/compare-versions>`_.
 
       .. warning::
-         Support for this installation method will be discontinued in future 
-         versions of :program:`MIRACL`. We recommend to use :program:`Docker` 
+         Support for installing :program:`MIRACL` locally in the WSL has been 
+         deprecated in version ``2.2.6`` of :program:`MIRACL`.
+
+      Once the :program:`WSL` has been installed you can proceed to install
+      :program:`Docker`.
+
+      .. note::
+         You may ignore the next step if you have a preferred, :program:`Docker`
+         enabled Linux distribution that is already installed in your 
+         :program:`WSL2`.
+
+      .. raw:: html
+
+         <h2>Installing Docker on Windows</h2>
+      
+      1. Download the :program:`Docker Desktop` installer for Windows from 
+         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`_ 
+         or from the `release notes <https://docs.docker.com/desktop/release-notes/>`_.
+      2. Double-click :program:`Docker Desktop Installer.exe` to run the 
+         installer. By default, :program:`Docker Desktop` is installed at 
+         ``C:\Program Files\Docker\Docker``.
+
+      .. attention::
+         By default, :program:`WSL2` should be used with :program:`Docker Desktop`.
+         However, if your Windows system supports :program:`WSL2` *and* 
+         :program:`Hyper-V`, make sure to select the :program:`WSL2` option on 
+         the Configuration page when prompted.
+
+      3. Follow the instructions on the installation wizard to authorize the 
+         installer and proceed with the install.
+      4. When the installation is successful, select ``Close`` to complete the 
+         installation process. 
+
+      .. tip::
+         Technically, :program:`Docker` can be run on the Windows command 
+         prompt. However, it is recommended to use :program:`Docker` in a Linux 
+         distro installed in the :program:`WSL`.
+
+      5. Open the :program:`WSL2` on Windows in a command prompt (``cmd``). 
+         Check the drop down menu next to the tab for installed Linux versions 
+         or type ``wsl -l -v``.
+
+         a. **`Ubuntu` is already installed**: Select it from the drop down.
+            An :program:`Ubuntu` terminal will open in a new tab.
+
+         b. **`Ubuntu` is not yet installed**: Open the
+            :program:`Microsoft Store` and search for :program:`Ubuntu`. 
+            Choose the version you want to install and click the ``Get`` button 
+            to automatically install it on the :program:`WSL`. Select the 
+            version you installed from the drop down next to the command prompt 
+            tab. An :program:`Ubuntu` terminal will open in a new tab.
+
+      6. Open :program:`Docker Desktop` and navigate to ``Settings``. In the
+         ``General`` tab check if ``Use the WSL 2 based engine`` checkbox is 
+         checked. Check it if it isn't yet.
+      7. Still in the ``Settings`` navigate to ``Resources>WSL integration``.
+         Enable the :program:`Ubuntu` distribution that you want to use
+         :program:`Docker` with.
+      8. Go back to the command prompt and open the :program:`Docker` enabled 
+         :program:`Ubuntu` distro in a new tab.
+      9. In the Linux terminal, type ``docker run hello`` to check if 
+         :program:`Docker` is working correctly. 
+
+      .. raw:: html
+         
+         <h2>Install MIRACL in the WSL2</h2>
+
+      Just follow our installation instructions for :program:`Docker` to 
+      install :program:`MIRACL` as a :program:`Docker` container in the
+      :program:`WSL2`.
+
+      .. hint::
+         Follow the below steps if you want to install :program:`MIRACL` in 
+         your WSL instance locally. If you prefer to use :program:`Docker` to 
+         run :program:`MIRACL` on Windows follow our installation instructions 
+         for :program:`Docker` instead.
+
+   .. tab:: Local (deprecated)
+
+      .. warning::
+         Support for this installation method has been discontinued starting
+         with version of ``2.2.6`` of :program:`MIRACL`. Please use :program:`Docker` 
          or :program:`Singularity` instead.
+
+      .. warning::
+         THIS INSTALLATION METHOD HAS BEEN DEPRECATED!
 
       Steps to setup/run :program:`MIRACL` on a Linux/macOS machine:
 
@@ -473,132 +573,4 @@ either of the following methods:
          $ git pull
       
       You should be good to go!
-
-   .. tab:: Windows
-
-      .. warning::
-         Support for installing :program:`MIRACL` locally in the WSL will be 
-         discontinued in future versions of :program:`MIRACL`. We recommend to 
-         use :program:`Docker` or :program:`Singularity` instead.
-
-      To install :program:`MIRACL` on your Windows system, Windows Subsystem 
-      for Linux (WSL) must be installed. 
-      `WSL2 <https://docs.microsoft.com/en-us/windows/wsl/compare-versions>`_
-      is preferred. From there, the usual steps to install :program:`MIRACL` on 
-      a Linux based system will be used with a few tweaks.
-      
-      .. hint::
-         Follow the below steps if you want to install :program:`MIRACL` in 
-         your WSL instance locally. If you prefer to use :program:`Docker` to 
-         run :program:`MIRACL` on Windows follow our installation instructions 
-         for :program:`Docker` instead.
-      
-      .. raw:: html
-
-         <h2>Installing WSL 2 on Windows</h2>
-      
-      The Windows Subsystem for Linux (WSL) creates an environment that allows 
-      users to run versions of Linux without having to set up a virtual 
-      machine or a different computer.
-      
-      To install WSL, users can follow the 
-      `instructions <https://docs.microsoft.com/en-us/windows/wsl/install>`_ 
-      from Microsoft. More comprehensive instructions can be found 
-      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`_. 
-      Upgrading from WSL 1 to WSL 2 is recommended, due to 
-      `WSL 2's benefits <https://docs.microsoft.com/en-us/windows/wsl/compare-versions>`_.
-
-      .. raw:: html
-
-         <h2>Install the Ubuntu distribution (Ubuntu 22.04) from the Microsoft Store</h2>
-      
-      .. note::
-         You may ignore this step if you have a preferred Linux distribution 
-         that is already installed in your WSL2
-      
-      A Linux distribution (distro), like Ubuntu, is an operating system based 
-      on the Linux kernel.
-      
-      Now that WSL (either 1 or 2) is installed, the :program:`Ubuntu 22.04` 
-      distro can be installed. To install Ubuntu, open the Windows Store app, 
-      search for ":program:`Ubuntu 22.04`", and select the ``Get`` button. You 
-      could also use this 
-      `link <https://www.microsoft.com/en-gb/p/ubuntu-2004-lts/9n6svws3rx71>`_.
-
-      .. raw:: html
-
-         <h2>Install Python and pip</h2>
-      
-      The Ubuntu distro should have :program:`Python 3` installed. To ensure 
-      that this is the case, update all packages installed in the WSL:
-      
-      .. code-block::
-
-         $ sudo apt update
-         $ sudo apt -y upgrade
-      
-      We can see which version of :program:`Python 3` is installed by typing:
-      
-      .. code-block::
-
-         $ python3 -V
-      
-      The output in the terminal window will show the version number.
-      
-      :program:`pip` is required to install software packages in 
-      :program:`Python`. It can be installed by running the following command:
-      
-      .. code-block::
-
-         $ sudo apt install -y python3-pip
-      
-      You could also use :program:`Anaconda` to install the packages but we 
-      found that installing and using pip was more straightforward.
-
-      .. raw:: html
-
-         <h2>Install MIRACL using local installation instructions</h2>
-      
-      To actually install :program:`MIRACL`, follow the local installation 
-      instructions for Linux and macOS.
-
-      .. raw:: html
-
-         <h2>Installing Xming</h2>
-      
-      To use :program:`MIRACL's` graphical user interface (GUI), 
-      :program:`Xming` must be installed. :program:`Xming` is a display server 
-      for Windows computers, that is available for use by anyone. It can be 
-      downloaded from `SourceForge <https://www.google.com/url?q=https://sourceforge.net/projects/xming/&source=gmail&ust=1641769602186000&usg=AOvVaw2MoTURhTsyCk_-56M3Qljj>`_.
-      
-      Before running :program:`MIRACL's` GUI, run Xming. In the terminal window 
-      where :program:`MIRACL's` GUI will be run, input the following command:
-      
-      .. code-block::
-
-         $ export DISPLAY=$DISPLAY:localhost:0
-      
-      .. raw:: html
-
-         <h2>Running MIRACL with WSL 2</h2>
-      
-      Now that everything is installed, :program:`MIRACL` can be run via the 
-      WSL. To run:
-      
-      #. Open WSL via terminal
-      #. Navigate to the folder where you would like to run MIRACL from
-      #. Activate the environment containing ``miracl``:
-      
-      .. code-block::
-
-         $ source activate miracl
-         $ miraclGUI
-
-      .. raw:: html
-
-         <h2>Jupyter notebook</h2>
-
-      .. |linktoworkshop| replace:: :doc:`here <../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
-
-      .. include:: ../directives/tutorial_notebook_links.txt
 
