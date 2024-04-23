@@ -13,33 +13,51 @@ function usage()
     
     cat <<usage
 
-	1) Warps Allen annotations to the original high-res CLARITY space
+	1) Warps allen annotations or labels in atlas space to the original high-res CLARITY space
 
-	Usage: `basename $0`
+	Usage: miracl lbls warp_clar
 
 	A GUI will open to choose your:
 
-		- < Input clarity registration folder >
+			input clarity registration dir
 
-		- < Labels to warp>
+			input Allen Labels to warp (in Allen space)
 
-    Looks for ort2std.txt in directory where script is run
+			file with orientation to standard code (ort2std.txt)
+
+			original / initial clarity tiff folder
+
+			output warped labels 
 
 	----------
 
 	For command-line / scripting
 
-	Usage: `basename $0` -r [ clarity registration dir ] -l [ labels in allen space to warp ] -o [ orient file ]
+	Usage: miracl lbls warp_clar -r [ clarity registration dir ] -l [ labels in allen space to warp ] -c [ orient file ] 
+	-f [ original clarity tiff folder ] -o [ output file name ]
 
-	Example: `basename $0` -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz -o ort2std.txt
+	Example: miracl lbls warp_clar -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz -o ort2std.txt 
+	-c LSFM_clar_tiff_chan1 -d warped_labels -f annotation_hemi_split_25um_depth6
 
 		arguments (required):
 
-			r. Input clarity registration dir
+			r. input clarity registration dir
 
 			l. input Allen Labels to warp (in Allen space)
 
 			o. file with orientation to standard code
+
+			c. original clarity tiff folder
+
+			d. output directory 
+
+			f. output warped labels name (tiff files; prefix only without file type '.tif')
+
+		optional arguments:
+
+			i. interpolation (default: MultiLabel ) [ other options: NearestNeighbor ... ]
+
+			t. output file type (default: short) [ other options: char ... ]
 
 	----------		
 
@@ -53,7 +71,7 @@ function usage()
 
 	-----------------------------------
 	
-	(c) Maged Goubran @ AICONSlab, 2022
+	(c) Maged Goubran @ AICONSlab, 2024
 	maged.goubran@utoronto.ca
 	
 	-----------------------------------
@@ -127,42 +145,80 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:l:o:" opt; do
-    
+	while getopts ":r:l:c:f:o:d:i:t:" opt; do
 	    case "${opt}" in
-
 	        r)
-            	regdir=${OPTARG}
-            	;;
+	            regdir=${OPTARG}
+	            ;;
+	        l)
+	            lbls=${OPTARG}
+	            ;;
+	        o)
+	            ortfile=${OPTARG}
+	            ;;
+	        c)
+	            clardir=${OPTARG}
+	            ;;
+	        f)
+	            outputname=${OPTARG}
+	            ;;
+	        d)
+	            outputdir=${OPTARG}
+	            ;;
+	        i)
+	            interpolation=${OPTARG}
+	            ;;
+	        t)
+	            outputtype=${OPTARG}
+	            ;;
+	        *)
+	            usage
+	            ;;
+	    esac
+	done
 
-        	l)
-            	lbls=${OPTARG}
-            	;;
 
-            o)
-            	ortfile=${OPTARG}
-            	;;
-
-        	*)
-            	usage            	
-            	;;
-
-		esac
-	
-	done    	
 
 	# check required input arguments
 	if [ -z ${regdir} ];
 	then
 		usage
-		echo "ERROR: < -r => input clarity registration dir> not specified"
+		echo "ERROR: < -r => input clarity registration dir > not specified"
 		exit 1
 	fi
 
     if [ -z ${lbls} ];
 	then
 		usage
-		echo "ERROR: < -l => labels> not specified"
+		echo "ERROR: < -l => labels > not specified"
+		exit 1
+	fi
+
+	if [ -z ${ortfile} ];
+	then
+		usage
+		echo "ERROR: < -c => orient code file > not specified"
+		exit 1
+	fi
+
+	if [ -z ${clardir} ];
+	then
+		usage
+		echo "ERROR: < -f => input original clarity dir > not specified"
+		exit 1
+	fi
+
+	if [ -z ${outputdir} ];
+	then
+		usage
+		echo "ERROR: < -d => outputdir > output directory not specified"
+		exit 1
+	fi
+
+	if [ -z ${outputname} ];
+	then
+		usage
+		echo "ERROR: < -o => outputname > output file name not specified"
 		exit 1
 	fi
 
@@ -178,12 +234,19 @@ else
 
 	choose_file_gui "Input labels to warp" lbls
 
+	choose_file_gui "Input orient file" ortfile
+
+	choose_folder_gui "Clarity registration folder" clardir
+
+	choose_folder_gui "Output directory" outputdir
+
+	choose_file_gui "Output file name" outputname 	# file name 
+
 	# check required input arguments
-	if [ -z ${regdir} ];
-	then
-		usage
-		echo "ERROR: <input clarity registration dir> was not chosen"
-		exit 1
+	if [ -z ${regdir} ] || [ -z ${lbls} ] || [ -z ${ortfile} ] || [ -z ${clardir} ] || [ -z ${outputname} ] || [ -z ${outputdir} ]; then
+	    usage
+	    echo "ERROR: Required arguments are missing."
+	    exit 1
 	fi
 
 fi
@@ -256,7 +319,8 @@ function warpallenlbls()
 	local wrplbls=$6
 
 	# Ort pars
-	local orttaglbls=$7
+	# local orttaglbls=$7
+	local regdir=$7
 	local ortintlbls=$8
 	local orttypelbls=$9
 	local ortlbls=${10}
@@ -268,7 +332,7 @@ function warpallenlbls()
 	# Up lbls
     local inclar=${13}
     local reslbls=${14}
-    local restif=${15}
+    local outputname=${15}
 
     # Vox
     local vox=${16}
@@ -276,8 +340,17 @@ function warpallenlbls()
     # Res clar
     local smclarres=${17}
 
+    # lbls to high res tiff
+    local orgclar=${18}
+    local tiflblszstack=${19}
+    local tifdirreg=${20}
+    local tifdirregfinal=${21}
+    local lblsname=${22}
+
+
     # Upsample ref
     vres=`python -c "print(${vox}/1000.0)"`
+
 
     # res clar in
     ifdsntexistrun ${smclarres} "Usampling reference image" ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 1
@@ -287,28 +360,92 @@ function warpallenlbls()
 	 antsApplyTransforms -r ${smclarres} -i ${lbls} -n Multilabel -t ${antswarp} ${antsaff} ${initform} -o ${wrplbls}
 
 	# orient to org
-	ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+	# ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
+
+	# get org tag
+	inclar=${regdir}/clar_res0.05.nii.gz
+	ortmatrix=`PrintHeader ${inclar} 4 | tr 'x' ' '`
+	ifdsntexistrun ${ortlbls} "Orienting Allen labels" SetDirectionByMatrix ${wrplbls} ${ortlbls} ${ortmatrix}
 
 	# swap dim (x=>y / y=>x)
-	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes  3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
+	ifdsntexistrun ${swplbls} "Swapping label dimensions" PermuteFlipImageOrientationAxes 3 ${ortlbls} ${swplbls}  1 0 2  1 0 0
 
 	# create tif lbls
-	ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
+	# ifdsntexistrun ${tiflbls} "Converting lbls to tif" c3d ${swplbls} -type ${orttypelbls} -o ${tiflbls}
 
-	# upsample to img dimensions
-    df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
-     # get img dim
-    alldim=`PrintHeader ${inclar} 2`
-    x=${alldim%%x*} ;
-    yz=${alldim#*x} ; y=${yz%x*} ;
-    z=${alldim##*x} ;
+    padvox=11.5
 
-    ox=$(($y*$df)) ;
-    oy=$(($x*$df)) ;
+    printf "\n pad vox: ${padvox} \n" 
+
+    ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${swplbls} -type ${orttypelbls} -pad -${padvox}% -${padvox}% -o ${tiflbls}
 
     # create hres tif lbls
-	ifdsntexistrun ${restif} "Converting high res lbls to tif" c3d ${swplbls} -resample ${ox}x${oy}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
+
+    # get tiflbls dim
+    tiflblsdim=`PrintHeader ${tiflbls} 2`
+    tiflblsx=${tiflblsdim%%x*} ;
+    tiflblsyz=${tiflblsdim#*x} ; tiflblsy=${tiflblsyz%x*} ;
+    # z=${tiflblsdim##*x} ;
+
+    # get num slices (z dim)
+	orgclar=$(realpath ${orgclar})
+	orgclarz=`ls ${orgclar}/*.tif* | wc -l` 
+	firstslice=${orgclar}/`ls ${orgclar} | head -n1`
+
+    # get first_slice dim
+    firstslicedim=`PrintHeader ${firstslice} 2`
+    firstslicex=${firstslicedim%%x*} ;
+    firstslicey=${firstslicedim##*x} ;
+
+
+    printf "\n orgclar: ${orgclar} \n" 
+	printf "\n orgclar z: ${orgclarz} \n"
+
+    ifdsntexistrun ${tiflblszstack} "Resampling high res tif" ResampleImage 3 ${tiflbls} ${tiflblszstack} ${tiflblsx}x${tiflblsy}x${orgclarz} 1 1 3  
+    # 1- Spacing , 1- NN, 3- ushort
+
+	if [[ ! -d ${tifdirreg} ]]; then
+    	mkdir -p ${tifdirreg} ${tifdirregfinal} 
+    fi  
+
+
+    firstlbl=${tifdirreg}/lbls_slice_000000.tif
+
+    ifdsntexistrun ${firstlbl} "Extracting tiff slices" c3d ${tiflblszstack} -slice z 0:-1 -type ushort -oo ${tifdirreg}/lbls_slice_%06d.tif
+
+    loop_z=$(python -c "print(${orgclarz}-1)")
+
+
+    firstlblclar=${tifdirregfinal}/${lblsname}_000000.tif
+
+    printf "\n firstslice: ${firstslice} \n" 
+    printf "\n firstslice x: ${firstslicex} \n"
+    printf "\n firstslice y: ${firstslicey} \n"
+
+    # printf "\n loop z: ${loop_z} \n" 
+
+    if [[ ! -f ${firstlblclar} ]]; then
+
+    	printf "\n Resampling tiff slices to original space \n"
+
+		for i in $(seq 0 ${loop_z}); 
+			do 
+				i=$(printf %06d $i) ; 
+				ResampleImage 2 ${tifdirreg}/lbls_slice_${i}.tif ${tifdirregfinal}/${outputname}_${i}.tif ${firstslicex}x${firstslicey} 1 1 3 ; 
+		done
+
+	fi
+
+
+
+	# ifdsntexistrun ${restif} "Generating high res lbls in tif" \
+		# ResampleImage 3 ${swplbls} ${restif} ${x}x${y}x${z} 1 1 0
+	
+	 # c3d ${swplbls} -resample ${x}x${y}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
+
+	# ifdsntexistrun ${restif} "Converting high res lbls to tif" \ 
+	# c3d ${swplbls} -resample ${ox}x${oy}x${z}mm -interpolation ${ortintlbls} -type ${orttypelbls} -o ${restif}
 
 }
 
@@ -318,9 +455,31 @@ function warpallenlbls()
 function main()
 {
 
+	# Print final args to screen for user
+	printf "\n ######################################################\n"
+	printf "\n The following arguments will be used for label warping:"
+	printf "\n r: Registration dir: ${regdir}\n"
+	printf "\n c: Clarity tiff folder: ${clardir}\n"
+	printf "\n d: Output directory: ${outputdir}\n"
+	printf "\n o: Orientation code: ${ortfile}\n"
+	printf "\n f: Output file name: ${outputname}\n"
+	printf "\n i: Interpolation: ${interpolation}\n"
+	printf "\n t: Output type: ${outputtype}\n"
+	printf "\n ######################################################\n"
+
+
+# Set default values for optional arguments if not provided
+	interpolation=${interpolation:-"MultiLabel"}
+	outputtype=${outputtype:-"ushort"}
+
 # 1) Warp Allen labels to original CLARITY
 
-    regdirfinal=$PWD/reg_final
+	regdir=$(realpath ${regdir})
+	motherdir=$(dirname ${regdir})
+
+    regdirfinal=${motherdir}/reg_final
+
+    # regdirfinal=$PWD/reg_final
 
     if [[ ! -d ${regdirfinal} ]]; then
 
@@ -334,24 +493,25 @@ function main()
 	antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
 	antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
 
-	base=`basename $lbls`
+	base=`basename ${outputname}`
 	lblsname=${base%%.*};
 
     # In files
     smclar=${regdir}/clar.nii.gz
 
-    motherdir=$(dirname ${regdir})
-
     # last file made in niftis folder
-    inclar=`ls -r ${motherdir}/niftis | tail -n 1`
+    inclar=`ls -r ${motherdir}/niftis/*down* | tail -n 1`
+
+    # printf "inclar: ${inclar}"
 
     # Out lbls
 	wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
 	ortlbls=${regdir}/${lblsname}_ants_ort.nii.gz
-	swplbls=${regdir}/${lblsname}_ants_swp.nii.gz
-	tiflbls=${regdirfinal}/${lblsname}_clar_vox.tif
-	reslbls=${regdirfinal}/${lblsname}_clar.nii.gz
-	restif=${regdirfinal}/${lblsname}_clar.tif
+	swplbls=${regdir}/${lblsname}_ants_swp.tif
+	tiflbls=${regdir}/${lblsname}_clar_vox.tif
+	reslbls=${regdir}/${lblsname}_clar.nii.gz
+
+	# restif=${regdirfinal}/${lblsname}_clar.tif
 
     lblsdim=`PrintHeader ${lbls} 1`
     xlbl=${lblsdim%%x*}
@@ -362,45 +522,14 @@ function main()
 
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
-    # setting lbl ort
-    o=${ort:0:1}
-    r=${ort:1:1}
-    t=${ort:2:2}
-
-    ol=${r}
-
-    if [ ${o} == "A" ]; then
-        rl="P"
-    elif [ ${o} == "P" ]; then
-        rl="A"
-    elif [ ${o} == "R" ]; then
-        rl="L"
-    elif [ ${o} == "L" ]; then
-        rl="R"
-    elif [ ${o} == "S" ]; then
-        rl="I"
-    elif [ ${o} == "I" ]; then
-        rl="S"
-    fi
-
-    if [ ${t} == "A" ]; then
-        tl="P"
-    elif [ ${t} == "P" ]; then
-        tl="A"
-    elif [ ${t} == "R" ]; then
-        tl="L"
-    elif [ ${t} == "L" ]; then
-        tl="R"
-    elif [ ${t} == "S" ]; then
-        tl="I"
-    elif [ ${t} == "I" ]; then
-        tl="S"
-    fi
-
-    ortlbl="$ol$rl$tl"
+    tiflblszstack=${regdir}/${lblsname}_unpad_clar_zstack.tif
+    tifdirreg=${regdir}/${lblsname}_tiff
+    tifdirregfinal=${outputdir}/${lblsname}_tiff_clar
 
 
-	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${ortlbl} NearestNeighbor short ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} ${smclarres}
+	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${regdir} ${interpolation} ${outputtype} \
+		${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${outputname} ${vox} ${smclarres} \
+		${clardir} ${tiflblszstack} ${tifdirreg} ${tifdirregfinal} ${lblsname} ${regdir}
 
 
 }
@@ -414,4 +543,4 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-echo "Allen labels warping done in $DIFF minutes. Have a good day!"
+echo "Label warping done in $DIFF minutes. Have a good day!"

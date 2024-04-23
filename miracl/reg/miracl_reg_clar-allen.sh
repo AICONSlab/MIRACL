@@ -25,15 +25,16 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: miracl reg clar_allen -i [ input clarity nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
+	Usage: miracl reg clar_allen -i [ input clarity nii ] -c [ clarity tiff stack ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
 
-    Example: miracl reg clar_allen -i Reference_channel_05x_down.nii.gz -o ARS -m combined -v 25
+    Example: miracl reg clar_allen -i reference_channel_05x_down.nii.gz -c LSFM_clar_tiff_chan1 -o ARS -m combined -v 25
 
     arguments (required):
         i.  input down-sampled clarity nii
             Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
             file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
             [this should be accurate as it is used for allen label upsampling to clarity]
+        c.	original clarity tiff folder (stack) - folder used as input to convert from tiff to nii 
 
     optional arguments:
         r.  output (results) directory (default: working directory)
@@ -61,10 +62,13 @@ function usage()
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
         reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar.tif : Allen labels registered to original (full-resolution) Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um/lbls_clar_slice....tif : Tiff stack of Allen labels registered to original (full-resolution) Clarity
+
 
         - To visualize results use: miracl reg check
-        - Full resolution Allen labels in original clarity space (.tif) can be visualized by Fiji
+
+        - Full resolution Allen labels in original clarity space (.tif) can be visualized using Fiji or Napari
+
     -----------------------------------
     registration based on ANTs
     -----------------------------------
@@ -130,12 +134,16 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:r:o:m:v:l:f:p:a:w:b:s:" opt; do
+	while getopts ":i:c:r:o:m:v:l:f:p:a:w:b:s:" opt; do
     
 	    case "${opt}" in
 
-	        i)
+	      i)
            inclar="${OPTARG}"
+           ;;
+
+	      c)
+           orgclar="${OPTARG}"
            ;;
 
           r)
@@ -200,6 +208,12 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 		exit 1
 	fi
 
+	if [[ -z ${orgclar} ]];
+	then
+		usage
+		echo "ERROR: < -c => input clarity tiff folder> not specified"
+		exit 1
+	fi
 
 else
 
@@ -236,31 +250,42 @@ else
 		exit 1
 	fi
 
-	work_dir=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	if [[ -z ${orgclar} ]] || [[ "${orgclar}" == "No file was chosen" ]];
+	then
+		usage
+		echo "ERROR: <input clarity tiff folder> was not chosen"
+		exit 1
+	fi
+
+	orgclar=`echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+	printf "\n Chosen clarity tiff directory: $orgclar \n"
+
+	work_dir=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen output directory: $work_dir \n"
 
-	ort=`echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	ort=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen orient code: $ort \n"
 
-	hemi=`echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	hemi=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen labels hemi option: $hemi \n"
 
-	vox=`echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	vox=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
 	printf "\n Chosen vox (um): $vox \n"
 
-	bulb=`echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	bulb=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen olfactory bulb option: $bulb \n"
 
-	side=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+	side=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen side option: $side \n"
 
-    prebias=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+    prebias=`echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen extra intensity correct: $prebias \n"
 
@@ -370,7 +395,13 @@ if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]]; then
     # remove olfactory bulb from labels
     custom_lbls=${regdir}/${lblsname}.nii.gz
     c3d ${lbls} -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o ${custom_lbls}
-    c3d ${custom_lbls} -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o ${custom_lbls}
+
+    if [[ "${hemi}" == "split" ]]; then
+
+    	c3d ${custom_lbls} -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o ${custom_lbls}
+
+    fi
+    	
     lbls=${custom_lbls}
 
 else
@@ -402,7 +433,8 @@ fi
 # Print final args to screen for user
 printf "\n######################################################\n\n"
 printf "The following arguments will be used for registration:\n\n"
-printf "i: Down-sampled nii folder: ${inclar}\n"
+printf "i: Down-sampled nii file: ${inclar}\n"
+printf "c: Clarity tiff folder: ${orgclar}\n"
 printf "r: Output directory: ${work_dir}\n"
 printf "o: Orientation code: ${ort}\n"
 printf "m: Hemisphere: ${hemi}\n"
@@ -412,7 +444,7 @@ printf "s: Side: ${side}\n"
 printf "a: Custom Allen atlas: ${atlas}\n"
 printf "l: Allen labels to warp: ${lbls}\n"
 printf "p: Prebias: ${prebias}\n"
-printf "f: Sace Mosaic figure: ${savefig}\n"
+printf "f: Save Mosaic figure: ${savefig}\n"
 printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
 printf "\n######################################################\n"
 
@@ -786,6 +818,16 @@ function warpallenlbls()
     local wrplblsorg=${18}
     local unpadtif=${19}
 
+
+    # lbls to high res tiff
+    local orgclar=${20}
+    local tiflblszstack=${21}
+    local tifdirreg=${22}
+    local tifdirregfinal=${23}
+
+    # orgclar, tiflbls_zstack , tifdir_reg, tifdir_regfinal 
+
+
     # Upsample ref
     vres=`python -c "print (${vox}/1000.0)"`
 
@@ -808,39 +850,108 @@ function warpallenlbls()
 	ifdsntexistrun ${ortlbls} "Orienting Allen labels" SetDirectionByMatrix ${wrplbls} ${ortlbls} ${ortmatrix}
 
 	# swap dim (x=>y / y=>x)
-	ifdsntexistrun ${swplbls} "Swapping label dimensions" \
-	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
+	# ifdsntexistrun ${swplbls} "Swapping label dimensions" \
+	 # PermuteFlipImageOrientationAxes 3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
 
-	ifdsntexistrun ${unpadtif} "Converting lbls to tif" \
-	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${unpadtif}  1 0 2  0 0 0
+	ifdsntexistrun ${unpadtif} "Swapping label dimensions & converting to tif" \
+	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${unpadtif}  1 0 2  1 0 0
 
-    ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -10% -10% -o ${tiflbls}
+    # ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -15% -15% -o ${tiflbls}
+
+    if [[ "${vox}" == 10 ]]; then
+    	padvox=11.5 
+    else
+    	padvox=12
+    fi
+
+    printf "\n pad vox: ${padvox} \n" 
+
+    ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -${padvox}% -${padvox}% -o ${tiflbls}
+
+    # create hres tif lbls
 
 	# upsample to img dimensions
-    df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
+    # df=`echo ${inclar} | egrep -o "[0-9]{2}x_down" | egrep -o "[0-9]{2}"`
 
     # Print calculated downsampling factor
-    printf "\nUsing downsampling factor $df.\n"
+    # printf "\nUsing downsampling factor $df.\n"
 
-    # get img dim
+    # # get img dim
     alldim=`PrintHeader ${inclar} 2`
     x=${alldim%%x*} ;
     yz=${alldim#*x} ; y=${yz%x*} ;
     z=${alldim##*x} ;
 
-    # Print header dimensions
-    printf "\nHeader dimensions:\nx = $x\ny = $y\nyz = $yz\nz = $z\n"
+    # # Print header dimensions
+    # printf "\nHeader dimensions:\nx = $x\ny = $y\nyz = $yz\nz = $z\n"
 
-    ox=$(($y*$df)) ;
-    oy=$(($x*$df)) ;
-    oz=$(($z*$df)) ;
+    # ox=$(($y*$df)) ;
+    # oy=$(($x*$df)) ;
+    # oz=$(($z*$df)) ;
 
-    # Print upsamle dimensions
-    printf "\nUpsample dimensions:\nox = $ox\noy = $oy\noz = $oz\n"
+    # # Print upsamle dimensions
+    # printf "\nUpsample dimensions:\nox = $ox\noy = $oy\noz = $oz\n"
 
-    # create hres tif lbls
-    ifdsntexistrun ${restif} "Converting high res lbls to tif" \
-     c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
+    # ifdsntexistrun ${restif} "Converting high res lbls to tif" \
+     # c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
+
+
+    # get tiflbls dim
+    tiflblsdim=`PrintHeader ${tiflbls} 2`
+    tiflblsx=${tiflblsdim%%x*} ;
+    tiflblsyz=${tiflblsdim#*x} ; tiflblsy=${tiflblsyz%x*} ;
+    # z=${tiflblsdim##*x} ;
+
+    # get num slices (z dim)
+	orgclar=$(realpath ${orgclar})
+	orgclarz=`ls ${orgclar}/*.tif* | wc -l` 
+	firstslice=${orgclar}/`ls ${orgclar} | head -n1`
+
+    # get first_slice dim
+    firstslicedim=`PrintHeader ${firstslice} 2`
+    firstslicex=${firstslicedim%%x*} ;
+    firstslicey=${firstslicedim##*x} ;
+
+
+    printf "\n orgclar: ${orgclar} \n" 
+	printf "\n orgclar z: ${orgclarz} \n"
+
+    ifdsntexistrun ${tiflblszstack} "Resampling high res tif" ResampleImage 3 ${tiflbls} ${tiflblszstack} ${tiflblsx}x${tiflblsy}x${orgclarz} 1 1 3  
+    # 1- Spacing , 1- NN, 3- ushort
+
+	if [[ ! -d ${tifdirreg} ]]; then
+    	mkdir -p ${tifdirreg} ${tifdirregfinal} 
+    fi  
+
+
+    firstlbl=${tifdirreg}/lbls_slice_000000.tif
+
+    ifdsntexistrun ${firstlbl} "Extracting tiff slices" c3d ${tiflblszstack} -slice z 0:-1 -type ushort -oo ${tifdirreg}/lbls_slice_%06d.tif
+
+    loop_z=$(python -c "print(${orgclarz}-1)")
+
+
+    firstlblclar=${tifdirregfinal}/lbls_clar_slice_000000.tif
+
+    printf "\n firstslice: ${firstslice} \n" 
+    printf "\n firstslice x: ${firstslicex} \n"
+    printf "\n firstslice y: ${firstslicey} \n"
+
+    # printf "\n loop z: ${loop_z} \n" 
+
+    if [[ ! -f ${firstlblclar} ]]; then
+
+    	printf "\n Resampling tiff slices to original space \n"
+
+		for i in $(seq 0 ${loop_z}); 
+			do 
+				i=$(printf %06d $i) ; 
+				ResampleImage 2 ${tifdirreg}/lbls_slice_${i}.tif ${tifdirregfinal}/lbls_clar_slice_${i}.tif ${firstslicex}x${firstslicey} 1 1 3 ; 
+		done
+
+	fi
+
+
 
     # warp nifti to org space
     orgspacing=`PrintHeader ${inclar} 1`
@@ -1135,9 +1246,16 @@ function main()
     orgortlbls=${regdir}/${lblsname}_ants_org_ort.nii.gz
     lblsorgnii=${regdirfinal}/${lblsname}_clar_space_downsample.nii.gz
 
+    tiflblszstack=${regdir}/${lblsname}_unpad_clar_zstack.tif
+    tifdirreg=${regdir}/${lblsname}_tiff
+    tifdirregfinal=${regdirfinal}/${lblsname}_tiff_clar
+
+	# orgclar, tiflbls_zstack , tifdir_reg, tifdir_regfinal 
+
 	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} \
 	 ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} \
-	  ${smclarres} ${inclar} ${orgortlbls} ${lblsorgnii} ${wrplblsorg} ${unpadtif}
+	  ${smclarres} ${inclar} ${orgortlbls} ${lblsorgnii} ${wrplblsorg} ${unpadtif} \
+	  ${orgclar} ${tiflblszstack} ${tifdirreg} ${tifdirregfinal}
 
 
 	#---------------------------
