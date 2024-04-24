@@ -422,8 +422,8 @@ else
     ort=`cat ${work_dir}/ort2std.txt | grep ortcode | cut -d '=' -f 2`
     ort="${ort:0:3}"
 
-    printf "\n miracl reg clar_allen -i niftis/${nii} -w ${work_dir} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} -a ${atlas} -l ${lbls} \n"
-    miracl reg clar_allen -i ""${work_dir}"/niftis/"${nii}"" -w "${work_dir}" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}" -a "${atlas}" -l "${lbls}"
+    printf "\n miracl reg clar_allen -i niftis/${nii} -w ${work_dir} -o ${ort} -m ${hemi} -v ${vox} -b ${ob} -s ${side} -a ${atlas} -l ${lbls} -c ${indir}\n"
+    miracl reg clar_allen -i ""${work_dir}"/niftis/"${nii}"" -w "${work_dir}" -o "${ort}" -m "${hemi}" -v "${vox}" -b "${ob}" -s "${side}" -a "${atlas}" -l "${lbls}" -c "${indir}"
 
 fi
 
