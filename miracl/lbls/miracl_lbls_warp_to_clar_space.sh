@@ -33,8 +33,8 @@ function usage()
 
 	For command-line / scripting
 
-	Usage: miracl lbls warp_clar -r [ clarity registration dir ] -l [ labels in allen space to warp ] -c [ orient file ] 
-	-f [ original clarity tiff folder ] -o [ output file name ]
+	Usage: miracl lbls warp_clar -r [ clarity registration dir ] -l [ labels in allen space to warp ] -o [ orient file ] 
+	-c [ original clarity tiff folder ] -d [ output folder name ] -f [ output file name ]
 
 	Example: miracl lbls warp_clar -r clar_reg_allen -l annotation_hemi_combined_25um_grand_parent_level_3.nii.gz -o ort2std.txt 
 	-c LSFM_clar_tiff_chan1 -d warped_labels -f annotation_hemi_split_25um_depth6
@@ -197,14 +197,14 @@ if [[ "$#" -gt 1 ]]; then
 	if [ -z ${ortfile} ];
 	then
 		usage
-		echo "ERROR: < -c => orient code file > not specified"
+		echo "ERROR: < -o => orient code file > not specified"
 		exit 1
 	fi
 
 	if [ -z ${clardir} ];
 	then
 		usage
-		echo "ERROR: < -f => input original clarity dir > not specified"
+		echo "ERROR: < -c => input original clarity dir > not specified"
 		exit 1
 	fi
 
@@ -218,7 +218,7 @@ if [[ "$#" -gt 1 ]]; then
 	if [ -z ${outputname} ];
 	then
 		usage
-		echo "ERROR: < -o => outputname > output file name not specified"
+		echo "ERROR: < -f => outputname > output file name not specified"
 		exit 1
 	fi
 
@@ -363,7 +363,7 @@ function warpallenlbls()
 	# ifdsntexistrun ${ortlbls} "Orienting Allen labels" orientimg ${wrplbls} ${orttaglbls} ${ortintlbls} ${orttypelbls} ${ortlbls}
 
 	# get org tag
-	inclar=${regdir}/clar_res0.05.nii.gz
+	inclar=${regdir}/clar_res0.05.nii.gz # TODO: what is this?
 	ortmatrix=`PrintHeader ${inclar} 4 | tr 'x' ' '`
 	ifdsntexistrun ${ortlbls} "Orienting Allen labels" SetDirectionByMatrix ${wrplbls} ${ortlbls} ${ortmatrix}
 
