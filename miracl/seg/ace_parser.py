@@ -28,7 +28,7 @@ class aceParser:
         # Parser for input folder i.e. location of the data
         parser.add_argument(
             "-sai",
-            "--sa_input_folder",
+            "--single",
             type=self._readable_file,
             required=True,
             help="path to raw tif/tiff data folder",
@@ -65,7 +65,7 @@ class aceParser:
             "-sar",
             "--sa_resolution",
             nargs=3,
-            type=self._validate_vox_res,
+            type=float,
             required=False,
             metavar=("X-res", "Y-res", "Z-res"),
             help="voxel size (type: %(type)s)",
