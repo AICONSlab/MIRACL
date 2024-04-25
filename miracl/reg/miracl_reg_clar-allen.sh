@@ -227,7 +227,8 @@ else
 
 	# options gui 
 	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel"  \
-	-f  "Output directory (def = working dir)" "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" \
+	-f  "Input clarity tiff folder (no default)" \
+		"Output directory (def = working dir)" "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" \
         "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" \
         "extra int correct (def = 0)" -hf "`usage`")
 
