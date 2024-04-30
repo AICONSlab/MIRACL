@@ -340,9 +340,11 @@ def main(args, output_dir_arg):
     # -------------------------------------------------------
 
     # find the atl directory
-    if atl_dir == "miracl_home":
-        atl_dir = Path("/code/atlases/ara/template")
-        ann_dir = Path("/code/atlases/ara/annotation")
+    ann_dir = Path(atl_dir)
+    atl_dir = Path(atl_dir)
+
+    atl_dir = atl_dir / "template"
+    ann_dir = ann_dir / "annotation"
 
     if hemi == "combined":
         mask_filename = f"average_template_{img_res}um_brainmask.nii.gz"

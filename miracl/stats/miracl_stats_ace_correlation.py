@@ -95,10 +95,12 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     # -------------------------------------------------------
 
     # find the atl directory
-    if atl_dir == "miracl_home":
-        atl_dir = "/code/atlases/ara/template/"  # TODO: are theses right?
-        ann_dir = "/code/atlases/ara/annotation/"  # TODO: are theses right?
+    ann_dir = Path(atl_dir)
+    atl_dir = Path(atl_dir)
 
+    atl_dir = atl_dir / "template"
+    ann_dir = ann_dir / "annotation"
+    
     mask_filename = f"average_template_{img_res}um.nii.gz"  # TODO: are theses right?
     ann_filename = (
         f"annotation_hemi_combined_{img_res}um.nii.gz"  # TODO: are theses right?

@@ -2,6 +2,7 @@ import argparse
 import os
 from pathlib import Path
 
+ARA_ENV = "aradir"
 
 class ACEStatsParser:
     def __init__(self) -> None:
@@ -54,8 +55,8 @@ class ACEStatsParser:
         utility_args.add_argument(
             "-ua",
             "--u_atlas_dir",
-            default="miracl_home",
-            help="path of atlas directory (default: '/code/atlases/ara/')",
+            default=os.environ.get(ARA_ENV, None),
+            help="path of atlas directory (default: %(default)s)",
         )
 
         utility_args.add_argument(

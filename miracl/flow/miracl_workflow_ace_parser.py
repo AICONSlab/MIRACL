@@ -6,6 +6,7 @@ import sys
 from numpy import require
 from miracl.seg import ace_parser
 
+ARA_ENV = "aradir"
 
 def parser_true_or_false(arg: str) -> bool:
     upper_arg = str(arg).upper()
@@ -724,8 +725,8 @@ class ACEWorkflowParser:
         stats_args.add_argument(
             "-ua",
             "--u_atlas_dir",
-            default="miracl_home",
-            help="path of atlas directory (default: '/code/atlases/ara/')",
+            default=os.environ.get(ARA_ENV, None),
+            help="path of atlas directory (default: %(default)s)",
         )
         stats_args.add_argument(
             "-po",
