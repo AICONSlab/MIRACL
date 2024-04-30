@@ -808,8 +808,8 @@ class RegistrationChecker:
             RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
-        # check that *_clar*.tif exists
-        if not reg_folder.glob("*_clar*.tif"):
+        # check that annotation_*um_clar*.tif exists
+        if not reg_folder.glob("annotation_*um_clar*.tif"):
             RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
