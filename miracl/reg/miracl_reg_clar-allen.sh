@@ -855,7 +855,7 @@ function warpallenlbls()
 	 # PermuteFlipImageOrientationAxes 3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
 
 	ifdsntexistrun ${unpadtif} "Swapping label dimensions & converting to tif" \
-	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${unpadtif}  1 0 2  1 0 0
+	 PermuteFlipImageOrientationAxes 3 ${ortlbls} ${unpadtif}  1 0 2  0 0 0
 
     # ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -15% -15% -o ${tiflbls}
 
