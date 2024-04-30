@@ -696,7 +696,7 @@ class ACEWorkflowParser:
             "--sh_dir_outfile",
             type=str,
             help="Output file directory (default: %(default)s)",
-            default=os.getcwd(),
+            default=Path.cwd(),
         )
         heatmap_args.add_argument(
             "-sho",

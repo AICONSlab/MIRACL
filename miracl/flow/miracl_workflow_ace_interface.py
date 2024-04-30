@@ -204,7 +204,7 @@ class ACEWarping(Warping):
                 -v {args.rwc_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
-        warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[
+        warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[
             0
         ]
         shutil.move(

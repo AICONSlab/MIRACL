@@ -152,7 +152,7 @@ def parsefn() -> argparse.ArgumentParser:
         "--dir_outfile",
         type=str,
         help="Output file directory",
-        default=os.getcwd(),
+        default=Path.cwd(),
     )
     parser.add_argument(
         "-o",
