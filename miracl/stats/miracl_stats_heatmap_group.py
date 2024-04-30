@@ -30,7 +30,7 @@ from miracl.stats import reg_svg, stats_gui_heatmap_group
 
 # Log errors to file in current working directory
 # FIX: Add output directory to path if provided as argument
-logger.add(Path.cwd() + "/miracl_stats_heatmap_group_error.log", level='ERROR', mode="w")
+logger.add(Path.cwd() / "miracl_stats_heatmap_group_error.log", level='ERROR', mode="w")
 
 
 # ----- Input Arguments ------
