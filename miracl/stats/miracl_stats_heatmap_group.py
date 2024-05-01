@@ -199,7 +199,7 @@ def parsefn():
     parser.add_argument("--mask",
                         action="store_true",
                         default=False,
-                        help="mask out non-brain regions in heatmap",)
+                        help="mask out non-brain regions in heatmap (default: %(default)s)",)
     return parser
 
 
