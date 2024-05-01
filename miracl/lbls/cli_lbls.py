@@ -34,8 +34,10 @@ def run_warp_clar(parser, args):
             subprocess.Popen('%s/lbls/miracl_lbls_warp_to_clar_space.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-f %s -t %s -v %s -s "%s" -e "%s"' % (args['folder'], args['type'], args['vox_res'],
-                                                               args['seg_opts'][0], args['ext_opts'][0])
+            bash_args = '-r %s -l %s -o %s -c %s -d %s -f %s -i %s -t %s' % (args['reg_dir'], args['in_lbl'],
+                                                                             args['ort_file'], args['clar_dir'],
+                                                                             args['output_dir'], args['output_file'],
+                                                                             args['interpolation'], args['output_type'])
 
             subprocess.check_call('%s/lbls/miracl_lbls_warp_to_clar_space.sh %s' % (miracl_home, bash_args),
                                   shell=True,
@@ -103,6 +105,16 @@ def get_parser():
                             help="Input Allen labels to warp")
     parser_warp_clar.add_argument('-o', '--ort_file', metavar='',
                             help="file with orientation to standard code")
+    parser_warp_clar.add_argument('-c', '--clar_dir', metavar='',
+                            help="Original clarity tiff folder")
+    parser_warp_clar.add_argument("-d", "--output_dir", metavar='',
+                            help="Output directory")
+    parser_warp_clar.add_argument("-f", "--output_file", metavar='',
+                            help="Output warped labels name")
+    parser_warp_clar.add_argument("-i", "--interpolation", metavar='',
+                            help="Interpolation method", default="MultiLabel", required=False)
+    parser_warp_clar.add_argument("-t", "--output_type", metavar='',
+                            help="Output file type", default="short", required=False)
     parser_warp_clar.add_argument('-h', '--help', action='store_true')
 
     parser_warp_clar.set_defaults(func=run_warp_clar)
