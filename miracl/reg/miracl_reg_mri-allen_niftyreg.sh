@@ -334,7 +334,7 @@ if [ "${atl}" == "allen" ]; then
 else
     
     vox=60
-    lbls=${atlasdir}/fischer/template/Fischer344_template_labels.nii
+    lbls=${atlasdir}/fischer/template/Fischer344_template_labels.nii.gz
 
 fi
 
@@ -632,7 +632,7 @@ if [ "${atl}" == "allen" ]; then
 else
 
     # Fischer atlas template
-    atlref=${atlasdir}/fischer/template/Fischer344_template_stripped.nii
+    atlref=${atlasdir}/fischer/template/Fischer344_template_stripped.nii.gz
 
 fi  
 	#---------------------------
