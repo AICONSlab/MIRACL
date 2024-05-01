@@ -606,7 +606,7 @@ class StackTiffs:
         :type is_MC: bool
         """
         print("  stacking segmented tifs...")
-        filter = "out_" if not is_MC else "MC_"
+        filter =  "MC_" if is_MC else "out_"
         with open(fiji_file, "w") as file:
             file.write(f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n')
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
