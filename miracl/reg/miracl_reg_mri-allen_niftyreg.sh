@@ -14,14 +14,14 @@ function usage()
     
     cat <<usage
 
-	1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
-	2) Warps Allen annotations to the MRI space
+	1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain or Fischer Reference rat brain Atlas
+	2) Warps Allen/Fischer annotations to the MRI space
 
 	if no inputs are given function will run in GUI mode
 
 	For command-line / scripting
 
-	Usage: miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+	Usage: miracl reg mri_allen_fischer_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [atlas]
 
     Example: miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -44,7 +44,9 @@ function usage()
         s.  skull strip or not, binary option (default: 1 -> skull-strip)
         f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
         n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
-
+    	a. atlas (default: allen)
+	   use allen atlas for mouse models and fischer atlas for rat models
+           accepted inputs are: <allen> or <fischer>
 	-----------------------------------
 	registration based on NiftyReg
 	-----------------------------------
@@ -122,11 +124,11 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:b:s:f:n:" opt; do
+	while getopts ":i:o:l:m:v:b:s:f:n:a:" opt; do
     
 	    case "${opt}" in
 
-	        i)
+	          i)
             	inmr=${OPTARG}
             	;;
 
@@ -134,14 +136,14 @@ if [[ "$#" -gt 1 ]]; then
             	ort=${OPTARG}
             	;;
 
-        	l)
+        	  l)
             	lbls=${OPTARG}
             	;;
 
-        	m)
+        	  m)
             	hemi=${OPTARG}
             	;;
-        	v)
+        	  v)
             	vox=${OPTARG}
             	;;
 
@@ -160,8 +162,10 @@ if [[ "$#" -gt 1 ]]; then
             n)
             	noort=${OPTARG}
             	;;
-
-        	*)
+	          a)
+            	atl=${OPTARG}
+            	;;
+        	  *)
             	usage            	
             	;;
 
@@ -193,7 +197,7 @@ else
 	# options gui
 	opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "In-vivo or Ex-vivo MRI" \
 	-f "Orient code (def = RSP)" "Labels Hemi [combined (def)/split]" "Labels resolution [vox] (def = 10 'um')"  \
-	 "olfactory bulb incl. (def = 0)" "skull strip (def = 1)" "No orient (def = 0)"  -hf "`usage`")
+	 "olfactory bulb incl. (def = 0)" "skull strip (def = 1)" "No orient (def = 0)" "atlas (def = allen)"  -hf "`usage`")
 
 	# populate array
 	arr=()
@@ -238,6 +242,10 @@ else
     noort=`echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
 
     printf "\n Chosen No orientation option: $noort \n"
+    
+    atl=`echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//'`
+
+    printf "\n Chosen atlas: $atl \n"
 
 fi
 
@@ -246,8 +254,7 @@ fi
 # make reg dir
 
 regdirfinal=$PWD/reg_final
-regdir=$PWD/mr_allen_reg
-
+regdir=$PWD/mr_"${atl}"_reg
 
 if [[ ! -d ${regdir} ]]; then
 
@@ -257,8 +264,7 @@ if [[ ! -d ${regdir} ]]; then
 fi
 
 # output log file of script
-
-exec > >(tee -i ${regdir}/mri_allen_script.log)
+exec > >(tee -i ${regdir}/mri_"${atl}"_script.log)
 exec 2>&1
 
 
@@ -272,39 +278,63 @@ if [[ -z ${ort} ]]; then
     ort=RSP
 fi
 
+# atlas type
+if [[ -z ${atl} ]]; then
+
+    atl=allen
+
+else
+
+    if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ]; then
+
+	printf "ERROR: < -a => (atl) > only takes as inputs: allen or fischer"
+	exit 1
+
+    fi
+
+fi
+	
 # If want to warp multi-res / hemi lbls
+if [ "${atl}" == "allen" ]; then
+    
+  if [[ -z ${lbls} ]]; then
 
-if [[ -z ${lbls} ]]; then
+      if [[ -z ${hemi} ]]; then
 
-    if [[ -z ${hemi} ]]; then
+          hemi=combined
 
-        hemi=combined
+      else
 
-    else
+          if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
 
-        if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
+              printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+              exit 1
+          fi
 
-            printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
-            exit 1
-        fi
+      fi
 
-    fi
+      if [[ -z ${vox} ]]; then
 
-    if [[ -z ${vox} ]]; then
+          vox=10
 
-        vox=10
+      else
 
-    else
+          if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
 
-        if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
+              printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+              exit 1
+          fi
 
-            printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
-            exit 1
-        fi
+      fi
 
-    fi
+      lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 
-    lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+  fi
+
+else
+    
+    vox=60
+    lbls=${atlasdir}/fischer/template/Fischer344_template_labels.nii
 
 fi
 
@@ -336,6 +366,7 @@ else
 fi
 
 # olfactory bulb
+# FIX: What if Fischer is used here?
 if [[ -z ${bulb} ]] ; then
     bulb=0
 else
@@ -587,45 +618,54 @@ function main()
 	#---------------------------
 
 # 2a) initialize registration
-
+if [ "${atl}" == "allen" ]; then
     # Allen atlas template
 
+    # FIX: Needs to addressed: same template for w/ or w/o bulb?
+    
     # if [[ "${bulb}" == 0 ]]; then
-    #     allenref=${atlasdir}/ara/template/average_template_50um_OBmasked.nii.gz
+    #     atlref=${atlasdir}/ara/template/average_template_50um_OBmasked.nii.gz
 
     # elif [[ "${bulb}" == 1 ]]; then
-        allenref=${atlasdir}/ara/template/average_template_50um.nii.gz
-    # fi
+        atlref=${atlasdir}/ara/template/average_template_50um.nii.gz
+	# fi
+else
 
+    # Fischer atlas template
+    atlref=${atlasdir}/fischer/template/Fischer344_template_stripped.nii
+
+fi  
 	#---------------------------
 
-# 2b) Register to Allen atlas
+# 2b) Register to Allen/Fischer atlas
 	
 
 	# Parameters: 
 
+  # NOTE: Delete this?
+  
 	# # Out Allen
 	# antsallen=${regdir}/allen_mr_antsWarped.nii.gz
 
 
-    alad_xfm=${regdir}/mr_allen_affine.xfm
-    alad_out=${regdir}/mr_allen_aladin.nii.gz
+    alad_xfm=${regdir}/mr_"${atl}"_affine.xfm
+    alad_out=${regdir}/mr_"${atl}"_aladin.nii.gz
 
     # aladin 
-    ifdsntexistrun ${alad_xfm} "Registering MRI data to allen atlas using affine reg" \
-    reg_aladin -ref ${allenref} -flo ${mrlnk} -%i 95 -sym -res ${alad_out} -aff ${alad_xfm} -maxit 10 -ln 4
+    ifdsntexistrun ${alad_xfm} "Registering MRI data to "${atl}" atlas using affine reg" \
+    reg_aladin -ref ${atlref} -flo ${mrlnk} -%i 95 -sym -res ${alad_out} -aff ${alad_xfm} -maxit 10 -ln 4
 
     # reg_f3d
-    cpp=${regdir}/mr_allen_cpp.nii.gz
-    f3d_out=${regdirfinal}/mr_allen_f3d.nii.gz
+    cpp=${regdir}/mr_"${atl}"_cpp.nii.gz
+    f3d_out=${regdirfinal}/mr_"${atl}"_f3d.nii.gz
 
-    ifdsntexistrun ${f3d_out} "Registering MRI data to allen atlas using deformable transformation" \
-    reg_f3d -flo ${alad_out} -ref ${allenref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -6
+    ifdsntexistrun ${f3d_out} "Registering MRI data to "${atl}" atlas using deformable transformation" \
+    reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -6
 
 	#---------------------------
 
 
-# 3) Warp Allen labels to MRI
+# 3) Warp Allen/Fischer labels to MRI
 
 
     base=`basename ${lbls}`
@@ -635,20 +675,20 @@ function main()
 	wrplbls=${regdirfinal}/${lblsname}_f3d.nii.gz
 
  	# inv affine
- 	inv_aff=${regdir}/mr_allen_affine_inv.xfm
+ 	inv_aff=${regdir}/mr_"${atl}"_affine_inv.xfm
 
  	ifdsntexistrun ${inv_aff} "Inverting affine transform" \
  	reg_transform -ref ${mrlnk} -invAffine ${alad_xfm} ${inv_aff}
 
  	# comb inv aff & def
- 	comb_def=${regdir}/allen_mr_comb_def.nii.gz
- 	inv_cpp=${regdir}/mr_allen_cpp_backward.nii.gz
+ 	comb_def=${regdir}/"${atl}"_mr_comb_def.nii.gz
+ 	inv_cpp=${regdir}/mr_"${atl}"_cpp_backward.nii.gz
 
  	ifdsntexistrun ${comb_def} "Combing affine transform and deformable field" \
- 	reg_transform -ref ${mrlnk} -aff2def ${inv_aff} ${allenref} ${inv_cpp} ${comb_def}
+ 	reg_transform -ref ${mrlnk} -aff2def ${inv_aff} ${atlref} ${inv_cpp} ${comb_def}
 
  	# resample lbls
- 	ifdsntexistrun ${wrplbls} "Resampling Allen labels to MRI space" \
+ 	ifdsntexistrun ${wrplbls} "Resampling "${atl}" labels to MRI space" \
  	reg_resample -ref ${mrlnk} -flo ${lbls} -def ${comb_def} -res ${wrplbls} -inter 0
 
 	#---------------------------
@@ -666,7 +706,7 @@ END=$(date +%s)
 DIFF=$((END-START))
 DIFF=$((DIFF/60))
 
-miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minutes"
+miracl utils end_state -f "Registration and "${atl}" labels warping" -t "$DIFF minutes"
 
 #--------------------
 
