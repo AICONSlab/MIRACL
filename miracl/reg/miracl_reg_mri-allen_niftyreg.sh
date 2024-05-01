@@ -90,8 +90,10 @@ fi
 
 # Init atlas dir
 
-atlasdir=${MIRACL_HOME}/atlases
+# FIX: MIRACL_HOME is the incorrect dir ref here!
 
+# atlasdir=${MIRACL_HOME}/atlases
+atlasdir=${ATLASES_HOME}
 
 # GUI for MRI input imgs
 
