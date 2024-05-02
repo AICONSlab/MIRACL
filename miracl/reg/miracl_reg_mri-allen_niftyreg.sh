@@ -32,21 +32,24 @@ function usage()
     optional arguments:
         o.  orient code (default: RSP)
             to orient nifti from original orientation to "standard/Allen" orientation
+    	a.  atlas (default: allen)
+	    	use allen atlas for mouse models and fischer atlas for rat fischer models
+            accepted inputs are: <allen> or <fischer>
+        l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
+            input labels could be at a different depth than default labels
+        f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
+        n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+        s.  skull strip or not, binary option (default: 1 -> skull-strip)
+
+    Allen atlas related arguments:
         m.  hemisphere mirror (default: combined)
             warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>
-    	a.  atlas (default: allen)
-	    use allen atlas for mouse models and fischer atlas for rat models
-            accepted inputs are: <allen> or <fischer>
-        l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz)
-            input labels could be at a different depth than default labels
         v.  labels voxel size/Resolution in um (default: 10)
             accepted inputs are: 10, 25 or 50
             If l. is specified (m & v cannot be specified)
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
-        s.  skull strip or not, binary option (default: 1 -> skull-strip)
-        f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
-        n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+
 	-----------------------------------
 	registration based on NiftyReg
 	-----------------------------------
