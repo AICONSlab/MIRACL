@@ -334,7 +334,7 @@ if [ "${atl}" == "allen" ]; then
 else
     
     vox=60
-    lbls=${atlasdir}/fischer/template/Fischer344_template_labels.nii.gz
+    lbls=${atlasdir}/fischer/annotation/Fischer344_template_labels.nii.gz
 
 fi
 
@@ -653,14 +653,14 @@ fi
 
     # aladin 
     ifdsntexistrun ${alad_xfm} "Registering MRI data to "${atl}" atlas using affine reg" \
-    reg_aladin -ref ${atlref} -flo ${mrlnk} -%i 95 -sym -res ${alad_out} -aff ${alad_xfm} -maxit 10 -ln 4
+    reg_aladin -ref ${atlref} -flo ${mrlnk} -%i 95 -res ${alad_out} -aff ${alad_xfm} -maxit 15 -ln 4
 
     # reg_f3d
     cpp=${regdir}/mr_"${atl}"_cpp.nii.gz
     f3d_out=${regdirfinal}/mr_"${atl}"_f3d.nii.gz
 
     ifdsntexistrun ${f3d_out} "Registering MRI data to "${atl}" atlas using deformable transformation" \
-    reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -6
+    reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -10
 
 	#---------------------------
 
@@ -685,11 +685,11 @@ fi
  	inv_cpp=${regdir}/mr_"${atl}"_cpp_backward.nii.gz
 
  	ifdsntexistrun ${comb_def} "Combing affine transform and deformable field" \
- 	reg_transform -ref ${mrlnk} -aff2def ${inv_aff} ${atlref} ${inv_cpp} ${comb_def}
+ 	reg_transform -ref ${inmr} -comp ${inv_aff} ${inv_cpp} ${comb_def}
 
  	# resample lbls
  	ifdsntexistrun ${wrplbls} "Resampling "${atl}" labels to MRI space" \
- 	reg_resample -ref ${mrlnk} -flo ${lbls} -def ${comb_def} -res ${wrplbls} -inter 0
+ 	reg_resample -ref ${inmr} -flo ${lbls} -trans ${comb_def} -res ${wrplbls} -inter 0
 
 	#---------------------------
 
