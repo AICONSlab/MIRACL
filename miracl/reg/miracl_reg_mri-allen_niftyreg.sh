@@ -30,11 +30,11 @@ function usage()
             Preferably T2-weighted
 
     optional arguments:
-        r.  output (results) directory (default: working directory)
+        r.  set base dir for reg output (default: cwd)
         o.  orient code (default: RSP)
             to orient nifti from original orientation to "standard/Allen" orientation
     	a.  atlas (default: allen)
-	    	use allen atlas for mouse models and fischer atlas for rat fischer models
+	    	use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
             accepted inputs are: <allen> or <fischer>
         l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
             input labels could be at a different depth than default labels
