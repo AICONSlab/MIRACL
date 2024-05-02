@@ -134,7 +134,17 @@ def save_tiff_MC_dropout(img_list, output_path, path, model_name):
 
 
 # this function generates outputs using the trained model
-def generate_output_single(model_name, model_out):
+def generate_output_single(
+        model_name,
+        model_out,
+        input_path,
+        sw_batch_size_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     def model_loader(model, trained_model_path):
         # move the models to gpu
         model.to(device)
@@ -175,7 +185,19 @@ def generate_output_single(model_name, model_out):
 
 
 # this function generates outputs using the trained model and MC dropout techniques
-def generate_output_MC(model_name, model_out):
+def generate_output_MC(
+        model_name,
+        model_out,
+        input_path,
+        batch_size_internal,
+        sw_batch_size_internal,
+        forward_passes_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     batch_size = batch_size_internal
 
     # number of forward pass
@@ -297,7 +319,16 @@ def generate_output_MC(model_name, model_out):
 
 
 # this function generates outputs using ensemble two models
-def generate_output_ensemble(model_out):
+def generate_output_ensemble(
+        model_out,
+        input_path,
+        sw_batch_size_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     sw_batch_size = sw_batch_size_internal
 
     def model_loader(model, trained_model_path):
@@ -359,7 +390,18 @@ def generate_output_ensemble(model_out):
 
 
 # this function generates outputs using ensemble of ensembles (averaging two models + MC) technique
-def generate_output_ensemble_of_ensembles(model_out):
+def generate_output_ensemble_of_ensembles(
+        model_out,
+        input_path,
+        batch_size_internal,
+        sw_batch_size_internal,
+        forward_passes_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     # number of forward pass
     # forward_passes = 5
     forward_passes = forward_passes_internal
@@ -584,17 +626,13 @@ def deploy_functions(
     binarization_threshold,
     percentage_brain_patch_skip,
 ):
-    # Define global vars
+    # Define vars
     model_name = chosen_model
-    global input_path
     input_path = patch_dir_var
     CFG_PATH = Path(os.environ["MIRACL_HOME"]) / "seg/config_unetr.yml"
     MC_flag = True if forward_passes_var > 0 else False
-    global batch_size_internal
     batch_size_internal = batch_size_var
-    global sw_batch_size_internal
     sw_batch_size_internal = 4
-    global forward_passes_internal
     forward_passes_internal = forward_passes_var
 
     # -------------------------------------------------------
@@ -630,7 +668,6 @@ def deploy_functions(
 
     images_val = images_val_non_empty
 
-    global data_dicts_test
     data_dicts_test = [{"image": image_name} for image_name in images_val]
     print("data dicts are ready!")
     print(f"some samples from data dicts: {data_dicts_test[:3]}")
@@ -642,19 +679,14 @@ def deploy_functions(
     model_out, test_transforms = ace_prepare_model_transform.generate_model_transforms(
         model_name, CFG_PATH
     )
-    global post_pred
     post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2, threshold=binarization_threshold)])
-    global post_label
-    post_label = Compose([EnsureType(), AsDiscrete(to_onehot=2)])
 
     with open(CFG_PATH, "r") as ymlfile:
-        global cfg
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # GPU selection
     print(f"number of available gpus: {torch.cuda.device_count()}")
     gpu_opt = cfg["general"].get("GPU", "single")
-    global device
     if gpu_opt == "single":
         if torch.cuda.device_count() <= gpu_index:
             raise ValueError(f"Selected GPU index ({gpu_index}) is not available. Available GPUs: {torch.cuda.device_count()}")
@@ -673,27 +705,90 @@ def deploy_functions(
         num_workers=num_workers_var,
     )
     # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
-    global val_loader
     val_loader = DataLoader(val_ds, batch_size=batch_size_internal, num_workers=num_workers_var)
 
     # unet alone
     if model_name == "unet" and not MC_flag:
-        generate_output_single(model_name, model_out)
+        generate_output_single(
+            model_name,
+            model_out,
+            input_path,
+            sw_batch_size_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unetr alone
     elif model_name == "unetr" and not MC_flag:
-        generate_output_single(model_name, model_out)
+        generate_output_single(
+            model_name,
+            model_out,
+            input_path,
+            sw_batch_size_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unet alone + MC dropout
     elif model_name == "unet" and MC_flag:
-        generate_output_MC(model_name, model_out)
+        generate_output_MC(
+            model_name,
+            model_out,
+            input_path,
+            batch_size_internal,
+            sw_batch_size_internal,
+            forward_passes_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unetr alone + MC dropout
     elif model_name == "unetr" and MC_flag:
-        generate_output_MC(model_name, model_out)
+        generate_output_MC(
+            model_name,
+            model_out,
+            input_path,
+            batch_size_internal,
+            sw_batch_size_internal,
+            forward_passes_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unet + unetr
     elif model_name == "ensemble" and not MC_flag:
-        generate_output_ensemble(model_out)
+        generate_output_ensemble(
+            model_out,
+            input_path,
+            sw_batch_size_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unet + unetr + MC dropout
     elif model_name == "ensemble" and MC_flag:
-        generate_output_ensemble_of_ensembles(model_out)
+        generate_output_ensemble_of_ensembles(
+            model_out,
+            input_path,
+            batch_size_internal,
+            sw_batch_size_internal,
+            forward_passes_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     else:
         raise ValueError("Selected model is invalid")
 
@@ -701,7 +796,6 @@ def deploy_functions(
 
     # for the images in images_val
     # define dataloader
-    global data_dicts_test_empty
     data_dicts_test_empty = [{"image": image_name} for image_name in images_val_empty]
     val_ds_empty = CacheDataset(
         data=data_dicts_test_empty,
@@ -710,7 +804,6 @@ def deploy_functions(
         num_workers=num_workers_var,
     )
     # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
-    global val_loader_empty
     val_loader_empty = DataLoader(val_ds_empty, batch_size=batch_size_internal, num_workers=num_workers_var)
     RI_subj_id = 1
     for i, val_data in enumerate(val_loader_empty):
