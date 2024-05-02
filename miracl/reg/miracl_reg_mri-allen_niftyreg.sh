@@ -30,6 +30,7 @@ function usage()
             Preferably T2-weighted
 
     optional arguments:
+        r.  output (results) directory (default: working directory)
         o.  orient code (default: RSP)
             to orient nifti from original orientation to "standard/Allen" orientation
     	a.  atlas (default: allen)
@@ -95,8 +96,6 @@ fi
 
 # Init atlas dir
 
-# FIX: MIRACL_HOME is the incorrect dir ref here!
-
 # atlasdir=${MIRACL_HOME}/atlases
 atlasdir=${ATLASES_HOME}
 
@@ -127,26 +126,29 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":i:o:l:m:v:b:s:f:n:a:" opt; do
+	while getopts ":i:r:o:l:m:v:b:s:f:n:a:" opt; do
     
 	    case "${opt}" in
 
-	          i)
+	        i)
             	inmr=${OPTARG}
+            	;;
+            r)
+            	work_dir=${OPTARG}
             	;;
 
             o)
             	ort=${OPTARG}
             	;;
 
-        	  l)
+        	l)
             	lbls=${OPTARG}
             	;;
 
-        	  m)
+        	m)
             	hemi=${OPTARG}
             	;;
-        	  v)
+        	v)
             	vox=${OPTARG}
             	;;
 
@@ -165,7 +167,7 @@ if [[ "$#" -gt 1 ]]; then
             n)
             	noort=${OPTARG}
             	;;
-	          a)
+	        a)
             	atl=${OPTARG}
             	;;
         	  *)
@@ -252,12 +254,34 @@ else
 
 fi
 
+# atlas type
+if [[ -z ${atl} ]]; then
 
+    atl=allen
+
+else
+
+    if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ]; then
+
+	printf "ERROR: < -a => (atl) > only takes as inputs: allen or fischer"
+	exit 1
+
+    fi
+
+fi
 
 # make reg dir
+if [[ -z ${work_dir} ]] || [[ "${work_dir}" == "None" ]]; then
 
-regdirfinal=$PWD/reg_final
-regdir=$PWD/mr_"${atl}"_reg
+    regdirfinal=${PWD}/reg_final
+    regdir=${PWD}/clar_${atl}_reg
+
+else
+
+    regdirfinal=${work_dir}/reg_final
+    regdir=${work_dir}/clar_${atl}_reg
+
+fi
 
 if [[ ! -d ${regdir} ]]; then
 
@@ -276,27 +300,12 @@ exec 2>&1
 # set defaults and assert (check for input errors)
 
 
+
 # orient code
 if [[ -z ${ort} ]]; then
     ort=RSP
 fi
 
-# atlas type
-if [[ -z ${atl} ]]; then
-
-    atl=allen
-
-else
-
-    if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ]; then
-
-	printf "ERROR: < -a => (atl) > only takes as inputs: allen or fischer"
-	exit 1
-
-    fi
-
-fi
-	
 # If want to warp multi-res / hemi lbls
 if [ "${atl}" == "allen" ]; then
     
