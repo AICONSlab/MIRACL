@@ -90,6 +90,7 @@ Allen example:
 
    $ miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
+
 Fischer example:
 
 .. code-block::
@@ -120,6 +121,7 @@ Arguments:
      s.  skull strip or not, binary option (default: 1 -> skull-strip)
 
    Allen atlas related arguments:
+   
      m.  hemisphere mirror (default: combined)
          warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
          accepted inputs are: <split> or <combined>

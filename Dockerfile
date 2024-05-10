@@ -57,6 +57,7 @@ RUN mkdir -p /code/atlases/ara && \
 # RUN conda install -y --no-update-deps pyqt=5
 
 ENV aradir "/code/atlases/ara"
+ENV fischerdir "/code/atlases/fischer"
 
 # Templates (atlas images)
 ENV allen10 "/code/atlases/ara/template/average_template_10um.nii.gz"

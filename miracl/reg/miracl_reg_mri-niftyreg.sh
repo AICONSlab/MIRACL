@@ -23,7 +23,7 @@ function usage()
 
 	Usage: miracl reg mri_allen_fischer_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [atlas]
 
-    Example: miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
+    Example: miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
     arguments (required):
 		i.  input MRI nii
@@ -32,7 +32,7 @@ function usage()
     optional arguments:
         r.  set base dir for reg output (default: cwd)
         o.  orient code (default: RSP)
-            to orient nifti from original orientation to "standard/Allen" orientation
+            to orient nifti from original orientation to "standard/Allen/Fischer" orientation
     	a.  atlas (default: allen)
 	    	use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
             accepted inputs are: <allen> or <fischer>
