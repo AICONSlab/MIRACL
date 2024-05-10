@@ -11,4 +11,5 @@ Reference mouse brain atlas.
    :caption: Table of contents:
 
    clarity_allen/clarity_allen
-   MRI-Allen registration <mri_nifty/mri_nifty>
+   MRI Allen/Fischer registration <mri_nifty/mri_nifty>
+   itk-SNAP re-orient image <itksnap_reorient/itksnap_reorient>
