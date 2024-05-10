@@ -26,15 +26,15 @@ function usage()
     Example: miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
     arguments (required):
-		i.  input MRI nii
+        i.  input MRI nii
             Preferably T2-weighted
 
     optional arguments:
         r.  set base dir for reg output (default: cwd)
         o.  orient code (default: RSP)
             to orient nifti from original orientation to "standard/Allen/Fischer" orientation
-    	a.  atlas (default: allen)
-	    	use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
+        a.  atlas (default: allen)
+            use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
             accepted inputs are: <allen> or <fischer>
         l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
             input labels could be at a different depth than default labels
