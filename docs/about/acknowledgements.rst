@@ -10,10 +10,9 @@ Huge thank you to:
 - The members of `AICONS Lab <https://aiconslab.github.io/>`_ for their 
   feedback and contributions
 
-GitHub contributers (ordered by number of commits):
+GitHub contributors (ordered by number of commits):
 
 .. contributors:: AICONSlab/MIRACL
-    :exclude: mgoubran,entiri,jono3030,AAttarpour
     :avatars:
     :order: DESC
 
