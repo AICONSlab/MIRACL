@@ -654,8 +654,6 @@ fi
 
 	# Parameters: 
 
-  # NOTE: Delete this?
-  
 	# # Out Allen
 	# antsallen=${regdir}/allen_mr_antsWarped.nii.gz
 
@@ -672,7 +670,7 @@ fi
     f3d_out=${regdirfinal}/mr_"${atl}"_f3d.nii.gz
 
     ifdsntexistrun ${f3d_out} "Registering MRI data to "${atl}" atlas using deformable transformation" \
-    reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -10
+    reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -15
 
 	#---------------------------
 
