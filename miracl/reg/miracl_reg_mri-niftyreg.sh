@@ -32,7 +32,7 @@ function usage()
     optional arguments:
         r.  set base dir for reg output (default: cwd)
         o.  orient code (default: RSP)
-            to orient nifti from original orientation to "standard/Allen" orientation
+            to orient nifti from original orientation to "standard/Allen/Fischer" orientation
     	a.  atlas (default: allen)
 	    	use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
             accepted inputs are: <allen> or <fischer>
