@@ -13,7 +13,7 @@ Invoke with ``$ miraclGUI`` and select from main menu or run:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty
+   $ miracl reg mri_nifty
 
 The following window will open:
 
@@ -70,13 +70,13 @@ Usage:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+   $ miracl reg mri_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
 Example:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
+   $ miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
 Arguments:
 
