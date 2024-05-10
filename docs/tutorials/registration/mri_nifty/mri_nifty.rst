@@ -1,19 +1,25 @@
-MRI whole-brain registration to Allen Atlas
-###########################################
+MRI whole-brain registration to Allen or Fischer Atlas
+######################################################
 
 This registration method performs the following tasks:
 
-#. Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
-#. Warps Allen annotations to the MRI space
+#. Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas or Fischer Reference rat brain Atlas
+#. Warps Allen/Fischer annotations to the MRI space
 
 GUI
 ===
+
+.. warning::
+
+   The recently added Fischer Reference rat brain Atlas has not been integrated
+   into the GUI yet. We will update the GUI soon but in the meantime please
+   use the CLI for rat brain registration.
 
 Invoke with ``$ miraclGUI`` and select from main menu or run:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty
+   $ miracl reg mri_nifty
 
 The following window will open:
 
@@ -66,17 +72,29 @@ Click ``Enter`` and ``Run`` to start the registration process.
 Command-line
 ============
 
+Help:
+
+.. code-block::
+
+   $ miracl reg mri_nifty -h
+
 Usage:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+   $ miracl reg mri_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
 
-Example:
+Allen example:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
+   $ miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
+
+Fischer example:
+
+.. code-block::
+
+   $ miracl reg mri_nifty -i /data/rat_atlas/mr_data/axial.nii.gz -a fischer -n 1 -r /data/rat_atlas
 
 Arguments:
 
@@ -85,21 +103,39 @@ Arguments:
    arguments (required):
 
      i.  input MRI nii
-        Preferably T2-weighted
+         Preferably T2-weighted
 
    optional arguments:
-   
+
+     r.  set base dir for reg output (default: cwd)
      o.  orient code (default: RSP)
-         to orient nifti from original orientation to "standard/Allen" orientation
+         to orient nifti from original orientation to "standard/Allen/Fischer" orientation
+     a.  atlas (default: allen)
+         use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
+         accepted inputs are: <allen> or <fischer>
+     l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
+         input labels could be at a different depth than default labels
+     f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
+     n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+     s.  skull strip or not, binary option (default: 1 -> skull-strip)
+
+   Allen atlas related arguments:
      m.  hemisphere mirror (default: combined)
          warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
          accepted inputs are: <split> or <combined>
      v.  labels voxel size/Resolution in um (default: 10)
          accepted inputs are: 10, 25 or 50
-     l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
-         input labels could be at a different depth than default labels
          If l. is specified (m & v cannot be specified)
      b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
-     s.  skull strip or not, binary option (default: 1 -> skull-strip)
-     f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
-     n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+
+Example results for rat brain registration (Fischer)
+====================================================
+
+.. image:: ./images/MIRACL_registration_mri_nifty_1.png
+
+.. image:: ./images/MIRACL_registration_mri_nifty_2.png
+
+Example results for mouse brain registration (Allen) in ITK-SNAP
+================================================================
+
+.. image:: ../../../gallery/images/registration_result_in_itksnap.png
