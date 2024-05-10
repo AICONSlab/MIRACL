@@ -57,23 +57,23 @@ def run_mri_allen_ants(parser, args):
                                   stderr=subprocess.STDOUT)
 
 
-def run_mri_allen_nifty(parser, args):
+def run_mri_nifty(parser, args):
     miracl_home = os.environ['MIRACL_HOME']
     args = vars(args)
 
-    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'mri_allen_nifty':
-        subprocess.Popen('%s/reg/miracl_reg_mri-allen_niftyreg.sh' % miracl_home,
+    if sys.argv[-2] == 'reg' and sys.argv[-1] == 'mri_nifty':
+        subprocess.Popen('%s/reg/miracl_reg_mri-niftyreg.sh' % miracl_home,
                          shell=True)
     else:
         if args['help']:
-            subprocess.Popen('%s/reg/miracl_reg_mri-allen_niftyreg.sh -h' % miracl_home,
+            subprocess.Popen('%s/reg/miracl_reg_mri-niftyreg.sh -h' % miracl_home,
                              shell=True)
         else:
             bash_args = '-i %s -r %s -o %s -m %s -v %s -l %s -b %s -s %s -f %s -n %s -a %s' \
                         % (args['in_nii'], args['work_dir'], args['ort'], args['hemi'], args['vox_res'], args['lbls'], args['bulb'],
                            args['skull'], args['bet'], args['noort'], args['atlas'])
 
-            subprocess.check_call('%s/reg/miracl_reg_mri-allen_niftyreg.sh %s' % (miracl_home, bash_args), shell=True,
+            subprocess.check_call('%s/reg/miracl_reg_mri-niftyreg.sh %s' % (miracl_home, bash_args), shell=True,
                                   stderr=subprocess.STDOUT)
 
 
@@ -179,33 +179,33 @@ def get_parser():
     parser_mri_allen.set_defaults(func=run_mri_allen_ants)
 
     # mri allen nifty
-    parser_mri_allen_nifty = subparsers.add_parser('mri_allen_nifty', add_help=False,
-                                                   help="MRI registration to Allen atlas using NiftyReg")
-    parser_mri_allen_nifty.add_argument('-i', '--in_nii', metavar='',
+    parser_mri_nifty = subparsers.add_parser('mri_nifty', add_help=False,
+                                                   help="MRI registration to Allen (mouse) or Fischer (rat) atlas using NiftyReg")
+    parser_mri_nifty.add_argument('-i', '--in_nii', metavar='',
                                         help="input nifti")
-    parser_mri_allen_nifty.add_argument('-r', '--work_dir', metavar='',
+    parser_mri_nifty.add_argument('-r', '--work_dir', metavar='',
                                         help="set base dir for reg output (default: cwd)")
-    parser_mri_allen_nifty.add_argument('-o', '--ort', metavar='',
+    parser_mri_nifty.add_argument('-o', '--ort', metavar='',
                                         help="orientation tag")
-    parser_mri_allen_nifty.add_argument('-m', '--hemi', metavar='',
+    parser_mri_nifty.add_argument('-m', '--hemi', metavar='',
                                         help="whole brain or hemi")
-    parser_mri_allen_nifty.add_argument('-v', '--vox_res', metavar='',
+    parser_mri_nifty.add_argument('-v', '--vox_res', metavar='',
                                         help="voxel resolution")
-    parser_mri_allen_nifty.add_argument('-l', '--lbls', metavar='',
+    parser_mri_nifty.add_argument('-l', '--lbls', metavar='',
                                         help="input labels")
-    parser_mri_allen_nifty.add_argument('-b', '--bulb', metavar='',
+    parser_mri_nifty.add_argument('-b', '--bulb', metavar='',
                                         help="olfactory bulb")
-    parser_mri_allen_nifty.add_argument('-s', '--skull', metavar='',
+    parser_mri_nifty.add_argument('-s', '--skull', metavar='',
                                         help="skull strip")
-    parser_mri_allen_nifty.add_argument('-f', '--bet', metavar='',
+    parser_mri_nifty.add_argument('-f', '--bet', metavar='',
                                         help="bet fractional intensity")
-    parser_mri_allen_nifty.add_argument('-n', '--noort', metavar='',
+    parser_mri_nifty.add_argument('-n', '--noort', metavar='',
                                         help="no orientation needed (input image in 'standard' orientation), binary option (default: 0 -> orient; use 1 if no orientation is needed)")
-    parser_mri_allen_nifty.add_argument('-a', '--atlas', metavar='',
+    parser_mri_nifty.add_argument('-a', '--atlas', metavar='',
                                         help="use 'allen' for mouse models and 'fischer' for rat Fischer models (default: 'allen')") 
-    parser_mri_allen_nifty.add_argument('-h', '--help', action='store_true')
+    parser_mri_nifty.add_argument('-h', '--help', action='store_true')
 
-    parser_mri_allen_nifty.set_defaults(func=run_mri_allen_nifty)
+    parser_mri_nifty.set_defaults(func=run_mri_nifty)
 
     # warp clar
     parser_warp_clar = subparsers.add_parser('warp_clar', add_help=False,
