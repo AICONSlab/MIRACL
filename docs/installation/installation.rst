@@ -309,7 +309,7 @@ either of the following methods:
       To install WSL, users can follow the instructions from 
       `Microsoft <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
       More comprehensive instructions can be found
-      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`_.
+      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`__.
       Upgrading from :program:`WSL1` to :program:`WSL2` is recommended, due to 
       :program:`WSL2`’s `benefits <https://docs.microsoft.com/en-us/windows/wsl/compare-versions>`_.
 
@@ -330,7 +330,7 @@ either of the following methods:
          <h2>Installing Docker on Windows</h2>
       
       1. Download the :program:`Docker Desktop` installer for Windows from 
-         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`_ 
+         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`__ 
          or from the `release notes <https://docs.docker.com/desktop/release-notes/>`_.
       2. Double-click :program:`Docker Desktop Installer.exe` to run the 
          installer. By default, :program:`Docker Desktop` is installed at 
