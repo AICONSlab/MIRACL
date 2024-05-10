@@ -11,4 +11,4 @@ Reference mouse brain atlas.
    :caption: Table of contents:
 
    clarity_allen/clarity_allen
-   MRI-Allen registration <mri_allen/mri_allen>
+   MRI-Allen registration <mri_nifty/mri_nifty>
