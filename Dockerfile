@@ -53,6 +53,9 @@ WORKDIR /tmp
 RUN mkdir -p /code/atlases/ara && \
     wget -P /code/atlases https://www.dropbox.com/sh/j31vurlp6h4lvod/AAAIKpYJQizkAte3Ju5DZYj8a --content-disposition && \
     unzip /code/atlases/ara.zip -x / -d /code/atlases/ara
+RUN mkdir -p /code/atlases/fischer && \
+    wget -O fischer.zip "https://www.dropbox.com/scl/fo/7q0xrj1bq0wdgez4qv8bh/AK_rxFdvE4SMUm18El_0l68?rlkey=uvs7kwq9it0tzbl2v54szj1qt&e=1&st=cehbojsh&dl=0" && \
+    unzip fischer.zip -x / -d /code/atlases/fischer
 
 # RUN conda install -y --no-update-deps pyqt=5
 
