@@ -379,7 +379,7 @@ fi
 
 # olfactory bulb
 # FIX: What if Fischer is used here?
-if [[ -z ${bulb} ]] ; then
+if [[ -z ${bulb} || ${bulb} == "None" ]] ; then
     bulb=0
 else
 
@@ -392,7 +392,7 @@ else
 fi
 
 # fractional intensity for skull-strip
-if [[ -z ${frac} ]] ; then
+if [[ -z ${frac} || ${frac} == "None" ]] ; then
     frac=0.3
 fi
 
@@ -509,6 +509,7 @@ function skullstrip()
     com=`fslstats ${skullmr} -C`
 
 #    ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -r 55 -c ${com} -f ${frac}
+
     ifdsntexistrun ${betmr} "Skull stripping MRI image" bet ${skullmr} ${betmr} -c ${com} -f ${frac} -R
 
 }
