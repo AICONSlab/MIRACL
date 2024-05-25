@@ -5,8 +5,7 @@ This tutorial highlights the registration workflow but a similar approach
 applies to other commands.
 
 When using Compute Canada, :program:`MIRACL` can be used as a 
-:program:`Singularity` container. The following instructions are based on the 
-steps provided on the Compute Canada Wiki.
+:program:`Apptainer/Singularity` container.
 
 Copy your data to Compute Canada
 ================================
@@ -23,6 +22,10 @@ or
 .. code-block::
 
    $ rsync -avPhz input_clar <username>@niagara.computecanada.edu:/scratch/<username>/.
+
+or
+
+For large datasets, or if you desire a GUI, you can setup a Globus transfer server by following instructions on the [Digital Research Alliance of Canada wiki](https://docs.alliancecan.ca/wiki/Transferring_data "Compute Canada Wiki").  
  
 Log in to Compute Canada server
 ===============================
@@ -36,49 +39,74 @@ Log in to the Compute Canada server you copied your data to:
 Setting up and using MIRACL
 ===========================
 
-Load the specific Singularity module you would like to use (e.g. Singularity 3.5):
+Load the specific Apptainer/Singularity module you would like to use (e.g. Apptainer 1.2.4):
 
 .. code-block::
 
-   $ module load singularity/3.5
+   $ module load apptainer/1.2.4
 
 .. note::
    Not specifying the version will load the latest version available on your node
 
 Since :program:`MIRACL` will take up a significant amount of space, it is 
 recommended to download and work with the :program:`MIRACL` 
-:program:`Singularity` container in the scratch directory. First, navigate 
+:program:`Apptainer/Singularity` container in the scratch directory. First, navigate 
 there:
 
 .. code-block::
    
    $ cd $SCRATCH
 
-Then pull (download) the :program:`Singularity` container:
+Then pull (download) the :program:`Apptainer/Singularity` container:
 
 .. code-block::
 
-   $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
+   $ apptainer pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 
 .. attention::
+
+   If you encouter the following error with the pull request:
+
+.. code-block:: 
+
+   FATAL:   Unable to get library client configuration: remote has no library client (see https://apptainer.org/docs/user/latest/endpoint.html#no-default-remote)
+
+This error is resolved by adding the default Apptainer end point from which the container is downloaded. Use:
+
+.. code-block::
+
+   apptainer remote add --no-login SylabsCloud cloud.sylabs.io
+
+then:
+
+.. code-block::
+
+   apptainer remote use SylabsCloud
+
+Now you should be able to pull the container using the commands described earlier.
+
+.. attention::
+
    ``singularity pull`` requires :program:`Singularity` version ``3.0.0`` or 
    higher. Please refer to our 
    :doc:`Troubleshooting <../../../troubleshooting/index>` section ("Q: Can I 
    build a Singularity container from the latest MIRACL image on Docker Hub") 
    if you are using an older version of Singularity.
 
+
 .. note::
+
    If you have a particular Singularity container of :program:`MIRACL` that you 
    want to use on Compute Canada, just copy it to the servers directly using 
    e.g. ``scp`` or ``rsync`` instead of pulling (downloading) the latest 
    version of :program:`MIRACL` from the :program:`Singularity` registry
 
-Start the :program:`MIRACL` :program:`Singularity` container with the default 
+Start the :program:`MIRACL` :program:`Apptainer/Singularity` container with the default 
 folders mounted:
 
 .. code-block::
 
-   $ singularity shell miracl_latest.sif bash
+   $ apptainer shell miracl_latest.sif bash
 
 :program:`Singularity` will automatically mount your scratch folder to your 
 container. If you need to mount a specific directory into a specific location, 
