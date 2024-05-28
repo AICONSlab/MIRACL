@@ -23,9 +23,7 @@ or
 
    $ rsync -avPhz input_clar <username>@niagara.computecanada.edu:/scratch/<username>/.
 
-or
-
-For large datasets, or if you desire a GUI, you can setup a Globus transfer server by following instructions on the [Digital Research Alliance of Canada wiki](https://docs.alliancecan.ca/wiki/Transferring_data "Compute Canada Wiki").  
+Alternatively, for large datasets, or if you desire a GUI, you can setup a Globus transfer server by following instructions on the Digital Research Alliance of Canada wiki <https://docs.alliancecan.ca/wiki/Transferring_data>_. 
  
 Log in to Compute Canada server
 ===============================
@@ -63,27 +61,25 @@ Then pull (download) the :program:`Apptainer/Singularity` container:
 
    $ apptainer pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
 
-.. attention::
+.. attention::  
 
-   If you encouter the following error with the pull request:
+   If you encouter the following error with the pull command:  
 
-.. code-block:: 
+   .. code-block:: 
+   
+      FATAL:   Unable to get library client configuration: remote has no library client (see https://apptainer.org/docs/user/latest/endpoint.html#no-default-remote)  
 
-   FATAL:   Unable to get library client configuration: remote has no library client (see https://apptainer.org/docs/user/latest/endpoint.html#no-default-remote)
+   This error can be resolved by adding the default Apptainer end point from which the container is downloaded. Use:  
 
-This error is resolved by adding the default Apptainer end point from which the container is downloaded. Use:
+   .. code-block::  
+      apptainer remote add --no-login SylabsCloud cloud.sylabs.io  
 
-.. code-block::
+   then:  
 
-   apptainer remote add --no-login SylabsCloud cloud.sylabs.io
+   .. code-block::  
+      apptainer remote use SylabsCloud  
 
-then:
-
-.. code-block::
-
-   apptainer remote use SylabsCloud
-
-Now you should be able to pull the container using the commands described earlier.
+   Now you should be able to pull the container using the commands described earlier.
 
 .. attention::
 
