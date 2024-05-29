@@ -23,8 +23,8 @@ or
 
    $ rsync -avPhz input_clar <username>@niagara.computecanada.edu:/scratch/<username>/.
 
-Alternatively, for large datasets, or if you desire a GUI, you can setup a Globus transfer server by following instructions on the Digital Research Alliance of Canada wiki <https://docs.alliancecan.ca/wiki/Transferring_data>_. 
- 
+Alternatively, for large datasets, or if you desire a GUI, you can setup a Globus transfer server by following instructions on the `Digital Research Alliance of Canada wiki <https://docs.alliancecan.ca/wiki/Transferring_data>`_.  
+
 Log in to Compute Canada server
 ===============================
 
