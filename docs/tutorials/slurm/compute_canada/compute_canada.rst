@@ -72,11 +72,13 @@ Then pull (download) the :program:`Apptainer/Singularity` container:
    This error can be resolved by adding the default Apptainer end point from which the container is downloaded. Use:  
 
    .. code-block::  
+
       apptainer remote add --no-login SylabsCloud cloud.sylabs.io  
 
    then:  
 
    .. code-block::  
+      
       apptainer remote use SylabsCloud  
 
    Now you should be able to pull the container using the commands described earlier.
