@@ -1,6 +1,7 @@
 import argparse
 import os
 from pathlib import Path
+
 # from typing import List, Tuple
 
 
@@ -58,7 +59,7 @@ class aceParser:
             type=self._validate_img_size,
             required=False,
             metavar=("height", "width", "depth"),
-            help="image size (type: int; default: fetched from image header)"
+            help="image size (type: int; default: fetched from image header)",
         )
         # Parser to select voxel size
         parser.add_argument(
@@ -77,7 +78,7 @@ class aceParser:
             type=int,
             required=False,
             default=4,
-            help="number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)"
+            help="number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)",
         )
         # Parser for cache rate
         parser.add_argument(
@@ -86,7 +87,7 @@ class aceParser:
             type=float,
             required=False,
             default=0.0,
-            help="percentage of raw data that is loaded into cpu during segmentation (type: %(type)s; default: %(default)s)"
+            help="percentage of raw data that is loaded into cpu during segmentation (type: %(type)s; default: %(default)s)",
         )
         # Parser for sw batch size
         parser.add_argument(
@@ -95,7 +96,7 @@ class aceParser:
             type=int,
             required=False,
             default=4,
-            help="number of image patches being processed by the model in parallel on gpu (type: %(type)s; default: %(default)s)"
+            help="number of image patches being processed by the model in parallel on gpu (type: %(type)s; default: %(default)s)",
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
@@ -119,7 +120,7 @@ class aceParser:
             "--sa_uncertainty_map",
             action="store_true",
             default=False,
-            help="enable map (default: %(default)s)"
+            help="enable map (default: %(default)s)",
         )
         # Parser for GPU index
         parser.add_argument(
@@ -128,7 +129,7 @@ class aceParser:
             type=int,
             required=False,
             default=0,
-            help="index of the GPU to use (type: %(type)s; default: %(default)s)"
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
         )
         # Parser for binarization threshold
         parser.add_argument(
@@ -137,7 +138,7 @@ class aceParser:
             type=float,
             required=False,
             default=0.5,
-            help="threshold value for binarization (type: %(type)s; default: %(default)s)"
+            help="threshold value for binarization (type: %(type)s; default: %(default)s)",
         )
         # Parser for percentage brain patch skip
         parser.add_argument(
@@ -146,7 +147,7 @@ class aceParser:
             type=float,
             required=False,
             default=0.0,
-            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)"
+            help="percentage threshold of patch that is brain to skip during segmentation (between 0 and 1; type: %(type)s; default: %(default)s)",
         )
         return parser
 

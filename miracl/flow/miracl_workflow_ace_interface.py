@@ -204,9 +204,7 @@ class ACEWarping(Warping):
                 -v {args.rwc_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
-        warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[
-            0
-        ]
+        warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[0]
         shutil.move(
             str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final")
         )
@@ -373,7 +371,9 @@ class ACEWorkflows:
         fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
         stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
         StackTiffs.check_folders(fiji_file, stacked_tif)
-        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo)
+        StackTiffs.stacking(
+            fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo
+        )
         self.voxelization.voxelize(args, stacked_tif)
 
         (
@@ -591,7 +591,10 @@ class StackTiffs:
 
     @staticmethod
     def stacking(
-        fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path, is_MC: bool
+        fiji_file: pathlib.Path,
+        stacked_tif: pathlib.Path,
+        seg_output_dir: pathlib.Path,
+        is_MC: bool,
     ):
         """Writes a Fiji macro and runs it to stack the segmented tif files.
         Needed to run before voxelization.
@@ -606,9 +609,11 @@ class StackTiffs:
         :type is_MC: bool
         """
         print("  stacking segmented tifs...")
-        filter =  "MC_" if is_MC else "out_"
+        filter = "MC_" if is_MC else "out_"
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n')
+            file.write(
+                f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n'
+            )
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
@@ -781,8 +786,9 @@ class RegistrationChecker:
         reg_folder: Path,
     ) -> bool:
         """Checks if registration needs to be run based on user input and the file structure.
-        If the user want to run registration, we run it. Otherwise we check that all the necessary
-        files are inplace before skipping. If they are not, we re-reun registration.
+        If the user want to run registration (with the --rerun-registration flag), we run it. 
+        Otherwise we check that all the necessary files are inplace before skipping.
+        If they are not, we re-reun registration.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
@@ -887,8 +893,9 @@ class SegmentationChecker:
         seg_folder: Path,
     ) -> bool:
         """Checks if segmentation needs to be run based on user input and the file structure.
-        If the user wants to run seg, we run it. Otherwise, check that all the necessary files
-        are in place before skipping. If they are not, we re-run seg.
+        If the user wants to run seg (with the --rerun-segmentation flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run seg.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
@@ -946,8 +953,9 @@ class ConversionChecker:
         conv_folder: Path,
     ) -> bool:
         """Checks if conversion needs to be run based on user input and the file structure.
-        If the user wants to run conv, we run it. Otherwise, check that all the necessary files
-        are in place before skipping. If they are not, we re-run conv.
+        If the user wants to run conv (with the --rerun-conversion flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run conv.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
