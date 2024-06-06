@@ -33,14 +33,14 @@ class ACEStatsParser:
         )
 
         single_multi_args_group.add_argument(
-            "-e",
-            "--experiment",
+            "-t",
+            "--treated",
             type=str,
             metavar=(
-                "EXPERIMENT_BASE_DIR",
-                "EXPERIMENT_VOXILIZED_SEGMENTED_TIF_EXAMPLE_PATH",
+                "TREATED_BASE_DIR",
+                "TREATED_VOXILIZED_SEGMENTED_TIF_EXAMPLE_PATH",
             ),
-            help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject voxelized tif file (voxelized_seg_*.nii.gz)",
+            help="FIRST: path to base treated directory.\nSECOND: example path to treated subject voxelized tif file (voxelized_seg_*.nii.gz)",
             nargs="+",
         )
 

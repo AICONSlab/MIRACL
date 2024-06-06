@@ -282,6 +282,9 @@ def get_parser():
         parents=[ace_parser],
         add_help=False,
         help="AI-based Cartography of Ensembles (ACE)",
+        usage=ace_parser.usage,
+        description=ace_parser.description,
+        formatter_class=ace_parser.formatter_class,
     )
     parser_ace.set_defaults(func=run_ace)
 

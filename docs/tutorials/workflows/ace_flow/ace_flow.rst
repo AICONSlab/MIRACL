@@ -37,48 +37,79 @@ The following information will be printed to the terminal:
 
 .. code-block::
 
-   usage: miracl ace (-s SINGLE_TIFF_DIR | 
-                     (-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE -e EXPERIMENT_BASE_DIR EXPERIMENT_TIFF_DIR_EXAMPLE))
-                     -sao SA_OUTPUT_FOLDER -sam {unet,unetr,ensemble}
-                     (--overwrite | --no-overwrite)
+   usage: miracl flow ace
+        [-s SINGLE_TIFF_DIR]
+        [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
+        [-t TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE]
+        -sao SA_OUTPUT_FOLDER
+        -sam {unet,unetr,ensemble}
+        -sar X-res Y-res Z-res
+        [-sag SA_GPU_INDEX]
+        [-ctnd CTN_DOWN]
+        [-rcao RCA_ORIENT_CODE]
+        [-rcav {10,25,50}]
+        [-rvad RVA_DOWNSAMPLE]
+        [-rwcv {10,25,50}]
+        [--rerun-registration TRUE/FALSE]
+        [--rerun-segmentation TRUE/FALSE]
+        [--rerun-conversion TRUE/FALSE]
 
-     1) Segments images with ACE
-     2) Registers tissue cleared data (down-sampled nifti images) to Allen Reference mouse brain atlas
-     3) Voxelizes high-resolution segmentation maps to downsample into Allen atlas resolution
-     4) Warps voxelied segmentation maps from native space to Allen atlas
-     5) Generates group-wise heatmaps of cell density using the average of voxelized and warped segmentation maps in each group
-     6) Computes group-level statistics/correlation using cluster-wise analysis on voxelized and warped segmentation maps
-   
-   Single or multi method arguments:
-   -s SINGLE_TIFF_DIR, --single SINGLE_TIFF_DIR
-                           path to single raw tif/tiff data folder
-   -c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE, --control CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE
-                           FIRST: path to base control directory. SECOND: example
-                           path to control subject tiff directory
-   -e EXPERIMENT_BASE_DIR EXPERIMENT_TIFF_DIR_EXAMPLE, --experiment EXPERIMENT_BASE_DIR EXPERIMENT_TIFF_DIR_EXAMPLE
-                           FIRST: path to base experiment directory. SECOND:
-                           example path to experiment subject tiff directory
-   --overwrite           overwrite existing output files for comparison
-                           workflow
-   --no-overwrite        do not overwrite existing output files for comparison
-                           workflow. This flag can be used to run only the stats
-                           analysis (if the subject-only steps have already been
-                           run).
+      1) Segments images with ACE
+      2) Convert raw tif/tiff files to nifti for registration
+      3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
+      4) Voxelizes segmentation results into density maps with Allen atlas resolution
+      5) Warps downsampled CLARITY data/channels from native space to Allen atlas
+
+   single or multi method arguments:
+      user is required to pass either single or multi method arguments
+
+      -s SINGLE_TIFF_DIR, --single SINGLE_TIFF_DIR
+                              path to single raw tif/tiff data folder
+      -c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE, --control CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE
+                              FIRST: path to base control directory. SECOND: example
+                              path to control subject tiff directory
+      -t TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE, --treated TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE
+                              FIRST: path to base treated directory. SECOND: example
+                              path to treated subject tiff directory
 
    required arguments:
-   -sao SA_OUTPUT_FOLDER, --sa_output_folder SA_OUTPUT_FOLDER
-                           path to output file folder
-   -sam {unet,unetr,ensemble}, --sa_model_type {unet,unetr,ensemble}
-                           model architecture
+      (set the single or multi method arguments first)
 
-   utility arguments:
-   -ua U_ATLAS_DIR, --u_atlas_dir U_ATLAS_DIR
-                           path of atlas directory (default:
-                           '/code/atlases/ara/')
+      -sao SA_OUTPUT_FOLDER, --sa_output_folder SA_OUTPUT_FOLDER
+                              path to output file folder
+      -sam {unet,unetr,ensemble}, --sa_model_type {unet,unetr,ensemble}
+                              model architecture
+      -sar X-res Y-res Z-res, --sa_resolution X-res Y-res Z-res
+                              voxel size (type: float)
+
+   useful/important arguments:
+      -sag SA_GPU_INDEX, --sa_gpu_index SA_GPU_INDEX
+                              index of the GPU to use (type: int; default: 0)
+      -ctnd CTN_DOWN, --ctn_down CTN_DOWN
+                              Down-sample ratio for conversion (default: 5)
+      -rcao RCA_ORIENT_CODE, --rca_orient_code RCA_ORIENT_CODE
+                              to orient nifti from original orientation to
+                              'standard/Allen' orientation, (default: ALS)
+      -rcav {10,25,50}, --rca_voxel_size {10,25,50}
+                              labels voxel size/Resolution in um (default: 10)
+      -rvad RVA_DOWNSAMPLE, --rva_downsample RVA_DOWNSAMPLE
+                              downsample ratio for voxelization, recommended: 5 <=
+                              ratio <= 10
+      -rwcv {10,25,50}, --rwc_voxel_size {10,25,50}
+                              voxel size/Resolution in um for warping (default: 25)
+      --rerun-registration TRUE/FALSE
+                              Whether to rerun registration step of flow; TRUE =>
+                              Force re-run (default: false)
+      --rerun-segmentation TRUE/FALSE
+                              Whether to rerun segmentation step of flow; TRUE =>
+                              Force re-run (default: false)
+      --rerun-conversion TRUE/FALSE
+                              Whether to rerun conversion step of flow; TRUE =>
+                              Force re-run (default: false)
 
    --------------------------------------------------
-
-   Use -hv or --help_verbose flag for more verbose help and view other ACE modules arguments
+   
+   Use -hv or --help_verbose flag for more verbose help
 
 
 .. note::
@@ -89,15 +120,17 @@ The following information will be printed to the terminal:
 
 .. table::
 
-   ==================================  ================================================  ==============  ====================================================================================
-   Flag                                Parameter                                         Type            Description                     
-   ==================================  ================================================  ==============  ====================================================================================
-   \-s, \-\-single                     SINGLE_TIFF_DIR                                   ``str``         path to raw tif/tiff data folder
-   \-c, \-\-control                    CONTROL_BASE_DIR, CONTROL_TIFF_DIR_EXAMPLE        ``(str, str)``  path to base control directory, example path to control subject tiff directory
-   \-e, \-\-experiment                 EXPERIMENT_BASE_DIR, EXPERIMENT_TIFF_DIR_EXAMPLE  ``(str, str)``  path to base experiment directory, example path to experiment subject tiff directory
-   \-sam, \-\-sa_model_type            {unet,unetr,ensemble}                             ``str``         model architecture              
-   \-\-overwrite \| \-\-no\-overwrite                                                    ``bool``        whether to overwrite existing output files for comparison workflow  
-   ==================================  ================================================  ==============  ====================================================================================
+   ==================================  ================================================  ===================  ===================================================================================================
+   Flag                                Parameter                                         Type                 Description                     
+   ==================================  ================================================  ===================  ===================================================================================================
+   \-s, \-\-single                     SINGLE_TIFF_DIR                                   ``str``              path to single raw tif/tiff data folder
+   \-c, \-\-control                    CONTROL_BASE_DIR, CONTROL_TIFF_DIR_EXAMPLE        ``(str, str)``       FIRST: path to base control directory; SECOND: example path to control subject tiff directory
+   \-t, \-\-treated                    TREATED_BASE_DIR, TREATED_TIFF_DIR_EXAMPLE        ``(str, str)``       FIRST: path to base treated directory; SECOND: example path to treated subject tiff directory
+   \-sam, \-\-sa_model_type            {unet,unetr,ensemble}                             ``str``              model architecture              
+   \-sao, \-\-sa_output_folder         SA_OUTPUT_FOLDER                                  ``str``              path to output file folder
+   \-sar, \-\-sa_resolution            X-res Y-res Z-res                                 ``(str, str, str)``  voxel size 
+   ==================================  ================================================  ===================  ===================================================================================================
+
 
 Main outputs
 ============
@@ -147,7 +180,7 @@ Example of running ACE flow on multiple subjects:
 
    $ miracl flow ace \
       -c ./non_walking/ ./non_walking/Newton_HC1/cells/ \
-      -e ./walking/ ./walking/Newton_UI1/cells/ \
+      -t ./walking/ ./walking/Newton_UI1/cells/ \
       -sao ./output_dir \
       -sam unet \
       --overwrite
@@ -171,5 +204,5 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
 
    $ miracl stats ace \
       -c ./ctrl/ \
-      -e ./treated/ \
+      -t ./treated/ \
       -sao ./output_dir \

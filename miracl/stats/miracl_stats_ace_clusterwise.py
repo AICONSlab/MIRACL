@@ -295,7 +295,7 @@ def cluster_fn(
 
 def main(args, output_dir_arg):
     control_dir = args.pcs_control
-    exp_dir = args.pcs_experiment
+    treated_dir = args.treated
     out_dir = output_dir_arg
     num_perm = args.sctp_num_perm
     atl_dir = args.u_atlas_dir
@@ -317,7 +317,7 @@ def main(args, output_dir_arg):
 
     print("Running clusterwise stats with the following arguments:")
     print(f"  control_dir: {control_dir}")
-    print(f"  exp_dir: {exp_dir}")
+    print(f"  treated_dir: {treated_dir}")
     print(f"  out_dir: {out_dir}")
     print(f"  num_perm: {num_perm}")
     print(f"  atl_dir: {atl_dir}")
@@ -411,36 +411,36 @@ def main(args, output_dir_arg):
     control_imgs.sort()
     print("found #", len(control_imgs), "pre-processed control type images!")
 
-    # load exp images
-    if len(exp_dir) > 1:
-        experiment_warp_tiff_template = Path(exp_dir[1])
-        experiment_base_dir = Path(exp_dir[0])
-        experiment_warp_tiff_extension = Path(
-            *experiment_warp_tiff_template.relative_to(experiment_base_dir).parts[1:]
+    # load treated images
+    if len(treated_dir) > 1:
+        treated_warp_tiff_template = Path(treated_dir[1])
+        treated_base_dir = Path(treated_dir[0])
+        treated_warp_tiff_extension = Path(
+            *treated_warp_tiff_template.relative_to(treated_base_dir).parts[1:]
         )
-        exp_imgs_regex = "*/" + experiment_warp_tiff_extension.as_posix()
-        exp_imgs = experiment_base_dir.glob(exp_imgs_regex)
-        exp_imgs = [str(file.relative_to(experiment_base_dir)) for file in exp_imgs]
-        exp_dir = experiment_base_dir
+        trt_imgs_regex = "*/" + treated_warp_tiff_extension.as_posix()
+        trt_imgs = treated_base_dir.glob(trt_imgs_regex)
+        trt_imgs = [str(file.relative_to(treated_base_dir)) for file in trt_imgs]
+        treated_dir = treated_base_dir
     else:
-        exp_dir = exp_dir[0]
-        exp_imgs = fnmatch.filter(os.listdir(exp_dir), "*.nii.gz")
-        exp_imgs.sort()
+        treated_dir = treated_dir[0]
+        trt_imgs = fnmatch.filter(os.listdir(treated_dir), "*.nii.gz")
+        trt_imgs.sort()
 
     # only keep a quarter of an image for testing
     print("pre processing group 2 ...")
-    for img in exp_imgs:
+    for img in trt_imgs:
         pre_processing_func(
-            img, exp_dir, out_dir, "exp", mask_img_array, smoothing_fwhm, img_res
+            img, treated_dir, out_dir, "trt", mask_img_array, smoothing_fwhm, img_res
         )
 
-    # update the exp_images list after cropping
-    exp_imgs = fnmatch.filter(os.listdir(out_dir), "exp_processed*.nii.gz")
-    exp_imgs.sort()
-    print("found #", len(exp_imgs), "pre-processed experiment type images!")
+    # update the trt_images list after cropping
+    trt_imgs = fnmatch.filter(os.listdir(out_dir), "trt_processed*.nii.gz")
+    trt_imgs.sort()
+    print("found #", len(trt_imgs), "pre-processed treatement type images!")
 
     # -------------------------------------------------------
-    # compute mean of experiment and control type images + differences of the mean
+    # compute mean of treatment and control type images + differences of the mean
     # -------------------------------------------------------
 
     # compute the mean of control type images
@@ -479,46 +479,46 @@ def main(args, output_dir_arg):
         os.path.join(out_dir, "control_imgs_std.nii.gz"),
     )
 
-    # compute the mean of experiment type images
-    print("compute the mean of experiment type images")
+    # compute the mean of treatment type images
+    print("compute the mean of treatment type images")
 
     # load the control images into an array
-    exp_img_list = []
+    trt_img_list = []
 
-    for img_name in exp_imgs:
+    for img_name in trt_imgs:
         img = nib.load(os.path.join(out_dir, img_name))
-        exp_imgs_header = img.header
-        exp_imgs_affine = img.affine
+        trt_imgs_header = img.header
+        trt_imgs_affine = img.affine
         img = img.get_fdata()
         # multiply with atlas
         img = np.multiply(img, mask_img_array)
-        exp_img_list.append(img)
+        trt_img_list.append(img)
 
-    exp_imgs_array = np.stack(exp_img_list, axis=3)
-    print("exp_imgs_array shape: ", exp_imgs_array.shape)
-    del exp_img_list  # to reduce memory usage
+    trt_imgs_array = np.stack(trt_img_list, axis=3)
+    print("trt_imgs_array shape: ", trt_imgs_array.shape)
+    del trt_img_list  # to reduce memory usage
 
-    exp_imgs_mean = np.mean(exp_imgs_array, axis=3)
-    exp_imgs_std = np.std(exp_imgs_array, axis=3)
-    print("exp_imgs_mean shape: ", exp_imgs_mean.shape)
+    trt_imgs_mean = np.mean(trt_imgs_array, axis=3)
+    trt_imgs_std = np.std(trt_imgs_array, axis=3)
+    print("trt_imgs_mean shape: ", trt_imgs_mean.shape)
 
-    # save the exp_imgs_mean and std
+    # save the trt_imgs_mean and std
     nib.save(
-        nib.Nifti1Image(exp_imgs_mean, exp_imgs_affine, exp_imgs_header),
-        os.path.join(out_dir, "exp_imgs_mean.nii.gz"),
+        nib.Nifti1Image(trt_imgs_mean, trt_imgs_affine, trt_imgs_header),
+        os.path.join(out_dir, "trt_imgs_mean.nii.gz"),
     )
     nib.save(
-        nib.Nifti1Image(exp_imgs_std, exp_imgs_affine, exp_imgs_header),
-        os.path.join(out_dir, "exp_imgs_std.nii.gz"),
+        nib.Nifti1Image(trt_imgs_std, trt_imgs_affine, trt_imgs_header),
+        os.path.join(out_dir, "trt_imgs_std.nii.gz"),
     )
 
-    # compute the mean of experiment type images
+    # compute the mean of the differences
     print("compute the difference of means")
-    diff_mean = np.subtract(exp_imgs_mean, control_imgs_mean)
+    diff_mean = np.subtract(trt_imgs_mean, control_imgs_mean)
 
     # save the diff_mean
     nib.save(
-        nib.Nifti1Image(diff_mean, exp_imgs_affine, exp_imgs_header),
+        nib.Nifti1Image(diff_mean, trt_imgs_affine, trt_imgs_header),
         os.path.join(out_dir, "diff_mean.nii.gz"),
     )
     print("diff_mean shape: ", diff_mean.shape)
@@ -531,12 +531,12 @@ def main(args, output_dir_arg):
     # nib.save(diff_mean_smooth, os.path.join(out_dir, 'diff_mean_smooth.nii'))
 
     del control_imgs_mean  # to reduce memory usage
-    del exp_imgs_mean  # to reduce memory usage
+    del trt_imgs_mean  # to reduce memory usage
     del control_imgs_std  # to reduce memory usage
-    del exp_imgs_std  # to reduce memory usage
+    del trt_imgs_std  # to reduce memory usage
     # del diff_mean # to reduce memory usage
     del control_imgs_array  # to reduce memory usage
-    del exp_imgs_array  # to reduce memory usage
+    del trt_imgs_array  # to reduce memory usage
 
     # -------------------------------------------------------
     # create a mask based on diff_mean
@@ -562,7 +562,7 @@ def main(args, output_dir_arg):
 
     # save the mask_diff_mean
     nib.save(
-        nib.Nifti1Image(mask_diff_mean_arr, exp_imgs_affine, exp_imgs_header),
+        nib.Nifti1Image(mask_diff_mean_arr, trt_imgs_affine, trt_imgs_header),
         os.path.join(out_dir, "mask_diff_mean.nii.gz"),
     )
     print("mask_diff_mean shape: ", mask_diff_mean_arr.shape)
@@ -572,7 +572,7 @@ def main(args, output_dir_arg):
     # start statistics
     # -------------------------------------------------------
     # concatenate two groups images
-    all_vols = control_imgs + exp_imgs
+    all_vols = control_imgs + trt_imgs
     # print(all_vols)
     all_vols = [os.path.join(out_dir, file) for file in all_vols]
     all_vols_imgs = [nib.load(file) for file in all_vols]

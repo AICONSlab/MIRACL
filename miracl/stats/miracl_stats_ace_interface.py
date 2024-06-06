@@ -55,9 +55,9 @@ class Interface:
         self.correlation = correlation
 
     def run_fns(self, args):
-        if not hasattr(args, "pcs_control") or not hasattr(args, "pcs_experiment"):
+        if not hasattr(args, "pcs_control") or not hasattr(args, "pcs_treated"):
             args.pcs_control = args.control
-            args.pcs_experiment = args.experiment
+            args.pcs_treated = args.treated
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"

@@ -39,7 +39,7 @@ Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN
 
    $ miracl stats ace \
         -c ./ctrl/ \
-        -e ./treated/ \
+        -t ./treated/ \
         -sao ./output_dir \
         -n 1000 \
         -a ./atlas/ \
@@ -56,7 +56,7 @@ Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN
 Flag                         Parameter               Type                Description                                                  Default
 ===========================  ======================  ==================  ===========================================================  =======================
 \-c, \-\-control             CONTROL_BASE_DIR        ``str``             path to base control directory                               ``None`` (required)
-\-e, \-\-experiment          EXPERIMENT_BASE_DIR     ``str``             path to base experiment directory                            ``None`` (required)
+\-t, \-\-treated             TREATED_BASE_DIR        ``str``             path to base treated directory                               ``None`` (required)
 \-sao, \-\-sa_output_folder  SA_OUTPUT_FOLDER        ``str``             path to output directory                                     ``None`` (required)
 \-n, \-\-num_perm            NUM_PERM                ``int``             number of permutations                                       ``100``                                                   
 \-a, \-\-atlas_dir           ATLAS_DIR               ``str``             path to atlas directory                                      ``miracl_home``

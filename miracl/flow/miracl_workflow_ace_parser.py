@@ -7,7 +7,7 @@ from numpy import require
 from miracl.seg import ace_parser
 
 ARA_ENV = "aradir"
-
+FULL_PROG_NAME = "miracl flow ace"
 
 def parser_true_or_false(arg: str) -> bool:
     upper_arg = str(arg).upper()
@@ -41,7 +41,7 @@ class ACEWorkflowParser:
     def parsefn(self) -> argparse.ArgumentParser:
         # Define custom parser
         parser = argparse.ArgumentParser(
-            prog="miracl flow ace",
+            prog=FULL_PROG_NAME,
             formatter_class=argparse.RawDescriptionHelpFormatter,
             add_help=False,  # Used for separating args
             description="""
@@ -50,14 +50,33 @@ class ACEWorkflowParser:
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
   4) Voxelizes segmentation results into density maps with Allen atlas resolution
   5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
-            usage="""%(prog)s (-s single_dir | (-c control_root_dir control_tiff_file -e experiment_root_dir experiment_tiff_file)) -sao output_folder -sam model_type""",
+            usage=f"""{FULL_PROG_NAME}
+        [-s SINGLE_TIFF_DIR]
+        [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
+        [-t TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE]
+        -sao SA_OUTPUT_FOLDER
+        -sam {{unet,unetr,ensemble}}
+        -sar X-res Y-res Z-res
+        [-sag SA_GPU_INDEX]
+        [-ctnd CTN_DOWN]
+        [-rcao RCA_ORIENT_CODE]
+        [-rcav {{10,25,50}}]
+        [-rvad RVA_DOWNSAMPLE]
+        [-rwcv {{10,25,50}}]
+        [--rerun-registration TRUE/FALSE]
+        [--rerun-segmentation TRUE/FALSE]
+        [--rerun-conversion TRUE/FALSE]""",
         )
 
         # Define custom headers for args to separate required and optional
         single_multi_args_group = parser.add_argument_group(
-            "Single or multi method arguments"
+            "single or multi method arguments",
+            description="user is required to pass either single or multi method arguments",
         )
-        required_args = parser.add_argument_group("required arguments")
+        required_args = parser.add_argument_group(
+            "required arguments",
+            description="(set the single or multi method arguments first)",
+        )
         useful_args = parser.add_argument_group("useful/important arguments")
         seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
@@ -89,11 +108,11 @@ class ACEWorkflowParser:
         )
 
         single_multi_args_group.add_argument(
-            "-e",
-            "--experiment",
+            "-t",
+            "--treated",
             type=str,
-            metavar=("EXPERIMENT_BASE_DIR", "EXPERIMENT_TIFF_DIR_EXAMPLE"),
-            help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject tiff directory",
+            metavar=("TREATED_BASE_DIR", "TREATED_TIFF_DIR_EXAMPLE"),
+            help="FIRST: path to base treated directory.\nSECOND: example path to treated subject tiff directory",
             nargs=2,
         )
 
@@ -209,7 +228,7 @@ class ACEWorkflowParser:
             type=float,
             required=False,
             default=0.0,
-            help="percentage threshold of patch that is brain to skip during segmentation (between 0 and 1; type: %(type)s; default: %(default)s)",
+            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
         )
 
         # Parser for GPU index
@@ -529,64 +548,69 @@ class ACEWorkflowParser:
         # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
-            "-sctpn",
-            "--sctp_num_perm",
+            "-pcsa",
+            "--pcs_atlas_dir",
+            help="path of atlas directory",
+            default="miracl_home",
+        )
+        perm_args.add_argument(
+            "-pcsn",
+            "--pcs_num_perm",
             type=int,
             help="number of permutations",
             default=500,
         )
         perm_args.add_argument(
-            "-sctpfwhm",
-            "--sctp_smoothing_fwhm",
+            "-pcsr",
+            "--pcs_img_resolution",
+            type=int,
+            help="resolution of images in um",
+            default=25,
+        )
+        perm_args.add_argument(
+            "-pcsfwhm",
+            "--pcs_smoothing_fwhm",
             type=int,
             help="fwhm of Gaussian kernel in pixel",
             default=3,
         )
         perm_args.add_argument(
-            "-sctpstart",
-            "--sctp_tfce_start",
+            "-pcsstart",
+            "--pcs_tfce_start",
             type=float,
             help="tfce threshold start",
             default=0.01,
         )
         perm_args.add_argument(
-            "-sctpstep",
-            "--sctp_tfce_step",
+            "-pcsstep",
+            "--pcs_tfce_step",
             type=float,
             help="tfce threshold step",
             default=5,
         )
         perm_args.add_argument(
-            "-sctpc",
-            "--sctp_cpu_load",
+            "-pcsc",
+            "--pcs_cpu_load",
             type=float,
             help="Percent of cpus used for parallelization",
             default=0.9,
         )
         perm_args.add_argument(
-            "-sctph",
-            "--sctp_tfce_h",
-            type=float,
-            help="tfce H power",
-            default=2
+            "-pcsh", "--pcs_tfce_h", type=float, help="tfce H power", default=2
         )
         perm_args.add_argument(
-            "-sctpe",
-            "--sctp_tfce_e",
-            type=float,
-            help="tfce E power",
-            default=0.5
+            "-pcse", "--pcs_tfce_e", type=float, help="tfce E power", default=0.5
         )
         perm_args.add_argument(
-            "-sctpsp",
-            "--sctp_step_down_p",
+            "-pcssp",
+            "--pcs_step_down_p",
             type=float,
             help="step_down_p value",
             default=0.3,
         )
         perm_args.add_argument(
-            "-sctpm",
-            "--sctp_mask_thr",
+            "-pcsm",
+            "--pcs_mask_thr",
             type=int,
             help="percentile to be used for binarizing difference of the mean",
             default=95,
@@ -815,30 +839,30 @@ class ACEWorkflowParser:
     def parse_args(self):
         args = self.parser.parse_args()
 
-        # check that control and experiment are not passed with single
-        if (args.control and args.experiment) and args.single:
+        # check that control and treated are not passed with single
+        if (args.control and args.treated) and args.single:
             raise argparse.ArgumentError(
                 None,
-                "-c/--control and -e/--experiment must be passed together without -s/--single",
+                "-c/--control and -t/--treated must be passed together without -s/--single",
             )
         # check that single is passed alone
-        elif args.single and (args.control or args.experiment):
+        elif args.single and (args.control or args.treated):
             raise argparse.ArgumentError(
                 None,
-                "-s/--single cannot be passed with either -c/--control or -e/--experiment",
+                "-s/--single cannot be passed with either -c/--control or -t/--treated",
             )
-        # check that control and experiment are always passed together
-        elif (args.control and not args.experiment) or (
-            args.experiment and not args.control
+        # check that control and treated are always passed together
+        elif (args.control and not args.treated) or (
+            args.treated and not args.control
         ):
             raise argparse.ArgumentError(
-                None, "-c/--control and -e/--experiment must be passed together"
+                None, "-c/--control and -t/--treated must be passed together"
             )
         # check that something is passed
-        elif not args.single and not args.control and not args.experiment:
+        elif not args.single and not args.control and not args.treated:
             raise argparse.ArgumentError(
                 None,
-                "either [-s/--single] or [-c/--control and -e/--experiment] must be passed",
+                "either [-s/--single] or [-c/--control and -t/--treated] must be passed",
             )
 
         return args
