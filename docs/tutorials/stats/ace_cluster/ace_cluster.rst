@@ -41,32 +41,32 @@ Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN
         -c ./ctrl/ \
         -t ./treated/ \
         -sao ./output_dir \
-        -n 1000 \
-        -a ./atlas/ \
-        -r 25 \
-        -sfwhm 3 \
-        -start 0.05 \
-        -step 5 \
-        -h 2 \
-        -e 0.5 
+        -ua ./atlas/ \
+        --sctp_num_perm 1000 \
+        --rwc_voxel_size 25 \
+        --sctp_smoothing_fwhm 3 \
+        --sctp_tfce_start 0.05 \
+        --sctp_tfce_step 5 \
+        --sctp_tfce_h 2 \
+        --sctp_tfce_e 0.5 
 
 
 
-===========================  ======================  ==================  ===========================================================  =======================
-Flag                         Parameter               Type                Description                                                  Default
-===========================  ======================  ==================  ===========================================================  =======================
-\-c, \-\-control             CONTROL_BASE_DIR        ``str``             path to base control directory                               ``None`` (required)
-\-t, \-\-treated             TREATED_BASE_DIR        ``str``             path to base treated directory                               ``None`` (required)
-\-sao, \-\-sa_output_folder  SA_OUTPUT_FOLDER        ``str``             path to output directory                                     ``None`` (required)
-\-n, \-\-num_perm            NUM_PERM                ``int``             number of permutations                                       ``100``                                                   
-\-a, \-\-atlas_dir           ATLAS_DIR               ``str``             path to atlas directory                                      ``miracl_home``
-\-r, \-\-img_resolution      IMG_RESOLUTION          ``int``             image resolution (atlas resolution 10 or 25 um)              ``25``
-\-sfwhm, \-\-smoothing_fwhm  SMOOTHING_FWHM          ``int``             fwhm of Gaussian kernel in pixel                             ``3``
-\-start, \-\-tfce_start      TFCE_START              ``float``           tfce threshold start                                         ``0.01``
-\-step, \-\-tfce_step        TFCE_STEP               ``float``           tfce threshold step                                          ``10``
-\-h, \-\-tfce_h              TFCE_H                  ``float``           tfce H power                                                 ``2``
-\-e, \-\-tfce_e              TFCE_E                  ``float``           tfce E power                                                 ``0.5``
-\-c, \-\-cpu_load            CPU_LOAD                ``float``           percent of cpus used for parallelization                     ``0.9``
-\-p, \-\--step_down_p        STEP_DOWN_P             ``float``           step down p value                                            ``0.3``
-\-m, \-\-mask_thr            MASK_THR                ``int``             percentile to be used for binarizing difference of the mean  ``95``
-===========================  ======================  ==================  ===========================================================  =======================
+===================================  ======================  ==================  ===========================================================  =================================
+Flag                                 Parameter               Type                Description                                                  Default
+===================================  ======================  ==================  ===========================================================  =================================
+\-c, \-\-control                     CONTROL_BASE_DIR        ``str``             path to base control directory                               ``None`` (required)
+\-t, \-\-treated                     TREATED_BASE_DIR        ``str``             path to base treated directory                               ``None`` (required)
+\-sao, \-\-sa_output_folder          SA_OUTPUT_FOLDER        ``str``             path to output directory                                     ``None`` (required)
+\-ua, \-\-u_atlas_dir                ATLAS_DIR               ``str``             path to atlas directory                                      ``os.environ.get(ARA_ENV, None)``
+\-sctpn, \-\-sctp_num_perm           NUM_PERM                ``int``             number of permutations                                       ``100``                                                   
+\-rwcv, \-\-rwc_voxel_size           IMG_RESOLUTION          ``int``             image resolution (atlas resolution 10 or 25 um)              ``25``
+\-sctpfwhm, \-\-sctp_smoothing_fwhm  SMOOTHING_FWHM          ``int``             fwhm of Gaussian kernel in pixel                             ``3``
+\-sctpstart, \-\-sctp_tfce_start     TFCE_START              ``float``           tfce threshold start                                         ``0.01``
+\-sctpstep, \-\-sctp_tfce_step       TFCE_STEP               ``float``           tfce threshold step                                          ``10``
+\-sctph, \-\-sctp_tfce_h             TFCE_H                  ``float``           tfce H power                                                 ``2``
+\-sctpe, \-\-sctp_tfce_e             TFCE_E                  ``float``           tfce E power                                                 ``0.5``
+\-sctpc, \-\-sctp_cpu_load           CPU_LOAD                ``float``           percent of cpus used for parallelization                     ``0.9``
+\-sctpsp, \-\--sctp_step_down_p      STEP_DOWN_P             ``float``           step down p value                                            ``0.3``
+\-sctpm, \-\-sctp_mask_thr           MASK_THR                ``int``             percentile to be used for binarizing difference of the mean  ``95``
+===================================  ======================  ==================  ===========================================================  =================================

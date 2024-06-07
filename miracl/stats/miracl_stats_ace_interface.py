@@ -59,6 +59,11 @@ class Interface:
         if not hasattr(args, "pcs_control") or not hasattr(args, "pcs_treated"):
             args.pcs_control = args.control
             args.pcs_treated = args.treated
+            # assert they are not None
+            assert args.pcs_control is not None, \
+                "Control group voxelized segmented tif file path is required (--control)."
+            assert args.pcs_treated is not None, \
+                "Treated group voxelized segmented tif file path is required (--treated)."
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"

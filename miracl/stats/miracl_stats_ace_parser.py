@@ -1,8 +1,10 @@
 import argparse
 import os
+import sys
 from pathlib import Path
 
 ARA_ENV = "aradir"
+FULL_PROG_NAME = "miracl stats ace"
 
 class ACEStatsParser:
     def __init__(self) -> None:
@@ -10,15 +12,27 @@ class ACEStatsParser:
 
     def parsefn(self) -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser(
-            description="Statistics functions for AI-based Cartography of Ensembles (ACE) segmentation method. These functions assume that the ACE workflow has already been completed."
+            prog=FULL_PROG_NAME,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            add_help=False,
+            description="Statistics functions for AI-based Cartography of Ensembles (ACE) segmentation method. These functions assume that the ACE workflow has already been completed.",
+            usage=f"""{FULL_PROG_NAME}
+        -c CONTROL_BASE_DIR CONTROL_VOXILIZED_SEGMENTED_TIF_EXAMPLE_PATH
+        -t TREATED_BASE_DIR TREATED_VOXILIZED_SEGMENTED_TIF_EXAMPLE_PATH
+        -sao SA_OUTPUT_FOLDER
+        [-ua U_ATLAS_DIR]
+        [-rcam {{combined,split}}]
+        [-rcas {{rh,lh}}]
+        [-rwcv {{10,25,50}}]"""
         )
 
-        single_multi_args_group = parser.add_argument_group("Comparison arguments")
+        single_multi_args_group = parser.add_argument_group("control and treated group arguments")
         required_args = parser.add_argument_group("required arguments")
         utility_args = parser.add_argument_group("utility arguments")
         corr_args = parser.add_argument_group("optional correlation arguments")
         perm_args = parser.add_argument_group("optional permutation arguments")
         pvalue_args = parser.add_argument_group("optional pvalue plot arguments")
+        optional_args = parser.add_argument_group("optional arguments")
 
         single_multi_args_group.add_argument(
             "-c",
@@ -57,15 +71,6 @@ class ACEStatsParser:
             "--u_atlas_dir",
             default=os.environ.get(ARA_ENV, None),
             help="path of atlas directory (default: %(default)s)",
-        )
-
-        utility_args.add_argument(
-            "-rcav",
-            "--rca_voxel_size",
-            type=int,
-            choices=[10, 25, 50],
-            default=10,
-            help="labels voxel size/Resolution in um (default: %(default)s)",
         )
 
         utility_args.add_argument(
@@ -240,6 +245,57 @@ class ACEStatsParser:
             type=int,
             help="dots per inch (default: %(default)s)",
             default=500,
+        )
+
+        class _CustomHelpAction(argparse._HelpAction):
+            _required_args = []
+            for arg in required_args._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in single_multi_args_group._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in utility_args._group_actions:
+                _required_args.extend(arg.option_strings)
+
+            def __call__(
+                self,
+                parser: argparse.ArgumentParser,
+                namespace,
+                values,
+                options_string=None,
+            ):
+                args = sys.argv[1:]
+
+                opts = parser._option_string_actions
+
+                if "-h" in args or "--help" in args:
+                    for arg in opts:
+                        if arg not in self._required_args:
+                            setattr(opts[arg], "help", argparse.SUPPRESS)
+                    parser.print_help()
+                    print("\n" + "-" * 50)
+                    print("\nUse -hv or --help_verbose flag for more verbose help\n")
+                elif "-hv" in args or "--help_verbose" in args:
+                    parser.print_help()
+
+                parser.exit()
+
+        parser.register("action", "help", _CustomHelpAction)
+
+        # Add help back under optional args header
+        optional_args.add_argument(
+            "-h",
+            "--help",
+            action="help",
+            default=argparse.SUPPRESS,
+            help="show concise help message and exit",
+        )
+
+        optional_args.add_argument(
+            "-hv",
+            "--help_verbose",
+            action="help",
+            default=argparse.SUPPRESS,
+            help="show this verbose help message and exit",
         )
 
         return parser
