@@ -189,3 +189,7 @@ To check on the status of your submitted job use:
    `submitting <https://www.sherlock.stanford.edu/docs/getting-started/submitting/>`_ 
    and `running <https://www.sherlock.stanford.edu/docs/user-guide/running-jobs/>`_ 
    jobs on Sherlock
+
+.. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
+
+.. include:: ../../../directives/tutorial_notebook_links.txt

@@ -17,7 +17,7 @@ def run_clar_allen(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_clar-allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -r %s -o %s -m %s -v %s -l %s -f %s -p %s -a %s -w %s -b %s -s %s' \
+            bash_args = '-i %s -r %s -o %s -m %s -v %s -l %s -f %s -p %s -a %s -w %s -b %s -s %s -c %s' \
                         % (args['in_nii'],   # -i
                            args['reg_out'],  # -r
                            args['ort'],      # -o
@@ -29,7 +29,8 @@ def run_clar_allen(parser, args):
                            args['atlas'],    # -a
                            args['warp'],     # -w
                            args['bulb'],     # -b
-                           args['side']      # -s
+                           args['side'],     # -s
+                           args['clar_dir']  # -c
                            )
 
             subprocess.check_call('%s/reg/miracl_reg_clar-allen.sh %s' % (miracl_home, bash_args),
@@ -151,6 +152,8 @@ def get_parser():
                                       help="save mosaic figure of results")
     parser_clar_allen.add_argument('-w', '--warp', metavar='', default=0,
                                       help="warp high resolution clarity")
+    parser_clar_allen.add_argument('-c', '--clar_dir', metavar='', default='',
+                                      help="original clarity tiff folder")
     parser_clar_allen.add_argument('-h', '--help', action='store_true')
 
     parser_clar_allen.set_defaults(func=run_clar_allen)

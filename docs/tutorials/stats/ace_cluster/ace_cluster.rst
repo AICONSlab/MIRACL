@@ -70,3 +70,7 @@ Flag                                 Parameter               Type               
 \-sctpsp, \-\--sctp_step_down_p      STEP_DOWN_P             ``float``           step down p value                                            ``0.3``
 \-sctpm, \-\-sctp_mask_thr           MASK_THR                ``int``             percentile to be used for binarizing difference of the mean  ``95``
 ===================================  ======================  ==================  ===========================================================  =================================
+
+.. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
+
+.. include:: ../../../directives/tutorial_notebook_links.txt

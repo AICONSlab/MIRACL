@@ -4,12 +4,12 @@ ACE Workflow
 **A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
 1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_ 
+   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__
    and :ref:`refer to example section<example_anchor>`) to map brain-wide neuronal activity.
 2. Optimized cluster-wise statistical analysis with a threshold-free 
    enhancement approach to chart subpopulation-specific effects at the laminar 
    and local level, without restricting the analysis to atlas-defined regions 
-   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_ 
+   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__ 
    and :ref:`refer to example section<example_anchor>`).
 3. Modules for providing DL model uncertainty estimates and fine-tuning.
 4. Interface with MIRACL registration to create study-specific atlases.
@@ -35,9 +35,7 @@ use the following command on the cli:
 
 The following information will be printed to the terminal:
 
-.. code-block::
-
-   usage: miracl flow ace
+.. code-block::   usage: miracl flow ace
         [-s SINGLE_TIFF_DIR]
         [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
         [-t TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE]
@@ -57,8 +55,10 @@ The following information will be printed to the terminal:
       1) Segments images with ACE
       2) Convert raw tif/tiff files to nifti for registration
       3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
-      4) Voxelizes segmentation results into density maps with Allen atlas resolution
-      5) Warps downsampled CLARITY data/channels from native space to Allen atlas
+      4) Voxelizes high-resolution segmentation results into density maps with Allen atlas resolution
+      5) Warps voxelied segmentation maps from native space to Allen atlas
+      6) Generates group-wise heatmaps of cell density using the average of voxelized and warped segmentation maps in each group
+      7) Computes group-level statistics/correlation using cluster-wise analysis on voxelized and warped segmentation maps
 
    single or multi method arguments:
       user is required to pass either single or multi method arguments
@@ -111,7 +111,6 @@ The following information will be printed to the terminal:
    
    Use -hv or --help_verbose flag for more verbose help
 
-
 .. note::
 
    There are a number of optional arguments including TFCE cluster-wise analysis parameters that can be provided to the
@@ -130,7 +129,6 @@ The following information will be printed to the terminal:
    \-sao, \-\-sa_output_folder         SA_OUTPUT_FOLDER                                  ``str``              path to output file folder
    \-sar, \-\-sa_resolution            X-res Y-res Z-res                                 ``(str, str, str)``  voxel size 
    ==================================  ================================================  ===================  ===================================================================================================
-
 
 Main outputs
 ============
@@ -161,8 +159,8 @@ Executes:
 
 .. _example_anchor:
 
-Example of running ACE on single subject (segmenation + registration + voxelization + warping) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_):
-===================================================================================================================================================================================================
+Example of running ACE on single subject (segmenation + registration + voxelization + warping) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
+====================================================================================================================================================================================================
 
 .. code-block::
 
@@ -186,8 +184,8 @@ Example of running ACE flow on multiple subjects:
       --overwrite
 
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_):
-=====================================================================================================================================================================================
+Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
+======================================================================================================================================================================================
 
 .. code-block::
 
@@ -197,8 +195,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
       -sam unetr
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_):
-===========================================================================================================================================================================================================
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
+============================================================================================================================================================================================================
 
 .. code-block::
 
@@ -206,3 +204,7 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
       -c ./ctrl/ \
       -t ./treated/ \
       -sao ./output_dir \
+
+.. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
+
+.. include:: ../../../directives/tutorial_notebook_links.txt

@@ -13,4 +13,4 @@ The :file:`Data` folder contains test data with example inputs and outputs for
 the registration and segmentation modules.
 
 For a detailed description and input parameters please check the respective 
-help or :doc:`tutorial <../tutorials/index>` of each module.
+help or :doc:`tutorial <../../../tutorials/index>` of each module.

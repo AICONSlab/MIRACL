@@ -14,9 +14,10 @@ Welcome to MIRACL's documentation!
    about/index
    Installation <installation/installation>
    tutorials/index
+   Notebooks <notebooks/notebooks>
    troubleshooting/index
    gallery/gallery
-   Data <data/example_and_atlases_data>
+   downloads/index
 
 .. |license_img| image:: https://img.shields.io/github/license/mgoubran/MIRACL
    :width: 117px

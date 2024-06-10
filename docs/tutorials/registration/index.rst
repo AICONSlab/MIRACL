@@ -12,3 +12,4 @@ Reference mouse brain atlas.
 
    clarity_allen/clarity_allen
    MRI-Allen registration <mri_allen/mri_allen>
+   itk-SNAP re-orient image <itksnap_reorient/itksnap_reorient>
