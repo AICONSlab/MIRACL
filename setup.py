@@ -45,7 +45,7 @@ setup(
         "torch==1.13.1",
         "torchaudio==0.13.1",
         "torchvision==0.14.1",
-        "opencv-python==4.2.0.32",
+        "opencv-python",
         "tifffile==2021.11.2",
         "nibabel==4.0.2",
         "argparse==1.4.0",

@@ -6,13 +6,19 @@ RUN apt-get update && apt-get install -y git wget build-essential g++ gcc cmake 
     apt-get install -y libfreetype6-dev apt-utils pkg-config vim gfortran && \
     apt-get install -y binutils make linux-source unzip && \
     apt install libxcb-xinerama0 && \
-    apt install -y libsm6 libxext6 libfontconfig1 libxrender1 && \
-    apt-get install -y itksnap
+    apt install -y libsm6 libxext6 libfontconfig1 libxrender1
+
+RUN curl -Lo itksnap-4.2.0-20240422-Linux-gcc64.tar.gz https://sourceforge.net/projects/itk-snap/files/itk-snap/4.2.0/itksnap-4.2.0-20240422-Linux-gcc64.tar.gz/download && \
+    tar -xzvf itksnap-4.2.0-20240422-Linux-gcc64.tar.gz && \
+    cp -av itksnap-4.2.0-20240422-Linux-gcc64 /opt/itksnap && \
+    rm itksnap-4.2.0-20240422-Linux-gcc64.tar.gz
+
+ENV PATH=/opt/itksnap/bin:${PATH}
 
 # Install miniconda
-RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh && \
-    bash Miniconda3-4.6.14-Linux-x86_64.sh -p /opt/miniconda -b && \
-    rm Miniconda3-4.6.14-Linux-x86_64.sh
+RUN curl -LO https://repo.anaconda.com/miniconda/Miniconda3-py39_24.4.0-0-Linux-x86_64.sh && \
+    bash Miniconda3-py39_24.4.0-0-Linux-x86_64.sh -p /opt/miniconda -b && \
+    rm Miniconda3-py39_24.4.0-0-Linux-x86_64.sh
 ENV PATH=/opt/miniconda/bin:${PATH}
 
 RUN mkdir -p /code/atlases /data
@@ -23,10 +29,10 @@ RUN apt install -y libhdf5-serial-dev && \
     pip install --upgrade pip && \
     python3 -m pip install numpy && \
     python3 -m pip install matplotlib joblib && \
-    python3 -m pip install scipy==1.2.1 && \
+    python3 -m pip install scipy && \
     python3 -m pip install tifffile && \
-    conda install -c menpo menpo && \
-    python3 -m pip install opencv-python==4.2.0.32 && \
+    python3 -m pip install menpo && \
+    python3 -m pip install opencv-python && \
     apt remove -y cmake && \
     pip3 install cmake
 
@@ -147,9 +153,9 @@ RUN apt-get install -y ./g++-5_5.5.0-12ubuntu1_amd64.deb \
     rm -r /tmp/gcc_downloads
 
 WORKDIR /code
-RUN pip3 install scikit-image==0.14.2 && \
+RUN pip3 install scikit-image && \
     pip3 install cython h5py && \
-    pip3 install pandas==0.24.2
+    pip3 install pandas
 
 #RUN alias python=python3
 
