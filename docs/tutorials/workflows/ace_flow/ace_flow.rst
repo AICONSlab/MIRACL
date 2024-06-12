@@ -4,27 +4,84 @@ ACE Workflow
 **A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
 1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__
-   and :ref:`refer to example section<example_anchor>`) to map brain-wide neuronal activity.
+   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_
+   and :ref:`refer to example section<example_anchor>`) to map brain-wide local/laminar neuronal activity.
 2. Optimized cluster-wise statistical analysis with a threshold-free 
    enhancement approach to chart subpopulation-specific effects at the laminar 
    and local level, without restricting the analysis to atlas-defined regions 
-   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__ 
+   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_ 
    and :ref:`refer to example section<example_anchor>`).
-3. Modules for providing DL model uncertainty estimates and fine-tuning.
-4. Interface with MIRACL registration to create study-specific atlases.
-5. Ability to account for covariates at the cluster level and map the 
-   connectivity between clusters of activations.
+3. Modules for providing DL model uncertainty estimates and fine-tuning (in a future release).
+4. Interface with MIRACL registration.
+5. Ability to map the connectivity between clusters of activations.
+
+Installation
+============
+
+To install the ACE workflow, refer to the MIRACL installation guide and video tutorials:
+
+- :doc:`Installation guide <../../../installation/installation>`
+
+- `Video tutorial <https://www.google.ca/>`_
+
+.. TODO: update the tutorial link
+
+.. note::
+
+   Make sure that you set the GPU option during installation using the ``-g`` flag.
+   Once the installation is complete, enter the ``docker`` container using ``docker exec -it <CONTAINER_NAME> bash``
+   and run the ``nvidia-smi`` command to ensure your GPU is detected.
+
+The ACE workflow can only be run with pre-trained DL models. To get access to these models please reach out
+to `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
+
+These models will be included by default in a future release once ACE is published.
+
+.. note::
+   
+   The DL models must be in a specific directory structure to be used by the ACE workflow.
+
+   Once you have the models, place them in the required directory structure by using the following command:
+
+   .. code-block::
+
+      cp <PATH TO UNET MODEL FILE> /code/miracl/seg/models/unet/best_metric_model.pth
+      cp <PATH TO UNETR MODEL FILE> /code/miracl/seg/models/unetr/best_metric_model.pth
+
+   To check that the models are in the correct directory structure, run the following command:
+
+   .. code-block::
+
+      $ ls /code/miracl/seg/models/unet
+      $ ls /code/miracl/seg/models/unetr
+
+   The output should be similar to the following:
+
+   .. code-block::
+
+      best_metric_model.pth
+      best_metric_model.pth
+
 
 Main Inputs
 ============
 
-Control and Treated directories, containing whole-brain 3D LSFM datasets for multiple subjects.
-OR 
-A single directory containing a single subject's whole-brain 3D LSFM dataset.
+Mode 1: Running ACE for two groups
+- Control and Treated directories, containing whole-brain 3D LSFM datasets for multiple subjects.
 
-CLI
-===
+OR
+
+Mode 2: Running ACE for a single subject
+- A single directory containing a single subject's whole-brain 3D LSFM dataset.
+
+Command Line Interface (CLI)
+============================
+
+To use the CLI, you must first enter the docker container by running the following command:
+
+.. code-block::
+
+   $ docker exec -it <CONTAINER_NAME> bash
 
 To get more information about the workflow and its required arguments 
 use the following command on the cli:
@@ -35,7 +92,9 @@ use the following command on the cli:
 
 The following information will be printed to the terminal:
 
-.. code-block::   usage: miracl flow ace
+.. code-block::   
+   
+   usage: miracl flow ace
         [-s SINGLE_TIFF_DIR]
         [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
         [-t TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE]
@@ -115,14 +174,21 @@ The following information will be printed to the terminal:
 
    There are a number of optional arguments including TFCE cluster-wise analysis parameters that can be provided to the
    respective function invoked by the workflow. These arguments have been 
-   ommitted here for readability but can be viewed by running ``miracl flow ace -hv``.
+   omitted here for readability but can be viewed by running ``miracl flow ace -hv``.
+
+ACE Quick Start
+---------------
+
+The following arguments are the minimum required to run the ACE workflow:
+
+Mode 1: Running ACE for two groups
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. table::
 
    ==================================  ================================================  ===================  ===================================================================================================
    Flag                                Parameter                                         Type                 Description                     
    ==================================  ================================================  ===================  ===================================================================================================
-   \-s, \-\-single                     SINGLE_TIFF_DIR                                   ``str``              path to single raw tif/tiff data folder
    \-c, \-\-control                    CONTROL_BASE_DIR, CONTROL_TIFF_DIR_EXAMPLE        ``(str, str)``       FIRST: path to base control directory; SECOND: example path to control subject tiff directory
    \-t, \-\-treated                    TREATED_BASE_DIR, TREATED_TIFF_DIR_EXAMPLE        ``(str, str)``       FIRST: path to base treated directory; SECOND: example path to treated subject tiff directory
    \-sam, \-\-sa_model_type            {unet,unetr,ensemble}                             ``str``              model architecture              
@@ -130,49 +196,43 @@ The following information will be printed to the terminal:
    \-sar, \-\-sa_resolution            X-res Y-res Z-res                                 ``(str, str, str)``  voxel size 
    ==================================  ================================================  ===================  ===================================================================================================
 
+Mode 2: Running ACE for a single subject
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. table::
+
+   ==================================  ================================================  ===================  ===================================================================================================
+   Flag                                Parameter                                         Type                 Description                     
+   ==================================  ================================================  ===================  ===================================================================================================
+   \-s, \-\-single                     SINGLE_TIFF_DIR                                   ``str``              path to single raw tif/tiff data folder
+   \-sam, \-\-sa_model_type            {unet,unetr,ensemble}                             ``str``              model architecture              
+   \-sao, \-\-sa_output_folder         SA_OUTPUT_FOLDER                                  ``str``              path to output file folder
+   \-sar, \-\-sa_resolution            X-res Y-res Z-res                                 ``(str, str, str)``  voxel size 
+   ==================================  ================================================  ===================  ===================================================================================================
+
+
+
 Main outputs
 ============
 
 .. code-block::
 
-   clar_allen_reg # registration output / pre-liminary files  
-   conv_final # conversion (tiff to nifti) output
-   reg_final  # main registration output 
    seg_final # segmentation output including model(s) outputs and uncertainty estimates
+   conv_final # conversion (tiff to nifti) output
+   clar_allen_reg # registration output / preliminary files  
+   reg_final  # main registration output 
    vox_final 
-   warp_final 
+   warp_final
+   
+   # the following outputs are generated only in Mode 1
    heatmap_final
    cluster_final # cluster-wise analysis output including p_value and f_stats maps
    corr_final # correlation analysis output including correlation maps and p_value maps
 
-Executes:
-
-.. code-block::
-
-   seg/ace_interface.py
-   conv/miracl_conv_convertTIFFtoNII.py
-   reg/miracl_reg_clar-allen.sh
-   seg/miracl_seg_voxelize_parallel.py
-   reg/miracl_reg_warp_clar_data_to_allen.sh
-   stats/miracl_stats_heatmap_group.py
-   stats/miracl_stats_ace_interface.py
-
 .. _example_anchor:
 
-Example of running ACE on single subject (segmenation + registration + voxelization + warping) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
-====================================================================================================================================================================================================
-
-.. code-block::
-
-   $ miracl flow ace \
-      -s ./non_walking/Newton_HC1/cells/ \
-      -sao ./output_dir \
-      -sam unet \
-      --overwrite
-
-
-Example of running ACE flow on multiple subjects:
-=================================================
+Example of running ACE flow on multiple subjects (Mode 1):
+==========================================================
 
 .. code-block::
 
@@ -180,11 +240,25 @@ Example of running ACE flow on multiple subjects:
       -c ./non_walking/ ./non_walking/Newton_HC1/cells/ \
       -t ./walking/ ./walking/Newton_UI1/cells/ \
       -sao ./output_dir \
-      -sam unet \
-      --overwrite
+      -sam unet
 
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
+Example of running ACE on single subject (Mode 2) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_):
+======================================================================================================================================================
+
+.. code-block::
+
+   $ miracl flow ace \
+      -s ./non_walking/Newton_HC1/cells/ \
+      -sao ./output_dir \
+      -sam unet
+
+.. note::
+
+   The user can also run the ACE segmentation module or the ACE cluster-wise analysis module separately.
+   Examples of running these modules separately are provided below.
+
+Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_):
 ======================================================================================================================================================================================
 
 .. code-block::
@@ -195,7 +269,7 @@ Example of running only ACE segmentation module on one single subject (`link to 
       -sam unetr
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_):
 ============================================================================================================================================================================================================
 
 .. code-block::
@@ -203,7 +277,11 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
    $ miracl stats ace \
       -c ./ctrl/ \
       -t ./treated/ \
-      -sao ./output_dir \
+      -sao ./output_dir
+
+More information on the ``miracl stats ace`` function can be found
+:doc:`here <../../stats/ace_cluster/ace_cluster>`.
+
 
 .. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
 
