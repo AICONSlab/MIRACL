@@ -4,12 +4,12 @@ ACE Workflow
 **A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
 1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_
+   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__
    and :ref:`refer to example section<example_anchor>`) to map brain-wide local/laminar neuronal activity.
 2. Optimized cluster-wise statistical analysis with a threshold-free 
    enhancement approach to chart subpopulation-specific effects at the laminar 
    and local level, without restricting the analysis to atlas-defined regions 
-   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_ 
+   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__ 
    and :ref:`refer to example section<example_anchor>`).
 3. Modules for providing DL model uncertainty estimates and fine-tuning (in a future release).
 4. Interface with MIRACL registration.
@@ -243,8 +243,8 @@ Example of running ACE flow on multiple subjects (Mode 1):
       -sam unet
 
 
-Example of running ACE on single subject (Mode 2) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_):
-======================================================================================================================================================
+Example of running ACE on single subject (Mode 2) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
+=======================================================================================================================================================
 
 .. code-block::
 
@@ -258,8 +258,8 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
    The user can also run the ACE segmentation module or the ACE cluster-wise analysis module separately.
    Examples of running these modules separately are provided below.
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`_):
-======================================================================================================================================================================================
+Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
+=======================================================================================================================================================================================
 
 .. code-block::
 
@@ -269,8 +269,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
       -sam unetr
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_):
-============================================================================================================================================================================================================
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
+=============================================================================================================================================================================================================
 
 .. code-block::
 
