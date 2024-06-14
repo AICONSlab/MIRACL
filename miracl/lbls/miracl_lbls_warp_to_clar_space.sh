@@ -406,7 +406,11 @@ function warpallenlbls()
     # 1- Spacing , 1- NN, 3- ushort
 
 	if [[ ! -d ${tifdirreg} ]]; then
-    	mkdir -p ${tifdirreg} ${tifdirregfinal} 
+    	mkdir -p ${tifdirreg}
+    fi
+
+	if [[ ! -d ${tifdirregfinal} ]]; then
+    	mkdir -p ${tifdirregfinal}
     fi  
 
 
@@ -523,7 +527,7 @@ function main()
     ort=`cat ${ortfile} | grep ortcode | cut -d = -f 2`
 
     tiflblszstack=${regdir}/${lblsname}_unpad_clar_zstack.tif
-    tifdirreg=${regdir}/${lblsname}_tiff
+    tifdirreg=${outputdir}/${lblsname}_tiff
     tifdirregfinal=${outputdir}/${lblsname}_tiff_clar
 
 

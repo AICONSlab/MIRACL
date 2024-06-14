@@ -109,7 +109,8 @@ class ACEConversion(Conversion):
         --resz {vz} \
         --center {' '.join(map(str, args.ctn_center))} \
         --downzdim {args.ctn_downzdim} \
-        --prevdown {args.ctn_prevdown}"
+        --prevdown {args.ctn_prevdown} \
+        --percentile_thr {args.ctn_percentile_thr}"
         subprocess.Popen(conv_cmd, shell=True).wait()
         logger.debug("Calling conversion fn here")
         logger.debug(f"Example args: {args.ctn_down}")
@@ -203,8 +204,10 @@ class ACEWarping(Warping):
                 -v {args.rwc_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
-        warp_file = list((Path(os.getcwd()) / "reg_final").glob("voxelized_*.nii.gz"))[0]
-        shutil.move(str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final"))
+        warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[0]
+        shutil.move(
+            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final")
+        )
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
 
@@ -297,11 +300,11 @@ class ACEWorkflows:
         # check for single or multi in the args
         if args.single:
             self._execute_single_workflow(args, **kwargs)
-        elif args.control and args.experiment:
+        elif args.control and args.treated:
             self._execute_comparison_workflow(args, **kwargs)
         else:
             raise ValueError(
-                "Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args."
+                "Must specify either (-s/--single) or (-c/--control and -t/--treated) in args."
             )
 
     def _execute_single_workflow(
@@ -316,7 +319,7 @@ class ACEWorkflows:
         :rtype: pathlib.Path
         """
         final_folder = (
-            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}" # TODO: fix
+            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}"
         )
         args.sa_output_folder = str((Path(args.sa_output_folder) / final_folder))
 
@@ -330,19 +333,67 @@ class ACEWorkflows:
         ace_flow_reg_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "reg_final"
         )
+        ace_flow_vox_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "vox_final"
+        )
+        ace_flow_warp_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "warp_final"
+        )
 
-        self.segmentation.segment(args)
-        self.conversion.convert(args)
+        rerun_seg = SegmentationChecker.check_segmentation(
+            args, ace_flow_seg_output_folder
+        )
+
+        if rerun_seg:
+            self.segmentation.segment(args)
+
+        rerun_conv = ConversionChecker.check_conversion(
+            args, ace_flow_conv_output_folder
+        )
+
+        if rerun_conv:
+            self.conversion.convert(args)
+
         converted_nii_file = GetConverterdNifti.get_nifti_file(
             ace_flow_conv_output_folder
         )
-        reg_cmd = RegistrationChecker.get_registration_cmd(
-            args,
-            converted_nii_file=converted_nii_file,
+        rerun_subject = RegistrationChecker.check_registration(
+            args, ace_flow_reg_output_folder
         )
-        self.registration.register(args, reg_cmd)
+        if rerun_subject:
+            reg_cmd = RegistrationChecker.get_registration_cmd(
+                args,
+                converted_nii_file=converted_nii_file,
+            )
+            self.registration.register(args, reg_cmd)
 
-        return args.sa_output_folder
+        # Stack tiff files for use in voxelization method
+        fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
+        stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
+        StackTiffs.check_folders(fiji_file, stacked_tif)
+        StackTiffs.stacking(
+            fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo
+        )
+        self.voxelization.voxelize(args, stacked_tif)
+
+        (
+            voxelized_segmented_tif,
+            orientation_file,
+        ) = GetVoxSegTif.check_warping_requirements(
+            ace_flow_vox_output_folder, ace_flow_warp_output_folder
+        )
+
+        GetVoxSegTif.create_orientation_file(
+            orientation_file,
+            ace_flow_warp_output_folder,
+            args.rca_orient_code,
+        )
+        self.warping.warp(
+            args,
+            ace_flow_reg_output_folder.parent / "clar_allen_reg",
+            voxelized_segmented_tif,
+            orientation_file,
+        )
 
     def _execute_comparison_workflow(self, args: argparse.Namespace, **kwargs):
         """Private method for executing the comparison workflow.
@@ -356,12 +407,12 @@ class ACEWorkflows:
         args_dict = vars(args)
 
         per_subject_final_folder = (
-            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}" # TODO: fix
+            f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}"
         )
 
         nifti_save_location = {}
 
-        for type_ in ["control", "experiment"]:
+        for type_ in ["control", "treated"]:
             tiff_template = Path(args_dict[type_][1])
             base_dir = Path(args_dict[type_][0])
 
@@ -393,8 +444,20 @@ class ACEWorkflows:
 
                 args.single = base_dir / subject.stem / tiff_extension
 
-                self.segmentation.segment(args)
-                self.conversion.convert(args)
+                rerun_seg = SegmentationChecker.check_segmentation(
+                    args, ace_flow_seg_output_folder
+                )
+
+                if rerun_seg:
+                    self.segmentation.segment(args)
+
+                rerun_conv = ConversionChecker.check_conversion(
+                    args, ace_flow_conv_output_folder
+                )
+
+                if rerun_conv:
+                    self.conversion.convert(args)
+
                 converted_nii_file = GetConverterdNifti.get_nifti_file(
                     ace_flow_conv_output_folder
                 )
@@ -434,16 +497,16 @@ class ACEWorkflows:
                     orientation_file,
                 )
 
-            nifti_save_location[
-                type_
-            ] = list(ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz"))[0]   # make sure this is the right file
+            nifti_save_location[type_] = list(
+                ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz")
+            )[0]
 
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
         args.pcs_control = (args.control[0], nifti_save_location["control"].as_posix())
-        args.pcs_experiment = (
-            args.experiment[0],
-            nifti_save_location["experiment"].as_posix(),
+        args.pcs_treated = (
+            args.treated[0],
+            nifti_save_location["treated"].as_posix(),
         )
 
         ace_flow_heatmap_output_folder = FolderCreator.create_folder(
@@ -528,7 +591,10 @@ class StackTiffs:
 
     @staticmethod
     def stacking(
-        fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path
+        fiji_file: pathlib.Path,
+        stacked_tif: pathlib.Path,
+        seg_output_dir: pathlib.Path,
+        is_MC: bool,
     ):
         """Writes a Fiji macro and runs it to stack the segmented tif files.
         Needed to run before voxelization.
@@ -539,10 +605,15 @@ class StackTiffs:
         :type stacked_tif: pathlib.Path
         :param seg_output_dir: path to the segmented tif files ('seg_final/')
         :type seg_output_dir: pathlib.Path
+        :param is_MC: flag for Monte Carlo or not
+        :type is_MC: bool
         """
         print("  stacking segmented tifs...")
+        filter = "MC_" if is_MC else "out_"
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}", "virtual");\n')
+            file.write(
+                f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n'
+            )
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
@@ -687,7 +758,7 @@ class ConstructHeatmapCmd:
         """
         tested_heatmap_cmd += f"\
             -g1 {args.pcs_control[0]} {args.pcs_control[1]} \
-            -g2 {args.pcs_experiment[0]} {args.pcs_experiment[1]} \
+            -g2 {args.pcs_treated[0]} {args.pcs_treated[1]} \
             -v {args.rwc_voxel_size} \
             -gs {args.sh_sigma} \
             -p {args.sh_percentile} \
@@ -696,7 +767,10 @@ class ConstructHeatmapCmd:
             -d {ace_flow_heatmap_output_folder} \
             -o {args.sh_outfile} \
             -e {args.sh_extension} \
-            --dpi {args.sh_dpi}"
+            --dpi {args.sh_dpi} \
+            -si {args.rca_side} \
+            -m {args.rca_hemi} \
+            -l {args.rca_allen_label}"
 
         return tested_heatmap_cmd
 
@@ -712,8 +786,9 @@ class RegistrationChecker:
         reg_folder: Path,
     ) -> bool:
         """Checks if registration needs to be run based on user input and the file structure.
-        If the user want to run registration, we run it. Otherwise we check that all the necessary
-        files are inplace before skipping. If they are not, we re-reun registration.
+        If the user want to run registration (with the --rerun-registration flag), we run it. 
+        Otherwise we check that all the necessary files are inplace before skipping.
+        If they are not, we re-reun registration.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
@@ -723,7 +798,7 @@ class RegistrationChecker:
         :rtype: bool
         """
         if args.rerun_registration:
-            # RegistrationChecker._clear_reg_folders(reg_folder)
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check for reg_final/ and clar_allen_reg/
@@ -731,17 +806,17 @@ class RegistrationChecker:
             not reg_folder.is_dir()
             or not (reg_folder.parent / "clar_allen_reg").is_dir()
         ):
-            # RegistrationChecker._clear_reg_folders(reg_folder)
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         # check in the directory if there is a file that contains this command
         if not (reg_folder / "reg_command.log").is_file():
-            # RegistrationChecker._clear_reg_folders(reg_folder) # TODO: do we always clear the dir if we re-run?
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
-        # check that *_clar*.tif exists
-        if not reg_folder.glob("*_clar*.tif"):
-            # RegistrationChecker._clear_reg_folders(reg_folder)
+        # check that annotation_*um_clar*.tif exists
+        if not reg_folder.glob("annotation_*um_clar*.tif"):
+            RegistrationChecker._clear_reg_folders(reg_folder)
             return True
 
         with open(reg_folder / "reg_command.log", "r") as f:
@@ -802,11 +877,120 @@ class RegistrationChecker:
             shutil.rmtree(reg_folder)
         reg_folder.mkdir(parents=True, exist_ok=True)
 
-        # TODO: do we also want to remove this dir?
         clar_allen_reg = reg_folder.parent / "clar_allen_reg"
         if clar_allen_reg.is_dir():
             shutil.rmtree(clar_allen_reg)
         clar_allen_reg.mkdir(parents=True, exist_ok=True)
+
+
+class SegmentationChecker:
+    """Class for checking if each subject needs to re-run
+    segmentation.
+    """
+
+    @staticmethod
+    def check_segmentation(
+        args: argparse.Namespace,
+        seg_folder: Path,
+    ) -> bool:
+        """Checks if segmentation needs to be run based on user input and the file structure.
+        If the user wants to run seg (with the --rerun-segmentation flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run seg.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param seg_folder: path to seg output folder (seg_final/)
+        :type seg_folder: Path
+        :return: whether or not segmentation needs to be re-run
+        :rtype: bool
+        """
+
+        if args.rerun_segmentation:
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check for seg_final/
+        if not seg_folder.is_dir():
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check if generated_patches exists
+        if not (seg_folder / "generated_patches").is_dir():
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check if generated_patches is empty
+        if not sorted(seg_folder.glob("generated_patches/*.tiff")):  # doule check names
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+        # check that the directory isn't empty
+        if not list(seg_folder.glob("*.tif")):
+            SegmentationChecker._clear_seg_folders(seg_folder)
+            return True
+
+    @staticmethod
+    def _clear_seg_folders(seg_folder: Path):
+        """Clears the results from the segmentation folder.
+
+        :param seg_folder: path to the segmentation output folder ('seg_final/')
+        :type seg_folder: Path
+        """
+
+        if seg_folder.is_dir():
+            shutil.rmtree(seg_folder)
+        seg_folder.mkdir(parents=True, exist_ok=True)
+
+
+class ConversionChecker:
+    """Class for checking if each subject needs to re-run
+    conversion.
+    """
+
+    @staticmethod
+    def check_conversion(
+        args: argparse.Namespace,
+        conv_folder: Path,
+    ) -> bool:
+        """Checks if conversion needs to be run based on user input and the file structure.
+        If the user wants to run conv (with the --rerun-conversion flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run conv.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param conv_folder: path to conv output folder (conv_final/)
+        :type conv_folder: Path
+        :return: whether or not conversion needs to be re-run
+        :rtype: bool
+        """
+
+        if args.rerun_conversion:
+            ConversionChecker._clear_conv_folders(conv_folder)
+            return True
+
+        # check for conv_final/
+        if not conv_folder.is_dir():
+            ConversionChecker._clear_conv_folders(conv_folder)
+            return True
+
+        # check for the right downsample value
+        if not list(conv_folder.glob(f"*_{args.ctn_down}x_down_*.nii.gz")):
+            ConversionChecker._clear_conv_folders(conv_folder)
+            return True
+
+    @staticmethod
+    def _clear_conv_folders(conv_folder: Path):
+        """Clears the results from the conversion folder.
+
+        :param conv_folder: path to the conversion output folder ('conv_final/')
+        :type conv_folder: Path
+        """
+
+        if conv_folder.is_dir():
+            shutil.rmtree(conv_folder)
+        conv_folder.mkdir(parents=True, exist_ok=True)
 
 
 def main():
