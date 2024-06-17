@@ -1,5 +1,5 @@
 ARG MIRACL_VERSION=latest
-FROM mgoubran/miracl:revised-base-$MIRACL_VERSION
+FROM mgoubran/miracl:${MIRACL_VERSION}-base
 
 ADD . /code
 # delete ruamel pkg

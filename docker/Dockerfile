@@ -44,25 +44,7 @@ ENV ANTS_FOLDER=/usr/local/ANTs
 # Grab the Github repository, checkout the needed version,
 #   build
 ARG ANTs_VERSION
-RUN cd /tmp && \
-    git clone https://github.com/ANTsX/ANTs.git && \
-    cd ANTs && \
-    git checkout ${ANTs_VERSION} && \
-    buildDir=${PWD}/build && \
-    mkdir -p $buildDir ${ANTS_FOLDER} && \
-    cd $buildDir && \
-    cmake \
-        -DCMAKE_INSTALL_PREFIX=${ANTS_FOLDER} \
-        -DBUILD_SHARED_LIBS=OFF \
-    -DSuperBuild_ANTS_USE_GIT_PROTOCOL=OFF \
-        -DBUILD_TESTING=OFF \
-        -DRUN_LONG_TESTS=OFF \
-        -DRUN_SHORT_TESTS=OFF \
-        /tmp/ANTs 2>&1 | tee cmake.log && \
-    make 2>&1 | tee build.log && \
-    cd ${buildDir}/ANTS-build && \
-    make install 2>&1 | tee install.log && \
-    rm -r /tmp/ANTs
+RUN conda install -y aramislab::ants
 
 # Add ANTs/bin to the path:
 ENV PATH=$ANTS_FOLDER/bin/:$PATH
@@ -120,12 +102,8 @@ RUN apt-get install -y git \
     libpng-dev
 
 WORKDIR /opt
-RUN git clone https://github.com/MRtrix3/mrtrix3.git
-RUN cd mrtrix3 && \
-    ./configure && \
-    ./build
 
-ENV PATH="/opt/mrtrix3/bin:${PATH}"
+RUN conda install -c mrtrix3 mrtrix3
 
 # Install g++-5
 # Required for NiftyReg installation

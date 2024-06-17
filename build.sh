@@ -283,6 +283,7 @@ if [ -x "$(command -v docker)" ]; then
 	      --build-arg USER_ID="$(id -u)" \
 	      --build-arg GROUP_ID="$(id -g)" \
 	      --build-arg USER="$HOST_USER" \
+	      --build-arg MIRACL_VERSION="$miracl_version" \
 	      -t "$image_name":"$miracl_version" .
       }
 
