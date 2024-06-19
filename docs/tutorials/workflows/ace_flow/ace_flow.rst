@@ -41,19 +41,22 @@ These models will be included by default in a future release once ACE is publish
    
    The DL models must be in a specific directory structure to be used by the ACE workflow.
 
-   Once you have the models, place them in the required directory structure by using the following command:
+   Once you have the models, place them in the required directory structure by using the following commands:
 
    .. code-block::
 
-      cp <PATH TO UNET MODEL FILE> /code/miracl/seg/models/unet/best_metric_model.pth
-      cp <PATH TO UNETR MODEL FILE> /code/miracl/seg/models/unetr/best_metric_model.pth
+      cp <PATH TO UNET MODEL FILE> <WHERE YOU CLONED MIRACL>/miracl/seg/models/unet/best_metric_model.pth
+      cp <PATH TO UNETR MODEL FILE> <WHERE YOU CLONED MIRACL>/miracl/seg/models/unetr/best_metric_model.pth
 
-   To check that the models are in the correct directory structure, run the following command:
+   The path <WHERE YOU CLONED MIRACL> is the path where you cloned the MIRACL repository. This is the
+   location where you ran these :ref:`installation steps <git clone target>`.
+
+   To check that the models are in the correct directory structure, run the following commands:
 
    .. code-block::
 
-      $ ls /code/miracl/seg/models/unet
-      $ ls /code/miracl/seg/models/unetr
+      ls <WHERE YOU CLONED MIRACL>/miracl/seg/models/unet/best_metric_model.pth
+      ls <WHERE YOU CLONED MIRACL>/miracl/seg/models/unetr/best_metric_model.pth
 
    The output should be similar to the following:
 
