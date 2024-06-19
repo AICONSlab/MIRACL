@@ -153,7 +153,7 @@ The following information will be printed to the terminal:
                               labels voxel size/Resolution in um (default: 10)
       -rvad RVA_DOWNSAMPLE, --rva_downsample RVA_DOWNSAMPLE
                               downsample ratio for voxelization, recommended: 5 <=
-                              ratio <= 10
+                              ratio <= 10 (default: 10)
       -rwcv {10,25,50}, --rwc_voxel_size {10,25,50}
                               voxel size/Resolution in um for warping (default: 25)
       --rerun-registration TRUE/FALSE

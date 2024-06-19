@@ -461,7 +461,7 @@ class ACEWorkflowParser:
             "--rva_downsample",
             type=int,
             default=10,
-            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10",
+            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10 (default: %(default)s)",
         )
         # Should be inherited from above -rcav argument
         # vox_args.add_argument(
