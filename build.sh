@@ -271,7 +271,7 @@ if [ -x "$(command -v docker)" ]; then
       ######################################
       
       # Printing information about build process and docker-compose.yml to stdout
-      printf "\n[+] Building MIRACL and creating dGPU passthroughocker-compose.yml with the following parameters:\n"
+      printf "\n[+] Building MIRACL and creating docker-compose.yml with the following parameters:\n"
       printf " User: %s\n" "$HOST_USER"
       printf " pid: %s\n" "$(id -u)"
       printf " gid: %s\n" "$(id -g)"
