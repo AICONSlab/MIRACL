@@ -222,7 +222,7 @@ class ACEWorkflowParser:
             help="threshold value for binarization (type: %(type)s; default: %(default)s)",
         )
         # Parser for percentage brain patch skip
-        parser.add_argument(
+        seg_args.add_argument(
             "-sap",
             "--sa_percentage_brain_patch_skip",
             type=float,
