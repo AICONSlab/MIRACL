@@ -18,19 +18,23 @@ either of the following methods:
 .. important::
    :program:`MIRACL` has been tested on:
 
-   * Docker:
+   * **Docker**:
 
-     * Ubuntu: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
+     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
 
-     * Debian: ``13`` (trixie)
+     * **Debian**: ``13`` (trixie)
 
-     * Gentoo: ``2.14``
+   * **Singularity**:
 
-   * Singularity:
+     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
 
-     * Ubuntu: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
+     * **Gentoo**: ``2.14``
 
-     * Gentoo: ``2.14``
+   * **Apptainer**:
+
+     * **Ubuntu**: ``20.04`` (Focal Fossa)
+
+     * **Gentoo**: ``2.14``
 
    We strongly recommend that you use one of the above Linux versions to run
    :program:`MIRACL`!
@@ -40,8 +44,8 @@ either of the following methods:
    type/size of your data as well as the analyses you are running. While 
    some modules and datasets can be less computationally expensive, others 
    require a lot of resources. As a point of reference, the least powerful 
-   system that we are testing :program:`MIRACL` on, uses a 
-   ``24-Core Threadripper`` with ``128GB RAM`` and a ``NVIDIA RTX A6000 GPU``.
+   system that we are testing :program:`MIRACL` on, uses a ``24-Core Threadripper`` 
+   with ``128GB RAM`` and two ``NVIDIA RTX A6000 GPUs``.
 
 .. tabs::
 
