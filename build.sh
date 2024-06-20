@@ -35,7 +35,8 @@ miracl_version="latest"
 miracl_version_file=$(cat ./miracl/version.txt)
 
 # Set default shared memory size
-shm=$(cat /proc/meminfo | grep MemTotal | awk '{printf "%dmb", int($2/1024*0.85)}')
+shm=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
+
 
 # Set array to capture volumes
 volumes=()
@@ -279,21 +280,9 @@ if [ -x "$(command -v docker)" ]; then
       printf " Service name: %s\n" "$service_name"
       printf " Image name: %s\n" "$image_name:$miracl_version"
       printf " Container name: %s\n" "$container_name"
-      if [[ $gpu ]]; then
-        printf " GPU passthrough: enabled\n"
-      else
-        printf " GPU passthrough: disabled\n"
-      fi
-      if [[ $dev ]]; then
-        printf " Script dir mounted: false\n"
-      else
-        printf " Script dir mounted: true\n"
-      fi
-      if [[ $write_log ]]; then
-        printf " Log file: enabled\n"
-      else
-        printf " Log file: disabled\n"
-      fi
+      printf " GPU passthrough: %s\n" "${gpu:-false}"
+      printf " Script dir mounted: %s\n" "${dev:-true}"
+      printf " Log file: %s\n" "${write_log:-false}"
       for v in "${!volumes[@]}"; do
         printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
       done
