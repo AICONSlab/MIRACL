@@ -15,11 +15,39 @@ either of the following methods:
    has been deprecated. Please use :program:`Docker` or :program:`Singularity`
    instead.
 
+.. important::
+   :program:`MIRACL` has been tested on:
+
+   * Docker:
+
+     * Ubuntu: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
+
+     * Debian: ``13`` (trixie)
+
+     * Gentoo: ``2.14``
+
+   * Singularity:
+
+     * Ubuntu: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
+
+     * Gentoo: ``2.14``
+
+   We strongly recommend that you use one of the above Linux versions to run
+   :program:`MIRACL`!
+
+.. note::
+   Hardware requirements for :program:`MIRACL` are heavily dependent on the 
+   type/size of your data as well as the analyses you are running. While 
+   some modules and datasets can be less computationally expensive, others 
+   require a lot of resources. As a point of reference, the least powerful 
+   system that we are testing :program:`MIRACL` on, uses a 
+   ``24-Core Threadripper`` with ``128GB RAM`` and a ``NVIDIA RTX A6000 GPU``.
+
 .. tabs::
 
    .. tab:: Docker
 
-      We provide a build script to automatically create a :program:`Docker` 
+      We provide a installation script to automatically create a :program:`Docker` 
       image for you that can be run using :program:`Docker Compose`. This 
       method does not require a manual installation of :program:`MIRACL` and 
       works on Linux, macOS and Windows (using WSL 2).
@@ -33,7 +61,7 @@ either of the following methods:
       cluster, see our instructions for installing :program:`Singularity`. If 
       you don't have Docker installed on your computer, do that first. Make 
       sure your installation includes :program:`Docker Compose` as it is 
-      required to run the build script we provide. Note that :program:`Docker 
+      required to run the installation script we provide. Note that :program:`Docker 
       Compose` is included as part of the :program:`Docker Desktop` 
       installation by default.
 
@@ -68,16 +96,16 @@ either of the following methods:
          $ git clone https://www.github.com/mgoubran/MIRACL
          $ cd MIRACL
 
-      Build the latest :program:`MIRACL` image using the build script we 
+      Build the latest :program:`MIRACL` image using the installation script we 
       provide:
 
       .. code-block::
 
-         $ ./build.sh
+         $ ./install.sh
 
       .. error::
          Make sure that the script can be executed. If it can't and you are 
-         the owner of the file, use ``chmod u+x build.sh`` to make it 
+         the owner of the file, use ``chmod u+x install.sh`` to make it 
          executable. Prefix with ``sudo`` if you are not the owner of the file 
          or change permissions for ``g`` and/or ``o``.
 
@@ -140,16 +168,16 @@ either of the following methods:
 
          <h3>Image and container naming</h3>
       
-      Naming is done automatically when using our build script which includes 
-      a default naming scheme. By default, the image is named 
+      Naming is done automatically when using our installation script which 
+      includes a default naming scheme. By default, the image is named 
       ``mgoubran/miracl:latest`` and the container is tagged with ``miracl``.
       
       You can easily change the defaults if your usecase requires it by 
-      running our build script with the following options:
+      running our installation script with the following options:
       
       .. code-block::
 
-         $ ./build -i <image_name> -c <container_name>
+         $ ./install.sh -i <image_name> -c <container_name>
       
       Options:
       
@@ -162,10 +190,10 @@ either of the following methods:
       
       .. code-block::
 
-         $ ./build -i josmann/miracl -c miracl_dev_version
+         $ ./install.sh -i josmann/miracl -c miracl_dev_version
       
       .. tip::
-         Use ``./build -h`` to show additional options
+         Use ``./install.sh -h`` to show additional options
       
       .. raw:: html
 
@@ -214,19 +242,20 @@ either of the following methods:
          $ git checkout tags/v2.2.4 -b miracl_v2.2.4
       
       4. If you are reverting to a version of MIRACL >= ``2.2.4``, you can 
-         build the image for your chosen version by running the build script 
-         with the ``-t`` flag:
+         build the image for your chosen version by running the installation
+         script with the ``-t`` flag:
       
       .. code-block::
 
-         $ ./build.sh -t
+         $ ./install.sh -t
       
       .. note::
          If you want to build an image for a version of MIRACL <= ``2.2.4`` 
          either follow the build instructions of the particular version or 
-         download the latest build script using e.g. ``wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh``
-         (overwrites current build script if present) and run it with the 
-         ``-t`` flag.
+         download the latest installation script using e.g. 
+         ``wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/install.sh``
+         (overwrites current installation script if present) and run it with 
+         the ``-t`` flag.
       
       5. From here you can follow our instructions for building 
          :program:`MIRACL` from scratch starting with ``docker compose up -d``. 
@@ -297,6 +326,10 @@ either of the following methods:
 
    .. tab:: Windows (WSL2)
 
+      .. warning::
+         Support for installing :program:`MIRACL` locally in the :program:`WSL`
+         has been deprecated in version ``2.2.6`` of :program:`MIRACL`.
+
       The Windows Subsystem for Linux (:program:`WSL`) creates an environment 
       that allows users to run versions of :program:`Linux` without having to 
       set up a virtual machine or a different computer.
@@ -309,13 +342,9 @@ either of the following methods:
       To install WSL, users can follow the instructions from 
       `Microsoft <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
       More comprehensive instructions can be found
-      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`_.
+      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`__.
       Upgrading from :program:`WSL1` to :program:`WSL2` is recommended, due to 
       :program:`WSL2`’s `benefits <https://docs.microsoft.com/en-us/windows/wsl/compare-versions>`_.
-
-      .. warning::
-         Support for installing :program:`MIRACL` locally in the WSL has been 
-         deprecated in version ``2.2.6`` of :program:`MIRACL`.
 
       Once the :program:`WSL` has been installed you can proceed to install
       :program:`Docker`.
@@ -330,7 +359,7 @@ either of the following methods:
          <h2>Installing Docker on Windows</h2>
       
       1. Download the :program:`Docker Desktop` installer for Windows from 
-         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`_ 
+         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`__ 
          or from the `release notes <https://docs.docker.com/desktop/release-notes/>`_.
       2. Double-click :program:`Docker Desktop Installer.exe` to run the 
          installer. By default, :program:`Docker Desktop` is installed at 
