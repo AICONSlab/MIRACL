@@ -269,7 +269,12 @@ Example of running only ACE segmentation module on one single subject (`link to 
    $ miracl seg ace \
       -sai ./Ex_561_Em_600_stitched/ \
       -sao ./output_dir \
-      -sam unetr
+      -sam unetr \
+      -rcao ARI \
+      -sar 3.5 3.5 4.0 \
+      -ctnd 10 \ 
+      -rcav 25 \
+      --ctn_channame Signal
 
 
 Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
@@ -280,7 +285,8 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
    $ miracl stats ace \
       -c ./ctrl/ \
       -t ./treated/ \
-      -sao ./output_dir
+      -sao ./output_dir \
+      -rwcv 25
 
 More information on the ``miracl stats ace`` function can be found
 :doc:`here <../../stats/ace_cluster/ace_cluster>`.
