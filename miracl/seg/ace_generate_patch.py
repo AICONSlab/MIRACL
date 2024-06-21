@@ -28,7 +28,9 @@ from math import floor
 import tifffile
 from pathlib import Path
 import logging
-
+from skimage.filters import threshold_otsu
+from scipy.ndimage import binary_fill_holes
+import json
 
 # def generate_patch_main(input_folder, output_folder):
 #     input_path = input_folder
@@ -115,15 +117,21 @@ def generate_patch_main(input_folder, output_folder):
 
     # def print_dim(idx):
     #     return ["Z", "Y", "X"][idx]
-
+    percentage_brain_patch = {}
     for idx1, stack in enumerate(stack_index_img):
         img_list = []
+        img_list_binary = []
 
         print(f"  \nProcessing image slices for Z-dim...\n")
         for idx2, file in enumerate(stack):
             print("  Slice: ", file)
             fname_input_img = os.path.join(input_path, file)
             img = io.imread(fname_input_img)
+
+            # create a brain mask for the img
+            threshold = threshold_otsu(img)
+            img_binary = img > threshold
+            img_binary = binary_fill_holes(img_binary)
 
             # check if the img needs zero padding
             if (img.shape[0] % batch_size) != 0:
@@ -137,20 +145,28 @@ def generate_patch_main(input_folder, output_folder):
                 img_width = img.shape[1]
 
             img_padding = np.zeros((img_height, img_width), dtype=img.dtype)
+            img_padding_binary = np.zeros((img_height, img_width), dtype=np.bool_)
             img_padding[: img.shape[0], : img.shape[1]] = img
+            img_padding_binary[: img.shape[0], : img.shape[1]] = img_binary
 
             batch_arr_img = blockshaped(img_padding, batch_size, batch_size)
+            batch_arr_img_binary = blockshaped(img_padding_binary, batch_size, batch_size)
 
             img_list.append(batch_arr_img)
+            img_list_binary.append(batch_arr_img_binary)
 
         img_batch = np.stack(img_list, axis=1)
+        img_batch_binary = np.stack(img_list_binary, axis=1)
 
         # save each data with size of 512 * 512 * 512
         print(
             f" \nSaving patches for Z-dim to '{output_path}/{output_dir_subfolder}/'..."
         )
+        
         for i in range(img_batch.shape[0]):
             img_batch_single = img_batch[i, :, :, :]
+            img_batch_single_binary = img_batch_binary[i, :, :, :]
+
             # img_batch_single_normalized = (img_batch_single - img_batch_single.min()) / (img_batch_single.max() - img_batch_single.min())
             file_img = "patch_" + str(idx1) + "_" + str(i) + ".tiff"
 
@@ -162,6 +178,34 @@ def generate_patch_main(input_folder, output_folder):
                 output_dir_img.mkdir(parents=True)
                 print(f"output_dir: {output_dir_img}")
             fname_output_img = os.path.join(output_dir_img, file_img)
+
+            # check if the image depth is less than 512 and zero-pad
+            if img_batch_single.shape[0] < batch_size:
+                img_batch_single = np.pad(
+                    img_batch_single,
+                    ((0, batch_size - img_batch_single.shape[0]), (0, 0), (0, 0)),
+                    mode="constant",
+                    constant_values=0,
+                )
+            
+            # check the image width is less than 512 and zero-pad
+            if img_batch_single.shape[1] < batch_size:
+                img_batch_single = np.pad(
+                    img_batch_single,
+                    ((0, 0), (0, batch_size - img_batch_single.shape[1]), (0, 0)),
+                    mode="constant",
+                    constant_values=0,
+                )
+            
+            # check the image width is less than 512 and zero-pad
+            if img_batch_single.shape[2] < batch_size:
+                img_batch_single = np.pad(
+                    img_batch_single,
+                    ((0, 0), (0, 0), (0, batch_size - img_batch_single.shape[2])),
+                    mode="constant",
+                    constant_values=0,
+                )
+
 
             tifffile.imwrite(
                 fname_output_img,
@@ -176,8 +220,14 @@ def generate_patch_main(input_folder, output_folder):
                 },
             )
 
+            percentage_brain_patch[Path(fname_output_img).name] = 100 * img_batch_single_binary.sum() / (batch_size**3)
+
+    # save percentage of brain in each patch as json
+    with open(output_dir_img / "percentage_brain_patch.json", "w") as f:
+        json.dump(percentage_brain_patch, f, indent=4)
+
     print(
-        f"  \nIn total, {img_batch.shape[0]} patches have been saved to '{output_path}/{output_dir_subfolder}/'!"
+        f"  \nIn total, {len(percentage_brain_patch)} patches have been saved to '{output_path}/{output_dir_subfolder}/'!"
     )
 
     logging.debug("generate_patch_main called")

@@ -6,6 +6,8 @@ import sys
 from numpy import require
 from miracl.seg import ace_parser
 
+ARA_ENV = "aradir"
+FULL_PROG_NAME = "miracl flow ace"
 
 def parser_true_or_false(arg: str) -> bool:
     upper_arg = str(arg).upper()
@@ -39,7 +41,7 @@ class ACEWorkflowParser:
     def parsefn(self) -> argparse.ArgumentParser:
         # Define custom parser
         parser = argparse.ArgumentParser(
-            prog="miracl flow ace",
+            prog=FULL_PROG_NAME,
             formatter_class=argparse.RawDescriptionHelpFormatter,
             add_help=False,  # Used for separating args
             description="""
@@ -48,15 +50,34 @@ class ACEWorkflowParser:
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
   4) Voxelizes segmentation results into density maps with Allen atlas resolution
   5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
-            usage="""%(prog)s (-s single_dir | (-c control_root_dir control_tiff_file -e experiment_root_dir experiment_tiff_file)) -sao output_folder -sam model_type""",
+            usage=f"""{FULL_PROG_NAME}
+        [-s SINGLE_TIFF_DIR]
+        [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
+        [-t TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE]
+        -sao SA_OUTPUT_FOLDER
+        -sam {{unet,unetr,ensemble}}
+        -sar X-res Y-res Z-res
+        [-sag SA_GPU_INDEX]
+        [-ctnd CTN_DOWN]
+        [-rcao RCA_ORIENT_CODE]
+        [-rcav {{10,25,50}}]
+        [-rvad RVA_DOWNSAMPLE]
+        [-rwcv {{10,25,50}}]
+        [--rerun-registration TRUE/FALSE]
+        [--rerun-segmentation TRUE/FALSE]
+        [--rerun-conversion TRUE/FALSE]""",
         )
 
         # Define custom headers for args to separate required and optional
         single_multi_args_group = parser.add_argument_group(
-            "Single or multi method arguments"
+            "single or multi method arguments",
+            description="user is required to pass either single or multi method arguments",
         )
-        required_args = parser.add_argument_group("required arguments")
-        useful_args = parser.add_argument_group("useful/imoprtant arguments")
+        required_args = parser.add_argument_group(
+            "required arguments",
+            description="(set the single or multi method arguments first)",
+        )
+        useful_args = parser.add_argument_group("useful/important arguments")
         seg_args = parser.add_argument_group("optional segmentation arguments")
         conv_args = parser.add_argument_group("optional conversion arguments")
         reg_args = parser.add_argument_group("optional registration arguments")
@@ -87,11 +108,11 @@ class ACEWorkflowParser:
         )
 
         single_multi_args_group.add_argument(
-            "-e",
-            "--experiment",
+            "-t",
+            "--treated",
             type=str,
-            metavar=("EXPERIMENT_BASE_DIR", "EXPERIMENT_TIFF_DIR_EXAMPLE"),
-            help="FIRST: path to base experiment directory.\nSECOND: example path to experiment subject tiff directory",
+            metavar=("TREATED_BASE_DIR", "TREATED_TIFF_DIR_EXAMPLE"),
+            help="FIRST: path to base treated directory.\nSECOND: example path to treated subject tiff directory",
             nargs=2,
         )
 
@@ -160,8 +181,8 @@ class ACEWorkflowParser:
         )
         # Parser for sw batch size
         seg_args.add_argument(
-            "-sasw",
-            "--sa_sw_batch_size",
+            "-sab",
+            "--sa_batch_size",
             type=int,
             required=False,
             default=4,
@@ -170,9 +191,9 @@ class ACEWorkflowParser:
         # Boolean to choose if whether it is needed to MC
         seg_args.add_argument(
             "-samc",
-            "--sa_monte_dropout",
-            action="store_true",
-            default=False,
+            "--sa_monte_carlo",
+            type=int,
+            default=0,
             help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized
@@ -190,6 +211,34 @@ class ACEWorkflowParser:
             action="store_true",
             default=False,
             help="enable map (default: %(default)s)",
+        )
+        # Parser for binarization threshold
+        seg_args.add_argument(
+            "-sat",
+            "--sa_binarization_threshold",
+            type=float,
+            required=False,
+            default=0.5,
+            help="threshold value for binarization (type: %(type)s; default: %(default)s)",
+        )
+        # Parser for percentage brain patch skip
+        seg_args.add_argument(
+            "-sap",
+            "--sa_percentage_brain_patch_skip",
+            type=float,
+            required=False,
+            default=0.0,
+            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
+        )
+
+        # Parser for GPU index
+        useful_args.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
         )
 
         # INFO: Conversion parser
@@ -292,6 +341,15 @@ class ACEWorkflowParser:
             help="Previous down-sample ratio, if already downs-sampled",
         )
 
+        conv_args.add_argument(
+            "-ctnpct",
+            "--ctn_percentile_thr",
+            type=float,
+            metavar="",
+            default=0.01,
+            help="Percentile threshold for intensity correction (default: %(default)s)",
+        )
+
         # INFO: Registration parser
 
         # FIX: This should be the input folder from ACE?
@@ -337,7 +395,7 @@ class ACEWorkflowParser:
             "-rcal",
             "--rca_allen_label",
             type=str,
-            default="annotation_hemi_combined_10um.nii.gz",
+            default=None,
             help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
         )
         reg_args.add_argument(
@@ -352,7 +410,7 @@ class ACEWorkflowParser:
             "--rca_side",
             type=str,
             choices=["rh", "lh"],
-            default="rh",
+            default=None,
             help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
         )
         reg_args.add_argument(
@@ -403,7 +461,7 @@ class ACEWorkflowParser:
             "--rva_downsample",
             type=int,
             default=10,
-            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10",
+            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10 (default: %(default)s)",
         )
         # Should be inherited from above -rcav argument
         # vox_args.add_argument(
@@ -658,7 +716,7 @@ class ACEWorkflowParser:
             "--sh_dir_outfile",
             type=str,
             help="Output file directory (default: %(default)s)",
-            default=os.getcwd(),
+            default=Path.cwd(),
         )
         heatmap_args.add_argument(
             "-sho",
@@ -687,16 +745,39 @@ class ACEWorkflowParser:
         stats_args.add_argument(
             "-ua",
             "--u_atlas_dir",
-            default="miracl_home",
-            help="path of atlas directory (default: '/code/atlases/ara/')"
+            default=os.environ.get(ARA_ENV, None),
+            help="path of atlas directory (default: %(default)s)",
         )
-
+        stats_args.add_argument(
+            "-po",
+            "--p_outfile",
+            type=str,
+            help="Output filenames (default: %(default)s)",
+            default="pvalue_heatmap",
+        )
 
         # Parser to select the registration skipping
         useful_args.add_argument(
             "--rerun-registration",
             default="false",
-            help="Whether to rerun registration step of flow",
+            help="Whether to rerun registration step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        # Parser to select the segmentation skipping
+        useful_args.add_argument(
+            "--rerun-segmentation",
+            default="false",
+            help="Whether to rerun segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        useful_args.add_argument(
+            "--rerun-conversion",
+            default="false",
+            help="Whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
@@ -758,30 +839,30 @@ class ACEWorkflowParser:
     def parse_args(self):
         args = self.parser.parse_args()
 
-        # check that control and experiment are not passed with single
-        if (args.control and args.experiment) and args.single:
+        # check that control and treated are not passed with single
+        if (args.control and args.treated) and args.single:
             raise argparse.ArgumentError(
                 None,
-                "-c/--control and -e/--experiment must be passed together without -s/--single",
+                "-c/--control and -t/--treated must be passed together without -s/--single",
             )
         # check that single is passed alone
-        elif args.single and (args.control or args.experiment):
+        elif args.single and (args.control or args.treated):
             raise argparse.ArgumentError(
                 None,
-                "-s/--single cannot be passed with either -c/--control or -e/--experiment",
+                "-s/--single cannot be passed with either -c/--control or -t/--treated",
             )
-        # check that control and experiment are always passed together
-        elif (args.control and not args.experiment) or (
-            args.experiment and not args.control
+        # check that control and treated are always passed together
+        elif (args.control and not args.treated) or (
+            args.treated and not args.control
         ):
             raise argparse.ArgumentError(
-                None, "-c/--control and -e/--experiment must be passed together"
+                None, "-c/--control and -t/--treated must be passed together"
             )
         # check that something is passed
-        elif not args.single and not args.control and not args.experiment:
+        elif not args.single and not args.control and not args.treated:
             raise argparse.ArgumentError(
                 None,
-                "either [-s/--single] or [-c/--control and -e/--experiment] must be passed",
+                "either [-s/--single] or [-c/--control and -t/--treated] must be passed",
             )
 
         return args

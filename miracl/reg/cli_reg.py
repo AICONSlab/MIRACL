@@ -17,7 +17,7 @@ def run_clar_allen(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_clar-allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -r %s -o %s -m %s -v %s -l %s -f %s -p %s -a %s -w %s -b %s -s %s' \
+            bash_args = '-i %s -r %s -o %s -m %s -v %s -l %s -f %s -p %s -a %s -w %s -b %s -s %s -c %s' \
                         % (args['in_nii'],   # -i
                            args['reg_out'],  # -r
                            args['ort'],      # -o
@@ -29,7 +29,8 @@ def run_clar_allen(parser, args):
                            args['atlas'],    # -a
                            args['warp'],     # -w
                            args['bulb'],     # -b
-                           args['side']      # -s
+                           args['side'],     # -s
+                           args['clar_dir']  # -c
                            )
 
             subprocess.check_call('%s/reg/miracl_reg_clar-allen.sh %s' % (miracl_home, bash_args),
@@ -89,8 +90,8 @@ def run_warp_clar(parser, args):
             subprocess.Popen('%s/reg/miracl_reg_warp_clar_data_to_allen.sh -h' % miracl_home,
                              shell=True)
         else:
-            bash_args = '-i %s -o %s -r %s -s %s -v %s' % (
-                args['in_nii'], args['ort_file'], args['reg_dir'], args['seg_chan'], args['vox_res'])
+            bash_args = '-i %s -o %s -r %s -s %s -v %s -l %s' % (
+                args['in_nii'], args['ort_file'], args['reg_dir'], args['seg_chan'], args['vox_res'], args['lbls'])
 
             subprocess.check_call('%s/reg/miracl_reg_warp_clar_data_to_allen.sh %s' % (miracl_home, bash_args),
                                   shell=True,
@@ -151,6 +152,8 @@ def get_parser():
                                       help="save mosaic figure of results")
     parser_clar_allen.add_argument('-w', '--warp', metavar='', default=0,
                                       help="warp high resolution clarity")
+    parser_clar_allen.add_argument('-c', '--clar_dir', metavar='', default='',
+                                      help="original clarity tiff folder")
     parser_clar_allen.add_argument('-h', '--help', action='store_true')
 
     parser_clar_allen.set_defaults(func=run_clar_allen)
@@ -214,6 +217,8 @@ def get_parser():
                                   help="segmentation channel")
     parser_warp_clar.add_argument('-v', '--vox_res', metavar='',
                                   help="voxel resolution")
+    parser_warp_clar.add_argument('-l', '--lbls', metavar='',
+                                    help="labels")
     parser_warp_clar.add_argument('-h', '--help', action='store_true')
 
     parser_warp_clar.set_defaults(func=run_warp_clar)

@@ -80,7 +80,7 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     img_res = args.rwc_voxel_size
     thr = args.cf_pvalue_thr
     control_dir = args.pcs_control
-    exp_dir = args.pcs_experiment
+    treated_dir = args.pcs_treated
 
     print(f"p_value: {p_value_arg}")
     print(f"stats: {stats_arg}")
@@ -95,10 +95,12 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     # -------------------------------------------------------
 
     # find the atl directory
-    if atl_dir == "miracl_home":
-        atl_dir = "/code/atlases/ara/template/"  # TODO: are theses right?
-        ann_dir = "/code/atlases/ara/annotation/"  # TODO: are theses right?
+    ann_dir = Path(atl_dir)
+    atl_dir = Path(atl_dir)
 
+    atl_dir = atl_dir / "template"
+    ann_dir = ann_dir / "annotation"
+    
     mask_filename = f"average_template_{img_res}um.nii.gz"  # TODO: are theses right?
     ann_filename = (
         f"annotation_hemi_combined_{img_res}um.nii.gz"  # TODO: are theses right?
@@ -159,17 +161,17 @@ def main(args, output_dir_arg, p_value_arg, stats_arg, mean_diff_arg):
     ]
     grp_ctrl_dir = control_base_dir
 
-    experiment_warp_tiff_template = Path(exp_dir[1])
-    experiment_base_dir = Path(exp_dir[0])
-    experiment_warp_tiff_extension = Path(
-        *experiment_warp_tiff_template.relative_to(experiment_base_dir).parts[1:]
+    treated_warp_tiff_template = Path(treated_dir[1])
+    treated_base_dir = Path(treated_dir[0])
+    treated_warp_tiff_extension = Path(
+        *treated_warp_tiff_template.relative_to(treated_base_dir).parts[1:]
     )
-    exp_imgs_regex = "*/" + experiment_warp_tiff_extension.as_posix()
-    grp_treated_imgs_list = experiment_base_dir.glob(exp_imgs_regex)
+    trt_imgs_regex = "*/" + treated_warp_tiff_extension.as_posix()
+    grp_treated_imgs_list = treated_base_dir.glob(trt_imgs_regex)
     grp_treated_imgs_list = [
-        str(file.relative_to(experiment_base_dir)) for file in grp_treated_imgs_list
+        str(file.relative_to(treated_base_dir)) for file in grp_treated_imgs_list
     ]
-    grp_treated_dir = experiment_base_dir
+    grp_treated_dir = treated_base_dir
 
     for img in grp_treated_imgs_list:
         # normalize data similar strategy used in cluster analysis
