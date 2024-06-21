@@ -331,8 +331,10 @@ either of the following methods:
    .. tab:: Windows (WSL2)
 
       .. warning::
-         Support for installing :program:`MIRACL` locally in the :program:`WSL`
-         has been deprecated in version ``2.2.6`` of :program:`MIRACL`.
+         Support for installing :program:`MIRACL` **locally** in the 
+         :program:`WSL` has been deprecated in version ``2.2.6`` of 
+         :program:`MIRACL`. The recommended way to install :program:`MIRACL`
+         on Windows is to use Docker in the :program:`WSL`.
 
       The Windows Subsystem for Linux (:program:`WSL`) creates an environment 
       that allows users to run versions of :program:`Linux` without having to 
