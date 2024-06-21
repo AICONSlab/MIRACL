@@ -222,7 +222,7 @@ class ACEWorkflowParser:
             help="threshold value for binarization (type: %(type)s; default: %(default)s)",
         )
         # Parser for percentage brain patch skip
-        parser.add_argument(
+        seg_args.add_argument(
             "-sap",
             "--sa_percentage_brain_patch_skip",
             type=float,
@@ -410,7 +410,7 @@ class ACEWorkflowParser:
             "--rca_side",
             type=str,
             choices=["rh", "lh"],
-            default="rh",
+            default=None,
             help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
         )
         reg_args.add_argument(
@@ -461,7 +461,7 @@ class ACEWorkflowParser:
             "--rva_downsample",
             type=int,
             default=10,
-            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10",
+            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10 (default: %(default)s)",
         )
         # Should be inherited from above -rcav argument
         # vox_args.add_argument(

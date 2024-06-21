@@ -63,6 +63,8 @@ either of the following methods:
 
       Clone the :program:`MIRACL` repo to your machine:
 
+      .. _git clone target:
+
       .. code-block::
 
          $ git clone https://www.github.com/mgoubran/MIRACL
