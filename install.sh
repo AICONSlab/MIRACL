@@ -17,7 +17,7 @@
 
 # Set variables base state
 # Script version
-version="2.0.0-beta"
+version="2.0.1-beta"
 
 # Service name
 service_name="miracl"
@@ -35,13 +35,14 @@ miracl_version="latest"
 miracl_version_file=$(cat ./miracl/version.txt)
 
 # Set default shared memory size
-shm="64mb"
+shm=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
+
 
 # Set array to capture volumes
 volumes=()
 
 # Base usage
-base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-v vol:vol] [-l] [-s] [-m] [-h]"
+base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
 
 ##########
 # PARSER #
@@ -64,7 +65,8 @@ function usage()
    -c, specify container name (default: 'miracl')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
-   -d, set shared memory (shm) size which is important for some of MIRACL's scripts e.g. ACE segmentation (default: '64mb')
+   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled)
+   -d, set shared memory (shm) size (e.g. '128mb', '1024mb' or '16gb'), which is important for some of MIRACL's scripts e.g. ACE segmentation (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
    -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
    -s, print version of build script and exit
@@ -79,7 +81,7 @@ usage
 }
 
 # Parse command line arguments
-while getopts ":n:i:c:t:gd:v:lsmh" opt; do
+while getopts ":n:i:c:t:ged:v:lsmh" opt; do
   case ${opt} in
 
     n)
@@ -113,6 +115,10 @@ while getopts ":n:i:c:t:gd:v:lsmh" opt; do
 
     g)
       gpu=true
+      ;;
+
+    e)
+      dev=false
       ;;
 
     d)
@@ -199,6 +205,17 @@ cat >> docker-compose.yml <<EOF
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
 EOF
 
+# Append MIRACL scripts folder mounting
+if [[ -z $dev ]]; then
+
+install_script_dir=$(dirname "$(readlink -f "$0")")
+
+cat >> docker-compose.yml <<EOF
+      - ${install_script_dir}/miracl:/code/miracl
+EOF
+
+fi
+
 # Add additional volumes
 for v in "${volumes[@]}"; do
   echo "      - $v" >> docker-compose.yml
@@ -263,16 +280,9 @@ if [ -x "$(command -v docker)" ]; then
       printf " Service name: %s\n" "$service_name"
       printf " Image name: %s\n" "$image_name:$miracl_version"
       printf " Container name: %s\n" "$container_name"
-      if [[ $gpu ]]; then
-        printf " GPU passthrough: enabled\n"
-      else
-        printf " GPU passthrough: disabled\n"
-      fi
-      if [[ $write_log ]]; then
-        printf " Log file: enabled\n"
-      else
-        printf " Log file: disabled\n"
-      fi
+      printf " GPU passthrough: %s\n" "${gpu:-false}"
+      printf " Script dir mounted: %s\n" "${dev:-true}"
+      printf " Log file: %s\n" "${write_log:-false}"
       for v in "${!volumes[@]}"; do
         printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
       done

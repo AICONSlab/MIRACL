@@ -41,19 +41,22 @@ These models will be included by default in a future release once ACE is publish
    
    The DL models must be in a specific directory structure to be used by the ACE workflow.
 
-   Once you have the models, place them in the required directory structure by using the following command:
+   Once you have the models, place them in the required directory structure by using the following commands:
 
    .. code-block::
 
-      cp <PATH TO UNET MODEL FILE> /code/miracl/seg/models/unet/best_metric_model.pth
-      cp <PATH TO UNETR MODEL FILE> /code/miracl/seg/models/unetr/best_metric_model.pth
+      cp <PATH TO UNET MODEL FILE> <WHERE YOU CLONED MIRACL>/miracl/seg/models/unet/best_metric_model.pth
+      cp <PATH TO UNETR MODEL FILE> <WHERE YOU CLONED MIRACL>/miracl/seg/models/unetr/best_metric_model.pth
 
-   To check that the models are in the correct directory structure, run the following command:
+   The path <WHERE YOU CLONED MIRACL> is the path where you cloned the MIRACL repository. This is the
+   location where you ran these :ref:`installation steps <git clone target>`.
+
+   To check that the models are in the correct directory structure, run the following commands:
 
    .. code-block::
 
-      $ ls /code/miracl/seg/models/unet
-      $ ls /code/miracl/seg/models/unetr
+      ls <WHERE YOU CLONED MIRACL>/miracl/seg/models/unet/best_metric_model.pth
+      ls <WHERE YOU CLONED MIRACL>/miracl/seg/models/unetr/best_metric_model.pth
 
    The output should be similar to the following:
 
@@ -153,7 +156,7 @@ The following information will be printed to the terminal:
                               labels voxel size/Resolution in um (default: 10)
       -rvad RVA_DOWNSAMPLE, --rva_downsample RVA_DOWNSAMPLE
                               downsample ratio for voxelization, recommended: 5 <=
-                              ratio <= 10
+                              ratio <= 10 (default: 10)
       -rwcv {10,25,50}, --rwc_voxel_size {10,25,50}
                               voxel size/Resolution in um for warping (default: 25)
       --rerun-registration TRUE/FALSE
@@ -266,7 +269,12 @@ Example of running only ACE segmentation module on one single subject (`link to 
    $ miracl seg ace \
       -sai ./Ex_561_Em_600_stitched/ \
       -sao ./output_dir \
-      -sam unetr
+      -sam unetr \
+      -rcao ARI \
+      -sar 3.5 3.5 4.0 \
+      -ctnd 10 \ 
+      -rcav 25 \
+      --ctn_channame Signal
 
 
 Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
@@ -277,7 +285,8 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
    $ miracl stats ace \
       -c ./ctrl/ \
       -t ./treated/ \
-      -sao ./output_dir
+      -sao ./output_dir \
+      -rwcv 25
 
 More information on the ``miracl stats ace`` function can be found
 :doc:`here <../../stats/ace_cluster/ace_cluster>`.

@@ -41,7 +41,6 @@ Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN
         -c ./ctrl/ \
         -t ./treated/ \
         -sao ./output_dir \
-        -ua ./atlas/ \
         --sctp_num_perm 1000 \
         --rwc_voxel_size 25 \
         --sctp_smoothing_fwhm 3 \

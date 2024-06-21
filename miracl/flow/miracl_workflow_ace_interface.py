@@ -206,7 +206,7 @@ class ACEWarping(Warping):
         # move the output file to the right folder
         warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[0]
         shutil.move(
-            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final")
+            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final" / warp_file.name)
         )
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
@@ -976,7 +976,7 @@ class ConversionChecker:
             return True
 
         # check for the right downsample value
-        if not list(conv_folder.glob(f"*_{args.ctn_down}x_down_*.nii.gz")):
+        if not list(conv_folder.glob(f"*{args.ctn_down}x_down_*.nii.gz")):
             ConversionChecker._clear_conv_folders(conv_folder)
             return True
 
