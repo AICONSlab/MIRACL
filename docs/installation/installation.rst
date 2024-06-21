@@ -73,11 +73,11 @@ either of the following methods:
 
       .. code-block::
 
-         $ ./build.sh
+         $ ./install.sh
 
       .. error::
          Make sure that the script can be executed. If it can't and you are 
-         the owner of the file, use ``chmod u+x build.sh`` to make it 
+         the owner of the file, use ``chmod u+x install.sh`` to make it 
          executable. Prefix with ``sudo`` if you are not the owner of the file 
          or change permissions for ``g`` and/or ``o``.
 
@@ -219,12 +219,12 @@ either of the following methods:
       
       .. code-block::
 
-         $ ./build.sh -t
+         $ ./install.sh -t
       
       .. note::
          If you want to build an image for a version of MIRACL <= ``2.2.4`` 
          either follow the build instructions of the particular version or 
-         download the latest build script using e.g. ``wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh``
+         download the latest build script using e.g. ``wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/install.sh``
          (overwrites current build script if present) and run it with the 
          ``-t`` flag.
       
