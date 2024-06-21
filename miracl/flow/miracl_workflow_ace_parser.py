@@ -410,7 +410,7 @@ class ACEWorkflowParser:
             "--rca_side",
             type=str,
             choices=["rh", "lh"],
-            default="rh",
+            default=None,
             help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
         )
         reg_args.add_argument(
