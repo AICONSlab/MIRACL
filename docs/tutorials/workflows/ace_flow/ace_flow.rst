@@ -252,9 +252,14 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
 .. code-block::
 
    $ miracl flow ace \
-      -s ./non_walking/Newton_HC1/cells/ \
+      -s ./Ex_561_Em_600_stitched/ \
       -sao ./output_dir \
-      -sam unet
+      -sam unet \
+      -rcao ARI \
+      -sar 3.5 3.5 4.0 \
+      -ctnd 10 \ 
+      -rcav 25 \
+      --ctn_channame Signal
 
 .. note::
 
@@ -269,12 +274,7 @@ Example of running only ACE segmentation module on one single subject (`link to 
    $ miracl seg ace \
       -sai ./Ex_561_Em_600_stitched/ \
       -sao ./output_dir \
-      -sam unetr \
-      -rcao ARI \
-      -sar 3.5 3.5 4.0 \
-      -ctnd 10 \ 
-      -rcav 25 \
-      --ctn_channame Signal
+      -sam unetr
 
 
 Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
