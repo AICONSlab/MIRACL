@@ -38,9 +38,9 @@ Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN
 .. code-block::
 
    $ miracl stats ace \
-        -c ./ctrl/ \
-        -t ./treated/ \
-        -sao ./output_dir \
+        --control ./ctrl/ \
+        --treated ./treated/ \
+        --sa_output_folder ./output_dir \
         --sctp_num_perm 1000 \
         --rwc_voxel_size 25 \
         --sctp_smoothing_fwhm 3 \
