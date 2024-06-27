@@ -82,6 +82,11 @@ OR
 Mode 2: Running ACE for a single subject
 - A single directory containing a single subject's whole-brain 3D LSFM dataset.
 
+.. note::
+
+   The trained DL models are not considered inputs, but are required to
+   run ACE. 
+
 Command Line Interface (CLI)
 ============================
 
@@ -251,8 +256,18 @@ Example of running ACE flow on multiple subjects (Mode 1):
       --sa_model_type unet
 
 
-Example of running ACE on single subject (Mode 2) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
-=======================================================================================================================================================
+Example of running ACE on single subject (Mode 2) (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
+======================================================================================================================================================================================
+
+.. note::
+   
+   You must download the sample data and unzip it before running the following command.
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip
+      $ unzip ace_sample_data_mode_2.zip
 
 .. code-block::
 
@@ -278,8 +293,18 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
    The user can also run the ACE segmentation module or the ACE cluster-wise analysis module separately.
    Examples of running these modules separately are provided below.
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
-=======================================================================================================================================================================================
+Example of running only ACE segmentation module on one single subject (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
+==========================================================================================================================================================================================================
+
+.. note::
+   
+   You must download the sample data and unzip it before running the following command.
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip
+      $ unzip ace_sample_data_mode_2.zip
 
 .. code-block::
 
@@ -290,8 +315,18 @@ Example of running only ACE segmentation module on one single subject (`link to 
       --sa_batch_size 2
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
-=============================================================================================================================================================================================================
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`__):
+===============================================================================================================================================================================================================================
+
+.. note::
+
+   You must download the sample data and unzip it before running the following command.
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip
+      $ unzip ace_sample_data_stats.zip
 
 .. code-block::
 
