@@ -264,7 +264,14 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
       --sa_resolution 3.5 3.5 4.0 \
       --ctn_down 10 \ 
       --rca_voxel_size 25 \
-      --ctn_channame Signal
+      --ctn_channame Signal \
+      --sa_batch_size 2
+
+.. tip::
+
+   Here we use a batch size of 2 for the DL model so that it fits in the GPU memory.
+   The batch size can be adjusted based on the GPU memory available on the current system.
+   Experienced users can try increasing the batch size to speed up the processing time.
 
 .. note::
 
@@ -279,7 +286,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
    $ miracl seg ace \
       --single ./Ex_561_Em_600_stitched/ \
       --sa_output_folder ./output_dir \
-      --sa_model_type unetr
+      --sa_model_type unetr \
+      --sa_batch_size 2
 
 
 Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
