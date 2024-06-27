@@ -29,6 +29,13 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from miracl_workflow_ace_gui_tab_manager import TabManager
+from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow import miracl_workflow_ace_parser
+
+# import sys
+# import os
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 
 class MainWindow(QMainWindow):
@@ -125,6 +132,10 @@ class MainWindow(QMainWindow):
             print("MULTIPLE METHOD")
         else:
             print("SINGLE METHOD")
+
+        args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+        test_dict = wu.extract_help_texts(args_parser)
+        print(test_dict['single'])
 
 
 if __name__ == "__main__":

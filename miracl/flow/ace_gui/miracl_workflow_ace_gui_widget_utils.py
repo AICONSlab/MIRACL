@@ -28,6 +28,8 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QCheckBox,
 )
+import argparse
+from typing import Dict
 
 
 class WidgetUtils:
@@ -89,7 +91,10 @@ class WidgetUtils:
         :return: A QLabel instance with indented text.
         :rtype: QLabel
         """
-        return QLabel("  " + text)
+        label = QLabel("  " + text)
+        # label.setToolTip("This is the help text")
+        return label
+        # return QLabel("  " + text)
 
     @staticmethod
     def openFileDialog(parent, path_input):
@@ -250,3 +255,76 @@ class WidgetUtils:
         parent.single_checkbox = QCheckBox(lbl)
         layout.addRow(parent.single_checkbox)
         return parent.single_checkbox
+
+    @staticmethod
+    def extract_help_texts(parser: argparse.ArgumentParser) -> Dict[str, str]:
+        """
+        Extracts help texts from an ArgumentParser object and returns them in a dictionary.
+
+        This function efficiently processes all actions in the given parser, extracting the help text
+        for each long-form option (starting with '--'), and stores it in a dictionary. It handles
+        placeholders like %(default)s, %(type)s, and others that might be present in the help text.
+        It also removes any newline characters (\n) from the help text.
+
+        :param parser: The ArgumentParser object to extract help texts from.
+        :type parser: argparse.ArgumentParser or a custom parser class
+
+        :return: A dictionary where keys are the long-form flags (without '--') and values are the help texts.
+        :rtype: dict
+
+        :example:
+
+        >>> from argparse import ArgumentParser
+        >>> parser = ArgumentParser()
+        >>> parser.add_argument('--flag', help='This is a flag\nwith multiple lines', default='value')
+        >>> help_texts = YourClass.extract_help_texts(parser)
+        >>> print(help_texts)
+        {'flag': 'This is a flag with multiple lines'}
+        """
+        # Ensure we are working with an ArgumentParser instance
+        if not isinstance(parser, argparse.ArgumentParser):
+            if hasattr(parser, "parser") and isinstance(
+                parser.parser, argparse.ArgumentParser
+            ):
+                parser = parser.parser
+            else:
+                raise TypeError(
+                    "The provided parser is not an instance of argparse.ArgumentParser"
+                )
+
+        help_texts = {}
+        for action in parser._actions:
+            if action.help == argparse.SUPPRESS:
+                continue
+
+            # Find the first long option (if any)
+            long_option = next(
+                (opt for opt in action.option_strings if opt.startswith("--")), None
+            )
+            if long_option:
+                flag = long_option[2:]  # Remove the '--'
+                help_text = action.help
+
+                # Prepare a dictionary with all possible placeholders
+                format_dict = {
+                    "default": action.default,
+                    "type": action.type.__name__ if action.type else None,
+                    "choices": ", ".join(map(str, action.choices))
+                    if action.choices
+                    else None,
+                    "required": action.required,
+                }
+
+                # Replace placeholders in the help text
+                try:
+                    help_text = help_text % format_dict
+                except KeyError as e:
+                    # If a placeholder is not in our dictionary, we'll leave it as is
+                    print(f"Warning: Unhandled placeholder {e} in help text for {flag}")
+
+                # Remove newline characters from the help text
+                help_text = help_text.replace("\n", " ")
+
+                help_texts[flag] = help_text
+
+        return help_texts

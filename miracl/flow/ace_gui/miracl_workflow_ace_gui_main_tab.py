@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow import miracl_workflow_ace_parser
 
 
 class MainTab(QWidget):
@@ -34,6 +35,9 @@ class MainTab(QWidget):
         ####################
         # METHOD SELECTION #
         ####################
+
+        args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+        help_dict = wu.extract_help_texts(args_parser)
 
         wu.create_section_title(
             main_tab_layout, "<b>Single or multi method arguments</b>"
