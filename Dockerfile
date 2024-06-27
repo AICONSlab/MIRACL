@@ -13,6 +13,7 @@ RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(ge
 ENV MIRACL_HOME=/code/miracl
 ENV ATLASES_HOME=/code/atlases
 COPY ./utility_scripts /usr/bin
+RUN chmod o+x /usr/bin/download_sample_data
 
 # Point to g++-5 for NiftyReg compilation
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50 --slave /usr/bin/g++ g++ /usr/bin/g++-5
