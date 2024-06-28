@@ -65,6 +65,12 @@ These models will be included by default in a future release once ACE is publish
       best_metric_model.pth
       best_metric_model.pth
 
+.. note::
+   By default, the installation script mounts the ``<WHERE YOU CLONED MIRACL>/miracl/``
+   directory to the docker container at ``/code/miracl/``. Thus, copying the model
+   files to the right location **outside** the docker container will make them
+   available inside the container.
+
 
 Main Inputs
 ============
@@ -76,6 +82,11 @@ OR
 
 Mode 2: Running ACE for a single subject
 - A single directory containing a single subject's whole-brain 3D LSFM dataset.
+
+.. note::
+
+   The trained DL models are not considered inputs, but are required to
+   run ACE. 
 
 Command Line Interface (CLI)
 ============================
@@ -240,53 +251,104 @@ Example of running ACE flow on multiple subjects (Mode 1):
 .. code-block::
 
    $ miracl flow ace \
-      -c ./non_walking/ ./non_walking/Newton_HC1/cells/ \
-      -t ./walking/ ./walking/Newton_UI1/cells/ \
-      -sao ./output_dir \
-      -sam unet
+      --control ./non_walking/ ./non_walking/Newton_HC1/cells/ \
+      --treated ./walking/ ./walking/Newton_UI1/cells/ \
+      --sa_output_folder ./output_dir \
+      --sa_model_type unet
 
 
-Example of running ACE on single subject (Mode 2) (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
-=======================================================================================================================================================
+Example of running ACE on single subject (Mode 2) (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
+======================================================================================================================================================================================
+
+.. note::
+
+   You must download the sample data before running the below command.
+   To do so, run:
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``1``.
 
 .. code-block::
 
    $ miracl flow ace \
-      -s ./non_walking/Newton_HC1/cells/ \
-      -sao ./output_dir \
-      -sam unet
+      --single ./Ex_561_Em_600_stitched/ \
+      --sa_output_folder ./output_dir \
+      --sa_model_type unet \
+      --rca_orient_code ARI \
+      --sa_resolution 3.5 3.5 4.0 \
+      --ctn_down 10 \ 
+      --rca_voxel_size 25 \
+      --ctn_channame Signal \
+      --sa_batch_size 2
+
+.. tip::
+
+   Here we use a batch size of 2 for the DL model so that it fits in the GPU memory.
+   The batch size can be adjusted based on the GPU memory available on the current system.
+   Experienced users can try increasing the batch size to speed up the processing time.
 
 .. note::
 
    The user can also run the ACE segmentation module or the ACE cluster-wise analysis module separately.
    Examples of running these modules separately are provided below.
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__):
-=======================================================================================================================================================================================
+Example of running only ACE segmentation module on one single subject (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
+==========================================================================================================================================================================================================
+
+.. note::
+
+   You must download the sample data before running the below command.
+   To do so, run:
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``1``.
 
 .. code-block::
 
    $ miracl seg ace \
-      -sai ./Ex_561_Em_600_stitched/ \
-      -sao ./output_dir \
-      -sam unetr \
-      -rcao ARI \
-      -sar 3.5 3.5 4.0 \
-      -ctnd 10 \ 
-      -rcav 25 \
-      --ctn_channame Signal
+      --single ./Ex_561_Em_600_stitched/ \
+      --sa_output_folder ./output_dir \
+      --sa_model_type unetr \
+      --sa_batch_size 2
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__):
-=============================================================================================================================================================================================================
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`__):
+===============================================================================================================================================================================================================================
 
-.. code-block::
+.. note::
+
+   You must download the sample data before running the below command.
+   To do so, run:
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``2``.
 
    $ miracl stats ace \
-      -c ./ctrl/ \
-      -t ./treated/ \
-      -sao ./output_dir \
-      -rwcv 25
+      --control ./ctrl/ \
+      --treated ./treated/ \
+      --sa_output_folder ./output_dir \
+      --rwc_voxel_size 25
 
 More information on the ``miracl stats ace`` function can be found
 :doc:`here <../../stats/ace_cluster/ace_cluster>`.

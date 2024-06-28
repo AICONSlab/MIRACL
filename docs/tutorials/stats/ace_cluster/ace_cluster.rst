@@ -32,15 +32,32 @@ use the following command on the CLI:
 
 
 
-Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_):
-==================================================================================================================
+Example usage (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`_):
+================================================================================================================================================
+
+.. note::
+
+   You must download the sample data before running the below command.
+   To do so, run:
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``2``.
+
+
 
 .. code-block::
 
    $ miracl stats ace \
-        -c ./ctrl/ \
-        -t ./treated/ \
-        -sao ./output_dir \
+        --control ./ctrl/ \
+        --treated ./treated/ \
+        --sa_output_folder ./output_dir \
         --sctp_num_perm 1000 \
         --rwc_voxel_size 25 \
         --sctp_smoothing_fwhm 3 \

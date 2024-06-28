@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Build MIRACL Docker image with user information from host system
 
@@ -16,6 +16,9 @@
 #############
 
 # Set variables base state
+# Detect OS (Linux/MacOs)
+os=$(uname -s)
+
 # Script version
 version="2.0.1-beta"
 
@@ -34,9 +37,15 @@ miracl_version="latest"
 # Version file version
 miracl_version_file=$(cat ./miracl/version.txt)
 
-# Set default shared memory size
-shm=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
-
+# Set container memory size limit
+if [[ "$os" == "Linux" ]]; then
+    mem=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
+elif [[ "$os" == "Darwin" ]]; then
+    mem=$(sysctl hw.memsize | awk '{printf "%dmb", int($2/1024/1024*0.85)}')
+else
+    echo "Unsupported operating system: $os"
+    exit 1
+fi
 
 # Set array to capture volumes
 volumes=()
@@ -66,7 +75,7 @@ function usage()
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
    -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled)
-   -d, set shared memory (shm) size (e.g. '128mb', '1024mb' or '16gb'), which is important for some of MIRACL's scripts e.g. ACE segmentation (default: int(MemTotal/1024)*0.85 of host machine)
+   -d, manually set limit on max amount of memory the container can use ('--memory'). E.g. '1024mb', '16gb' or '512gb'. This is good practice for memory intensive applications like ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
    -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
    -s, print version of build script and exit
@@ -122,8 +131,8 @@ while getopts ":n:i:c:t:ged:v:lsmh" opt; do
       ;;
 
     d)
-      if [ "${OPTARG}" != "$shm" ]; then
-      shm=${OPTARG}
+      if [ "${OPTARG}" != "$mem" ]; then
+      mem=${OPTARG}
       fi
       ;;
 
@@ -182,7 +191,7 @@ services:
     stdin_open: true
     network_mode: host
     container_name: $container_name
-    shm_size: $shm
+    mem_limit: $mem
 EOF
 
 if [[ $gpu ]]; then
@@ -276,7 +285,7 @@ if [ -x "$(command -v docker)" ]; then
       printf " User: %s\n" "$HOST_USER"
       printf " pid: %s\n" "$(id -u)"
       printf " gid: %s\n" "$(id -g)"
-      printf " shm: %s\n" "$shm"
+      printf " Max memory: %s\n" "$mem"
       printf " Service name: %s\n" "$service_name"
       printf " Image name: %s\n" "$image_name:$miracl_version"
       printf " Container name: %s\n" "$container_name"
@@ -314,9 +323,9 @@ if [ -x "$(command -v docker)" ]; then
         # Test if docker-compose is installed
         # Should come by default with Docker-Desktop
         if [ -x "$(command -v docker-compose)" ]; then
-          printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the MIRACL container in background.\n" "$(docker-compose --version)"
+          printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the ${container_name} container in background.\n" "Run 'docker exec -it ${container_name} bash' to enter the container.\n" "$(docker-compose --version)"
         elif dcex=$(docker compose version); then
-          printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
+          printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the ${container_name} container in background.\n" "Run 'docker exec -it ${container_name} bash' to enter the container.\n" "$dcex"
         else
           printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
         fi
