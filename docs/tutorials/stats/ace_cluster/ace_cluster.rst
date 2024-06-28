@@ -32,15 +32,26 @@ use the following command on the CLI:
 
 
 
-Example usage (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`_):
-==================================================================================================================
+Example usage (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`_):
+================================================================================================================================================
+
+.. note::
+
+   You must download the sample data and unzip it before running the following command.
+
+   .. code-block::
+
+      $ docker exec -it <CONTAINER_NAME> bash
+      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip
+      $ unzip ace_sample_data_stats.zip
+
 
 .. code-block::
 
    $ miracl stats ace \
-        -c ./ctrl/ \
-        -t ./treated/ \
-        -sao ./output_dir \
+        --control ./ctrl/ \
+        --treated ./treated/ \
+        --sa_output_folder ./output_dir \
         --sctp_num_perm 1000 \
         --rwc_voxel_size 25 \
         --sctp_smoothing_fwhm 3 \
