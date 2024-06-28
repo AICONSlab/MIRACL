@@ -37,13 +37,19 @@ Example usage (`link to sample data <https://huggingface.co/datasets/AICONSlab/M
 
 .. note::
 
-   You must download the sample data and unzip it before running the following command.
+   You must download the sample data before running the below command.
+   To do so, run:
 
    .. code-block::
 
       $ docker exec -it <CONTAINER_NAME> bash
-      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip
-      $ unzip ace_sample_data_stats.zip
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``2``.
+
 
 
 .. code-block::

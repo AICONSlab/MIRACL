@@ -261,14 +261,19 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
 ======================================================================================================================================================================================
 
 .. note::
-   
-   You must download the sample data and unzip it before running the following command.
+
+   You must download the sample data before running the below command.
+   To do so, run:
 
    .. code-block::
 
       $ docker exec -it <CONTAINER_NAME> bash
-      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip
-      $ unzip ace_sample_data_mode_2.zip
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``1``.
 
 .. code-block::
 
@@ -298,14 +303,19 @@ Example of running only ACE segmentation module on one single subject (`link to 
 ==========================================================================================================================================================================================================
 
 .. note::
-   
-   You must download the sample data and unzip it before running the following command.
+
+   You must download the sample data before running the below command.
+   To do so, run:
 
    .. code-block::
 
       $ docker exec -it <CONTAINER_NAME> bash
-      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip
-      $ unzip ace_sample_data_mode_2.zip
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
+
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``1``.
 
 .. code-block::
 
@@ -321,15 +331,18 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
 
 .. note::
 
-   You must download the sample data and unzip it before running the following command.
+   You must download the sample data before running the below command.
+   To do so, run:
 
    .. code-block::
 
       $ docker exec -it <CONTAINER_NAME> bash
-      $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip
-      $ unzip ace_sample_data_stats.zip
+      $ cd <WHERE YOU WANT TO DOWNLOAD DATA>
+      $ download_sample_data
 
-.. code-block::
+   This will open an interface where you can select which data
+   you want to download. For this tutorial, you will need to
+   download option ``2``.
 
    $ miracl stats ace \
       --control ./ctrl/ \
