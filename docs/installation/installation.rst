@@ -111,14 +111,15 @@ either of the following methods:
 
       .. attention::
 
-         If you want to add GPU support to your :program:`MIRACL` container,
-         you can do so by running the installation script with the ``-g`` flag:
+         If you want to add GPU (Nvidia/CUDA) support to your :program:`MIRACL`
+         container,         you can do so by running the installation script with the
+         ``-g`` flag:
 
          .. code-block::
 
             $ ./install.sh -g
 
-         This is needed if you want to run :doc:`ACE <../tutorials/workflows/ace_flow/ace_flow>`
+         This is needed if you want to run :doc:`ACE <../tutorials/workflows/ace_flow/ace_flow>`.
 
       .. error::
          Make sure that the script can be executed. If it can't and you are 
