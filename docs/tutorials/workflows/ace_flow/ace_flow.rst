@@ -66,8 +66,9 @@ These models will be included by default in a future release once ACE is publish
       best_metric_model.pth
 
 .. note::
-   By default, the installation script mounts the ``<WHERE YOU CLONED MIRACL>/miracl/`` directory to the docker container
-   at ``/code/miracl/``. Thus, copying the model files to right location **outside** the docker container will make them
+   By default, the installation script mounts the ``<WHERE YOU CLONED MIRACL>/miracl/``
+   directory to the docker container at ``/code/miracl/``. Thus, copying the model
+   files to the right location **outside** the docker container will make them
    available inside the container.
 
 
