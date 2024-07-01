@@ -31,13 +31,12 @@ class MainTab(QWidget):
         super().__init__()
         main_tab_layout = QFormLayout()
         self.setLayout(main_tab_layout)
+        args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+        help_dict = wu.extract_help_texts(args_parser)
 
         ####################
         # METHOD SELECTION #
         ####################
-
-        args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-        help_dict = wu.extract_help_texts(args_parser)
 
         wu.create_section_title(
             main_tab_layout, "<b>Single or multi method arguments</b>"
@@ -55,7 +54,11 @@ class MainTab(QWidget):
             self.single_method_path_input,
             self.single_method_button_input,
         ) = wu.create_path_input_widget(
-            self, main_tab_layout, "Single tif/tiff data folder:", "Select folder"
+            self,
+            main_tab_layout,
+            "Single tif/tiff data folder:",
+            help_dict["single"],
+            "Select folder",
         )
 
         (
@@ -63,7 +66,11 @@ class MainTab(QWidget):
             self.multi_method_ctrl_path_input,
             self.multi_method_ctrl_button_input,
         ) = wu.create_path_input_widget(
-            self, main_tab_layout, "Base control dir:", "Select folder"
+            self,
+            main_tab_layout,
+            "Base control dir:",
+            help_dict["control"],
+            "Select folder",
         )
 
         (
@@ -71,7 +78,11 @@ class MainTab(QWidget):
             self.multi_method_ctrl_tif_path_input,
             self.multi_method_ctrl_tif_button_input,
         ) = wu.create_path_input_widget(
-            self, main_tab_layout, "Base control tif/tiff dir:", "Select folder"
+            self,
+            main_tab_layout,
+            "Base control tif/tiff dir:",
+            help_dict["control"],
+            "Select folder",
         )
 
         (
@@ -79,7 +90,11 @@ class MainTab(QWidget):
             self.multi_method_treated_path_input,
             self.multi_method_treated_button_input,
         ) = wu.create_path_input_widget(
-            self, main_tab_layout, "Base treated dir:", "Select folder"
+            self,
+            main_tab_layout,
+            "Base treated dir:",
+            help_dict["treated"],
+            "Select folder",
         )
 
         (
@@ -87,7 +102,11 @@ class MainTab(QWidget):
             self.multi_method_treated_tif_path_input,
             self.multi_method_treated_tif_button_input,
         ) = wu.create_path_input_widget(
-            self, main_tab_layout, "Base treated tif/tiff dir:", "Select folder"
+            self,
+            main_tab_layout,
+            "Base treated tif/tiff dir:",
+            help_dict["treated"],
+            "Select folder",
         )
 
         ######################
@@ -101,24 +120,29 @@ class MainTab(QWidget):
             self.output_folder_path_input,
             self.output_folder_button_input,
         ) = wu.create_path_input_widget(
-            self, main_tab_layout, "Output folder:", "Select folder"
+            self,
+            main_tab_layout,
+            "Output folder:",
+            help_dict["sa_output_folder"],
+            "Select folder",
         )
 
         self.model_architecture_input = wu.create_multiple_choice(
             main_tab_layout,
             "Model architecture:",
+            help_dict["sa_model_type"],
             ["UNet", "UNETR", "Ensemble"],
             "UNet",
         )
 
         self.x_res_field_input = wu.create_resolution(
-            main_tab_layout, "X-res:", "float"
+            main_tab_layout, "X-res:", help_dict["sa_resolution"], "float"
         )
         self.y_res_field_input = wu.create_resolution(
-            main_tab_layout, "Y-res:", "float"
+            main_tab_layout, "Y-res:", help_dict["sa_resolution"], "float"
         )
         self.z_res_field_input = wu.create_resolution(
-            main_tab_layout, "Z-res:", "float"
+            main_tab_layout, "Z-res:", help_dict["sa_resolution"], "float"
         )
 
         ####################
@@ -127,37 +151,59 @@ class MainTab(QWidget):
 
         wu.create_section_title(main_tab_layout, "<b>Useful/important arguments</b>")
 
-        self.gpu_index_input = wu.create_digit_spinbox(main_tab_layout, "GPU index:", 0)
+        self.gpu_index_input = wu.create_digit_spinbox(
+            main_tab_layout, "GPU index:", help_dict["sa_gpu_index"], 0
+        )
 
         self.conversion_dx_input = wu.create_digit_spinbox(
-            main_tab_layout, "Conversion_dx", 5
+            main_tab_layout, "Conversion_dx", help_dict["ctn_down"], 5
         )
 
         self.orientation_code_input = wu.create_orientation_code(
-            main_tab_layout, "Orientation code:", "ALS"
+            main_tab_layout, "Orientation code:", help_dict["rca_orient_code"], "ALS"
         )
 
         self.labels_voxel_size_input = wu.create_multiple_choice(
-            main_tab_layout, "Labels voxel size:", ["10", "25", "50"], "10"
+            main_tab_layout,
+            "Labels voxel size (um):",
+            help_dict["rca_voxel_size"],
+            ["10", "25", "50"],
+            "10",
         )
 
         self.voxelixation_dx_input = wu.create_digit_spinbox(
-            main_tab_layout, "Voxelization dx:", 5
+            main_tab_layout, "Voxelization dx:", help_dict["rva_downsample"], 5
         )
 
         self.warping_voxel_size_input = wu.create_multiple_choice(
-            main_tab_layout, "Warping voxel size:", ["10", "25", "50"], "25"
+            main_tab_layout,
+            "Warping voxel size (um):",
+            help_dict["rwc_voxel_size"],
+            ["10", "25", "50"],
+            "25",
         )
 
         # self.create_rerun_registration(main_tab_layout)
         self.rerun_registration_input = wu.create_multiple_choice(
-            main_tab_layout, "Rerun registration: ", ["Yes", "No"], "No"
+            main_tab_layout,
+            "Rerun registration: ",
+            help_dict["rerun-registration"],
+            ["Yes", "No"],
+            "No",
         )
         self.rerun_segmentation_input = wu.create_multiple_choice(
-            main_tab_layout, "Rerun segmentation: ", ["Yes", "No"], "No"
+            main_tab_layout,
+            "Rerun segmentation: ",
+            help_dict["rerun-segmentation"],
+            ["Yes", "No"],
+            "No",
         )
         self.rerun_conversion_input = wu.create_multiple_choice(
-            main_tab_layout, "Rerun conversion: ", ["Yes", "No"], "No"
+            main_tab_layout,
+            "Rerun conversion: ",
+            help_dict["rerun-conversion"],
+            ["Yes", "No"],
+            "No",
         )
 
         ################

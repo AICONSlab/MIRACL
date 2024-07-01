@@ -34,7 +34,7 @@ from typing import Dict
 
 class WidgetUtils:
     @staticmethod
-    def create_path_input_widget(parent, layout, label_text, button_text):
+    def create_path_input_widget(parent, layout, lbl, lbl_help_text, button_text):
         """
         Create and add a path input widget to the given layout.
 
@@ -57,7 +57,7 @@ class WidgetUtils:
             >>> label, path_input, folder_button = WidgetUtils.create_path_input_widget(self, main_tab_layout, "Select folder:", "Browse")
         """
         # Create the label
-        label = WidgetUtils.create_indented_label(label_text)
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
 
         # Create the widget to hold the QLineEdit and QPushButton
         path_widget = QWidget()
@@ -82,7 +82,7 @@ class WidgetUtils:
         return label, path_input, folder_test_button
 
     @staticmethod
-    def create_indented_label(text):
+    def create_indented_label(text, help_text):
         """
         Create an indented label.
 
@@ -92,7 +92,7 @@ class WidgetUtils:
         :rtype: QLabel
         """
         label = QLabel("  " + text)
-        # label.setToolTip("This is the help text")
+        label.setToolTip(help_text)
         return label
         # return QLabel("  " + text)
 
@@ -126,7 +126,7 @@ class WidgetUtils:
         layout.addRow(QLabel(text))
 
     @staticmethod
-    def create_multiple_choice(layout, lbl, choices, default_choice):
+    def create_multiple_choice(layout, lbl, lbl_help_text, choices, default_choice):
         """
         Create a multiple-choice widget and add it to the given layout.
 
@@ -134,6 +134,8 @@ class WidgetUtils:
         :type layout: QFormLayout
         :param lbl: The label text for the multiple-choice widget.
         :type lbl: str
+        :param lbl_help_text: The help text to be displayed as a tooltip for the label.
+        :type lbl_help_text: str
         :param choices: A list of available choices for the multiple-choice widget.
         :type choices: list[str]
         :param default_choice: The default choice to be selected.
@@ -141,7 +143,7 @@ class WidgetUtils:
         :return: The created QComboBox instance.
         :rtype: QComboBox
         """
-        label = WidgetUtils.create_indented_label(lbl)
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
         model = WidgetUtils.create_combo(choices)
         model.setCurrentText(default_choice)
         layout.addRow(label, model)
@@ -162,7 +164,7 @@ class WidgetUtils:
         return combo
 
     @staticmethod
-    def create_resolution(layout, lbl, default_text):
+    def create_resolution(layout, lbl, lbl_help_text, default_text):
         """
         Create a resolution input widget and add it to the given layout.
 
@@ -175,14 +177,14 @@ class WidgetUtils:
         :return: The created QLineEdit instance.
         :rtype: QLineEdit
         """
-        label = WidgetUtils.create_indented_label(lbl)
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
         text_field = QLineEdit()
         text_field.setPlaceholderText(default_text)
         layout.addRow(label, text_field)
         return text_field
 
     @staticmethod
-    def create_digit_spinbox(layout, lbl, default_value):
+    def create_digit_spinbox(layout, lbl, lbl_help_text, default_value):
         """
         Create a digit spinbox widget and add it to the given layout.
 
@@ -195,7 +197,7 @@ class WidgetUtils:
         :return: The created QSpinBox instance.
         :rtype: QSpinBox
         """
-        label = WidgetUtils.create_indented_label(lbl)
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
         spinbox = WidgetUtils.create_spinbox(0, 99)
         spinbox.setValue(default_value)
         layout.addRow(label, spinbox)
@@ -218,7 +220,7 @@ class WidgetUtils:
         return spinbox
 
     @staticmethod
-    def create_orientation_code(layout, lbl, default_text):
+    def create_orientation_code(layout, lbl, lbl_help_text, default_text):
         """
         Create an orientation code input widget and add it to the given layout.
 
@@ -231,7 +233,7 @@ class WidgetUtils:
         :return: The created QLineEdit instance.
         :rtype: QLineEdit
         """
-        label = WidgetUtils.create_indented_label(lbl)
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
         text_field_test = QLineEdit()
         text_field_test.setPlaceholderText(default_text)
         text_field_test.setText(default_text)
@@ -255,6 +257,26 @@ class WidgetUtils:
         parent.single_checkbox = QCheckBox(lbl)
         layout.addRow(parent.single_checkbox)
         return parent.single_checkbox
+
+    @staticmethod
+    def translate_choice_to_parser_value(dictionary, input_key):
+        """
+        Check if the input_key exists in the dictionary and return its corresponding value.
+
+        Parameters:
+        dictionary (dict): The dictionary to search in.
+        input_key: The key to look for in the dictionary.
+
+        Returns:
+        The value corresponding to the input_key if found.
+
+        Raises:
+        KeyError: If the input_key is not found in the dictionary.
+        """
+        if input_key in dictionary:
+            return dictionary[input_key]
+        else:
+            raise KeyError(f"Key '{input_key}' not found in the dictionary.")
 
     @staticmethod
     def extract_help_texts(parser: argparse.ArgumentParser) -> Dict[str, str]:

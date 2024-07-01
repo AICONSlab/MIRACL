@@ -37,7 +37,6 @@ from miracl.flow import miracl_workflow_ace_parser
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-
 class MainWindow(QMainWindow):
     """
     The main window of the application.
@@ -135,7 +134,31 @@ class MainWindow(QMainWindow):
 
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         test_dict = wu.extract_help_texts(args_parser)
-        print(test_dict['single'])
+        print(test_dict["single"])
+
+        reg_side_test = wu.translate_choice_to_parser_value(
+            {"right hemisphere": "rh", "left hemisphere": "lh"},
+            self.tab_manager.clarity_registration_tab.reg_side_input.currentText(),
+        )
+        print(reg_side_test)
+
+        reg_olfactory_test = wu.translate_choice_to_parser_value(
+            {"not included": 0, "included": 1},
+            self.tab_manager.clarity_registration_tab.reg_olfactory_bulb_input.currentText(),
+        )
+        print(reg_olfactory_test)
+
+        reg_util_int_correction_test = wu.translate_choice_to_parser_value(
+            {"run": 0, "skip": 1},
+            self.tab_manager.clarity_registration_tab.reg_util_int_correction_input.currentText(),
+        )
+        print(reg_util_int_correction_test)
+
+        reg_warp_to_allen = wu.translate_choice_to_parser_value(
+            {"yes": True, "no": False},
+            self.tab_manager.clarity_registration_tab.reg_util_int_correction_input.currentText(),
+        )
+        print(reg_warp_to_allen)
 
 
 if __name__ == "__main__":
