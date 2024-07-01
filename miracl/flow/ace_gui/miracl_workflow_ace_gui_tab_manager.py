@@ -36,6 +36,6 @@ class TabManager:
             self.voxelizing_warping_tab,
         ]
 
-        self.tab_widget.addTab(self.main_tab, "ACE")
+        self.tab_widget.addTab(self.main_tab, "Main")
         self.tab_widget.addTab(self.clarity_registration_tab, "CLARITY registration")
         self.tab_widget.addTab(self.voxelizing_warping_tab, "Voxelizing/warping")
