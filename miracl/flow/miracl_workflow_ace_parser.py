@@ -760,7 +760,7 @@ class ACEWorkflowParser:
         useful_args.add_argument(
             "--rerun-registration",
             default="false",
-            help="Whether to rerun registration step of flow; TRUE => Force re-run (default: %(default)s)",
+            help="whether to rerun registration step of flow; TRUE => Force re-run (default: %(default)s)",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
@@ -769,7 +769,7 @@ class ACEWorkflowParser:
         useful_args.add_argument(
             "--rerun-segmentation",
             default="false",
-            help="Whether to rerun segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
+            help="whether to rerun segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
@@ -777,7 +777,7 @@ class ACEWorkflowParser:
         useful_args.add_argument(
             "--rerun-conversion",
             default="false",
-            help="Whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
+            help="whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
             type=parser_true_or_false,
             metavar="TRUE/FALSE",
         )
