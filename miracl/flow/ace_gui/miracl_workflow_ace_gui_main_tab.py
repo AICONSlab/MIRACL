@@ -171,7 +171,7 @@ class MainTab(QWidget):
             "10",
         )
 
-        self.voxelixation_dx_input = wu.create_digit_spinbox(
+        self.voxelization_dx_input = wu.create_digit_spinbox(
             main_tab_layout, "Voxelization dx:", help_dict["rva_downsample"], 5
         )
 
@@ -188,22 +188,22 @@ class MainTab(QWidget):
             main_tab_layout,
             "Rerun registration: ",
             help_dict["rerun-registration"],
-            ["Yes", "No"],
-            "No",
+            ["yes", "no"],
+            "no",
         )
         self.rerun_segmentation_input = wu.create_multiple_choice(
             main_tab_layout,
             "Rerun segmentation: ",
             help_dict["rerun-segmentation"],
-            ["Yes", "No"],
-            "No",
+            ["yes", "no"],
+            "no",
         )
         self.rerun_conversion_input = wu.create_multiple_choice(
             main_tab_layout,
             "Rerun conversion: ",
             help_dict["rerun-conversion"],
-            ["Yes", "No"],
-            "No",
+            ["yes", "no"],
+            "no",
         )
 
         ################

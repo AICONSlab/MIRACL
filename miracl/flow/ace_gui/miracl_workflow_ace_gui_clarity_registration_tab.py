@@ -30,9 +30,9 @@ class ClarityRegistrationTab(QWidget):
         )
 
         (
-            self.reg_allen_lbl_warp_input,
-            self.reg_allen_lbl_warp_input,
-            self.reg_allen_lbl_warp_input,
+            self.reg_allen_lbl_warp_label_input,
+            self.reg_allen_lbl_warp_path_input,
+            self.reg_allen_lbl_warp_button_input,
         ) = wu.create_path_input_widget(
             self,
             clarity_registration_layout,
@@ -42,9 +42,9 @@ class ClarityRegistrationTab(QWidget):
         )
 
         (
-            self.reg_cust_allen_atlas_input,
-            self.reg_cust_allen_atlas_input,
-            self.reg_cust_allen_atlas_input,
+            self.reg_cust_allen_atlas_label_input,
+            self.reg_cust_allen_atlas_path_input,
+            self.reg_cust_allen_atlas_button_input,
         ) = wu.create_path_input_widget(
             self,
             clarity_registration_layout,
@@ -82,7 +82,7 @@ class ClarityRegistrationTab(QWidget):
             "Utilfn intensity correction:",
             help_dict["rca_skip_cor"],
             ["run", "skip"],
-            "run",
+            "skip",
         )
 
         self.reg_warp_to_allen_input = wu.create_multiple_choice(

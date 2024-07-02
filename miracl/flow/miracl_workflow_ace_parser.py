@@ -435,7 +435,7 @@ class ACEWorkflowParser:
             action="store_const",
             const=1,
             default=0,
-            help="if utilfn intensity correction already ran, skip correction inside registration (default: False)",
+            help="if utilfn intensity correction already ran, skip correction inside registration (default: %(default)s)",
         )
         reg_args.add_argument(
             "-rcaw",

@@ -29,7 +29,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
 )
 import argparse
-from typing import Dict
+from typing import Dict, Any, Optional
 
 
 class WidgetUtils:
@@ -277,6 +277,133 @@ class WidgetUtils:
             return dictionary[input_key]
         else:
             raise KeyError(f"Key '{input_key}' not found in the dictionary.")
+
+    # Use once we updated to newer Python version. This uses match!
+    # @staticmethod
+    # def get_tab_var(tab, input_field_name, widget_type):
+    #     """
+    #     Retrieve the value from a specified input field in a given tab.
+    #
+    #     This function dynamically accesses the specified input field,
+    #     and returns the value of the input field based on the widget type.
+    #
+    #     :param tab: The tab object containing the input field
+    #     :type tab: object
+    #     :param input_field_name: The name of the input field
+    #     :type input_field_name: str
+    #     :param widget_type: The type of the widget
+    #     :type widget_type: str
+    #     :return: The value of the specified input field
+    #     :rtype: Any
+    #     :raises AttributeError: If the specified input field or method does not exist
+    #     :raises ValueError: If an unsupported widget type is provided
+    #
+    #     :example:
+    #
+    #     >>> main_tab = self.tab_manager.main_tab
+    #     >>> main_tab_single_method_path = YourClass.get_tab_var(
+    #     ...     main_tab, "single_method_path_input", "qlineedit"
+    #     ... )
+    #     '/path/to/single/method'
+    #     >>> selected_option = YourClass.get_tab_var(
+    #     ...     main_tab, "some_combo_box", "qcombobox"
+    #     ... )
+    #     'Selected Option'
+    #     >>> numeric_value = YourClass.get_tab_var(
+    #     ...     main_tab, "some_spin_box", "qspinbox"
+    #     ... )
+    #     42
+    #     """
+    #     input_field = getattr(tab, input_field_name)
+    #
+    #     match widget_type.lower():
+    #         case "qlineedit":
+    #             return input_field.text()
+    #         case "qcombobox":
+    #             return input_field.currentText()
+    #         case "qspinbox" | "qdoublespinbox":
+    #             return input_field.value()
+    #         case _:
+    #             raise ValueError(f"Unsupported widget type: {widget_type}")
+
+    @staticmethod
+    def get_tab_var(tab: object, input_field_name: str, widget_type: str) -> Any:
+        """
+        Retrieve the value from a specified input field in a given tab.
+
+        This function dynamically accesses the specified input field,
+        and returns the value of the input field based on the widget type.
+
+        :param tab: The tab object containing the input field
+        :type tab: object
+        :param input_field_name: The name of the input field
+        :type input_field_name: str
+        :param widget_type: The type of the widget
+        :type widget_type: str
+        :return: The value of the specified input field
+        :rtype: Any
+        :raises AttributeError: If the specified input field or method does not exist
+        :raises ValueError: If an unsupported widget type is provided
+
+        :example:
+
+        >>> main_tab = self.tab_manager.main_tab
+        >>> main_tab_single_method_path = YourClass.get_tab_var(
+        ...     main_tab, "single_method_path_input", "textfield"
+        ... )
+        '/path/to/single/method'
+        >>> selected_option = YourClass.get_tab_var(
+        ...     main_tab, "some_combo_box", "multiplechoice"
+        ... )
+        'Selected Option'
+        >>> numeric_value = YourClass.get_tab_var(
+        ...     main_tab, "some_spin_box", "spinbox"
+        ... )
+        42
+        """
+        input_field = getattr(tab, input_field_name)
+
+        widget_type = widget_type.lower()
+        if widget_type == "textfield":
+            return input_field.text()
+        elif widget_type == "multiplechoice":
+            return input_field.currentText()
+        elif widget_type in ["spinbox", "doublespinbox"]:
+            return input_field.value()
+        else:
+            raise ValueError(f"Unsupported widget type: {widget_type}")
+
+    @staticmethod
+    def craft_flags(flags: Dict[str, Optional[str]]) -> str:
+        """
+        Construct a string of flags and arguments from the provided dictionary.
+
+        This function takes a dictionary of flags and their corresponding values,
+        and constructs a string by concatenating the flags and values that have non-empty values.
+
+        :param flags: A dictionary where the keys are the flags and the values are the corresponding text (or None or empty string).
+        :type flags: Dict[str, Optional[str]]
+        :return: The constructed string of flags and arguments.
+        :rtype: str
+
+        :example:
+
+        >>> flags = {
+        ...     "-t": "/path/to/single/method",
+        ...     "-a": "/path/to/multi/method",
+        ...     "-o": None,
+        ...     "-p": ""
+        ... }
+        >>> flag_string = YourClass.craft_flags(flags)
+        >>> print(flag_string)
+        -t /path/to/single/method -a /path/to/multi/method
+        """
+        flag_pairs = (
+            f"{flag} {value}"
+            for flag, value in flags.items()
+            if value and str(value).strip()
+        )
+        return " ".join(flag_pairs)
 
     @staticmethod
     def extract_help_texts(parser: argparse.ArgumentParser) -> Dict[str, str]:
