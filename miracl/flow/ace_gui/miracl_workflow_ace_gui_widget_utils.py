@@ -220,7 +220,7 @@ class WidgetUtils:
         return spinbox
 
     @staticmethod
-    def create_orientation_code(layout, lbl, lbl_help_text, default_text):
+    def create_text_field(layout, lbl, lbl_help_text, default_text):
         """
         Create an orientation code input widget and add it to the given layout.
 

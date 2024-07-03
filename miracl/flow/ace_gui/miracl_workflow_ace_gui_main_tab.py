@@ -159,7 +159,7 @@ class MainTab(QWidget):
             main_tab_layout, "Conversion_dx", help_dict["ctn_down"], 5
         )
 
-        self.orientation_code_input = wu.create_orientation_code(
+        self.orientation_code_input = wu.create_text_field(
             main_tab_layout, "Orientation code:", help_dict["rca_orient_code"], "ALS"
         )
 
