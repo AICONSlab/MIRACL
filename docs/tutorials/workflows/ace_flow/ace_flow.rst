@@ -344,11 +344,13 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
    you want to download. For this tutorial, you will need to
    download option ``2``.
 
-   $ miracl stats ace \
-      --control ./ctrl/ \
-      --treated ./treated/ \
-      --sa_output_folder ./output_dir \
-      --rwc_voxel_size 25
+   .. code-block::
+
+      $ miracl stats ace \
+         --control ./ctrl/ \
+         --treated ./treated/ \
+         --sa_output_folder ./output_dir \
+         --rwc_voxel_size 25
 
 More information on the ``miracl stats ace`` function can be found
 :doc:`here <../../stats/ace_cluster/ace_cluster>`.
