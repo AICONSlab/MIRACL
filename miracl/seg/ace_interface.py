@@ -12,8 +12,7 @@ def main(args):
         print("CUDA available!")
 
         input_folder_arg = args.single
-        ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
-        output_folder_arg = ace_flow_seg_output_folder if ace_flow_seg_output_folder.is_dir() else Path(args.sa_output_folder)
+        output_folder_arg = Path(args.sa_output_folder) / "seg_final"
         model_type_arg = args.sa_model_type
         voxel_resolutions_arg = args.sa_resolution
         image_sizes_arg = args.sa_image_size
@@ -51,6 +50,8 @@ def main(args):
         # print(f"Out: {tmp_out}")
 
         # INFO: ace_generate_patch.py
+        if not output_folder_arg.exists():
+            output_folder_arg.mkdir(parents=True)
 
         patches_folder = ace_generate_patch.generate_patch_main(
             input_folder=input_folder_arg,
