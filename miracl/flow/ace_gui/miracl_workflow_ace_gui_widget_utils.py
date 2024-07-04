@@ -28,6 +28,8 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QCheckBox,
 )
+from PyQt5.QtGui import QIntValidator, QRegularExpressionValidator, QDoubleValidator
+from PyQt5.QtCore import QRegularExpression
 import argparse
 from typing import Dict, Any, Optional
 
@@ -56,30 +58,59 @@ class WidgetUtils:
         Example:
             >>> label, path_input, folder_button = WidgetUtils.create_path_input_widget(self, main_tab_layout, "Select folder:", "Browse")
         """
-        # Create the label
         label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
-
-        # Create the widget to hold the QLineEdit and QPushButton
         path_widget = QWidget()
         path_layout = QHBoxLayout(path_widget)
-
-        # Create and add input field
         path_input = QLineEdit()
         path_layout.addWidget(path_input)
-
-        # Create and add button
         folder_test_button = QPushButton(button_text)
         folder_test_button.clicked.connect(
             lambda: WidgetUtils.openFileDialog(parent, path_input)
         )
         path_layout.addWidget(folder_test_button)
-
         path_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Add the label and the path widget to the form layout
         layout.addRow(label, path_widget)
 
         return label, path_input, folder_test_button
+
+    @staticmethod
+    def create_three_text_input_widget(layout, lbl, lbl_help_text, default_values):
+        """
+        Create and add a path input widget with three validated text fields to the given layout.
+
+        :param layout: The QFormLayout to which the widget will be added.
+        :type layout: QFormLayout
+        :param lbl: The text to be displayed in the label.
+        :type lbl: str
+        :param lbl_help_text: The help text for the label.
+        :type lbl_help_text: str
+        :param default_values: A list of three default values for the input fields.
+        :type default_values: list
+        :return: A tuple containing the created QLabel and three QLineEdit widgets.
+        :rtype: tuple(QLabel, QLineEdit, QLineEdit, QLineEdit)
+        """
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+
+        input_widget = QWidget()
+        input_layout = QHBoxLayout(input_widget)
+        input_layout.setContentsMargins(0, 0, 0, 0)
+
+        inputs = []
+        for default_value in default_values:
+            input_field = QLineEdit()
+            input_field.setPlaceholderText(str(default_value))
+            input_field.setText(str(default_value))
+
+            validator = QDoubleValidator()
+            validator.setNotation(QDoubleValidator.StandardNotation)
+            input_field.setValidator(validator)
+
+            input_layout.addWidget(input_field)
+            inputs.append(input_field)
+
+        layout.addRow(label, input_widget)
+
+        return (label, *inputs)
 
     @staticmethod
     def create_indented_label(text, help_text):
@@ -164,7 +195,7 @@ class WidgetUtils:
         return combo
 
     @staticmethod
-    def create_resolution(layout, lbl, lbl_help_text, default_text):
+    def create_resolution(layout, lbl, lbl_help_text, default_placeholder, default_text):
         """
         Create a resolution input widget and add it to the given layout.
 
@@ -178,8 +209,12 @@ class WidgetUtils:
         :rtype: QLineEdit
         """
         label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+        float_validator = QDoubleValidator()
         text_field = QLineEdit()
-        text_field.setPlaceholderText(default_text)
+        text_field.setValidator(float_validator)
+        text_field.setPlaceholderText(default_placeholder)
+        if default_text != "none":
+            text_field.setText(default_text)
         layout.addRow(label, text_field)
         return text_field
 
@@ -220,7 +255,37 @@ class WidgetUtils:
         return spinbox
 
     @staticmethod
-    def create_text_field(layout, lbl, lbl_help_text, default_text):
+    def create_text_field(layout, lbl, lbl_help_text, default_text, validator):
+        """
+        Create an orientation code input widget and add it to the given layout.
+
+        :param layout: The layout to which the orientation code input widget will be added.
+        :type layout: QFormLayout
+        :param lbl: The label text for the orientation code input widget.
+        :type lbl: str
+        :param default_text: The default text to be displayed in the orientation code input widget.
+        :type default_text: str
+        :return: The created QLineEdit instance.
+        :rtype: QLineEdit
+        """
+        if validator == "str":
+            regex = QRegularExpression("^[A-Za-z]+$")
+        else:
+            regex = QRegularExpression("^[A-Za-z0-9]+$")
+        str_validator = QRegularExpressionValidator(regex)
+        label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+        text_field_test = QLineEdit()
+        if default_text != "none":
+            text_field_test.setPlaceholderText(default_text)
+            text_field_test.setText(default_text)
+        else:
+            text_field_test.setPlaceholderText("None")
+        text_field_test.setValidator(str_validator)
+        layout.addRow(label, text_field_test)
+        return text_field_test
+
+    @staticmethod
+    def create_digit_text_field(layout, lbl, lbl_help_text, default_digit):
         """
         Create an orientation code input widget and add it to the given layout.
 
@@ -234,11 +299,17 @@ class WidgetUtils:
         :rtype: QLineEdit
         """
         label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
-        text_field_test = QLineEdit()
-        text_field_test.setPlaceholderText(default_text)
-        text_field_test.setText(default_text)
-        layout.addRow(label, text_field_test)
-        return text_field_test
+        digit_text_field_test = QLineEdit()
+        if default_digit != "none":
+            digit_text_field_test.setPlaceholderText(default_digit)
+            digit_text_field_test.setText(default_digit)
+        else:
+            digit_text_field_test.setPlaceholderText("None")
+        digit_text_field_test.setValidator(QIntValidator())
+        digit_text_field_test.setPlaceholderText(default_digit)
+        digit_text_field_test.setText(default_digit)
+        layout.addRow(label, digit_text_field_test)
+        return digit_text_field_test
 
     @staticmethod
     def create_method_checkbox(parent, layout, lbl):

@@ -136,13 +136,13 @@ class MainTab(QWidget):
         )
 
         self.x_res_field_input = wu.create_resolution(
-            main_tab_layout, "X-res:", help_dict["sa_resolution"], "float"
+            main_tab_layout, "X-res:", help_dict["sa_resolution"], "float", "none"
         )
         self.y_res_field_input = wu.create_resolution(
-            main_tab_layout, "Y-res:", help_dict["sa_resolution"], "float"
+            main_tab_layout, "Y-res:", help_dict["sa_resolution"], "float", "none"
         )
         self.z_res_field_input = wu.create_resolution(
-            main_tab_layout, "Z-res:", help_dict["sa_resolution"], "float"
+            main_tab_layout, "Z-res:", help_dict["sa_resolution"], "float", "none"
         )
 
         ####################
@@ -156,11 +156,15 @@ class MainTab(QWidget):
         )
 
         self.conversion_dx_input = wu.create_digit_spinbox(
-            main_tab_layout, "Conversion_dx", help_dict["ctn_down"], 5
+            main_tab_layout, "Conversion dx:", help_dict["ctn_down"], 5
         )
 
         self.orientation_code_input = wu.create_text_field(
-            main_tab_layout, "Orientation code:", help_dict["rca_orient_code"], "ALS"
+            main_tab_layout,
+            "Orientation code:",
+            help_dict["rca_orient_code"],
+            "ALS",
+            "str",
         )
 
         self.labels_voxel_size_input = wu.create_multiple_choice(
