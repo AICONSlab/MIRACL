@@ -41,5 +41,5 @@ class TabManager:
 
         self.tab_widget.addTab(self.main_tab, "Main")
         self.tab_widget.addTab(self.conversion_tab, "Conversion")
-        self.tab_widget.addTab(self.clarity_registration_tab, "CLARITY registration")
-        self.tab_widget.addTab(self.voxelizing_warping_tab, "Voxelizing/warping")
+        self.tab_widget.addTab(self.clarity_registration_tab, "Registration")
+        self.tab_widget.addTab(self.voxelizing_warping_tab, "Voxelizing/Warping")

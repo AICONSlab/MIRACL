@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Widget Utilities
+
+Description:
+    Tab manager for ACE flow GUI.
+
+Copyright:
+    (c) 2024 AICONs Lab. All rights reserved.
+
+Author:
+    Jonas Osmann
+    j.osmann@mail.utoronto.ca
+
+License:
+    GPL-3.0
+"""
+
 from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 
 

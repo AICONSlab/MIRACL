@@ -1,16 +1,31 @@
-# voxelizing_warping_tab.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Widget Utilities
+
+Description:
+    Tab manager for ACE flow GUI.
+
+Copyright:
+    (c) 2024 AICONs Lab. All rights reserved.
+
+Author:
+    Jonas Osmann
+    j.osmann@mail.utoronto.ca
+
+License:
+    GPL-3.0
+"""
+
 from PyQt5.QtWidgets import (
     QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
     QFormLayout,
-    QLineEdit,
-    QPushButton,
     QLabel,
     QComboBox,
-    QSpinBox,
 )
 from PyQt5.QtCore import Qt
+from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow import miracl_workflow_ace_parser
 
 
 class VoxelizingWarpingTab(QWidget):
@@ -18,26 +33,12 @@ class VoxelizingWarpingTab(QWidget):
         super().__init__()
         voxelizing_warping_layout = QFormLayout()
         self.setLayout(voxelizing_warping_layout)
+        args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+        help_dict = wu.extract_help_texts(args_parser)
 
-        # Add widgets for the Voxelizing/warping tab here
-        # ...
+        ################
+        # VOXELIZATION #
+        ################
 
-        self.create_section_title(voxelizing_warping_layout, "<b>Voxelization</b>")
+        wu.create_section_title(voxelizing_warping_layout, "<b>Voxelization</b>")
 
-        self.create_labels_voxel_size(voxelizing_warping_layout)
-
-    def create_labels_voxel_size(self, layout):
-        label = self.create_indented_label("Labels voxel size:")
-        combo = self.create_combo(["10", "25", "50"])
-        layout.addRow(label, combo)
-
-    def create_indented_label(self, text):
-        return QLabel("  " + text)
-
-    def create_section_title(self, layout, text):
-        layout.addRow(QLabel(text))
-
-    def create_combo(self, items):
-        combo = QComboBox()
-        combo.addItems(items)
-        return combo
