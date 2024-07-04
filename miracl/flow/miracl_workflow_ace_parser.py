@@ -322,7 +322,7 @@ class ACEWorkflowParser:
             nargs="+",
             metavar="",
             default=[0, 0, 0],
-            help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template",
+            help="Nii center (default: 0 0 0 ) corresponding to Allen atlas nii template",
         )
         conv_args.add_argument(
             "-ctndz",
