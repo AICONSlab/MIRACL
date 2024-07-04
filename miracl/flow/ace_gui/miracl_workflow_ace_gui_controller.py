@@ -131,10 +131,16 @@ class MainWindow(QMainWindow):
 
         # CLARITY-Allen registration
         clarity_registration_tab = self.tab_manager.clarity_registration_tab
-        clarity_registration_tab_flags = flag_creator.create_clarity_registration_flags(clarity_registration_tab)
+        clarity_registration_tab_flags = flag_creator.create_clarity_registration_flags(
+            clarity_registration_tab
+        )
+
+        # Conversion
+        conversion_tab = self.tab_manager.conversion_tab
+        conversion_tab_flags = flag_creator.create_conversion_flags(conversion_tab)
 
         logger.debug(
-            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)}"
+            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)}"
         )
 
         # reg_side_test = wu.translate_choice_to_parser_value(

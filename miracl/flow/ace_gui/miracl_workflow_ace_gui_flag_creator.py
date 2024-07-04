@@ -99,3 +99,32 @@ class flag_creator:
         }
 
         return clarity_registration_tab_flags
+
+    @staticmethod
+    def create_conversion_flags(conversion_tab):
+        conversion_tab_flags = {
+            "--ctn_channum": wu.get_tab_var(
+                conversion_tab, "conversion_channel_number_input", "textfield"
+            ),
+            "--ctn_chanprefix": wu.get_tab_var(
+                conversion_tab, "conversion_channel_prefix_input", "textfield"
+            ),
+            "--ctn_channame": wu.get_tab_var(
+                conversion_tab, "conversion_output_channel_name_input", "textfield"
+            ),
+            "--ctn_outnii": wu.get_tab_var(
+                conversion_tab, "conversion_output_nii_name_input", "textfield"
+            ),
+            "--ctn_center": f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_1', 'textfield')} {wu.get_tab_var(conversion_tab, 'conversion_center_input_2', 'textfield')} {wu.get_tab_var(conversion_tab, 'conversion_center_input_3', 'textfield')}",
+            "--ctn_downzdim": wu.get_tab_var(
+                conversion_tab, "conversion_dx_z_input", "spinbox"
+            ),
+            "--ctn_prevdown": wu.get_tab_var(
+                conversion_tab, "conversion_prev_dx_input", "spinbox"
+            ),
+            "--ctn_percentile_thr": wu.get_tab_var(
+                conversion_tab, "conversion_percentile_thr_input", "textfield"
+            ),
+        }
+
+        return conversion_tab_flags
