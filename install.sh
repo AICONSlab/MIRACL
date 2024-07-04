@@ -39,9 +39,9 @@ miracl_version_file=$(cat ./miracl/version.txt)
 
 # Set container memory size limit
 if [[ "$os" == "Linux" ]]; then
-    mem=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
+    shm_mem=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
 elif [[ "$os" == "Darwin" ]]; then
-    mem=$(sysctl hw.memsize | awk '{printf "%dmb", int($2/1024/1024*0.85)}')
+    shm_mem=$(sysctl hw.memsize | awk '{printf "%dmb", int($2/1024/1024*0.85)}')
 else
     echo "Unsupported operating system: $os"
     exit 1
@@ -131,8 +131,8 @@ while getopts ":n:i:c:t:ged:v:lsmh" opt; do
       ;;
 
     d)
-      if [ "${OPTARG}" != "$mem" ]; then
-      mem=${OPTARG}
+      if [ "${OPTARG}" != "$shm_mem" ]; then
+      shm_mem=${OPTARG}
       fi
       ;;
 
@@ -191,7 +191,7 @@ services:
     stdin_open: true
     network_mode: host
     container_name: $container_name
-    mem_limit: $mem
+    shm_size: ${shm_mem}
 EOF
 
 if [[ $gpu ]]; then
@@ -285,7 +285,7 @@ if [ -x "$(command -v docker)" ]; then
       printf " User: %s\n" "$HOST_USER"
       printf " pid: %s\n" "$(id -u)"
       printf " gid: %s\n" "$(id -g)"
-      printf " Max memory: %s\n" "$mem"
+      printf " Max shared memory: %s\n" "$shm_mem"
       printf " Service name: %s\n" "$service_name"
       printf " Image name: %s\n" "$image_name:$miracl_version"
       printf " Container name: %s\n" "$container_name"
