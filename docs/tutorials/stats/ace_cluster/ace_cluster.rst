@@ -26,8 +26,18 @@ Main outputs
 
 .. code-block::
    
-   cluster_final # cluster-wise analysis output including p_value and f_stats maps
-   corr_final # correlation analysis output including correlation maps and p_value maps
+   ./
+   |-- clust_final/
+      |-- f_obs.nii.gz
+      |-- p_values.nii.gz
+      |-- pvalue_heatmap_mean_plot.tiff
+   |-- corr_final/
+
+- ``clust_final``: Contains the cluster-wise TFCE permutation statistics at the atlas space
+(``f_obs.nii.gz``), the p-value image of the F-statistics (``p_values.nii.gz``), and the p-value heatmap
+projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
+as ``-log10(p-value)``.
+- ``corr_final``: Contains the correlation analysis output including correlation maps and p_value maps.
 
 
 Example usage (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`_):
