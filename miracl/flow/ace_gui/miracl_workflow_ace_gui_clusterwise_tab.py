@@ -43,7 +43,7 @@ class ClusterwiseTab(QWidget):
         ) = wu.create_path_input_widget(
             self,
             clusterwise_layout,
-            "Path to altas dir: ",
+            "Path to altas dir:",
             help_dict["pcs_atlas_dir"],
             "Select folder",
         )
