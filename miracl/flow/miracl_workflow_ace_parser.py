@@ -474,14 +474,14 @@ class ACEWorkflowParser:
         # )
         vox_args.add_argument(
             "-rvavx",
-            "-rva_vx_res",
+            "--rva_vx_res",
             default=1,
             type=float,
             help="voxel size (x, y dims) in um (default: %(default)s)",
         )
         vox_args.add_argument(
             "-rvavz",
-            "-rva_vz_res",
+            "--rva_vz_res",
             default=1,
             type=float,
             help="voxel size (z dim) in um (default: %(default)s)",
