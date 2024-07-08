@@ -151,8 +151,14 @@ class MainWindow(QMainWindow):
             clusterwise_tab
         )
 
+        # Correlation/stats
+        correlation_stats_tab = self.tab_manager.correlation_stats_tab
+        correlation_stats_tab_flags = flag_creator.create_correlation_stats_flags(
+            correlation_stats_tab
+        )
+
         logger.debug(
-            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)}"
+            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)}"
         )
 
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()

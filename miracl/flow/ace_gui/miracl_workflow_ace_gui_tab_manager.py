@@ -23,6 +23,7 @@ from miracl_workflow_ace_gui_clarity_registration_tab import ClarityRegistration
 from miracl_workflow_ace_gui_voxelizing_warping_tab import VoxelizingWarpingTab
 from miracl_workflow_ace_gui_conversion_tab import ConversionTab
 from miracl_workflow_ace_gui_clusterwise_tab import ClusterwiseTab
+from miracl_workflow_ace_gui_correlation_stats_tab import CorrelationStatsTab
 
 
 class TabManager:
@@ -34,12 +35,14 @@ class TabManager:
         self.clarity_registration_tab = ClarityRegistrationTab()
         self.voxelizing_warping_tab = VoxelizingWarpingTab()
         self.clusterwise_tab = ClusterwiseTab()
+        self.correlation_stats_tab = CorrelationStatsTab()
 
         self.additional_tabs = [
             self.conversion_tab,
             self.clarity_registration_tab,
             self.voxelizing_warping_tab,
             self.clusterwise_tab,
+            self.correlation_stats_tab,
         ]
 
         self.tab_widget.addTab(self.main_tab, "Main")
@@ -47,3 +50,4 @@ class TabManager:
         self.tab_widget.addTab(self.clarity_registration_tab, "Registration")
         self.tab_widget.addTab(self.voxelizing_warping_tab, "Voxelizing/Warping")
         self.tab_widget.addTab(self.clusterwise_tab, "Cluster-wise")
+        self.tab_widget.addTab(self.correlation_stats_tab, "Correlation/Stats")

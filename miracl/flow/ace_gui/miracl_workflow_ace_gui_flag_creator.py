@@ -206,3 +206,23 @@ class flag_creator:
         }
 
         return clusterwise_tab_flags
+
+    @staticmethod
+    def create_correlation_stats_flags(correlation_stats_tab):
+        correlation_stats_tab_flags = {
+            "--cf_pvalue_thr": wu.get_tab_var(
+                correlation_stats_tab,
+                "correlation_stats_correlation_cf_pvalue_input",
+                "textfield",
+            ),
+            "--u_atlas_dir": wu.get_tab_var(
+                correlation_stats_tab,
+                "correlation_stats_stats_atlas_folder_path_input",
+                "textfield",
+            ),
+            "--p_outfile": wu.get_tab_var(
+                correlation_stats_tab, "correlation_stats_stats_outfile_input", "textfield"
+            ),
+        }
+
+        return correlation_stats_tab_flags

@@ -477,6 +477,8 @@ class WidgetUtils:
         """
         if validator == "str":
             regex = QRegularExpression("^[A-Za-z]+$")
+        elif validator == "strcon":
+            regex = QRegularExpression("^[A-Za-z0-9_-]+$")
         else:
             regex = QRegularExpression("^[A-Za-z0-9]+$")
         str_validator = QRegularExpressionValidator(regex)
