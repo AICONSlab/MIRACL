@@ -622,7 +622,7 @@ class ACEWorkflowParser:
             "-cft",
             "--cf_pvalue_thr",
             type=float,
-            help="threshold for binarizing p value",
+            help="threshold for binarizing p value (default: %(default)s)",
             default=0.05,
         )
 
