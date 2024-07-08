@@ -26,6 +26,8 @@ from PyQt5.QtWidgets import (
     QLabel,
     QFileDialog,
     QComboBox,
+    QSpacerItem,
+    QSizePolicy,
     QCheckBox,
 )
 from PyQt5.QtGui import QIntValidator, QRegularExpressionValidator, QDoubleValidator
@@ -35,43 +37,111 @@ from typing import Dict, Any, Optional
 
 
 class WidgetUtils:
+    # @staticmethod
+    # def create_path_input_widget(parent, layout, lbl, lbl_help_text, button_text):
+    #     """
+    #     Create and add a path input widget to the given layout.
+    #
+    #     This method creates a widget consisting of a QLabel, QLineEdit, and QPushButton.
+    #     The label is placed in the left column of the form layout, while the QLineEdit
+    #     and QPushButton are combined in a QWidget and placed in the right column.
+    #
+    #     :param parent: The parent widget for the file dialog.
+    #     :type parent: QWidget
+    #     :param layout: The QFormLayout to which the widget will be added.
+    #     :type layout: QFormLayout
+    #     :param label_text: The text to be displayed in the label.
+    #     :type label_text: str
+    #     :param button_text: The text to be displayed on the button.
+    #     :type button_text: str
+    #     :return: A tuple containing the created QLabel, QLineEdit, and QPushButton.
+    #     :rtype: tuple(QLabel, QLineEdit, QPushButton)
+    #
+    #     Example:
+    #         >>> label, path_input, folder_button = WidgetUtils.create_path_input_widget(self, main_tab_layout, "Select folder:", "Browse")
+    #     """
+    #     label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+    #     path_widget = QWidget()
+    #     path_layout = QHBoxLayout(path_widget)
+    #     path_input = QLineEdit()
+    #     path_layout.addWidget(path_input)
+    #     folder_test_button = QPushButton(button_text)
+    #     folder_test_button.clicked.connect(
+    #         lambda: WidgetUtils.openFileDialog(parent, path_input)
+    #     )
+    #     path_layout.addWidget(folder_test_button)
+    #     path_layout.setContentsMargins(0, 0, 0, 0)
+    #     layout.addRow(label, path_widget)
+    #
+    #     return label, path_input, folder_test_button
+
     @staticmethod
-    def create_path_input_widget(parent, layout, lbl, lbl_help_text, button_text):
+    def create_path_input_widget(
+        parent,
+        layout,
+        lbl,
+        lbl_help_text,
+        button_text,
+        select_files=False,
+        file_filter="All Files (*)",
+    ):
         """
         Create and add a path input widget to the given layout.
 
         This method creates a widget consisting of a QLabel, QLineEdit, and QPushButton.
         The label is placed in the left column of the form layout, while the QLineEdit
         and QPushButton are combined in a QWidget and placed in the right column.
+        The button opens a file or folder selection dialog based on the select_files argument.
 
         :param parent: The parent widget for the file dialog.
         :type parent: QWidget
         :param layout: The QFormLayout to which the widget will be added.
         :type layout: QFormLayout
-        :param label_text: The text to be displayed in the label.
-        :type label_text: str
+        :param lbl: The text to be displayed in the label.
+        :type lbl: str
+        :param lbl_help_text: The help text for the label.
+        :type lbl_help_text: str
         :param button_text: The text to be displayed on the button.
         :type button_text: str
+        :param select_files: If True, the dialog will allow file selection; otherwise, folder selection.
+        :type select_files: bool
+        :param file_filter: The file filter for the file dialog (default: "All Files (*)").
+        :type file_filter: str
         :return: A tuple containing the created QLabel, QLineEdit, and QPushButton.
         :rtype: tuple(QLabel, QLineEdit, QPushButton)
 
         Example:
-            >>> label, path_input, folder_button = WidgetUtils.create_path_input_widget(self, main_tab_layout, "Select folder:", "Browse")
+            >>> label, path_input, path_button = WidgetUtils.create_path_input_widget(
+            ...     self, main_tab_layout, "Select path:", "Help text", "Browse", select_files=True, file_filter="Text Files (*.txt)")
         """
         label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
         path_widget = QWidget()
         path_layout = QHBoxLayout(path_widget)
         path_input = QLineEdit()
         path_layout.addWidget(path_input)
-        folder_test_button = QPushButton(button_text)
-        folder_test_button.clicked.connect(
-            lambda: WidgetUtils.openFileDialog(parent, path_input)
+        path_select_button = QPushButton(button_text)
+        path_select_button.clicked.connect(
+            lambda: WidgetUtils.open_path_dialog(
+                parent, path_input, select_files, file_filter
+            )
         )
-        path_layout.addWidget(folder_test_button)
+        path_layout.addWidget(path_select_button)
         path_layout.setContentsMargins(0, 0, 0, 0)
         layout.addRow(label, path_widget)
 
-        return label, path_input, folder_test_button
+        return label, path_input, path_select_button
+
+    @staticmethod
+    def open_path_dialog(parent, line_edit, select_files, file_filter):
+        if select_files:
+            path, _ = QFileDialog.getOpenFileName(
+                parent, "Select File", "", file_filter
+            )
+        else:
+            path = QFileDialog.getExistingDirectory(parent, "Select Directory")
+
+        if path:
+            line_edit.setText(path)
 
     @staticmethod
     def create_three_text_input_widget(layout, lbl, lbl_help_text, default_values):
@@ -111,6 +181,60 @@ class WidgetUtils:
         layout.addRow(label, input_widget)
 
         return (label, *inputs)
+
+    @staticmethod
+    def create_multiple_text_input_widget(
+        layout, lbl, lbl_help_text, default_values, field_labels
+    ):
+        """
+        Create and add a widget with multiple validated text fields to the given layout.
+
+        :param layout: The QFormLayout to which the widget will be added.
+        :type layout: QFormLayout
+        :param lbl: The text to be displayed in the main label.
+        :type lbl: str
+        :param lbl_help_text: The help text for the main label.
+        :type lbl_help_text: str
+        :param default_values: A list of default values for the input fields.
+        :type default_values: list
+        :param field_labels: A list of labels for each input field.
+        :type field_labels: list
+        :return: A tuple containing the created main QLabel and the QLineEdit widgets.
+        :rtype: tuple(QLabel, QLineEdit, ...)
+        """
+        main_label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+
+        input_widget = QWidget()
+        input_layout = QHBoxLayout(input_widget)
+        input_layout.setContentsMargins(0, 0, 0, 0)
+
+        inputs = []
+        for i, (default_value, field_label) in enumerate(
+            zip(default_values, field_labels)
+        ):
+            label = QLabel(field_label)
+            input_layout.addWidget(label)
+
+            input_field = QLineEdit()
+            input_field.setPlaceholderText(str(default_value))
+            input_field.setText(str(default_value))
+
+            validator = QDoubleValidator()
+            validator.setNotation(QDoubleValidator.StandardNotation)
+            input_field.setValidator(validator)
+
+            input_layout.addWidget(input_field)
+            inputs.append(input_field)
+
+            # Add spacer widget for better spacing, but not after the last field
+            if i < len(default_values) - 1:
+                input_layout.addItem(
+                    QSpacerItem(10, 0, QSizePolicy.Fixed, QSizePolicy.Minimum)
+                )
+
+        layout.addRow(main_label, input_widget)
+
+        return (main_label, *inputs)
 
     @staticmethod
     def create_indented_label(text, help_text):
@@ -195,7 +319,9 @@ class WidgetUtils:
         return combo
 
     @staticmethod
-    def create_resolution(layout, lbl, lbl_help_text, default_placeholder, default_text):
+    def create_resolution(
+        layout, lbl, lbl_help_text, default_placeholder, default_text
+    ):
         """
         Create a resolution input widget and add it to the given layout.
 

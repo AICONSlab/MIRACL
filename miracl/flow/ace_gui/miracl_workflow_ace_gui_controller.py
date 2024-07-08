@@ -139,9 +139,19 @@ class MainWindow(QMainWindow):
         conversion_tab = self.tab_manager.conversion_tab
         conversion_tab_flags = flag_creator.create_conversion_flags(conversion_tab)
 
-        logger.debug(
-            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)}"
+        # Voxelizing/warping
+        voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
+        voxelizing_warping_tab_flags = flag_creator.create_voxelization_warping_flags(
+            voxelizing_warping_tab
         )
+
+        logger.debug(
+            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)}"
+        )
+
+        # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+        # help_dict = wu.extract_help_texts(args_parser)
+        # print(help_dict['rva_vx_res'])
 
         # reg_side_test = wu.translate_choice_to_parser_value(
         #     {"right hemisphere": "rh", "left hemisphere": "lh"},

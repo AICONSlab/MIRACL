@@ -35,10 +35,6 @@ class ClarityRegistrationTab(QWidget):
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         help_dict = wu.extract_help_texts(args_parser)
 
-        ####################
-        # METHOD SELECTION #
-        ####################
-
         self.reg_hemi_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Labels hemisphere",
@@ -56,7 +52,9 @@ class ClarityRegistrationTab(QWidget):
             clarity_registration_layout,
             "Allen labels to warp:",
             help_dict["rca_allen_label"],
-            "Select folder",
+            "Select file",
+            select_files=True,
+            file_filter="All Files (*)",
         )
 
         (
@@ -68,7 +66,9 @@ class ClarityRegistrationTab(QWidget):
             clarity_registration_layout,
             "Custom Allen atlas:",
             help_dict["rca_allen_atlas"],
-            "Select folder",
+            "Select file",
+            select_files=True,
+            file_filter="All Files (*)",
         )
 
         self.reg_side_input = wu.create_multiple_choice(
