@@ -84,10 +84,10 @@ class ConversionTab(QWidget):
             conversion_layout, "Previous dx:", help_dict["ctn_prevdown"], 1
         )
 
-        self.conversion_percentile_thr_input = wu.create_resolution(
+        self.conversion_percentile_thr_input = wu.create_digit_text_field(
             conversion_layout,
             "% threshold intensity corr:",
             help_dict["ctn_percentile_thr"],
             "0.01",
-            "0.01",
+            "float",
         )

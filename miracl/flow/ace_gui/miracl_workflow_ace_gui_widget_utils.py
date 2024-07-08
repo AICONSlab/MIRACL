@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
     QCheckBox,
+    QDoubleSpinBox,
 )
 from PyQt5.QtGui import QIntValidator, QRegularExpressionValidator, QDoubleValidator
 from PyQt5.QtCore import QRegularExpression
@@ -344,8 +345,54 @@ class WidgetUtils:
         layout.addRow(label, text_field)
         return text_field
 
+    # @staticmethod
+    # def create_digit_spinbox(layout, lbl, lbl_help_text, default_value):
+    #     """
+    #     Create a digit spinbox widget and add it to the given layout.
+    #
+    #     :param layout: The layout to which the digit spinbox widget will be added.
+    #     :type layout: QFormLayout
+    #     :param lbl: The label text for the digit spinbox widget.
+    #     :type lbl: str
+    #     :param default_value: The default value for the digit spinbox widget.
+    #     :type default_value: int
+    #     :return: The created QSpinBox instance.
+    #     :rtype: QSpinBox
+    #     """
+    #     label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+    #     spinbox = WidgetUtils.create_spinbox(0, 99)
+    #     spinbox.setValue(default_value)
+    #     layout.addRow(label, spinbox)
+    #     return spinbox
+    #
+    # @staticmethod
+    # def create_spinbox(min_value, max_value):
+    #     """
+    #     Create a QSpinBox with the given minimum and maximum values.
+    #
+    #     :param min_value: The minimum value for the QSpinBox.
+    #     :type min_value: int
+    #     :param max_value: The maximum value for the QSpinBox.
+    #     :type max_value: int
+    #     :return: The created QSpinBox instance.
+    #     :rtype: QSpinBox
+    #     """
+    #     spinbox = QSpinBox()
+    #     spinbox.setRange(min_value, max_value)
+    #     return spinbox
+
     @staticmethod
-    def create_digit_spinbox(layout, lbl, lbl_help_text, default_value):
+    def create_digit_spinbox(
+        layout,
+        lbl,
+        lbl_help_text,
+        default_value,
+        min_value=0,
+        max_value=99,
+        input_type="int",
+        increment=1,
+        decimals=2,
+    ):
         """
         Create a digit spinbox widget and add it to the given layout.
 
@@ -353,31 +400,65 @@ class WidgetUtils:
         :type layout: QFormLayout
         :param lbl: The label text for the digit spinbox widget.
         :type lbl: str
+        :param lbl_help_text: The help text for the label.
+        :type lbl_help_text: str
         :param default_value: The default value for the digit spinbox widget.
-        :type default_value: int
-        :return: The created QSpinBox instance.
-        :rtype: QSpinBox
+        :type default_value: int or float
+        :param min_value: The minimum value for the spinbox (default is 0).
+        :type min_value: int or float
+        :param max_value: The maximum value for the spinbox (default is 99).
+        :type max_value: int or float
+        :param input_type: The type of input to accept, either "int" or "float" (default is "int").
+        :type input_type: str
+        :param increment: The increment value for the spinbox (default is 1 for int, 0.01 for float).
+        :type increment: int or float
+        :param decimals: The number of decimal places to display (default is 2).
+        :type decimals: int
+        :return: The created QSpinBox or QDoubleSpinBox instance.
+        :rtype: QSpinBox or QDoubleSpinBox
         """
         label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
-        spinbox = WidgetUtils.create_spinbox(0, 99)
-        spinbox.setValue(default_value)
+        spinbox = WidgetUtils.create_spinbox(
+            min_value, max_value, input_type, increment, decimals
+        )
+
+        if input_type == "int":
+            spinbox.setValue(int(default_value))
+        elif input_type == "float":
+            spinbox.setValue(float(default_value))
+
         layout.addRow(label, spinbox)
         return spinbox
 
     @staticmethod
-    def create_spinbox(min_value, max_value):
+    def create_spinbox(min_value, max_value, input_type="int", increment=1, decimals=2):
         """
-        Create a QSpinBox with the given minimum and maximum values.
+        Create a QSpinBox or QDoubleSpinBox with the given minimum and maximum values.
 
-        :param min_value: The minimum value for the QSpinBox.
-        :type min_value: int
-        :param max_value: The maximum value for the QSpinBox.
-        :type max_value: int
-        :return: The created QSpinBox instance.
-        :rtype: QSpinBox
+        :param min_value: The minimum value for the spinbox.
+        :type min_value: int or float
+        :param max_value: The maximum value for the spinbox.
+        :type max_value: int or float
+        :param input_type: The type of input to accept, either "int" or "float" (default is "int").
+        :type input_type: str
+        :param increment: The increment value for the spinbox (default is 1 for int, 0.01 for float).
+        :type increment: int or float
+        :param decimals: The number of decimal places to display (default is 2).
+        :type decimals: int
+        :return: The created QSpinBox or QDoubleSpinBox instance.
+        :rtype: QSpinBox or QDoubleSpinBox
         """
-        spinbox = QSpinBox()
-        spinbox.setRange(min_value, max_value)
+        if input_type == "int":
+            spinbox = QSpinBox()
+            spinbox.setRange(int(min_value), int(max_value))
+            spinbox.setSingleStep(int(increment))
+        elif input_type == "float":
+            spinbox = QDoubleSpinBox()
+            spinbox.setRange(float(min_value), float(max_value))
+            spinbox.setSingleStep(float(increment))
+            spinbox.setDecimals(decimals)
+        else:
+            raise ValueError("Invalid input_type. Must be 'int' or 'float'.")
         return spinbox
 
     @staticmethod
@@ -410,32 +491,73 @@ class WidgetUtils:
         layout.addRow(label, text_field_test)
         return text_field_test
 
-    @staticmethod
-    def create_digit_text_field(layout, lbl, lbl_help_text, default_digit):
-        """
-        Create an orientation code input widget and add it to the given layout.
+    # @staticmethod
+    # def create_digit_text_field(layout, lbl, lbl_help_text, default_digit):
+    #     """
+    #     Create an orientation code input widget and add it to the given layout.
+    #
+    #     :param layout: The layout to which the orientation code input widget will be added.
+    #     :type layout: QFormLayout
+    #     :param lbl: The label text for the orientation code input widget.
+    #     :type lbl: str
+    #     :param default_text: The default text to be displayed in the orientation code input widget.
+    #     :type default_text: str
+    #     :return: The created QLineEdit instance.
+    #     :rtype: QLineEdit
+    #     """
+    #     label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+    #     digit_text_field_test = QLineEdit()
+    #     if default_digit != "none":
+    #         digit_text_field_test.setPlaceholderText(default_digit)
+    #         digit_text_field_test.setText(default_digit)
+    #     else:
+    #         digit_text_field_test.setPlaceholderText("None")
+    #     digit_text_field_test.setValidator(QIntValidator())
+    #     digit_text_field_test.setPlaceholderText(default_digit)
+    #     digit_text_field_test.setText(default_digit)
+    #     layout.addRow(label, digit_text_field_test)
+    #     return digit_text_field_test
 
-        :param layout: The layout to which the orientation code input widget will be added.
+    @staticmethod
+    def create_digit_text_field(
+        layout, lbl, lbl_help_text, default_digit, input_type="int"
+    ):
+        """
+        Create a validated text field widget and add it to the given layout.
+
+        :param layout: The layout to which the text field widget will be added.
         :type layout: QFormLayout
-        :param lbl: The label text for the orientation code input widget.
+        :param lbl: The label text for the text field widget.
         :type lbl: str
-        :param default_text: The default text to be displayed in the orientation code input widget.
-        :type default_text: str
+        :param lbl_help_text: The help text for the label.
+        :type lbl_help_text: str
+        :param default_digit: The default value for the text field.
+        :type default_digit: str
+        :param input_type: The type of input to accept, either "int" or "float" (default is "int").
+        :type input_type: str
         :return: The created QLineEdit instance.
         :rtype: QLineEdit
         """
         label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
-        digit_text_field_test = QLineEdit()
-        if default_digit != "none":
-            digit_text_field_test.setPlaceholderText(default_digit)
-            digit_text_field_test.setText(default_digit)
+        digit_text_field = QLineEdit()
+
+        if input_type == "int":
+            validator = QIntValidator()
+        elif input_type == "float":
+            validator = QDoubleValidator()
         else:
-            digit_text_field_test.setPlaceholderText("None")
-        digit_text_field_test.setValidator(QIntValidator())
-        digit_text_field_test.setPlaceholderText(default_digit)
-        digit_text_field_test.setText(default_digit)
-        layout.addRow(label, digit_text_field_test)
-        return digit_text_field_test
+            raise ValueError("Invalid input_type. Must be 'int' or 'float'.")
+
+        if default_digit != "none":
+            digit_text_field.setPlaceholderText(str(default_digit))
+            digit_text_field.setText(str(default_digit))
+        else:
+            digit_text_field.setPlaceholderText("None")
+
+        digit_text_field.setValidator(validator)
+        layout.addRow(label, digit_text_field)
+
+        return digit_text_field
 
     @staticmethod
     def create_method_checkbox(parent, layout, lbl):

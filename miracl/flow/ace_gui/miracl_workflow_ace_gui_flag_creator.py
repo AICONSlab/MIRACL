@@ -166,3 +166,43 @@ class flag_creator:
         }
 
         return voxelization_warping_tab_flags
+
+    @staticmethod
+    def create_clusterwise_flags(clusterwise_tab):
+        clusterwise_tab_flags = {
+            "--pcs_atlas_dir": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_atlas_folder_path_input", "textfield"
+            ),
+            "--pcs_num_perm": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_nr_permutations_input", "textfield"
+            ),
+            "--pcs_img_resolution": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_image_resolution_input", "multiplechoice"
+            ),
+            "--pcs_smoothing_fwhm": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_fwhm_smoothing_input", "textfield"
+            ),
+            "--pcs_tfce_start": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_thr_start_input", "textfield"
+            ),
+            "--pcs_tfce_step": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_thr_step_input", "textfield"
+            ),
+            "--pcs_cpu_load": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_cpu_load_input", "textfield"
+            ),
+            "--pcs_tfce_h": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_tfce_h_input", "textfield"
+            ),
+            "--pcs_tfce_e": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_tfce_e_input", "textfield"
+            ),
+            "--pcs_step_down_p": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_step_down_input", "textfield"
+            ),
+            "--pcs_mask_thr": wu.get_tab_var(
+                clusterwise_tab, "clusterwise_mask_thr_input", "textfield"
+            ),
+        }
+
+        return clusterwise_tab_flags
