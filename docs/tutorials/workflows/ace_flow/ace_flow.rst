@@ -286,6 +286,13 @@ on the parameters used in conversion. This will be the only file in this directo
    atlas space in nifti format. Can be overlaid on ``clar_downsample*.nii.gz``.
    - ``clar_downsample*.nii.gz``: Contains the downsampled conversion output 
    warped to atlas space.
+
+.. note::
+
+   The ``annotation_*_clar_downsample.nii.gz`` file is the most important file in this directory.
+   Please overlay this file on the ``clar_downsample*.nii.gz`` file to visualize and check the
+   registration output in native space and make sure it is correct.
+
 - ``vox_final``: Contains the voxelized segmentation output.
 - ``warp_final``: Contains the voxelized + warped segmentation output. This file
 is in atlas space.
