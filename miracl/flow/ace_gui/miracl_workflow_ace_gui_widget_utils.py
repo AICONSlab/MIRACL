@@ -144,8 +144,49 @@ class WidgetUtils:
         if path:
             line_edit.setText(path)
 
+    # @staticmethod
+    # def create_three_text_input_widget(layout, lbl, lbl_help_text, default_values):
+    #     """
+    #     Create and add a path input widget with three validated text fields to the given layout.
+    #
+    #     :param layout: The QFormLayout to which the widget will be added.
+    #     :type layout: QFormLayout
+    #     :param lbl: The text to be displayed in the label.
+    #     :type lbl: str
+    #     :param lbl_help_text: The help text for the label.
+    #     :type lbl_help_text: str
+    #     :param default_values: A list of three default values for the input fields.
+    #     :type default_values: list
+    #     :return: A tuple containing the created QLabel and three QLineEdit widgets.
+    #     :rtype: tuple(QLabel, QLineEdit, QLineEdit, QLineEdit)
+    #     """
+    #     label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+    #
+    #     input_widget = QWidget()
+    #     input_layout = QHBoxLayout(input_widget)
+    #     input_layout.setContentsMargins(0, 0, 0, 0)
+    #
+    #     inputs = []
+    #     for default_value in default_values:
+    #         input_field = QLineEdit()
+    #         input_field.setPlaceholderText(str(default_value))
+    #         input_field.setText(str(default_value))
+    #
+    #         validator = QDoubleValidator()
+    #         validator.setNotation(QDoubleValidator.StandardNotation)
+    #         input_field.setValidator(validator)
+    #
+    #         input_layout.addWidget(input_field)
+    #         inputs.append(input_field)
+    #
+    #     layout.addRow(label, input_widget)
+    #
+    #     return (label, *inputs)
+
     @staticmethod
-    def create_three_text_input_widget(layout, lbl, lbl_help_text, default_values):
+    def create_three_text_input_widget(
+        layout, lbl, lbl_help_text, default_values, input_types
+    ):
         """
         Create and add a path input widget with three validated text fields to the given layout.
 
@@ -157,6 +198,8 @@ class WidgetUtils:
         :type lbl_help_text: str
         :param default_values: A list of three default values for the input fields.
         :type default_values: list
+        :param input_types: A list of three input types for the fields ("int", "float", "str", "strcon", or "alphanum").
+        :type input_types: list
         :return: A tuple containing the created QLabel and three QLineEdit widgets.
         :rtype: tuple(QLabel, QLineEdit, QLineEdit, QLineEdit)
         """
@@ -167,15 +210,29 @@ class WidgetUtils:
         input_layout.setContentsMargins(0, 0, 0, 0)
 
         inputs = []
-        for default_value in default_values:
+        for default_value, input_type in zip(default_values, input_types):
             input_field = QLineEdit()
             input_field.setPlaceholderText(str(default_value))
             input_field.setText(str(default_value))
 
-            validator = QDoubleValidator()
-            validator.setNotation(QDoubleValidator.StandardNotation)
-            input_field.setValidator(validator)
+            if input_type == "int":
+                validator = QIntValidator()
+            elif input_type == "float":
+                validator = QDoubleValidator()
+                validator.setNotation(QDoubleValidator.StandardNotation)
+            elif input_type == "str":
+                regex = QRegularExpression("^[A-Za-z]+$")
+                validator = QRegularExpressionValidator(regex)
+            elif input_type == "strcon":
+                regex = QRegularExpression("^[A-Za-z0-9_-]+$")
+                validator = QRegularExpressionValidator(regex)
+            elif input_type == "alphanum":
+                regex = QRegularExpression("^[A-Za-z0-9]+$")
+                validator = QRegularExpressionValidator(regex)
+            else:
+                raise ValueError(f"Invalid input type: {input_type}")
 
+            input_field.setValidator(validator)
             input_layout.addWidget(input_field)
             inputs.append(input_field)
 
@@ -217,8 +274,13 @@ class WidgetUtils:
             input_layout.addWidget(label)
 
             input_field = QLineEdit()
-            input_field.setPlaceholderText(str(default_value))
-            input_field.setText(str(default_value))
+            if default_value != "none":
+                input_field.setPlaceholderText(str(default_value))
+                input_field.setText(str(default_value))
+            else:
+                input_field.setPlaceholderText("None")
+            # input_field.setPlaceholderText(str(default_value))
+            # input_field.setText(str(default_value))
 
             validator = QDoubleValidator()
             validator.setNotation(QDoubleValidator.StandardNotation)
@@ -227,10 +289,9 @@ class WidgetUtils:
             input_layout.addWidget(input_field)
             inputs.append(input_field)
 
-            # Add spacer widget for better spacing, but not after the last field
             if i < len(default_values) - 1:
                 input_layout.addItem(
-                    QSpacerItem(10, 0, QSizePolicy.Fixed, QSizePolicy.Minimum)
+                    QSpacerItem(0.5, 0, QSizePolicy.Fixed, QSizePolicy.Minimum)
                 )
 
         layout.addRow(main_label, input_widget)
