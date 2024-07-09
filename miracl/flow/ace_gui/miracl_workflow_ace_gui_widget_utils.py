@@ -780,11 +780,17 @@ class WidgetUtils:
         >>> print(flag_string)
         -t /path/to/single/method -a /path/to/multi/method
         """
+        # flag_pairs = (
+        #     f"{flag} {value}"
+        #     for flag, value in flags.items()
+        #     if value and str(value).strip()
+        # )
         flag_pairs = (
-            f"{flag} {value}"
+            f"{flag} {value}" if str(value).strip() != "set_bool" else f"{flag}"
             for flag, value in flags.items()
             if value and str(value).strip()
         )
+
         return " ".join(flag_pairs)
 
     @staticmethod

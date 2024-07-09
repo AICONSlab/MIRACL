@@ -36,7 +36,7 @@ class flag_creator:
             ),
             "--sa_model_type": wu.get_tab_var(
                 main_tab, "model_architecture_input", "multiplechoice"
-            ),
+            ).lower(),
             "--sa_resolution": f"{wu.get_tab_var(main_tab, 'x_res_field_input', 'textfield')} {wu.get_tab_var(main_tab, 'y_res_field_input', 'textfield')} {wu.get_tab_var(main_tab, 'z_res_field_input', 'textfield')}",
             "--sa_gpu_index": str(
                 wu.get_tab_var(main_tab, "gpu_index_input", "spinbox")
@@ -102,6 +102,7 @@ class flag_creator:
 
     @staticmethod
     def create_clarity_registration_flags(clarity_registration_tab):
+        REG_BOOL_FLAGS = "set_bool"
         clarity_registration_tab_flags = {
             "--rca_hemi": wu.get_tab_var(
                 clarity_registration_tab, "reg_hemi_input", "multiplechoice"
@@ -118,32 +119,32 @@ class flag_creator:
             )
             == "right hemisphere"
             else "lh",
-            "--rca_no_mosaic_fig": "1"
+            "--rca_no_mosaic_fig": None
             if wu.get_tab_var(
                 clarity_registration_tab, "reg_mosaic_figure_input", "multiplechoice"
             )
             == "yes"
-            else "0",
+            else REG_BOOL_FLAGS,
             "--rca_olfactory_bulb": "1"
             if wu.get_tab_var(
                 clarity_registration_tab, "reg_olfactory_bulb_input", "multiplechoice"
             )
             == "included"
             else "0",
-            "--rca_skip_cor": "1"
+            "--rca_skip_cor": REG_BOOL_FLAGS
             if wu.get_tab_var(
                 clarity_registration_tab,
                 "reg_util_int_correction_input",
                 "multiplechoice",
             )
-            == "run"
-            else "0",
-            "--rca_warp": "1"
+            == "skip"
+            else None,
+            "--rca_warp": REG_BOOL_FLAGS
             if wu.get_tab_var(
                 clarity_registration_tab, "reg_warp_to_allen_input", "multiplechoice"
             )
             == "yes"
-            else "0",
+            else None,
         }
 
         return clarity_registration_tab_flags
@@ -268,9 +269,7 @@ class flag_creator:
             "--sh_extension": wu.get_tab_var(
                 heatmap_tab, "heatmap_extension_input", "textfield"
             ),
-            "--sh_dpi": wu.get_tab_var(
-                heatmap_tab, "heatmap_dpi_input", "textfield"
-            ),
+            "--sh_dpi": wu.get_tab_var(heatmap_tab, "heatmap_dpi_input", "textfield"),
         }
 
         return heatmap_tab_flags

@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QPushButton,
     QTabWidget,
+    QMessageBox,
 )
 from PyQt5.QtCore import Qt
 from miracl_workflow_ace_gui_tab_manager import TabManager
@@ -33,6 +34,8 @@ from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
 from miracl import miracl_logger
 from miracl_workflow_ace_gui_flag_creator import flag_creator
+import subprocess, shlex
+from pathlib import Path
 
 # import sys
 # import os
@@ -147,9 +150,7 @@ class MainWindow(QMainWindow):
 
         # Clusterwise
         clusterwise_tab = self.tab_manager.clusterwise_tab
-        clusterwise_tab_flags = flag_creator.create_clusterwise_flags(
-            clusterwise_tab
-        )
+        clusterwise_tab_flags = flag_creator.create_clusterwise_flags(clusterwise_tab)
 
         # Correlation/stats
         correlation_stats_tab = self.tab_manager.correlation_stats_tab
@@ -159,13 +160,67 @@ class MainWindow(QMainWindow):
 
         # Heatmap
         heatmap_tab = self.tab_manager.heatmap_tab
-        heatmap_tab_flags = flag_creator.create_heatmap_flags(
-            heatmap_tab
-        )
+        heatmap_tab_flags = flag_creator.create_heatmap_flags(heatmap_tab)
 
-        logger.debug(
-            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"
-        )
+        # logger.debug(
+        #     f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"
+        # )
+
+        # full_command_split = full_command.split()[1:]
+        current_script_path = Path(__file__).resolve()
+        parent_dir = current_script_path.parent.parent
+        script_path = parent_dir / "miracl_workflow_ace_interface.py"
+        full_command = f"python {str(script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"
+        full_command_split = shlex.split(full_command)
+        logger.debug(f"FULL COMMAND: {full_command_split}")
+        # subprocess.run(full_command_split)
+        try:
+            subprocess.run(
+                full_command_split, capture_output=True, text=True, check=True
+            )
+            print("Command executed successfully!")
+            return True
+        # except subprocess.CalledProcessError as e:
+        #     print(f"Command failed with error: {e}")
+        #     print(f"Output: {e.stdout}")
+        #     print(f"Error: {e.stderr}")
+        #     QMessageBox()
+        #     return False
+        # except subprocess.CalledProcessError as e:
+        #     error_message = f"Command failed with error: {e.stderr}"
+        #     QMessageBox.critical(None, "Error", error_message)
+        #     return False
+        except subprocess.CalledProcessError as e:
+            stderr_lines = e.stderr.strip().split("\n")
+            error_message = "\n".join(stderr_lines[-1:])
+            QMessageBox.critical(None, "Error", error_message)
+            return False
+
+        # parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+        #
+        # def validate_args(parser, args):
+        #     # Save the original sys.argv
+        #     original_argv = sys.argv
+        #
+        #     try:
+        #         # Set sys.argv to our args (including a dummy script name)
+        #         sys.argv = ["dummy_script.py"] + args
+        #
+        #         # Parse the arguments
+        #         parsed_args = parser.parse_args()
+        #
+        #         # If we get here, parsing was successful
+        #         return True, None
+        #
+        #     except SystemExit as e:
+        #         # ArgumentParser calls sys.exit() when it encounters an error
+        #         return False, str(e)
+        #
+        #     finally:
+        #         # Restore the original sys.argv
+        #         sys.argv = original_argv
+        #
+        # is_valid, error_message = validate_args(parser, args)
 
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         # help_dict = wu.extract_help_texts(args_parser)

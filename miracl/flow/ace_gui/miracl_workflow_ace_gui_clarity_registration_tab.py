@@ -100,7 +100,7 @@ class ClarityRegistrationTab(QWidget):
             "Utilfn intensity correction:",
             help_dict["rca_skip_cor"],
             ["run", "skip"],
-            "skip",
+            "run",
         )
 
         self.reg_warp_to_allen_input = wu.create_multiple_choice(
