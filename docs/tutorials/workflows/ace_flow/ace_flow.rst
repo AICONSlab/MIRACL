@@ -18,11 +18,24 @@ ACE Workflow
 Installation
 ============
 
-To install the ACE workflow, refer to the MIRACL installation guide and video tutorials:
+To install the ACE workflow, refer to the MIRACL installation guide:
 
 - :doc:`Installation guide <../../../installation/installation>`
 
-- `Video tutorial <https://www.google.ca/>`_
+Video Tutorial
+==============
+
+`Video tutorial <https://www.google.ca/>`_
+
+- This video tutorial covers the following topics:
+   - MIRACL installation validation
+   - Download sample data
+   - Run ACE on a single subject (Mode 2) including deep learning
+   segmentation of cFos+ cells, registration, voxelization, and warping
+   - Analyze the results of the above step
+   - Run ACE cluster-wise statistical algorithm between two groups to map
+   local cell activation
+   - Analyze the results of the above step
 
 .. TODO: update the tutorial link
 
