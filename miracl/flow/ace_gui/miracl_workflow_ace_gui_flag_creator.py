@@ -221,8 +221,56 @@ class flag_creator:
                 "textfield",
             ),
             "--p_outfile": wu.get_tab_var(
-                correlation_stats_tab, "correlation_stats_stats_outfile_input", "textfield"
+                correlation_stats_tab,
+                "correlation_stats_stats_outfile_input",
+                "textfield",
             ),
         }
 
         return correlation_stats_tab_flags
+
+    @staticmethod
+    def create_heatmap_flags(heatmap_tab):
+        heatmap_tab_flags = {
+            "--sh_group1": wu.get_tab_var(
+                heatmap_tab,
+                "heatmap_group_1_path_input",
+                "textfield",
+            ),
+            "--sh_group2": wu.get_tab_var(
+                heatmap_tab,
+                "heatmap_group_2_path_input",
+                "textfield",
+            ),
+            "--sh_vox": wu.get_tab_var(
+                heatmap_tab, "heatmap_voxel_size_input", "multiplechoice"
+            ),
+            "--sh_sigma": str(
+                wu.get_tab_var(heatmap_tab, "heatmap_sigma_input", "spinbox")
+            ),
+            "--sh_percentile": str(
+                wu.get_tab_var(heatmap_tab, "heatmap_percentile_input", "spinbox")
+            ),
+            "--sh_colourmap_pos": wu.get_tab_var(
+                heatmap_tab, "heatmap_colourmap_positive_input", "textfield"
+            ),
+            "--sh_colourmap_neg": wu.get_tab_var(
+                heatmap_tab, "heatmap_colourmap_negative_input", "textfield"
+            ),
+            "--sh_sagittal": f"{wu.get_tab_var(heatmap_tab, 'heatmap_slicing_sagittal_axis_start_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_sagittal_axis_interval_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_sagittal_axis_nr_slices_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_sagittal_axis_nr_rows_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_sagittal_axis_nr_cols_input', 'textfield')}",
+            "--sh_coronal": f"{wu.get_tab_var(heatmap_tab, 'heatmap_slicing_coronal_axis_start_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_coronal_axis_interval_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_coronal_axis_nr_slices_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_coronal_axis_nr_rows_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_coronal_axis_nr_cols_input', 'textfield')}",
+            "--sh_axial": f"{wu.get_tab_var(heatmap_tab, 'heatmap_slicing_axial_axis_start_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_axial_axis_interval_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_axial_axis_nr_slices_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_axial_axis_nr_rows_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_slicing_axial_axis_nr_cols_input', 'textfield')}",
+            "--sh_figure_dim": f"{wu.get_tab_var(heatmap_tab, 'heatmap_figure_dims_width_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_figure_dims_height_input', 'textfield')}",
+            "--sh_dir_outfile": wu.get_tab_var(
+                heatmap_tab, "heatmap_output_folder_path_input", "textfield"
+            ),
+            "--sh_outfile": f"{wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_1_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_2_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_diff_input', 'textfield')}",
+            "--sh_extension": wu.get_tab_var(
+                heatmap_tab, "heatmap_extension_input", "textfield"
+            ),
+            "--sh_dpi": wu.get_tab_var(
+                heatmap_tab, "heatmap_dpi_input", "textfield"
+            ),
+        }
+
+        return heatmap_tab_flags

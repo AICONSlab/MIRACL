@@ -24,6 +24,7 @@ from miracl_workflow_ace_gui_voxelizing_warping_tab import VoxelizingWarpingTab
 from miracl_workflow_ace_gui_conversion_tab import ConversionTab
 from miracl_workflow_ace_gui_clusterwise_tab import ClusterwiseTab
 from miracl_workflow_ace_gui_correlation_stats_tab import CorrelationStatsTab
+from miracl_workflow_ace_gui_heatmap_tab import HeatmapTab
 
 
 class TabManager:
@@ -36,6 +37,7 @@ class TabManager:
         self.voxelizing_warping_tab = VoxelizingWarpingTab()
         self.clusterwise_tab = ClusterwiseTab()
         self.correlation_stats_tab = CorrelationStatsTab()
+        self.heatmap_tab = HeatmapTab()
 
         self.additional_tabs = [
             self.conversion_tab,
@@ -43,6 +45,7 @@ class TabManager:
             self.voxelizing_warping_tab,
             self.clusterwise_tab,
             self.correlation_stats_tab,
+            self.heatmap_tab,
         ]
 
         self.tab_widget.addTab(self.main_tab, "Main")
@@ -51,3 +54,4 @@ class TabManager:
         self.tab_widget.addTab(self.voxelizing_warping_tab, "Voxelizing/Warping")
         self.tab_widget.addTab(self.clusterwise_tab, "Cluster-wise")
         self.tab_widget.addTab(self.correlation_stats_tab, "Correlation/Stats")
+        self.tab_widget.addTab(self.heatmap_tab, "Heatmap")

@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
         """
         super().__init__()
         self.setWindowTitle("ACE flow")
-        self.setGeometry(100, 100, 600, 600)
+        self.setGeometry(100, 100, 750, 600)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -157,8 +157,14 @@ class MainWindow(QMainWindow):
             correlation_stats_tab
         )
 
+        # Heatmap
+        heatmap_tab = self.tab_manager.heatmap_tab
+        heatmap_tab_flags = flag_creator.create_heatmap_flags(
+            heatmap_tab
+        )
+
         logger.debug(
-            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)}"
+            f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"
         )
 
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
