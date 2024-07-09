@@ -75,7 +75,7 @@ function usage()
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
    -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled)
-   -d, manually set limit on max amount of memory the container can use ('--memory'). E.g. '1024mb', '16gb' or '512gb'. This is good practice for memory intensive applications like ACE (default: int(MemTotal/1024)*0.85 of host machine)
+   -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
    -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
    -s, print version of build script and exit
