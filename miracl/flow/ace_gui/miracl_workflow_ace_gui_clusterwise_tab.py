@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Cluster-wise
 
 Description:
-    Tab manager for ACE flow GUI.
+    View for cluster-wise statistics.
 
 Copyright:
     (c) 2024 AICONs Lab. All rights reserved.

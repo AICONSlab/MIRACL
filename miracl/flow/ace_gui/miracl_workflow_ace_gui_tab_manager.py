@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Tab Manager
 
 Description:
     Tab manager for ACE flow GUI.

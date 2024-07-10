@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Input validator
 
 Description:
-    View for ACE main tab for ACE flow GUI.
+    Validation logic for GUI to CLI input.
 
 Copyright:
     (c) 2024 AICONs Lab. All rights reserved.

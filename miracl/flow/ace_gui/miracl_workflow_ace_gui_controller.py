@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Controller
 
 Description:
-    Controller for ACE flow GUI.
+    Controller for ACE flow GUI from MVC design.
 
 Copyright:
     (c) 2024 AICONs Lab. All rights reserved.

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Flag Creator
 
 Description:
-    Tab manager for ACE flow GUI.
+    Creates flag dictionaries for use in controller.
 
 Copyright:
     (c) 2024 AICONs Lab. All rights reserved.

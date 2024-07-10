@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Correlation and Stats
 
 Description:
-    Tab manager for ACE flow GUI.
+    View for correlation and statistics.
 
 Copyright:
     (c) 2024 AICONs Lab. All rights reserved.

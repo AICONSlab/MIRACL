@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Widget Utilities
+Main ACE tab
 
 Description:
     View for ACE main tab for ACE flow GUI.
