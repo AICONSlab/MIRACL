@@ -46,7 +46,7 @@ class MainTab(QWidget):
         self.single_checkbox = wu.create_method_checkbox(
             self,
             main_tab_layout,
-            "Check for group, leave unchecked for single (default)",
+            "Check for two groups, leave unchecked for single subject (default)",
         )
 
         (
