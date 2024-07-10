@@ -17,7 +17,7 @@ License:
     GPL-3.0
 """
 
-from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 
 REG_BOOL_FLAGS = "set_bool"
 

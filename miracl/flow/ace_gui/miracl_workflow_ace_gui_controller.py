@@ -29,11 +29,11 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 from PyQt5.QtCore import Qt
-from miracl_workflow_ace_gui_tab_manager import TabManager
-from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_tab_manager import TabManager
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
 from miracl import miracl_logger
-from miracl_workflow_ace_gui_flag_creator import flag_creator
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_creator import flag_creator
 import subprocess, shlex
 from pathlib import Path
 
@@ -238,9 +238,12 @@ class MainWindow(QMainWindow):
         # test_dict = wu.extract_help_texts(args_parser)
         # print(test_dict["single"])
 
-
-if __name__ == "__main__":
+def main():
     app = QApplication([])
     window = MainWindow()
     window.show()
     app.exec_()
+
+
+if __name__ == "__main__":
+    main()

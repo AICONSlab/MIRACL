@@ -1,9 +1,10 @@
 import argparse
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 from numpy import require
+
 from miracl.seg import ace_parser
 
 ARA_ENV = "aradir"
@@ -123,7 +124,7 @@ class ACEWorkflowParser:
             "-sao",
             "--sa_output_folder",
             type=str,
-            required=True,
+            # required=True,
             help="path to output file folder",
         )
         # Parser to select model type
@@ -132,7 +133,7 @@ class ACEWorkflowParser:
             "--sa_model_type",
             type=str,
             choices=["unet", "unetr", "ensemble"],
-            required=True,
+            # required=True,
             help="model architecture",
         )
         # Parser to select voxel size
@@ -141,7 +142,7 @@ class ACEWorkflowParser:
             "--sa_resolution",
             nargs=3,
             type=float,
-            required=True,
+            # required=True,
             metavar=("X-res", "Y-res", "Z-res"),
             help="voxel size (type: %(type)s)",
         )
@@ -845,36 +846,46 @@ class ACEWorkflowParser:
 
         return parser
 
-    def parse_args(self):
-        args = self.parser.parse_args()
+    def validate_args(self, args) -> argparse.Namespace:
 
-        # check that control and treated are not passed with single
+         # check that control and treated are not passed with single
         if (args.control and args.treated) and args.single:
-            raise argparse.ArgumentError(
-                None,
+            self.parser.error(
                 "-c/--control and -t/--treated must be passed together without -s/--single",
             )
         # check that single is passed alone
         elif args.single and (args.control or args.treated):
-            raise argparse.ArgumentError(
-                None,
+            self.parser.error(
                 "-s/--single cannot be passed with either -c/--control or -t/--treated",
             )
         # check that control and treated are always passed together
-        elif (args.control and not args.treated) or (args.treated and not args.control):
-            raise argparse.ArgumentError(
-                None, "-c/--control and -t/--treated must be passed together"
+        elif (args.control and not args.treated) or (
+            args.treated and not args.control
+        ):
+            self.parser.error(
+                "-c/--control and -t/--treated must be passed together"
             )
         # check that something is passed
         elif not args.single and not args.control and not args.treated:
-            raise argparse.ArgumentError(
-                None,
+            self.parser.error(
                 "either [-s/--single] or [-c/--control and -t/--treated] must be passed",
             )
+
+        required_args = ["sa_output_folder", "sa_model_type", "sa_resolution"]
+        error_string = "the following arguments are required: "
+        error_encountered = False
+        for arg in required_args:
+            if not getattr(args, arg):
+                error_string += f"--{arg}, "
+                error_encountered = True
+
+        if error_encountered:
+            self.parser.error(error_string[:-2])              
 
         return args
 
 
 if __name__ == "__main__":
     args_parser = ACEWorkflowParser()
-    args = args_parser.parse_args()
+    args = args_parser.parser.parse_args()
+    args = args_parser.validate_args(args)

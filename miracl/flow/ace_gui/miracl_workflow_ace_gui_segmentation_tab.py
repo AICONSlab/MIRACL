@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtCore import Qt
-from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
 
 
