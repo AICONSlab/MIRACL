@@ -145,6 +145,7 @@ class MainWindow(QMainWindow):
         # segmentation
         segmentation_tab = self.tab_manager.segmentation_tab
         segmentation_tab_flags = flag_creator.create_segmentation_flags(segmentation_tab)
+
         # Voxelizing/warping
         voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
         voxelizing_warping_tab_flags = flag_creator.create_voxelization_warping_flags(
@@ -165,18 +166,13 @@ class MainWindow(QMainWindow):
         heatmap_tab = self.tab_manager.heatmap_tab
         heatmap_tab_flags = flag_creator.create_heatmap_flags(heatmap_tab)
 
-        # logger.debug(
-        #     f"FULL CMD: miracl flow ace {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"
-        # )
-
-        # full_command_split = full_command.split()[1:]
-        current_script_path = Path(__file__).resolve()
-        parent_dir = current_script_path.parent.parent
-        script_path = parent_dir / "miracl_workflow_ace_interface.py"
-        full_command = f"python {str(script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"
-        full_command_split = shlex.split(full_command)
+        # Run ACE
+        ace_gui_controller_path = Path(__file__).resolve()
+        ace_interface_dir = ace_gui_controller_path.parent.parent
+        ace_interface_script_path = ace_interface_dir / "miracl_workflow_ace_interface.py"
+        full_command = f"python {str(ace_interface_script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(segmentation_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"  # Crafts cmd
+        full_command_split = shlex.split(full_command)  # Split cmd for subprocess use
         logger.debug(f"FULL COMMAND: {full_command_split}")
-        # subprocess.run(full_command_split)
         try:
             subprocess.run(
                 full_command_split, capture_output=True, text=True, check=True
@@ -196,34 +192,11 @@ class MainWindow(QMainWindow):
         except subprocess.CalledProcessError as e:
             stderr_lines = e.stderr.strip().split("\n")
             error_message = "\n".join(stderr_lines[-1:])
+            print(e)
+            print(e.stdout)
+            print(e.stderr)
             QMessageBox.critical(None, "Error", error_message)
             return False
-
-        # parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-        #
-        # def validate_args(parser, args):
-        #     # Save the original sys.argv
-        #     original_argv = sys.argv
-        #
-        #     try:
-        #         # Set sys.argv to our args (including a dummy script name)
-        #         sys.argv = ["dummy_script.py"] + args
-        #
-        #         # Parse the arguments
-        #         parsed_args = parser.parse_args()
-        #
-        #         # If we get here, parsing was successful
-        #         return True, None
-        #
-        #     except SystemExit as e:
-        #         # ArgumentParser calls sys.exit() when it encounters an error
-        #         return False, str(e)
-        #
-        #     finally:
-        #         # Restore the original sys.argv
-        #         sys.argv = original_argv
-        #
-        # is_valid, error_message = validate_args(parser, args)
 
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         # help_dict = wu.extract_help_texts(args_parser)
