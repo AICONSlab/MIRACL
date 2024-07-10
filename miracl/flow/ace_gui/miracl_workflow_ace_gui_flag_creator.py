@@ -19,6 +19,7 @@ License:
 
 from miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 
+REG_BOOL_FLAGS = "set_bool"
 
 class flag_creator:
     @staticmethod
@@ -101,8 +102,47 @@ class flag_creator:
         return conversion_tab_flags
 
     @staticmethod
+    def create_segmentation_flags(segmentation_tab):
+        segmentation_tab_flags = {
+            "--sa_image_size": f"{wu.get_tab_var(segmentation_tab, 'segmentation_image_size_height_input', 'textfield')} {wu.get_tab_var(segmentation_tab, 'segmentation_image_size_width_input', 'textfield')} {wu.get_tab_var(segmentation_tab, 'segmentation_image_size_depth_input', 'textfield')}",
+            "--sa_nr_workers": wu.get_tab_var(
+                segmentation_tab, "segmentation_nr_workers_input", "spinbox"
+            ),
+            "--sa_cache_rate": wu.get_tab_var(
+                segmentation_tab, "segmentation_cache_rate_input", "spinbox"
+            ),
+            "--sa_batch_size": wu.get_tab_var(
+                segmentation_tab, "segmentation_batch_size_input", "spinbox"
+            ),
+            "--sa_monte_carlo": "1"
+            if wu.get_tab_var(
+                segmentation_tab, "segmentation_monte_carlo_input", "multiplechoice"
+            )
+            == "yes"
+            else "0",
+            "--sa_visualize_results": REG_BOOL_FLAGS if wu.get_tab_var(
+                segmentation_tab,
+                "segmentation_visualize_results_input",
+                "multiplechoice",
+            ) == "yes" else None,
+            "--sa_uncertainty_map": REG_BOOL_FLAGS
+            if wu.get_tab_var(
+                segmentation_tab, "segmentation_uncertainty_map_input", "multiplechoice"
+            )
+            == "yes"
+            else None,
+            "--sa_binarization_threshold": wu.get_tab_var(
+                segmentation_tab, "segmentation_binarization_thr_input", "spinbox"
+            ),
+            "--sa_percentage_brain_patch_skip": wu.get_tab_var(
+                segmentation_tab, "segmentation_brain_patch_skip_input", "spinbox"
+            ),
+        }
+
+        return segmentation_tab_flags
+
+    @staticmethod
     def create_clarity_registration_flags(clarity_registration_tab):
-        REG_BOOL_FLAGS = "set_bool"
         clarity_registration_tab_flags = {
             "--rca_hemi": wu.get_tab_var(
                 clarity_registration_tab, "reg_hemi_input", "multiplechoice"

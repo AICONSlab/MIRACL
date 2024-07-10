@@ -142,6 +142,9 @@ class MainWindow(QMainWindow):
         conversion_tab = self.tab_manager.conversion_tab
         conversion_tab_flags = flag_creator.create_conversion_flags(conversion_tab)
 
+        # segmentation
+        segmentation_tab = self.tab_manager.segmentation_tab
+        segmentation_tab_flags = flag_creator.create_segmentation_flags(segmentation_tab)
         # Voxelizing/warping
         voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
         voxelizing_warping_tab_flags = flag_creator.create_voxelization_warping_flags(

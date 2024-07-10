@@ -19,6 +19,7 @@ License:
 
 from PyQt5.QtWidgets import QTabWidget
 from miracl_workflow_ace_gui_main_tab import MainTab
+from miracl_workflow_ace_gui_segmentation_tab import SegmentationTab
 from miracl_workflow_ace_gui_clarity_registration_tab import ClarityRegistrationTab
 from miracl_workflow_ace_gui_voxelizing_warping_tab import VoxelizingWarpingTab
 from miracl_workflow_ace_gui_conversion_tab import ConversionTab
@@ -33,6 +34,7 @@ class TabManager:
 
         self.main_tab = MainTab()
         self.conversion_tab = ConversionTab()
+        self.segmentation_tab = SegmentationTab()
         self.clarity_registration_tab = ClarityRegistrationTab()
         self.voxelizing_warping_tab = VoxelizingWarpingTab()
         self.clusterwise_tab = ClusterwiseTab()
@@ -41,6 +43,7 @@ class TabManager:
 
         self.additional_tabs = [
             self.conversion_tab,
+            self.segmentation_tab,
             self.clarity_registration_tab,
             self.voxelizing_warping_tab,
             self.clusterwise_tab,
@@ -50,6 +53,7 @@ class TabManager:
 
         self.tab_widget.addTab(self.main_tab, "Main")
         self.tab_widget.addTab(self.conversion_tab, "Conversion")
+        self.tab_widget.addTab(self.segmentation_tab, "Segmentation")
         self.tab_widget.addTab(self.clarity_registration_tab, "Registration")
         self.tab_widget.addTab(self.voxelizing_warping_tab, "Voxelizing/Warping")
         self.tab_widget.addTab(self.clusterwise_tab, "Cluster-wise")
