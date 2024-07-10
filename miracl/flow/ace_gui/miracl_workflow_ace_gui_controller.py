@@ -68,7 +68,7 @@ class MainWindow(QMainWindow):
         """
         super().__init__()
         self.setWindowTitle("ACE flow")
-        self.setGeometry(100, 100, 750, 600)
+        self.setGeometry(100, 100, 720, 600)
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(help_button)
 
         run_button = QPushButton("Run")
-        run_button.clicked.connect(self.test_run_routine)
+        run_button.clicked.connect(self.run_ace_cli)
         main_layout.addWidget(run_button)
 
         # Hide additional tabs initially
@@ -112,9 +112,9 @@ class MainWindow(QMainWindow):
             tab_index = self.tab_widget.indexOf(tab)
             self.tab_widget.setTabVisible(tab_index, state == Qt.Checked)
 
-    def test_run_routine(self):
+    def run_ace_cli(self):
         """
-        Perform a test run of the application.
+        Run ACE by invoking it through the cli.
 
         This method retrieves various input values from the main tab and prints
         them to the console. It also checks the state of the "Single or multi
