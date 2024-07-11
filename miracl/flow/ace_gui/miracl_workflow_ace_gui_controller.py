@@ -186,30 +186,36 @@ class MainWindow(QMainWindow):
         full_command = f"python {str(ace_interface_script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(segmentation_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"  # Crafts cmd
         full_command_split = shlex.split(full_command)  # Split cmd for subprocess use
         logger.debug(f"FULL COMMAND: {full_command_split}")
-        try:
-            subprocess.run(
-                full_command_split, capture_output=True, text=True, check=True
-            )
-            print("Command executed successfully!")
-            return True
-        # except subprocess.CalledProcessError as e:
-        #     print(f"Command failed with error: {e}")
-        #     print(f"Output: {e.stdout}")
-        #     print(f"Error: {e.stderr}")
-        #     QMessageBox()
-        #     return False
-        # except subprocess.CalledProcessError as e:
-        #     error_message = f"Command failed with error: {e.stderr}"
-        #     QMessageBox.critical(None, "Error", error_message)
-        #     return False
-        except subprocess.CalledProcessError as e:
-            stderr_lines = e.stderr.strip().split("\n")
+        process = subprocess.Popen(
+            full_command_split,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        while True:
+            output = process.stdout.readline()
+            if output == "" and process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+
+        stdout, stderr = process.communicate()
+
+        if stdout:
+            print(stdout)
+
+        if stderr:
+            print(stderr)
+
+        if process.returncode != 0:
+            stderr_lines = stderr.strip().split("\n")
             error_message = "\n".join(stderr_lines[-1:])
-            print(e)
-            print(e.stdout)
-            print(e.stderr)
             QMessageBox.critical(None, "Error", error_message)
-            return False
+            return False  
+
+        print("Command executed successfully!")
+        return True
 
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         # help_dict = wu.extract_help_texts(args_parser)
