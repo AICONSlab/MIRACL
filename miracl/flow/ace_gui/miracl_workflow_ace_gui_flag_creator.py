@@ -31,7 +31,9 @@ class flag_creator:
             "-c": f"{wu.get_tab_var(main_tab, 'multi_method_ctrl_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_ctrl_tif_path_input', 'textfield')}"
             if method_checkbox.isChecked()
             else None,
-            "-t": f"{wu.get_tab_var(main_tab, 'multi_method_treated_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_treated_tif_path_input', 'textfield')}",
+            "-t": f"{wu.get_tab_var(main_tab, 'multi_method_treated_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_treated_tif_path_input', 'textfield')}"
+            if method_checkbox.isChecked()
+            else None,
             "--sa_output_folder": wu.get_tab_var(
                 main_tab, "output_folder_path_input", "textfield"
             ),
