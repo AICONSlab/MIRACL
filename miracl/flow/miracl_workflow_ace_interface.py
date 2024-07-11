@@ -993,10 +993,7 @@ class ConversionChecker:
         conv_folder.mkdir(parents=True, exist_ok=True)
 
 
-def main():
-    args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-    args = args_parser.parse_args()
-
+def main(args):
     segmentation = ACESegmentation()
     conversion = ACEConversion()
     registration = ACERegistration()
@@ -1014,8 +1011,11 @@ def main():
         stats,
         heatmap,
     )
+    args = miracl_workflow_ace_parser.ACEWorkflowParser().validate_args(args)
     result = ace_workflow.execute_workflow(args)
 
 
 if __name__ == "__main__":
-    main()
+    args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+    args = args_parser.parser.parse_args()
+    main(args)

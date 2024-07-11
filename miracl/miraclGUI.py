@@ -73,6 +73,11 @@ nestedict = {
                 'name': 'Multiple mice',
                 'script': 'miracl flow mul',
                 'helpmsg': 'Wrapper for running a MIRACL script on multiple mice'
+            },
+            4: {
+                'name': 'ACE',
+                'script': 'miracl flow ace',
+                'helpmsg': 'Wrapper for running ACE'
             }
         }
     },
