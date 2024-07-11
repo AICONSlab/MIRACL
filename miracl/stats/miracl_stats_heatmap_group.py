@@ -104,14 +104,14 @@ def parsefn():
                         help="path to group 1 directory",
                         default=None,
                         nargs='+',
-                        required=True)
+                        required=False)
     parser.add_argument('-g2',
                         '--group2',
                         type=str,
                         help="path to group 2 directory",
                         default=None,
                         nargs='+',
-                        required=True)
+                        required=False)
     parser.add_argument('-v',
                         '--vox',
                         type=int,
@@ -235,8 +235,8 @@ def parse_inputs(parser, args):
     side = args.side
     mask_flag = args.mask
 
-    # sys.exit()
-
+    if g1 is None:
+        parser.error("Group 1 directory path (-g1 / --group1) is required")
     # validation functions
 
     def path_check(*paths):

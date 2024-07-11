@@ -1,13 +1,15 @@
 import argparse
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 from numpy import require
+
 from miracl.seg import ace_parser
 
 ARA_ENV = "aradir"
 FULL_PROG_NAME = "miracl flow ace"
+
 
 def parser_true_or_false(arg: str) -> bool:
     upper_arg = str(arg).upper()
@@ -89,7 +91,8 @@ class ACEWorkflowParser:
         optional_args = parser.add_argument_group("optional arguments")
         stats_args = parser.add_argument_group("optional statistics arguments")
 
-        # INFO: ACE segmentation parser
+        # INFO: ACE main parser
+
         single_multi_args_group.add_argument(
             "-s",
             "--single",
@@ -116,20 +119,12 @@ class ACEWorkflowParser:
             nargs=2,
         )
 
-        # Parser for input folder i.e. location of the data
-        # required_args.add_argument(
-        #     "-sai",
-        #     "--sa_input_folder",
-        #     type=str,
-        #     required=True,
-        #     help="path to raw tif/tiff data folder",
-        # )
         # Parser for output folder i.e. location where results are stored
         required_args.add_argument(
             "-sao",
             "--sa_output_folder",
             type=str,
-            required=True,
+            # required=True,
             help="path to output file folder",
         )
         # Parser to select model type
@@ -138,7 +133,7 @@ class ACEWorkflowParser:
             "--sa_model_type",
             type=str,
             choices=["unet", "unetr", "ensemble"],
-            required=True,
+            # required=True,
             help="model architecture",
         )
         # Parser to select voxel size
@@ -147,10 +142,92 @@ class ACEWorkflowParser:
             "--sa_resolution",
             nargs=3,
             type=float,
-            required=True,
+            # required=True,
             metavar=("X-res", "Y-res", "Z-res"),
             help="voxel size (type: %(type)s)",
         )
+
+        # Parser for GPU index
+        useful_args.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
+        )
+
+        useful_args.add_argument(
+            "-ctnd",
+            "--ctn_down",
+            type=int,
+            default=5,
+            help="Down-sample ratio for conversion (default: %(default)s)",
+        )
+
+        useful_args.add_argument(
+            "-rcao",
+            "--rca_orient_code",
+            type=str,
+            default="ALS",
+            help="to orient nifti from original orientation to 'standard/Allen' orientation, (default: %(default)s)",
+        )
+
+        useful_args.add_argument(
+            "-rcav",
+            "--rca_voxel_size",
+            type=int,
+            choices=[10, 25, 50],
+            default=10,
+            help="labels voxel size/Resolution in um (default: %(default)s)",
+        )
+
+        # Should be inherited from above -rcad (?) argument
+        useful_args.add_argument(
+            "-rvad",
+            "--rva_downsample",
+            type=int,
+            default=10,
+            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10 (default: %(default)s)",
+        )
+
+        useful_args.add_argument(
+            "-rwcv",
+            "--rwc_voxel_size",
+            type=int,
+            default=25,
+            choices=[10, 25, 50],
+            help="voxel size/Resolution in um for warping (default: %(default)s)",
+        )
+
+        # Parser to select the registration skipping
+        useful_args.add_argument(
+            "--rerun-registration",
+            default="false",
+            help="whether to rerun registration step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        # Parser to select the segmentation skipping
+        useful_args.add_argument(
+            "--rerun-segmentation",
+            default="false",
+            help="whether to rerun segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        useful_args.add_argument(
+            "--rerun-conversion",
+            default="false",
+            help="whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        # INFO: Segmentation parser
+
         # Parser to select image size
         seg_args.add_argument(
             "-sas",
@@ -231,16 +308,6 @@ class ACEWorkflowParser:
             help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
         )
 
-        # Parser for GPU index
-        useful_args.add_argument(
-            "-sag",
-            "--sa_gpu_index",
-            type=int,
-            required=False,
-            default=0,
-            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
-        )
-
         # INFO: Conversion parser
 
         # required_args.add_argument(
@@ -260,13 +327,6 @@ class ACEWorkflowParser:
         #     default=os.path.abspath(os.getcwd()),
         #     help="Output directory (default: %(default)s)",
         # )
-        useful_args.add_argument(
-            "-ctnd",
-            "--ctn_down",
-            type=int,
-            default=5,
-            help="Down-sample ratio for conversion (default: %(default)s)",
-        )
         conv_args.add_argument(
             "-ctncn",
             "--ctn_channum",
@@ -322,7 +382,7 @@ class ACEWorkflowParser:
             nargs="+",
             metavar="",
             default=[0, 0, 0],
-            help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template",
+            help="Nii center (default: 0 0 0 ) corresponding to Allen atlas nii template",
         )
         conv_args.add_argument(
             "-ctndz",
@@ -368,13 +428,6 @@ class ACEWorkflowParser:
         #     required=True,
         #     help="path to results directory",
         # )
-        useful_args.add_argument(
-            "-rcao",
-            "--rca_orient_code",
-            type=str,
-            default="ALS",
-            help="to orient nifti from original orientation to 'standard/Allen' orientation, (default: %(default)s)",
-        )
         reg_args.add_argument(
             "-rcam",
             "--rca_hemi",
@@ -382,14 +435,6 @@ class ACEWorkflowParser:
             choices=["combined", "split"],
             default="combined",
             help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
-        )
-        useful_args.add_argument(
-            "-rcav",
-            "--rca_voxel_size",
-            type=int,
-            choices=[10, 25, 50],
-            default=10,
-            help="labels voxel size/Resolution in um (default: %(default)s)",
         )
         reg_args.add_argument(
             "-rcal",
@@ -435,7 +480,7 @@ class ACEWorkflowParser:
             action="store_const",
             const=1,
             default=0,
-            help="if utilfn intensity correction already ran, skip correction inside registration (default: False)",
+            help="if utilfn intensity correction already ran, skip correction inside registration (default: %(default)s)",
         )
         reg_args.add_argument(
             "-rcaw",
@@ -455,14 +500,6 @@ class ACEWorkflowParser:
         #     help="binary segmentation tif i.e. segmented tif file",
         #     required=True,
         # )
-        # Should be inherited from above -rcad (?) argument
-        useful_args.add_argument(
-            "-rvad",
-            "--rva_downsample",
-            type=int,
-            default=10,
-            help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10 (default: %(default)s)",
-        )
         # Should be inherited from above -rcav argument
         # vox_args.add_argument(
         #     "-rvav",
@@ -474,14 +511,14 @@ class ACEWorkflowParser:
         # )
         vox_args.add_argument(
             "-rvavx",
-            "-rva_vx_res",
+            "--rva_vx_res",
             default=1,
             type=float,
             help="voxel size (x, y dims) in um (default: %(default)s)",
         )
         vox_args.add_argument(
             "-rvavz",
-            "-rva_vz_res",
+            "--rva_vz_res",
             default=1,
             type=float,
             help="voxel size (z dim) in um (default: %(default)s)",
@@ -536,15 +573,6 @@ class ACEWorkflowParser:
             help="Segmentation channel (ex. green) - required if voxelized seg is input",
         )
 
-        useful_args.add_argument(
-            "-rwcv",
-            "--rwc_voxel_size",
-            type=int,
-            default=25,
-            choices=[10, 25, 50],
-            help="voxel size/Resolution in um for warping (default: %(default)s)",
-        )
-
         # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
@@ -557,62 +585,70 @@ class ACEWorkflowParser:
             "-pcsn",
             "--pcs_num_perm",
             type=int,
-            help="number of permutations",
+            help="number of permutations (default: %(default)s)",
             default=500,
         )
         perm_args.add_argument(
             "-pcsr",
             "--pcs_img_resolution",
             type=int,
-            help="resolution of images in um",
+            help="resolution of images in um (default: %(default)s)",
             default=25,
         )
         perm_args.add_argument(
             "-pcsfwhm",
             "--pcs_smoothing_fwhm",
             type=int,
-            help="fwhm of Gaussian kernel in pixel",
+            help="fwhm of Gaussian kernel in pixel (default: %(default)s)",
             default=3,
         )
         perm_args.add_argument(
             "-pcsstart",
             "--pcs_tfce_start",
             type=float,
-            help="tfce threshold start",
+            help="tfce threshold start (default: %(default)s)",
             default=0.01,
         )
         perm_args.add_argument(
             "-pcsstep",
             "--pcs_tfce_step",
             type=float,
-            help="tfce threshold step",
+            help="tfce threshold step (default: %(default)s)",
             default=5,
         )
         perm_args.add_argument(
             "-pcsc",
             "--pcs_cpu_load",
             type=float,
-            help="Percent of cpus used for parallelization",
+            help="Percent of cpus used for parallelization (default: %(default)s)",
             default=0.9,
         )
         perm_args.add_argument(
-            "-pcsh", "--pcs_tfce_h", type=float, help="tfce H power", default=2
+            "-pcsh",
+            "--pcs_tfce_h",
+            type=float,
+            help="tfce H power (default: %(default)s)",
+            default=2,
         )
         perm_args.add_argument(
-            "-pcse", "--pcs_tfce_e", type=float, help="tfce E power", default=0.5
+            "-pcse",
+            "--pcs_tfce_e",
+            type=float,
+            help="tfce E power (default: %(default)s)",
+            default=0.5,
         )
         perm_args.add_argument(
             "-pcssp",
             "--pcs_step_down_p",
             type=float,
-            help="step_down_p value",
+            help="step down p-value (default: %(default)s)",
             default=0.3,
         )
         perm_args.add_argument(
             "-pcsm",
             "--pcs_mask_thr",
             type=int,
-            help="percentile to be used for binarizing difference of the mean",
+            help="percentile to be used for binarizing difference of the mean (default: %(default)s)",
             default=95,
         )
 
@@ -622,7 +658,7 @@ class ACEWorkflowParser:
             "-cft",
             "--cf_pvalue_thr",
             type=float,
-            help="threshold for binarizing p value",
+            help="threshold for binarizing p value (default: %(default)s)",
             default=0.05,
         )
 
@@ -756,32 +792,6 @@ class ACEWorkflowParser:
             default="pvalue_heatmap",
         )
 
-        # Parser to select the registration skipping
-        useful_args.add_argument(
-            "--rerun-registration",
-            default="false",
-            help="Whether to rerun registration step of flow; TRUE => Force re-run (default: %(default)s)",
-            type=parser_true_or_false,
-            metavar="TRUE/FALSE",
-        )
-
-        # Parser to select the segmentation skipping
-        useful_args.add_argument(
-            "--rerun-segmentation",
-            default="false",
-            help="Whether to rerun segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
-            type=parser_true_or_false,
-            metavar="TRUE/FALSE",
-        )
-
-        useful_args.add_argument(
-            "--rerun-conversion",
-            default="false",
-            help="Whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
-            type=parser_true_or_false,
-            metavar="TRUE/FALSE",
-        )
-
         # INFO: help section
         class _CustomHelpAction(argparse._HelpAction):
             _required_args = []
@@ -836,38 +846,46 @@ class ACEWorkflowParser:
 
         return parser
 
-    def parse_args(self):
-        args = self.parser.parse_args()
+    def validate_args(self, args) -> argparse.Namespace:
 
-        # check that control and treated are not passed with single
+         # check that control and treated are not passed with single
         if (args.control and args.treated) and args.single:
-            raise argparse.ArgumentError(
-                None,
+            self.parser.error(
                 "-c/--control and -t/--treated must be passed together without -s/--single",
             )
         # check that single is passed alone
         elif args.single and (args.control or args.treated):
-            raise argparse.ArgumentError(
-                None,
+            self.parser.error(
                 "-s/--single cannot be passed with either -c/--control or -t/--treated",
             )
         # check that control and treated are always passed together
         elif (args.control and not args.treated) or (
             args.treated and not args.control
         ):
-            raise argparse.ArgumentError(
-                None, "-c/--control and -t/--treated must be passed together"
+            self.parser.error(
+                "-c/--control and -t/--treated must be passed together"
             )
         # check that something is passed
         elif not args.single and not args.control and not args.treated:
-            raise argparse.ArgumentError(
-                None,
+            self.parser.error(
                 "either [-s/--single] or [-c/--control and -t/--treated] must be passed",
             )
+
+        required_args = ["sa_output_folder", "sa_model_type", "sa_resolution"]
+        error_string = "the following arguments are required: "
+        error_encountered = False
+        for arg in required_args:
+            if not getattr(args, arg):
+                error_string += f"--{arg}, "
+                error_encountered = True
+
+        if error_encountered:
+            self.parser.error(error_string[:-2])              
 
         return args
 
 
 if __name__ == "__main__":
     args_parser = ACEWorkflowParser()
-    args = args_parser.parse_args()
+    args = args_parser.parser.parse_args()
+    args = args_parser.validate_args(args)
