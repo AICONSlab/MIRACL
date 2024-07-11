@@ -319,7 +319,8 @@ Example of running ACE flow on multiple subjects (Mode 1):
       --control ./non_walking/ ./non_walking/Newton_HC1/cells/ \
       --treated ./walking/ ./walking/Newton_UI1/cells/ \
       --sa_output_folder ./output_dir \
-      --sa_model_type unet
+      --sa_model_type unet \
+      --sa_resolution 1.4 1.4 5.0
 
 
 Example of running ACE on single subject (Mode 2) (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
