@@ -166,7 +166,7 @@ either of the following methods:
                - '/home/mgoubran/mydata:/home/mgoubran/mydata'
 
       The format of mounting volumes is ``<host_path>:<container_path>``.
-      In the aboev example, the host path ``/home/mgoubran/mydata`` is mounted
+      In the above example, the host path ``/home/mgoubran/mydata`` is mounted
       to the container path ``/home/mgoubran/mydata``. Note that in general
       these paths can be different.
 

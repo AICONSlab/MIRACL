@@ -31,10 +31,10 @@ Video Tutorial
    - MIRACL installation validation
    - Download sample data
    - Run ACE on a single subject (Mode 2) including deep learning
-   segmentation of cFos+ cells, registration, voxelization, and warping
+     segmentation of cFos+ cells, registration, voxelization, and warping
    - Analyze the results of the above step
    - Run ACE cluster-wise statistical algorithm between two groups to map
-   local cell activation
+     local cell activation
    - Analyze the results of the above step
 
 .. TODO: update the tutorial link
@@ -273,19 +273,19 @@ Main outputs
    |-- corr_final/
 
 - ``seg_final``: Contains the segmentation output (binary) including model(s) outputs (and
-uncertainty estimates) in slice format that match with the raw data naming.
+  uncertainty estimates) in slice format that match with the raw data naming.
 - ``conv_final``: Contains the conversion (tiff to nifti) output. The name of this file depends
-on the parameters used in conversion. This will be the only file in this directory.
+  on the parameters used in conversion. This will be the only file in this directory.
 - ``clar_allen_reg``: Contains the registration outputs / preliminary files.
 - ``reg_final``: Contains the main registration outputs.
    - ``annotation_*_tiff_clar``: Contains the atlas annotations in native space.
-   These are saved in slice format, with the same naming as the raw input
+     These are saved in slice format, with the same naming as the raw input
    - ``annotation_*_clar_space_downsample.nii.gz``: Contains the atlas annotations
-   in native space in nifti format. Can be overlaid on the conversion output.
+     in native space in nifti format. Can be overlaid on the conversion output.
    - ``annotation_*_clar_downsample.nii.gz``: Contains the atlas annotations in
-   atlas space in nifti format. Can be overlaid on ``clar_downsample*.nii.gz``.
+     atlas space in nifti format. Can be overlaid on ``clar_downsample*.nii.gz``.
    - ``clar_downsample*.nii.gz``: Contains the downsampled conversion output 
-   warped to atlas space.
+     warped to atlas space.
 
 .. note::
 
@@ -295,15 +295,15 @@ on the parameters used in conversion. This will be the only file in this directo
 
 - ``vox_final``: Contains the voxelized segmentation output.
 - ``warp_final``: Contains the voxelized + warped segmentation output. This file
-is in atlas space.
+  is in atlas space.
 - ``heatmap_final``: Contains the group-wise heatmaps of cell density using the average
-of voxelized and warped segmentation maps in each group. Also contains the group difference
-heatmap. ``group_1_mean_plot.tiff`` is for the control group, ``group_2_mean_plot.tiff``
-is for the treated group.
+  of voxelized and warped segmentation maps in each group. Also contains the group difference
+  heatmap. ``group_1_mean_plot.tiff`` is for the control group, ``group_2_mean_plot.tiff``
+  is for the treated group.
 - ``clust_final``: Contains the cluster-wise TFCE permutation statistics at the atlas space
-(``f_obs.nii.gz``), the p-value image of the F-statistics (``p_values.nii.gz``), and the p-value heatmap
-projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
-as ``-log10(p-value)``.
+  (``f_obs.nii.gz``), the p-value image of the F-statistics (``p_values.nii.gz``), and the p-value heatmap
+  projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
+  as ``-log10(p-value)``.
 - ``corr_final``: Contains the correlation analysis output including correlation maps and p_value maps.
 
 
