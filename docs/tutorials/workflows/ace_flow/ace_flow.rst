@@ -278,6 +278,7 @@ Main outputs
   on the parameters used in conversion. This will be the only file in this directory.
 - ``clar_allen_reg``: Contains the registration outputs / preliminary files.
 - ``reg_final``: Contains the main registration outputs.
+
    - ``annotation_*_tiff_clar``: Contains the atlas annotations in native space.
      These are saved in slice format, with the same naming as the raw input
    - ``annotation_*_clar_space_downsample.nii.gz``: Contains the atlas annotations
