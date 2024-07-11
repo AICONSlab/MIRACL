@@ -34,9 +34,9 @@ Main outputs
    |-- corr_final/
 
 - ``clust_final``: Contains the cluster-wise TFCE permutation statistics at the atlas space
-(``f_obs.nii.gz``), the p-value image of the F-statistics (``p_values.nii.gz``), and the p-value heatmap
-projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
-as ``-log10(p-value)``.
+  (``f_obs.nii.gz``), the p-value image of the F-statistics (``p_values.nii.gz``), and the p-value heatmap
+  projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
+  as ``-log10(p-value)``.
 - ``corr_final``: Contains the correlation analysis output including correlation maps and p_value maps.
 
 
