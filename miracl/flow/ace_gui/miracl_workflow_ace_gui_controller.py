@@ -31,6 +31,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_tab_manager import TabManager
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_help_window import HelpMessageBox
 from miracl.flow import miracl_workflow_ace_parser
 from miracl import miracl_logger
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_creator import flag_creator
@@ -86,6 +87,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(show_tabs_checkbox)
 
         help_button = QPushButton("Help")
+        help_button.clicked.connect(self.help_button_clicked)
         main_layout.addWidget(help_button)
 
         run_button = QPushButton("Run")
@@ -96,6 +98,17 @@ class MainWindow(QMainWindow):
         for tab in self.tab_manager.additional_tabs:
             tab_index = self.tab_widget.indexOf(tab)
             self.tab_widget.setTabVisible(tab_index, False)
+
+    def help_button_clicked(self):
+        """
+        Handle the click event of the help button.
+
+        This method is called when the help button is clicked. It displays
+        help information to the user.
+        """
+
+        help_message_box = HelpMessageBox()
+        help_message_box.exec_()
 
     def toggle_additional_tabs(self, state):
         """
