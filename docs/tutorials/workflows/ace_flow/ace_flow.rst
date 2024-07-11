@@ -18,11 +18,24 @@ ACE Workflow
 Installation
 ============
 
-To install the ACE workflow, refer to the MIRACL installation guide and video tutorials:
+To install the ACE workflow, refer to the MIRACL installation guide:
 
 - :doc:`Installation guide <../../../installation/installation>`
 
-- `Video tutorial <https://www.google.ca/>`_
+Video Tutorial
+==============
+
+`Video tutorial <https://www.youtube.com/playlist?list=PLZeAd6YsEkyhWsHuym5dTV2wjQ299ekm8>`_
+
+- This video tutorial covers the following topics:
+   - MIRACL installation validation
+   - Download sample data
+   - Run ACE on a single subject (Mode 2) including deep learning
+   segmentation of cFos+ cells, registration, voxelization, and warping
+   - Analyze the results of the above step
+   - Run ACE cluster-wise statistical algorithm between two groups to map
+   local cell activation
+   - Analyze the results of the above step
 
 .. TODO: update the tutorial link
 
@@ -231,17 +244,69 @@ Main outputs
 
 .. code-block::
 
-   seg_final # segmentation output including model(s) outputs and uncertainty estimates
-   conv_final # conversion (tiff to nifti) output
-   clar_allen_reg # registration output / preliminary files  
-   reg_final  # main registration output 
-   vox_final 
-   warp_final
+   final_ctn_down_<CONVERSION DOWNSAMPLE RATIO>_rca_voxel_size_<REGISTRATION VOXEL SIZE>/ # main output folder
+   |-- seg_final/
+      |-- ...
+   |-- conv_final/
+      |-- <CONVERSION NAME>.nii.gz
+   |-- clar_allen_reg/
+      |-- ...
+   |-- reg_final/
+      |-- annotation_*_tiff_clar/
+      |-- annotation_*_clar_space_downsample.nii.gz
+      |-- annotation_*_clar_downsample.nii.gz
+      |-- clar_downsample*.nii.gz
+   |-- vox_final/
+      |-- voxelized_seg_seg.nii.gz
+   |-- warp_final/
+      |-- voxelized_seg_seg_allen_space.nii.gz
    
    # the following outputs are generated only in Mode 1
-   heatmap_final
-   cluster_final # cluster-wise analysis output including p_value and f_stats maps
-   corr_final # correlation analysis output including correlation maps and p_value maps
+   |-- heatmap_final/
+      |-- group_1_mean_plot.tiff
+      |-- group_2_mean_plot.tiff
+      |-- group_difference_mean_plot.tiff
+   |-- clust_final/
+      |-- f_obs.nii.gz
+      |-- p_values.nii.gz
+      |-- pvalue_heatmap_mean_plot.tiff
+   |-- corr_final/
+
+- ``seg_final``: Contains the segmentation output (binary) including model(s) outputs (and
+uncertainty estimates) in slice format that match with the raw data naming.
+- ``conv_final``: Contains the conversion (tiff to nifti) output. The name of this file depends
+on the parameters used in conversion. This will be the only file in this directory.
+- ``clar_allen_reg``: Contains the registration outputs / preliminary files.
+- ``reg_final``: Contains the main registration outputs.
+   - ``annotation_*_tiff_clar``: Contains the atlas annotations in native space.
+   These are saved in slice format, with the same naming as the raw input
+   - ``annotation_*_clar_space_downsample.nii.gz``: Contains the atlas annotations
+   in native space in nifti format. Can be overlaid on the conversion output.
+   - ``annotation_*_clar_downsample.nii.gz``: Contains the atlas annotations in
+   atlas space in nifti format. Can be overlaid on ``clar_downsample*.nii.gz``.
+   - ``clar_downsample*.nii.gz``: Contains the downsampled conversion output 
+   warped to atlas space.
+
+.. note::
+
+   The ``annotation_*_clar_downsample.nii.gz`` file is the most important file in this directory.
+   Please overlay this file on the ``clar_downsample*.nii.gz`` file to visualize and check the
+   registration output in native space and make sure it is correct.
+
+- ``vox_final``: Contains the voxelized segmentation output.
+- ``warp_final``: Contains the voxelized + warped segmentation output. This file
+is in atlas space.
+- ``heatmap_final``: Contains the group-wise heatmaps of cell density using the average
+of voxelized and warped segmentation maps in each group. Also contains the group difference
+heatmap. ``group_1_mean_plot.tiff`` is for the control group, ``group_2_mean_plot.tiff``
+is for the treated group.
+- ``clust_final``: Contains the cluster-wise TFCE permutation statistics at the atlas space
+(``f_obs.nii.gz``), the p-value image of the F-statistics (``p_values.nii.gz``), and the p-value heatmap
+projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
+as ``-log10(p-value)``.
+- ``corr_final``: Contains the correlation analysis output including correlation maps and p_value maps.
+
+
 
 .. _example_anchor:
 
@@ -254,7 +319,8 @@ Example of running ACE flow on multiple subjects (Mode 1):
       --control ./non_walking/ ./non_walking/Newton_HC1/cells/ \
       --treated ./walking/ ./walking/Newton_UI1/cells/ \
       --sa_output_folder ./output_dir \
-      --sa_model_type unet
+      --sa_model_type unet \
+      --sa_resolution 1.4 1.4 5.0
 
 
 Example of running ACE on single subject (Mode 2) (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
