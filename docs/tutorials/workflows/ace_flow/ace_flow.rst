@@ -25,7 +25,7 @@ To install the ACE workflow, refer to the MIRACL installation guide:
 Video Tutorial
 ==============
 
-`Video tutorial <https://www.google.ca/>`_
+`Video tutorial <https://www.youtube.com/playlist?list=PLZeAd6YsEkyhWsHuym5dTV2wjQ299ekm8>`_
 
 - This video tutorial covers the following topics:
    - MIRACL installation validation
