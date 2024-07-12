@@ -4,12 +4,12 @@ ACE Workflow
 **A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
 1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets (`link to sample data <https://drive.google.com/drive/folders/14xWysQshKxwuTDWEQHT3OGKcH16scrrQ>`__
+   very large LSFM datasets (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/blob/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__
    and :ref:`refer to example section<example_anchor>`) to map brain-wide local/laminar neuronal activity.
 2. Optimized cluster-wise statistical analysis with a threshold-free 
    enhancement approach to chart subpopulation-specific effects at the laminar 
    and local level, without restricting the analysis to atlas-defined regions 
-   (`link to sample data <https://drive.google.com/drive/folders/1IgN9fDEVNeeT0a_BCzy3nReJWfxbrg72>`__ 
+   (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/blob/dev/sample_data/ace/ace_sample_data_stats.zip>`__ 
    and :ref:`refer to example section<example_anchor>`).
 3. Modules for providing DL model uncertainty estimates and fine-tuning (in a future release).
 4. Interface with MIRACL registration.
