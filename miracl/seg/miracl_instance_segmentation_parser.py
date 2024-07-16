@@ -15,7 +15,18 @@ class MIRACLInstanceSegParser(argparse.ArgumentParser):
     def parsefn(self) -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser(
             prog=FULL_PROG_NAME,
-            description="Instance segmentation step of ACE segmentation",
+            description="""Instance segmentation step of ACE segmentation
+    This module perfoms the following:
+        1. Load in the patches from ACE segmentation output folder
+        2. Perform connected component analysis on the patches to label neurons
+        3. Get region properties for each neuron
+        4. Save the results to a json file
+        5. Optionally stack the patches to form image slices
+        
+    Notes: stacking is needed to correct the neuron count since counting is done in parallel.
+    The patches must be processed in sequence to get the correct neuron count, which
+    is done by patch stacking.
+    """,
             formatter_class=argparse.RawDescriptionHelpFormatter,
             usage=f"""{FULL_PROG_NAME} -i <input_seg_folder> [ -o <output_folder> ] [ -g <glob_pattern> ] [ -p <percentage_brain_patch_skip> ]""",
             add_help=False,
