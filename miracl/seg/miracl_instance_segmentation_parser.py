@@ -17,7 +17,7 @@ class MIRACLInstanceSegParser(argparse.ArgumentParser):
             prog=FULL_PROG_NAME,
             description="Instance segmentation step of ACE segmentation",
             formatter_class=argparse.RawDescriptionHelpFormatter,
-            usage="""%(prog)s -i <input_seg_folder> [ -o <output_folder> ] [ -g <glob_pattern> ] [ -p <percentage_brain_patch_skip> ]""",
+            usage=f"""{FULL_PROG_NAME} -i <input_seg_folder> [ -o <output_folder> ] [ -g <glob_pattern> ] [ -p <percentage_brain_patch_skip> ]""",
             add_help=False,
         )
         required_args = parser.add_argument_group("Required arguments")
@@ -46,6 +46,15 @@ class MIRACLInstanceSegParser(argparse.ArgumentParser):
             required=False,
             default=None,
             help="Path to output folder (default: <input_folder>.parent /cc_slices/)",
+        )
+        # Parser for the properties to compute for each neurone
+        optional_args.add_argument(
+            "--properties",
+            type=str,
+            required=False,
+            nargs="+",
+            default=["area", "centroid", "bbox", "label"],
+            help="Properties to compute for each neurone (default: %(default)s)",
         )
         # Parser for glob pattern i.e. pattern to match files
         optional_args.add_argument(
