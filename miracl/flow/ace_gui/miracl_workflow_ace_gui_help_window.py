@@ -13,7 +13,6 @@ class HelpMessageBox(QDialog):
 https://miracl.readthedocs.io/en/latest/tutorials/workflows/ace_flow/ace_flow.html
 </a>
 <br>
-<br>
 """
     parameter_description="""
 single or multi method arguments:
@@ -247,7 +246,7 @@ optional statistics arguments:
         text_region = QTextEdit()
         text_region.setReadOnly(True)
         text_region.setText(self.docs_message)
-        text_region.append("<b>Parameter desecriptions:</b>")
+        text_region.append("<b>Parameter descriptions:</b>")
         text_region.append(self.parameter_description)
         layout.addWidget(text_region)
 
