@@ -20,9 +20,11 @@ License:
 from pandas.core.dtypes.common import conversion
 from PyQt5.QtWidgets import (
     QApplication,
+    QHBoxLayout,
     QMainWindow,
     QWidget,
     QVBoxLayout,
+    QFileDialog,
     QCheckBox,
     QPushButton,
     QTabWidget,
@@ -37,6 +39,7 @@ from miracl import miracl_logger
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_creator import flag_creator
 import subprocess, shlex
 from pathlib import Path
+from miracl.system.io_utils import UserInputPairsManager
 
 # import sys
 # import os
@@ -67,8 +70,11 @@ class MainWindow(QMainWindow):
         This method sets up the main window, including the central widget,
         main layout, tab widget, and various UI elements.
         """
+        self.window_title = "ACE flow"
+
         super().__init__()
-        self.setWindowTitle("ACE flow")
+
+        self.setWindowTitle(self.window_title)
         self.setGeometry(100, 100, 720, 600)
 
         central_widget = QWidget()
@@ -86,6 +92,17 @@ class MainWindow(QMainWindow):
         show_tabs_checkbox.stateChanged.connect(self.toggle_additional_tabs)
         main_layout.addWidget(show_tabs_checkbox)
 
+        io_widget = QWidget()
+        io_layout = QHBoxLayout(io_widget)
+        io_load_button = QPushButton("Load")
+        io_load_button.clicked.connect(self.load_button_clicked)
+        io_layout.addWidget(io_load_button)
+        io_save_button = QPushButton("Save")
+        io_save_button.clicked.connect(self.save_button_clicked)
+        io_layout.addWidget(io_save_button)
+        io_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(io_widget)
+
         help_button = QPushButton("Help")
         help_button.clicked.connect(self.help_button_clicked)
         main_layout.addWidget(help_button)
@@ -98,6 +115,34 @@ class MainWindow(QMainWindow):
         for tab in self.tab_manager.additional_tabs:
             tab_index = self.tab_widget.indexOf(tab)
             self.tab_widget.setTabVisible(tab_index, False)
+
+    def save_button_clicked(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getSaveFileName(
+            self, "Save File", "", "MIRACL Files (*.mdat)", options=options
+        )
+        if fileName:
+            if not fileName.endswith(".mdat"):
+                fileName += ".mdat"
+
+            flag_arguments = {
+                "--input": "input.txt",
+                "--output": "output.txt",
+                "--num-threads": 4,
+                "--verbose": True,
+                "--list": [1, 2, 3, 4],
+            }
+
+            manager = UserInputPairsManager(self.window_title.lower().replace(" ", "_"))
+            manager.set_user_input_pairs(flag_arguments)
+            manager.save_to_json(fileName)
+            print(f"File saved as: {fileName}")
+
+    def load_button_clicked(self):
+        manager = UserInputPairsManager("ace_flow")
+        loaded_flag_arguments = manager.load_from_json("flag_arguments.json")
+        print(loaded_flag_arguments)
 
     def help_button_clicked(self):
         """
@@ -157,7 +202,9 @@ class MainWindow(QMainWindow):
 
         # segmentation
         segmentation_tab = self.tab_manager.segmentation_tab
-        segmentation_tab_flags = flag_creator.create_segmentation_flags(segmentation_tab)
+        segmentation_tab_flags = flag_creator.create_segmentation_flags(
+            segmentation_tab
+        )
 
         # Voxelizing/warping
         voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
@@ -182,7 +229,9 @@ class MainWindow(QMainWindow):
         # Run ACE
         ace_gui_controller_path = Path(__file__).resolve()
         ace_interface_dir = ace_gui_controller_path.parent.parent
-        ace_interface_script_path = ace_interface_dir / "miracl_workflow_ace_interface.py"
+        ace_interface_script_path = (
+            ace_interface_dir / "miracl_workflow_ace_interface.py"
+        )
         full_command = f"python {str(ace_interface_script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(segmentation_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"  # Crafts cmd
         full_command_split = shlex.split(full_command)  # Split cmd for subprocess use
         logger.debug(f"FULL COMMAND: {full_command_split}")
@@ -212,7 +261,7 @@ class MainWindow(QMainWindow):
             stderr_lines = stderr.strip().split("\n")
             error_message = "\n".join(stderr_lines[-1:])
             QMessageBox.critical(None, "Error", error_message)
-            return False  
+            return False
 
         print("Command executed successfully!")
         return True
@@ -256,6 +305,7 @@ class MainWindow(QMainWindow):
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         # test_dict = wu.extract_help_texts(args_parser)
         # print(test_dict["single"])
+
 
 def main():
     app = QApplication([])
