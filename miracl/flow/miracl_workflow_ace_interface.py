@@ -497,6 +497,8 @@ class ACEWorkflows:
                     orientation_file,
                 )
 
+                # TODO: do instance seg and move the files to one shared directory
+
             nifti_save_location[type_] = list(
                 ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz")
             )[0]
