@@ -68,6 +68,7 @@ class ACEWorkflowParser:
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
         stats_args = parser.add_argument_group("optional statistics arguments")
+        validate_clusters_args = parser.add_argument_group("optional validate clusters arguments")
 
         # INFO: ACE segmentation parser
         single_multi_args_group.add_argument(
@@ -769,6 +770,35 @@ class ACEWorkflowParser:
             help="""Do not run instance segmentation (default: %(default)s).
     Instance seg is used to identify and label neurons in the image. It is useful for
     counting and downstream tasks.""",
+        )
+
+        useful_args.add_argument(
+            "--no-validate-clusters",
+            action="store_false",
+            default=False,
+            help="""Do not validate clusters (default: %(default)s).
+    Validate clusters is used to get native space statistics for each subject
+    based on the ouput of ACE TFCE stats.""",
+        )
+
+        # validate clusters args
+        validate_clusters_args.add_argument(
+            "--vc_skip",
+            default=50,
+            type=int,
+            help="Number of slices to skip in the z direction (default: %(default)s)",
+        )
+        validate_clusters_args.add_argument(
+            "--vc_min_area",
+            default=0,
+            type=int,
+            help="Minimum area of a neuron to be considered (default: %(default)s)",
+        )
+        validate_clusters_args.add_argument(
+            "--vc_pvalue_thr",
+            default=0.01,
+            type=float,
+            help="P-value threshold for binarizing p value (default: %(default)s)",
         )
 
         # INFO: help section

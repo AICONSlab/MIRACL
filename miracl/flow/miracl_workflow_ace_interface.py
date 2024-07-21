@@ -12,7 +12,8 @@ from typing import List, Optional
 from miracl import miracl_logger
 from miracl.flow import miracl_workflow_ace_parser
 from miracl.seg import ace_interface, miracl_instance_segmentation_interface
-from miracl.stats import miracl_stats_ace_interface
+from miracl.stats import (miracl_stats_ace_interface,
+                          miracl_stats_ace_validate_clusters)
 
 logger = miracl_logger.logger
 
@@ -65,6 +66,21 @@ class Stats(ABC):
 class Heatmap(ABC):
     @abstractmethod
     def create_heatmap(self, heatmap_cmd):
+        pass
+
+
+class ValidateClusters(ABC):
+    @abstractmethod
+    def validate(self,
+                 args,
+                 validate_clusters_output_folder,
+                 p_value_path,
+                 f_stat_path,
+                 mean_diff_path,
+                 neuron_info_dir,
+                 tif_extension,
+                 ace_output_extension,
+                 ):
         pass
 
 
@@ -285,6 +301,64 @@ class ACEHeatmap(Heatmap):
         logger.debug(f"heatmap_cmd: {heatmap_cmd}")
 
 
+class ACEValidateClusters(ValidateClusters):
+    """ACE ValidateClusters module used for validating the clusters in native space.
+
+    :param ValidateClusters: base abstract class for cluster validation
+    :type ValidateClusters: ABC
+    """
+
+    def validate(self,
+                 args: argparse.Namespace,
+                 validate_clusters_output_folder: Path,
+                 p_value_path: Path,
+                 f_stat_path: Path,
+                 mean_diff_path: Path,
+                 neuron_info_dir: Path,
+                 tif_extension: str,
+                 ace_output_extension: str,
+                 ):
+        """Main method for validation module. Calls `miracl stats ace_validate_clusters` module.
+
+        :param args: command line arguments needed for MIRACL stats module.
+        :type args: argparse.Namespace
+        :param validate_clusters_output_folder: path to the validate clusters output folder ('validate_clusters_final/')
+        :type validate_clusters_output_folder: pathlib.Path
+        :param p_value_path: path to the p-value file from ace stats
+        :type p_value_path: pathlib.Path
+        :param f_stat_path: path to the f-stat file from ace stats
+        :type f_stat_path: pathlib.Path
+        :param mean_diff_path: path to the mean difference file from ace stats
+        :type mean_diff_path: pathlib.Path
+        :param neuron_info_dir: path to the neuron info json folder ('neuron_info_json/')
+        :type neuron_info_dir: pathlib.Path
+        :param tif_extension: extension of the tiff files from base directory
+        :type tif_extension: str
+        :param ace_output_extension: extension of the ace output files
+        :type ace_output_extension: str
+        """
+        print("  validating clusters...")
+        validate_args = argparse.Namespace(
+            p_value=p_value_path,
+            path_to_ace_output=ace_output_extension,
+            path_to_raw_slices=tif_extension,
+            pvalue_thr=args.vc_pvalue_thr,
+            f_stat=f_stat_path,
+            mean_diff=mean_diff_path,
+            atlas_dir=args.u_atlas_dir,
+            control=args.control[0],
+            treated=args.treated[0],
+            neuron_info_dir=neuron_info_dir,
+            orient_code=args.rca_orient_code,
+            vox_size=args.rwc_voxel_size,
+            hemi=args.rca_hemi,
+            side=args.rca_side,
+            output_dir=validate_clusters_output_folder,
+            skip=args.vc_skip,
+            min_area=args.vc_min_area,
+        )
+        miracl_stats_ace_validate_clusters.main(args=validate_args)
+
 class ACEWorkflows:
     """Class used for executing each step in ACE workflow.
 
@@ -316,6 +390,7 @@ class ACEWorkflows:
         warping: Warping,
         stats: Stats,
         heatmap: Heatmap,
+        validate_clusters: ValidateClusters,
     ):
         """Constructor method"""
         self.segmentation = segmentation
@@ -326,6 +401,7 @@ class ACEWorkflows:
         self.warping = warping
         self.stats = stats
         self.heatmap = heatmap
+        self.validate_clusters = validate_clusters
 
     def execute_workflow(self, args: argparse.Namespace, **kwargs):
         """Method that handles logic for single or comparison workflow.
@@ -447,6 +523,10 @@ class ACEWorkflows:
             f"final_ctn_down_{args.ctn_down}_rca_voxel_size_{args.rca_voxel_size}"
         )
 
+        neuron_info_json_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "neuron_info_json"
+        )
+
         nifti_save_location = {}
 
         for type_ in ["control", "experiment"]:
@@ -542,7 +622,11 @@ class ACEWorkflows:
                     orientation_file,
                 )
 
-                # TODO: do instance seg and move the files to one shared directory
+                # copy neuron info to the neuron_info_json folder
+                neuron_info_json_file = list(
+                    ace_flow_seg_output_folder.rglob("neuron_info_final.json")
+                )[0]
+                shutil.copy(neuron_info_json_file, neuron_info_json_folder / f"{subject.name}_neuron_info.json")
 
             nifti_save_location[type_] = list(
                 ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz")
@@ -560,6 +644,10 @@ class ACEWorkflows:
             args.sa_output_folder, "heat_final"
         )
 
+        ace_flow_validate_clusters_output_folder = FolderCreator.create_folder(
+            args.sa_output_folder, "validate_clusters_final"
+        )
+
         self.stats.compute_stats(args)
 
         tested_heatmap_cmd = ConstructHeatmapCmd.test_none_args(
@@ -569,6 +657,20 @@ class ACEWorkflows:
             args, ace_flow_heatmap_output_folder, tested_heatmap_cmd
         )
         self.heatmap.create_heatmap(heatmap_cmd)
+
+        run_validate_clusters = not args.no_validate_clusters
+        
+        if run_validate_clusters:
+            self.validate_clusters.validate(
+                args=args,
+                validate_clusters_output_folder=ace_flow_validate_clusters_output_folder,
+                p_value_path=Path(args.sa_output_folder) / "clust_final" / "p_values.nii.gz",
+                f_stat_path=Path(args.sa_output_folder) / "clust_final" / "f_obs.nii.gz",
+                mean_diff_path=Path(args.sa_output_folder) / "clust_final" / "diff_mean.nii.gz",
+                neuron_info_dir=neuron_info_json_folder,
+                tif_extension=tiff_extension,
+                ace_output_extension=str(Path(tiff_extension).parent / per_subject_final_folder),
+            )
 
 
 class FolderCreator:
@@ -1043,6 +1145,7 @@ def main():
     warping = ACEWarping()
     stats = ACEStats()
     heatmap = ACEHeatmap()
+    validate_clusters = ACEValidateClusters()
 
     ace_workflow = ACEWorkflows(
         segmentation,
@@ -1053,6 +1156,7 @@ def main():
         warping,
         stats,
         heatmap,
+        validate_clusters,
     )
     result = ace_workflow.execute_workflow(args)
 
