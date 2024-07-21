@@ -762,6 +762,15 @@ class ACEWorkflowParser:
             metavar="TRUE/FALSE",
         )
 
+        useful_args.add_argument(
+            "--no-instance-segmentation",
+            action="store_false",
+            default=False,
+            help="""Do not run instance segmentation (default: %(default)s).
+    Instance seg is used to identify and label neurons in the image. It is useful for
+    counting and downstream tasks.""",
+        )
+
         # INFO: help section
         class _CustomHelpAction(argparse._HelpAction):
             _required_args = []

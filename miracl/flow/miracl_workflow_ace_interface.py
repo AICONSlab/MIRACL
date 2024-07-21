@@ -11,7 +11,7 @@ from typing import List, Optional
 
 from miracl import miracl_logger
 from miracl.flow import miracl_workflow_ace_parser
-from miracl.seg import ace_interface
+from miracl.seg import ace_interface, miracl_instance_segmentation_interface
 from miracl.stats import miracl_stats_ace_interface
 
 logger = miracl_logger.logger
@@ -21,6 +21,12 @@ MIRACL_HOME = Path(os.environ["MIRACL_HOME"])
 
 # DECLARE ABSTRACT METHODS #
 class Segmentation(ABC):
+    @abstractmethod
+    def segment(self, args):
+        pass
+
+
+class InstanceSegmentation(ABC):
     @abstractmethod
     def segment(self, args):
         pass
@@ -81,6 +87,35 @@ class ACESegmentation(Segmentation):
         logger.debug(f"Example args: {args.sa_model_type}")
         ace_interface.main(args=args)
 
+class ACEInstanceSegmentation(InstanceSegmentation):
+    """ACE Instance Segmentation module used for segmenting the input images
+    into a connected component representation (labeled).
+    
+    :param InstanceSegmentation: base abstract class for instance segmentation
+    :type InstanceSegmentation: ABC
+    """
+
+    def segment(self, args: argparse.Namespace, seg_dir: Path):
+        """Main method for instance segmentation module. Calls the `miracl seg instance` module.
+        
+        :param args: command line arguments needed for MIRACL ACE instance seg module.
+        :type args: argparse.Namespace
+        :param seg_dir: path to the segmentation output folder ('seg_final/')
+        :type seg_dir: Path
+        """
+        print("  instance segmentation...")
+        # set up namespace for instance segmentation
+        args_instance = argparse.Namespace(
+            input_folder=seg_dir / "generated_patches",
+            raw_input_folder=args.single,
+            output_folder=seg_dir / "cc_slices",
+            properties=["area", "centroid", "label", "bbox"],
+            glob_pattern="[A-Zo]*patch_*.tiff",
+            percentage_brain_patch_skip=args.sa_percentage_brain_patch_skip,
+            no_stack=False,
+            cpu_load=0.4,
+        )
+        miracl_instance_segmentation_interface.main(args=args_instance)
 
 class ACEConversion(Conversion):
     """ACE Conversion module used for converting the segmented tif files to nifti.
@@ -274,6 +309,7 @@ class ACEWorkflows:
     def __init__(
         self,
         segmentation: Segmentation,
+        instance_segmentation: InstanceSegmentation,
         conversion: Conversion,
         registration: Registration,
         voxelization: Voxelization,
@@ -283,6 +319,7 @@ class ACEWorkflows:
     ):
         """Constructor method"""
         self.segmentation = segmentation
+        self.instance_segmentation = instance_segmentation
         self.conversion = conversion
         self.registration = registration
         self.voxelization = voxelization
@@ -450,6 +487,14 @@ class ACEWorkflows:
 
                 if rerun_seg:
                     self.segmentation.segment(args)
+
+                run_instance_seg = not args.no_instance_segmentation
+
+                if run_instance_seg:
+                    self.instance_segmentation.segment(
+                        args,
+                        ace_flow_seg_output_folder
+                    )
 
                 rerun_conv = ConversionChecker.check_conversion(
                     args, ace_flow_conv_output_folder
@@ -991,6 +1036,7 @@ def main():
     args = args_parser.parse_args()
 
     segmentation = ACESegmentation()
+    instance_segmentation = ACEInstanceSegmentation()
     conversion = ACEConversion()
     registration = ACERegistration()
     voxelization = ACEVoxelization()
@@ -1000,6 +1046,7 @@ def main():
 
     ace_workflow = ACEWorkflows(
         segmentation,
+        instance_segmentation,
         conversion,
         registration,
         voxelization,
