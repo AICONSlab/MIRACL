@@ -35,6 +35,9 @@ class ClusterwiseTab(QWidget):
         self.setLayout(clusterwise_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         help_dict = wu.extract_help_texts(args_parser)
+        parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
+
+        print(f"PARSER PARSER PARSER: {parser_vals_dict}")
 
         (
             self.clusterwise_atlas_folder_label_input,
@@ -49,15 +52,18 @@ class ClusterwiseTab(QWidget):
         )
 
         self.clusterwise_nr_permutations_input = wu.create_digit_text_field(
-            clusterwise_layout, "# permutations:", help_dict["pcs_num_perm"], "500"
+            clusterwise_layout,
+            "# permutations:",
+            help_dict["pcs_num_perm"],
+            parser_vals_dict["pcs_num_perm"]["default"],
         )
 
         self.clusterwise_image_resolution_input = wu.create_multiple_choice(
             clusterwise_layout,
             "Resolution of images (um):",
-            help_dict["pcs_img_resolution"],
-            ["10", "25", "50"],
-            "25",
+            parser_vals_dict["pcs_img_resolution"]["help"],
+            parser_vals_dict["pcs_img_resolution"]["choices"],
+            parser_vals_dict["pcs_img_resolution"]["default"],
         )
 
         self.clusterwise_fwhm_smoothing_input = wu.create_digit_text_field(
@@ -92,7 +98,7 @@ class ClusterwiseTab(QWidget):
             1.00,
             "float",
             0.01,
-            2
+            2,
         )
 
         self.clusterwise_tfce_h_input = wu.create_digit_text_field(
@@ -112,7 +118,7 @@ class ClusterwiseTab(QWidget):
             1.0000,
             "float",
             0.01,
-            4
+            4,
         )
 
         self.clusterwise_mask_thr_input = wu.create_digit_spinbox(
