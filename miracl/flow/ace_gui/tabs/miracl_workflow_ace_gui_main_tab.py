@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (
     QFormLayout,
 )
 from PyQt5.QtCore import Qt
-from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
 
 

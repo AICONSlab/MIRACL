@@ -1,7 +1,6 @@
 from typing import Optional
 
-from PyQt5.QtWidgets import (QDialog, QPushButton, QTextEdit, QVBoxLayout,
-                             QWidget)
+from PyQt5.QtWidgets import QDialog, QPushButton, QTextEdit, QVBoxLayout, QWidget
 
 
 class HelpMessageBox(QDialog):
@@ -14,7 +13,7 @@ https://miracl.readthedocs.io/en/latest/tutorials/workflows/ace_flow/ace_flow.ht
 </a>
 <br>
 """
-    parameter_description="""
+    parameter_description = """
 single or multi method arguments:
   user is required to pass either single or multi method arguments
 
@@ -234,7 +233,7 @@ optional statistics arguments:
                         Output filenames (default: pvalue_heatmap)
 
 """
-   
+
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
