@@ -928,6 +928,7 @@ class WidgetUtils:
                     "default": default_value,
                     "help": help_message,
                     "choices": choices_info,
+                    "type": action.type.__name__ if action.type else "None",
                 }
 
         return args_dict
