@@ -21,6 +21,7 @@ from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 
 REG_BOOL_FLAGS = "set_bool"
 
+
 class flag_creator:
     @staticmethod
     def create_main_tab_flags(main_tab, method_checkbox):
@@ -122,11 +123,14 @@ class flag_creator:
             )
             == "yes"
             else "0",
-            "--sa_visualize_results": REG_BOOL_FLAGS if wu.get_tab_var(
+            "--sa_visualize_results": REG_BOOL_FLAGS
+            if wu.get_tab_var(
                 segmentation_tab,
                 "segmentation_visualize_results_input",
                 "multiplechoice",
-            ) == "yes" else None,
+            )
+            == "yes"
+            else None,
             "--sa_uncertainty_map": REG_BOOL_FLAGS
             if wu.get_tab_var(
                 segmentation_tab, "segmentation_uncertainty_map_input", "multiplechoice"
