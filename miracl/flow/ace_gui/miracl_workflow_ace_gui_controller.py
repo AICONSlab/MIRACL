@@ -116,6 +116,82 @@ class MainWindow(QMainWindow):
             tab_index = self.tab_widget.indexOf(tab)
             self.tab_widget.setTabVisible(tab_index, False)
 
+    def get_script_path(self, module_interface):
+        gui_controller_path = Path(__file__).resolve()
+        interface_dir = gui_controller_path.parent.parent
+        interface_script_path = interface_dir / module_interface
+        return interface_script_path
+
+    def create_cmd_dict(self):
+        #########
+        # FLAGS #
+        #########
+
+        # Main tab
+        # main_tab = self.tab_manager.main_tab
+        # method_checkbox = (
+        #     self.tab_manager.main_tab.single_checkbox
+        # )  # Checks if single or multiple method is used
+        # main_tab_flags = flag_creator.create_main_tab_flags(main_tab, method_checkbox)
+        main_tab_flags = flag_creator.create_main_tab_flags(
+            self.tab_manager.main_tab, self.tab_manager.main_tab.single_checkbox
+        )
+
+        # CLARITY-Allen registration
+        # clarity_registration_tab = self.tab_manager.clarity_registration_tab
+        clarity_registration_tab_flags = flag_creator.create_clarity_registration_flags(
+            self.tab_manager.clarity_registration_tab
+        )
+
+        # Conversion
+        # conversion_tab = self.tab_manager.conversion_tab
+        conversion_tab_flags = flag_creator.create_conversion_flags(
+            self.tab_manager.conversion_tab
+        )
+
+        # segmentation
+        # segmentation_tab = self.tab_manager.segmentation_tab
+        segmentation_tab_flags = flag_creator.create_segmentation_flags(
+            self.tab_manager.segmentation_tab
+        )
+
+        # Voxelizing/warping
+        # voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
+        voxelizing_warping_tab_flags = flag_creator.create_voxelization_warping_flags(
+            self.tab_manager.voxelizing_warping_tab
+        )
+
+        # Clusterwise
+        # clusterwise_tab = self.tab_manager.clusterwise_tab
+        clusterwise_tab_flags = flag_creator.create_clusterwise_flags(
+            self.tab_manager.clusterwise_tab
+        )
+
+        # Correlation/stats
+        # correlation_stats_tab = self.tab_manager.correlation_stats_tab
+        correlation_stats_tab_flags = flag_creator.create_correlation_stats_flags(
+            self.tab_manager.correlation_stats_tab
+        )
+
+        # Heatmap
+        # heatmap_tab = self.tab_manager.heatmap_tab
+        heatmap_tab_flags = flag_creator.create_heatmap_flags(
+            self.tab_manager.heatmap_tab
+        )
+
+        all_user_input_pairs_dicts = {
+            "main_tab": main_tab_flags,
+            "clarity_registration_tab": clarity_registration_tab_flags,
+            "conversion_tab": conversion_tab_flags,
+            "segmentation_tab": segmentation_tab_flags,
+            "voxelizing_warping_tab": voxelizing_warping_tab_flags,
+            "clusterwise_tab": clusterwise_tab_flags,
+            "correlation_stats_tab": correlation_stats_tab_flags,
+            "heatmap_tab": heatmap_tab_flags,
+        }
+
+        return all_user_input_pairs_dicts
+
     def save_button_clicked(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -126,23 +202,21 @@ class MainWindow(QMainWindow):
             if not fileName.endswith(".mdat"):
                 fileName += ".mdat"
 
-            flag_arguments = {
-                "--input": "input.txt",
-                "--output": "output.txt",
-                "--num-threads": 4,
-                "--verbose": True,
-                "--list": [1, 2, 3, 4],
-            }
-
+            user_input_pairs_dicts = self.create_cmd_dict()
             manager = UserInputPairsManager(self.window_title.lower().replace(" ", "_"))
-            manager.set_user_input_pairs(flag_arguments)
+            manager.set_user_input_pairs(user_input_pairs_dicts)
             manager.save_to_json(fileName)
             print(f"File saved as: {fileName}")
 
     def load_button_clicked(self):
         manager = UserInputPairsManager("ace_flow")
-        loaded_flag_arguments = manager.load_from_json("flag_arguments.json")
+        loaded_flag_arguments, metadata = manager.load_from_json(
+            "/code/miracl/flow/ace_gui/test.mdat"
+        )
         print(loaded_flag_arguments)
+        print(metadata)
+        temp_load = loaded_flag_arguments['clusterwise_tab']['--pcs_num_perm']
+        self.tab_manager.clusterwise_tab.clusterwise_nr_permutations_input.setText(temp_load)
 
     def help_button_clicked(self):
         """
@@ -179,61 +253,29 @@ class MainWindow(QMainWindow):
         method arguments" checkbox and prints the corresponding mode.
         """
 
-        #########
-        # FLAGS #
-        #########
-
-        # Main tab
-        main_tab = self.tab_manager.main_tab
-        method_checkbox = (
-            self.tab_manager.main_tab.single_checkbox
-        )  # Checks if single or multiple method is used
-        main_tab_flags = flag_creator.create_main_tab_flags(main_tab, method_checkbox)
-
-        # CLARITY-Allen registration
-        clarity_registration_tab = self.tab_manager.clarity_registration_tab
-        clarity_registration_tab_flags = flag_creator.create_clarity_registration_flags(
-            clarity_registration_tab
+        print(
+            f"TESTER TESTER TESTER: {self.tab_manager.clusterwise_tab.clusterwise_nr_permutations_input.text()}"
         )
 
-        # Conversion
-        conversion_tab = self.tab_manager.conversion_tab
-        conversion_tab_flags = flag_creator.create_conversion_flags(conversion_tab)
-
-        # segmentation
-        segmentation_tab = self.tab_manager.segmentation_tab
-        segmentation_tab_flags = flag_creator.create_segmentation_flags(
-            segmentation_tab
-        )
-
-        # Voxelizing/warping
-        voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
-        voxelizing_warping_tab_flags = flag_creator.create_voxelization_warping_flags(
-            voxelizing_warping_tab
-        )
-
-        # Clusterwise
-        clusterwise_tab = self.tab_manager.clusterwise_tab
-        clusterwise_tab_flags = flag_creator.create_clusterwise_flags(clusterwise_tab)
-
-        # Correlation/stats
-        correlation_stats_tab = self.tab_manager.correlation_stats_tab
-        correlation_stats_tab_flags = flag_creator.create_correlation_stats_flags(
-            correlation_stats_tab
-        )
-
-        # Heatmap
-        heatmap_tab = self.tab_manager.heatmap_tab
-        heatmap_tab_flags = flag_creator.create_heatmap_flags(heatmap_tab)
+        all_user_input_pairs_dicts = self.create_cmd_dict()
 
         # Run ACE
-        ace_gui_controller_path = Path(__file__).resolve()
-        ace_interface_dir = ace_gui_controller_path.parent.parent
-        ace_interface_script_path = (
-            ace_interface_dir / "miracl_workflow_ace_interface.py"
+        ace_interface_script_path = self.get_script_path(
+            "miracl_workflow_ace_interface.py"
         )
-        full_command = f"python {str(ace_interface_script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(segmentation_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"  # Crafts cmd
+        full_command = (
+            f"python {str(ace_interface_script_path)} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['main_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['conversion_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['segmentation_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['clarity_registration_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['voxelizing_warping_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['clusterwise_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['correlation_stats_tab'])} "
+            f"{wu.craft_flags(all_user_input_pairs_dicts['heatmap_tab'])}"
+        )  # Crafts cmd
         full_command_split = shlex.split(full_command)  # Split cmd for subprocess use
+
         logger.debug(f"FULL COMMAND: {full_command_split}")
         process = subprocess.Popen(
             full_command_split,

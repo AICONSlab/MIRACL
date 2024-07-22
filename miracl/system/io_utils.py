@@ -38,4 +38,4 @@ class UserInputPairsManager:
         with open(file_path, "w") as file:
             ujson.dump(loaded_data, file, indent=4)
 
-        return self.user_input_pairs
+        return self.user_input_pairs, self.metadata

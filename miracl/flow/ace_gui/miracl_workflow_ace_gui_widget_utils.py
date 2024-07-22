@@ -865,3 +865,69 @@ class WidgetUtils:
                 help_texts[flag] = help_text
 
         return help_texts
+
+    @staticmethod
+    def extract_arguments_to_dict(parser):
+        if not isinstance(parser, argparse.ArgumentParser):
+            if hasattr(parser, "parser") and isinstance(
+                parser.parser, argparse.ArgumentParser
+            ):
+                parser = parser.parser
+            else:
+                raise TypeError(
+                    "The provided parser is not an instance of argparse.ArgumentParser"
+                )
+        args_dict = {}
+
+        # Iterate over the parser's actions to extract argument details
+        for action in parser._actions:
+            # Separate flags based on the number of leading hyphens
+            short_flags = [
+                flag
+                for flag in action.option_strings
+                if flag.startswith("-") and not flag.startswith("--")
+            ]
+            long_flags = [
+                flag for flag in action.option_strings if flag.startswith("--")
+            ]
+
+            # Default value handling
+            default_value = (
+                str(action.default) if action.default is not argparse.SUPPRESS else ""
+            )
+
+            # Help message with the actual default value and type
+            help_message = action.help if action.help else ""
+
+            # Create a format dictionary for the help message
+            format_dict = {
+                "default": default_value,
+                "type": action.type.__name__ if action.type else "None",
+            }
+
+            # Attempt to format the help message
+            try:
+                help_message = help_message % format_dict
+            except KeyError as e:
+                print(
+                    f"Warning: Unhandled placeholder {e} in help text for {long_flags}"
+                )
+
+            # Prepare choices information as a list of strings
+            if action.choices is not None:
+                choices_info = [
+                    str(choice) for choice in action.choices
+                ]  # Convert choices to strings
+            else:
+                choices_info = None
+
+            # Store the information in the dictionary using long flags as keys (without '--')
+            for flag in long_flags:
+                key = flag.lstrip("--")  # Remove the '--' prefix
+                args_dict[key] = {
+                    "default": default_value,
+                    "help": help_message,
+                    "choices": choices_info,
+                }
+
+        return args_dict
