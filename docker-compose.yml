@@ -1,12 +1,21 @@
 version: "3.3"
 services:
   miracl:
-    image: mgoubran/miracl
+    image: jo-miracl-save_functionality_img:latest
     tty: true
     environment:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: miracl
+    container_name: jo-miracl-save_functionality
+    shm_size: 219007mb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+      - /home/josmann/git/MIRACL/MIRACL_save_functionality/miracl:/code/miracl

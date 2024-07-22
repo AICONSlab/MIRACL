@@ -592,6 +592,7 @@ class ACEWorkflowParser:
             "-pcsr",
             "--pcs_img_resolution",
             type=int,
+            choices=[10, 25, 50],
             help="resolution of images in um (default: %(default)s)",
             default=25,
         )
