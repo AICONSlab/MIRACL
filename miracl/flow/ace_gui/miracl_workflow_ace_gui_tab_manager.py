@@ -18,14 +18,26 @@ License:
 """
 
 from PyQt5.QtWidgets import QTabWidget
-from tabs.miracl_workflow_ace_gui_main_tab import MainTab
-from tabs.miracl_workflow_ace_gui_segmentation_tab import SegmentationTab
-from tabs.miracl_workflow_ace_gui_clarity_registration_tab import ClarityRegistrationTab
-from tabs.miracl_workflow_ace_gui_voxelizing_warping_tab import VoxelizingWarpingTab
-from tabs.miracl_workflow_ace_gui_conversion_tab import ConversionTab
-from tabs.miracl_workflow_ace_gui_clusterwise_tab import ClusterwiseTab
-from tabs.miracl_workflow_ace_gui_correlation_stats_tab import CorrelationStatsTab
-from tabs.miracl_workflow_ace_gui_heatmap_tab import HeatmapTab
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_main_tab import MainTab
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_segmentation_tab import (
+    SegmentationTab,
+)
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_clarity_registration_tab import (
+    ClarityRegistrationTab,
+)
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_voxelizing_warping_tab import (
+    VoxelizingWarpingTab,
+)
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_conversion_tab import (
+    ConversionTab,
+)
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_clusterwise_tab import (
+    ClusterwiseTab,
+)
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_correlation_stats_tab import (
+    CorrelationStatsTab,
+)
+from miracl.flow.ace_gui.tabs.miracl_workflow_ace_gui_heatmap_tab import HeatmapTab
 
 
 class TabManager:
