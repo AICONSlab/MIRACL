@@ -25,7 +25,6 @@ from PyQt5.QtWidgets import (
 
 from PyQt5.QtCore import Qt
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
-from miracl.flow import miracl_workflow_ace_parser
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_config import FlagConfig
 
 
@@ -34,10 +33,7 @@ class ConversionTab(QWidget):
         super().__init__()
         conversion_layout = QFormLayout()
         self.setLayout(conversion_layout)
-        args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-        parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
         conv_dict = FlagConfig().create_conversion()
-        print(f"CONV CONV CONV: {conv_dict}")
 
         ####################
         # METHOD SELECTION #
@@ -86,7 +82,7 @@ class ConversionTab(QWidget):
             conv_dict["conv_center"]["label"],
             conv_dict["conv_center"]["help"],
             [str(num) for num in ast.literal_eval(conv_dict["conv_center"]["default"])],
-            [parser_vals_dict["ctn_center"]["type"]]
+            [conv_dict["conv_center"]["type"]]
             * len(
                 [
                     str(num)

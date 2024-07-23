@@ -190,21 +190,21 @@ class MainTab(QWidget):
         # self.create_rerun_registration(main_tab_layout)
         self.rerun_registration_input = wu.create_multiple_choice(
             main_tab_layout,
-            "Rerun registration: ",
+            "Rerun registration",
             help_dict["rerun-registration"],
             ["yes", "no"],
             "no",
         )
         self.rerun_segmentation_input = wu.create_multiple_choice(
             main_tab_layout,
-            "Rerun segmentation: ",
+            "Rerun segmentation",
             help_dict["rerun-segmentation"],
             ["yes", "no"],
             "no",
         )
         self.rerun_conversion_input = wu.create_multiple_choice(
             main_tab_layout,
-            "Rerun conversion: ",
+            "Rerun conversion",
             help_dict["rerun-conversion"],
             ["yes", "no"],
             "no",
