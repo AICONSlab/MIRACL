@@ -877,58 +877,52 @@ class WidgetUtils:
                 raise TypeError(
                     "The provided parser is not an instance of argparse.ArgumentParser"
                 )
-        args_dict = {}
 
+        args_dict = {}
+    
         # Iterate over the parser's actions to extract argument details
         for action in parser._actions:
             # Separate flags based on the number of leading hyphens
-            short_flags = [
-                flag
-                for flag in action.option_strings
-                if flag.startswith("-") and not flag.startswith("--")
-            ]
-            long_flags = [
-                flag for flag in action.option_strings if flag.startswith("--")
-            ]
-
+            short_flags = [flag for flag in action.option_strings if flag.startswith('-') and not flag.startswith('--')]
+            long_flags = [flag for flag in action.option_strings if flag.startswith('--')]
+            
             # Default value handling
-            default_value = (
-                str(action.default) if action.default is not argparse.SUPPRESS else ""
-            )
-
+            default_value = action.default if action.default is not argparse.SUPPRESS else ''
+            
+            # Convert default value to string
+            default_value_str = str(default_value)
+            
             # Help message with the actual default value and type
-            help_message = action.help if action.help else ""
-
+            help_message = action.help if action.help else ''
+            
             # Create a format dictionary for the help message
             format_dict = {
-                "default": default_value,
-                "type": action.type.__name__ if action.type else "None",
+                'default': default_value_str,
+                'type': action.type.__name__ if action.type else 'None'
             }
-
+            
             # Attempt to format the help message
             try:
                 help_message = help_message % format_dict
             except KeyError as e:
-                print(
-                    f"Warning: Unhandled placeholder {e} in help text for {long_flags}"
-                )
+                print(f"Warning: Unhandled placeholder {e} in help text for {long_flags}")
 
             # Prepare choices information as a list of strings
             if action.choices is not None:
-                choices_info = [
-                    str(choice) for choice in action.choices
-                ]  # Convert choices to strings
+                choices_info = [str(choice) for choice in action.choices]  # Convert choices to strings
             else:
                 choices_info = None
-
+            
             # Store the information in the dictionary using long flags as keys (without '--')
             for flag in long_flags:
-                key = flag.lstrip("--")  # Remove the '--' prefix
+                key = flag.lstrip('--')  # Remove the '--' prefix
                 args_dict[key] = {
-                    "default": default_value,
-                    "help": help_message,
-                    "choices": choices_info,
-                    "type": action.type.__name__ if action.type else "None",
+                    'default': default_value_str,
+                    'help': help_message,
+                    'choices': choices_info,
+                    'type': action.type.__name__ if action.type else 'None',  # Add type to the dictionary
+                    'nargs': action.nargs  # Add nargs to the dictionary
                 }
-
+        
         return args_dict
+
