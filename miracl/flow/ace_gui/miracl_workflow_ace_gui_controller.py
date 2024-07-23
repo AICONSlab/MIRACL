@@ -126,71 +126,31 @@ class MainWindow(QMainWindow):
         return interface_script_path
 
     def create_cmd_dict(self):
-        #########
-        # FLAGS #
-        #########
-
-        # Main tab
-        # main_tab = self.tab_manager.main_tab
-        # method_checkbox = (
-        #     self.tab_manager.main_tab.single_checkbox
-        # )  # Checks if single or multiple method is used
-        # main_tab_flags = flag_creator.create_main_tab_flags(main_tab, method_checkbox)
-        main_tab_flags = flag_creator.create_main_tab_flags(
-            self.tab_manager.main_tab, self.tab_manager.main_tab.single_checkbox
-        )
-
-        # CLARITY-Allen registration
-        # clarity_registration_tab = self.tab_manager.clarity_registration_tab
-        clarity_registration_tab_flags = flag_creator.create_clarity_registration_flags(
-            self.tab_manager.clarity_registration_tab
-        )
-
-        # Conversion
-        # conversion_tab = self.tab_manager.conversion_tab
-        conversion_tab_flags = flag_creator.create_conversion_flags(
-            self.tab_manager.conversion_tab
-        )
-
-        # segmentation
-        # segmentation_tab = self.tab_manager.segmentation_tab
-        segmentation_tab_flags = flag_creator.create_segmentation_flags(
-            self.tab_manager.segmentation_tab
-        )
-
-        # Voxelizing/warping
-        # voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
-        voxelizing_warping_tab_flags = flag_creator.create_voxelization_warping_flags(
-            self.tab_manager.voxelizing_warping_tab
-        )
-
-        # Clusterwise
-        # clusterwise_tab = self.tab_manager.clusterwise_tab
-        clusterwise_tab_flags = flag_creator.create_clusterwise_flags(
-            self.tab_manager.clusterwise_tab
-        )
-
-        # Correlation/stats
-        # correlation_stats_tab = self.tab_manager.correlation_stats_tab
-        correlation_stats_tab_flags = flag_creator.create_correlation_stats_flags(
-            self.tab_manager.correlation_stats_tab
-        )
-
-        # Heatmap
-        # heatmap_tab = self.tab_manager.heatmap_tab
-        heatmap_tab_flags = flag_creator.create_heatmap_flags(
-            self.tab_manager.heatmap_tab
-        )
-
         all_user_input_pairs_dicts = {
-            "main_tab": main_tab_flags,
-            "clarity_registration_tab": clarity_registration_tab_flags,
-            "conversion_tab": conversion_tab_flags,
-            "segmentation_tab": segmentation_tab_flags,
-            "voxelizing_warping_tab": voxelizing_warping_tab_flags,
-            "clusterwise_tab": clusterwise_tab_flags,
-            "correlation_stats_tab": correlation_stats_tab_flags,
-            "heatmap_tab": heatmap_tab_flags,
+            "main_tab": flag_creator.create_main_tab_flags(
+                self.tab_manager.main_tab, self.tab_manager.main_tab.single_checkbox
+            ),
+            "clarity_registration_tab": flag_creator.create_clarity_registration_flags(
+                self.tab_manager.clarity_registration_tab
+            ),
+            "conversion_tab": flag_creator.create_conversion_flags(
+                self.tab_manager.conversion_tab
+            ),
+            "segmentation_tab": flag_creator.create_segmentation_flags(
+                self.tab_manager.segmentation_tab
+            ),
+            "voxelizing_warping_tab": flag_creator.create_voxelization_warping_flags(
+                self.tab_manager.voxelizing_warping_tab
+            ),
+            "clusterwise_tab": flag_creator.create_clusterwise_flags(
+                self.tab_manager.clusterwise_tab
+            ),
+            "correlation_stats_tab": flag_creator.create_correlation_stats_flags(
+                self.tab_manager.correlation_stats_tab
+            ),
+            "heatmap_tab": flag_creator.create_heatmap_flags(
+                self.tab_manager.heatmap_tab
+            ),
         }
 
         return all_user_input_pairs_dicts
