@@ -308,6 +308,8 @@ class WidgetUtils:
         :return: A QLabel instance with indented text.
         :rtype: QLabel
         """
+        if not text.endswith(':'):
+            text += ':'
         label = QLabel("  " + text)
         label.setToolTip(help_text)
         return label
