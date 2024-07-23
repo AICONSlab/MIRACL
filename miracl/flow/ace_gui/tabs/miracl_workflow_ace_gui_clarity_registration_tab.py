@@ -33,14 +33,14 @@ class ClarityRegistrationTab(QWidget):
         clarity_registration_layout = QFormLayout()
         self.setLayout(clarity_registration_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-        help_dict = wu.extract_help_texts(args_parser)
+        parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 
         self.reg_hemi_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Labels hemisphere",
-            help_dict["rca_hemi"],
-            ["combined", "split"],
-            "combined",
+            parser_vals_dict["rca_hemi"]["help"],
+            parser_vals_dict["rca_hemi"]["choices"],
+            parser_vals_dict["rca_hemi"]["default"],
         )
 
         (
@@ -51,7 +51,7 @@ class ClarityRegistrationTab(QWidget):
             self,
             clarity_registration_layout,
             "Allen labels to warp:",
-            help_dict["rca_allen_label"],
+            parser_vals_dict["rca_allen_label"]["help"],
             "Select file",
             select_files=True,
             file_filter="All Files (*)",
@@ -65,7 +65,7 @@ class ClarityRegistrationTab(QWidget):
             self,
             clarity_registration_layout,
             "Custom Allen atlas:",
-            help_dict["rca_allen_atlas"],
+            parser_vals_dict["rca_allen_atlas"]["help"],
             "Select file",
             select_files=True,
             file_filter="All Files (*)",
@@ -74,7 +74,7 @@ class ClarityRegistrationTab(QWidget):
         self.reg_side_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Side:",
-            help_dict["rca_side"],
+            parser_vals_dict["rca_side"]["help"],
             ["right hemisphere", "left hemisphere"],
             "right hemisphere",
         )
@@ -82,7 +82,7 @@ class ClarityRegistrationTab(QWidget):
         self.reg_mosaic_figure_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Create mosaic figure:",
-            help_dict["rca_no_mosaic_fig"],
+            parser_vals_dict["rca_no_mosaic_fig"]["help"],
             ["yes", "no"],
             "yes",
         )
@@ -90,7 +90,7 @@ class ClarityRegistrationTab(QWidget):
         self.reg_olfactory_bulb_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Olfactory bulb incl.:",
-            help_dict["rca_olfactory_bulb"],
+            parser_vals_dict["rca_olfactory_bulb"]["help"],
             ["not included", "included"],
             "not included",
         )
@@ -98,7 +98,7 @@ class ClarityRegistrationTab(QWidget):
         self.reg_util_int_correction_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Utilfn intensity correction:",
-            help_dict["rca_skip_cor"],
+            parser_vals_dict["rca_skip_cor"]["help"],
             ["run", "skip"],
             "run",
         )
@@ -106,7 +106,7 @@ class ClarityRegistrationTab(QWidget):
         self.reg_warp_to_allen_input = wu.create_multiple_choice(
             clarity_registration_layout,
             "Warp CLARITY to Allen:",
-            help_dict["rca_warp"],
+            parser_vals_dict["rca_warp"]["help"],
             ["yes", "no"],
             "no",
         )

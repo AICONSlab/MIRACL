@@ -17,6 +17,7 @@ License:
     GPL-3.0
 """
 
+import ast
 from PyQt5.QtWidgets import (
     QWidget,
     QFormLayout,
@@ -34,6 +35,7 @@ class HeatmapTab(QWidget):
         self.setLayout(heatmap_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         help_dict = wu.extract_help_texts(args_parser)
+        parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 
         (
             self.heatmap_group_1_label_input,
@@ -183,8 +185,19 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "Output filenames:",
             help_dict["sh_outfile"],
-            ["group_1", "group_2", "group_difference"],
-            ["strcon", "strcon", "strcon"]
+            [
+                str(num)
+                for num in ast.literal_eval(parser_vals_dict["sh_outfile"]["default"])
+            ],
+            ["strcon"]
+            * len(
+                [
+                    str(num)
+                    for num in ast.literal_eval(
+                        parser_vals_dict["sh_outfile"]["default"]
+                    )
+                ]
+            ),
         )
 
         self.heatmap_extension_input = wu.create_text_field(

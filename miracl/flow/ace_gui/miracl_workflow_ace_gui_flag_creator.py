@@ -17,9 +17,13 @@ License:
     GPL-3.0
 """
 
+import ast
 from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
+from miracl.flow import miracl_workflow_ace_parser
 
 REG_BOOL_FLAGS = "set_bool"
+args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 
 
 class flag_creator:
@@ -77,6 +81,10 @@ class flag_creator:
 
     @staticmethod
     def create_conversion_flags(conversion_tab):
+        ctn_center_default = [
+            str(num)
+            for num in ast.literal_eval(parser_vals_dict["ctn_center"]["default"])
+        ]
         conversion_tab_flags = {
             "--ctn_channum": wu.get_tab_var(
                 conversion_tab, "conversion_channel_number_input", "textfield"
@@ -90,7 +98,11 @@ class flag_creator:
             "--ctn_outnii": wu.get_tab_var(
                 conversion_tab, "conversion_output_nii_name_input", "textfield"
             ),
-            "--ctn_center": f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_1', 'textfield')} {wu.get_tab_var(conversion_tab, 'conversion_center_input_2', 'textfield')} {wu.get_tab_var(conversion_tab, 'conversion_center_input_3', 'textfield')}",
+            "--ctn_center": (
+                f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_1', 'textfield') or ctn_center_default[0]} "
+                f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_2', 'textfield') or ctn_center_default[1]} "
+                f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_3', 'textfield') or ctn_center_default[2]} "
+            ),
             "--ctn_downzdim": wu.get_tab_var(
                 conversion_tab, "conversion_dx_z_input", "spinbox"
             ),
@@ -278,6 +290,10 @@ class flag_creator:
 
     @staticmethod
     def create_heatmap_flags(heatmap_tab):
+        sh_outfile_default = [
+            str(num)
+            for num in ast.literal_eval(parser_vals_dict["sh_outfile"]["default"])
+        ]
         heatmap_tab_flags = {
             "--sh_group1": wu.get_tab_var(
                 heatmap_tab,
@@ -311,7 +327,11 @@ class flag_creator:
             "--sh_dir_outfile": wu.get_tab_var(
                 heatmap_tab, "heatmap_output_folder_path_input", "textfield"
             ),
-            "--sh_outfile": f"{wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_1_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_2_input', 'textfield')} {wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_diff_input', 'textfield')}",
+            "--sh_outfile": (
+                f"{wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_1_input', 'textfield') or sh_outfile_default[0]} "
+                f"{wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_2_input', 'textfield') or sh_outfile_default[1]} "
+                f"{wu.get_tab_var(heatmap_tab, 'heatmap_output_filenames_group_diff_input', 'textfield') or sh_outfile_default[2]}"
+            ),
             "--sh_extension": wu.get_tab_var(
                 heatmap_tab, "heatmap_extension_input", "textfield"
             ),

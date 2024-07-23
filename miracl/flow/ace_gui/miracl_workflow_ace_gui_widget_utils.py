@@ -144,44 +144,44 @@ class WidgetUtils:
         if path:
             line_edit.setText(path)
 
-    # @staticmethod
-    # def create_three_text_input_widget(layout, lbl, lbl_help_text, default_values):
-    #     """
-    #     Create and add a path input widget with three validated text fields to the given layout.
-    #
-    #     :param layout: The QFormLayout to which the widget will be added.
-    #     :type layout: QFormLayout
-    #     :param lbl: The text to be displayed in the label.
-    #     :type lbl: str
-    #     :param lbl_help_text: The help text for the label.
-    #     :type lbl_help_text: str
-    #     :param default_values: A list of three default values for the input fields.
-    #     :type default_values: list
-    #     :return: A tuple containing the created QLabel and three QLineEdit widgets.
-    #     :rtype: tuple(QLabel, QLineEdit, QLineEdit, QLineEdit)
-    #     """
-    #     label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
-    #
-    #     input_widget = QWidget()
-    #     input_layout = QHBoxLayout(input_widget)
-    #     input_layout.setContentsMargins(0, 0, 0, 0)
-    #
-    #     inputs = []
-    #     for default_value in default_values:
-    #         input_field = QLineEdit()
-    #         input_field.setPlaceholderText(str(default_value))
-    #         input_field.setText(str(default_value))
-    #
-    #         validator = QDoubleValidator()
-    #         validator.setNotation(QDoubleValidator.StandardNotation)
-    #         input_field.setValidator(validator)
-    #
-    #         input_layout.addWidget(input_field)
-    #         inputs.append(input_field)
-    #
-    #     layout.addRow(label, input_widget)
-    #
-    #     return (label, *inputs)
+        # @staticmethod
+        # def create_three_text_input_widget(layout, lbl, lbl_help_text, default_values):
+        #     """
+        #     Create and add a path input widget with three validated text fields to the given layout.
+        #
+        #     :param layout: The QFormLayout to which the widget will be added.
+        #     :type layout: QFormLayout
+        #     :param lbl: The text to be displayed in the label.
+        #     :type lbl: str
+        #     :param lbl_help_text: The help text for the label.
+        #     :type lbl_help_text: str
+        #     :param default_values: A list of three default values for the input fields.
+        #     :type default_values: list
+        #     :return: A tuple containing the created QLabel and three QLineEdit widgets.
+        #     :rtype: tuple(QLabel, QLineEdit, QLineEdit, QLineEdit)
+        #     """
+        #     label = WidgetUtils.create_indented_label(lbl, lbl_help_text)
+        #
+        #     input_widget = QWidget()
+        #     input_layout = QHBoxLayout(input_widget)
+        #     input_layout.setContentsMargins(0, 0, 0, 0)
+        #
+        #     inputs = []
+        #     for default_value in default_values:
+        #         input_field = QLineEdit()
+        #         input_field.setPlaceholderText(str(default_value))
+        #         input_field.setText(str(default_value))
+        #
+        #         validator = QDoubleValidator()
+        #         validator.setNotation(QDoubleValidator.StandardNotation)
+        #         input_field.setValidator(validator)
+        #
+        #         input_layout.addWidget(input_field)
+        #         inputs.append(input_field)
+        #
+        #     layout.addRow(label, input_widget)
+        #
+        #     return (label, *inputs)
 
     @staticmethod
     def create_three_text_input_widget(
