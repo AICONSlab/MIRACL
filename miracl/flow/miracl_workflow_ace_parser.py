@@ -760,7 +760,7 @@ class ACEWorkflowParser:
             "--sh_outfile",
             nargs="+",
             type=str,
-            help="Output filenames (default: %(default)s)",
+            help="Output filenames (default: group_1 group_2 group_difference)",
             default=["group_1", "group_2", "group_difference"],
         )
         heatmap_args.add_argument(
