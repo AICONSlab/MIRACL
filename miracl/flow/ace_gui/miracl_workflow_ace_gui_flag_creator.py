@@ -28,6 +28,7 @@ parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 conv_dict = FlagConfig().create_conversion()
 clust_dict = FlagConfig().create_clusterwise()
 corr_stats_dict = FlagConfig().create_correlation_stats()
+seg_dict = FlagConfig().create_segmentation()
 
 
 class flag_creator:
@@ -136,7 +137,11 @@ class flag_creator:
     @staticmethod
     def create_segmentation_flags(segmentation_tab):
         segmentation_tab_flags = {
-            "--sa_image_size": f"{wu.get_tab_var(segmentation_tab, 'segmentation_image_size_height_input', 'textfield')} {wu.get_tab_var(segmentation_tab, 'segmentation_image_size_width_input', 'textfield')} {wu.get_tab_var(segmentation_tab, 'segmentation_image_size_depth_input', 'textfield')}",
+            seg_dict["seg_imagesize"]["long_flag"]: (
+                f"{wu.get_tab_var(segmentation_tab, 'seg_imagesize_height_input', seg_dict['seg_imagesize']['widget_type'])} "
+                f"{wu.get_tab_var(segmentation_tab, 'seg_imagesize_width_input', seg_dict['seg_imagesize']['widget_type'])} "
+                f"{wu.get_tab_var(segmentation_tab, 'seg_imagesize_depth_input', seg_dict['seg_imagesize']['widget_type'])}"
+            ),
             "--sa_nr_workers": wu.get_tab_var(
                 segmentation_tab, "segmentation_nr_workers_input", "spinbox"
             ),
@@ -316,12 +321,12 @@ class flag_creator:
             corr_stats_dict["stats_atlasdir"]["long_flag"]: wu.get_tab_var(
                 correlation_stats_tab,
                 "stats_atlasdir_path_input",
-                corr_stats_dict["stats_atlasdir"]["widget_type"]
+                corr_stats_dict["stats_atlasdir"]["widget_type"],
             ),
             corr_stats_dict["stats_poutfile"]["long_flag"]: wu.get_tab_var(
                 correlation_stats_tab,
                 "stats_poutfile_input",
-                corr_stats_dict["stats_poutfile"]["widget_type"]
+                corr_stats_dict["stats_poutfile"]["widget_type"],
             ),
         }
 

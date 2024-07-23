@@ -67,6 +67,27 @@ class FlagConfig:
 
         return conversion_dict
 
+    def create_segmentation(self) -> Dict[str, Dict[str, str]]:
+        """
+        Creates a dictionary for the segmentation module that includes all
+        flags.
+
+        :return: A dictionary containing segmentation information.
+        """
+        segmentation_dict: Dict[str, Dict[str, str]] = {
+            "seg_imagesize": self.add_to_nested_dict(
+                self.flag_dict["sa_image_size"],
+                label="Image size (default: from header)",
+                widget_type="textfield",
+                custom={
+                    "default": "none",
+                    "field_labels": ["height:", "width", "depth"]
+                },
+            ),
+        }
+
+        return segmentation_dict
+
     def create_clusterwise(self) -> Dict[str, Dict[str, str]]:
         """
         Creates a dictionary for the clusterwise module that includes all
@@ -187,6 +208,7 @@ class FlagConfig:
         max_val: Union[int, float, None] = None,
         increment_val: Union[int, float, None] = None,
         nr_decimals: Union[int, None] = None,
+        custom: Dict[str, Any] = {},
     ) -> Dict[str, Any]:
         """
         Adds additional key/value pairs to nested dictionary.
@@ -204,4 +226,5 @@ class FlagConfig:
         nested_dict["max_val"] = max_val
         nested_dict["increment_val"] = increment_val
         nested_dict["nr_decimals"] = nr_decimals
+        nested_dict["custom"] = custom
         return nested_dict  # Return the updated dictionary

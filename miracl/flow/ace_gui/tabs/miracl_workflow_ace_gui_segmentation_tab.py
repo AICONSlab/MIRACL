@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_config import FlagConfig
 
 
 class SegmentationTab(QWidget):
@@ -34,18 +35,20 @@ class SegmentationTab(QWidget):
         self.setLayout(segmentation_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         help_dict = wu.extract_help_texts(args_parser)
+        seg_dict = FlagConfig().create_segmentation()
 
         (
-            self.segmentation_image_size_label_input,
-            self.segmentation_image_size_height_input,
-            self.segmentation_image_size_width_input,
-            self.segmentation_image_size_depth_input,
+            self.seg_imagesize_label_input,
+            self.seg_imagesize_height_input,
+            self.seg_imagesize_width_input,
+            self.seg_imagesize_depth_input,
         ) = wu.create_multiple_text_input_widget(
             segmentation_layout,
-            "Image size (default: from header):",
-            help_dict["sa_image_size"],
-            ["none", "none", "none"],
-            ["height:", "width:", "depth:"],
+            seg_dict["seg_imagesize"]["label"],
+            seg_dict["seg_imagesize"]["help"],
+            [seg_dict["seg_imagesize"]["custom"]["default"]]
+            * seg_dict["seg_imagesize"]["nargs"],
+            seg_dict["seg_imagesize"]["custom"]["field_labels"],
         )
 
         self.segmentation_nr_workers_input = wu.create_digit_spinbox(
