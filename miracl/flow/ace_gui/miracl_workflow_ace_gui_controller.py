@@ -164,11 +164,11 @@ class MainWindow(QMainWindow):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "MIRACL Files (*.mdat)", options=options
+            self, "Save File", "", "MIRACL ACE Flow Files (*.aceflow)", options=options
         )
         if fileName:
-            if not fileName.endswith(".mdat"):
-                fileName += ".mdat"
+            if not fileName.endswith(".aceflow"):
+                fileName += ".aceflow"
 
             user_input_pairs_dicts = self.create_cmd_dict()
             manager = UserInputPairsManager(self.window_title.lower().replace(" ", "_"))
@@ -252,10 +252,6 @@ class MainWindow(QMainWindow):
         them to the console. It also checks the state of the "Single or multi
         method arguments" checkbox and prints the corresponding mode.
         """
-
-        print(
-            f"TESTER TESTER TESTER: {self.tab_manager.clusterwise_tab.pcs_num_perm_input.text()}"
-        )
 
         all_user_input_pairs_dicts = self.create_cmd_dict()
 

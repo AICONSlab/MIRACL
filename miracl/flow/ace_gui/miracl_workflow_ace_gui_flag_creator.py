@@ -20,10 +20,13 @@ License:
 import ast
 from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_config import FlagConfig
 
 REG_BOOL_FLAGS = "set_bool"
 args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
 parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
+conv_dict = FlagConfig().create_conversion()
+clust_dict = FlagConfig().create_clusterwise()
 
 
 class flag_creator:
@@ -81,36 +84,49 @@ class flag_creator:
 
     @staticmethod
     def create_conversion_flags(conversion_tab):
-        ctn_center_default = [
-            str(num)
-            for num in ast.literal_eval(parser_vals_dict["ctn_center"]["default"])
+        conv_center_default = [
+            str(num) for num in ast.literal_eval(conv_dict["conv_center"]["default"])
         ]
         conversion_tab_flags = {
-            "--ctn_channum": wu.get_tab_var(
-                conversion_tab, "ctn_channum_input", "textfield"
+            conv_dict["conv_channum"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_channum_input",
+                conv_dict["conv_channum"]["widget_type"],
             ),
-            "--ctn_chanprefix": wu.get_tab_var(
-                conversion_tab, "ctn_chanprefix_input", "textfield"
+            conv_dict["conv_chanprefix"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_chanprefix_input",
+                conv_dict["conv_chanprefix"]["widget_type"],
             ),
-            "--ctn_channame": wu.get_tab_var(
-                conversion_tab, "conversion_output_channel_name_input", "textfield"
+            conv_dict["conv_chanoutname"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_chanoutname_input",
+                conv_dict["conv_chanprefix"]["widget_type"],
             ),
-            "--ctn_outnii": wu.get_tab_var(
-                conversion_tab, "conversion_output_nii_name_input", "textfield"
+            conv_dict["conv_outnii"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_outnii_input",
+                conv_dict["conv_outnii"]["widget_type"],
             ),
-            "--ctn_center": (
-                f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_1', 'textfield') or ctn_center_default[0]} "
-                f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_2', 'textfield') or ctn_center_default[1]} "
-                f"{wu.get_tab_var(conversion_tab, 'conversion_center_input_3', 'textfield') or ctn_center_default[2]} "
+            conv_dict["conv_center"]["long_flag"]: (
+                f"{wu.get_tab_var(conversion_tab, 'conv_center_input_1', 'textfield') or conv_center_default[0]} "
+                f"{wu.get_tab_var(conversion_tab, 'conv_center_input_2', 'textfield') or conv_center_default[1]} "
+                f"{wu.get_tab_var(conversion_tab, 'conv_center_input_3', 'textfield') or conv_center_default[2]} "
             ),
-            "--ctn_downzdim": wu.get_tab_var(
-                conversion_tab, "conversion_dx_z_input", "spinbox"
+            conv_dict["conv_downzdim"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_downzdim_input",
+                conv_dict["conv_downzdim"]["widget_type"],
             ),
-            "--ctn_prevdown": wu.get_tab_var(
-                conversion_tab, "conversion_prev_dx_input", "spinbox"
+            conv_dict["conv_prevdown"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_prevdown_input",
+                conv_dict["conv_prevdown"]["widget_type"],
             ),
-            "--ctn_percentile_thr": wu.get_tab_var(
-                conversion_tab, "conversion_percentile_thr_input", "textfield"
+            conv_dict["conv_percentilethr"]["long_flag"]: wu.get_tab_var(
+                conversion_tab,
+                "conv_percentilethr_input",
+                conv_dict["conv_percentilethr"]["widget_type"],
             ),
         }
 
@@ -229,38 +245,60 @@ class flag_creator:
     @staticmethod
     def create_clusterwise_flags(clusterwise_tab):
         clusterwise_tab_flags = {
-            "--pcs_atlas_dir": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_atlas_folder_path_input", "textfield"
+            clust_dict["clust_atlasdir"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_atlasdir_path_input",
+                clust_dict["clust_atlasdir"]["widget_type"],
             ),
-            "--pcs_num_perm": wu.get_tab_var(
-                clusterwise_tab, "pcs_num_perm_input", "textfield"
+            clust_dict["clust_numperm"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_numperm_input",
+                clust_dict["clust_numperm"]["widget_type"],
             ),
-            "--pcs_img_resolution": wu.get_tab_var(
-                clusterwise_tab, "pcs_img_resolution_input", "multiplechoice"
+            clust_dict["clust_imgresolution"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_imgresolution_input",
+                clust_dict["clust_imgresolution"]["widget_type"],
             ),
-            "--pcs_smoothing_fwhm": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_fwhm_smoothing_input", "textfield"
+            clust_dict["clust_smoothingfwhm"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_smoothingfwhm_input",
+                clust_dict["clust_smoothingfwhm"]["widget_type"],
             ),
-            "--pcs_tfce_start": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_thr_start_input", "textfield"
+            clust_dict["clust_tfcestart"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_tfcestart_input",
+                clust_dict["clust_tfcestart"]["widget_type"],
             ),
-            "--pcs_tfce_step": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_thr_step_input", "textfield"
+            clust_dict["clust_tfcestep"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_tfcestep_input",
+                clust_dict["clust_tfcestep"]["widget_type"],
             ),
-            "--pcs_cpu_load": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_cpu_load_input", "textfield"
+            clust_dict["clust_cpuload"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_cpuload_input",
+                clust_dict["clust_cpuload"]["widget_type"],
             ),
-            "--pcs_tfce_h": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_tfce_h_input", "textfield"
+            clust_dict["clust_tfceh"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_tfceh_input",
+                clust_dict["clust_tfceh"]["widget_type"],
             ),
-            "--pcs_tfce_e": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_tfce_e_input", "textfield"
+            clust_dict["clust_tfcee"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_tfcee_input",
+                clust_dict["clust_tfcee"]["widget_type"],
             ),
-            "--pcs_step_down_p": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_step_down_input", "textfield"
+            clust_dict["clust_stepdownp"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_stepdownp_input",
+                clust_dict["clust_stepdownp"]["widget_type"],
             ),
-            "--pcs_mask_thr": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_mask_thr_input", "textfield"
+            clust_dict["clust_maskthr"]["long_flag"]: wu.get_tab_var(
+                clusterwise_tab,
+                "clust_maskthr_input",
+                clust_dict["clust_maskthr"]["widget_type"],
             ),
         }
 
