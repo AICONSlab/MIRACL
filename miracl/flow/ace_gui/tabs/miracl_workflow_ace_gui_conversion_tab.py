@@ -34,7 +34,6 @@ class ConversionTab(QWidget):
         conversion_layout = QFormLayout()
         self.setLayout(conversion_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-        help_dict = wu.extract_help_texts(args_parser)
         parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 
         ####################
@@ -45,7 +44,7 @@ class ConversionTab(QWidget):
             conversion_layout,
             "Channel #:",
             parser_vals_dict["ctn_channum"]["help"],
-            "0",
+            parser_vals_dict["ctn_channum"]["default"],
         )
 
         self.conversion_channel_prefix_input = wu.create_text_field(
@@ -99,20 +98,23 @@ class ConversionTab(QWidget):
         )
 
         self.conversion_dx_z_input = wu.create_digit_spinbox(
-            conversion_layout, "Z-axis dx:", parser_vals_dict["ctn_downzdim"]["help"], 1
+            conversion_layout,
+            "Z-axis dx:",
+            parser_vals_dict["ctn_downzdim"]["help"],
+            parser_vals_dict["ctn_downzdim"]["default"],
         )
 
         self.conversion_prev_dx_input = wu.create_digit_spinbox(
             conversion_layout,
             "Previous dx:",
             parser_vals_dict["ctn_prevdown"]["help"],
-            1,
+            parser_vals_dict["ctn_prevdown"]["default"],
         )
 
         self.conversion_percentile_thr_input = wu.create_digit_text_field(
             conversion_layout,
             "% threshold intensity corr:",
             parser_vals_dict["ctn_percentile_thr"]["help"],
-            "0.01",
-            "float",
+            parser_vals_dict["ctn_percentile_thr"]["default"],
+            parser_vals_dict["ctn_percentile_thr"]["type"],
         )
