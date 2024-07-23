@@ -40,14 +40,14 @@ class ConversionTab(QWidget):
         # METHOD SELECTION #
         ####################
 
-        self.conversion_channel_number_input = wu.create_digit_text_field(
+        self.ctn_channum_input = wu.create_digit_text_field(
             conversion_layout,
             "Channel #:",
             parser_vals_dict["ctn_channum"]["help"],
             parser_vals_dict["ctn_channum"]["default"],
         )
 
-        self.conversion_channel_prefix_input = wu.create_text_field(
+        self.ctn_chanprefix_input = wu.create_text_field(
             conversion_layout,
             "Channel prefix:",
             parser_vals_dict["ctn_chanprefix"]["help"],

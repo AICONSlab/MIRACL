@@ -87,10 +87,10 @@ class flag_creator:
         ]
         conversion_tab_flags = {
             "--ctn_channum": wu.get_tab_var(
-                conversion_tab, "conversion_channel_number_input", "textfield"
+                conversion_tab, "ctn_channum_input", "textfield"
             ),
             "--ctn_chanprefix": wu.get_tab_var(
-                conversion_tab, "conversion_channel_prefix_input", "textfield"
+                conversion_tab, "ctn_chanprefix_input", "textfield"
             ),
             "--ctn_channame": wu.get_tab_var(
                 conversion_tab, "conversion_output_channel_name_input", "textfield"
@@ -233,10 +233,10 @@ class flag_creator:
                 clusterwise_tab, "clusterwise_atlas_folder_path_input", "textfield"
             ),
             "--pcs_num_perm": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_nr_permutations_input", "textfield"
+                clusterwise_tab, "pcs_num_perm_input", "textfield"
             ),
             "--pcs_img_resolution": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_image_resolution_input", "multiplechoice"
+                clusterwise_tab, "pcs_img_resolution_input", "multiplechoice"
             ),
             "--pcs_smoothing_fwhm": wu.get_tab_var(
                 clusterwise_tab, "clusterwise_fwhm_smoothing_input", "textfield"

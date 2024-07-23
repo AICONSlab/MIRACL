@@ -29,6 +29,8 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QTabWidget,
     QMessageBox,
+    QComboBox,
+    QLineEdit,
 )
 from PyQt5.QtCore import Qt
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_tab_manager import TabManager
@@ -174,6 +176,27 @@ class MainWindow(QMainWindow):
             manager.save_to_json(fileName)
             print(f"File saved as: {fileName}")
 
+    def load_widget_iterator(self, tab_name, flag_name, loaded_flag_arguments):
+        tab = getattr(self.tab_manager, tab_name)  # Get tab object dynamically
+        widget_name = f"{flag_name}_input"  # Construct widget name
+        widget = getattr(tab, widget_name)  # Get widget object dynamically
+
+        try:
+            value = loaded_flag_arguments[tab_name][f"--{flag_name}"]
+        except KeyError as e:
+            raise KeyError(
+                f"Could not find value for '{tab_name}' with flag '{flag_name}' in loaded_flag_arguments."
+            ) from e
+
+        if isinstance(widget, QComboBox) and hasattr(widget, "setCurrentText"):
+            widget.setCurrentText(str(value))
+        elif isinstance(widget, QLineEdit) and hasattr(widget, "setText"):
+            widget.setText(str(value))
+        else:
+            raise TypeError(
+                f"Widget '{widget_name}' is of an unsupported type: {type(widget).__name__} or does not support setting a value."
+            )
+
     def load_button_clicked(self):
         manager = UserInputPairsManager("ace_flow")
         loaded_flag_arguments, metadata = manager.load_from_json(
@@ -181,8 +204,19 @@ class MainWindow(QMainWindow):
         )
         print(loaded_flag_arguments)
         print(metadata)
-        temp_load = loaded_flag_arguments['clusterwise_tab']['--pcs_num_perm']
-        self.tab_manager.clusterwise_tab.clusterwise_nr_permutations_input.setText(temp_load)
+        # temp_load = loaded_flag_arguments["clusterwise_tab"]["--pcs_num_perm"]
+        # self.tab_manager.clusterwise_tab.pcs_num_perm_input.setText(temp_load)
+        test_dict = {
+            "num_perm": ["clusterwise_tab", "pcs_num_perm"],
+            "img_res": ["clusterwise_tab", "pcs_img_resolution"],
+            "chan_num": ["conversion_tab", "ctn_channum"],
+            "chan_pre": ["conversion_tab", "ctn_chanprefix"],
+        }
+        for value in test_dict.values():
+            try:
+                self.load_widget_iterator(value[0], value[1], loaded_flag_arguments)
+            except KeyError as e:
+                print(e)
 
     def help_button_clicked(self):
         """
@@ -220,7 +254,7 @@ class MainWindow(QMainWindow):
         """
 
         print(
-            f"TESTER TESTER TESTER: {self.tab_manager.clusterwise_tab.clusterwise_nr_permutations_input.text()}"
+            f"TESTER TESTER TESTER: {self.tab_manager.clusterwise_tab.pcs_num_perm_input.text()}"
         )
 
         all_user_input_pairs_dicts = self.create_cmd_dict()

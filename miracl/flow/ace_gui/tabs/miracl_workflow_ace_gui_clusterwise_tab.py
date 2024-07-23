@@ -50,14 +50,14 @@ class ClusterwiseTab(QWidget):
             "Select folder",
         )
 
-        self.clusterwise_nr_permutations_input = wu.create_digit_text_field(
+        self.pcs_num_perm_input = wu.create_digit_text_field(
             clusterwise_layout,
             "# permutations:",
             parser_vals_dict["pcs_num_perm"]["help"],
             parser_vals_dict["pcs_num_perm"]["default"],
         )
 
-        self.clusterwise_image_resolution_input = wu.create_multiple_choice(
+        self.pcs_img_resolution_input = wu.create_multiple_choice(
             clusterwise_layout,
             "Resolution of images (um):",
             parser_vals_dict["pcs_img_resolution"]["help"],
