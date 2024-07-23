@@ -20,12 +20,11 @@ License:
 from PyQt5.QtWidgets import (
     QWidget,
     QFormLayout,
-    QLabel,
-    QComboBox,
 )
 from PyQt5.QtCore import Qt
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_config import FlagConfig
 
 
 class CorrelationStatsTab(QWidget):
@@ -35,22 +34,23 @@ class CorrelationStatsTab(QWidget):
         self.setLayout(correlation_stats_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         help_dict = wu.extract_help_texts(args_parser)
+        corr_stats_dict = FlagConfig().create_correlation_stats()
 
         ###############
         # CORRELATION #
         ###############
 
         wu.create_section_title(correlation_stats_layout, "<b>Correlation</b>")
-        self.correlation_stats_correlation_cf_pvalue_input = wu.create_digit_spinbox(
+        self.corr_pvaluethr_input = wu.create_digit_spinbox(
             correlation_stats_layout,
-            "Threshold binarizing p-value:",
-            help_dict["cf_pvalue_thr"],
-            0.05,
-            0.0000,
-            1.0000,
-            "float",
-            0.01,
-            4,
+            corr_stats_dict["corr_pvaluethr"]["label"],
+            corr_stats_dict["corr_pvaluethr"]["help"],
+            corr_stats_dict["corr_pvaluethr"]["default"],
+            corr_stats_dict["corr_pvaluethr"]["min_val"],
+            corr_stats_dict["corr_pvaluethr"]["max_val"],
+            corr_stats_dict["corr_pvaluethr"]["type"],
+            corr_stats_dict["corr_pvaluethr"]["increment_val"],
+            corr_stats_dict["corr_pvaluethr"]["nr_decimals"],
         )
 
         ##############
@@ -59,21 +59,21 @@ class CorrelationStatsTab(QWidget):
 
         wu.create_section_title(correlation_stats_layout, "<b>Statistics</b>")
         (
-            self.correlation_stats_stats_atlas_folder_label_input,
-            self.correlation_stats_stats_atlas_folder_path_input,
-            self.correlation_stats_stats_atlas_folder_button_input,
+            self.stats_atlasdir_label_input,
+            self.stats_atlasdir_path_input,
+            self.stats_atlasdir_button_input,
         ) = wu.create_path_input_widget(
             self,
             correlation_stats_layout,
-            "Path to altas dir:",
-            help_dict["u_atlas_dir"],
+            corr_stats_dict["stats_atlasdir"]["label"],
+            corr_stats_dict["stats_atlasdir"]["help"],
             "Select folder",
         )
 
-        self.correlation_stats_stats_outfile_input = wu.create_text_field(
+        self.stats_poutfile_input = wu.create_text_field(
             correlation_stats_layout,
-            "Output filename:",
-            help_dict["p_outfile"],
-            "pvalue_heatmap",
-            "strcon",
+            corr_stats_dict["stats_poutfile"]["label"],
+            corr_stats_dict["stats_poutfile"]["help"],
+            corr_stats_dict["stats_poutfile"]["default"],
+            corr_stats_dict["stats_poutfile"]["validator"],
         )

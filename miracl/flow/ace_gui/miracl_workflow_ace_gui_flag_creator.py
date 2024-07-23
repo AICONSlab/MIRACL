@@ -27,6 +27,7 @@ args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
 parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 conv_dict = FlagConfig().create_conversion()
 clust_dict = FlagConfig().create_clusterwise()
+corr_stats_dict = FlagConfig().create_correlation_stats()
 
 
 class flag_creator:
@@ -307,20 +308,20 @@ class flag_creator:
     @staticmethod
     def create_correlation_stats_flags(correlation_stats_tab):
         correlation_stats_tab_flags = {
-            "--cf_pvalue_thr": wu.get_tab_var(
+            corr_stats_dict["corr_pvaluethr"]["long_flag"]: wu.get_tab_var(
                 correlation_stats_tab,
-                "correlation_stats_correlation_cf_pvalue_input",
-                "textfield",
+                "corr_pvaluethr_input",
+                corr_stats_dict["corr_pvaluethr"]["widget_type"],
             ),
-            "--u_atlas_dir": wu.get_tab_var(
+            corr_stats_dict["stats_atlasdir"]["long_flag"]: wu.get_tab_var(
                 correlation_stats_tab,
-                "correlation_stats_stats_atlas_folder_path_input",
-                "textfield",
+                "stats_atlasdir_path_input",
+                corr_stats_dict["stats_atlasdir"]["widget_type"]
             ),
-            "--p_outfile": wu.get_tab_var(
+            corr_stats_dict["stats_poutfile"]["long_flag"]: wu.get_tab_var(
                 correlation_stats_tab,
-                "correlation_stats_stats_outfile_input",
-                "textfield",
+                "stats_poutfile_input",
+                corr_stats_dict["stats_poutfile"]["widget_type"]
             ),
         }
 

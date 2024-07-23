@@ -145,6 +145,38 @@ class FlagConfig:
 
         return clusterwise_dict
 
+    def create_correlation_stats(self) -> Dict[str, Dict[str, str]]:
+        """
+        Creates a dictionary for the correlation/stats module that includes all
+        flags.
+
+        :return: A dictionary containing correlation/stats information.
+        """
+        corr_stats_dict: Dict[str, Dict[str, str]] = {
+            "corr_pvaluethr": self.add_to_nested_dict(
+                self.flag_dict["cf_pvalue_thr"],
+                label="Threshold binarizing p-value",
+                widget_type="textfield",
+                min_val=0.0000,
+                max_val=1.0000,
+                increment_val=0.01,
+                nr_decimals=4,
+            ),
+            "stats_atlasdir": self.add_to_nested_dict(
+                self.flag_dict["u_atlas_dir"],
+                label="Path to altas dir",
+                widget_type="textfield",
+            ),
+            "stats_poutfile": self.add_to_nested_dict(
+                self.flag_dict["p_outfile"],
+                label="Output filename:",
+                widget_type="textfield",
+                validator="strcon",
+            ),
+        }
+
+        return corr_stats_dict
+
     @staticmethod
     def add_to_nested_dict(
         nested_dict: Dict[str, Any],
