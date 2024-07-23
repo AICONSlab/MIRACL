@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
+from miracl.flow.ace_gui.miracl_workflow_ace_gui_flag_config import FlagConfig
 
 
 class ConversionTab(QWidget):
@@ -35,6 +36,9 @@ class ConversionTab(QWidget):
         self.setLayout(conversion_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
+        conv_dict = FlagConfig().create_conversion()
+        print(f"CONV CONV CONV: {conv_dict}")
+
 
         ####################
         # METHOD SELECTION #
@@ -42,27 +46,40 @@ class ConversionTab(QWidget):
 
         self.ctn_channum_input = wu.create_digit_text_field(
             conversion_layout,
-            "Channel #:",
-            parser_vals_dict["ctn_channum"]["help"],
-            parser_vals_dict["ctn_channum"]["default"],
+            conv_dict["conv_channum"]["label"],
+            conv_dict["conv_channum"]["help"],
+            conv_dict["conv_channum"]["default"],
+            # "Channel #:",
+            # parser_vals_dict["ctn_channum"]["help"],
+            # parser_vals_dict["ctn_channum"]["default"],
         )
 
         self.ctn_chanprefix_input = wu.create_text_field(
             conversion_layout,
-            "Channel prefix:",
-            parser_vals_dict["ctn_chanprefix"]["help"],
+            conv_dict["conv_chanprefix"]["label"],
+            conv_dict["conv_chanprefix"]["help"],
             "none"
-            if parser_vals_dict["ctn_chanprefix"]["default"] == "None"
-            else parser_vals_dict["ctn_chanprefix"]["default"],
-            "alphanumeric",
+            if conv_dict["conv_chanprefix"]["default"] == "None"
+            else conv_dict["conv_chanprefix"]["default"],
+            conv_dict["conv_chanprefix"]["validator"],
+            # "Channel prefix:",
+            # parser_vals_dict["ctn_chanprefix"]["help"],
+            # "none"
+            # if parser_vals_dict["ctn_chanprefix"]["default"] == "None"
+            # else parser_vals_dict["ctn_chanprefix"]["default"],
+            # "alphanumeric",
         )
 
         self.conversion_output_channel_name_input = wu.create_text_field(
             conversion_layout,
-            "Output channel name:",
-            parser_vals_dict["ctn_channame"]["help"],
-            parser_vals_dict["ctn_channame"]["default"],
-            "alphanumeric",
+            conv_dict["conv_chanoutname"]["label"],
+            conv_dict["conv_chanoutname"]["help"],
+            conv_dict["conv_chanoutname"]["default"],
+            conv_dict["conv_chanoutname"]["validator"],
+            # "Output channel name:",
+            # parser_vals_dict["ctn_channame"]["help"],
+            # parser_vals_dict["ctn_channame"]["default"],
+            # "alphanumeric",
         )
 
         self.conversion_output_nii_name_input = wu.create_text_field(
