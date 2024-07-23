@@ -45,7 +45,7 @@ class HeatmapTab(QWidget):
             self,
             heatmap_layout,
             "Path to group 1 dir:",
-            help_dict["sh_group1"],
+            parser_vals_dict["sh_group1"]["help"],
             "Select folder",
         )
 
@@ -57,14 +57,14 @@ class HeatmapTab(QWidget):
             self,
             heatmap_layout,
             "Path to group 2 dir:",
-            help_dict["sh_group2"],
+            parser_vals_dict["sh_group2"]["help"],
             "Select folder",
         )
 
         self.heatmap_voxel_size_input = wu.create_multiple_choice(
             heatmap_layout,
             "Voxel size (um):",
-            help_dict["sh_vox"],
+            parser_vals_dict["sh_vox"]["help"],
             ["10", "25", "50"],
             "10",
         )
@@ -72,7 +72,7 @@ class HeatmapTab(QWidget):
         self.heatmap_sigma_input = wu.create_digit_spinbox(
             heatmap_layout,
             "Guassian smoothing sigma:",
-            help_dict["sh_sigma"],
+            parser_vals_dict["sh_sigma"]["help"],
             4,
             0,
             1000,
@@ -83,7 +83,7 @@ class HeatmapTab(QWidget):
         self.heatmap_percentile_input = wu.create_digit_spinbox(
             heatmap_layout,
             "% threshold svg:",
-            help_dict["sh_percentile"],
+            parser_vals_dict["sh_percentile"]["help"],
             10,
             0,
             100,
@@ -94,7 +94,7 @@ class HeatmapTab(QWidget):
         self.heatmap_colourmap_positive_input = wu.create_text_field(
             heatmap_layout,
             "Matplotlib colourmap pos values:",
-            help_dict["sh_colourmap_pos"],
+            parser_vals_dict["sh_colourmap_pos"]["help"],
             "Reds",
             "str",
         )
@@ -102,7 +102,7 @@ class HeatmapTab(QWidget):
         self.heatmap_colourmap_negative_input = wu.create_text_field(
             heatmap_layout,
             "Matplotlib colourmap neg values:",
-            help_dict["sh_colourmap_neg"],
+            parser_vals_dict["sh_colourmap_neg"]["help"],
             "Blues",
             "str",
         )
@@ -117,7 +117,7 @@ class HeatmapTab(QWidget):
         ) = wu.create_multiple_text_input_widget(
             heatmap_layout,
             "Slicing across sagittal axis:",
-            help_dict["sh_sagittal"],
+            parser_vals_dict["sh_sagittal"]["help"],
             ["none", "none", "none", "none", "none"],
             ["Start:", "Interval:", "#Slices:", "#Rows:", "#Cols:"],
         )
@@ -132,7 +132,7 @@ class HeatmapTab(QWidget):
         ) = wu.create_multiple_text_input_widget(
             heatmap_layout,
             "Slicing across coronal axis:",
-            help_dict["sh_coronal"],
+            parser_vals_dict["sh_coronal"]["help"],
             ["none", "none", "none", "none", "none"],
             ["Start:", "Interval:", "#Slices:", "#Rows:", "#Cols:"],
         )
@@ -147,7 +147,7 @@ class HeatmapTab(QWidget):
         ) = wu.create_multiple_text_input_widget(
             heatmap_layout,
             "Slicing across axial axis:",
-            help_dict["sh_axial"],
+            parser_vals_dict["sh_axial"]["help"],
             ["none", "none", "none", "none", "none"],
             ["Start:", "Interval:", "#Slices:", "#Rows:", "#Cols:"],
         )
@@ -159,8 +159,13 @@ class HeatmapTab(QWidget):
         ) = wu.create_multiple_text_input_widget(
             heatmap_layout,
             "Figure dimensions:",
-            help_dict["sh_figure_dim"],
-            ["none", "none"],
+            parser_vals_dict["sh_figure_dim"]["help"],
+            [
+                "none"
+                if parser_vals_dict["sh_figure_dim"]["default"] == "None"
+                else parser_vals_dict["sh_figure_dim"]["default"]
+            ]
+            * parser_vals_dict["sh_figure_dim"]["nargs"],
             ["Width:", "Height:"],
         )
 
@@ -172,7 +177,7 @@ class HeatmapTab(QWidget):
             self,
             heatmap_layout,
             "Output folder:",
-            help_dict["sh_dir_outfile"],
+            parser_vals_dict["sh_dir_outfile"]["help"],
             "Select folder",
         )
 
@@ -184,7 +189,7 @@ class HeatmapTab(QWidget):
         ) = wu.create_three_text_input_widget(
             heatmap_layout,
             "Output filenames:",
-            help_dict["sh_outfile"],
+            parser_vals_dict["sh_outfile"]["help"],
             [
                 str(num)
                 for num in ast.literal_eval(parser_vals_dict["sh_outfile"]["default"])
@@ -203,15 +208,15 @@ class HeatmapTab(QWidget):
         self.heatmap_extension_input = wu.create_text_field(
             heatmap_layout,
             "Heatmap fig extension:",
-            help_dict["sh_extension"],
-            "tiff",
-            "strint",
+            parser_vals_dict["sh_extension"]["help"],
+            parser_vals_dict["sh_extension"]["default"],
+            parser_vals_dict["sh_extension"]["type"] + "int",
         )
 
         self.heatmap_dpi_input = wu.create_digit_text_field(
             heatmap_layout,
             "Dots per inch:",
-            help_dict["sh_dpi"],
-            500,
-            "int",
+            parser_vals_dict["sh_dpi"]["help"],
+            parser_vals_dict["sh_dpi"]["default"],
+            parser_vals_dict["sh_dpi"]["type"],
         )
