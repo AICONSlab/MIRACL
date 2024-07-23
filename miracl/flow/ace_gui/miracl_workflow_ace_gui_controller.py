@@ -100,6 +100,9 @@ class MainWindow(QMainWindow):
         io_save_button = QPushButton("Save")
         io_save_button.clicked.connect(self.save_button_clicked)
         io_layout.addWidget(io_save_button)
+        io_reset_button = QPushButton("Reset")
+        io_reset_button.clicked.connect(self.reset_button_clicked)
+        io_layout.addWidget(io_reset_button)
         io_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(io_widget)
 
@@ -191,6 +194,9 @@ class MainWindow(QMainWindow):
         }
 
         return all_user_input_pairs_dicts
+
+    def reset_button_clicked(self):
+        pass
 
     def save_button_clicked(self):
         options = QFileDialog.Options()
