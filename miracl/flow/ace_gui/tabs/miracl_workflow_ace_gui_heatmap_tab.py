@@ -34,7 +34,6 @@ class HeatmapTab(QWidget):
         heatmap_layout = QFormLayout()
         self.setLayout(heatmap_layout)
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-        help_dict = wu.extract_help_texts(args_parser)
         parser_vals_dict = wu.extract_arguments_to_dict(args_parser)
 
         (
@@ -65,18 +64,18 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "Voxel size (um):",
             parser_vals_dict["sh_vox"]["help"],
-            ["10", "25", "50"],
-            "10",
+            parser_vals_dict["sh_vox"]["choices"],
+            parser_vals_dict["sh_vox"]["default"],
         )
 
         self.heatmap_sigma_input = wu.create_digit_spinbox(
             heatmap_layout,
             "Guassian smoothing sigma:",
             parser_vals_dict["sh_sigma"]["help"],
-            4,
+            parser_vals_dict["sh_sigma"]["default"],
             0,
             1000,
-            "int",
+            parser_vals_dict["sh_sigma"]["type"],
             1,
         )
 
@@ -84,10 +83,10 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "% threshold svg:",
             parser_vals_dict["sh_percentile"]["help"],
-            10,
+            parser_vals_dict["sh_percentile"]["default"],
             0,
             100,
-            "int",
+            parser_vals_dict["sh_percentile"]["type"],
             1,
         )
 
@@ -95,16 +94,16 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "Matplotlib colourmap pos values:",
             parser_vals_dict["sh_colourmap_pos"]["help"],
-            "Reds",
-            "str",
+            parser_vals_dict["sh_colourmap_pos"]["default"],
+            parser_vals_dict["sh_colourmap_pos"]["type"],
         )
 
         self.heatmap_colourmap_negative_input = wu.create_text_field(
             heatmap_layout,
             "Matplotlib colourmap neg values:",
             parser_vals_dict["sh_colourmap_neg"]["help"],
-            "Blues",
-            "str",
+            parser_vals_dict["sh_colourmap_neg"]["default"],
+            parser_vals_dict["sh_colourmap_neg"]["type"],
         )
 
         (
@@ -118,7 +117,12 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "Slicing across sagittal axis:",
             parser_vals_dict["sh_sagittal"]["help"],
-            ["none", "none", "none", "none", "none"],
+            [
+                "none"
+                if parser_vals_dict["sh_sagittal"]["default"] == "None"
+                else parser_vals_dict["sh_sagittal"]["default"]
+            ]
+            * parser_vals_dict["sh_sagittal"]["nargs"],
             ["Start:", "Interval:", "#Slices:", "#Rows:", "#Cols:"],
         )
 
@@ -133,7 +137,12 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "Slicing across coronal axis:",
             parser_vals_dict["sh_coronal"]["help"],
-            ["none", "none", "none", "none", "none"],
+            [
+                "none"
+                if parser_vals_dict["sh_coronal"]["default"] == "None"
+                else parser_vals_dict["sh_coronal"]["default"]
+            ]
+            * parser_vals_dict["sh_coronal"]["nargs"],
             ["Start:", "Interval:", "#Slices:", "#Rows:", "#Cols:"],
         )
 
@@ -148,7 +157,12 @@ class HeatmapTab(QWidget):
             heatmap_layout,
             "Slicing across axial axis:",
             parser_vals_dict["sh_axial"]["help"],
-            ["none", "none", "none", "none", "none"],
+            [
+                "none"
+                if parser_vals_dict["sh_axial"]["default"] == "None"
+                else parser_vals_dict["sh_axial"]["default"]
+            ]
+            * parser_vals_dict["sh_axial"]["nargs"],
             ["Start:", "Interval:", "#Slices:", "#Rows:", "#Cols:"],
         )
 
