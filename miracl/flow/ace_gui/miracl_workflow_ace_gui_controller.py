@@ -103,7 +103,7 @@ class MainWindow(QMainWindow):
         io_save_button.clicked.connect(self.save_button_clicked)
         io_layout.addWidget(io_save_button)
         io_reset_button = QPushButton("Reset")
-        io_reset_button.clicked.connect(self.reset_button_clicked)
+        io_reset_button.clicked.connect(self.confirm_reset)
         io_layout.addWidget(io_reset_button)
         io_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addWidget(io_widget)
@@ -157,8 +157,24 @@ class MainWindow(QMainWindow):
 
         return all_user_input_pairs_dicts
 
+    def confirm_reset(self):
+        # Create the QMessageBox
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setText("Are you sure you want to reset?")
+        msg_box.setWindowTitle("Confirm reset")
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        msg_box.setDefaultButton(QMessageBox.Cancel)
+
+        response = msg_box.exec_()
+
+        if response == QMessageBox.Yes:
+            self.reset_button_clicked()
+        else:
+            return
+
     def reset_button_clicked(self):
-        pass
+        logger.debug("Resetting to default values")
 
     def save_button_clicked(self):
         options = QFileDialog.Options()
@@ -273,6 +289,10 @@ class MainWindow(QMainWindow):
         full_command_split = shlex.split(full_command)  # Split cmd for subprocess use
 
         logger.debug(f"FULL COMMAND: {full_command_split}")
+        flag_dict = wu.extract_arguments_to_dict_2(
+            miracl_workflow_ace_parser.ACEWorkflowParser()
+        )
+        logger.debug(f"FLAG DICT: {flag_dict}")
         process = subprocess.Popen(
             full_command_split,
             stdout=subprocess.PIPE,
