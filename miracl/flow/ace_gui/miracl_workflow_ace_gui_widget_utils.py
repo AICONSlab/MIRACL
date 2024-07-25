@@ -308,8 +308,8 @@ class WidgetUtils:
         :return: A QLabel instance with indented text.
         :rtype: QLabel
         """
-        if not text.endswith(':'):
-            text += ':'
+        if not text.endswith(":"):
+            text += ":"
         label = QLabel("  " + text)
         label.setToolTip(help_text)
         return label
@@ -848,9 +848,9 @@ class WidgetUtils:
                 format_dict = {
                     "default": action.default,
                     "type": action.type.__name__ if action.type else None,
-                    "choices": ", ".join(map(str, action.choices))
-                    if action.choices
-                    else None,
+                    "choices": (
+                        ", ".join(map(str, action.choices)) if action.choices else None
+                    ),
                     "required": action.required,
                 }
 
@@ -934,74 +934,144 @@ class WidgetUtils:
                     "default": default_value_str,
                     "help": help_message,
                     "choices": choices_info,
-                    "type": action.type.__name__
-                    if action.type
-                    else "None",  # Add type to the dictionary
+                    "type": (
+                        action.type.__name__ if action.type else "None"
+                    ),  # Add type to the dictionary
                     "nargs": action.nargs,  # Add nargs to the dictionary
                 }
 
         return args_dict
 
+    # @staticmethod
+    # def extract_arguments_to_dict_2(parser):
+    #     if not isinstance(parser, argparse.ArgumentParser):
+    #         if hasattr(parser, "parser") and isinstance(
+    #             parser.parser, argparse.ArgumentParser
+    #         ):
+    #             parser = parser.parser
+    #         else:
+    #             raise TypeError(
+    #                 "The provided parser is not an instance of argparse.ArgumentParser"
+    #             )
+    #
+    #     args_dict = {}
+    #
+    #     # Iterate over the parser's actions to extract argument details
+    #     for action in parser._actions:
+    #         # Separate flags based on the number of leading hyphens
+    #         short_flags = [
+    #             flag
+    #             for flag in action.option_strings
+    #             if flag.startswith("-") and not flag.startswith("--")
+    #         ]
+    #         long_flags = [
+    #             flag for flag in action.option_strings if flag.startswith("--")
+    #         ]
+    #
+    #         # Default value handling
+    #         default_value = (
+    #             action.default if action.default is not argparse.SUPPRESS else ""
+    #         )
+    #
+    #         # Convert default value to string
+    #         default_value_str = str(default_value)
+    #
+    #         # Help message with the actual default value and type
+    #         help_message = action.help if action.help else ""
+    #
+    #         # Create a format dictionary for the help message
+    #         format_dict = {
+    #             "default": default_value_str,
+    #             "type": action.type.__name__ if action.type else "None",
+    #         }
+    #
+    #         # Attempt to format the help message
+    #         try:
+    #             help_message = help_message % format_dict
+    #         except KeyError as e:
+    #             print(
+    #                 f"Warning: Unhandled placeholder {e} in help text for {long_flags}"
+    #             )
+    #
+    #         # Prepare choices information as a list of strings
+    #         if action.choices is not None:
+    #             choices_info = [
+    #                 str(choice) for choice in action.choices
+    #             ]  # Convert choices to strings
+    #         else:
+    #             choices_info = None
+    #
+    #         # Use the first long flag as the key for the outer dictionary, without '--'
+    #         if long_flags:
+    #             long_flag_key = long_flags[0].lstrip(
+    #                 "--"
+    #             )  # Get the long flag without '--'
+    #
+    #             # Store the information in the dictionary
+    #             args_dict[long_flag_key] = {
+    #                 "short_flag": (
+    #                     short_flags[0] if short_flags else None
+    #                 ),  # Use the first short flag or None
+    #                 "long_flag": long_flags[0],  # Use the first long flag
+    #                 "default": default_value_str,
+    #                 "help": help_message,
+    #                 "choices": choices_info,
+    #                 "type": (
+    #                     action.type.__name__ if action.type else "None"
+    #                 ),  # Add type to the dictionary
+    #                 "nargs": action.nargs,  # Add nargs to the dictionary
+    #             }
+
     @staticmethod
     def extract_arguments_to_dict_2(parser):
         if not isinstance(parser, argparse.ArgumentParser):
-            if hasattr(parser, "parser") and isinstance(
-                parser.parser, argparse.ArgumentParser
-            ):
+            if hasattr(parser, "parser") and isinstance(parser.parser, argparse.ArgumentParser):
                 parser = parser.parser
             else:
-                raise TypeError(
-                    "The provided parser is not an instance of argparse.ArgumentParser"
-                )
+                raise TypeError("The provided parser is not an instance of argparse.ArgumentParser")
 
         args_dict = {}
 
-        # Iterate over the parser's actions to extract argument details
         for action in parser._actions:
-            # Separate flags based on the number of leading hyphens
             short_flags = [flag for flag in action.option_strings if flag.startswith('-') and not flag.startswith('--')]
             long_flags = [flag for flag in action.option_strings if flag.startswith('--')]
 
-            # Default value handling
             default_value = action.default if action.default is not argparse.SUPPRESS else ''
-
-            # Convert default value to string
             default_value_str = str(default_value)
 
-            # Help message with the actual default value and type
             help_message = action.help if action.help else ''
-
-            # Create a format dictionary for the help message
             format_dict = {
                 'default': default_value_str,
-                'type': action.type.__name__ if action.type else 'None'
+                'type': action.type.__name__ if action.type else 'None',
             }
 
-            # Attempt to format the help message
             try:
                 help_message = help_message % format_dict
             except KeyError as e:
                 print(f"Warning: Unhandled placeholder {e} in help text for {long_flags}")
 
-            # Prepare choices information as a list of strings
-            if action.choices is not None:
-                choices_info = [str(choice) for choice in action.choices]  # Convert choices to strings
-            else:
-                choices_info = None
+            choices_info = [str(choice) for choice in action.choices] if action.choices is not None else None
 
-            # Use the first long flag as the key for the outer dictionary, without '--'
             if long_flags:
-                long_flag_key = long_flags[0].lstrip('--')  # Get the long flag without '--'
+                long_flag_key = long_flags[0].lstrip('--')
+
+                # Check for the argmeta attribute
+                argmeta_value = getattr(action, 'argmeta', {})  # Default to empty dict if not present
+
+                # Determine the key to use for the dictionary
+                argname_key = argmeta_value.get('argname', long_flag_key) if argmeta_value else long_flag_key
 
                 # Store the information in the dictionary
-                args_dict[long_flag_key] = {
-                    'short_flag': short_flags[0] if short_flags else None,  # Use the first short flag or None
-                    'long_flag': long_flags[0],  # Use the first long flag
+                args_dict[argname_key] = {
+                    'short_flag': short_flags[0] if short_flags else None,
+                    'long_flag': long_flags[0],
                     'default': default_value_str,
                     'help': help_message,
                     'choices': choices_info,
-                    'type': action.type.__name__ if action.type else 'None',  # Add type to the dictionary
-                    'nargs': action.nargs  # Add nargs to the dictionary
+                    'type': action.type.__name__ if action.type else 'None',
+                    'nargs': action.nargs,
+                    'argmeta': argmeta_value,  # Add the argmeta value (now a dictionary) to the dictionary
                 }
 
         return args_dict
+

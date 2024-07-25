@@ -1,0 +1,36 @@
+{
+  "metadata": 
+    {
+      "module": "aceflow",
+      "version": "0.0.1-alpha"
+    },
+  "arguments": {
+      "seg_args": {
+          "id": "seg_imagesize",
+            "cli": {
+              "short_flag": "-sas",
+              "long_flag": "--sa_image_size",
+              "type": "str",
+              "required": false,
+              "nargs": 3,
+              "metavar": "('height', 'width', 'depth')",
+              "help": "image size (type: int; default: fetched from image header)"
+            },
+            "gui": {
+              "label": "Path to atlas dir"
+          },
+          "id": "seg_nrworkers",
+            "cli": {
+                "short_flag": "-saw",
+                "long_flag": "--sa_nr_workers",
+                "type": "int",
+                "required": false,
+                "default":4,
+                "help":"number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)"
+            },
+            "gui": {
+              "label": "# parallel CPU cores pre-processing"
+          }
+      }
+    }
+  }

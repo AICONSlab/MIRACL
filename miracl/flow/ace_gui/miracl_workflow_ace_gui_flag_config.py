@@ -100,7 +100,7 @@ class FlagConfig:
                 widget_type="textfield",
                 custom={
                     "default": "none",
-                    "field_labels": ["height:", "width", "depth"]
+                    "field_labels": ["height:", "width", "depth"],
                 },
             ),
         }
@@ -116,8 +116,10 @@ class FlagConfig:
         """
         clusterwise_dict: Dict[str, Dict[str, str]] = {
             "clust_atlasdir": self.add_to_nested_dict(
-                self.flag_dict["pcs_atlas_dir"],
-                label="Path to atlas dir",
+                # self.flag_dict["pcs_atlas_dir"],
+                self.flag_dict["clust_atlasdir"],
+                # label="Path to atlas dir",
+                label=self.flag_dict["clust_atlasdir"]["argmeta"]["aceflowguilabel"],
                 widget_type="textfield",
             ),
             "clust_numperm": self.add_to_nested_dict(

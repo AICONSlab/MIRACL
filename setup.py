@@ -65,8 +65,9 @@ setup(
         "scikit-learn==1.0.2",
         "svgwrite==1.4.3",
         "loguru==0.6.0",
-        'mne==1.3.1',
-        'imagecodecs==2021.11.20'
+        "mne==1.3.1",
+        "imagecodecs==2021.11.20",
+        "ujson==5.7.0",
     ],
     entry_points={
         "console_scripts": ["miracl=miracl.cli:main"],

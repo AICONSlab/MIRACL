@@ -580,7 +580,7 @@ class ACEWorkflowParser:
             "--pcs_atlas_dir",
             help="path of atlas directory",
             default="miracl_home",
-        )
+        ).argmeta = {"argname": "clust_atlasdir", "category": "clusterwise", "aceflowguilabel": "Path to atlas dir"}
         perm_args.add_argument(
             "-pcsn",
             "--pcs_num_perm",
@@ -849,7 +849,7 @@ class ACEWorkflowParser:
 
     def validate_args(self, args) -> argparse.Namespace:
 
-         # check that control and treated are not passed with single
+        # check that control and treated are not passed with single
         if (args.control and args.treated) and args.single:
             self.parser.error(
                 "-c/--control and -t/--treated must be passed together without -s/--single",
@@ -860,12 +860,8 @@ class ACEWorkflowParser:
                 "-s/--single cannot be passed with either -c/--control or -t/--treated",
             )
         # check that control and treated are always passed together
-        elif (args.control and not args.treated) or (
-            args.treated and not args.control
-        ):
-            self.parser.error(
-                "-c/--control and -t/--treated must be passed together"
-            )
+        elif (args.control and not args.treated) or (args.treated and not args.control):
+            self.parser.error("-c/--control and -t/--treated must be passed together")
         # check that something is passed
         elif not args.single and not args.control and not args.treated:
             self.parser.error(
@@ -881,7 +877,7 @@ class ACEWorkflowParser:
                 error_encountered = True
 
         if error_encountered:
-            self.parser.error(error_string[:-2])              
+            self.parser.error(error_string[:-2])
 
         return args
 
