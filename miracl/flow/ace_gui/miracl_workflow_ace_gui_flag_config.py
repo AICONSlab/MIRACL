@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Flag Config
+
+Description:
+    Creates parser objects for use in controller.
+
+Copyright:
+    (c) 2024 AICONs Lab. All rights reserved.
+
+Author:
+    Jonas Osmann
+    j.osmann@mail.utoronto.ca
+
+License:
+    GPL-3.0
+"""
+
 from miracl.flow.ace_gui.miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 from miracl.flow import miracl_workflow_ace_parser
 from typing import Dict, Any, Union
