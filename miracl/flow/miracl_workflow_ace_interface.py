@@ -372,7 +372,7 @@ class ACEWorkflows:
         stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
         StackTiffs.check_folders(fiji_file, stacked_tif)
         StackTiffs.stacking(
-            fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo
+            fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo > 0
         )
         self.voxelization.voxelize(args, stacked_tif)
 
@@ -475,7 +475,7 @@ class ACEWorkflows:
                 fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
                 stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
                 StackTiffs.check_folders(fiji_file, stacked_tif)
-                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo > 0)
                 self.voxelization.voxelize(args, stacked_tif)
 
                 (
