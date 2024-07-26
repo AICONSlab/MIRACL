@@ -1,6 +1,7 @@
 import argparse
 import os
 from pathlib import Path
+
 # from typing import List, Tuple
 
 
@@ -28,7 +29,7 @@ class aceParser:
         # Parser for input folder i.e. location of the data
         parser.add_argument(
             "-sai",
-            "--sa_input_folder",
+            "--single",
             type=self._readable_file,
             required=True,
             help="path to raw tif/tiff data folder",
@@ -58,14 +59,14 @@ class aceParser:
             type=self._validate_img_size,
             required=False,
             metavar=("height", "width", "depth"),
-            help="image size (type: int; default: fetched from image header)"
+            help="image size (type: int; default: fetched from image header)",
         )
         # Parser to select voxel size
         parser.add_argument(
             "-sar",
             "--sa_resolution",
             nargs=3,
-            type=self._validate_vox_res,
+            type=float,
             required=False,
             metavar=("X-res", "Y-res", "Z-res"),
             help="voxel size (type: %(type)s)",
@@ -77,7 +78,7 @@ class aceParser:
             type=int,
             required=False,
             default=4,
-            help="number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)"
+            help="number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)",
         )
         # Parser for cache rate
         parser.add_argument(
@@ -86,23 +87,23 @@ class aceParser:
             type=float,
             required=False,
             default=0.0,
-            help="percentage of raw data that is loaded into cpu during segmentation (type: %(type)s; default: %(default)s)"
+            help="percentage of raw data that is loaded into cpu during segmentation (type: %(type)s; default: %(default)s)",
         )
         # Parser for sw batch size
         parser.add_argument(
-            "-sasw",
-            "--sa_sw_batch_size",
+            "-sab",
+            "--sa_batch_size",
             type=int,
             required=False,
             default=4,
-            help="number of image patches being processed by the model in parallel on gpu (type: %(type)s; default: %(default)s)"
+            help="number of image patches being processed by the model in parallel on gpu (type: %(type)s; default: %(default)s)",
         )
         # Boolean to choose if whether it is needed to MC
         parser.add_argument(
             "-samc",
-            "--sa_monte_dropout",
-            action="store_true",
-            default=False,
+            "--sa_monte_carlo",
+            type=int,
+            default=0,
             help="use Monte Carlo dropout (default: %(default)s)",
         )
         # Boolean to choose if results are visualized
@@ -119,7 +120,34 @@ class aceParser:
             "--sa_uncertainty_map",
             action="store_true",
             default=False,
-            help="enable map (default: %(default)s)"
+            help="enable map (default: %(default)s)",
+        )
+        # Parser for GPU index
+        parser.add_argument(
+            "-sag",
+            "--sa_gpu_index",
+            type=int,
+            required=False,
+            default=0,
+            help="index of the GPU to use (type: %(type)s; default: %(default)s)",
+        )
+        # Parser for binarization threshold
+        parser.add_argument(
+            "-sat",
+            "--sa_binarization_threshold",
+            type=float,
+            required=False,
+            default=0.5,
+            help="threshold value for binarization (type: %(type)s; default: %(default)s)",
+        )
+        # Parser for percentage brain patch skip
+        parser.add_argument(
+            "-sap",
+            "--sa_percentage_brain_patch_skip",
+            type=float,
+            required=False,
+            default=0.0,
+            help="percentage threshold of patch that is brain to skip during segmentation (between 0 and 1; type: %(type)s; default: %(default)s)",
         )
         return parser
 

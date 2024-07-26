@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Build MIRACL Docker image with user information from host system
 
@@ -16,8 +16,11 @@
 #############
 
 # Set variables base state
+# Detect OS (Linux/MacOs)
+os=$(uname -s)
+
 # Script version
-version="2.0.0-beta"
+version="2.0.1-beta"
 
 # Service name
 service_name="miracl"
@@ -34,14 +37,21 @@ miracl_version="latest"
 # Version file version
 miracl_version_file=$(cat ./miracl/version.txt)
 
-# Set default shared memory size
-shm="64mb"
+# Set container memory size limit
+if [[ "$os" == "Linux" ]]; then
+    shm_mem=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
+elif [[ "$os" == "Darwin" ]]; then
+    shm_mem=$(sysctl hw.memsize | awk '{printf "%dmb", int($2/1024/1024*0.85)}')
+else
+    echo "Unsupported operating system: $os"
+    exit 1
+fi
 
 # Set array to capture volumes
 volumes=()
 
 # Base usage
-base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-v vol:vol] [-l] [-s] [-m] [-h]"
+base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
 
 ##########
 # PARSER #
@@ -64,7 +74,8 @@ function usage()
    -c, specify container name (default: 'miracl')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
-   -d, set shared memory (shm) size which is important for some of MIRACL's scripts e.g. ACE segmentation (default: '64mb')
+   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled)
+   -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
    -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
    -s, print version of build script and exit
@@ -79,7 +90,7 @@ usage
 }
 
 # Parse command line arguments
-while getopts ":n:i:c:t:gd:v:lsmh" opt; do
+while getopts ":n:i:c:t:ged:v:lsmh" opt; do
   case ${opt} in
 
     n)
@@ -115,9 +126,13 @@ while getopts ":n:i:c:t:gd:v:lsmh" opt; do
       gpu=true
       ;;
 
+    e)
+      dev=false
+      ;;
+
     d)
-      if [ "${OPTARG}" != "$shm" ]; then
-      shm=${OPTARG}
+      if [ "${OPTARG}" != "$shm_mem" ]; then
+      shm_mem=${OPTARG}
       fi
       ;;
 
@@ -176,7 +191,7 @@ services:
     stdin_open: true
     network_mode: host
     container_name: $container_name
-    shm_size: $shm
+    shm_size: ${shm_mem}
 EOF
 
 if [[ $gpu ]]; then
@@ -198,6 +213,17 @@ cat >> docker-compose.yml <<EOF
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
 EOF
+
+# Append MIRACL scripts folder mounting
+if [[ -z $dev ]]; then
+
+install_script_dir=$(dirname "$(readlink -f "$0")")
+
+cat >> docker-compose.yml <<EOF
+      - ${install_script_dir}/miracl:/code/miracl
+EOF
+
+fi
 
 # Add additional volumes
 for v in "${volumes[@]}"; do
@@ -259,20 +285,13 @@ if [ -x "$(command -v docker)" ]; then
       printf " User: %s\n" "$HOST_USER"
       printf " pid: %s\n" "$(id -u)"
       printf " gid: %s\n" "$(id -g)"
-      printf " shm: %s\n" "$shm"
+      printf " Max shared memory: %s\n" "$shm_mem"
       printf " Service name: %s\n" "$service_name"
       printf " Image name: %s\n" "$image_name:$miracl_version"
       printf " Container name: %s\n" "$container_name"
-      if [[ $gpu ]]; then
-        printf " GPU passthrough: enabled\n"
-      else
-        printf " GPU passthrough: disabled\n"
-      fi
-      if [[ $write_log ]]; then
-        printf " Log file: enabled\n"
-      else
-        printf " Log file: disabled\n"
-      fi
+      printf " GPU passthrough: %s\n" "${gpu:-false}"
+      printf " Script dir mounted: %s\n" "${dev:-true}"
+      printf " Log file: %s\n" "${write_log:-false}"
       for v in "${!volumes[@]}"; do
         printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
       done
@@ -304,9 +323,9 @@ if [ -x "$(command -v docker)" ]; then
         # Test if docker-compose is installed
         # Should come by default with Docker-Desktop
         if [ -x "$(command -v docker-compose)" ]; then
-          printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the MIRACL container in background.\n" "$(docker-compose --version)"
+          printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$(docker-compose --version)"
         elif dcex=$(docker compose version); then
-          printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the MIRACL container in background.\n" "$dcex"
+          printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$dcex"
         else
           printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
         fi

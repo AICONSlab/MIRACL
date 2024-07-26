@@ -33,6 +33,7 @@ from monai.transforms import (
 )
 import torch
 from monai.data import CacheDataset, DataLoader, decollate_batch
+import json
 
 # from monai.handlers.utils import from_engine
 import numpy as np
@@ -133,7 +134,17 @@ def save_tiff_MC_dropout(img_list, output_path, path, model_name):
 
 
 # this function generates outputs using the trained model
-def generate_output_single(model_name, model_out):
+def generate_output_single(
+        model_name,
+        model_out,
+        input_path,
+        sw_batch_size_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     def model_loader(model, trained_model_path):
         # move the models to gpu
         model.to(device)
@@ -165,7 +176,7 @@ def generate_output_single(model_name, model_out):
                 val_inputs, roi_size, sw_batch_size, model_out
             )
 
-            val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+            val_outputs = [post_pred(z) for z in decollate_batch(val_outputs)]
             # save the images as .tiff file readable by Fiji
             for j in range(len(val_outputs)):
                 img_list = [val_outputs[j][1, :, :, :].detach().cpu()]
@@ -174,11 +185,24 @@ def generate_output_single(model_name, model_out):
 
 
 # this function generates outputs using the trained model and MC dropout techniques
-def generate_output_MC(model_name, model_out):
-    batch_size = sw_batch_size_internal
+def generate_output_MC(
+        model_name,
+        model_out,
+        input_path,
+        batch_size_internal,
+        sw_batch_size_internal,
+        forward_passes_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
+    batch_size = batch_size_internal
 
     # number of forward pass
-    forward_passes = 4
+    # forward_passes = 4
+    forward_passes = forward_passes_internal
 
     # this function only sets the model dropout layesrs to train
     def enable_dropout(model):
@@ -216,8 +240,9 @@ def generate_output_MC(model_name, model_out):
             # val_outputs_list = []
 
             # these are needed to calculate mean and var iteratively --> less memory needed
-            sum_voxels = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_squared_voxels = np.zeros((batch_size, 2, 512, 512, 512))
+            H, W, D = val_data["image"].shape[2], val_data["image"].shape[3], val_data["image"].shape[4]
+            sum_voxels = np.zeros((batch_size, 2, H, W, D))
+            sum_squared_voxels = np.zeros((batch_size, 2, H, W, D))
 
             for f in range(forward_passes):
                 val_inputs = (val_data["image"].to(device)).float()
@@ -249,9 +274,6 @@ def generate_output_MC(model_name, model_out):
                         sum_squared_voxels[j], val_outputs[j].detach().cpu() ** 2
                     )
 
-            print(val_outputs.shape)
-            print(sum_voxels[j].shape)
-
             # stack all the forward passes together
             # use compute_variance function to calculate the uncertainty
             # the should be [N, C, H, W, D] or [N, C, H, W] or [N, C, H] where N is repeats,
@@ -271,20 +293,16 @@ def generate_output_MC(model_name, model_out):
                 )
                 uncertainty = uncertainty[1, :, :, :]
 
-                print(uncertainty.shape)
-
                 # get the average of MC_dropout and send it to GPU for calculating the new dice score
                 # MC_outputs = torch.Tensor(np.mean(val_outputs_stack, axis=0)).to(device)
                 MC_outputs = torch.Tensor(sum_voxels[j] / forward_passes).to(device)
-
-                print(MC_outputs.shape)
 
                 # clear val_outputs_stack for memory efficiency
                 # del val_outputs_stack
 
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs = [
-                    post_pred(i) for i in decollate_batch(MC_outputs.unsqueeze(0))
+                    post_pred(z) for z in decollate_batch(MC_outputs.unsqueeze(0))
                 ]
 
                 # save the images as .tiff file readable by Fiji
@@ -301,7 +319,16 @@ def generate_output_MC(model_name, model_out):
 
 
 # this function generates outputs using ensemble two models
-def generate_output_ensemble(model_out):
+def generate_output_ensemble(
+        model_out,
+        input_path,
+        sw_batch_size_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     sw_batch_size = sw_batch_size_internal
 
     def model_loader(model, trained_model_path):
@@ -339,37 +366,48 @@ def generate_output_ensemble(model_out):
 
             # change the shape of val_outputs from (1, 2, 512, 512, 512) to (2, 512, 512, 512)
             # also move it to cpu
-            val_outputs1 = val_outputs1.squeeze(0).detach().cpu()
-            val_outputs2 = val_outputs2.squeeze(0).detach().cpu()
+            for j in range(len(val_outputs1)):
 
-            # stack them together --> (2, 2, 512, 512, 512)
-            val_outputs = np.stack([val_outputs1, val_outputs2], axis=0)
+                # stack them together --> (2, 2, 512, 512, 512)
+                val_outputs = np.stack([
+                    val_outputs1[j].detach().cpu(),
+                    val_outputs2[j].detach().cpu()
+                ], axis=0)
 
-            # average them together ---> (2, 512, 512, 512)
-            # add one channel and change it to tensor ---> (1, 2, 512, 512, 512)
-            val_outputs = (
-                torch.Tensor(np.mean(val_outputs, axis=0)).unsqueeze(0).to(device)
-            )
+                # average them together ---> (2, 512, 512, 512)
+                # add one channel and change it to tensor ---> (1, 2, 512, 512, 512)
+                val_outputs = (
+                    torch.Tensor(np.mean(val_outputs, axis=0)).unsqueeze(0).to(device)
+                )
 
-            val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+                val_outputs = [post_pred(z) for z in decollate_batch(val_outputs)]
 
-            # save the images as .tiff file readable by Fiji
-            img_list = [
-                val_data["image"][0, 0, :, :, :],
-                val_outputs[0].detach().cpu()[1, :, :, :],
-            ]
-            save_tiff(img_list, input_path, data_dicts_test[RI_subj_id - 1])
+                # save the images as .tiff file readable by Fiji
+                img_list = [val_outputs[0][1, :, :, :].detach().cpu()]
+                save_tiff(img_list, input_path, data_dicts_test[RI_subj_id - 1])
 
-            RI_subj_id += 1
+                RI_subj_id += 1
 
 
 # this function generates outputs using ensemble of ensembles (averaging two models + MC) technique
-def generate_output_ensemble_of_ensembles(model_out):
+def generate_output_ensemble_of_ensembles(
+        model_out,
+        input_path,
+        batch_size_internal,
+        sw_batch_size_internal,
+        forward_passes_internal,
+        data_dicts_test,
+        post_pred,
+        cfg,
+        device,
+        val_loader
+    ):
     # number of forward pass
-    forward_passes = 50
+    # forward_passes = 5
+    forward_passes = forward_passes_internal
 
     sw_batch_size = sw_batch_size_internal
-    batch_size = sw_batch_size_internal
+    batch_size = batch_size_internal
 
     # this function only sets the model dropout layesrs to train
     def enable_dropout(model):
@@ -409,10 +447,11 @@ def generate_output_ensemble_of_ensembles(model_out):
             # val_outputs_list2 = []
 
             # these are needed to calculate mean and var iteratively --> less memory needed
-            sum_voxels1 = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_squared_voxels1 = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_voxels2 = np.zeros((batch_size, 2, 512, 512, 512))
-            sum_squared_voxels2 = np.zeros((batch_size, 2, 512, 512, 512))
+            H, W, D = val_data["image"].shape[2], val_data["image"].shape[3], val_data["image"].shape[4]
+            sum_voxels1 = np.zeros((batch_size, 2, H, W, D))
+            sum_squared_voxels1 = np.zeros((batch_size, 2, H, W, D))
+            sum_voxels2 = np.zeros((batch_size, 2, H, W, D))
+            sum_squared_voxels2 = np.zeros((batch_size, 2, H, W, D))
 
             for f in range(forward_passes):
                 val_inputs = (val_data["image"].to(device)).float()
@@ -523,12 +562,12 @@ def generate_output_ensemble_of_ensembles(model_out):
                 # MC_outputs1_temp = torch.Tensor(MC_outputs1).to(device)
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs1_temp = [
-                    post_pred(i) for i in decollate_batch(MC_outputs1.unsqueeze(0))
+                    post_pred(z) for z in decollate_batch(MC_outputs1.unsqueeze(0))
                 ]
                 # MC_outputs2_temp = torch.Tensor(MC_outputs2).to(device)
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs2_temp = [
-                    post_pred(i) for i in decollate_batch(MC_outputs2.unsqueeze(0))
+                    post_pred(z) for z in decollate_batch(MC_outputs2.unsqueeze(0))
                 ]
 
                 # save the images as .tiff file readable by Fiji
@@ -549,7 +588,7 @@ def generate_output_ensemble_of_ensembles(model_out):
                 )
 
                 # combine the MC_outputs together to get the average of the two models
-                val_outputs_stack = np.stack([MC_outputs1, MC_outputs2], axis=0)
+                val_outputs_stack = np.stack([MC_outputs1.detach().cpu(), MC_outputs2.detach().cpu()], axis=0)
 
                 val_outputs = torch.Tensor(np.mean(val_outputs_stack, axis=0)).to(
                     device
@@ -579,19 +618,22 @@ def generate_output_ensemble_of_ensembles(model_out):
 def deploy_functions(
     chosen_model,
     patch_dir_var,
-    sw_batch_size_var,
-    monte_var,
+    batch_size_var,
     cache_rate_var,
     num_workers_var,
+    forward_passes_var,
+    gpu_index,
+    binarization_threshold,
+    percentage_brain_patch_skip,
 ):
-    # Define global vars
+    # Define vars
     model_name = chosen_model
-    global input_path
     input_path = patch_dir_var
     CFG_PATH = Path(os.environ["MIRACL_HOME"]) / "seg/config_unetr.yml"
-    MC_flag = monte_var
-    global sw_batch_size_internal
-    sw_batch_size_internal = sw_batch_size_var
+    MC_flag = True if forward_passes_var > 0 else False
+    batch_size_internal = batch_size_var
+    sw_batch_size_internal = 4
+    forward_passes_internal = forward_passes_var
 
     # -------------------------------------------------------
     # Read generate_patch directory / created by generate_patch.py
@@ -605,9 +647,27 @@ def deploy_functions(
             if entry.is_file() and entry.name.lower().endswith((".tif", ".tiff")):
                 images_val.append(entry.name)
 
-    images_val.sort()
-    images_val = [os.path.join(input_path, image) for image in images_val]
-    global data_dicts_test
+    # load in percentage_brain_patch.json
+    with open(os.path.join(input_path, "percentage_brain_patch.json")) as f:
+        percentage_brain_patch = json.load(f)
+
+    # filter through images val based on percentage threshold
+    images_val_non_empty = [
+        os.path.join(input_path, image)
+        for image in images_val
+        if percentage_brain_patch[image] > percentage_brain_patch_skip
+    ]
+    images_val_non_empty.sort()
+
+    images_val_empty = [
+        os.path.join(input_path, image)
+        for image in images_val
+        if percentage_brain_patch[image] <= percentage_brain_patch_skip
+    ]
+    images_val_empty.sort()
+
+    images_val = images_val_non_empty
+
     data_dicts_test = [{"image": image_name} for image_name in images_val]
     print("data dicts are ready!")
     print(f"some samples from data dicts: {data_dicts_test[:3]}")
@@ -619,22 +679,20 @@ def deploy_functions(
     model_out, test_transforms = ace_prepare_model_transform.generate_model_transforms(
         model_name, CFG_PATH
     )
-    global post_pred
-    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
-    global post_label
-    post_label = Compose([EnsureType(), AsDiscrete(to_onehot=2)])
+    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2, threshold=binarization_threshold)])
 
     with open(CFG_PATH, "r") as ymlfile:
-        global cfg
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # GPU selection
     print(f"number of available gpus: {torch.cuda.device_count()}")
     gpu_opt = cfg["general"].get("GPU", "single")
-    global device
     if gpu_opt == "single":
-        device = torch.device("cuda:0")
+        if torch.cuda.device_count() <= gpu_index:
+            raise ValueError(f"Selected GPU index ({gpu_index}) is not available. Available GPUs: {torch.cuda.device_count()}")
+        device = torch.device(f"cuda:{gpu_index}")
     else:
+        raise NotImplementedError("multi-gpu is not implemented yet")
         device = torch.device("cuda:0")
         # model = torch.nn.DataParallel(model)
         # model.to(device)
@@ -647,28 +705,135 @@ def deploy_functions(
         num_workers=num_workers_var,
     )
     # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
-    global val_loader
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)
+    val_loader = DataLoader(val_ds, batch_size=batch_size_internal, num_workers=num_workers_var)
 
     # unet alone
     if model_name == "unet" and not MC_flag:
-        generate_output_single(model_name, model_out)
+        generate_output_single(
+            model_name,
+            model_out,
+            input_path,
+            sw_batch_size_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unetr alone
     elif model_name == "unetr" and not MC_flag:
-        generate_output_single(model_name, model_out)
+        generate_output_single(
+            model_name,
+            model_out,
+            input_path,
+            sw_batch_size_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unet alone + MC dropout
     elif model_name == "unet" and MC_flag:
-        generate_output_MC(model_name, model_out)
+        generate_output_MC(
+            model_name,
+            model_out,
+            input_path,
+            batch_size_internal,
+            sw_batch_size_internal,
+            forward_passes_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unetr alone + MC dropout
     elif model_name == "unetr" and MC_flag:
-        generate_output_MC(model_name, model_out)
+        generate_output_MC(
+            model_name,
+            model_out,
+            input_path,
+            batch_size_internal,
+            sw_batch_size_internal,
+            forward_passes_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unet + unetr
     elif model_name == "ensemble" and not MC_flag:
-        generate_output_ensemble(model_out)
+        generate_output_ensemble(
+            model_out,
+            input_path,
+            sw_batch_size_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     # unet + unetr + MC dropout
     elif model_name == "ensemble" and MC_flag:
-        generate_output_ensemble_of_ensembles(model_out)
+        generate_output_ensemble_of_ensembles(
+            model_out,
+            input_path,
+            batch_size_internal,
+            sw_batch_size_internal,
+            forward_passes_internal,
+            data_dicts_test,
+            post_pred,
+            cfg,
+            device,
+            val_loader
+        )
     else:
         raise ValueError("Selected model is invalid")
 
     logging.debug("deploy_model called")
+
+    # for the images in images_val
+    # define dataloader
+    data_dicts_test_empty = [{"image": image_name} for image_name in images_val_empty]
+    val_ds_empty = CacheDataset(
+        data=data_dicts_test_empty,
+        transform=test_transforms,
+        cache_rate=cache_rate_var,
+        num_workers=num_workers_var,
+    )
+    # val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
+    val_loader_empty = DataLoader(val_ds_empty, batch_size=batch_size_internal, num_workers=num_workers_var)
+    RI_subj_id = 1
+    for i, val_data in enumerate(val_loader_empty):
+        H, W, D = val_data["image"].shape[2], val_data["image"].shape[3], val_data["image"].shape[4]
+        curr_batch_size = val_data["image"].shape[0]
+        val_outputs = [np.zeros((H, W, D)) for b in range(curr_batch_size)]
+
+        if MC_flag:
+            uncertainty = [np.zeros((H, W, D)) for b in range(curr_batch_size)]
+
+        # save the images as .tiff file readable by Fiji
+        for j in range(len(val_outputs)):
+            
+
+            if (model_name == "unet" or model_name == "unetr") and not MC_flag:
+                img_list = [val_outputs[j]]
+                save_tiff(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1])
+                RI_subj_id += 1
+
+            elif model_name == "ensemble" and not MC_flag:
+                img_list = [val_outputs[j]]
+                save_tiff(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1])
+                RI_subj_id += 1
+
+            elif model_name == "ensemble" and MC_flag:
+                img_list = [uncertainty[j], val_outputs[j]]
+                save_tiff_MC_dropout(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1], model_name+"_")
+                RI_subj_id += 1
+
+            elif (model_name == "unet" or model_name == "unetr") and MC_flag:
+                img_list = [uncertainty[j], val_outputs[j]]
+                save_tiff_MC_dropout(img_list, input_path, data_dicts_test_empty[RI_subj_id - 1], model_name+"_")
+                RI_subj_id += 1
