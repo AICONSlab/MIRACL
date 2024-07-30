@@ -68,6 +68,9 @@ setup(
         "mne==1.3.1",
         "imagecodecs==2021.11.20",
         "ujson==5.7.0",
+        "pydantic==2.5.3",
+        "pydantic_core==2.14.6",
+        "typing_extensions==4.7.1",
     ],
     entry_points={
         "console_scripts": ["miracl=miracl.cli:main"],
