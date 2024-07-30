@@ -110,6 +110,10 @@ class MiraclObj(BaseModel):
         example="--help",
     )
 
+    cli_const: Optional[int] = Field(
+        None, description="Argparse const option", example=0
+    )
+
     # Argument behavior
     cli_obj_type: Optional[ArgumentType] = Field(
         None,

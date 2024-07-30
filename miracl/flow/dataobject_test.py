@@ -300,7 +300,7 @@ sa_image_size = MiraclObj(
     cli_help="image size (type: int; default: fetched from image header)",
     cli_required=False,
     cli_metavar=("height", "width", "depth"),
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["Path to atlas dir"],
     module="ace",
     module_group="seg",
@@ -317,7 +317,7 @@ sa_nr_workers = MiraclObj(
     cli_obj_type=ArgumentType.INTEGER,
     cli_required=False,
     cli_help="number of cpu cores deployed to pre-process image patches in parallel (type: %(type)s; default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["# parallel CPU cores pre-processing"],
     module="ace",
     module_group="seg",
@@ -340,7 +340,7 @@ sa_cache_rate = MiraclObj(
     cli_obj_type=ArgumentType.FLOAT,
     cli_required=False,
     cli_help="percentage of raw data that is loaded into cpu during segmentation (type: %(type)s; default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["% raw data loaded into CPU"],
     version_added="2.4.0",
     module="ace",
@@ -363,7 +363,7 @@ sa_batch_size = MiraclObj(
     cli_obj_type=ArgumentType.INTEGER,
     cli_required=False,
     cli_help="number of image patches being processed by the model in parallel on gpu (type: %(type)s; default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["Batch size"],
     version_added="2.4.0",
     module="ace",
@@ -380,7 +380,7 @@ sa_monte_carlo = MiraclObj(
     cli_obj_type=ArgumentType.INTEGER,
     default=0,
     cli_help="use Monte Carlo dropout (default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["Use Monte Carlo dropout"],
     module="ace",
     module_group="seg",
@@ -394,7 +394,7 @@ sa_visualize_results = MiraclObj(
     cli_s_flag="sav",
     cli_l_flag="sa_visualize_results",
     cli_help="visualizing model output after predictions (default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     cli_action=ArgumentAction.STORE_TRUE,
     gui_label=["Visualize model output:"],
     module="ace",
@@ -410,7 +410,7 @@ sa_uncertainty_map = MiraclObj(
     cli_s_flag="sau",
     cli_l_flag="sa_uncertainty_map",
     cli_help="enable map (default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["Enable uncertainty map"],
     default=False,
     cli_action=ArgumentAction.STORE_TRUE,
@@ -429,7 +429,7 @@ sa_binarization_threshold = MiraclObj(
     cli_required=False,
     default=0.5,
     cli_help="threshold value for binarization (type: %(type)s; default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["Binarization threshold"],
     module="ace",
     module_group="seg",
@@ -452,7 +452,7 @@ sa_percentage_brain_patch_skip = MiraclObj(
     cli_obj_type=ArgumentType.FLOAT,
     default=0.0,
     cli_help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "segmentation"},
     gui_label=["% threshold of brain patch to skip:"],
     range_formatting_vals={
         "min_val": 0.0,
@@ -475,7 +475,7 @@ ctn_channum = MiraclObj(
     cli_obj_type=ArgumentType.INTEGER,
     cli_help="Chan # for extracting single channel from multiple channel data (default: %(default)s)",
     default=0,
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Channel #"],
     module="tiff_nii",
     module_group="conv",
@@ -490,7 +490,7 @@ ctn_chanprefix = MiraclObj(
     tags=["tiff_nii", "conv", "ace_flow"],
     cli_obj_type=ArgumentType.STRING,
     cli_help="Chan prefix (string before channel number in file name). ex: C00 (default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Channel prefix"],
     module="tiff_nii",
     module_group="conv",
@@ -506,7 +506,7 @@ ctn_channame = MiraclObj(
     cli_l_flag="ctn_channame",
     cli_obj_type=ArgumentType.STRING,
     cli_help="Output chan name (default: %(default)s). Channel used in registration.",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Output channel name"],
     version_added="2.4.0",
     module="tiff_nii",
@@ -522,7 +522,7 @@ ctn_outnii = MiraclObj(
     cli_l_flag="ctn_outnii",
     cli_obj_type=ArgumentType.STRING,
     cli_help="Output nii name (script will append downsample ratio & channel info to given name). Method of tissue clearing.",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Out nii name"],
     version_added="2.4.0",
     module="tiff_nii",
@@ -538,7 +538,7 @@ ctn_center = MiraclObj(
     cli_l_flag="ctn_center",
     cli_obj_type=ArgumentType.INTEGER,
     cli_help="Nii center (default: 0 0 0 ) corresponding to Allen atlas nii template",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Nii center"],
     version_added="2.4.0",
     cli_nargs="+",
@@ -555,7 +555,7 @@ ctn_downzdim = MiraclObj(
     cli_l_flag="ctn_downzdim",
     cli_obj_type=ArgumentType.INTEGER,
     cli_help="Down-sample in z dimension, binary argument, (default: %(default)s) => yes",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Z-axis dx"],
     version_added="2.4.0",
     module="tiff_nii",
@@ -571,7 +571,7 @@ ctn_prevdown = MiraclObj(
     cli_l_flag="ctn_prevdown",
     cli_obj_type=ArgumentType.INTEGER,
     cli_help="Previous down-sample ratio, if already down-sampled",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["Previous dx"],
     version_added="2.4.0",
     module="tiff_nii",
@@ -587,44 +587,13 @@ ctn_percentile_thr = MiraclObj(
     cli_l_flag="ctn_percentile_thr",
     cli_obj_type=ArgumentType.FLOAT,
     cli_help="Percentile threshold for intensity correction (default: %(default)s)",
-    gui_group={"ace_flow": "main"},
+    gui_group={"ace_flow": "conversion"},
     gui_label=["% threshold intensity corr"],
     version_added="2.4.0",
     module="tiff_nii",
     module_group="conv",
     default=0.01,
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 rca_hemi = MiraclObj(
@@ -635,126 +604,232 @@ rca_hemi = MiraclObj(
     cli_l_flag="rca_hemi",
     cli_obj_type=ArgumentType.STRING,
     cli_help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
-    gui_group={'ace_flow': 'main'},
+    gui_group={"ace_flow": "registration"},
     gui_label=["Labels hemisphere"],
     module="clar_allen",
     module_group="reg",
     version_added="2.4.0",
-    cli_choices=['combined', 'split'],
+    cli_choices=["combined", "split"],
     default="combined",
 )
 
-# rca_allen_label = MiraclObj(
-#     id="496d1355-fd08-4ab5-9aaf-ee2cc8d122d0",
-#     name="rca_allen_label",
-#     cli_s_flag="rcal",
-#     cli_l_flag="rca_allen_label",
-#     cli_obj_type=ArgumentType.STRING,
-#     cli_help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
-#     gui_group={'ace_flow': 'main'},
-#     gui_label=["Allen labels to warp"],
-#     module="clar_allen",
-#     module_group="reg",
-#     version_added="2.4.0",
-# )
+rca_allen_label = MiraclObj(
+    id="496d1355-fd08-4ab5-9aaf-ee2cc8d122d0",
+    name="rca_allen_label",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcal",
+    cli_l_flag="rca_allen_label",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Allen labels to warp"],
+    module="clar_allen",
+    module_group="reg",
+    version_added="2.4.0",
+    default=None,
+)
 
-# rca_allen_atlas = MiraclObj(
-#     id="3ea0859d-2cb9-4304-bfa6-0dab29207a74",
-#     name="rca_allen_atlas",
-#     cli_s_flag="rcaa",
-#     cli_l_flag="rca_allen_atlas",
-#     cli_obj_type=ArgumentType.STRING,
-#     cli_help="custom Allen atlas (default: %(default)s)",
-#     gui_group={'ace_flow': 'main'},
-#     version_added="2.4.0",
-#     default="None",
-# )
-#
-# rca_side = MiraclObj(
-#     id="e3719c74-0b5a-4bdf-a336-d533a1faf7ec",
-#     name="rca_side",
-#     cli_s_flag="rcas",
-#     cli_l_flag="rca_side",
-#     cli_obj_type=ArgumentType.STRING,
-#     cli_help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
-#     gui_group={'ace_flow': 'main'},
-#     version_added="2.4.0",
-#     cli_choices=['rh', 'lh'],
-# )
-#
-# rca_no_mosaic_fig = MiraclObj(
-#     id="0c3b2cac-4cb3-4b32-86fb-b1a64a49452a",
-#     name="rca_no_mosaic_fig",
-#     cli_s_flag="rcanm",
-#     cli_l_flag="rca_no_mosaic_fig",
-#     cli_obj_type=ArgumentType.NONE,
-#     cli_help="by default a mosaic figure (.png) of allen labels registered to clarity will be saved. If this flag is set, the mosaic figure will not be saved.",
-#     gui_group={'ace_flow': 'main'},
-#     version_added="2.4.0",
-#     default=1,
-# )
-#
-# rca_olfactory_bulb = MiraclObj(
-#     id="dfd47b33-6f66-4a41-b42a-6264bb478f87",
-#     name="rca_olfactory_bulb",
-#     cli_s_flag="rcab",
-#     cli_l_flag="rca_olfactory_bulb",
-#     cli_obj_type=ArgumentType.INTEGER,
-#     cli_help="include olfactory bulb in brain (default: %(default)s)",
-#     gui_group={'ace_flow': 'main'},
-#     version_added="2.4.0",
-#     cli_choices=[0, 1],
-# )
-#
-# rca_skip_cor = MiraclObj(
-#     id="a58b7a5a-c253-41cd-87bb-ef3f9b232cb6",
-#     name="rca_skip_cor",
-#     cli_s_flag="rcap",
-#     cli_l_flag="rca_skip_cor",
-#     cli_obj_type=ArgumentType.NONE,
-#     cli_help="if utilfn intensity correction already ran, skip correction inside registration (default: %(default)s)",
-#     gui_group={'ace_flow': 'main'},
-#     version_added="2.4.0",
-# )
-#
-# rca_warp = MiraclObj(
-#     id="faaca013-3a95-4a3e-be24-f85e74841a83",
-#     name="rca_warp",
-#     cli_s_flag="rcaw",
-#     cli_l_flag="rca_warp",
-#     cli_obj_type=ArgumentType.NONE,
-#     cli_help="warp high-res clarity to Allen space (default: False)",
-#     gui_group={'ace_flow': 'main'},
-#     version_added="2.4.0",
-# )
+rca_allen_atlas = MiraclObj(
+    id="3ea0859d-2cb9-4304-bfa6-0dab29207a74",
+    name="rca_allen_atlas",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcaa",
+    cli_l_flag="rca_allen_atlas",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="custom Allen atlas (default: %(default)s)",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Custom Allen atlas"],
+    module="clar_allen",
+    module_group="reg",
+    version_added="2.4.0",
+    default="None",
+)
+
+rca_side = MiraclObj(
+    id="e3719c74-0b5a-4bdf-a336-d533a1faf7ec",
+    name="rca_side",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcas",
+    cli_l_flag="rca_side",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Side"],
+    version_added="2.4.0",
+    cli_choices=["rh", "lh"],
+    default="rh",
+    gui_choice_override={
+        "vals": ["right hemisphere", "left hemisphere"],
+        "default_val": "right hemisphere",
+    },
+    module="clar_allen",
+    module_group="reg",
+)
+
+rca_no_mosaic_fig = MiraclObj(
+    id="0c3b2cac-4cb3-4b32-86fb-b1a64a49452a",
+    name="rca_no_mosaic_fig",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcanm",
+    cli_l_flag="rca_no_mosaic_fig",
+    cli_help="by default a mosaic figure (.png) of allen labels registered to clarity will be saved. If this flag is set, the mosaic figure will not be saved.",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Create mosaic figure"],
+    version_added="2.4.0",
+    cli_metavar="",
+    cli_action=ArgumentAction.STORE_CONST,
+    cli_const=0,
+    default=1,
+    gui_choice_override={
+        "vals": ["yes", "no"],
+        "default_val": "yes",
+    },
+    module="clar_allen",
+    module_group="reg",
+)
+
+rca_olfactory_bulb = MiraclObj(
+    id="dfd47b33-6f66-4a41-b42a-6264bb478f87",
+    name="rca_olfactory_bulb",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcab",
+    cli_l_flag="rca_olfactory_bulb",
+    cli_obj_type=ArgumentType.INTEGER,
+    cli_help="include olfactory bulb in brain. '0' means no (default: %(default)s)",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Olfactory bulb incl."],
+    gui_choice_override={
+        "vals": ["not included", "included"],
+        "default_val": "not included",
+    },
+    version_added="2.4.0",
+    cli_choices=[0, 1],
+    module="clar_allen",
+    module_group="reg",
+    default=0,
+)
+
+rca_skip_cor = MiraclObj(
+    id="a58b7a5a-c253-41cd-87bb-ef3f9b232cb6",
+    name="rca_skip_cor",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcap",
+    cli_l_flag="rca_skip_cor",
+    cli_help="if utilfn intensity correction already ran, skip correction inside registration. '1' means skip (default: %(default)s)",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Utilfn intensity correction"],
+    gui_choice_override={
+        "vals": ["run", "skip"],
+        "default_val": "run",
+    },
+    module="clar_allen",
+    module_group="reg",
+    version_added="2.4.0",
+    default=0,
+    cli_action=ArgumentAction.STORE_CONST,
+    cli_const=1,
+)
+
+rca_warp = MiraclObj(
+    id="faaca013-3a95-4a3e-be24-f85e74841a83",
+    name="rca_warp",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcaw",
+    cli_l_flag="rca_warp",
+    cli_help="warp high-res clarity to Allen space. '0' means do not warp (default: %(default)s)",
+    gui_group={"ace_flow": "registration"},
+    gui_label=["Warp CLARITY to Allen"],
+    module="clar_allen",
+    module_group="reg",
+    default=0,
+    cli_action=ArgumentAction.STORE_CONST,
+    cli_const=1,
+    gui_choice_override={
+        "vals": ["yes", "no"],
+        "default_val": "no",
+    },
+    version_added="2.4.0",
+)
 
 
+sv_xy_res = MiraclObj(
+    id="1575ba9e-bdae-4f6d-9ee9-7c31c7e3d3bc",
+    name="rva_vx_res",
+    tags=["voxelize", "seg", "ace_flow"],
+    cli_s_flag="rvavx",
+    cli_l_flag="rva_vx_res",
+    cli_obj_type=ArgumentType.FLOAT,
+    cli_help="voxel size (x, y dims) in um (default: %(default)s)",
+    gui_group={"ace_flow": "vox_warp"},
+    gui_label=["Voxel sizes (um):"],
+    version_added="2.4.0",
+    module="voxelize",
+    module_group="seg",
+    default=1,
+)
 
+sv_z_res = MiraclObj(
+    id="2f576c3a-d62f-4e37-aae1-2bae9d09ae36",
+    name="rva_vz_res",
+    tags=["voxelize", "seg", "ace_flow"],
+    cli_s_flag="rvavz",
+    cli_l_flag="rva_vz_res",
+    cli_obj_type=ArgumentType.FLOAT,
+    cli_help="voxel size (z dim) in um (default: %(default)s)",
+    gui_group={"ace_flow": "vox_warp"},
+    gui_label=["Voxel sizes (um):"],
+    version_added="2.4.0",
+    module="voxelize",
+    module_group="seg",
+    default=1,
+)
 
+rwc_input_folder = MiraclObj(
+    id="9bb71e9f-b6de-4c30-a6da-449fe97cd45c",
+    name="rwc_input_folder",
+    tags=["warp_clar", "reg", "ace_flow"],
+    cli_s_flag="rwcr",
+    cli_l_flag="rwc_input_folder",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="path to CLARITY registration folder",
+    gui_group={'ace_flow': 'vox_warp'},
+    gui_label=["Path to CLARITY reg folder:"],
+    module="warp_clar",
+    module_group="reg",
+    version_added="2.4.0",
+    default=None,
+)
 
+rwc_input_nii = MiraclObj(
+    id="d0d81ddf-caab-465f-8aed-0bcf7600bfa6",
+    name="rwc_input_nii",
+    tags=["warp_clar", "reg", "ace_flow"],
+    cli_s_flag="rwcn",
+    cli_l_flag="rwc_input_nii",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="path to downsampled CLARITY nii file to warp",
+    gui_group={'ace_flow': 'vox_warp'},
+    gui_label=["Path to dx CLARITY nii file:"],
+    module="warp_clar",
+    module_group="reg",
+    version_added="2.4.0",
+    default=None,
+)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+rwc_seg_channel = MiraclObj(
+    id="fc35cbe4-947b-4673-989a-f2d95db82c5e",
+    name="rwc_seg_channel",
+    cli_s_flag="rwcc",
+    cli_l_flag="rwc_seg_channel",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="Segmentation channel (ex. green) - required if voxelized seg is input",
+    gui_group={'ace_flow': 'vox_warp'},
+    gui_label=["Seg channel (ex: 'green'):"],
+    version_added="2.4.0",
+    module="warp_clar",
+    module_group="reg",
+    default="green",
+)
 
 
 def create_parser_arguments(
@@ -909,12 +984,20 @@ if __name__ == "__main__":
         "single_multi_args_group": {
             "title": "single or multi method arguments",
             "description": "user is required to pass either single or multi method arguments",
-            "args": [fa_single, fa_control, fa_treated],
+            "args": [
+                fa_single,
+                fa_control,
+                fa_treated,
+            ],
         },
         "required_args": {
             "title": "required arguments",
             "description": "(set the single or multi method arguments first)",
-            "args": [sa_out_dir, sa_model_type, sa_resolution],
+            "args": [
+                sa_out_dir,
+                sa_model_type,
+                sa_resolution,
+            ],
         },
         "useful_args": {
             "title": "useful/important arguments",
@@ -923,6 +1006,8 @@ if __name__ == "__main__":
                 ctn_down,
                 rca_orient_code,
                 rca_voxel_size,
+                sv_downsample,
+                rwc_voxel_size,
                 fa_rerun_registration,
                 fa_rerun_segmentation,
                 fa_rerun_conversion,
@@ -959,6 +1044,28 @@ if __name__ == "__main__":
             "title": "optional registration arguments",
             "args": [
                 rca_hemi,
+                rca_allen_label,
+                rca_allen_atlas,
+                rca_side,
+                rca_no_mosaic_fig,
+                rca_olfactory_bulb,
+                rca_skip_cor,
+                rca_warp,
+            ],
+        },
+        "vox_args": {
+            "title": "optional voxelization arguments",
+            "args": [
+                sv_xy_res,
+                sv_z_res,
+            ],
+        },
+        "warp_args": {
+            "title": "optional voxelization arguments",
+            "args": [
+                rwc_input_folder,
+                rwc_input_nii,
+                rwc_seg_channel,
             ],
         },
     }
