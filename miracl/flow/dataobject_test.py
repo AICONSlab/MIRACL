@@ -596,6 +596,167 @@ ctn_percentile_thr = MiraclObj(
 )
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rca_hemi = MiraclObj(
+    id="867580eb-ea69-426b-97ae-82b52d8d730d",
+    name="rca_hemi",
+    tags=["clar_allen", "reg", "ace_flow"],
+    cli_s_flag="rcam",
+    cli_l_flag="rca_hemi",
+    cli_obj_type=ArgumentType.STRING,
+    cli_help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
+    gui_group={'ace_flow': 'main'},
+    gui_label=["Labels hemisphere"],
+    module="clar_allen",
+    module_group="reg",
+    version_added="2.4.0",
+    cli_choices=['combined', 'split'],
+    default="combined",
+)
+
+# rca_allen_label = MiraclObj(
+#     id="496d1355-fd08-4ab5-9aaf-ee2cc8d122d0",
+#     name="rca_allen_label",
+#     cli_s_flag="rcal",
+#     cli_l_flag="rca_allen_label",
+#     cli_obj_type=ArgumentType.STRING,
+#     cli_help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
+#     gui_group={'ace_flow': 'main'},
+#     gui_label=["Allen labels to warp"],
+#     module="clar_allen",
+#     module_group="reg",
+#     version_added="2.4.0",
+# )
+
+# rca_allen_atlas = MiraclObj(
+#     id="3ea0859d-2cb9-4304-bfa6-0dab29207a74",
+#     name="rca_allen_atlas",
+#     cli_s_flag="rcaa",
+#     cli_l_flag="rca_allen_atlas",
+#     cli_obj_type=ArgumentType.STRING,
+#     cli_help="custom Allen atlas (default: %(default)s)",
+#     gui_group={'ace_flow': 'main'},
+#     version_added="2.4.0",
+#     default="None",
+# )
+#
+# rca_side = MiraclObj(
+#     id="e3719c74-0b5a-4bdf-a336-d533a1faf7ec",
+#     name="rca_side",
+#     cli_s_flag="rcas",
+#     cli_l_flag="rca_side",
+#     cli_obj_type=ArgumentType.STRING,
+#     cli_help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
+#     gui_group={'ace_flow': 'main'},
+#     version_added="2.4.0",
+#     cli_choices=['rh', 'lh'],
+# )
+#
+# rca_no_mosaic_fig = MiraclObj(
+#     id="0c3b2cac-4cb3-4b32-86fb-b1a64a49452a",
+#     name="rca_no_mosaic_fig",
+#     cli_s_flag="rcanm",
+#     cli_l_flag="rca_no_mosaic_fig",
+#     cli_obj_type=ArgumentType.NONE,
+#     cli_help="by default a mosaic figure (.png) of allen labels registered to clarity will be saved. If this flag is set, the mosaic figure will not be saved.",
+#     gui_group={'ace_flow': 'main'},
+#     version_added="2.4.0",
+#     default=1,
+# )
+#
+# rca_olfactory_bulb = MiraclObj(
+#     id="dfd47b33-6f66-4a41-b42a-6264bb478f87",
+#     name="rca_olfactory_bulb",
+#     cli_s_flag="rcab",
+#     cli_l_flag="rca_olfactory_bulb",
+#     cli_obj_type=ArgumentType.INTEGER,
+#     cli_help="include olfactory bulb in brain (default: %(default)s)",
+#     gui_group={'ace_flow': 'main'},
+#     version_added="2.4.0",
+#     cli_choices=[0, 1],
+# )
+#
+# rca_skip_cor = MiraclObj(
+#     id="a58b7a5a-c253-41cd-87bb-ef3f9b232cb6",
+#     name="rca_skip_cor",
+#     cli_s_flag="rcap",
+#     cli_l_flag="rca_skip_cor",
+#     cli_obj_type=ArgumentType.NONE,
+#     cli_help="if utilfn intensity correction already ran, skip correction inside registration (default: %(default)s)",
+#     gui_group={'ace_flow': 'main'},
+#     version_added="2.4.0",
+# )
+#
+# rca_warp = MiraclObj(
+#     id="faaca013-3a95-4a3e-be24-f85e74841a83",
+#     name="rca_warp",
+#     cli_s_flag="rcaw",
+#     cli_l_flag="rca_warp",
+#     cli_obj_type=ArgumentType.NONE,
+#     cli_help="warp high-res clarity to Allen space (default: False)",
+#     gui_group={'ace_flow': 'main'},
+#     version_added="2.4.0",
+# )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def create_parser_arguments(
     parser: ArgumentParser,
     groups_dict: Dict[str, Dict[str, Union[str, List[MiraclObj]]]],
@@ -792,6 +953,12 @@ if __name__ == "__main__":
                 ctn_downzdim,
                 ctn_prevdown,
                 ctn_percentile_thr,
+            ],
+        },
+        "reg_args": {
+            "title": "optional registration arguments",
+            "args": [
+                rca_hemi,
             ],
         },
     }
