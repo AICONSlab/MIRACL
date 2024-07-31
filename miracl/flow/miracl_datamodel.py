@@ -3,6 +3,7 @@ from typing_extensions import Literal
 from pydantic import BaseModel, Field, validator
 from enum import Enum
 from argparse import ArgumentTypeError
+from pathlib import Path
 
 
 def parser_true_or_false(arg: str) -> bool:
@@ -137,6 +138,7 @@ class MiraclObj(BaseModel):
     )
 
     default: Optional[Any] = Field(
+        # default: Optional[Union[Path, int, float, List[Any], str, Dict[str, Any]]] = Field(
         None,
         description="Default cli value for arg, if any",
         example=25,
@@ -239,7 +241,13 @@ class MiraclObj(BaseModel):
         example="ace",
     )
 
-    module_group: Literal["conv", "reg", "seg", "flow"] = Field(
+    module_group: Literal[
+        "conv",
+        "reg",
+        "seg",
+        "flow",
+        "stats",
+    ] = Field(
         ...,
         description="Module group this argument belongs to",
         example="reg",
