@@ -1087,7 +1087,7 @@ stats_heatmap_vox = MiraclObj(
     cli_choices=[10, 25, 50],
     module="heatmap_group",
     module_group="stats",
-    default=None,
+    default=25,
 )
 
 stats_heatmap_sigma = MiraclObj(
