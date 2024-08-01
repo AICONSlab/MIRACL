@@ -64,72 +64,7 @@ def create_parser_arguments(
                 current_parser.add_argument(*flags, **arg_dict)
 
 
-# def create_parser_arguments(
-#     parser: ArgumentParser, groups_dict: Dict[str, List[BaseModel]]
-# ) -> None:
-#     """
-#     Create argument parser groups based on a dictionary of MiraclObj instances.
-#
-#     Each group will contain command-line arguments defined by the attributes
-#     of the MiraclObj instances.
-#
-#     :param parser: The ArgumentParser instance to which the arguments will be added.
-#     :param groups_dict: A dictionary mapping group names to lists of MiraclObj instances.
-#     """
-#     # Define the optional attributes that can be added to the argument
-#     optional_attrs = {
-#         "cli_metavar": "metavar",
-#         "cli_nargs": "nargs",
-#         "cli_choices": "choices",
-#         "default": "default",
-#         "cli_required": "required",
-#     }
-#
-#     for group_name, obj_list in groups_dict.items():
-#         # Create a new argument group for each group name
-#         current_parser = parser.add_argument_group(group_name)
-#
-#         for obj in obj_list:
-#             # Prepare the base argument dictionary
-#             arg_dict = {
-#                 "type": obj.cli_obj_type.python_type,
-#                 "help": obj.cli_help,
-#             }
-#
-#             # Add optional attributes directly if they exist
-#             for attr, key in optional_attrs.items():
-#                 if hasattr(obj, attr):  # Check if the attribute exists
-#                     arg_dict[key] = getattr(obj, attr)  # Safe to access since it exists
-#
-#             # Prepare the flags
-#             flags = []
-#             if hasattr(obj, "cli_s_flag") and obj.cli_s_flag:
-#                 flags.append(f"-{obj.cli_s_flag}")
-#             if hasattr(obj, "cli_l_flag") and obj.cli_l_flag:
-#                 flags.append(f"--{obj.cli_l_flag}")
-#
-#             # Add the argument to the current parser group
-#             current_parser.add_argument(*flags, **arg_dict)
-
 if __name__ == "__main__":
-    # args = parser.parse_args()
-    # args_dict = vars(args)  # Instead of dict -> Pydantic serializer
-    # print(type(args_dict[fa_single.cli_l_flag]))
-    # print(f"Value for {fa_single.cli_l_flag}: {args_dict[fa_single.cli_l_flag]}")
-    # print(f"Value for {fa_control.cli_l_flag}: {args_dict[fa_control.cli_l_flag]}")
-    # Usage remains the same
-    # parser = ArgumentParser(description="Your program description")
-    # objects_list = [
-    #     fa_single,
-    #     fa_control,
-    #     fa_treated,
-    #     sa_out_dir,
-    # ]  # Add all your MiraclObj instances here
-    # create_parser_arguments(parser, objects_list)
-    #
-    # # Now you can use the parser as usual
-    # args = parser.parse_args()
-
     ARA_ENV = "aradir"
     FULL_PROG_NAME = "miracl flow ace"
 
