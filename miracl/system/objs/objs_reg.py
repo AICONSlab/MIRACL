@@ -1,4 +1,8 @@
-from miracl_datamodel import MiraclObj, ArgumentType, ArgumentAction
+from miracl.system.datamodels.datamodel_miracl_objs import (
+    MiraclObj,
+    ArgumentType,
+    ArgumentAction,
+)
 
 
 class RegClarAllenObjs:

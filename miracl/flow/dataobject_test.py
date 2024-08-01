@@ -1,16 +1,16 @@
-from miracl_datamodel import MiraclObj, ArgumentType, ArgumentAction
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from typing import List, Dict, Union, cast, Optional
-from objs_stats import StatsAceObjs as stats_ace
-from objs_stats import StatsAceClustObjs as stats_ace_clust
-from objs_stats import StatsAceCorrObjs as stats_ace_corr
-from objs_stats import StatsHeatmapObjs as stats_heatmap
-from objs_reg import RegClarAllenObjs as reg_clar_allen
-from objs_reg import RegWarpClarObjs as reg_warp_clar
-from objs_seg import SegAceObjs as seg_ace
-from objs_seg import SegVoxObjs as seg_vox
-from objs_conv import ConvTiffNiiObjs as conv_tiff_nii
-from objs_flow import FlowAceObjs as flow_ace
+from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
+from miracl.system.objs.objs_stats import StatsAceObjs as stats_ace
+from miracl.system.objs.objs_stats import StatsAceClustObjs as stats_ace_clust
+from miracl.system.objs.objs_stats import StatsAceCorrObjs as stats_ace_corr
+from miracl.system.objs.objs_stats import StatsHeatmapObjs as stats_heatmap
+from miracl.system.objs.objs_reg import RegClarAllenObjs as reg_clar_allen
+from miracl.system.objs.objs_reg import RegWarpClarObjs as reg_warp_clar
+from miracl.system.objs.objs_seg import SegAceObjs as seg_ace
+from miracl.system.objs.objs_seg import SegVoxObjs as seg_vox
+from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
+from miracl.system.objs.objs_flow import FlowAceObjs as flow_ace
 
 
 def create_parser_arguments(

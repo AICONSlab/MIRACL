@@ -580,7 +580,11 @@ class ACEWorkflowParser:
             "--pcs_atlas_dir",
             help="path of atlas directory",
             default="miracl_home",
-        ).argmeta = {"argname": "clust_atlasdir", "category": "clusterwise", "aceflowguilabel": "Path to atlas dir"}
+        ).argmeta = {
+            "argname": "clust_atlasdir",
+            "category": "clusterwise",
+            "aceflowguilabel": "Path to atlas dir",
+        }
         perm_args.add_argument(
             "-pcsn",
             "--pcs_num_perm",
