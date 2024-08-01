@@ -10,7 +10,7 @@ class RegClarAllenObjs:
         cli_l_flag="rca_orient_code",
         cli_obj_type=ArgumentType.STRING,
         cli_help="to orient nifti from original orientation to 'standard/Allen' orientation, (default: %(default)s)",
-        default="ALS",
+        obj_default="ALS",
         gui_label=["Orientation code"],
         gui_group={"ace_flow": "main"},
         gui_order=[9],
@@ -25,7 +25,7 @@ class RegClarAllenObjs:
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="rcav",
         cli_l_flag="rca_voxel_size",
-        default=10,
+        obj_default=10,
         cli_choices=[10, 25, 50],
         cli_obj_type=ArgumentType.INTEGER,
         cli_help="labels voxel size/Resolution in um (default: %(default)s)",
@@ -51,7 +51,7 @@ class RegClarAllenObjs:
         module_group="reg",
         version_added="2.4.0",
         cli_choices=["combined", "split"],
-        default="combined",
+        obj_default="combined",
     )
 
     allen_label = MiraclObj(
@@ -67,7 +67,7 @@ class RegClarAllenObjs:
         module="clar_allen",
         module_group="reg",
         version_added="2.4.0",
-        default=None,
+        obj_default=None,
     )
 
     allen_atlas = MiraclObj(
@@ -83,7 +83,7 @@ class RegClarAllenObjs:
         module="clar_allen",
         module_group="reg",
         version_added="2.4.0",
-        default="None",
+        obj_default="None",
     )
 
     side = MiraclObj(
@@ -98,7 +98,7 @@ class RegClarAllenObjs:
         gui_label=["Side"],
         version_added="2.4.0",
         cli_choices=["rh", "lh"],
-        default="rh",
+        obj_default="rh",
         gui_choice_override={
             "vals": ["right hemisphere", "left hemisphere"],
             "default_val": "right hemisphere",
@@ -120,7 +120,7 @@ class RegClarAllenObjs:
         cli_metavar="",
         cli_action=ArgumentAction.STORE_CONST,
         cli_const=0,
-        default=1,
+        obj_default=1,
         gui_choice_override={
             "vals": ["yes", "no"],
             "default_val": "yes",
@@ -147,7 +147,7 @@ class RegClarAllenObjs:
         cli_choices=[0, 1],
         module="clar_allen",
         module_group="reg",
-        default=0,
+        obj_default=0,
     )
 
     skip_cor = MiraclObj(
@@ -166,7 +166,7 @@ class RegClarAllenObjs:
         module="clar_allen",
         module_group="reg",
         version_added="2.4.0",
-        default=0,
+        obj_default=0,
         cli_action=ArgumentAction.STORE_CONST,
         cli_const=1,
     )
@@ -182,7 +182,7 @@ class RegClarAllenObjs:
         gui_label=["Warp CLARITY to Allen"],
         module="clar_allen",
         module_group="reg",
-        default=0,
+        obj_default=0,
         cli_action=ArgumentAction.STORE_CONST,
         cli_const=1,
         gui_choice_override={
@@ -200,7 +200,7 @@ class RegWarpClarObjs:
         tags=["warp_clar", "reg", "ace_flow"],
         cli_s_flag="rwcv",
         cli_l_flag="rwc_voxel_size",
-        default=25,
+        obj_default=25,
         cli_choices=[10, 25, 50],
         cli_obj_type=ArgumentType.INTEGER,
         cli_help="voxel size/Resolution in um for warping (default: %(default)s)",
@@ -225,7 +225,7 @@ class RegWarpClarObjs:
         module="warp_clar",
         module_group="reg",
         version_added="2.4.0",
-        default=None,
+        obj_default=None,
     )
 
     input_nii = MiraclObj(
@@ -241,7 +241,7 @@ class RegWarpClarObjs:
         module="warp_clar",
         module_group="reg",
         version_added="2.4.0",
-        default=None,
+        obj_default=None,
     )
 
     seg_channel = MiraclObj(
@@ -257,5 +257,5 @@ class RegWarpClarObjs:
         version_added="2.4.0",
         module="warp_clar",
         module_group="reg",
-        default="green",
+        obj_default="green",
     )

@@ -62,7 +62,7 @@ class SegAceObjs:
         cli_l_flag="sa_gpu_index",
         cli_obj_type=ArgumentType.INTEGER,
         cli_help="index of the GPU to use (type: %(type)s; default: %(default)s)",
-        default=0,
+        obj_default=0,
         cli_required=False,
         gui_label=["GPU index"],
         gui_group={"ace_flow": "main"},
@@ -110,7 +110,7 @@ class SegAceObjs:
             "increment_val": 1,
             "nr_decimals": 5,
         },
-        default=4,
+        obj_default=4,
     )
 
     cache_rate = MiraclObj(
@@ -133,7 +133,7 @@ class SegAceObjs:
             "increment_val": 1,
             "nr_decimals": 1,
         },
-        default=0.0,
+        obj_default=0.0,
     )
 
     batch_size = MiraclObj(
@@ -150,7 +150,7 @@ class SegAceObjs:
         version_added="2.4.0",
         module="ace",
         module_group="seg",
-        default=4,
+        obj_default=4,
     )
 
     monte_carlo = MiraclObj(
@@ -160,7 +160,7 @@ class SegAceObjs:
         cli_l_flag="sa_monte_carlo",
         tags=["ace", "seg", "ace_flow"],
         cli_obj_type=ArgumentType.INTEGER,
-        default=0,
+        obj_default=0,
         cli_help="use Monte Carlo dropout (default: %(default)s)",
         gui_group={"ace_flow": "segmentation"},
         gui_label=["Use Monte Carlo dropout"],
@@ -182,7 +182,7 @@ class SegAceObjs:
         module="ace",
         module_group="seg",
         version_added="2.4.0",
-        default=False,
+        obj_default=False,
     )
 
     uncertainty_map = MiraclObj(
@@ -194,7 +194,7 @@ class SegAceObjs:
         cli_help="enable map (default: %(default)s)",
         gui_group={"ace_flow": "segmentation"},
         gui_label=["Enable uncertainty map"],
-        default=False,
+        obj_default=False,
         cli_action=ArgumentAction.STORE_TRUE,
         module="ace",
         module_group="seg",
@@ -209,7 +209,7 @@ class SegAceObjs:
         cli_l_flag="sa_binarization_threshold",
         cli_obj_type=ArgumentType.FLOAT,
         cli_required=False,
-        default=0.5,
+        obj_default=0.5,
         cli_help="threshold value for binarization (type: %(type)s; default: %(default)s)",
         gui_group={"ace_flow": "segmentation"},
         gui_label=["Binarization threshold"],
@@ -232,7 +232,7 @@ class SegAceObjs:
         cli_l_flag="sa_percentage_brain_patch_skip",
         cli_required=False,
         cli_obj_type=ArgumentType.FLOAT,
-        default=0.0,
+        obj_default=0.0,
         cli_help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
         gui_group={"ace_flow": "segmentation"},
         gui_label=["% threshold of brain patch to skip:"],
@@ -257,7 +257,7 @@ class SegVoxObjs:
         cli_l_flag="rva_downsample",
         cli_obj_type=ArgumentType.INTEGER,
         cli_help="downsample ratio for voxelization, recommended: 5 <= ratio <= 10 (default: %(default)s)",
-        default=10,
+        obj_default=10,
         gui_label=["Voxelization dx"],
         gui_group={"ace_flow": "main"},
         gui_order=[11],
@@ -279,7 +279,7 @@ class SegVoxObjs:
         version_added="2.4.0",
         module="voxelize",
         module_group="seg",
-        default=1,
+        obj_default=1,
     )
 
     z_res = MiraclObj(
@@ -295,5 +295,5 @@ class SegVoxObjs:
         version_added="2.4.0",
         module="voxelize",
         module_group="seg",
-        default=1,
+        obj_default=1,
     )

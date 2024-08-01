@@ -6,6 +6,11 @@ from argparse import ArgumentTypeError
 from pathlib import Path
 
 
+############
+# UTIL FNS #
+############
+
+
 def parser_true_or_false(arg: str) -> bool:
     upper_arg = str(arg).upper()
     if upper_arg in ("TRUE", "T"):
@@ -14,6 +19,11 @@ def parser_true_or_false(arg: str) -> bool:
         return False
     else:
         raise ArgumentTypeError("Argument must be either 'True'/'T' or 'False'/'F'")
+
+
+#########
+# ENUMS #
+#########
 
 
 class ArgumentType(str, Enum):
@@ -48,6 +58,11 @@ class ArgumentAction(str, Enum):
     VERSION = "version"
 
 
+#################
+# CUSTOM FIELDS #
+#################
+
+
 class RangeFormConfig(BaseModel):
     min_val: Optional[Union[int, float]] = Field(
         None,
@@ -77,8 +92,13 @@ class GuiChoiceOverrideConfig(BaseModel):
     )
 
 
+############
+# MAIN OBJ #
+############
+
+
 class MiraclObj(BaseModel):
-    # Core argument properties
+    # REQUIRED FIELDS
     id: str = Field(
         ...,
         description="Unique id for object",
@@ -91,57 +111,54 @@ class MiraclObj(BaseModel):
         example="conv_outname",
     )
 
-    tags: Optional[List[str]] = Field(
-        None,
-        min_items=1,
-        max_items=5,
-        example=["flow", "ace"],
-        description="Tags for categorizing or filtering arguments",
-    )
-
-    cli_s_flag: Optional[str] = Field(
-        None,
-        description="Short flag for cli arg",
-        example="-h",
-    )
-
     cli_l_flag: str = Field(
         ...,
         description="Long flag for cli arg",
         example="--help",
     )
 
+    # GENERAL
+    obj_default: Optional[Union[Path, int, float, List[Any], str, Dict[str, Any]]] = (
+        Field(
+            None,
+            description="Default obj value for arg, if any, for e.g. cli or gui",
+            example=25,
+        )
+    )
+
+    depends_on: Optional[List[str]] = Field(
+        None,
+        description="IDs of arguments this one depends on",
+        example=["67b62f10-a6b6-4d61-9e2c-19819373265d"],
+    )
+
+    conflicts_with: Optional[List[str]] = Field(
+        None,
+        description="IDs of arguments this one conflicts with",
+        example=["4ca6271e-c351-4230-bd20-b0f606101c42"],
+    )
+
+    # CLI
+    cli_s_flag: Optional[str] = Field(
+        None,
+        description="Short flag for cli arg",
+        example="-h",
+    )
+
     cli_const: Optional[int] = Field(
         None, description="Argparse const option", example=0
     )
 
-    # Argument behavior
     cli_obj_type: Optional[ArgumentType] = Field(
         None,
         description="Data type of cli arg",
         example=ArgumentType.STRING,
     )
 
-    @validator("default")
-    def validate_default(cls, v, values):
-        if (
-            "cli_obj_type" in values
-            and values["cli_obj_type"] == ArgumentType.CUSTOM_BOOL
-        ):
-            return parser_true_or_false(str(v))
-        return v
-
     cli_required: Optional[bool] = Field(
         None,
         description="Whether cli arg is required",
         example=True,
-    )
-
-    default: Optional[Any] = Field(
-        # default: Optional[Union[Path, int, float, List[Any], str, Dict[str, Any]]] = Field(
-        None,
-        description="Default cli value for arg, if any",
-        example=25,
     )
 
     cli_choices: Optional[List[Any]] = Field(
@@ -156,48 +173,12 @@ class MiraclObj(BaseModel):
         example=ArgumentAction.STORE_FALSE,
     )
 
-    gui_choice_override: Optional[GuiChoiceOverrideConfig] = Field(
-        None,
-        description="Strings to override the choice labels in the GUI with",
-        example={
-            "vals": ["yes", "no"],
-            "default_val": "no",
-        },
-    )
-
     cli_nargs: Optional[Union[int, str]] = Field(
         None,
         description="Number of expected cli args",
         example=2,
     )
 
-    @validator("cli_nargs")
-    def validate_nargs(cls, value):
-        if value is None:
-            return value
-
-        valid_nargs = {"+", "*", "?", "...", "N"}
-
-        # Check if the value is an integer
-        if isinstance(value, int):
-            return value
-
-        # Check if the value is a valid nargs string
-        if isinstance(value, str) and value in valid_nargs:
-            return value
-
-        # If the value is a string but not valid, raise a ValueError
-        if isinstance(value, str):
-            raise ValueError(
-                f"Invalid string value for cli_nargs: '{value}'. Must be one of {valid_nargs}."
-            )
-
-        # Raise an ArgumentTypeError for any other invalid types
-        raise ArgumentTypeError(
-            f"Invalid type for cli_nargs: {value}. Must be an int or one of {valid_nargs}."
-        )
-
-    # Help and documentation
     cli_help: str = Field(
         ...,
         description="Help text for cli arg",
@@ -209,7 +190,16 @@ class MiraclObj(BaseModel):
         example=("height", "width", "depth"),
     )
 
-    # GUI-specific properties
+    # GUI
+    gui_choice_override: Optional[GuiChoiceOverrideConfig] = Field(
+        None,
+        description="Strings to override the choice labels in the GUI with",
+        example={
+            "vals": ["yes", "no"],
+            "default_val": "no",
+        },
+    )
+
     gui_label: Optional[List[str]] = Field(
         None,
         description="Label(s) to be used in GUI",
@@ -234,7 +224,18 @@ class MiraclObj(BaseModel):
         example="checkbox",
     )
 
-    # Additional metadata
+    range_formatting_vals: Optional[RangeFormConfig] = Field(
+        None,
+        description="Config for range/formatting parameters",
+        example={
+            "min_val": 0,
+            "max_val": 100,
+            "increment_val": 1,
+            "nr_decimals": 2,
+        },
+    )
+
+    # MIRACL
     module: str = Field(
         ...,
         description="Module or component this argument belongs to",
@@ -277,29 +278,66 @@ class MiraclObj(BaseModel):
         example="$ miracl reg clar_allen -i downsampled_niftis/SHIELD_03x_down_autoflor_chan.nii.gz -o ARI -m combined -b 1",
     )
 
-    range_formatting_vals: Optional[RangeFormConfig] = Field(
+    tags: Optional[List[str]] = Field(
         None,
-        description="Config for range/formatting parameters",
-        example={
-            "min_val": 0,
-            "max_val": 100,
-            "increment_val": 1,
-            "nr_decimals": 2,
-        },
+        min_items=1,
+        max_items=5,
+        example=["flow", "ace"],
+        description="Tags for categorizing or filtering arguments",
     )
 
-    # Relationships
-    depends_on: Optional[List[str]] = Field(
-        None,
-        description="IDs of arguments this one depends on",
-        example=["67b62f10-a6b6-4d61-9e2c-19819373265d"],
-    )
+    #####################
+    # CUSTOM VALIDATORS #
+    #####################
 
-    conflicts_with: Optional[List[str]] = Field(
-        None,
-        description="IDs of arguments this one conflicts with",
-        example=["4ca6271e-c351-4230-bd20-b0f606101c42"],
-    )
+    @validator("cli_obj_type")
+    def validate_default(cls, v, values):
+        if (
+            "cli_obj_type" in values
+            and values["cli_obj_type"] == ArgumentType.CUSTOM_BOOL
+        ):
+            return parser_true_or_false(str(v))
+        return v
+
+    @validator("cli_nargs")
+    def validate_nargs(cls, value):
+        if value is None:
+            return value
+
+        valid_nargs = {"+", "*", "?", "...", "N"}
+
+        if isinstance(value, int):
+            return value
+
+        if isinstance(value, str) and value in valid_nargs:
+            return value
+
+        if isinstance(value, str):
+            raise ValueError(
+                f"Invalid string value for cli_nargs: '{value}'. Must be one of {valid_nargs}."
+            )
+
+        raise ArgumentTypeError(
+            f"Invalid type for cli_nargs: {value}. Must be an int or one of {valid_nargs}."
+        )
+
+    @validator("obj_default")
+    def validate_default(cls, value):
+        if value is None:
+            return value
+
+        allowed_types = (Path, int, float, list, str, dict)
+
+        if not isinstance(value, allowed_types):
+            raise ValueError(
+                f"Invalid type for default: {type(value)}. Must be one of {allowed_types}."
+            )
+
+        return value
+
+    ################
+    # CLASS CONFIG #
+    ################
 
     class Config:
         extra = "forbid"  # Prevent additional attributes from being added

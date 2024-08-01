@@ -69,7 +69,7 @@ class FlowAceObjs:
         version_added="2.4.0",
         module="ace",
         module_group="flow",
-        default=False,
+        obj_default=False,
         gui_choice_override={
             "vals": ["yes", "no"],
             "default_val": "no",
@@ -89,7 +89,7 @@ class FlowAceObjs:
         version_added="2.4.0",
         module="ace",
         module_group="flow",
-        default=False,
+        obj_default=False,
         gui_choice_override={
             "vals": ["yes", "no"],
             "default_val": "no",
@@ -109,7 +109,7 @@ class FlowAceObjs:
         version_added="2.4.0",
         module="ace",
         module_group="flow",
-        default=False,
+        obj_default=False,
         gui_choice_override={
             "vals": ["yes", "no"],
             "default_val": "no",

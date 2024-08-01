@@ -10,7 +10,7 @@ class ConvTiffNiiObjs:
         cli_l_flag="ctn_down",
         cli_obj_type=ArgumentType.INTEGER,
         cli_help="Down-sample ratio for conversion (default: %(default)s)",
-        default=5,
+        obj_default=5,
         gui_label=["Conversion dx"],
         gui_group={"ace_flow": "main"},
         gui_order=[8],
@@ -27,7 +27,7 @@ class ConvTiffNiiObjs:
         cli_l_flag="ctn_channum",
         cli_obj_type=ArgumentType.INTEGER,
         cli_help="Chan # for extracting single channel from multiple channel data (default: %(default)s)",
-        default=0,
+        obj_default=0,
         gui_group={"ace_flow": "conversion"},
         gui_label=["Channel #"],
         module="tiff_nii",
@@ -48,7 +48,7 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         version_added="2.4.0",
-        default=None,
+        obj_default=None,
     )
 
     channame = MiraclObj(
@@ -64,7 +64,7 @@ class ConvTiffNiiObjs:
         version_added="2.4.0",
         module="tiff_nii",
         module_group="conv",
-        default="auto",
+        obj_default="auto",
     )
 
     outnii = MiraclObj(
@@ -80,7 +80,7 @@ class ConvTiffNiiObjs:
         version_added="2.4.0",
         module="tiff_nii",
         module_group="conv",
-        default="SHIELD",
+        obj_default="SHIELD",
     )
 
     center = MiraclObj(
@@ -97,7 +97,7 @@ class ConvTiffNiiObjs:
         cli_nargs="+",
         module="tiff_nii",
         module_group="conv",
-        default=[0, 0, 0],
+        obj_default=[0, 0, 0],
     )
 
     downzdim = MiraclObj(
@@ -113,7 +113,7 @@ class ConvTiffNiiObjs:
         version_added="2.4.0",
         module="tiff_nii",
         module_group="conv",
-        default=1,
+        obj_default=1,
     )
 
     prevdown = MiraclObj(
@@ -129,7 +129,7 @@ class ConvTiffNiiObjs:
         version_added="2.4.0",
         module="tiff_nii",
         module_group="conv",
-        default=1,
+        obj_default=1,
     )
 
     percentile_thr = MiraclObj(
@@ -145,5 +145,5 @@ class ConvTiffNiiObjs:
         version_added="2.4.0",
         module="tiff_nii",
         module_group="conv",
-        default=0.01,
+        obj_default=0.01,
     )

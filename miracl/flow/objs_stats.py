@@ -32,7 +32,7 @@ class StatsAceObjs:
         cli_help="path of atlas directory (default: %(default)s)",
         gui_group={"ace_flow": "corr_stats"},
         version_added="2.4.0",
-        default="pvalue_heatmap",
+        obj_default="pvalue_heatmap",
     )
 
 
@@ -47,7 +47,7 @@ class StatsAceClustObjs:
         gui_label=["Path to atlas dir"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default="miracl_home",
+        obj_default="miracl_home",
         module="ace",
         module_group="stats",
     )
@@ -63,7 +63,7 @@ class StatsAceClustObjs:
         gui_group={"ace_flow": "clust"},
         gui_label=["# permutations"],
         version_added="2.4.0",
-        default=500,
+        obj_default=500,
         module="ace",
         module_group="stats",
     )
@@ -80,7 +80,7 @@ class StatsAceClustObjs:
         gui_label=["Resolution of images (um)"],
         version_added="2.4.0",
         cli_choices=[10, 25, 50],
-        default=25,
+        obj_default=25,
         module="ace",
         module_group="stats",
     )
@@ -96,7 +96,7 @@ class StatsAceClustObjs:
         gui_label=["fwhm of Gaussian kernel (px)"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default=3,
+        obj_default=3,
         module="ace",
         module_group="stats",
     )
@@ -112,7 +112,7 @@ class StatsAceClustObjs:
         gui_label=["tfce threshold start"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default=0.01,
+        obj_default=0.01,
         module="ace",
         module_group="stats",
     )
@@ -128,7 +128,7 @@ class StatsAceClustObjs:
         gui_label=["tfce threshold step"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default=5,
+        obj_default=5,
         module="ace",
         module_group="stats",
     )
@@ -144,7 +144,7 @@ class StatsAceClustObjs:
         gui_label=["% CPU's for parallelization"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default=0.9,
+        obj_default=0.9,
         module="ace",
         module_group="stats",
     )
@@ -160,7 +160,7 @@ class StatsAceClustObjs:
         gui_label=["tfce H power"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default=2,
+        obj_default=2,
         module="ace",
         module_group="stats",
     )
@@ -176,7 +176,7 @@ class StatsAceClustObjs:
         gui_label=["tfce E power"],
         gui_group={"ace_flow": "clust"},
         version_added="2.4.0",
-        default=0.5,
+        obj_default=0.5,
         module="ace",
         module_group="stats",
     )
@@ -192,7 +192,7 @@ class StatsAceClustObjs:
         gui_group={"ace_flow": "clust"},
         gui_label=["Step down p-value"],
         version_added="2.4.0",
-        default=0.3,
+        obj_default=0.3,
         module="ace",
         module_group="stats",
         range_formatting_vals={
@@ -214,7 +214,7 @@ class StatsAceClustObjs:
         gui_group={"ace_flow": "clust"},
         gui_label=["% for binarizing mean diff"],
         version_added="2.4.0",
-        default=95,
+        obj_default=95,
         module="ace",
         module_group="stats",
         range_formatting_vals={
@@ -237,7 +237,7 @@ class StatsAceCorrObjs:
         gui_group={"ace_flow": "corr_stats"},
         gui_label=["Threshold binarizing p-value"],
         version_added="2.4.0",
-        default=0.05,
+        obj_default=0.05,
         module="ace",
         module_group="stats",
         range_formatting_vals={
@@ -261,7 +261,7 @@ class StatsHeatmapObjs:
         gui_label=["Path to group 1 dir"],
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default=None,
+        obj_default=None,
         module="heatmap_group",
         module_group="stats",
     )
@@ -279,7 +279,7 @@ class StatsHeatmapObjs:
         version_added="2.4.0",
         module="heatmap_group",
         module_group="stats",
-        default=None,
+        obj_default=None,
     )
 
     vox = MiraclObj(
@@ -296,7 +296,7 @@ class StatsHeatmapObjs:
         cli_choices=[10, 25, 50],
         module="heatmap_group",
         module_group="stats",
-        default=25,
+        obj_default=25,
     )
 
     sigma = MiraclObj(
@@ -312,7 +312,7 @@ class StatsHeatmapObjs:
         cli_help="Gaussian smoothing sigma (default: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default=4,
+        obj_default=4,
         range_formatting_vals={
             "min_val": 0,
             "max_val": 1000,
@@ -333,7 +333,7 @@ class StatsHeatmapObjs:
         cli_help="percentile (%%) threshold for registration-to-input data check svg animation (default: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default=10,
+        obj_default=10,
         range_formatting_vals={
             "min_val": 0,
             "max_val": 100,
@@ -354,7 +354,7 @@ class StatsHeatmapObjs:
         cli_help="matplotlib colourmap for positive values (default: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default="Reds",
+        obj_default="Reds",
     )
 
     colourmap_neg = MiraclObj(
@@ -370,7 +370,7 @@ class StatsHeatmapObjs:
         cli_help="matplotlib colourmap for negative values (default: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default="Blues",
+        obj_default="Blues",
     )
 
     sagittal = MiraclObj(
@@ -387,7 +387,7 @@ class StatsHeatmapObjs:
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
         cli_nargs=5,
-        default=None,
+        obj_default=None,
     )
 
     coronal = MiraclObj(
@@ -436,7 +436,7 @@ class StatsHeatmapObjs:
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
         cli_nargs=2,
-        default=None,
+        obj_default=None,
     )
 
     outfolder = MiraclObj(
@@ -452,7 +452,7 @@ class StatsHeatmapObjs:
         cli_help="Output file directory (default is cwd: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default=Path.cwd(),
+        obj_default=Path.cwd(),
     )
 
     outfile = MiraclObj(
@@ -469,7 +469,7 @@ class StatsHeatmapObjs:
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
         cli_nargs="+",
-        default=["group_1", "group_2", "group_difference"],
+        obj_default=["group_1", "group_2", "group_difference"],
     )
 
     extension = MiraclObj(
@@ -485,7 +485,7 @@ class StatsHeatmapObjs:
         cli_help="heatmap figure extension (default: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default="tiff",
+        obj_default="tiff",
     )
 
     dpi = MiraclObj(
@@ -501,5 +501,5 @@ class StatsHeatmapObjs:
         cli_help="dots per inch (default: %(default)s)",
         gui_group={"ace_flow": "heatmap"},
         version_added="2.4.0",
-        default=500,
+        obj_default=500,
     )
