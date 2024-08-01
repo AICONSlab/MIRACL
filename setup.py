@@ -71,6 +71,7 @@ setup(
         "pydantic==2.5.3",
         "pydantic_core==2.14.6",
         "typing_extensions==4.7.1",
+        "pydantic-settings==2.0.3",
     ],
     entry_points={
         "console_scripts": ["miracl=miracl.cli:main"],
