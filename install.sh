@@ -192,6 +192,9 @@ services:
     network_mode: host
     container_name: $container_name
     shm_size: ${shm_mem}
+    env_file:
+      - ./miracl/system/envs/.env.folders
+      - ./miracl/system/envs/.env.versions
 EOF
 
 if [[ $gpu ]]; then
