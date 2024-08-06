@@ -7,14 +7,17 @@ class FolderSettings(BaseSettings):
     MIRACL_HOME: str = Field(
         ...,
         env="MIRACL_HOME",
+        description="MIRACL code folder",
     )
     ATLASES_HOME: str = Field(
         ...,
         env="ATLASES_HOME",
+        description="Reference atlases base folder",
     )
     ARA_HOME: str = Field(
         ...,
         env="ARA_HOME",
+        description="Allan Reference Atlas (ARA) folder",
     )
 
 
@@ -22,6 +25,7 @@ class VersionSettings(BaseSettings):
     VERSION: str = Field(
         ...,
         env="VERSION",
+        description="MIRACL version",
     )
 
 
