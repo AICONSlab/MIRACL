@@ -291,7 +291,7 @@ class MiraclObj(BaseModel):
     #####################
 
     @validator("cli_obj_type")
-    def validate_default(cls, v, values):
+    def validate_type(cls, v, values):
         if (
             "cli_obj_type" in values
             and values["cli_obj_type"] == ArgumentType.CUSTOM_BOOL
