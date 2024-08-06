@@ -16,6 +16,7 @@ from miracl.system.objs.objs_flow import FlowAceObjs as flow_ace
 def create_parser_arguments(
     parser: ArgumentParser,
     groups_dict: Dict[str, Dict[str, Union[str, List[MiraclObj]]]],
+    module_type: str = "module",
 ) -> None:
     """
     Create argument parser groups based on a dictionary of MiraclObj instances.
@@ -25,13 +26,14 @@ def create_parser_arguments(
 
     :param parser: The ArgumentParser instance to which the arguments will be added.
     :param groups_dict: A dictionary mapping group names to lists of MiraclObj instances and descriptions.
+    :param module_type: A string differentiating between a stand-alone module or a module as part of a workflow.
     """
     optional_attrs = {
         "cli_obj_type": "type",
         "cli_metavar": "metavar",
         "cli_nargs": "nargs",
         "cli_choices": "choices",
-        "default": "default",
+        "obj_default": "default",
         "cli_required": "required",
     }
 
@@ -57,8 +59,27 @@ def create_parser_arguments(
                     else:
                         arg_dict[key] = value
 
-            flags = [f"-{obj.cli_s_flag}" for obj in [obj] if obj.cli_s_flag]
-            flags.extend(f"--{obj.cli_l_flag}" for obj in [obj] if obj.cli_l_flag)
+            if module_type == "module":
+                flags = [f"-{obj.cli_s_flag}" for obj in [obj] if obj.cli_s_flag]
+                flags.extend(f"--{obj.cli_l_flag}" for obj in [obj] if obj.cli_l_flag)
+            else:
+                flags = []
+                if hasattr(obj, "flow") and obj.flow and module_type in obj.flow:
+                    if (
+                        "cli_s_flag" in obj.flow[module_type]
+                        and obj.flow[module_type]["cli_s_flag"]
+                    ):
+                        flags.append(f"-{obj.flow[module_type]['cli_s_flag']}")
+                    if (
+                        "cli_l_flag" in obj.flow[module_type]
+                        and obj.flow[module_type]["cli_l_flag"]
+                    ):
+                        flags.append(f"--{obj.flow[module_type]['cli_l_flag']}")
+                else:
+                    if hasattr(obj, "cli_s_flag") and obj.cli_s_flag:
+                        flags.append(f"-{obj.cli_s_flag}")
+                    if hasattr(obj, "cli_l_flag") and obj.cli_l_flag:
+                        flags.append(f"--{obj.cli_l_flag}")
 
             if flags:
                 current_parser.add_argument(*flags, **arg_dict)
@@ -233,7 +254,7 @@ if __name__ == "__main__":
         },
     }
 
-    create_parser_arguments(parser, groups_dict)
+    create_parser_arguments(parser, groups_dict, "ace")
 
     # Now you can use the parser as usual
     args = parser.parse_args()

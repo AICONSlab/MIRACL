@@ -242,6 +242,17 @@ class MiraclObj(BaseModel):
         example="ace",
     )
 
+    flow: Optional[
+        Dict[
+            Literal["ace", "sta"],
+            Dict[Literal["cli_s_flag", "cli_l_flag"], str],
+        ]
+    ] = Field(
+        None,
+        description="Flags for flow that the module is a part of",
+        example={"ace": {"cli_s_flag": "s", "cli_l_flag": "s_seg"}},
+    )
+
     module_group: Literal[
         "conv",
         "reg",
