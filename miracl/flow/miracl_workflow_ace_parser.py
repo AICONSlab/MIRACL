@@ -2,12 +2,15 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from miracl.system.datamodels.datamodel_env_vars import get_settings
 
 from numpy import require
 
 from miracl.seg import ace_parser
 
-ARA_ENV = "aradir"
+# Env vars
+settings = get_settings()
+ARA_ENV = settings.folders.ARA_HOME
 FULL_PROG_NAME = "miracl flow ace"
 
 
@@ -786,7 +789,7 @@ class ACEWorkflowParser:
         stats_args.add_argument(
             "-ua",
             "--u_atlas_dir",
-            default=os.environ.get(ARA_ENV, None),
+            default=ARA_ENV,
             help="path of atlas directory (default: %(default)s)",
         )
         stats_args.add_argument(
