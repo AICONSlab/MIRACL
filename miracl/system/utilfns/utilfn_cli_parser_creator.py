@@ -1,8 +1,5 @@
 from argparse import ArgumentParser, _ArgumentGroup
-
-# from os import walk
 from typing import List, Dict, Union, cast, Optional, Any
-from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
 
 
 def create_parser_arguments(
@@ -30,6 +27,7 @@ def create_parser_arguments(
         "cli_required": "required",
     }
 
+    # Dict to return parser args groups for custom ACE flow help
     argument_groups = {}
 
     for group_name, group_info in groups_dict.items():
