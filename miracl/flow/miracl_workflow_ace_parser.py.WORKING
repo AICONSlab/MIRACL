@@ -66,12 +66,12 @@ class ACEWorkflowParser:
         [-{seg_ace.gpu_index.cli_s_flag} SA_GPU_INDEX]
         [-{conv_tiff_nii.down.flow['ace']['cli_s_flag']} CTN_DOWN]
         [-{reg_clar_allen.orient_code.flow['ace']['cli_s_flag']} RCA_ORIENT_CODE]
-        [-{reg_clar_allen.voxel_size.flow['ace']['cli_s_flag']} rcav {{10,25,50}}]
-        [-rvad RVA_DOWNSAMPLE]
-        [-rwcv {{10,25,50}}]
-        [--rerun-registration TRUE/FALSE]
-        [--rerun-segmentation TRUE/FALSE]
-        [--rerun-conversion TRUE/FALSE]""",
+        [-{reg_clar_allen.voxel_size.flow['ace']['cli_s_flag']} {{10,25,50}}]
+        [-{seg_vox.downsample.flow['ace']['cli_s_flag']} RVA_DOWNSAMPLE]
+        [-{reg_warp_clar.voxel_size.flow['ace']['cli_s_flag']} {{10,25,50}}]
+        [--{flow_ace.rerun_registration.cli_l_flag} TRUE/FALSE]
+        [--{flow_ace.rerun_segmentation.cli_l_flag} TRUE/FALSE]
+        [--{flow_ace.rerun_conversion.cli_l_flag} TRUE/FALSE]""",
         )
 
         groups_dict = {
@@ -211,6 +211,7 @@ class ACEWorkflowParser:
             },
         }
 
+        # Create parser args and return group dicts
         argument_groups = create_parser_arguments(parser, groups_dict, "ace")
 
         required_args = argument_groups.get("required_args")
