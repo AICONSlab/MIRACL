@@ -1,0 +1,313 @@
+import sys
+from pathlib import Path
+from miracl.system.datamodels.datamodel_env_vars import get_settings
+from argparse import (
+    ArgumentError,
+    ArgumentParser,
+    RawDescriptionHelpFormatter,
+    _HelpAction,
+    SUPPRESS,
+    Namespace,
+)
+from miracl.system.utilfns.utilfn_cli_parser_creator import create_parser_arguments
+from miracl.system.objs.objs_stats import StatsAceObjs as stats_ace
+from miracl.system.objs.objs_stats import StatsAceClustObjs as stats_ace_clust
+from miracl.system.objs.objs_stats import StatsAceCorrObjs as stats_ace_corr
+from miracl.system.objs.objs_stats import StatsHeatmapObjs as stats_heatmap
+from miracl.system.objs.objs_reg import RegClarAllenObjs as reg_clar_allen
+from miracl.system.objs.objs_reg import RegWarpClarObjs as reg_warp_clar
+from miracl.system.objs.objs_seg import SegAceObjs as seg_ace
+from miracl.system.objs.objs_seg import SegVoxObjs as seg_vox
+from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
+from miracl.system.objs.objs_flow import FlowAceObjs as flow_ace
+
+# Env vars
+settings = get_settings()
+ARA_ENV = settings.folders.ARA_HOME
+FULL_PROG_NAME = "miracl flow ace"
+
+
+class ACEWorkflowParser:
+    """
+    Command-line argument parser for AI-based Cartography of Ensembles (ACE) segmentation method workflow.
+
+    :param input: A required string argument that specifies the input file path.
+    :param output: A required string argument that specifies the output file path.
+    :param model: A required string argument that specifies the model type. It has three possible choices: 'unet', 'unetr', and 'ensemble'.
+    :param voxel: A required flag that takes three arguments of type int.
+    :param visualize: An optional boolean flag that is set to `True` if present.
+    :param map: An optional boolean flag that is set to `True` if present.
+
+    :returns: The parsed arguments.
+    """
+
+    def __init__(self) -> None:
+        self.parser = self.parsefn()
+
+    def parsefn(self) -> ArgumentParser:
+        # Define custom parser
+        parser = ArgumentParser(
+            prog=FULL_PROG_NAME,
+            formatter_class=RawDescriptionHelpFormatter,
+            add_help=False,  # Used for separating args
+            description="""
+  1) Segments images with ACE
+  2) Convert raw tif/tiff files to nifti for registration
+  3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
+  4) Voxelizes segmentation results into density maps with Allen atlas resolution
+  5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
+            usage=f"""{FULL_PROG_NAME}
+        [-{flow_ace.single.cli_s_flag} SINGLE_TIFF_DIR]
+        [-{flow_ace.control.cli_s_flag} CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
+        [-{flow_ace.treated.cli_s_flag} TREATED_BASE_DIR TREATED_TIFF_DIR_EXAMPLE]
+        -{seg_ace.out_dir.cli_s_flag} SA_OUTPUT_FOLDER
+        -{seg_ace.model_type.cli_s_flag} {{unet,unetr,ensemble}}
+        -{seg_ace.resolution.cli_s_flag} X-res Y-res Z-res
+        [-{seg_ace.gpu_index.cli_s_flag} SA_GPU_INDEX]
+        [-{conv_tiff_nii.down.flow['ace']['cli_s_flag']} CTN_DOWN]
+        [-{reg_clar_allen.orient_code.flow['ace']['cli_s_flag']} RCA_ORIENT_CODE]
+        [-{reg_clar_allen.voxel_size.flow['ace']['cli_s_flag']} rcav {{10,25,50}}]
+        [-rvad RVA_DOWNSAMPLE]
+        [-rwcv {{10,25,50}}]
+        [--rerun-registration TRUE/FALSE]
+        [--rerun-segmentation TRUE/FALSE]
+        [--rerun-conversion TRUE/FALSE]""",
+        )
+
+        groups_dict = {
+            "single_multi_args_group": {
+                "title": "single or multi method arguments",
+                "description": "user is required to pass either single or multi method arguments",
+                "args": [
+                    flow_ace.single,
+                    flow_ace.control,
+                    flow_ace.treated,
+                ],
+            },
+            "required_args": {
+                "title": "required arguments",
+                "description": "(set the single or multi method arguments first)",
+                "args": [
+                    seg_ace.out_dir,
+                    seg_ace.model_type,
+                    seg_ace.resolution,
+                ],
+            },
+            "useful_args": {
+                "title": "useful/important arguments",
+                "args": [
+                    seg_ace.gpu_index,
+                    conv_tiff_nii.down,
+                    reg_clar_allen.orient_code,
+                    reg_clar_allen.voxel_size,
+                    seg_vox.downsample,
+                    reg_warp_clar.voxel_size,
+                    flow_ace.rerun_registration,
+                    flow_ace.rerun_segmentation,
+                    flow_ace.rerun_conversion,
+                ],
+            },
+            "seg_args": {
+                "title": "optional segmentation arguments",
+                "args": [
+                    seg_ace.image_size,
+                    seg_ace.nr_workers,
+                    seg_ace.cache_rate,
+                    seg_ace.batch_size,
+                    seg_ace.monte_carlo,
+                    seg_ace.visualize_results,
+                    seg_ace.uncertainty_map,
+                    seg_ace.binarization_threshold,
+                    seg_ace.percentage_brain_patch_skip,
+                ],
+            },
+            "conv_args": {
+                "title": "optional conversion arguments",
+                "args": [
+                    conv_tiff_nii.channum,
+                    conv_tiff_nii.chanprefix,
+                    conv_tiff_nii.channame,
+                    conv_tiff_nii.outnii,
+                    conv_tiff_nii.center,
+                    conv_tiff_nii.downzdim,
+                    conv_tiff_nii.prevdown,
+                    conv_tiff_nii.percentile_thr,
+                ],
+            },
+            "reg_args": {
+                "title": "optional registration arguments",
+                "args": [
+                    reg_clar_allen.hemi,
+                    reg_clar_allen.allen_label,
+                    reg_clar_allen.allen_atlas,
+                    reg_clar_allen.side,
+                    reg_clar_allen.no_mosaic_fig,
+                    reg_clar_allen.olfactory_bulb,
+                    reg_clar_allen.skip_cor,
+                    reg_clar_allen.warp,
+                ],
+            },
+            "vox_args": {
+                "title": "optional voxelization arguments",
+                "args": [
+                    seg_vox.xy_res,
+                    seg_vox.z_res,
+                ],
+            },
+            "warp_args": {
+                "title": "optional voxelization arguments",
+                "args": [
+                    reg_warp_clar.input_folder,
+                    reg_warp_clar.input_nii,
+                    reg_warp_clar.seg_channel,
+                ],
+            },
+            "clust_args": {
+                "title": "optional cluster_wise arguments",
+                "args": [
+                    stats_ace_clust.atlas_dir,
+                    stats_ace_clust.img_resolution,
+                    stats_ace_clust.smoothing_fwhm,
+                    stats_ace_clust.tfce_start,
+                    stats_ace_clust.tfce_step,
+                    stats_ace_clust.tfce_h,
+                    stats_ace_clust.tfce_e,
+                    stats_ace_clust.step_down_p,
+                    stats_ace_clust.mask_thr,
+                ],
+            },
+            "corr_args": {
+                "title": "optional correlational arguments",
+                "args": [
+                    stats_ace_corr.pvalue_thr,
+                ],
+            },
+            "heatmap_args": {
+                "title": "optional heatmap arguments",
+                "args": [
+                    stats_heatmap.group1,
+                    stats_heatmap.group2,
+                    stats_heatmap.vox,
+                    stats_heatmap.sigma,
+                    stats_heatmap.percentile,
+                    stats_heatmap.colourmap_pos,
+                    stats_heatmap.colourmap_neg,
+                    stats_heatmap.sagittal,
+                    stats_heatmap.coronal,
+                    stats_heatmap.axial,
+                    stats_heatmap.figure_dim,
+                    stats_heatmap.outfolder,
+                    stats_heatmap.outfile,
+                    stats_heatmap.extension,
+                    stats_heatmap.dpi,
+                ],
+            },
+            "stats_args": {
+                "title": "optional statistics arguments",
+                "args": [
+                    stats_ace.atlas_dir,
+                    stats_ace.p_outfile,
+                ],
+            },
+        }
+
+        argument_groups = create_parser_arguments(parser, groups_dict, "ace")
+
+        required_args = argument_groups.get("required_args")
+        single_multi_args_group = argument_groups.get("single_multi_args_group")
+        useful_args = argument_groups.get("useful_args")
+
+        # INFO: help section
+        class _CustomHelpAction(_HelpAction):
+            _required_args = []
+            for arg in required_args._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in single_multi_args_group._group_actions:
+                _required_args.extend(arg.option_strings)
+            for arg in useful_args._group_actions:
+                _required_args.extend(arg.option_strings)
+
+            def __call__(
+                self,
+                parser: ArgumentParser,
+                namespace,
+                values,
+                options_string=None,
+            ):
+                args = sys.argv[1:]
+
+                opts = parser._option_string_actions
+
+                if "-h" in args or "--help" in args:
+                    for arg in opts:
+                        if arg not in self._required_args:
+                            setattr(opts[arg], "help", SUPPRESS)
+                    parser.print_help()
+                    print("\n" + "-" * 50)
+                    print("\nUse -hv or --help_verbose flag for more verbose help\n")
+                elif "-hv" in args or "--help_verbose" in args:
+                    parser.print_help()
+
+                parser.exit()
+
+        parser.register("action", "help", _CustomHelpAction)
+
+        # Add help back under optional args header
+        optional_args = parser.add_argument_group("optional arguments")
+        optional_args.add_argument(
+            "-h",
+            "--help",
+            action="help",
+            default=SUPPRESS,
+            help="show concise help message and exit",
+        )
+
+        optional_args.add_argument(
+            "-hv",
+            "--help_verbose",
+            action="help",
+            default=SUPPRESS,
+            help="show this verbose help message and exit",
+        )
+
+        return parser
+
+    def validate_args(self, args) -> Namespace:
+
+        # check that control and treated are not passed with single
+        if (args.control and args.treated) and args.single:
+            self.parser.error(
+                "-c/--control and -t/--treated must be passed together without -s/--single",
+            )
+        # check that single is passed alone
+        elif args.single and (args.control or args.treated):
+            self.parser.error(
+                "-s/--single cannot be passed with either -c/--control or -t/--treated",
+            )
+        # check that control and treated are always passed together
+        elif (args.control and not args.treated) or (args.treated and not args.control):
+            self.parser.error("-c/--control and -t/--treated must be passed together")
+        # check that something is passed
+        elif not args.single and not args.control and not args.treated:
+            self.parser.error(
+                "either [-s/--single] or [-c/--control and -t/--treated] must be passed",
+            )
+
+        required_args = ["sa_output_folder", "sa_model_type", "sa_resolution"]
+        error_string = "the following arguments are required: "
+        error_encountered = False
+        for arg in required_args:
+            if not getattr(args, arg):
+                error_string += f"--{arg}, "
+                error_encountered = True
+
+        if error_encountered:
+            self.parser.error(error_string[:-2])
+
+        return args
+
+
+if __name__ == "__main__":
+    args_parser = ACEWorkflowParser()
+    args = args_parser.parser.parse_args()
+    args = args_parser.validate_args(args)
