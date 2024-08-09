@@ -11,7 +11,9 @@ stream_handler = logging.StreamHandler(sys.stdout)
 stream_handler.setLevel(logging.DEBUG)
 
 # INFO: Use %(name)s instead of %(filename)s to get logger script name
-formatter = logging.Formatter("%(asctime)s - %(filename)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter(
+    "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
+)
 
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)

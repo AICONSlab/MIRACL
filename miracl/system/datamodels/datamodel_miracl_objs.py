@@ -58,6 +58,13 @@ class ArgumentAction(str, Enum):
     VERSION = "version"
 
 
+class WidgetType(str, Enum):
+    LINE_EDIT = "line_edit"  # Text input (QLineEdit)
+    SPINBOX = "spinbox"  # Integer input (QSpinBox)
+    DOUBLE_SPINBOX = "double_spinbox"  # Float input (QDoubleSpinBox)
+    DROPDOWN = "dropdown"  # Multiple choice (QComboBox)
+
+
 #################
 # CUSTOM FIELDS #
 #################
@@ -202,8 +209,14 @@ class MiraclObj(BaseModel):
 
     gui_label: Optional[List[str]] = Field(
         None,
-        description="Label(s) to be used in GUI",
+        description="Main label used in GUI",
         example=["Path to atlas dir"],
+    )
+
+    gui_additional_labels: Optional[List[str]] = Field(
+        None,
+        description="Additional label(s) used in GUI",
+        example=["x-res", "y-res", "z-res"],
     )
 
     gui_group: Optional[Dict[str, str]] = Field(
@@ -218,10 +231,10 @@ class MiraclObj(BaseModel):
         example=5,
     )
 
-    gui_widget_type: Optional[str] = Field(
+    gui_widget_type: Optional[WidgetType] = Field(
         None,
-        description="Specific widget to use in GUI",
-        example="checkbox",
+        description="Specify widget to use in GUI",
+        example="WidgetType.SPIN_BOX",
     )
 
     range_formatting_vals: Optional[RangeFormConfig] = Field(

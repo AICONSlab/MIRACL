@@ -19,8 +19,8 @@ from PyQt5.QtCore import pyqtSignal, QObject
 # Define constants for widget types
 class WidgetType:
     LINE_EDIT = "line_edit"  # For text input (QLineEdit)
-    SPIN_BOX = "spin_box"  # For integer input (QSpinBox)
-    DOUBLE_SPIN_BOX = "double_spin_box"  # For float input (QDoubleSpinBox)
+    SPINBOX = "spinbox"  # For integer input (QSpinBox)
+    DOUBLE_SPINBOX = "double_spinbox"  # For float input (QDoubleSpinBox)
 
 
 # Define the Pydantic model for user input

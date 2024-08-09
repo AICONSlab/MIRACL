@@ -2,6 +2,7 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     ArgumentType,
     ArgumentAction,
+    WidgetType,
 )
 
 
@@ -32,6 +33,7 @@ class SegAceObjs:
         cli_l_flag="sa_model_type",
         flow={"ace": {"cli_s_flag": "sam", "cli_l_flag": "sa_model_type"}},
         cli_choices=["unet", "unetr", "ensemble"],
+        obj_default="unet",
         cli_obj_type=ArgumentType.STRING,
         cli_help="model architecture",
         gui_label=["Model architecture"],
@@ -40,6 +42,7 @@ class SegAceObjs:
         module="ace",
         module_group="seg",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.DROPDOWN,
     )
 
     resolution = MiraclObj(
@@ -118,9 +121,9 @@ class SegAceObjs:
             "min_val": 0,
             "max_val": 1000,
             "increment_val": 1,
-            "nr_decimals": 5,
         },
         obj_default=4,
+        gui_widget_type=WidgetType.SPINBOX,
     )
 
     cache_rate = MiraclObj(

@@ -15,7 +15,6 @@ class FlowAceObjs:
         gui_label=["Single tif/tiff data folder"],
         gui_group={"ace_flow": "main"},
         gui_order=[1],
-        gui_widget_type="textfield",
         module="ace",
         module_group="flow",
         version_added="2.4.0",
