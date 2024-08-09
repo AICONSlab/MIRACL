@@ -94,20 +94,18 @@ class WidgetFactory:
         :param obj: The MiraclObj containing range information.
         :type obj: MiraclObj
         """
-        # Define the attribute methods for range setting
         attribute_methods: Dict[str, Callable] = {
             "min_val": spinbox.setMinimum,
             "max_val": spinbox.setMaximum,
             "increment_val": spinbox.setSingleStep,
         }
 
-        # Set ranges that are attributes of obj
         if obj.range_formatting_vals:
             for attr, method in attribute_methods.items():
                 if attr in obj.range_formatting_vals:
                     method(obj.range_formatting_vals[attr])
 
-        # Set decimals only for double spinbox
+        # Set decimals for double spinbox if available
         if (
             isinstance(spinbox, QDoubleSpinBox)
             and "nr_decimals" in obj.range_formatting_vals
