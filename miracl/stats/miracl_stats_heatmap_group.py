@@ -193,7 +193,7 @@ def parsefn():
     parser.add_argument("-si",
                         "--side",
                         type=str,
-                        choices=["rh", "lh"],
+                        choices=["rh", "lh", "None"],
                         default=None,
                         help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",)
     parser.add_argument("--mask",
