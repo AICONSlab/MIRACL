@@ -292,7 +292,9 @@ def main(args):
 
     print("Computing neuron count...")
 
-    label_files = label_files[skip:-skip]
+    min_slice = skip
+    max_slice = len(label_files) - skip
+    label_files = label_files[min_slice:max_slice]
 
     # get bounding box
     print("Getting bbox")
