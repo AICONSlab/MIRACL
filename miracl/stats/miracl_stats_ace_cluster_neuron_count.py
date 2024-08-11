@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
+import pandas as pd
 import skimage.measure
 import tifffile as tiff
 from joblib import Parallel, delayed
@@ -232,18 +233,24 @@ class NeuronInfo:
         seg_masked = skimage.measure.label(seg_masked.astype(np.bool_))
 
         # do regionprops
-        region_out = skimage.measure.regionprops_table(
+        region_out = skimage.measure.regionprops(
             seg_masked,
-            properties=("label", "centroid", "area"),
         )
+        properties= ("label", "centroid", "area")
+        region_data = {
+            prop: [getattr(region, prop) for region in region_out]
+            for prop in properties
+        }
+        region_out = pd.DataFrame(region_data)
+
         # get the centroid and area
         for i, neuron_num in enumerate(region_out.get("label", [])):
             if region_out["area"][i] >= min_area:
                 neuron_info[int(neuron_num)] = {
                     "centroid": (
-                        float(region_out["centroid-0"][i]) + region_bbox[0],
-                        float(region_out["centroid-1"][i]) + region_bbox[1],
-                        float(region_out["centroid-2"][i]) + region_bbox[2],
+                        float(region_out["centroid"][i][0]) + region_bbox[0],
+                        float(region_out["centroid"][i][1]) + region_bbox[1],
+                        float(region_out["centroid"][i][2]) + region_bbox[2],
                     ),
                     "area": float(region_out["area"][i]),
                 }
