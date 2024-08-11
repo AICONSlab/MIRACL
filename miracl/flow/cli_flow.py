@@ -1,9 +1,12 @@
-import os
-import sys
 import argparse
+import os
 import subprocess
+import sys
 
+from miracl.flow import miracl_workflow_ace_interface
 from miracl.flow.miracl_workflow_ace_parser import ACEWorkflowParser
+from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
+
 
 def run_reg_clar(parser, args):
     miracl_home = os.environ["MIRACL_HOME"]
@@ -146,14 +149,10 @@ def run_mul(parser, args):
 
 
 def run_ace(parser, args):
-    miracl_home = os.environ["MIRACL_HOME"]
-    args = vars(args)
-
     if sys.argv[-2] == "flow" and sys.argv[-1] == "ace":
-        print("NO GUI YET")
+        miracl_workflow_ace_gui_controller.main()
     else:
-        flags = sys.argv[3:]
-        subprocess.run(["python", f"{miracl_home}/flow/miracl_workflow_ace_interface.py"] + flags)
+        miracl_workflow_ace_interface.main(args)
 
 
 
@@ -282,6 +281,9 @@ def get_parser():
         parents=[ace_parser],
         add_help=False,
         help="AI-based Cartography of Ensembles (ACE)",
+        usage=ace_parser.usage,
+        description=ace_parser.description,
+        formatter_class=ace_parser.formatter_class,
     )
     parser_ace.set_defaults(func=run_ace)
 

@@ -1,0 +1,4 @@
+Jupyter notebook
+================
+
+An accompanying Jupyter notebook for this tutorial can be found |linktoworkshop|.

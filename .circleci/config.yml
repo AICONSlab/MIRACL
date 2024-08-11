@@ -53,17 +53,11 @@ jobs:
           name: Compile and push Singularity image
           no_output_timeout: 2h
           command: |
-            # Install spython for def file creation
-            apk update && \
-            apk add py3-pip && \
-            pip3 install spython && \
-            # Create def file with spython
-            spython recipe Dockerfile &> miracl.def && \
-            # Change permissions for code directory for any Singularity user
-            sed -i '/#STOPUNCOMMENT#/a # Change permissions for code dir\nchmod -R 777 /code' miracl.def && \
             # Log in to cloud.sylabs.io
-            echo $SYLABS_TOKEN_JAN_26_2024 > tokenfile && \
+            echo $SYLABS_TOKEN_JUL_10_2024 > tokenfile && \
             singularity remote login -u aiconslab --tokenfile tokenfile && \
+            # Create Singularity container remotely and push to cloud
+            singularity build miracl.sif docker://mgoubran/miracl:latest
             # Setting trap in case image cannot be deleted
             set -e
             trap "echo 'Image doesn't exist - catching error!'; if [ $? == 255 ]; then echo 'Error 255'; fi" ERR
@@ -71,8 +65,21 @@ jobs:
             singularity delete --force library://aiconslab/miracl/miracl:latest && \
             # Unset trap
             trap - ERR
+            singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
+  singularity-build:
+    docker:
+      - image: quay.io/singularity/singularity:v3.10.3
+    working_directory: /root/project/MIRACL
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Compile and push Singularity image
+          no_output_timeout: 2h
+          command: |
             # Create Singularity container remotely and push to cloud
-            singularity build --remote library://aiconslab/miracl/miracl:latest miracl.def
+            singularity build miracl.sif docker://mgoubran/miracl:dev-latest
 
 workflows:
   build_and_test:
@@ -93,6 +100,7 @@ workflows:
               ignore: 
                 - master
                 - docs*
+                - dev
           after_build:
             - run:
                 name: Preview Docker Tag for Build
@@ -127,6 +135,27 @@ workflows:
           filters:
             branches:
               only: master
-             # ignore: 
-             #   - master
-             #   - docs*
+  
+  docker_with_lifecycle_dev:
+    jobs:
+      - docker-publish/publish:
+          image: mgoubran/miracl
+          tag: dev-latest
+          filters:
+            branches:
+             only: dev
+          after_build:
+            - run:
+                name: Publish Docker Tag with MIRACL Version
+                command: |
+                   DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:dev-latest /code/miracl/version.txt)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
+                   docker tag mgoubran/miracl:dev-latest mgoubran/miracl:dev-${DOCKER_TAG}
+      - singularity-build:
+          context:
+            - miracl_singularity
+          requires:
+            - docker-publish/publish
+          filters:
+            branches:
+              only: dev

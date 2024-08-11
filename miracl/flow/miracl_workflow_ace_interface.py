@@ -255,11 +255,9 @@ class ACEWarping(Warping):
                 -v {args.rwc_voxel_size}"
         subprocess.Popen(warp_cmd, shell=True).wait()
         # move the output file to the right folder
-        warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[
-            0
-        ]
+        warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[0]
         shutil.move(
-            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final")
+            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final" / warp_file.name)
         )
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
@@ -415,11 +413,11 @@ class ACEWorkflows:
         # check for single or multi in the args
         if args.single:
             self._execute_single_workflow(args, **kwargs)
-        elif args.control and args.experiment:
+        elif args.control and args.treated:
             self._execute_comparison_workflow(args, **kwargs)
         else:
             raise ValueError(
-                "Must specify either (-s/--single) or (-c/--control and -e/--experiment) in args."
+                "Must specify either (-s/--single) or (-c/--control and -t/--treated) in args."
             )
 
     def _execute_single_workflow(
@@ -486,7 +484,9 @@ class ACEWorkflows:
         fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
         stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
         StackTiffs.check_folders(fiji_file, stacked_tif)
-        StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo)
+        StackTiffs.stacking(
+            fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo > 0
+        )
         self.voxelization.voxelize(args, stacked_tif)
 
         (
@@ -529,7 +529,7 @@ class ACEWorkflows:
 
         nifti_save_location = {}
 
-        for type_ in ["control", "experiment"]:
+        for type_ in ["control", "treated"]:
             tiff_template = Path(args_dict[type_][1])
             base_dir = Path(args_dict[type_][0])
 
@@ -600,7 +600,7 @@ class ACEWorkflows:
                 fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
                 stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
                 StackTiffs.check_folders(fiji_file, stacked_tif)
-                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder)
+                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo > 0)
                 self.voxelization.voxelize(args, stacked_tif)
 
                 (
@@ -635,9 +635,9 @@ class ACEWorkflows:
         # reset the save folder to the original provided arg
         args.sa_output_folder = overall_save_folder
         args.pcs_control = (args.control[0], nifti_save_location["control"].as_posix())
-        args.pcs_experiment = (
-            args.experiment[0],
-            nifti_save_location["experiment"].as_posix(),
+        args.pcs_treated = (
+            args.treated[0],
+            nifti_save_location["treated"].as_posix(),
         )
 
         ace_flow_heatmap_output_folder = FolderCreator.create_folder(
@@ -740,7 +740,10 @@ class StackTiffs:
 
     @staticmethod
     def stacking(
-        fiji_file: pathlib.Path, stacked_tif: pathlib.Path, seg_output_dir: pathlib.Path, is_MC: bool
+        fiji_file: pathlib.Path,
+        stacked_tif: pathlib.Path,
+        seg_output_dir: pathlib.Path,
+        is_MC: bool,
     ):
         """Writes a Fiji macro and runs it to stack the segmented tif files.
         Needed to run before voxelization.
@@ -755,9 +758,11 @@ class StackTiffs:
         :type is_MC: bool
         """
         print("  stacking segmented tifs...")
-        filter =  "MC_" if is_MC else "out_"
+        filter = "MC_" if is_MC else "out_"
         with open(fiji_file, "w") as file:
-            file.write(f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n')
+            file.write(
+                f'File.openSequence("{seg_output_dir}", "virtual filter={filter}");\n'
+            )
             file.write(f'saveAs("Tiff", "{stacked_tif}");\n')
             file.write("close();\n")
 
@@ -902,7 +907,7 @@ class ConstructHeatmapCmd:
         """
         tested_heatmap_cmd += f"\
             -g1 {args.pcs_control[0]} {args.pcs_control[1]} \
-            -g2 {args.pcs_experiment[0]} {args.pcs_experiment[1]} \
+            -g2 {args.pcs_treated[0]} {args.pcs_treated[1]} \
             -v {args.rwc_voxel_size} \
             -gs {args.sh_sigma} \
             -p {args.sh_percentile} \
@@ -930,8 +935,9 @@ class RegistrationChecker:
         reg_folder: Path,
     ) -> bool:
         """Checks if registration needs to be run based on user input and the file structure.
-        If the user want to run registration, we run it. Otherwise we check that all the necessary
-        files are inplace before skipping. If they are not, we re-reun registration.
+        If the user want to run registration (with the --rerun-registration flag), we run it. 
+        Otherwise we check that all the necessary files are inplace before skipping.
+        If they are not, we re-reun registration.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
@@ -1003,7 +1009,8 @@ class RegistrationChecker:
         -f {args.rca_no_mosaic_fig} \
         -b {args.rca_olfactory_bulb} \
         -p {args.rca_skip_cor} \
-        -w {args.rca_warp}"
+        -w {args.rca_warp} \
+        -c {args.single}"
 
         return reg_cmd
 
@@ -1036,8 +1043,9 @@ class SegmentationChecker:
         seg_folder: Path,
     ) -> bool:
         """Checks if segmentation needs to be run based on user input and the file structure.
-        If the user wants to run seg, we run it. Otherwise, check that all the necessary files
-        are in place before skipping. If they are not, we re-run seg.
+        If the user wants to run seg (with the --rerun-segmentation flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run seg.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
@@ -1095,8 +1103,9 @@ class ConversionChecker:
         conv_folder: Path,
     ) -> bool:
         """Checks if conversion needs to be run based on user input and the file structure.
-        If the user wants to run conv, we run it. Otherwise, check that all the necessary files
-        are in place before skipping. If they are not, we re-run conv.
+        If the user wants to run conv (with the --rerun-conversion flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run conv.
 
         :param args: command line args from ACE parser
         :type args: argparse.Namespace
@@ -1116,7 +1125,7 @@ class ConversionChecker:
             return True
 
         # check for the right downsample value
-        if not list(conv_folder.glob(f"*_{args.ctn_down}x_down_*.nii.gz")):
+        if not list(conv_folder.glob(f"*{args.ctn_down}x_down_*.nii.gz")):
             ConversionChecker._clear_conv_folders(conv_folder)
             return True
 
@@ -1133,10 +1142,7 @@ class ConversionChecker:
         conv_folder.mkdir(parents=True, exist_ok=True)
 
 
-def main():
-    args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
-    args = args_parser.parse_args()
-
+def main(args):
     segmentation = ACESegmentation()
     instance_segmentation = ACEInstanceSegmentation()
     conversion = ACEConversion()
@@ -1158,8 +1164,11 @@ def main():
         heatmap,
         validate_clusters,
     )
+    args = miracl_workflow_ace_parser.ACEWorkflowParser().validate_args(args)
     result = ace_workflow.execute_workflow(args)
 
 
 if __name__ == "__main__":
-    main()
+    args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
+    args = args_parser.parser.parse_args()
+    main(args)

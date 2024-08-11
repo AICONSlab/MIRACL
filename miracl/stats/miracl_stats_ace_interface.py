@@ -42,11 +42,12 @@ class ACEClusterwise(Clusterwise):
 class ACECorrelation(Correlation):
     def correlate(self, args, corr_output_folder, p_value, f_obs, mean_diff):
         print("  correlating...")
-        miracl_stats_ace_correlation.main(
-            args, corr_output_folder, p_value, f_obs, mean_diff
-        )
-        logger.debug("Calling correlation fn here")
-        logger.debug(f"Atlas dir arg: {args.u_atlas_dir}")
+        # TODO: update python version for correlation function
+        # miracl_stats_ace_correlation.main(
+        #     args, corr_output_folder, p_value, f_obs, mean_diff
+        # )
+        print("  correlation function not currently available...skipping")
+        print("  correlation will be available in a future release.")
 
 
 class Interface:
@@ -55,9 +56,14 @@ class Interface:
         self.correlation = correlation
 
     def run_fns(self, args):
-        if not hasattr(args, "pcs_control") or not hasattr(args, "pcs_experiment"):
+        if not hasattr(args, "pcs_control") or not hasattr(args, "pcs_treated"):
             args.pcs_control = args.control
-            args.pcs_experiment = args.experiment
+            args.pcs_treated = args.treated
+            # assert they are not None
+            assert args.pcs_control is not None, \
+                "Control group voxelized segmented tif file path is required (--control)."
+            assert args.pcs_treated is not None, \
+                "Treated group voxelized segmented tif file path is required (--treated)."
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"
@@ -86,13 +92,13 @@ class Interface:
             ace_flow_cluster_output_folder, "diff_mean.nii.gz"
         )
 
-        # self.correlation.correlate(
-        #     args,
-        #     ace_flow_corr_output_folder,
-        #     p_value_input,
-        #     f_obs_input,
-        #     mean_diff_input,
-        # )
+        self.correlation.correlate(
+            args,
+            ace_flow_corr_output_folder,
+            p_value_input,
+            f_obs_input,
+            mean_diff_input,
+        )
 
 
 class FolderCreator:
