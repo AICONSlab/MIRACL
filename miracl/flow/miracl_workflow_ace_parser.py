@@ -220,6 +220,14 @@ class ACEWorkflowParser:
         )
 
         useful_args.add_argument(
+            "--rerun-instance-segmentation",
+            default="false",
+            help="whether to rerun instance segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        useful_args.add_argument(
             "--rerun-conversion",
             default="false",
             help="whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
@@ -791,32 +799,6 @@ class ACEWorkflowParser:
             type=str,
             help="Output filenames (default: %(default)s)",
             default="pvalue_heatmap",
-        )
-
-        # Parser to select the registration skipping
-        useful_args.add_argument(
-            "--rerun-registration",
-            default="false",
-            help="Whether to rerun registration step of flow; TRUE => Force re-run (default: %(default)s)",
-            type=parser_true_or_false,
-            metavar="TRUE/FALSE",
-        )
-
-        # Parser to select the segmentation skipping
-        useful_args.add_argument(
-            "--rerun-segmentation",
-            default="false",
-            help="Whether to rerun segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
-            type=parser_true_or_false,
-            metavar="TRUE/FALSE",
-        )
-
-        useful_args.add_argument(
-            "--rerun-conversion",
-            default="false",
-            help="Whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
-            type=parser_true_or_false,
-            metavar="TRUE/FALSE",
         )
 
         useful_args.add_argument(

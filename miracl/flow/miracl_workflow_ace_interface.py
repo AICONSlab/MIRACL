@@ -568,7 +568,9 @@ class ACEWorkflows:
                 if rerun_seg:
                     self.segmentation.segment(args)
 
-                run_instance_seg = not args.no_instance_segmentation
+                run_instance_seg = InstanceSegmentationChecker.check_instance_segmentation(
+                    args, ace_flow_seg_output_folder
+                )
 
                 if run_instance_seg:
                     self.instance_segmentation.segment(
@@ -917,10 +919,8 @@ class ConstructHeatmapCmd:
             -o {args.sh_outfile} \
             -e {args.sh_extension} \
             --dpi {args.sh_dpi} \
-            -si {args.rca_side} \
-            -m {args.rca_hemi} \
-            -l {args.rca_allen_label}"
-
+            --side {args.rca_side} \
+            -m {args.rca_hemi}"
         return tested_heatmap_cmd
 
 
@@ -975,6 +975,7 @@ class RegistrationChecker:
         # clean the expected command
         expected_command = [str(args.rca_voxel_size), str(args.rca_orient_code)]
         if expected_command == received_cmd:
+            print("  Skipping registration...")
             return False
         else:
             raise ValueError(
@@ -1078,6 +1079,9 @@ class SegmentationChecker:
         if not list(seg_folder.glob("*.tif")):
             SegmentationChecker._clear_seg_folders(seg_folder)
             return True
+        
+        print("  Skipping segmentation...")
+        return False
 
     @staticmethod
     def _clear_seg_folders(seg_folder: Path):
@@ -1088,7 +1092,97 @@ class SegmentationChecker:
         """
 
         if seg_folder.is_dir():
-            shutil.rmtree(seg_folder)
+            # clear files in seg_final/
+            for file in seg_folder.glob("*"):
+                if file.is_file() and file.name.endswith(".tif"):
+                    file.unlink()
+            # clear generated_patches/
+            if (seg_folder / "generated_patches").is_dir():
+                for file in (seg_folder / "generated_patches").glob("*"):
+                    if file.is_file() and file.name.endswith(".tiff"):
+                        file.unlink()
+        seg_folder.mkdir(parents=True, exist_ok=True)
+
+
+class InstanceSegmentationChecker:
+    """Class for checking if each subject needs to re-run
+    instance segmentation.
+    """
+
+    @staticmethod
+    def check_instance_segmentation(
+        args: argparse.Namespace,
+        seg_folder: Path,
+    ) -> bool:
+        """Checks if instance segmentation needs to be run based on user input and the file structure.
+        If the user wants to run seg (with the --rerun-segmentation flag), we run it.
+        Otherwise, check that all the necessary files are in place before skipping.
+        If they are not, we re-run seg.
+
+        :param args: command line args from ACE parser
+        :type args: argparse.Namespace
+        :param seg_folder: path to seg output folder (seg_final/)
+        :type seg_folder: Path
+        :return: whether or not instance segmentation needs to be re-run
+        :rtype: bool
+        """
+
+        if args.no_instance_segmentation:
+            print("  No instance segmentation...")
+            return False
+
+        if args.rerun_instance_segmentation:
+            InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
+            return True
+
+        # check for seg_final/
+        if not seg_folder.is_dir():
+            InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
+            return True
+
+        # check if generated_patches exists
+        if not (seg_folder / "cc_slices").is_dir():
+            InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
+            return True
+
+        # check if generated_patches is empty
+        if not sorted(seg_folder.glob("cc_slices/*.tif")):
+            InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
+            return True
+        
+        # check for cc_patches
+        if not (seg_folder / "generated_patches" / "cc_patches").is_dir():
+            InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
+            return True
+        
+        # check for json in cc_patches
+        if not sorted(seg_folder.glob("generated_patches/cc_patches/*.json")):
+            InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
+            return True
+        
+        print("  Skipping instance segmentation...")
+        return False
+        
+    @staticmethod
+    def _clear_instance_seg_folders(seg_folder: Path):
+        """Clears the results from the instance segmentation folder.
+
+        :param seg_folder: path to the instance segmentation output folder ('seg_final/')
+        :type seg_folder: Path
+        """
+
+        if seg_folder.is_dir():
+            # clear contents of cc_slices/
+            if (seg_folder / "cc_slices").is_dir():
+                for file in (seg_folder / "cc_slices").glob("*"):
+                    if file.is_file() and file.name.endswith(".tif"):
+                        file.unlink()
+                
+            if (seg_folder / "generated_patches" / "cc_patches").is_dir():
+                for file in (seg_folder / "generated_patches" / "cc_patches").glob("*"):
+                    if file.is_file():
+                        file.unlink()
+        
         seg_folder.mkdir(parents=True, exist_ok=True)
 
 
@@ -1128,6 +1222,9 @@ class ConversionChecker:
         if not list(conv_folder.glob(f"*{args.ctn_down}x_down_*.nii.gz")):
             ConversionChecker._clear_conv_folders(conv_folder)
             return True
+
+        print("  Skipping conversion...")
+        return False
 
     @staticmethod
     def _clear_conv_folders(conv_folder: Path):
