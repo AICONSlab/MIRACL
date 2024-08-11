@@ -127,7 +127,7 @@ class ACEInstanceSegmentation(InstanceSegmentation):
             output_folder=seg_dir / "cc_slices",
             properties=["area", "centroid", "label", "bbox"],
             glob_pattern="[A-Zo]*patch_*.tiff",
-            percentage_brain_patch_skip=args.sa_percentage_brain_patch_skip,
+            percentage_brain_patch_skip=args.sa_percentage_brain_patch_skip / 100.0,
             no_stack=False,
             cpu_load=0.4,
         )
