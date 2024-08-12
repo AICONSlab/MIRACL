@@ -36,28 +36,8 @@ class ClusterwiseTab(QWidget):
         args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         help_dict = wu.extract_help_texts(args_parser)
 
-        (
-            self.clusterwise_atlas_folder_label_input,
-            self.clusterwise_atlas_folder_path_input,
-            self.clusterwise_atlas_folder_button_input,
-        ) = wu.create_path_input_widget(
-            self,
-            clusterwise_layout,
-            "Path to altas dir:",
-            help_dict["pcs_atlas_dir"],
-            "Select folder",
-        )
-
         self.clusterwise_nr_permutations_input = wu.create_digit_text_field(
             clusterwise_layout, "# permutations:", help_dict["pcs_num_perm"], "500"
-        )
-
-        self.clusterwise_image_resolution_input = wu.create_multiple_choice(
-            clusterwise_layout,
-            "Resolution of images (um):",
-            help_dict["pcs_img_resolution"],
-            ["10", "25", "50"],
-            "25",
         )
 
         self.clusterwise_fwhm_smoothing_input = wu.create_digit_text_field(

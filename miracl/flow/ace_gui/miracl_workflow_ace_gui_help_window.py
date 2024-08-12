@@ -157,12 +157,8 @@ optional warping arguments:
                         voxelized seg is input
 
 optional cluster-wise arguments:
-  -pcsa PCS_ATLAS_DIR, --pcs_atlas_dir PCS_ATLAS_DIR
-                        path of atlas directory
   -pcsn PCS_NUM_PERM, --pcs_num_perm PCS_NUM_PERM
                         number of permutations (default: 500)
-  -pcsr PCS_IMG_RESOLUTION, --pcs_img_resolution PCS_IMG_RESOLUTION
-                        resolution of images in um (default: 25)
   -pcsfwhm PCS_SMOOTHING_FWHM, --pcs_smoothing_fwhm PCS_SMOOTHING_FWHM
                         fwhm of Gaussian kernel in pixel (default: 3)
   -pcsstart PCS_TFCE_START, --pcs_tfce_start PCS_TFCE_START

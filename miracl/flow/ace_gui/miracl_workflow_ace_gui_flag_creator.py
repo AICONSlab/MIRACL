@@ -213,14 +213,8 @@ class flag_creator:
     @staticmethod
     def create_clusterwise_flags(clusterwise_tab):
         clusterwise_tab_flags = {
-            "--pcs_atlas_dir": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_atlas_folder_path_input", "textfield"
-            ),
             "--pcs_num_perm": wu.get_tab_var(
                 clusterwise_tab, "clusterwise_nr_permutations_input", "textfield"
-            ),
-            "--pcs_img_resolution": wu.get_tab_var(
-                clusterwise_tab, "clusterwise_image_resolution_input", "multiplechoice"
             ),
             "--pcs_smoothing_fwhm": wu.get_tab_var(
                 clusterwise_tab, "clusterwise_fwhm_smoothing_input", "textfield"

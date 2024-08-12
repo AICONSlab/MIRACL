@@ -314,7 +314,7 @@ class ACEWorkflowParser:
             type=float,
             required=False,
             default=0.0,
-            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
+            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s between 0 and 100; default: %(default)s)",
         )
 
         # INFO: Conversion parser
@@ -585,24 +585,11 @@ class ACEWorkflowParser:
         # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
-            "-pcsa",
-            "--pcs_atlas_dir",
-            help="path of atlas directory",
-            default="miracl_home",
-        )
-        perm_args.add_argument(
             "-pcsn",
             "--pcs_num_perm",
             type=int,
             help="number of permutations (default: %(default)s)",
             default=500,
-        )
-        perm_args.add_argument(
-            "-pcsr",
-            "--pcs_img_resolution",
-            type=int,
-            help="resolution of images in um (default: %(default)s)",
-            default=25,
         )
         perm_args.add_argument(
             "-pcsfwhm",
