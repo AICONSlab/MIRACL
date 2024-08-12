@@ -37,20 +37,20 @@ class ClusterwiseTab(QWidget):
         help_dict = wu.extract_help_texts(args_parser)
 
         self.clusterwise_nr_permutations_input = wu.create_digit_text_field(
-            clusterwise_layout, "# permutations:", help_dict["pcs_num_perm"], "500"
+            clusterwise_layout, "# permutations:", help_dict["sctp_num_perm"], "500"
         )
 
         self.clusterwise_fwhm_smoothing_input = wu.create_digit_text_field(
             clusterwise_layout,
             "fwhm of Gaussian kernel (px):",
-            help_dict["pcs_smoothing_fwhm"],
+            help_dict["sctp_smoothing_fwhm"],
             "3",
         )
 
         self.clusterwise_thr_start_input = wu.create_digit_text_field(
             clusterwise_layout,
             "tfce threshold start:",
-            help_dict["pcs_tfce_start"],
+            help_dict["sctp_tfce_start"],
             "0.01",
             "float",
         )
@@ -58,7 +58,7 @@ class ClusterwiseTab(QWidget):
         self.clusterwise_thr_step_input = wu.create_digit_text_field(
             clusterwise_layout,
             "tfce threshold step:",
-            help_dict["pcs_tfce_step"],
+            help_dict["sctp_tfce_step"],
             "5",
             "int",
         )
@@ -66,7 +66,7 @@ class ClusterwiseTab(QWidget):
         self.clusterwise_cpu_load_input = wu.create_digit_spinbox(
             clusterwise_layout,
             "% CPU's for parallelization:",
-            help_dict["pcs_cpu_load"],
+            help_dict["sctp_cpu_load"],
             0.90,
             0.00,
             1.00,
@@ -76,17 +76,17 @@ class ClusterwiseTab(QWidget):
         )
 
         self.clusterwise_tfce_h_input = wu.create_digit_text_field(
-            clusterwise_layout, "tfce H power:", help_dict["pcs_tfce_h"], "2", "float"
+            clusterwise_layout, "tfce H power:", help_dict["sctp_tfce_h"], "2", "float"
         )
 
         self.clusterwise_tfce_e_input = wu.create_digit_text_field(
-            clusterwise_layout, "tfce E power:", help_dict["pcs_tfce_e"], "0.5", "float"
+            clusterwise_layout, "tfce E power:", help_dict["sctp_tfce_e"], "0.5", "float"
         )
 
         self.clusterwise_step_down_input = wu.create_digit_spinbox(
             clusterwise_layout,
             "Step down p-value:",
-            help_dict["pcs_step_down_p"],
+            help_dict["sctp_step_down_p"],
             0.3,
             0.0000,
             1.0000,
@@ -98,7 +98,7 @@ class ClusterwiseTab(QWidget):
         self.clusterwise_mask_thr_input = wu.create_digit_spinbox(
             clusterwise_layout,
             "% for binarizing mean diff:",
-            help_dict["pcs_mask_thr"],
+            help_dict["sctp_mask_thr"],
             95,
             0,
             100,

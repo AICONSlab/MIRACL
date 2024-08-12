@@ -157,24 +157,24 @@ optional warping arguments:
                         voxelized seg is input
 
 optional cluster-wise arguments:
-  -pcsn PCS_NUM_PERM, --pcs_num_perm PCS_NUM_PERM
+  -sctpn SCTP_NUM_PERM, --sctp_num_perm SCTP_NUM_PERM
                         number of permutations (default: 500)
-  -pcsfwhm PCS_SMOOTHING_FWHM, --pcs_smoothing_fwhm PCS_SMOOTHING_FWHM
+  -sctpfwhm SCTP_SMOOTHING_FWHM, --sctp_smoothing_fwhm SCTP_SMOOTHING_FWHM
                         fwhm of Gaussian kernel in pixel (default: 3)
-  -pcsstart PCS_TFCE_START, --pcs_tfce_start PCS_TFCE_START
+  -sctpstart SCTP_TFCE_START, --sctp_tfce_start SCTP_TFCE_START
                         tfce threshold start (default: 0.01)
-  -pcsstep PCS_TFCE_STEP, --pcs_tfce_step PCS_TFCE_STEP
+  -sctpstep SCTP_TFCE_STEP, --sctp_tfce_step SCTP_TFCE_STEP
                         tfce threshold step (default: 5)
-  -pcsc PCS_CPU_LOAD, --pcs_cpu_load PCS_CPU_LOAD
+  -sctpc SCTP_CPU_LOAD, --sctp_cpu_load SCTP_CPU_LOAD
                         Percent of cpus used for parallelization (default:
                         0.9)
-  -pcsh PCS_TFCE_H, --pcs_tfce_h PCS_TFCE_H
+  -sctph SCTP_TFCE_H, --sctp_tfce_h SCTP_TFCE_H
                         tfce H power (default: 2)
-  -pcse PCS_TFCE_E, --pcs_tfce_e PCS_TFCE_E
+  -sctpe SCTP_TFCE_E, --sctp_tfce_e SCTP_TFCE_E
                         tfce E power (default: 0.5)
-  -pcssp PCS_STEP_DOWN_P, --pcs_step_down_p PCS_STEP_DOWN_P
+  -sctpsp SCTP_STEP_DOWN_P, --sctp_step_down_p SCTP_STEP_DOWN_P
                         step down p-value (default: 0.3)
-  -pcsm PCS_MASK_THR, --pcs_mask_thr PCS_MASK_THR
+  -sctpm SCTP_MASK_THR, --sctp_mask_thr SCTP_MASK_THR
                         percentile to be used for binarizing difference of the
                         mean (default: 95)
 

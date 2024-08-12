@@ -585,64 +585,64 @@ class ACEWorkflowParser:
         # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
-            "-pcsn",
-            "--pcs_num_perm",
+            "-sctpn",
+            "--sctp_num_perm",
             type=int,
             help="number of permutations (default: %(default)s)",
             default=500,
         )
         perm_args.add_argument(
-            "-pcsfwhm",
-            "--pcs_smoothing_fwhm",
+            "-sctpfwhm",
+            "--sctp_smoothing_fwhm",
             type=int,
             help="fwhm of Gaussian kernel in pixel (default: %(default)s)",
             default=3,
         )
         perm_args.add_argument(
-            "-pcsstart",
-            "--pcs_tfce_start",
+            "-sctpstart",
+            "--sctp_tfce_start",
             type=float,
             help="tfce threshold start (default: %(default)s)",
             default=0.01,
         )
         perm_args.add_argument(
-            "-pcsstep",
-            "--pcs_tfce_step",
+            "-sctpstep",
+            "--sctp_tfce_step",
             type=float,
             help="tfce threshold step (default: %(default)s)",
             default=5,
         )
         perm_args.add_argument(
-            "-pcsc",
-            "--pcs_cpu_load",
+            "-sctpc",
+            "--sctp_cpu_load",
             type=float,
             help="Percent of cpus used for parallelization (default: %(default)s)",
             default=0.9,
         )
         perm_args.add_argument(
-            "-pcsh",
-            "--pcs_tfce_h",
+            "-sctph",
+            "--sctp_tfce_h",
             type=float,
             help="tfce H power (default: %(default)s)",
             default=2,
         )
         perm_args.add_argument(
-            "-pcse",
-            "--pcs_tfce_e",
+            "-sctpe",
+            "--sctp_tfce_e",
             type=float,
             help="tfce E power (default: %(default)s)",
             default=0.5,
         )
         perm_args.add_argument(
-            "-pcssp",
-            "--pcs_step_down_p",
+            "-sctpsp",
+            "--sctp_step_down_p",
             type=float,
             help="step down p-value (default: %(default)s)",
             default=0.3,
         )
         perm_args.add_argument(
-            "-pcsm",
-            "--pcs_mask_thr",
+            "-sctpm",
+            "--sctp_mask_thr",
             type=int,
             help="percentile to be used for binarizing difference of the mean (default: %(default)s)",
             default=95,
