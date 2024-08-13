@@ -94,15 +94,15 @@ def parsefn():
         required=True,
     )
     required_args.add_argument(
+        "--orient-code",
+        help="orientation code of the image (same as used in registration)",
+        required=True,
+    )
+    optional_args.add_argument(
         "--neuron-info-dir",
         help="""path to directory containing neuron information json files (if available)
     names of the json files should be the same as the subject names""",
         default=None,
-    )
-    required_args.add_argument(
-        "--orient-code",
-        help="orientation code of the image (same as used in registration)",
-        required=True,
     )
     optional_args.add_argument(
         "-v",
@@ -158,33 +158,16 @@ class AtlasLoader:
         atlas_dir: Path, out_dir: Path, hemi: str, side: str, img_res: int = 25
     ) -> Tuple[np.ndarray, pd.DataFrame]:
         ann_dir = atlas_dir / "annotation"
-        mask_dir = atlas_dir / "template"
-
-        mask_filename = f"average_template_{img_res}um_brainmask.nii.gz"
-        ann_filename = f"annotation_hemi_{hemi}_{img_res}um.nii.gz"
 
         # load the atlas
-        if img_res == 10:
-            ann_img = nib.load(ann_dir / ann_filename)
-            ann_img_array = ann_img.get_fdata()
-            # mask_img = np.ones_like(ann_img_array) # TODO: remove all mask img
-            # mask_img[ann_img_array == 0] = 0
-            # nib.save(
-            #     nib.Nifti1Image(mask_img, ann_img.affine, ann_img.header),
-            #     out_dir / f"brain_mask_{img_res}um.nii.gz",
-            # )
-
-            # mask_filename = out_dir / f"brain_mask_{img_res}um.nii.gz"
-            # mask_img = nib.load(mask_filename)
-            # mask_img_array = mask_img.get_fdata()
-
+        if hemi == "combined":
+            ann_filename = f"annotation_hemi_{hemi}_{img_res}um.nii.gz"
         else:
-            ann_img = nib.load(ann_dir / ann_filename)
-            ann_img_array = ann_img.get_fdata()
-            # mask_filename = mask_dir / mask_filename
-            # mask_img = nib.load(mask_filename)
-            # mask_img_array = mask_img.get_fdata()
-
+            ann_filename = f"annotation_hemi_{hemi}_{img_res}_{side}um.nii.gz"
+        
+        ann_img = nib.load(ann_dir / ann_filename)
+        ann_img_array = ann_img.get_fdata()
+        
         annotation_lbls = pd.read_csv(
             atlas_dir / f"ara_mouse_structure_graph_hemi_{hemi}.csv",
         )
@@ -257,7 +240,7 @@ class PreProcessClusters:
         labels_to_keep = np.where(label_sizes >= size_threshold)[0]
 
         # Create a mask to select only the labeled components we want to keep
-        mask = np.isin(labeled_pvals, labels_to_keep)  # TODO: make sure this works
+        mask = np.isin(labeled_pvals, labels_to_keep)
 
         # Apply the mask to the labeled array
         filtered_labeled_pvals = np.where(mask, labeled_pvals, 0)
@@ -387,7 +370,7 @@ class NeuronCounter:
         skip: Optional[int] = 50,
         hemi: Optional[str] = "combined",
     ):
-        treated_subj_list_json_paths = []
+        treated_subj_list_json_paths_with_counts = []
         for idx, subj in enumerate(treated_subj_list_paths):
             # create namespace for neuron counting
             count_neurons_json_namespace = argparse.Namespace(
@@ -403,29 +386,34 @@ class NeuronCounter:
             )
             count_neurons_with_json(count_neurons_json_namespace)
 
-            treated_subj_list_json_paths.append(
+            treated_subj_list_json_paths_with_counts.append(
                 out_dir / subj.name / "neuron_info_final_with_label.json"
             )
 
-        control_subj_list_json_paths = []
+        control_subj_list_json_paths_with_counts = []
         for idx, subj in enumerate(control_subj_list_paths):
             # create namespace for neuron counting
             count_neurons_json_namespace = argparse.Namespace(
                 lbl=control_subj_list_warped_clusters_dirs[idx],
                 min_area=min_area,
+                max_area=1000000,
                 neuron_info_dict=control_subj_list_json_paths[idx],
                 output=out_dir / subj.name,
                 hemi=hemi,
                 skip=skip,
                 verbose=True,
+                cpu_load=0.3,
             )
             count_neurons_with_json(count_neurons_json_namespace)
 
-            control_subj_list_json_paths.append(
+            control_subj_list_json_paths_with_counts.append(
                 out_dir / subj.name / "neuron_info_final_with_label.json"
             )
 
-        return treated_subj_list_json_paths, control_subj_list_json_paths
+        return (
+            treated_subj_list_json_paths_with_counts,
+            control_subj_list_json_paths_with_counts,
+        )
 
     def _neuron_count_without_json(
         self,
@@ -441,18 +429,9 @@ class NeuronCounter:
     ):
         treated_subj_list_json_paths = []
         for idx, subj in enumerate(treated_subj_list_paths):
-            count_cmd = f"miracl stats ace_neuron_count \
-                -s {treated_subj_list_seg_file_paths[idx]} \
-                -l {treated_subj_list_warped_clusters_dirs[idx]} \
-                -o {out_dir / subj.name} \
-                --min-area {min_area} \
-                --skip {skip}"
-
             treated_subj_list_json_paths.append(
                 out_dir / subj.name / "neuron_info_with_label.json"
             )
-
-            # subprocess.Popen(count_cmd, shell=True).wait()
 
             count_neurons_json_namespace = argparse.Namespace(
                 seg=treated_subj_list_seg_file_paths[idx],
@@ -468,18 +447,9 @@ class NeuronCounter:
 
         control_subj_list_json_paths = []
         for idx, subj in enumerate(control_subj_list_paths):
-            count_cmd = f"miracl stats ace_neuron_count \
-                -s {control_subj_list_seg_file_paths[idx]} \
-                -l {control_subj_list_warped_clusters_dirs[idx]} \
-                -o {out_dir / subj.name} \
-                --min-area {min_area} \
-                --skip {skip}"
-
             control_subj_list_json_paths.append(
                 out_dir / subj.name / "neuron_info_with_label.json"
             )
-
-            # subprocess.Popen(count_cmd, shell=True).wait()
 
             count_neurons_json_namespace = argparse.Namespace(
                 seg=control_subj_list_seg_file_paths[idx],
@@ -500,54 +470,76 @@ class NeuronCounter:
         filtered_pval_array: np.ndarray,
         out_dir: Path,
         mean_diff_array: Optional[np.ndarray] = None,
-        labeled_pval: Optional[np.ndarray] = None,
-        stats: Optional[np.ndarray] = None,
+        labeled_pval_array: Optional[np.ndarray] = None,
+        f_stat_array: Optional[np.ndarray] = None,
         atlas_annotation_array: Optional[np.ndarray] = None,
         atlas_annotation_lbls_df: Optional[pd.DataFrame] = None,
     ) -> pd.DataFrame:
+
+        # ensure label array is same shape as annotation
+        assert (
+            labeled_pval_array.shape == atlas_annotation_array.shape
+        ), f"label array and annotation array should have same shape: {labeled_pval_array.shape} != {atlas_annotation_array.shape}"
+
         prop_list_diff = (
             "label",
             "coords",
             "centroid",
             "area",
-            "intensity_mean",
-            "intensity_max",
-            "intensity_min",
+            "mean_intensity",
+            "max_intensity",
+            "min_intensity",
         )
 
-        cluster_props_difference = measure.regionprops_table(
-            label_image=labeled_pval,
+        cluster_props_difference = measure.regionprops(
+            label_image=labeled_pval_array,
             intensity_image=mean_diff_array,
-            properties=prop_list_diff,
         )
-        data = pd.DataFrame(cluster_props_difference)
+        difference_data = {
+            prop: [
+                getattr(prop_values, prop) for prop_values in cluster_props_difference
+            ]
+            for prop in prop_list_diff
+        }
+        # turn into a dataframe similar to regionprops_table
+        data = pd.DataFrame(difference_data)
 
         # get pvalue assosciated to each cluster
-        prop_list_pval = ("intensity_mean", "intensity_max", "intensity_min")
-        cluster_props_pval = measure.regionprops_table(
-            label_image=labeled_pval,
+        prop_list_pval = ("mean_intensity", "max_intensity", "min_intensity")
+        cluster_props_pval = measure.regionprops(
+            label_image=labeled_pval_array,
             intensity_image=filtered_pval_array,
-            properties=prop_list_pval,
         )
+        pval_data = {
+            prop: [getattr(prop_values, prop) for prop_values in cluster_props_pval]
+            for prop in prop_list_pval
+        }
+        df_pval = pd.DataFrame(pval_data)
 
-        data["pval_mean"] = cluster_props_pval["intensity_mean"]
-        data["pval_max"] = cluster_props_pval["intensity_max"]
-        data["pval_min"] = cluster_props_pval["intensity_min"]
+        data["pval_mean"] = df_pval["mean_intensity"]
+        data["pval_max"] = df_pval["max_intensity"]
+        data["pval_min"] = df_pval["min_intensity"]
 
         # get statistic assosciated to each cluster
-        prop_list_f_stat = ("intensity_mean", "intensity_max", "intensity_min")
-        cluster_props_f_stat = measure.regionprops_table(
-            label_image=labeled_pval, intensity_image=stats, properties=prop_list_f_stat
+        prop_list_f_stat = ("mean_intensity", "max_intensity", "min_intensity")
+        cluster_props_f_stat = measure.regionprops(
+            label_image=labeled_pval_array,
+            intensity_image=f_stat_array,
         )
+        f_stat_data = {
+            prop: [getattr(prop_values, prop) for prop_values in cluster_props_f_stat]
+            for prop in prop_list_f_stat
+        }
+        df_f_stat = pd.DataFrame(f_stat_data)
 
-        data["effect_size_mean"] = cluster_props_f_stat["intensity_mean"]
-        data["effect_size_max"] = cluster_props_f_stat["intensity_max"]
-        data["effect_size_min"] = cluster_props_f_stat["intensity_min"]
+        data["effect_size_mean"] = df_f_stat["mean_intensity"]
+        data["effect_size_max"] = df_f_stat["max_intensity"]
+        data["effect_size_min"] = df_f_stat["min_intensity"]
 
         # find the labels of each cluster
-        data["cluster_lbl_values"] = None
-        data["cluster_lbl_names"] = None
-        data["cluster_lbl_areas_percent"] = None
+        data["cluster_lbl_values"] = pd.Series(dtype=object)
+        data["cluster_lbl_names"] = pd.Series(dtype=object)
+        data["cluster_lbl_areas_percent"] = pd.Series(dtype=object)
 
         for i in range(len(data["coords"])):
             cluster_coords = data["coords"][i]
@@ -566,16 +558,17 @@ class NeuronCounter:
                     )
                 except ValueError:
                     cluster_lbl_names.append("unknown")
+            data.iloc[i, data.columns.get_loc("cluster_lbl_values")] = [
+                [cluster_lbl_values]
+            ]
+            data.iloc[i, data.columns.get_loc("cluster_lbl_names")] = [
+                [cluster_lbl_names]
+            ]
+            data.iloc[i, data.columns.get_loc("cluster_lbl_areas_percent")] = [
+                [cluster_lbl_areas_percent]
+            ]
 
-            data.iloc[
-                i, data.columns.get_loc("cluster_lbl_values")
-            ] = cluster_lbl_values
-            data.iloc[i, data.columns.get_loc("cluster_lbl_names")] = cluster_lbl_names
-            data.iloc[
-                i, data.columns.get_loc("cluster_lbl_areas_percent")
-            ] = cluster_lbl_areas_percent
-
-        data = data.sort_values(by="intensity_max", ascending=False)
+        data = data.sort_values(by="max_intensity", ascending=False)
         data = data.drop(columns=["coords"])
 
         out_filename = out_dir / "sig_clusters_summary.csv"
@@ -664,7 +657,7 @@ class NeuronCounter:
                 i, sig_clusters_summary_csv.columns.get_loc("mannwhitneyu_pvalue")
             ] = p
 
-        sig_clusters_summary_csv.to_csv(sig_clusters_summary_csv)
+        sig_clusters_summary_csv.to_csv(sig_clusters_summary_csv_path)
 
 
 class ValidateClustersInterface:
@@ -673,23 +666,23 @@ class ValidateClustersInterface:
     def __init__(self, args: argparse.Namespace):
         self.arg_dict: Dict = vars(args)
         self.treated_dir: str = self.arg_dict.get("treated", None)
-        self.control_dir: str = self.arg_dict.get("ctrl", None)
+        self.control_dir: str = self.arg_dict.get("control", None)
         self.relative_path_to_ace_output: str = self.arg_dict.get(
-            "path-to-ace-output", None
+            "path_to_ace_output", None
         )
         self.relative_path_to_raw_slices: str = self.arg_dict.get(
-            "path-to-raw-slices", None
+            "path_to_raw_slices", None
         )
         self.p_value_path: str = self.arg_dict.get("p_value", None)
         self.pvalue_thr: float = self.arg_dict.get("pvalue_thr", None)
-        self.f_stat_path: str = self.arg_dict.get("stats", None)
-        self.out_dir: str = self.arg_dict.get("out_dir", None)
+        self.f_stat_path: str = self.arg_dict.get("f_stat", None)
+        self.out_dir: str = self.arg_dict.get("output_dir", None)
         self.atlas_dir: str = self.arg_dict.get("atlas_dir", None)
         self.mean_diff_path: str = self.arg_dict.get("mean_diff", None)
         self.vox_size: int = self.arg_dict.get("vox_size", None)
         self.hemi: str = self.arg_dict.get("hemi", None)
         self.side: str = self.arg_dict.get("side", None)
-        self.neuron_info_dir: Optional[str] = self.arg_dict.get("neuron-info-dir", None)
+        self.neuron_info_dir: Optional[str] = self.arg_dict.get("neuron_info_dir", None)
         self.min_area: int = self.arg_dict.get("min_area", None)
         self.skip: int = self.arg_dict.get("skip", None)
         self.orientation_code = self.arg_dict.get("orient_code", None)
@@ -703,7 +696,7 @@ class ValidateClustersInterface:
         self.atlas_dir: Path = Path(self.atlas_dir)
         self.mean_diff_path: Path = Path(self.mean_diff_path)
         self.neuron_info_dir: Optional[Path] = (
-            Path(self.neuron_info_dir) if self.neuron_info_dir else None
+            Path(self.neuron_info_dir) if self.neuron_info_dir is not None else None
         )
 
         # assert all paths exist
@@ -727,11 +720,11 @@ class ValidateClustersInterface:
     def _create_orientation_files(self):
         for idx, subj in enumerate(self.treated_subj_list_reg_orientation_paths):
             with open(subj, "w") as f:
-                f.write(self.orientation_code)
+                f.write(f"ortcode={self.orientation_code}")
 
         for idx, subj in enumerate(self.control_subj_list_reg_orientation_paths):
             with open(subj, "w") as f:
-                f.write(self.orientation_code)
+                f.write(f"ortcode={self.orientation_code}")
 
     def _get_paths(self):
         self.treated_subj_list_paths = [
@@ -742,8 +735,8 @@ class ValidateClustersInterface:
         ]
 
         n_subj_treated = len(self.treated_subj_list_paths)
-        n_subj_ctrl = len(self.control_subj_list_paths)
-        print(f"{n_subj_treated} treated and {n_subj_ctrl} ctrl subjects found ...")
+        n_subj_control = len(self.control_subj_list_paths)
+        print(f"{n_subj_treated} treated and {n_subj_control} ctrl subjects found ...")
 
         # make absolute path to ace output
         treated_absolute_path_to_ace = [
@@ -805,15 +798,23 @@ class ValidateClustersInterface:
             for subj in control_absolute_path_to_ace
         ]
 
-        self.treated_subj_list_json_paths = [
-            self.neuron_info_dir / f"{subj.name}.json"
-            for subj in self.treated_subj_list_paths
-        ]
+        self.treated_subj_list_json_paths = (
+            [
+                self.neuron_info_dir / f"{subj.name}_neuron_info.json"
+                for subj in self.treated_subj_list_paths
+            ]
+            if self.neuron_info_dir is not None
+            else [None] * n_subj_treated
+        )
 
-        self.control_subj_list_json_paths = [
-            self.neuron_info_dir / f"{subj.name}.json"
-            for subj in self.control_subj_list_paths
-        ]
+        self.control_subj_list_json_paths = (
+            [
+                self.neuron_info_dir / f"{subj.name}_neuron_info.json"
+                for subj in self.control_subj_list_paths
+            ]
+            if self.neuron_info_dir is not None
+            else [None] * n_subj_control
+        )
 
     def _load_atlas(self):
         self.ann_img_array, self.annotation_lbls_df = AtlasLoader.load_atlas(
@@ -842,7 +843,7 @@ class ValidateClustersInterface:
             filtered_pval_array=filtered_pvals_img_arr,
             mean_diff_array=mean_diff_array,
             labeled_pval_array=labeled_pvals_array,
-            stats=f_stat_array,
+            f_stat_array=f_stat_array,
             out_dir=self.out_dir,
             atlas_annotation_array=self.ann_img_array,
             atlas_annotation_lbls_df=self.annotation_lbls_df,
@@ -851,29 +852,35 @@ class ValidateClustersInterface:
         # warp clusters to original space treated
         treated_subj_warped_clusters_dirs = []
         for idx, subj in enumerate(self.treated_subj_list_paths):
-            current_dir = f"p_values_bin_dilated_conncomp_filtered_warped_treated_{subj.name}_clar"
-            treated_subj_warped_clusters_dirs.append(self.out_dir / current_dir)
+            outfile = (
+                f"p_values_bin_dilated_conncomp_filtered_warped_treated_{subj.name}"
+            )
+            outdir = outfile + "_tiff_clar"
+            treated_subj_warped_clusters_dirs.append(self.out_dir / outdir)
             ClusterWarperToClar.warp_sig_clusters(
                 reg_dir=self.treated_subj_list_reg_paths[idx],
                 dil_bin_pval_comp_fil=dil_bin_pval_conn_comp_filtered_path,
                 ort_file=self.treated_subj_list_reg_orientation_paths[idx],
                 org_clar=self.treated_absolute_path_to_raw_slices[idx],
                 out_dir=self.out_dir,
-                out_lbl=current_dir,
+                out_lbl=outfile,
             )
 
         # warp clusters to original space
         control_subj_warped_clusters_dirs = []
         for idx, subj in enumerate(self.control_subj_list_paths):
-            current_dir = f"p_values_bin_dilated_conncomp_filtered_warped_control_{subj.name}_clar"
-            control_subj_warped_clusters_dirs.append(self.out_dir / current_dir)
+            outfile = (
+                f"p_values_bin_dilated_conncomp_filtered_warped_control_{subj.name}"
+            )
+            outdir = outfile + "_tiff_clar"
+            control_subj_warped_clusters_dirs.append(self.out_dir / outdir)
             ClusterWarperToClar.warp_sig_clusters(
                 reg_dir=self.control_subj_list_reg_paths[idx],
                 dil_bin_pval_comp_fil=dil_bin_pval_conn_comp_filtered_path,
                 ort_file=self.control_subj_list_reg_orientation_paths[idx],
                 org_clar=self.control_absolute_path_to_raw_slices[idx],
                 out_dir=self.out_dir,
-                out_lbl=current_dir,
+                out_lbl=outfile,
             )
 
         # use neuron info files if they exist
@@ -894,7 +901,7 @@ class ValidateClustersInterface:
                 skip=self.skip,
                 hemi=self.hemi,
             )
-            self.neuron_counter.init_neuron_count_args()
+
         else:
             self.neuron_counter.set_json(False)
             self.neuron_counter.init_neuron_count_args(
@@ -913,34 +920,6 @@ class ValidateClustersInterface:
             treated_subj_list_json_paths,
             control_subj_list_json_paths,
         ) = self.neuron_counter.run_neuron_count()
-
-        # for idx, subj in enumerate(self.treated_subj_list_paths):
-        #     # get the size of the raw image from segmentation file
-        #     seg_file = self.treated_subj_list_seg_file_paths[idx]
-
-        #     warped_cluster_dir = treated_subj_warped_clusters_paths[idx]
-        #     command = f'python /code/miracl/stats/miracl_stats_ace_cluster_neuron_count.py \
-        #             -s {seg_file} \
-        #             -l {warped_cluster_dir} \
-        #             -o {self.out_dir + "/" + os.path.basename(subj)}'
-        #     subprocess.Popen(command, shell=True).wait()
-
-        # print("\n counting neurons inside each cluster in the ctrl group")
-
-        # for idx, subj in enumerate(self.control_subj_list_paths):
-        #     # get the size of the raw image from segmentation file
-        #     seg_file = self.control_subj_list_seg_file_paths[idx]
-
-        #     warped_cluster_dir = os.path.join(
-        #         self.out_dir,
-        #         f"p_values_bin_dilated_conncomp_filtered_warped_ctrl_{os.path.basename(subj)}_tiff_clar",
-        #     )
-
-        #     command = f'python /data2/projects/Ahmadreza/ACE_reviewer_response_experiments/stats/validate_clusters/test_memmap.py \
-        #             -s {seg_file} \
-        #             -l {warped_cluster_dir} \
-        #             -o {self.out_dir + "/" + os.path.basename(subj)}'
-        #     subprocess.Popen(command, shell=True).wait()
 
         for idx, subj in enumerate(self.treated_subj_list_paths):
             NeuronCounter.summarize_neuron_count_to_csv(
