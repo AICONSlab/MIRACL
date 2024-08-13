@@ -16,13 +16,14 @@ class SegAceObjs:
         flow={"ace": {"cli_s_flag": "sao", "cli_l_flag": "sa_output_folder"}},
         cli_obj_type=ArgumentType.STRING,
         cli_help="path to output file folder",
-        gui_label=["path to output file folder"],
+        gui_label=["Ouput folder"],
         gui_group={"ace_flow": "main"},
         gui_order=[4.1, 4.2],
         cli_nargs=2,
         module="ace",
         module_group="seg",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.PATH_INPUT,
     )
 
     model_type = MiraclObj(

@@ -63,6 +63,7 @@ class WidgetType(str, Enum):
     SPINBOX = "spinbox"  # Integer input (QSpinBox)
     DOUBLE_SPINBOX = "double_spinbox"  # Float input (QDoubleSpinBox)
     DROPDOWN = "dropdown"  # Multiple choice (QComboBox)
+    PATH_INPUT = "path_input"  # Custom path input
 
 
 #################

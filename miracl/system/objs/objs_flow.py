@@ -1,4 +1,8 @@
-from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj, ArgumentType
+from miracl.system.datamodels.datamodel_miracl_objs import (
+    MiraclObj,
+    ArgumentType,
+    WidgetType,
+)
 
 
 class FlowAceObjs:
@@ -18,6 +22,7 @@ class FlowAceObjs:
         module="ace",
         module_group="flow",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.PATH_INPUT,
     )
 
     control = MiraclObj(
