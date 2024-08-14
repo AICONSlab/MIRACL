@@ -10,17 +10,18 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     WidgetType,
 )
-from typing import List, Callable, Union
+from typing import List, Callable, Union, Tuple
 
 
 class WidgetFactory:
     """Factory class for creating widgets based on MiraclObj instances."""
 
     @staticmethod
-    def create_widgets_from_objects(objs: List[MiraclObj]) -> QWidget:
+    def create_widgets_from_objects(objs: List[MiraclObj]) -> Tuple[QWidget, dict]:
         """Create a QWidget containing form elements from a list of MiraclObj."""
         container_widget: QWidget = QWidget()
         layout: QFormLayout = QFormLayout(container_widget)
+        miracl_obj_map = {}
 
         for obj in objs:
             label: QLabel = WidgetFactory.create_indented_label(
@@ -28,11 +29,16 @@ class WidgetFactory:
             )
 
             if obj.gui_widget_type == WidgetType.DROPDOWN:
-                layout.addRow(label, WidgetFactory.create_dropdown(obj))
+                widget = WidgetFactory.create_dropdown(obj)
             elif obj.gui_widget_type == WidgetType.SPINBOX:
-                layout.addRow(label, WidgetFactory.create_spinbox(obj))
+                widget = WidgetFactory.create_spinbox(obj)
+            else:
+                raise ValueError(f"Unexpected widget type: {obj.gui_widget_type}")
 
-        return container_widget
+            layout.addRow(label, widget)
+            miracl_obj_map[obj.flow["ace"]["cli_l_flag"]] = obj
+
+        return container_widget, miracl_obj_map
 
     @staticmethod
     def create_indented_label(text: str, help_text: str) -> QLabel:

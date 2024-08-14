@@ -249,8 +249,9 @@ class MainWindow(QMainWindow):
         self.central_widget.setLayout(self.main_layout)
 
         self.widgets = {}
+        self.miracl_objs = {}
 
-        first_section = WidgetFactory.create_widgets_from_objects(
+        first_section, miracl_obj_map = WidgetFactory.create_widgets_from_objects(
             [
                 seg_ace.model_type,
                 seg_ace.nr_workers,
@@ -259,7 +260,9 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(first_section)
 
         self.store_widgets(first_section)
+        self.miracl_objs.update(miracl_obj_map)
 
+        # Menu in all tabs
         io_widget = QWidget()
         io_layout = QHBoxLayout(io_widget)
         io_load_button = QPushButton("Load")
@@ -272,7 +275,9 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(io_widget)
 
         # Connect button signals to slots
-        io_load_button.clicked.connect(self.load_values)
+        io_load_button.clicked.connect(
+            self.load_values,
+        )
         io_save_button.clicked.connect(
             lambda: self.save_values(
                 "Save File",
@@ -401,6 +406,16 @@ class MainWindow(QMainWindow):
                     QMessageBox.warning(self, "Unexpected Field", error_message)
                     return  # Exit the function to avoid further processing
 
+            # Check for missing fields
+            missing_fields = expected_fields - self.user_input_pairs.keys()
+            if missing_fields:
+                error_message = (
+                    f"Warning: Missing field(s) in loaded data: {', '.join(missing_fields)}. "
+                    "Field(s) will not be updated."
+                )
+                print(error_message)
+                QMessageBox.warning(self, "Missing Fields", error_message)
+
             # Update the UI with loaded values using the stored widgets
             for name, value in self.user_input_pairs.items():
                 widget = self.widgets.get(name)
@@ -515,24 +530,60 @@ class MainWindow(QMainWindow):
     #             elif isinstance(widget, QComboBox):
     #                 widget.setCurrentText(miracl_obj.obj_default)
 
+    # def reset_values(self):
+    #     """Reset values in the widgets to their default values."""
+    #     for name, widget in self.widgets.items():
+    #         miracl_obj = self.get_miracl_obj_by_name(name)
+    #         if miracl_obj:
+    #             if isinstance(widget, QSpinBox):
+    #                 widget.setValue(miracl_obj.obj_default)
+    #             elif isinstance(widget, QDoubleSpinBox):
+    #                 widget.setValue(miracl_obj.obj_default)
+    #             elif isinstance(widget, QComboBox):
+    #                 widget.setCurrentText(miracl_obj.obj_default)
+
+    # def reset_values(self):
+    #     """Reset values in the widgets to their default values."""
+    #     for name, widget in self.widgets.items():
+    #         miracl_obj = self.miracl_objs.get(name)
+    #         if miracl_obj:
+    #             if isinstance(widget, QSpinBox):
+    #                 widget.setValue(miracl_obj.obj_default)
+    #             elif isinstance(widget, QDoubleSpinBox):
+    #                 widget.setValue(miracl_obj.obj_default)
+    #             elif isinstance(widget, QComboBox):
+    #                 widget.setCurrentText(miracl_obj.obj_default)
+
+    # def get_miracl_obj_by_name(self, name: str) -> MiraclObj:
+    #     """Retrieve the MiraclObj associated with the given widget name."""
+    #     for obj in [seg_ace.model_type, seg_ace.nr_workers]:
+    #         if obj.flow["ace"]["cli_l_flag"] == name:
+    #             return obj
+    #     raise ValueError(f"No MiraclObj found for widget name: {name}")
+
     def reset_values(self):
-        """Reset values in the widgets to their default values."""
+        """Reset values in the widgets to their default values.
+
+        Uses the miracl_objs dictionary to access default values from MiraclObj instances.
+        If obj_default is not present for string-based widgets, sets the widget to an empty string.
+        """
         for name, widget in self.widgets.items():
-            miracl_obj = self.get_miracl_obj_by_name(name)
+            miracl_obj = self.miracl_objs.get(name)
             if miracl_obj:
                 if isinstance(widget, QSpinBox):
+                    # obj_default is guaranteed for QSpinBox
                     widget.setValue(miracl_obj.obj_default)
                 elif isinstance(widget, QDoubleSpinBox):
+                    # obj_default is guaranteed for QDoubleSpinBox
                     widget.setValue(miracl_obj.obj_default)
                 elif isinstance(widget, QComboBox):
-                    widget.setCurrentText(miracl_obj.obj_default)
-
-    def get_miracl_obj_by_name(self, name: str) -> MiraclObj:
-        """Retrieve the MiraclObj associated with the given widget name."""
-        for obj in [seg_ace.model_type, seg_ace.nr_workers]:
-            if obj.flow["ace"]["cli_l_flag"] == name:
-                return obj
-        raise ValueError(f"No MiraclObj found for widget name: {name}")
+                    # Check if obj_default is present for QComboBox
+                    default_value = (
+                        miracl_obj.obj_default
+                        if hasattr(miracl_obj, "obj_default")
+                        else ""
+                    )
+                    widget.setCurrentText(default_value)
 
 
 def main():
