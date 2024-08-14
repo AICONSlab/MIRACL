@@ -1,0 +1,43 @@
+general:
+  model_name: 'unetr'
+  batch_size: 1
+  crop_size: 96
+  crop_number: 10
+  data_dicts_path: ""
+  checkpoint_period: 10
+  max_epochs: 300
+  validation_interval: 1
+  early_stop_patience: 50
+  model_state: 'trained'
+  model_trained_path: '/data2/projects/ahmadreza/ace_analysis_completed/ace_finetune_model_new/models/unetr/best_metric_model.pth'
+  data_aug_prob: 0.7
+  cache_rate_train: 1
+  cache_rate_val: 1
+  GPU: 'single'
+unet:
+  n_encoder_layers: 5
+  channels_initial: 16
+  num_res_unit: 2
+  dropout: 0.2
+dynunet:
+  n_layers: 5
+  filters_initial: 16
+  dropout: 0.25
+  res_block: True
+unetr:
+  feature_size: 16
+  hidden_size: 768
+  mlp_dim: 3072
+  num_heads: 12
+  dropout: 0.2
+  res_block: True
+loss:
+  name: 'dicece'
+  tversky_beta: 0.2
+  tversky_alpha: 0.8
+optimizer:
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  
+  
+
