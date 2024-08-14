@@ -75,7 +75,9 @@ class MainWindow(QMainWindow):
         #     self,
         # )
         # self.main_layout.addWidget(required_args_section)
-        section = WidgetFactory.create_widgets_from_objects(
+
+        # Create widgets and get the miracl_objs dictionary
+        section, self.miracl_objs = WidgetFactory.create_widgets_from_objects(
             [
                 SectionLabel("First Section"),
                 seg_ace.model_type,

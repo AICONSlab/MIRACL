@@ -14,7 +14,7 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     WidgetType,
 )
-from typing import List, Callable, Union, Dict
+from typing import List, Callable, Union, Dict, Tuple
 
 
 class SectionLabel:
@@ -71,34 +71,68 @@ class WidgetFactory:
     #
     #     return container_widget
 
+    # @staticmethod
+    # def create_widgets_from_objects(
+    #     objs: List[Union[MiraclObj, SectionLabel]], parent: QWidget
+    # ) -> QWidget:
+    #     """Create a QWidget containing form elements from a list of MiraclObj and SectionLabel."""
+    #     container_widget: QWidget = QWidget()
+    #     layout: QFormLayout = QFormLayout(container_widget)
+    #
+    #     for obj in objs:
+    #         if isinstance(obj, SectionLabel):
+    #             # Use LabelFactory to create a section label
+    #             label = LabelFactory.create_section_label(obj.text)
+    #             layout.addRow(label)  # Add the section label to the layout
+    #         elif isinstance(obj, MiraclObj):
+    #             label: QLabel = LabelFactory.create_indented_label(
+    #                 obj.gui_label[0], obj.cli_help
+    #             )
+    #
+    #             if obj.gui_widget_type == WidgetType.DROPDOWN:
+    #                 layout.addRow(label, WidgetFactory.create_dropdown(obj, parent))
+    #             elif obj.gui_widget_type == WidgetType.SPINBOX:
+    #                 layout.addRow(label, WidgetFactory.create_spinbox(obj, parent))
+    #             elif obj.gui_widget_type == WidgetType.PATH_INPUT:
+    #                 layout.addRow(
+    #                     label, WidgetFactory.create_path_input_widget(obj, parent)
+    #                 )
+    #
+    #     return container_widget
+
     @staticmethod
     def create_widgets_from_objects(
         objs: List[Union[MiraclObj, SectionLabel]], parent: QWidget
-    ) -> QWidget:
+    ) -> Tuple[QWidget, Dict[str, MiraclObj]]:
         """Create a QWidget containing form elements from a list of MiraclObj and SectionLabel."""
         container_widget: QWidget = QWidget()
         layout: QFormLayout = QFormLayout(container_widget)
 
+        miracl_objs = {}
+
         for obj in objs:
             if isinstance(obj, SectionLabel):
-                # Use LabelFactory to create a section label
                 label = LabelFactory.create_section_label(obj.text)
-                layout.addRow(label)  # Add the section label to the layout
+                layout.addRow(label)
             elif isinstance(obj, MiraclObj):
                 label: QLabel = LabelFactory.create_indented_label(
                     obj.gui_label[0], obj.cli_help
                 )
 
+                widget = None
                 if obj.gui_widget_type == WidgetType.DROPDOWN:
-                    layout.addRow(label, WidgetFactory.create_dropdown(obj, parent))
+                    widget = WidgetFactory.create_dropdown(obj, parent)
                 elif obj.gui_widget_type == WidgetType.SPINBOX:
-                    layout.addRow(label, WidgetFactory.create_spinbox(obj, parent))
+                    widget = WidgetFactory.create_spinbox(obj, parent)
                 elif obj.gui_widget_type == WidgetType.PATH_INPUT:
-                    layout.addRow(
-                        label, WidgetFactory.create_path_input_widget(obj, parent)
-                    )
+                    widget = WidgetFactory.create_path_input_widget(obj, parent)
 
-        return container_widget
+                if widget:
+                    layout.addRow(label, widget)
+                    # Store the MiraclObj using the widget's object name
+                    miracl_objs[widget.objectName()] = obj
+
+        return container_widget, miracl_objs
 
     @staticmethod
     def create_indented_label(text: str, help_text: str) -> QLabel:
