@@ -1,4 +1,8 @@
-from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj, ArgumentType
+from miracl.system.datamodels.datamodel_miracl_objs import (
+    MiraclObj,
+    ArgumentType,
+    WidgetType,
+)
 
 
 class ConvTiffNiiObjs:
@@ -18,6 +22,7 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.SPINBOX,
     )
 
     channum = MiraclObj(
