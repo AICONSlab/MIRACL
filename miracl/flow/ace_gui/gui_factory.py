@@ -14,7 +14,8 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     WidgetType,
 )
-from typing import List, Callable, Union, Dict
+from typing import List, Callable, Union, Dict, Any, Tuple
+from enum import Enum
 
 
 class SectionLabel:
@@ -34,11 +35,29 @@ class LabelFactory:
         return label
 
     @staticmethod
-    def create_indented_label(text: str, help_text: str) -> QLabel:
+    def create_indented_label(obj: MiraclObj) -> QLabel:
         """Create an indented label with a tooltip."""
-        if not text.endswith(":"):
-            text += ":"
-        label = QLabel("  " + text)
+
+        if not obj.gui_label or not obj.gui_label[0]:
+            raise ValueError(f"'gui_label' attribute missing from obj: {obj}")
+        gui_label = obj.gui_label[0]
+        help_text = obj.cli_help
+        placeholders = {
+            "%(default)s": "obj_default",
+            "%(type)s": "cli_obj_type",
+        }
+        for placeholder, attribute in placeholders.items():
+            if placeholder in help_text and hasattr(obj, attribute):
+                value = getattr(obj, attribute)
+                if isinstance(value, (int, float)):
+                    value = str(value)
+                elif isinstance(value, Enum):
+                    value = value.value
+                help_text = help_text.replace(placeholder, value)
+
+        if not gui_label.endswith(":"):
+            gui_label += ":"
+        label = QLabel("  " + gui_label)
         label.setToolTip(help_text)
         return label
 
@@ -71,49 +90,96 @@ class WidgetFactory:
     #
     #     return container_widget
 
+    # @staticmethod
+    # def create_widgets_from_objects(
+    #     objs: List[Union[MiraclObj, SectionLabel]], parent: QWidget
+    # ) -> QWidget:
+    #     """Create a QWidget containing form elements from a list of MiraclObj and SectionLabel."""
+    #     container_widget: QWidget = QWidget()
+    #     layout: QFormLayout = QFormLayout(container_widget)
+    #
+    #     for obj in objs:
+    #         if isinstance(obj, SectionLabel):
+    #             label = LabelFactory.create_section_label(obj.text)
+    #             layout.addRow(label)
+    #         elif isinstance(obj, MiraclObj):
+    #             label: QLabel = LabelFactory.create_indented_label(obj)
+    #
+    #             if obj.gui_widget_type == WidgetType.DROPDOWN:
+    #                 layout.addRow(
+    #                     label,
+    #                     WidgetFactory.create_dropdown(obj, parent),
+    #                 )
+    #             elif obj.gui_widget_type == WidgetType.SPINBOX:
+    #                 layout.addRow(
+    #                     label,
+    #                     WidgetFactory.create_spinbox(obj, parent),
+    #                 )
+    #             elif obj.gui_widget_type == WidgetType.PATH_INPUT:
+    #                 layout.addRow(
+    #                     label,
+    #                     WidgetFactory.create_path_input_widget(obj, parent),
+    #                 )
+    #
+    #     return container_widget
+
     @staticmethod
     def create_widgets_from_objects(
         objs: List[Union[MiraclObj, SectionLabel]], parent: QWidget
-    ) -> QWidget:
-        """Create a QWidget containing form elements from a list of MiraclObj and SectionLabel."""
+    ) -> Tuple[QWidget, Dict[str, MiraclObj]]:
+        """Create a QWidget containing form elements from a list of MiraclObj and SectionLabel.
+
+        Returns a tuple containing the QWidget and a dictionary of MiraclObj instances.
+        """
         container_widget: QWidget = QWidget()
         layout: QFormLayout = QFormLayout(container_widget)
 
+        # Initialize a dictionary to hold MiraclObj instances
+        obj_dict: Dict[str, MiraclObj] = {}
+
         for obj in objs:
             if isinstance(obj, SectionLabel):
-                # Use LabelFactory to create a section label
                 label = LabelFactory.create_section_label(obj.text)
-                layout.addRow(label)  # Add the section label to the layout
+                layout.addRow(label)
             elif isinstance(obj, MiraclObj):
-                label: QLabel = LabelFactory.create_indented_label(
-                    obj.gui_label[0], obj.cli_help
-                )
+                label: QLabel = LabelFactory.create_indented_label(obj)
+
+                # Store the MiraclObj instance in the dictionary
+                obj_dict[obj.name] = obj
 
                 if obj.gui_widget_type == WidgetType.DROPDOWN:
-                    layout.addRow(label, WidgetFactory.create_dropdown(obj, parent))
+                    layout.addRow(
+                        label,
+                        WidgetFactory.create_dropdown(obj, parent),
+                    )
                 elif obj.gui_widget_type == WidgetType.SPINBOX:
-                    layout.addRow(label, WidgetFactory.create_spinbox(obj, parent))
+                    layout.addRow(
+                        label,
+                        WidgetFactory.create_spinbox(obj, parent),
+                    )
                 elif obj.gui_widget_type == WidgetType.PATH_INPUT:
                     layout.addRow(
-                        label, WidgetFactory.create_path_input_widget(obj, parent)
+                        label,
+                        WidgetFactory.create_path_input_widget(obj, parent),
                     )
 
-        return container_widget
+        # Return both the container widget and the dictionary of MiraclObj instances
+        return container_widget, obj_dict
 
-    @staticmethod
-    def create_indented_label(text: str, help_text: str) -> QLabel:
-        """Create an indented label with a tooltip."""
-        if not text.endswith(":"):
-            text += ":"
-        label: QLabel = QLabel("  " + text)
-        label.setToolTip(help_text)
-        return label
+    # @staticmethod
+    # def create_indented_label(text: str, help_text: str) -> QLabel:
+    #     """Create an indented label with a tooltip."""
+    #     if not text.endswith(":"):
+    #         text += ":"
+    #     label: QLabel = QLabel("  " + text)
+    #     label.setToolTip(help_text)
+    #     return label
 
     @staticmethod
     def setup_widget(widget: QWidget, obj: MiraclObj) -> None:
         """Set up common properties for widgets.
 
-        :param widget: The widget to set up (QComboBox or QSpinBox).
+        :param widget: The widget to set up (QComboBox, QSpinBox and path selection).
         :param obj: The MiraclObj containing data for the widget.
         """
         if hasattr(obj, "flow") and obj.flow is not None:
@@ -124,9 +190,13 @@ class WidgetFactory:
     @staticmethod
     def create_dropdown(obj: MiraclObj, parent: QWidget) -> QComboBox:
         """Create a dropdown (combo box) widget from a MiraclObj."""
+        if obj.cli_choices:
+            string_choices = [str(choice) for choice in obj.cli_choices]
+        else:
+            raise ValueError("Missing list of choices in {obj.name}")
         dropdown: QComboBox = QComboBox(parent)
-        dropdown.addItems(obj.cli_choices)
-        dropdown.setCurrentText(obj.obj_default)
+        dropdown.addItems(string_choices)
+        dropdown.setCurrentText(str(obj.obj_default))
         WidgetFactory.setup_widget(dropdown, obj)
 
         return dropdown
@@ -191,7 +261,7 @@ class WidgetFactory:
         path_input = QLineEdit()
         path_input.setPlaceholderText(obj.cli_help)
         path_layout.addWidget(path_input)
-        path_select_button = QPushButton("Browse")
+        path_select_button = QPushButton("Select folder")
         path_select_button.clicked.connect(
             lambda: WidgetFactory.open_path_dialog(parent, path_input)
         )
