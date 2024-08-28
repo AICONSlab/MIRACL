@@ -2,6 +2,7 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     ArgumentType,
     ArgumentAction,
+    WidgetType,
 )
 
 
@@ -41,6 +42,7 @@ class RegClarAllenObjs:
         module="clar_allen",
         module_group="reg",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.DROPDOWN,
     )
 
     hemi = MiraclObj(
@@ -225,6 +227,7 @@ class RegWarpClarObjs:
         module="warp_clar",
         module_group="reg",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.DROPDOWN,
     )
 
     input_folder = MiraclObj(

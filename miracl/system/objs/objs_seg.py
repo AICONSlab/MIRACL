@@ -36,7 +36,7 @@ class SegAceObjs:
         cli_choices=["unet", "unetr", "ensemble"],
         obj_default="unet",
         cli_obj_type=ArgumentType.STRING,
-        cli_help="model architecture",
+        cli_help="model architecture (default: %(default)s)",
         gui_label=["Model architecture"],
         gui_group={"ace_flow": "main"},
         gui_order=[5],
@@ -82,6 +82,7 @@ class SegAceObjs:
         module="ace",
         module_group="seg",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.SPINBOX,
     )
 
     image_size = MiraclObj(
@@ -288,6 +289,7 @@ class SegVoxObjs:
         module="voxelize",
         module_group="seg",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.SPINBOX,
     )
 
     xy_res = MiraclObj(
