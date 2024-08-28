@@ -65,64 +65,6 @@ class LabelFactory:
 class WidgetFactory:
     """Factory class for creating widgets based on MiraclObj instances."""
 
-    # @staticmethod
-    # def create_widgets_from_objects(
-    #     objs: List[Union[MiraclObj, SectionLabel]],
-    #     parent: QWidget,
-    # ) -> QWidget:
-    #     """Create a QWidget containing form elements from a list of MiraclObj."""
-    #     container_widget: QWidget = QWidget()
-    #     layout: QFormLayout = QFormLayout(container_widget)
-    #
-    #     for obj in objs:
-    #         label: QLabel = WidgetFactory.create_indented_label(
-    #             obj.gui_label[0], obj.cli_help
-    #         )
-    #
-    #         if obj.gui_widget_type == WidgetType.DROPDOWN:
-    #             layout.addRow(label, WidgetFactory.create_dropdown(obj, parent))
-    #         elif obj.gui_widget_type == WidgetType.SPINBOX:
-    #             layout.addRow(label, WidgetFactory.create_spinbox(obj, parent))
-    #         elif obj.gui_widget_type == WidgetType.PATH_INPUT:
-    #             layout.addRow(
-    #                 label, WidgetFactory.create_path_input_widget(obj, parent)
-    #             )
-    #
-    #     return container_widget
-
-    # @staticmethod
-    # def create_widgets_from_objects(
-    #     objs: List[Union[MiraclObj, SectionLabel]], parent: QWidget
-    # ) -> QWidget:
-    #     """Create a QWidget containing form elements from a list of MiraclObj and SectionLabel."""
-    #     container_widget: QWidget = QWidget()
-    #     layout: QFormLayout = QFormLayout(container_widget)
-    #
-    #     for obj in objs:
-    #         if isinstance(obj, SectionLabel):
-    #             label = LabelFactory.create_section_label(obj.text)
-    #             layout.addRow(label)
-    #         elif isinstance(obj, MiraclObj):
-    #             label: QLabel = LabelFactory.create_indented_label(obj)
-    #
-    #             if obj.gui_widget_type == WidgetType.DROPDOWN:
-    #                 layout.addRow(
-    #                     label,
-    #                     WidgetFactory.create_dropdown(obj, parent),
-    #                 )
-    #             elif obj.gui_widget_type == WidgetType.SPINBOX:
-    #                 layout.addRow(
-    #                     label,
-    #                     WidgetFactory.create_spinbox(obj, parent),
-    #                 )
-    #             elif obj.gui_widget_type == WidgetType.PATH_INPUT:
-    #                 layout.addRow(
-    #                     label,
-    #                     WidgetFactory.create_path_input_widget(obj, parent),
-    #                 )
-    #
-    #     return container_widget
-
     @staticmethod
     def create_widgets_from_objects(
         objs: List[Union[MiraclObj, SectionLabel]], parent: QWidget
@@ -131,10 +73,9 @@ class WidgetFactory:
 
         Returns a tuple containing the QWidget and a dictionary of MiraclObj instances.
         """
-        container_widget: QWidget = QWidget()
+        container_widget: QWidget = QWidget(parent)  # Ensure the parent is set
         layout: QFormLayout = QFormLayout(container_widget)
 
-        # Initialize a dictionary to hold MiraclObj instances
         obj_dict: Dict[str, MiraclObj] = {}
 
         for obj in objs:
@@ -144,36 +85,26 @@ class WidgetFactory:
             elif isinstance(obj, MiraclObj):
                 label: QLabel = LabelFactory.create_indented_label(obj)
 
-                # Store the MiraclObj instance in the dictionary
+                # Store the MiraclObj instance in the dictionary using its name as the key
                 obj_dict[obj.name] = obj
 
                 if obj.gui_widget_type == WidgetType.DROPDOWN:
-                    layout.addRow(
-                        label,
-                        WidgetFactory.create_dropdown(obj, parent),
-                    )
+                    widget = WidgetFactory.create_dropdown(obj, parent)
+                    widget.setObjectName(obj.name)
+                    layout.addRow(label, widget)
                 elif obj.gui_widget_type == WidgetType.SPINBOX:
-                    layout.addRow(
-                        label,
-                        WidgetFactory.create_spinbox(obj, parent),
-                    )
+                    widget = WidgetFactory.create_spinbox(obj, parent)
+                    widget.setObjectName(obj.name)
+                    layout.addRow(label, widget)
                 elif obj.gui_widget_type == WidgetType.PATH_INPUT:
-                    layout.addRow(
-                        label,
-                        WidgetFactory.create_path_input_widget(obj, parent),
+                    # Update to unpack the returned values from create_path_input_widget
+                    path_widget, path_input = WidgetFactory.create_path_input_widget(
+                        obj, parent
                     )
+                    path_input.setObjectName(obj.name)
+                    layout.addRow(label, path_widget)
 
-        # Return both the container widget and the dictionary of MiraclObj instances
         return container_widget, obj_dict
-
-    # @staticmethod
-    # def create_indented_label(text: str, help_text: str) -> QLabel:
-    #     """Create an indented label with a tooltip."""
-    #     if not text.endswith(":"):
-    #         text += ":"
-    #     label: QLabel = QLabel("  " + text)
-    #     label.setToolTip(help_text)
-    #     return label
 
     @staticmethod
     def setup_widget(widget: QWidget, obj: MiraclObj) -> None:
@@ -254,13 +185,19 @@ class WidgetFactory:
             spinbox.setDecimals(obj.range_formatting_vals["nr_decimals"])
 
     @staticmethod
-    def create_path_input_widget(obj: MiraclObj, parent: QWidget) -> QWidget:
+    def create_path_input_widget(
+        obj: MiraclObj, parent: QWidget
+    ) -> Tuple[QWidget, QLineEdit]:
         """Create a path input widget from a MiraclObj."""
         path_widget = QWidget(parent)
         path_layout = QHBoxLayout(path_widget)
+
+        # Create the QLineEdit for path input
         path_input = QLineEdit()
         path_input.setPlaceholderText(obj.cli_help)
         path_layout.addWidget(path_input)
+
+        # Create the button for selecting the folder
         path_select_button = QPushButton("Select folder")
         path_select_button.clicked.connect(
             lambda: WidgetFactory.open_path_dialog(parent, path_input)
@@ -270,7 +207,8 @@ class WidgetFactory:
 
         WidgetFactory.setup_widget(path_input, obj)
 
-        return path_widget
+        # Return both the container widget and the QLineEdit
+        return path_widget, path_input  # Return the QWidget and QLineEdit
 
     @staticmethod
     def open_path_dialog(parent: QWidget, path_input: QLineEdit):

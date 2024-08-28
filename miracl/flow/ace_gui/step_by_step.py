@@ -26,6 +26,9 @@ from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
 import json
 from uuid import uuid4
 from datetime import datetime
+from miracl import miracl_logger
+
+logger = miracl_logger.logger
 
 
 class MainWindow(QMainWindow):
@@ -46,40 +49,8 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
-        # self.main_layout = QVBoxLayout()
-        # self.central_widget.setLayout(self.main_layout)
         self.main_layout = QVBoxLayout(self.central_widget)
 
-        # Dictionary to store widget references
-        # self.widgets = {}
-
-        # # Add the widgets to the main layout
-        # test = WidgetFactory.create_widgets_from_objects(
-        #     [
-        #         seg_ace.model_type,
-        #     ],
-        #     self,
-        # )
-        # self.main_layout.addWidget(test)
-        #
-        # single_multi_method_args_section = WidgetFactory.create_widgets_from_objects(
-        #     [
-        #         seg_ace.model_type,
-        #         seg_ace.nr_workers,
-        #     ],
-        #     self,
-        # )
-        # self.main_layout.addWidget(single_multi_method_args_section)
-        #
-        # required_args_section = WidgetFactory.create_widgets_from_objects(
-        #     [
-        #         seg_ace.out_dir,
-        #         seg_ace.model_type,
-        #         seg_ace.nr_workers,
-        #     ],
-        #     self,
-        # )
-        # self.main_layout.addWidget(required_args_section)
         section, self.obj_dict = WidgetFactory.create_widgets_from_objects(
             [
                 SectionLabel("Single or multi method arguments"),
@@ -107,26 +78,6 @@ class MainWindow(QMainWindow):
 
         self.add_io_buttons()
 
-        # # IO Buttons
-        # io_widget = QWidget()
-        # io_layout = QHBoxLayout(io_widget)
-        # io_load_button = QPushButton("Load")
-        # io_layout.addWidget(io_load_button)
-        # io_save_button = QPushButton("Save")
-        # io_layout.addWidget(io_save_button)
-        # io_reset_button = QPushButton("Reset")
-        # io_layout.addWidget(io_reset_button)
-        # io_layout.setContentsMargins(0, 0, 0, 0)
-        # self.main_layout.addWidget(io_widget)
-        #
-        # # Connect button signals to slots
-        # io_load_button.clicked.connect(self.load_values)
-        # io_save_button.clicked.connect(self.save_values)
-        # io_reset_button.clicked.connect(self.reset_values)
-        #
-        # # Connect the custom signal to a slot
-        # self.value_changed.connect(self.on_value_changed)
-
     def add_io_buttons(self):
         """Add IO buttons to the layout."""
         io_widget = QWidget()
@@ -153,35 +104,23 @@ class MainWindow(QMainWindow):
         )
         io_reset_button.clicked.connect(self.confirm_reset)
 
-    # def store_widgets(self, parent: QWidget):
-    #     """Store the widgets in the dictionary using their object names."""
-    #     for child in parent.findChildren(QWidget):
-    #         if isinstance(child, (QSpinBox, QDoubleSpinBox, QComboBox)):
-    #             object_name = child.objectName()
-    #             if object_name:
-    #                 self.widgets[object_name] = child
-    #                 # Connect signals to the slot
-    #                 if isinstance(child, (QSpinBox, QDoubleSpinBox)):
-    #                     child.valueChanged.connect(
-    #                         lambda value, name=object_name: self.value_changed.emit(
-    #                             name, value
-    #                         )
-    #                     )
-    #                 elif isinstance(child, QComboBox):
-    #                     child.currentTextChanged.connect(
-    #                         lambda text, name=object_name: self.value_changed.emit(
-    #                             name, text
-    #                         )
-    #                     )
-
     def store_widgets(self, parent: QWidget):
-        """Store the widgets in the dictionary using their object names."""
         for child in parent.findChildren(QWidget):
-            if isinstance(child, (QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit)):
-                object_name = child.objectName()
-                if object_name:
-                    self.widgets[object_name] = child
-                    # Connect signals to the slot
+            object_name = child.objectName()
+
+            # Skip processing for internal QLineEdit widgets
+            if isinstance(child, QLineEdit) and object_name.startswith("qt_"):
+                continue
+
+            # Log the object name only if it is not empty
+            if object_name:
+                logger.debug(f"Processing widget: {object_name}")  # Debug print
+
+                # Check if the child is a relevant widget type
+                if isinstance(child, (QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit)):
+                    self.widgets[object_name] = child  # Add to the widgets dictionary
+
+                    # Connect signals to the slot based on widget type
                     if isinstance(child, (QSpinBox, QDoubleSpinBox)):
                         child.valueChanged.connect(
                             lambda value, name=object_name: self.value_changed.emit(
@@ -203,11 +142,7 @@ class MainWindow(QMainWindow):
 
     def on_value_changed(self, name, value):
         """Handle widget value changes."""
-        print(f"Value changed in {name}: {value}")
-
-    # def load_values(self):
-    #     """Load values from the widgets."""
-    #     self.process_widget_values("Load")
+        logger.debug(f"Value changed in {name}: {value}")
 
     def load_values(self):
         """Open a dialog to load values from a JSON file."""
@@ -218,55 +153,6 @@ class MainWindow(QMainWindow):
         )
         if file_name:
             self.load_from_json(file_name)
-
-    # def save_values(self):
-    #     """Save values from the widgets (implement your logic here)."""
-    #     self.process_widget_values("Save")
-
-    # def load_from_json(self, file_path: str):
-    #     """Load settings from a JSON file and update the UI."""
-    #     try:
-    #         with open(file_path, "r") as file:
-    #             loaded_data = json.load(file)
-    #
-    #         # Extract metadata and user input pairs
-    #         self.metadata = loaded_data.get("metadata", {})
-    #         self.user_input_pairs = loaded_data.get("user_input_pairs", {})
-    #
-    #         # Update the last_loaded field
-    #         self.metadata["last_loaded"] = str(datetime.now())
-    #
-    #         # List of expected widget names
-    #         expected_fields = set(self.widgets.keys())
-    #
-    #         # Check for unexpected fields
-    #         for name in self.user_input_pairs.keys():
-    #             if name not in expected_fields:
-    #                 error_message = (
-    #                     f"Warning: Unexpected field '{name}' found in loaded data. "
-    #                     "Was the data saved with an older version of MIRACL? "
-    #                     f"You could try to delete '{name}' to load the rest of the data."
-    #                 )
-    #                 QMessageBox.warning(self, "Unexpected Field", error_message)
-    #                 return  # Exit the function to avoid further processing
-    #
-    #         # Update the UI with loaded values
-    #         for name, value in self.user_input_pairs.items():
-    #             widget = self.widgets.get(name)
-    #             if widget:
-    #                 self.update_widget_value(widget, value)
-    #
-    #         # Save the updated metadata back to the file
-    #         loaded_data["metadata"] = self.metadata
-    #         with open(file_path, "w") as file:
-    #             json.dump(loaded_data, file, indent=4)
-    #
-    #         QMessageBox.information(
-    #             self, "Success", f"Settings loaded from {file_path}"
-    #         )
-    #
-    #     except Exception as e:
-    #         QMessageBox.critical(self, "Error", f"An error occurred while loading: {e}")
 
     def load_from_json(self, file_path: str):
         """Load settings from a JSON file and update the UI."""
@@ -408,131 +294,35 @@ class MainWindow(QMainWindow):
         if response == QMessageBox.Yes:
             self.reset_values()
 
-    # def reset_values(self):
-    #     """Reset values in the widgets to their default values."""
-    #     for name, widget in self.widgets.items():
-    #         miracl_obj = self.get_miracl_obj_by_name(name)
-    #         if miracl_obj:
-    #             if isinstance(widget, QSpinBox):
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QDoubleSpinBox):
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QComboBox):
-    #                 widget.setCurrentText(miracl_obj.obj_default)
-
-    # def reset_values(self):
-    #     """Reset values in the widgets to their default values."""
-    #     for name, widget in self.widgets.items():
-    #         miracl_obj = self.get_miracl_obj_by_name(name)
-    #         if miracl_obj:
-    #             if isinstance(widget, QSpinBox):
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QDoubleSpinBox):
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QComboBox):
-    #                 widget.setCurrentText(miracl_obj.obj_default)
-
-    # def reset_values(self):
-    #     """Reset values in the widgets to their default values."""
-    #     for name, widget in self.widgets.items():
-    #         miracl_obj = self.miracl_objs.get(name)
-    #         if miracl_obj:
-    #             if isinstance(widget, QSpinBox):
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QDoubleSpinBox):
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QComboBox):
-    #                 widget.setCurrentText(miracl_obj.obj_default)
-
-    # def get_miracl_obj_by_name(self, name: str) -> MiraclObj:
-    #     """Retrieve the MiraclObj associated with the given widget name."""
-    #     for obj in [seg_ace.model_type, seg_ace.nr_workers]:
-    #         if obj.flow["ace"]["cli_l_flag"] == name:
-    #             return obj
-    #     raise ValueError(f"No MiraclObj found for widget name: {name}")
-
-    # def reset_values(self):
-    #     """Reset values in the widgets to their default values.
-    #
-    #     Uses the miracl_objs dictionary to access default values from MiraclObj instances.
-    #     If obj_default is not present for string-based widgets, sets the widget to an empty string.
-    #     """
-    #     for name, widget in self.widgets.items():
-    #         print(f"Widget Name: {name}, Widget Type: {type(widget)}")
-    #         miracl_obj = self.obj_dict.get(name)
-    #         if miracl_obj:
-    #             if isinstance(widget, QSpinBox):
-    #                 # obj_default is guaranteed for QSpinBox
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QDoubleSpinBox):
-    #                 # obj_default is guaranteed for QDoubleSpinBox
-    #                 widget.setValue(miracl_obj.obj_default)
-    #             elif isinstance(widget, QComboBox):
-    #                 print(f"THIS IS A QComboBox: {name}")
-    #                 # Check if obj_default is present for QComboBox
-    #                 default_value = (
-    #                     miracl_obj.obj_default
-    #                     if hasattr(miracl_obj, "obj_default")
-    #                     else ""
-    #                 )
-    #                 widget.setCurrentText(str(default_value))
-    #             # elif isinstance(widget, QLineEdit):
-    #             #     # Set the default value for QLineEdit
-    #             #     default_value = (
-    #             #         miracl_obj.obj_default
-    #             #         if hasattr(miracl_obj, "obj_default")
-    #             #         else miracl_obj.cli_help
-    #             #     )
-    #             #     widget.setText(default_value)
-    #             elif isinstance(widget, QLineEdit):
-    #                 print(f"THIS IS A QLineEdit: {name}")
-    #                 # Clear the current text and show the placeholder
-    #                 widget.clear()  # Clear current value
-    #                 # Optionally, you can set the placeholder text if needed
-    #                 # widget.setPlaceholderText(miracl_obj.cli_help)  # Uncomment if you want to set a specific placeholder
-    #
-    #                 # If you want to set the default value if it exists, you can do:
-    #                 default_value = (
-    #                     miracl_obj.obj_default
-    #                     if hasattr(miracl_obj, "obj_default")
-    #                     else ""
-    #                 )
-    #                 if default_value:  # If there is a default value, set it
-    #                     widget.setText(str(default_value))
-    #                 # If default_value is empty, the placeholder will show
-    #             else:
-    #                 print(f"Unhandled widget type for {name}: {type(widget)}")
-    #         else:
-    #             print(f"No corresponding MiraclObj found for {name}")
     def reset_values(self):
         """Reset values in the widgets to their default values.
 
         Uses the miracl_objs dictionary to access default values from MiraclObj instances.
         If obj_default is not present for string-based widgets, sets the widget to an empty string.
         """
-        print("Starting reset_values...")  # Indicate the start of the function
-        print(
+        print("Resetting values...")  # Indicate the start of the function
+        logger.debug(
             f"Widgets dictionary: {self.widgets}"
         )  # Print the entire widgets dictionary
-        print(
+        logger.debug(
             f"Object dictionary: {self.obj_dict}"
         )  # Print the entire object dictionary
 
         for name, widget in self.widgets.items():
-            print(
+            logger.debug(
                 f"Widget Name: {name}, Widget Type: {type(widget)}"
             )  # Print widget details
 
             miracl_obj = self.obj_dict.get(name)
             if miracl_obj:
                 if isinstance(widget, QSpinBox):
-                    print(f"Resetting QSpinBox: {name}")
+                    logger.debug(f"Resetting QSpinBox: {name}")
                     widget.setValue(miracl_obj.obj_default)
                 elif isinstance(widget, QDoubleSpinBox):
-                    print(f"Resetting QDoubleSpinBox: {name}")
+                    logger.debug(f"Resetting QDoubleSpinBox: {name}")
                     widget.setValue(miracl_obj.obj_default)
                 elif isinstance(widget, QComboBox):
-                    print(f"THIS IS A QComboBox: {name}")
+                    logger.debug(f"Resetting QComboBox: {name}")
                     default_value = (
                         miracl_obj.obj_default
                         if hasattr(miracl_obj, "obj_default")
@@ -540,7 +330,9 @@ class MainWindow(QMainWindow):
                     )
                     widget.setCurrentText(str(default_value))
                 elif isinstance(widget, QLineEdit):
-                    print(f"THIS IS A QLineEdit: {name}")  # Debug print for QLineEdit
+                    logger.debug(
+                        f"Resetting QLineEdit: {name}"
+                    )  # Debug print for QLineEdit
                     widget.clear()  # Clear current value
                     default_value = (
                         miracl_obj.obj_default
