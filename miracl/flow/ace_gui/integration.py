@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
 )
 
 from integration_tab_controller import TabController
+from miracl.system.objs.objs_flow import FlowAceObjs as flow_ace
 
 logger = miracl_logger.logger
 
@@ -49,6 +50,11 @@ class MainWindow(QMainWindow):
         # Initialize the TabController and get the tab widget
         self.tab_controller = TabController(self)
         main_layout.addWidget(self.tab_controller.get_widget())
+
+        self.tab_obj_dicts = self.tab_controller.get_tab_obj_dicts()
+
+        # Access the obj_dicts for each tab
+        print(self.tab_obj_dicts[flow_ace.single.name].cli_l_flag)
 
 
 def main():
