@@ -52,9 +52,11 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.tab_controller.get_widget())
 
         self.tab_obj_dicts = self.tab_controller.get_tab_obj_dicts()
+        self.tabs = self.tab_controller.get_tabs()
 
         # Access the obj_dicts for each tab
         print(self.tab_obj_dicts[flow_ace.single.name].cli_l_flag)
+        print(self.tab_controller)
 
 
 def main():
