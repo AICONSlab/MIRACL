@@ -2,13 +2,6 @@ from miracl import miracl_logger
 from PyQt5.QtWidgets import QTabWidget, QWidget
 from typing import Dict, List
 from miracl_gui_tab_factory import TabBuilder
-from miracl_gui_widget_factory import SectionLabel
-from miracl.system.objs.objs_seg import SegAceObjs as seg_ace
-from miracl.system.objs.objs_seg import SegVoxObjs as seg_vox
-from miracl.system.objs.objs_flow import FlowAceObjs as flow_ace
-from miracl.system.objs.objs_reg import RegClarAllenObjs as reg_clar_allen
-from miracl.system.objs.objs_reg import RegWarpClarObjs as reg_warp_clar
-from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
 
 logger = miracl_logger.logger
 
@@ -21,32 +14,21 @@ class TabController:
     retrieval of the tab widget and the associated objects for each tab.
     """
 
-    def __init__(self, parent: QWidget) -> None:
-        """Initialize the TabController with a parent widget."""
-        self.tab_widget = QTabWidget(parent)
-        self._tab_obj_dicts = {}  # Dict to store the widget objects
-        self._tabs = []  # List to store tab objects
+    def __init__(self, parent: QWidget, widget_dict: Dict) -> None:
+        """Initialize the TabController with a parent widget and a widget dictionary.
 
-        # Initialize the widget_dict here
-        self.widget_dict: Dict = {
-            "main": [
-                SectionLabel("Single or multi method arguments"),
-                flow_ace.single,
-                SectionLabel("Required arguments"),
-                seg_ace.out_dir,
-                seg_ace.model_type,
-                SectionLabel("Useful/important arguments"),
-                seg_ace.gpu_index,
-                conv_tiff_nii.down,
-                reg_clar_allen.voxel_size,
-                seg_vox.downsample,
-                # reg_warp_clar.voxel_size,
-            ],
-            "Conversion": [
-                SectionLabel("Test label"),
-                reg_warp_clar.voxel_size,
-            ],
-        }
+        This method sets up the tab controller, initializing the QTabWidget
+        and storing the provided widget dictionary for later use.
+
+        :param parent: The parent widget for the QTabWidget.
+        :type parent: QWidget
+        :param widget_dict: A dictionary mapping tab titles to their associated objects.
+        :type widget_dict: Dict[str, List]
+        """
+        self.tab_widget: QTabWidget = QTabWidget(parent)
+        self._tab_obj_dicts: Dict = {}  # Dict to store the widget objects
+        self._tabs: List = []  # List to store tab objects
+        self.widget_dict: Dict = widget_dict  # Dict to pass to tab builder
 
         self.create_tabs()
 
@@ -58,11 +40,9 @@ class TabController:
         The method to create tabs can be specified using the `which_tab` argument,
         which defaults to "base_tab" if not provided.
 
-        Args:
-            which_tab (str): The name of the method to call from TabBuilder. Defaults to "base_tab".
-
-        Returns:
-            None
+        :param which_tab: The name of the method to call from TabBuilder. Defaults to "base_tab".
+        :type which_tab: str
+        :return: None
         """
         for tab_title, tab_obj_list in self.widget_dict.items():
             logger.debug(f"Processing tab: {tab_title}")
@@ -78,7 +58,7 @@ class TabController:
                 tab_title,
                 tab_obj_list,
             )
-            self.tab_widget.addTab(tmp_title, tmp_title.name)
+            self.tab_widget.addTab(tmp_title, tmp_title._name)
             self._tab_obj_dicts.update(tmp_obj_dict)
             self._tabs.append(tmp_title)
             logger.info("Added tab: %s", tmp_title)
@@ -132,10 +112,10 @@ class TabController:
         tab_widget, including the number of tabs and their titles, as well as
         the _tab_obj_dicts and the list of tab objects.
 
-        Returns:
-            str: A formatted string representing the TabController's state,
+        :return: A formatted string representing the TabController's state,
                  including tab count, tab titles, tab object dictionaries,
                  and the list of tab objects.
+        :rtype: str
         """
         tab_count = self.tab_widget.count()
         tab_titles = [self.tab_widget.tabText(i) for i in range(tab_count)]
@@ -152,16 +132,22 @@ class TabController:
     def get_widget(self) -> QTabWidget:
         """Return the tab widget for use in the main application.
 
-        Returns:
-            QTabWidget: The tab widget containing all the tabs.
+        This method provides access to the QTabWidget instance that contains
+        all the tabs created by this TabController.
+
+        :return: The tab widget containing all the tabs.
+        :rtype: QTabWidget
         """
         return self.tab_widget
 
     def get_tab_obj_dicts(self) -> Dict:
         """Return the obj_dicts for each tab.
 
-        Returns:
-            Dict: A dictionary containing the objects associated with each tab.
+        This method returns a dictionary containing the objects associated with
+        each tab, allowing for easy access to the widget references.
+
+        :return: A dictionary containing the objects associated with each tab.
+        :rtype: Dict
         """
         return self._tab_obj_dicts
 
@@ -171,7 +157,7 @@ class TabController:
         This method provides access to the list of tab objects created
         in the QTabWidget.
 
-        Returns:
-            List: A list of all tab objects.
+        :return: A list of all tab objects.
+        :rtype: List
         """
         return self._tabs
