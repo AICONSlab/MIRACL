@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import (
 import json
 from datetime import datetime
 from uuid import uuid4
+from pathlib import Path
+
 
 # Import Pydantic datamodel
 from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
@@ -151,23 +153,61 @@ class DataManager:
     def save_to_json(self, file_name: str):
         """Save settings to a JSON file."""
         user_input_pairs = self.get_settings_data()
-        metadata = {
-            "uuid": str(uuid4()),
-            "module_name": "ace",
-            "last_saved": str(datetime.now()),
-            "last_loaded": None,
-        }
+
+        # Use pathlib to check if the file already exists
+        file_path = Path(file_name)  # Create a Path object for the file
+        metadata = {}
+
+        if file_path.exists():  # Check if the file exists
+            # Load existing data to retain the UUID
+            with file_path.open("r") as file:
+                existing_data = json.load(file)
+                metadata = existing_data.get("metadata", {})
+        else:
+            # Generate a new UUID for new files
+            metadata = {
+                "uuid": str(uuid4()),
+                "module_name": "ace",
+                "last_saved": str(datetime.now()),
+                "last_loaded": None,
+            }
+
+        # Update last saved time
+        metadata["last_saved"] = str(datetime.now())
+
         data_to_save = {
             "metadata": metadata,
             "user_input_pairs": user_input_pairs,
         }
+
         try:
             json_data = json.dumps(data_to_save, indent=4)
-            with open(file_name, "w") as file:
+            with file_path.open("w") as file:  # Use pathlib to open the file
                 file.write(json_data)
             QMessageBox.information(None, "Success", f"Settings saved to {file_name}")
         except Exception as e:
             QMessageBox.critical(None, "Error", f"An error occurred while saving: {e}")
+
+    # def save_to_json(self, file_name: str):
+    #     """Save settings to a JSON file."""
+    #     user_input_pairs = self.get_settings_data()
+    #     metadata = {
+    #         "uuid": str(uuid4()),
+    #         "module_name": "ace",
+    #         "last_saved": str(datetime.now()),
+    #         "last_loaded": None,
+    #     }
+    #     data_to_save = {
+    #         "metadata": metadata,
+    #         "user_input_pairs": user_input_pairs,
+    #     }
+    #     try:
+    #         json_data = json.dumps(data_to_save, indent=4)
+    #         with open(file_name, "w") as file:
+    #             file.write(json_data)
+    #         QMessageBox.information(None, "Success", f"Settings saved to {file_name}")
+    #     except Exception as e:
+    #         QMessageBox.critical(None, "Error", f"An error occurred while saving: {e}")
 
     def process_widget_values(self, action: str):
         """Process the values of the widgets based on the action."""
