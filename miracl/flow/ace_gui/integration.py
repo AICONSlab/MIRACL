@@ -5,8 +5,15 @@ from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
 )
-
-from integration_tab_controller import TabController
+from typing import Dict
+from miracl_gui_tab_controller import TabController
+from miracl_gui_widget_factory import SectionLabel
+from miracl.system.objs.objs_seg import SegAceObjs as seg_ace
+from miracl.system.objs.objs_seg import SegVoxObjs as seg_vox
+from miracl.system.objs.objs_flow import FlowAceObjs as flow_ace
+from miracl.system.objs.objs_reg import RegClarAllenObjs as reg_clar_allen
+from miracl.system.objs.objs_reg import RegWarpClarObjs as reg_warp_clar
+from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
 
 logger = miracl_logger.logger
 
@@ -46,9 +53,36 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout()
         central_widget.setLayout(main_layout)
 
+        widget_dict: Dict = {
+            "main": [
+                SectionLabel("Single or multi method arguments"),
+                flow_ace.single,
+                SectionLabel("Required arguments"),
+                seg_ace.out_dir,
+                seg_ace.model_type,
+                SectionLabel("Useful/important arguments"),
+                seg_ace.gpu_index,
+                conv_tiff_nii.down,
+                reg_clar_allen.voxel_size,
+                seg_vox.downsample,
+                # reg_warp_clar.voxel_size,
+            ],
+            "Conversion": [
+                SectionLabel("Test label"),
+                reg_warp_clar.voxel_size,
+            ],
+        }
+
         # Initialize the TabController and get the tab widget
-        self.tab_controller = TabController(self)
+        self.tab_controller = TabController(self, widget_dict)
+
         main_layout.addWidget(self.tab_controller.get_widget())
+        self.tab_obj_dicts = self.tab_controller.get_tab_obj_dicts()
+        self.tabs = self.tab_controller.get_tabs()
+
+        # Access the obj_dicts for each tab
+        print(self.tab_obj_dicts[flow_ace.single.name].cli_l_flag)
+        print(self.tab_controller)
 
 
 def main():

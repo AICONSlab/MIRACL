@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
 )
 from PyQt5.QtCore import pyqtSignal
-from gui_factory import WidgetFactory, SectionLabel
+from miracl_gui_widget_factory import WidgetFactory, SectionLabel
 from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
 )
