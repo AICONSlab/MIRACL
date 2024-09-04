@@ -29,6 +29,7 @@ from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
 # Import logger
 from miracl import miracl_logger
 
+# Initialize logger
 logger = miracl_logger.logger
 
 
@@ -68,6 +69,7 @@ class MainWindow(QMainWindow):
         self.main_layout = QVBoxLayout()
         central_widget.setLayout(self.main_layout)
 
+        # Method to create tabs
         widget_dict: Dict = {
             "Main": [
                 SectionLabel("Single or multi method arguments"),
@@ -88,17 +90,18 @@ class MainWindow(QMainWindow):
             ],
         }
 
-        # Initialize the TabController and get the tab widget
+        # Initialize the TabController
         self.tab_controller = TabController(self, widget_dict)
 
+        # Add tabs to layout
         self.main_layout.addWidget(self.tab_controller.get_widget())
 
-        # Initialize the DataManager with existing widgets and obj_dict
+        # Initialize the DataManager with current, existing widgets and obj_dict
         self.data_manager = DataManager(
             self.tab_controller.get_tab_obj_dicts(), self.tab_controller.get_obj_dict()
         )
 
-        # Add IO buttons
+        # Add main menu buttons
         self.add_io_buttons()
 
         # Get the widget and MiraclObj dictionaries
@@ -107,42 +110,20 @@ class MainWindow(QMainWindow):
         )  # Actual widget objects
         self.miracl_obj_dict = self.tab_controller.get_obj_dict()  # MiraclObj instances
 
-        # self.tab_obj_dicts = self.tab_controller.get_tab_obj_dicts()
-        # self.tabs = self.tab_controller.get_tabs()
-        # self.default_objs = self.tab_controller.get_obj_dict()
-
-        # logger.debug("Contents of tab_obj_dicts:")
-        # for name, widget in self.tab_obj_dicts.items():
-        #     logger.debug(f"Widget: {name}, Type: {type(widget)}")
-
         # Set up change detection
-        # WidgetObserver.setup_change_detection(self.tab_obj_dicts, self.on_value_changed)
         WidgetObserver.setup_change_detection(self.widget_dict, self.on_value_changed)
 
         # Access the obj_dicts for each tab
-        # print(self.tab_obj_dicts[flow_ace.single.name].cli_l_flag)
-        print(f"SINGLE: {self.miracl_obj_dict[flow_ace.single.name].cli_l_flag}")
-        # print(self.tab_controller)
-        print(f"SELF.MIRACL_OBJ_DICT: {self.miracl_obj_dict}")
-        print()
-        print()
-        print()
-        print()
-        print()
-        print(f"SELF.WIDGET_DICT: {self.widget_dict}")
-        print()
-        print()
-        print()
-        print()
-        print()
-        print(self.tab_controller)
+        # print(f"SINGLE: {self.miracl_obj_dict[flow_ace.single.name].cli_l_flag}")
+        logger.debug(f"Check self.miracl_obj_dict: \n{self.miracl_obj_dict}\n")
+        logger.debug(f"Check self.widget_dict: \n{self.widget_dict}\n")
+        logger.debug(self.tab_controller)
 
     def add_io_buttons(self):
         """Add IO buttons to the layout."""
         io_widget = QWidget()
-        io_layout = QHBoxLayout(io_widget)  # Layout for IO buttons (horizontal)
+        io_layout = QHBoxLayout(io_widget)  # Horizontal
 
-        # Create Load, Save, and Reset buttons
         io_load_button = QPushButton("Load")
         io_layout.addWidget(io_load_button)
         io_save_button = QPushButton("Save")
@@ -150,98 +131,37 @@ class MainWindow(QMainWindow):
         io_reset_button = QPushButton("Reset")
         io_layout.addWidget(io_reset_button)
 
-        # Set margins for the IO buttons
         io_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.addWidget(io_widget)  # Add IO buttons to the main layout
+        self.main_layout.addWidget(io_widget)  # Add buttons to the main layout
 
         # Connect button signals to slots
         io_load_button.clicked.connect(
-            self.data_manager.load_values
-        )  # Connect to DataManager's load method
+            lambda: self.data_manager.load_values(
+                "Load File",
+                "",
+                "MIRACL ACE Flow Files (*.aceflow)",
+            )
+        )
         io_save_button.clicked.connect(
             lambda: self.data_manager.save_values(
                 "Save File",
                 "",
                 "MIRACL ACE Flow Files (*.aceflow)",
             )
-        )  # Connect to DataManager's save method
-        io_reset_button.clicked.connect(
-            self.data_manager.confirm_reset
-        )  # Connect to DataManager's confirm reset method
+        )
+        io_reset_button.clicked.connect(self.data_manager.confirm_reset)
 
-        # NEW: Add Help button
         help_button = QPushButton("Help")
-        help_button.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Fixed
-        )  # Ensure full width
-        self.main_layout.addWidget(help_button)  # Add Help button to the main layout
+        help_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.main_layout.addWidget(help_button)
 
-        # NEW: Connect Help button to print statement
-        help_button.clicked.connect(
-            lambda: print("Help button pressed")
-        )  # Prints to terminal
+        help_button.clicked.connect(lambda: print("Help button pressed"))
 
-        # NEW: Add Run button
         run_button = QPushButton("Run")
-        run_button.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Fixed
-        )  # Ensure full width
-        self.main_layout.addWidget(run_button)  # Add Run button to the main layout
+        run_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.main_layout.addWidget(run_button)
 
-        # NEW: Connect Run button to print statement
-        run_button.clicked.connect(
-            lambda: print("Run button pressed")
-        )  # Prints to terminal
-
-    # def add_io_buttons(self):
-    #     """Add IO buttons to the layout."""
-    #     io_widget = QWidget()
-    #     io_layout = QHBoxLayout(io_widget)
-    #     io_load_button = QPushButton("Load")
-    #     io_layout.addWidget(io_load_button)
-    #     io_save_button = QPushButton("Save")
-    #     io_layout.addWidget(io_save_button)
-    #     io_reset_button = QPushButton("Reset")
-    #     io_layout.addWidget(io_reset_button)
-    #     io_layout.setContentsMargins(0, 0, 0, 0)
-    #     self.centralWidget().layout().addWidget(
-    #         io_widget
-    #     )  # Add IO buttons to the main layout
-    #
-    #     # Connect button signals to slots
-    #     io_load_button.clicked.connect(self.data_manager.load_values)
-    #     io_save_button.clicked.connect(
-    #         lambda: self.data_manager.save_values(
-    #             "Save File",
-    #             "",
-    #             "MIRACL ACE Flow Files (*.aceflow)",
-    #         )
-    #     )
-    #     io_reset_button.clicked.connect(self.data_manager.confirm_reset)
-    #
-    #     # NEW: Add Help button
-    #     help_button = QPushButton("Help")
-    #     help_button.setSizePolicy(
-    #         QSizePolicy.Expanding, QSizePolicy.Fixed
-    #     )  # Ensure full width
-    #     io_layout.addWidget(help_button)  # Add Help button to the same layout
-    #
-    #     # NEW: Connect Help button to print statement
-    #     help_button.clicked.connect(
-    #         lambda: print("Help button pressed")
-    #     )  # Prints to terminal
-    #
-    #     # NEW: Add Run button
-    #     run_button = QPushButton("Run")
-    #     run_button.setSizePolicy(
-    #         QSizePolicy.Expanding, QSizePolicy.Fixed
-    #     )  # Ensure full width
-    #     io_layout.addWidget(run_button)  # Add Run button to the same layout
-    #
-    #     # NEW: Connect Run button to print statement
-    #     run_button.clicked.connect(
-    #         lambda: print("Run button pressed")
-    #     )  # Prints to terminal
+        run_button.clicked.connect(lambda: print("Run button pressed"))
 
     def on_value_changed(self, name, value):
         """
