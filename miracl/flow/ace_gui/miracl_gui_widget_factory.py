@@ -17,6 +17,12 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
 from typing import List, Callable, Union, Dict, Any, Tuple
 from enum import Enum
 
+# Import logger
+from miracl import miracl_logger
+
+# Initialize logger
+logger = miracl_logger.logger
+
 
 class SectionLabel:
     """Class to represent a section label."""
@@ -97,6 +103,10 @@ class WidgetFactory:
                     widget = WidgetFactory.create_spinbox(obj, parent)
                     widget.setObjectName(obj.name)
                     layout.addRow(label, widget)
+                elif obj.gui_widget_type == WidgetType.DOUBLE_SPINBOX:
+                    widget = WidgetFactory.create_double_spinbox(obj, parent)
+                    widget.setObjectName(obj.name)
+                    layout.addRow(label, widget)
                 elif obj.gui_widget_type == WidgetType.PATH_INPUT:
                     # Update to unpack the returned values from create_path_input_widget
                     path_widget, path_input = WidgetFactory.create_path_input_widget(
@@ -144,9 +154,9 @@ class WidgetFactory:
         return spinbox
 
     @staticmethod
-    def create_double_spinbox(obj: MiraclObj) -> QDoubleSpinBox:
+    def create_double_spinbox(obj: MiraclObj, parent: QWidget) -> QDoubleSpinBox:
         """Create a double spinbox widget from a MiraclObj."""
-        double_spinbox: QDoubleSpinBox = QDoubleSpinBox()
+        double_spinbox: QDoubleSpinBox = QDoubleSpinBox(parent)
         double_spinbox.setValue(obj.obj_default)
         WidgetFactory.setup_widget(double_spinbox, obj)
         WidgetFactory.set_spinbox_ranges(double_spinbox, obj)
@@ -165,25 +175,49 @@ class WidgetFactory:
         :param obj: The MiraclObj containing range information.
         :type obj: MiraclObj
         """
-        # Define the attribute methods for range setting
-        attribute_methods: Dict[str, Callable] = {
-            "min_val": spinbox.setMinimum,
-            "max_val": spinbox.setMaximum,
-            "increment_val": spinbox.setSingleStep,
-        }
+        # Check if the range_formatting_vals attribute exists
+        if hasattr(obj, "range_formatting_vals"):
+            logger.debug(
+                f"{obj.name} has range_formatting_vals: {obj.range_formatting_vals}"
+            )
 
-        # Set ranges that are attributes of obj
-        if obj.range_formatting_vals:
-            for attr, method in attribute_methods.items():
-                if attr in obj.range_formatting_vals:
-                    method(obj.range_formatting_vals[attr])
+            # Initialize default values for spinbox properties
+            min_val = None
+            max_val = None
+            increment_val = None
+            nr_decimals = None
 
-        # Set decimals only for double spinbox
-        if (
-            isinstance(spinbox, QDoubleSpinBox)
-            and "nr_decimals" in obj.range_formatting_vals
-        ):
-            spinbox.setDecimals(obj.range_formatting_vals["nr_decimals"])
+            # Check if range_formatting_vals is not None
+            if obj.range_formatting_vals is not None:
+                logger.debug(
+                    f"Setting ranges for {obj.name} with range_formatting_vals: {obj.range_formatting_vals}"
+                )
+
+                min_val = obj.range_formatting_vals.min_val
+                max_val = obj.range_formatting_vals.max_val
+                increment_val = obj.range_formatting_vals.increment_val
+                nr_decimals = obj.range_formatting_vals.nr_decimals
+
+                if min_val is not None:
+                    spinbox.setMinimum(min_val)
+                    logger.debug(f"Set minimum value to {min_val} for {obj.name}")
+                if max_val is not None:
+                    spinbox.setMaximum(max_val)
+                    logger.debug(f"Set maximum value to {max_val} for {obj.name}")
+                if increment_val is not None:
+                    spinbox.setSingleStep(increment_val)
+                    logger.debug(
+                        f"Set increment value to {increment_val} for {obj.name}"
+                    )
+
+            # Set decimals only for double spinbox
+            if isinstance(spinbox, QDoubleSpinBox) and nr_decimals is not None:
+                spinbox.setDecimals(nr_decimals)
+                logger.debug(f"Set number of decimals to {nr_decimals} for {obj.name}")
+        else:
+            logger.debug(
+                f"{obj.name} does not have range_formatting_vals attribute, skipping range setup."
+            )
 
     @staticmethod
     def create_path_input_widget(

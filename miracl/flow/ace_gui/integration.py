@@ -82,11 +82,11 @@ class MainWindow(QMainWindow):
                 conv_tiff_nii.down,
                 reg_clar_allen.voxel_size,
                 seg_vox.downsample,
-                # reg_warp_clar.voxel_size,
+                reg_warp_clar.voxel_size,
             ],
             "Conversion": [
-                SectionLabel("Test label"),
-                reg_warp_clar.voxel_size,
+                conv_tiff_nii.prevdown,
+                conv_tiff_nii.percentile_thr,
             ],
         }
 

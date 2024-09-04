@@ -249,15 +249,15 @@ class DataManager:
         except Exception as e:
             QMessageBox.critical(None, "Error", f"An error occurred while saving: {e}")
 
-    def process_widget_values(self, action: str):
-        """Process the values of the widgets based on the action."""
-        for name, widget in self.widgets.items():
-            if isinstance(widget, (QSpinBox, QDoubleSpinBox)):
-                value = widget.value()
-                print(f"{action} {name}: {value}")
-            elif isinstance(widget, QComboBox):
-                value = widget.currentText()
-                print(f"{action} {name}: {value}")
+    # def process_widget_values(self, action: str):
+    #     """Process the values of the widgets based on the action."""
+    #     for name, widget in self.widgets.items():
+    #         if isinstance(widget, (QSpinBox, QDoubleSpinBox)):
+    #             value = widget.value()
+    #             print(f"{action} {name}: {value}")
+    #         elif isinstance(widget, QComboBox):
+    #             value = widget.currentText()
+    #             print(f"{action} {name}: {value}")
 
     def confirm_reset(self):
         """Show a confirmation dialog before resetting values."""

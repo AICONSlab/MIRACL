@@ -143,6 +143,7 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         obj_default=1,
+        gui_widget_type=WidgetType.SPINBOX,
     )
 
     percentile_thr = MiraclObj(
@@ -160,4 +161,11 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         obj_default=0.01,
+        gui_widget_type=WidgetType.DOUBLE_SPINBOX,
+        range_formatting_vals={
+            "min_val": 0.000,
+            "max_val": 1.000,
+            "increment_val": 0.01,
+            "nr_decimals": 3,
+        },
     )
