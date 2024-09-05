@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
             "Conversion": [
                 conv_tiff_nii.prevdown,
                 conv_tiff_nii.percentile_thr,
+                conv_tiff_nii.channame,
             ],
         }
 

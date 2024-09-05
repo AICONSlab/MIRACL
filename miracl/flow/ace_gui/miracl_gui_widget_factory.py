@@ -10,11 +10,15 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QFileDialog,
 )
+from PyQt5.QtGui import QRegularExpressionValidator
+from PyQt5.QtCore import QRegularExpression
+
 from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     WidgetType,
+    InputRestrictionType,
 )
-from typing import List, Callable, Union, Dict, Any, Tuple
+from typing import List, Union, Dict, Any, Tuple
 from enum import Enum
 
 # Import logger
@@ -99,6 +103,10 @@ class WidgetFactory:
                     widget = WidgetFactory.create_dropdown(obj, parent)
                     widget.setObjectName(obj.name)
                     layout.addRow(label, widget)
+                elif obj.gui_widget_type == WidgetType.LINE_EDIT:
+                    widget = WidgetFactory.create_line_edit(obj, parent)
+                    widget.setObjectName(obj.name)
+                    layout.addRow(label, widget)
                 elif obj.gui_widget_type == WidgetType.SPINBOX:
                     widget = WidgetFactory.create_spinbox(obj, parent)
                     widget.setObjectName(obj.name)
@@ -142,6 +150,47 @@ class WidgetFactory:
         WidgetFactory.setup_widget(dropdown, obj)
 
         return dropdown
+
+    @staticmethod
+    def create_line_edit(obj: MiraclObj, parent: QWidget) -> QLineEdit:
+        """Create a line edit widget from a MiraclObj."""
+        line_edit: QLineEdit = QLineEdit(parent)
+
+        # Set placeholder text and default value
+        if obj.obj_default is not None:
+            placeholder_text = str(obj.obj_default)
+            line_edit.setText(placeholder_text)
+        else:
+            placeholder_text = "None"
+
+        line_edit.setPlaceholderText(placeholder_text)
+
+        WidgetFactory.setup_widget(line_edit, obj)
+
+        # Set maximum length if available
+        if hasattr(obj, "max_length"):
+            line_edit.setMaxLength(obj.max_length)
+
+        # Set validator if input_restrictions are specified
+        if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+            validator = WidgetFactory.create_line_edit_validator(
+                obj.line_edit_settings.input_restrictions
+            )
+            line_edit.setValidator(validator)
+
+        return line_edit
+
+    @staticmethod
+    def create_line_edit_validator(
+        restriction_type: InputRestrictionType,
+    ) -> QRegularExpressionValidator:
+        if restriction_type == InputRestrictionType.STR:
+            regex = QRegularExpression("^[A-Za-z]+$")
+        elif restriction_type == InputRestrictionType.STRCON:
+            regex = QRegularExpression("^[A-Za-z0-9_-]+$")
+        else:  # default to alphanumeric
+            regex = QRegularExpression("^[A-Za-z0-9]+$")
+        return QRegularExpressionValidator(regex)
 
     @staticmethod
     def create_spinbox(obj: MiraclObj, parent: QWidget) -> QSpinBox:

@@ -66,6 +66,12 @@ class WidgetType(str, Enum):
     PATH_INPUT = "path_input"  # Custom path input
 
 
+class InputRestrictionType(str, Enum):
+    STR = "str"
+    STRCON = "strcon"
+    ALPHANUMERIC = "alphanumeric"
+
+
 #################
 # CUSTOM FIELDS #
 #################
@@ -97,6 +103,12 @@ class GuiChoiceOverrideConfig(BaseModel):
     default_val: Optional[str] = Field(
         None,
         description="Default value",
+    )
+
+
+class LineEditConfig(BaseModel):
+    input_restrictions: Optional[InputRestrictionType] = Field(
+        None, description="Type of input restrictions"
     )
 
 
@@ -246,6 +258,14 @@ class MiraclObj(BaseModel):
             "max_val": 100,
             "increment_val": 1,
             "nr_decimals": 2,
+        },
+    )
+
+    line_edit_settings: Optional[LineEditConfig] = Field(
+        None,
+        description="Config for QLineEdit widgets",
+        example={
+            "input_restrictions": "str",
         },
     )
 

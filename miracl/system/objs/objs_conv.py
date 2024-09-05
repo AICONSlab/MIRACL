@@ -1,4 +1,6 @@
 from miracl.system.datamodels.datamodel_miracl_objs import (
+    InputRestrictionType,
+    LineEditConfig,
     MiraclObj,
     ArgumentType,
     WidgetType,
@@ -74,6 +76,10 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         obj_default="auto",
+        gui_widget_type=WidgetType.LINE_EDIT,
+        line_edit_settings=LineEditConfig(
+            input_restrictions=InputRestrictionType.STRCON
+        ),
     )
 
     outnii = MiraclObj(
