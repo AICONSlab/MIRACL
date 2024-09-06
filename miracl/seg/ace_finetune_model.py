@@ -6,8 +6,8 @@ In this code we load the trained model and fine tuned it.
 
 """
 import argparse
-import os
 import pickle
+from pathlib import Path
 
 import numpy as np
 import tifffile
@@ -48,36 +48,39 @@ def parsefn():
 
 def main(args):
 
-    root_dir = args['output']
-    isExist = os.path.exists(root_dir)
-    if not isExist: os.mkdir(root_dir)
+    root_dir = Path(args['output'])
+    root_dir.mkdir(parents=True, exist_ok=True)
 
     # load config file
-    config_path = args['config'] 
-    with open(config_path, "r") as ymlfile:
+    config_path = Path(args['config'] )
+    with config_path.open('r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-    print('config: ', cfg)
+    print(f'Config:\n{cfg}')
+    
+    images_train_path = Path(args['train_images'])
+    images_segs_train_path = Path(args['train_labels'])
+    images_val_path = Path(args['val_images'])
+    images_segs_val_path = Path(args['val_labels'])
 
-    # load data
-    print('reading images ...')
+    assert images_train_path.exists(), f"train images path {images_train_path} does not exist"
+    assert images_segs_train_path.exists(), f"train labels path {images_segs_train_path} does not exist"
+    assert images_val_path.exists(), f"val images path {images_val_path} does not exist"
+    assert images_segs_val_path.exists(), f"val labels path {images_segs_val_path} does not exist"
+
 
     # images train
-    images_train_path = args['train']
     file_names = os.listdir(images_train_path)
     images_train = [os.path.join(images_train_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
 
     # segs/labels train
-    images_segs_train_path = args['train_label']
     file_names = os.listdir(images_segs_train_path)
     segs_train = [os.path.join(images_segs_train_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
 
     # images val
-    images_val_path = args['validation']
     file_names = os.listdir(images_val_path)
     images_val = [os.path.join(images_val_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
 
     # segs/labels val
-    images_segs_val_path = args['validation_label']
     file_names = os.listdir(images_segs_val_path)
     segs_val = [os.path.join(images_segs_val_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
 
