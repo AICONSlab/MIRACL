@@ -178,6 +178,80 @@ def get_data_loaders(
 
     return train_loader, val_loader
 
+def build_model(
+        cfg: Dict[str, Dict[str, str]],
+        crop_size: Tuple[int, int, int],
+    ) -> Tuple[torch.nn.Module, str, torch.device]:
+
+    # Create UNet, DiceLoss and Adam optimizer
+    model_name = cfg['general'].get('model_name', 'unet')
+    if model_name == 'unet':
+        n_layers = cfg['unet'].get('n_encoder_layers', 5)
+        initial_channel = cfg['unet'].get('channels_initial', 16)
+        model = UNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            channels=tuple([initial_channel * (2**j) for j in range(n_layers)]),
+            strides=tuple([2] * (n_layers - 1)),
+            num_res_units=cfg['unet'].get('num_res_unit', 2),
+            dropout = cfg['unet'].get('dropout', 0.2),
+            norm = Norm.BATCH
+        )
+    elif model_name == 'dynunet':
+        n_layers = cfg['dynunet'].get('n_layers', 5)
+        initial_filter = cfg['dynunet'].get('filters_initial', 16)
+        kernel_sizes = [[3, 3, 3] for j in range(n_layers)]
+        strides = [[2, 2, 2] for j in range(n_layers-1)]
+        strides.insert(0, [1, 1, 1])
+        filters = [initial_filter * (2**j) for j in range(n_layers)]
+        model = DynUNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            kernel_size=kernel_sizes,
+            strides=strides,
+            filters=filters,
+            upsample_kernel_size=strides[1:],
+            res_block=cfg['dynunet'].get('res_block', True),
+            deep_supervision=True,
+            deep_supr_num=2,
+            dropout=cfg['dynunet'].get('dropout', 0.2),
+            norm_name = Norm.BATCH
+        )
+    elif model_name == 'unetr':
+        model = UNETR(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            img_size=crop_size,
+            feature_size=cfg['unetr'].get('feature_size', 16),
+            hidden_size=cfg['unetr'].get('hidden_size', 768),
+            mlp_dim=cfg['unetr'].get('mlp_dim', 3072),
+            num_heads=cfg['unetr'].get('num_heads', 12),
+            dropout_rate=cfg['unetr'].get('dropout', 0.2),
+            res_block=cfg['unetr'].get('res_block', True),
+            norm_name='batch'             
+            )
+        
+    gpu_opt = cfg['general'].get('GPU', 'single')
+    if gpu_opt == 'single':
+        device = torch.device("cuda:0")
+        model.to(device)
+    else:
+        print('number of available gpus: ', torch.cuda.device_count())
+        device = torch.device("cuda:0")
+        model = torch.nn.DataParallel(model)
+        model.to(device)
+
+    model_state = cfg['general'].get('model_state', 'untrained')
+    model_path = cfg['general'].get('model_trained_path')
+    if model_state == 'trained':
+        model.load_state_dict(torch.load(model_path))
+        print('trained model loaded!')
+        
+    return model, model_name, device
+
 def main(args):
 
     root_dir = Path(args['output'])
@@ -224,85 +298,8 @@ def main(args):
     
     train_loader, val_loader = get_data_loaders(data_dicts_train, data_dicts_val, train_transforms, val_transforms, cache_rate_train, cache_rate_val, batch_size)
 
-    print('creating the model ...')
+    model, model_name, device = build_model(cfg, crop_size)
 
-    # Create UNet, DiceLoss and Adam optimizer
-    model_name = cfg['general'].get('model_name', 'unet')
-    if model_name == 'unet':
-        n_layers = cfg['unet'].get('n_encoder_layers', 5)
-        initial_channel = cfg['unet'].get('channels_initial', 16)
-        model = UNet(
-            spatial_dims=3,
-            in_channels=1,
-            out_channels=2,
-            channels=tuple([initial_channel * (2**j) for j in range(n_layers)]),
-            strides=tuple([2] * (n_layers - 1)),
-            num_res_units=cfg['unet'].get('num_res_unit', 2),
-            dropout = cfg['unet'].get('dropout', 0.2),
-            norm = Norm.BATCH
-        )
-    elif model_name == 'dynunet':
-        n_layers = cfg['dynunet'].get('n_layers', 5)
-        initial_filter = cfg['dynunet'].get('filters_initial', 16)
-        # e.g. creating [[3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3], [3, 3, 3]] if n_layers=5
-        kernel_sizes = [[3, 3, 3] for j in range(n_layers)]
-        # e.g. creating [[1, 1, 1], [2, 2, 2], [2, 2, 2], [2, 2, 2], [2, 2, 2]] if n_layers=5
-        strides = [[2, 2, 2] for j in range(n_layers-1)]
-        strides.insert(0, [1, 1, 1])
-        filters = [initial_filter * (2**j) for j in range(n_layers)]
-        model = DynUNet(
-            spatial_dims=3,
-            in_channels=1,
-            out_channels=2,
-            kernel_size=kernel_sizes,
-            strides=strides,
-            filters=filters,
-            upsample_kernel_size=strides[1:],
-            res_block=cfg['dynunet'].get('res_block', True),
-            deep_supervision=True,
-            deep_supr_num=2,
-            dropout=cfg['dynunet'].get('dropout', 0.2),
-            norm_name = Norm.BATCH
-        )
-    elif model_name == 'unetr':
-        model = UNETR(
-            spatial_dims=3,
-            in_channels=1,
-            out_channels=2,
-            img_size=crop_size,
-            feature_size=cfg['unetr'].get('feature_size', 16),
-            hidden_size=cfg['unetr'].get('hidden_size', 768),
-            mlp_dim=cfg['unetr'].get('mlp_dim', 3072),
-            num_heads=cfg['unetr'].get('num_heads', 12),
-            dropout_rate=cfg['unetr'].get('dropout', 0.2),
-            res_block=cfg['unetr'].get('res_block', True),
-            norm_name='batch'             
-            )
-    print('model: ', model)
-
-    # -------------------------------------------------------
-    # GPU selection
-    # -------------------------------------------------------
-
-    gpu_opt = cfg['general'].get('GPU', 'single')
-    if gpu_opt == 'single':
-        device = torch.device("cuda:0")
-        model.to(device)
-    else:
-        print('number of available gpus: ', torch.cuda.device_count())
-        device = torch.device("cuda:0")
-        model = torch.nn.DataParallel(model)
-        model.to(device)
-
-        
-    # -------------------------------------------------------
-    # check if the model is trained ; just load the model
-    # -------------------------------------------------------
-    model_state = cfg['general'].get('model_state', 'untrained')
-    model_path = cfg['general'].get('model_trained_path')
-    if model_state == 'trained':
-        model.load_state_dict(torch.load(model_path))
-        print('trained model loaded!')
     # -------------------------------------------------------   
     # define loss function
     # -------------------------------------------------------
@@ -384,7 +381,7 @@ def main(args):
             scaler.update()
             epoch_loss += loss.item()
             print(
-                f"{step}/{len(train_ds) // train_loader.batch_size}, "
+                f"{step}/{len(train_loader)}, "
                 f"train_loss: {loss.item():.4f}")
             
         epoch_loss /= step
