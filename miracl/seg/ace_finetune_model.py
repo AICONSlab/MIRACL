@@ -252,6 +252,33 @@ def build_model(
         
     return model, model_name, device
 
+
+def configure_optimizers(
+        model: torch.nn.Module,
+        cfg: Dict[str, Dict[str, str]],
+        device: torch.device,
+    ) -> Tuple[torch.optim.Optimizer, torch.nn.Module]:
+    loss_name = cfg['loss'].get('name')
+    if (loss_name == 'dicece'):
+        lambda_dice = cfg['loss'].get('dicece_lambda_dice', 1.0)
+        lambda_ce = cfg['loss'].get('dicece_lambda_ce', 1.0)
+        weight = torch.tensor([1/(cfg['loss'].get('dicece_weights', 1)), 1], dtype=torch.float, device=device)
+        loss_function = DiceCELoss(to_onehot_y=True, softmax=True, ce_weight=weight, lambda_dice=lambda_dice, lambda_ce=lambda_ce)
+    elif (loss_name == 'dice'):
+        loss_function = DiceLoss(to_onehot_y=True, softmax=True)
+    elif (loss_name == 'focaldice'):
+        loss_function = DiceFocalLoss(to_onehot_y=True, softmax=True)
+    elif (loss_name == 'tversky'):
+        tversky_alpha = cfg['loss'].get('tversky_alpha', 0.5) # weight of FP
+        tversky_beta = cfg['loss'].get('tversky_beta', 0.5) # weight of FN
+        loss_function = TverskyLoss(to_onehot_y=True, softmax=True, alpha=tversky_alpha, beta=tversky_beta)
+
+    learning_rate = cfg['optimizer'].get('learning_rate', 1e-4)
+    weight_decay = cfg['optimizer'].get('weight_decay', 0.0)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+    return optimizer, loss_function
+
 def main(args):
 
     root_dir = Path(args['output'])
@@ -300,31 +327,7 @@ def main(args):
 
     model, model_name, device = build_model(cfg, crop_size)
 
-    # -------------------------------------------------------   
-    # define loss function
-    # -------------------------------------------------------
-
-    loss_name = cfg['loss'].get('name')
-    if (loss_name == 'dicece'):
-        lambda_dice = cfg['loss'].get('dicece_lambda_dice', 1.0)
-        lambda_ce = cfg['loss'].get('dicece_lambda_ce', 1.0)
-        weight = torch.tensor([1/(cfg['loss'].get('dicece_weights', 1)), 1], dtype=torch.float, device=device)
-        loss_function = DiceCELoss(to_onehot_y=True, softmax=True, ce_weight=weight, lambda_dice=lambda_dice, lambda_ce=lambda_ce)
-        # CE_loss = torch.nn.CrossEntropyLoss(weight=torch.tensor([5., 1.]).to(device), size_average=None, ignore_index=-100, reduce=None, reduction='mean', label_smoothing=0.0)
-        # DICE_loss = DiceLoss(to_onehot_y=True, softmax=True)
-        # loss_function = lambda x, y: CE_loss(x, y[:,0,...].long()) + DICE_loss(x, y)
-    elif (loss_name == 'dice'):
-        loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-    elif (loss_name == 'focaldice'):
-        loss_function = DiceFocalLoss(to_onehot_y=True, softmax=True)
-    elif (loss_name == 'tversky'):
-        tversky_alpha = cfg['loss'].get('tversky_alpha', 0.5) # weight of FP
-        tversky_beta = cfg['loss'].get('tversky_beta', 0.5) # weight of FN
-        loss_function = TverskyLoss(to_onehot_y=True, softmax=True, alpha=tversky_alpha, beta=tversky_beta)
-
-    learning_rate = cfg['optimizer'].get('learning_rate', 1e-4)
-    weight_decay = cfg['optimizer'].get('weight_decay', 0.0)
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer, loss_function = configure_optimizers(model, cfg, device)
 
     # -------------------------------------------------------
     # dice and ConfusionMatrix from MONAI
