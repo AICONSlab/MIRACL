@@ -85,9 +85,14 @@ class MainWindow(QMainWindow):
                 reg_warp_clar.voxel_size,
             ],
             "Conversion": [
+                conv_tiff_nii.channum,
+                conv_tiff_nii.chanprefix,
+                conv_tiff_nii.channame,
+                conv_tiff_nii.outnii,
+                conv_tiff_nii.center,
+                conv_tiff_nii.downzdim,
                 conv_tiff_nii.prevdown,
                 conv_tiff_nii.percentile_thr,
-                conv_tiff_nii.channame,
             ],
         }
 
@@ -118,6 +123,7 @@ class MainWindow(QMainWindow):
         # print(f"SINGLE: {self.miracl_obj_dict[flow_ace.single.name].cli_l_flag}")
         logger.debug(f"Check self.miracl_obj_dict: \n{self.miracl_obj_dict}\n")
         logger.debug(f"Check self.widget_dict: \n{self.widget_dict}\n")
+        logger.debug(self.tab_controller.get_current_widget_values())
         logger.debug(self.tab_controller)
 
     def add_io_buttons(self):

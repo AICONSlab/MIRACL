@@ -42,6 +42,12 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         version_added="2.4.0",
+        gui_widget_type=WidgetType.SPINBOX,
+        range_formatting_vals={
+            "min_val": 0,
+            "max_val": 10000,
+            "increment_val": 1,
+        },
     )
 
     chanprefix = MiraclObj(
@@ -52,13 +58,17 @@ class ConvTiffNiiObjs:
         flow={"ace": {"cli_s_flag": "ctncp", "cli_l_flag": "ctn_chanprefix"}},
         tags=["tiff_nii", "conv", "ace_flow"],
         cli_obj_type=ArgumentType.STRING,
-        cli_help="Chan prefix (string before channel number in file name). ex: C00 (default: %(default)s)",
+        cli_help="Chan prefix (string before channel number in file name). ex: C00",
         gui_group={"ace_flow": "conversion"},
         gui_label=["Channel prefix"],
         module="tiff_nii",
         module_group="conv",
         version_added="2.4.0",
         obj_default=None,
+        gui_widget_type=WidgetType.LINE_EDIT,
+        line_edit_settings=LineEditConfig(
+            input_restrictions=InputRestrictionType.STRCON
+        ),
     )
 
     channame = MiraclObj(
@@ -97,6 +107,10 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         obj_default="SHIELD",
+        gui_widget_type=WidgetType.LINE_EDIT,
+        line_edit_settings=LineEditConfig(
+            input_restrictions=InputRestrictionType.ALPHANUMERIC
+        ),
     )
 
     center = MiraclObj(
@@ -111,10 +125,12 @@ class ConvTiffNiiObjs:
         gui_group={"ace_flow": "conversion"},
         gui_label=["Nii center"],
         version_added="2.4.0",
-        cli_nargs="+",
+        cli_nargs=3,
         module="tiff_nii",
         module_group="conv",
         obj_default=[0, 0, 0],
+        gui_widget_type=WidgetType.LINE_EDIT,
+        line_edit_settings=LineEditConfig(input_restrictions=InputRestrictionType.INT),
     )
 
     downzdim = MiraclObj(
@@ -132,6 +148,7 @@ class ConvTiffNiiObjs:
         module="tiff_nii",
         module_group="conv",
         obj_default=1,
+        gui_widget_type=WidgetType.SPINBOX,
     )
 
     prevdown = MiraclObj(

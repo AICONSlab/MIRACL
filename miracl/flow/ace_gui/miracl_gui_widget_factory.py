@@ -10,7 +10,10 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QFileDialog,
 )
-from PyQt5.QtGui import QRegularExpressionValidator
+from PyQt5.QtGui import (
+    QRegularExpressionValidator,
+    QIntValidator,
+)
 from PyQt5.QtCore import QRegularExpression
 
 from miracl.system.datamodels.datamodel_miracl_objs import (
@@ -151,46 +154,229 @@ class WidgetFactory:
 
         return dropdown
 
+    # @staticmethod
+    # def create_line_edit(obj: MiraclObj, parent: QWidget) -> QLineEdit:
+    #     """Create a line edit widget from a MiraclObj."""
+    #     line_edit: QLineEdit = QLineEdit(parent)
+    #
+    #     # Set placeholder text and default value
+    #     if obj.obj_default is not None:
+    #         placeholder_text = str(obj.obj_default)
+    #         line_edit.setText(placeholder_text)
+    #     else:
+    #         placeholder_text = "None"
+    #
+    #     line_edit.setPlaceholderText(placeholder_text)
+    #
+    #     WidgetFactory.setup_widget(line_edit, obj)
+    #
+    #     # Set maximum length if available
+    #     if hasattr(obj, "max_length"):
+    #         line_edit.setMaxLength(obj.max_length)
+    #
+    #     # Set validator if input_restrictions are specified
+    #     if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+    #         validator = WidgetFactory.create_line_edit_validator(
+    #             obj.line_edit_settings.input_restrictions
+    #         )
+    #         line_edit.setValidator(validator)
+    #
+    #     return line_edit
+
+    # @staticmethod
+    # def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
+    #     """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
+    #     if isinstance(obj.obj_default, list):
+    #         # Create multiple text fields
+    #         container = QWidget(parent)
+    #         layout = QHBoxLayout(container)
+    #         layout.setContentsMargins(0, 0, 0, 0)
+    #         layout.setSpacing(5)  # Adjust spacing between fields as needed
+    #
+    #         inputs = []
+    #         for default_value in obj.obj_default:
+    #             input_field = QLineEdit(container)
+    #             input_field.setText(str(default_value))
+    #             input_field.setPlaceholderText(str(default_value))
+    #
+    #             # Use the existing validator method with input restrictions
+    #             if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+    #                 validator = WidgetFactory.create_line_edit_validator(
+    #                     obj.line_edit_settings.input_restrictions
+    #                 )
+    #                 input_field.setValidator(validator)
+    #
+    #             layout.addWidget(input_field)
+    #             inputs.append(input_field)
+    #
+    #         # Attach the list of QLineEdit widgets to the container
+    #         container.inputs = inputs
+    #
+    #         return container  # Return the container widget
+    #     else:
+    #         # Handle single line edit case
+    #         line_edit = QLineEdit(parent)
+    #         if obj.obj_default is not None:
+    #             line_edit.setText(str(obj.obj_default))
+    #             line_edit.setPlaceholderText(str(obj.obj_default))
+    #         else:
+    #             line_edit.setPlaceholderText("None")
+    #
+    #         # Use the existing validator method with input restrictions
+    #         if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+    #             validator = WidgetFactory.create_line_edit_validator(
+    #                 obj.line_edit_settings.input_restrictions
+    #             )
+    #             line_edit.setValidator(validator)
+    #
+    #         return line_edit  # Return the single QLineEdit
+
+    # @staticmethod
+    # def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
+    #     """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
+    #     if isinstance(obj.obj_default, list):
+    #         # Create multiple text fields
+    #         container = QWidget(parent)
+    #         container.setObjectName(obj.name)  # Set the object name for the container
+    #         layout = QHBoxLayout(container)
+    #         layout.setContentsMargins(0, 0, 0, 0)
+    #         layout.setSpacing(5)  # Adjust spacing between fields as needed
+    #
+    #         inputs = []  # Initialize the list to hold QLineEdit widgets
+    #         for default_value in obj.obj_default:
+    #             input_field = QLineEdit(container)
+    #             input_field.setText(str(default_value))
+    #             input_field.setPlaceholderText(str(default_value))
+    #
+    #             # Use the existing validator method with input restrictions
+    #             if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+    #                 validator = WidgetFactory.create_line_edit_validator(
+    #                     obj.line_edit_settings.input_restrictions
+    #                 )
+    #                 input_field.setValidator(validator)
+    #
+    #             layout.addWidget(input_field)
+    #             inputs.append(input_field)  # Add the QLineEdit to the inputs list
+    #
+    #         # Attach the list of QLineEdit widgets to the container
+    #         container.inputs = inputs  # Set the inputs attribute on the container
+    #
+    #         return container  # Return the container widget
+    #     else:
+    #         # Handle single line edit case
+    #         line_edit = QLineEdit(parent)
+    #         if obj.obj_default is not None:
+    #             line_edit.setText(str(obj.obj_default))
+    #             line_edit.setPlaceholderText(str(obj.obj_default))
+    #         else:
+    #             line_edit.setPlaceholderText("None")
+    #
+    #         # Use the existing validator method with input restrictions
+    #         if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+    #             validator = WidgetFactory.create_line_edit_validator(
+    #                 obj.line_edit_settings.input_restrictions
+    #             )
+    #             line_edit.setValidator(validator)
+    #
+    #         return line_edit  # Return the single QLineEdit
+
     @staticmethod
-    def create_line_edit(obj: MiraclObj, parent: QWidget) -> QLineEdit:
-        """Create a line edit widget from a MiraclObj."""
-        line_edit: QLineEdit = QLineEdit(parent)
+    def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
+        """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
+        if isinstance(obj.obj_default, list):
+            # Create multiple text fields
+            container = QWidget(parent)
+            container.setObjectName(obj.name)  # Set the object name for the container
+            layout = QHBoxLayout(container)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(5)  # Adjust spacing between fields as needed
 
-        # Set placeholder text and default value
-        if obj.obj_default is not None:
-            placeholder_text = str(obj.obj_default)
-            line_edit.setText(placeholder_text)
+            inputs = []  # Initialize the list to hold QLineEdit widgets
+            for default_value in obj.obj_default:
+                input_field = QLineEdit(container)
+                input_field.setText(str(default_value))
+                input_field.setPlaceholderText(str(default_value))
+
+                # Use the existing validator method with input restrictions
+                if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+                    validator = WidgetFactory.create_line_edit_validator(
+                        obj.line_edit_settings.input_restrictions
+                    )
+                    input_field.setValidator(validator)
+
+                layout.addWidget(input_field)
+                inputs.append(input_field)  # Add the QLineEdit to the inputs list
+
+            # Attach the list of QLineEdit widgets to the container
+            container.inputs = inputs  # Set the inputs attribute on the container
+
+            return container  # Return the container widget
         else:
-            placeholder_text = "None"
+            # Handle single line edit case
+            line_edit = QLineEdit(parent)
+            if obj.obj_default is not None:
+                line_edit.setText(str(obj.obj_default))
+                line_edit.setPlaceholderText(str(obj.obj_default))
+            else:
+                line_edit.setPlaceholderText("None")
 
-        line_edit.setPlaceholderText(placeholder_text)
+            # Use the existing validator method with input restrictions
+            if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
+                validator = WidgetFactory.create_line_edit_validator(
+                    obj.line_edit_settings.input_restrictions
+                )
+                line_edit.setValidator(validator)
 
-        WidgetFactory.setup_widget(line_edit, obj)
-
-        # Set maximum length if available
-        if hasattr(obj, "max_length"):
-            line_edit.setMaxLength(obj.max_length)
-
-        # Set validator if input_restrictions are specified
-        if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
-            validator = WidgetFactory.create_line_edit_validator(
-                obj.line_edit_settings.input_restrictions
-            )
-            line_edit.setValidator(validator)
-
-        return line_edit
+            return line_edit  # Return the single QLineEdit
 
     @staticmethod
     def create_line_edit_validator(
         restriction_type: InputRestrictionType,
-    ) -> QRegularExpressionValidator:
+    ) -> Union[QRegularExpressionValidator, QIntValidator]:
+        """
+        Create a validator for a QLineEdit based on the specified input restriction type.
+
+        This function generates an appropriate validator (either QRegularExpressionValidator
+        or QIntValidator) based on the given InputRestrictionType.
+
+        :param restriction_type: The type of input restriction to apply.
+        :type restriction_type: InputRestrictionType
+
+        :return: A validator object suitable for use with a QLineEdit.
+        :rtype: Union[QRegularExpressionValidator, QIntValidator]
+
+        :raises ValueError: If an unsupported InputRestrictionType is provided.
+
+        .. note::
+            The function assumes that all InputRestrictionType values are handled.
+            If new types are added to InputRestrictionType, this function should be updated.
+
+        .. seealso::
+            :class:`InputRestrictionType`
+            :class:`QRegularExpressionValidator`
+            :class:`QIntValidator`
+
+        Examples:
+            >>> validator = create_line_edit_validator(InputRestrictionType.STR)
+            >>> isinstance(validator, QRegularExpressionValidator)
+            True
+
+            >>> validator = create_line_edit_validator(InputRestrictionType.INT)
+            >>> isinstance(validator, QIntValidator)
+            True
+        """
         if restriction_type == InputRestrictionType.STR:
             regex = QRegularExpression("^[A-Za-z]+$")
+            validator = QRegularExpressionValidator(regex)
         elif restriction_type == InputRestrictionType.STRCON:
             regex = QRegularExpression("^[A-Za-z0-9_-]+$")
-        else:  # default to alphanumeric
+            validator = QRegularExpressionValidator(regex)
+        elif restriction_type == InputRestrictionType.INT:
+            validator = QIntValidator()
+        elif restriction_type == InputRestrictionType.ALPHANUMERIC:
             regex = QRegularExpression("^[A-Za-z0-9]+$")
-        return QRegularExpressionValidator(regex)
+            validator = QRegularExpressionValidator(regex)
+        return validator
 
     @staticmethod
     def create_spinbox(obj: MiraclObj, parent: QWidget) -> QSpinBox:

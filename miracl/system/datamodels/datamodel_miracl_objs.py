@@ -70,6 +70,7 @@ class InputRestrictionType(str, Enum):
     STR = "str"
     STRCON = "strcon"
     ALPHANUMERIC = "alphanumeric"
+    INT = "numeric"
 
 
 #################

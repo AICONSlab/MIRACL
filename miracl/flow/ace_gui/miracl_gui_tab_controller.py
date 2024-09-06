@@ -95,19 +95,425 @@ class TabController:
             self._tabs.append(tmp_title)
             logger.info("Added tab: %s", tmp_title)
 
+    # def _populate_widget_dict(self, tab: QWidget):
+    #     """Populate the widget dictionary with actual widget objects from the given tab.
+    #
+    #     This method searches for all relevant child widgets in the specified tab
+    #     and adds them to the _widget_dict for later access.
+    #
+    #     :param tab: The tab widget from which to find child widgets.
+    #     :type tab: QWidget
+    #     :return: None
+    #     """
+    #     for child in tab.findChildren((QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit)):
+    #         if child.objectName():
+    #             self._widget_dict[child.objectName()] = child
+
+    # def _populate_widget_dict(self, tab: QWidget):
+    #     """Populate the widget dictionary with actual widget objects from the given tab."""
+    #     # Find all relevant child widgets in the specified tab
+    #     for child in tab.findChildren(
+    #         (QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit, QWidget)
+    #     ):
+    #         if hasattr(
+    #             child, "inputs"
+    #         ):  # Check if it's a container with QLineEdit inputs
+    #             if child.objectName():  # Ensure it has an object name
+    #                 self._widget_dict[child.objectName()] = (
+    #                     child  # Store the container widget
+    #                 )
+    #         elif isinstance(child, (QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox)):
+    #             if child.objectName():  # Ensure it has an object name
+    #                 self._widget_dict[child.objectName()] = (
+    #                     child  # Store the individual widget
+    #                 )
+
     def _populate_widget_dict(self, tab: QWidget):
-        """Populate the widget dictionary with actual widget objects from the given tab.
+        """Populate the widget dictionary with actual widget objects from the given tab."""
+        # Find all relevant child widgets in the specified tab
+        for child in tab.findChildren(
+            (QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit, QWidget)
+        ):
+            # Check if it's a container with QLineEdit inputs
+            if hasattr(child, "inputs"):
+                if child.objectName():  # Ensure it has an object name
+                    self._widget_dict[child.objectName()] = (
+                        child  # Store the container widget
+                    )
+            elif isinstance(child, (QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox)):
+                if child.objectName():  # Ensure it has an object name
+                    # Exclude specific widgets by their object name
+                    if (
+                        child.objectName() != "qt_spinbox_lineedit"
+                    ):  # Add more conditions as needed
+                        self._widget_dict[child.objectName()] = (
+                            child  # Store the individual widget
+                        )
 
-        This method searches for all relevant child widgets in the specified tab
-        and adds them to the _widget_dict for later access.
+    # def get_current_widget_values(self):
+    #     """Retrieve current values from the widgets in self.widget_dict."""
+    #     current_values = {}
+    #
+    #     for name, widget in self._widget_dict.items():
+    #         if isinstance(widget, QLineEdit):
+    #             current_values[name] = widget.text()
+    #         elif isinstance(widget, QSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QDoubleSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QComboBox):
+    #             current_values[name] = widget.currentText()
+    #         elif hasattr(widget, "inputs"):  # Check for container widget
+    #             # Collect values from all QLineEdit inputs in the container
+    #             current_values[name] = [
+    #                 input_field.text() for input_field in widget.inputs
+    #             ]
+    #         else:
+    #             raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+    #
+    #     return current_values
 
-        :param tab: The tab widget from which to find child widgets.
-        :type tab: QWidget
-        :return: None
-        """
-        for child in tab.findChildren((QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit)):
-            if child.objectName():
-                self._widget_dict[child.objectName()] = child
+    # def get_current_widget_values(self):
+    #     """Retrieve current values from the widgets in self._widget_dict."""
+    #     current_values = {}
+    #
+    #     for name, widget in self._widget_dict.items():
+    #         if isinstance(widget, QLineEdit):
+    #             current_values[name] = widget.text()
+    #         elif isinstance(widget, QSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QDoubleSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QComboBox):
+    #             current_values[name] = widget.currentText()
+    #         elif hasattr(widget, "inputs"):  # Check for container widget
+    #             # Collect values from all QLineEdit inputs in the container
+    #             current_values[name] = [
+    #                 input_field.text() for input_field in widget.inputs
+    #             ]
+    #         else:
+    #             raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+    #
+    #     # Validate the collected values against the expected types in MiraclObj
+    #     for name, value in current_values.items():
+    #         miracl_obj = self._miracl_obj_dict.get(name)
+    #         if miracl_obj:
+    #             expected_type = miracl_obj.cli_obj_type
+    #             if expected_type:
+    #                 # Check if the value matches the expected type
+    #                 if not isinstance(value, expected_type.python_type):
+    #                     raise TypeError(
+    #                         f"Value for '{name}' is of type {type(value).__name__}, "
+    #                         f"expected type {expected_type.python_type.__name__}."
+    #                     )
+    #
+    #     return current_values
+
+    # def get_current_widget_values(self):
+    #     """Retrieve current values from the widgets in self._widget_dict."""
+    #     current_values = {}
+    #
+    #     for name, widget in self._widget_dict.items():
+    #         if isinstance(widget, QLineEdit):
+    #             current_values[name] = widget.text()
+    #         elif isinstance(widget, QSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QDoubleSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QComboBox):
+    #             current_values[name] = widget.currentText()
+    #         elif hasattr(widget, "inputs"):  # Check for container widget
+    #             # Collect values from all QLineEdit inputs in the container
+    #             current_values[name] = [
+    #                 input_field.text() for input_field in widget.inputs
+    #             ]
+    #         else:
+    #             raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+    #
+    #     # Validate and convert types based on MiraclObj
+    #     for name, value in current_values.items():
+    #         miracl_obj = self._miracl_obj_dict.get(name)
+    #         if miracl_obj:
+    #             expected_type = miracl_obj.cli_obj_type.python_type
+    #             # Convert values to the expected type
+    #             if expected_type is int:
+    #                 current_values[name] = int(value)
+    #             elif expected_type is float:
+    #                 current_values[name] = float(value)
+    #             elif expected_type is str:
+    #                 current_values[name] = str(value)
+    #             else:
+    #                 raise TypeError(
+    #                     f"Value for '{name}' is of type {type(value).__name__}, "
+    #                     f"expected type {expected_type.__name__}."
+    #                 )
+    #
+    #     return current_values
+
+    # def get_current_widget_values(self):
+    #     """Retrieve current values from the widgets in self._widget_dict."""
+    #     current_values = {}
+    #
+    #     for name, widget in self._widget_dict.items():
+    #         if isinstance(widget, QLineEdit):
+    #             current_values[name] = widget.text()
+    #         elif isinstance(widget, QSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QDoubleSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QComboBox):
+    #             current_values[name] = widget.currentText()
+    #         elif hasattr(widget, "inputs"):  # Check for container widget
+    #             # Collect values from all QLineEdit inputs in the container
+    #             current_values[name] = [
+    #                 input_field.text() for input_field in widget.inputs
+    #             ]
+    #         else:
+    #             raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+    #
+    #     # Validate and convert types based on MiraclObj
+    #     for name, value in current_values.items():
+    #         miracl_obj = self._miracl_obj_dict.get(name)
+    #         if miracl_obj:
+    #             expected_type = miracl_obj.cli_obj_type.python_type
+    #
+    #             # Handle conversion for expected types
+    #             if expected_type is int:
+    #                 # If the value is a list, check each element
+    #                 if isinstance(value, list):
+    #                     current_values[name] = [
+    #                         int(item) for item in value
+    #                     ]  # Convert each item to int
+    #                 else:
+    #                     # Convert single value to int
+    #                     try:
+    #                         current_values[name] = int(value)
+    #                     except ValueError:
+    #                         raise TypeError(
+    #                             f"Value for '{name}' must be convertible to int, got '{value}'."
+    #                         )
+    #
+    #             elif expected_type is float:
+    #                 if isinstance(value, list):
+    #                     current_values[name] = [
+    #                         float(item) for item in value
+    #                     ]  # Convert each item to float
+    #                 else:
+    #                     try:
+    #                         current_values[name] = float(value)
+    #                     except ValueError:
+    #                         raise TypeError(
+    #                             f"Value for '{name}' must be convertible to float, got '{value}'."
+    #                         )
+    #
+    #             elif expected_type is str:
+    #                 # No conversion needed for strings
+    #                 current_values[name] = str(value)
+    #
+    #             else:
+    #                 raise TypeError(
+    #                     f"Value for '{name}' is of type {type(value).__name__}, "
+    #                     f"expected type {expected_type.__name__}."
+    #                 )
+    #
+    #     return current_values
+
+    # def get_current_widget_values(self):
+    #     """Retrieve current values from the widgets in self._widget_dict."""
+    #     current_values = {}
+    #
+    #     for name, widget in self._widget_dict.items():
+    #         if isinstance(widget, QLineEdit):
+    #             current_values[name] = widget.text()
+    #         elif isinstance(widget, QSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QDoubleSpinBox):
+    #             current_values[name] = widget.value()
+    #         elif isinstance(widget, QComboBox):
+    #             current_values[name] = widget.currentText()
+    #         elif hasattr(widget, "inputs"):  # Check for container widget
+    #             # Collect values from all QLineEdit inputs in the container
+    #             current_values[name] = [
+    #                 input_field.text() for input_field in widget.inputs
+    #             ]
+    #         else:
+    #             raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+    #
+    #     # Validate and convert types based on MiraclObj
+    #     for name, value in current_values.items():
+    #         miracl_obj = self._miracl_obj_dict.get(name)
+    #         if miracl_obj:
+    #             expected_type = miracl_obj.cli_obj_type.python_type
+    #
+    #             # Handle conversion for expected types
+    #             if expected_type is int:
+    #                 # If the value is a list, check each element
+    #                 if isinstance(value, list):
+    #                     current_values[name] = [
+    #                         int(item) for item in value
+    #                     ]  # Convert each item to int
+    #                 else:
+    #                     # Convert single value to int
+    #                     try:
+    #                         current_values[name] = int(value)
+    #                     except ValueError:
+    #                         raise TypeError(
+    #                             f"Value for '{name}' must be convertible to int, got '{value}'."
+    #                         )
+    #
+    #             elif expected_type is float:
+    #                 if isinstance(value, list):
+    #                     current_values[name] = [
+    #                         float(item) for item in value
+    #                     ]  # Convert each item to float
+    #                 else:
+    #                     try:
+    #                         current_values[name] = float(value)
+    #                     except ValueError:
+    #                         raise TypeError(
+    #                             f"Value for '{name}' must be convertible to float, got '{value}'."
+    #                         )
+    #
+    #             elif expected_type is str:
+    #                 # No conversion needed for strings
+    #                 current_values[name] = str(value)
+    #
+    #             else:
+    #                 raise TypeError(
+    #                     f"Value for '{name}' is of type {type(value).__name__}, "
+    #                     f"expected type {expected_type.__name__}."
+    #                 )
+    #
+    #     return current_values
+
+    # def get_current_widget_values(self):
+    #     """Retrieve current values from the widgets in self._widget_dict."""
+    #     widget_dict_values = {}  # Use the correct name for the dictionary
+    #
+    #     for name, widget in self._widget_dict.items():
+    #         if isinstance(widget, QLineEdit):
+    #             widget_dict_values[name] = widget.text()
+    #         elif isinstance(widget, QSpinBox):
+    #             widget_dict_values[name] = widget.value()
+    #         elif isinstance(widget, QDoubleSpinBox):
+    #             widget_dict_values[name] = widget.value()
+    #         elif isinstance(widget, QComboBox):
+    #             widget_dict_values[name] = widget.currentText()
+    #         elif hasattr(widget, "inputs"):  # Check for container widget
+    #             # Collect values from all QLineEdit inputs in the container
+    #             widget_dict_values[name] = [
+    #                 int(input_field.text())
+    #                 for input_field in widget.inputs
+    #                 if input_field.text().isdigit()
+    #             ]
+    #         else:
+    #             raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+    #
+    #     # Validate and convert types based on MiraclObj
+    #     for name, value in widget_dict_values.items():
+    #         miracl_obj = self._miracl_obj_dict.get(name)
+    #         if miracl_obj:
+    #             expected_type = miracl_obj.cli_obj_type.python_type
+    #
+    #             # Handle conversion for expected types
+    #             if expected_type is int:
+    #                 if isinstance(value, list):
+    #                     widget_dict_values[name] = [int(item) for item in value]
+    #                 else:
+    #                     try:
+    #                         widget_dict_values[name] = int(value)
+    #                     except ValueError:
+    #                         raise TypeError(
+    #                             f"Value for '{name}' must be convertible to int, got '{value}'."
+    #                         )
+    #
+    #             elif expected_type is float:
+    #                 if isinstance(value, list):
+    #                     widget_dict_values[name] = [float(item) for item in value]
+    #                 else:
+    #                     try:
+    #                         widget_dict_values[name] = float(value)
+    #                     except ValueError:
+    #                         raise TypeError(
+    #                             f"Value for '{name}' must be convertible to float, got '{value}'."
+    #                         )
+    #
+    #             elif expected_type is str:
+    #                 widget_dict_values[name] = str(value)
+    #
+    #             else:
+    #                 raise TypeError(
+    #                     f"Value for '{name}' is of type {type(value).__name__}, "
+    #                     f"expected type {expected_type.__name__}."
+    #                 )
+    #
+    #     return widget_dict_values  # Return the correctly named dictionary
+
+    def get_current_widget_values(self):
+        """Retrieve current values from the widgets in self._widget_dict."""
+        widget_dict_values = {}  # Correctly name the dictionary
+
+        for name, widget in self._widget_dict.items():
+            if isinstance(widget, QLineEdit):
+                widget_dict_values[name] = widget.text()
+            elif isinstance(widget, QSpinBox):
+                widget_dict_values[name] = widget.value()
+            elif isinstance(widget, QDoubleSpinBox):
+                widget_dict_values[name] = widget.value()
+            elif isinstance(widget, QComboBox):
+                widget_dict_values[name] = widget.currentText()
+            elif hasattr(widget, "inputs"):  # Check for container widget
+                # Collect values from all QLineEdit inputs in the container
+                widget_dict_values[name] = [
+                    int(input_field.text())
+                    for input_field in widget.inputs
+                    if input_field.text().isdigit()
+                ]
+            else:
+                raise TypeError(f"Unsupported widget type for {name}: {type(widget)}")
+
+        # Validate and convert types based on MiraclObj
+        for name, value in widget_dict_values.items():
+            miracl_obj = self._miracl_obj_dict.get(name)
+            if miracl_obj:
+                expected_type = miracl_obj.cli_obj_type.python_type
+
+                # Handle conversion for expected types
+                if expected_type is int:
+                    if isinstance(value, list):
+                        widget_dict_values[name] = [int(item) for item in value]
+                    else:
+                        try:
+                            widget_dict_values[name] = int(value)
+                        except ValueError:
+                            raise TypeError(
+                                f"Value for '{name}' must be convertible to int, got '{value}'."
+                            )
+
+                elif expected_type is float:
+                    if isinstance(value, list):
+                        widget_dict_values[name] = [float(item) for item in value]
+                    else:
+                        try:
+                            widget_dict_values[name] = float(value)
+                        except ValueError:
+                            raise TypeError(
+                                f"Value for '{name}' must be convertible to float, got '{value}'."
+                            )
+
+                elif expected_type is str:
+                    widget_dict_values[name] = str(value)
+
+                else:
+                    raise TypeError(
+                        f"Value for '{name}' is of type {type(value).__name__}, "
+                        f"expected type {expected_type.__name__}."
+                    )
+
+        # Log the dictionary with the correct name
+        logger.debug(f"widget_dict_values: {widget_dict_values}")
+
+        return widget_dict_values  # Return the correctly named dictionary
 
     def get_widget(self) -> QTabWidget:
         """Return the tab widget for use in the main application.
