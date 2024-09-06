@@ -8,6 +8,7 @@ In this code we load the trained model and fine tuned it.
 import argparse
 import pickle
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import numpy as np
 import tifffile
@@ -45,6 +46,41 @@ def parsefn():
 
     return parser
 
+def load_images(
+        images_train_path: Path,
+        images_segs_train_path: Path,
+        images_val_path: Path,
+        images_segs_val_path: Path
+    ) -> Tuple[Dict[str, List[Path]], Dict[str, List[Path]]]:
+
+    # images train
+    file_names = images_train_path.iterdir()
+    images_train = [file for file in file_names if file.name.endswith('.tiff') or file.name.endswith('.tif')]
+
+    # segs/labels train
+    file_names = images_segs_train_path.iterdir()
+    segs_train = [file for file in file_names if file.name.endswith('.tiff') or file.name.endswith('.tif')]
+
+    # images val
+    file_names = images_val_path.iterdir()
+    images_val = [file for file in file_names if file.name.endswith('.tiff') or file.name.endswith('.tif')]
+
+    # segs/labels val
+    file_names = images_segs_val_path.iterdir()
+    segs_val = [file for file in file_names if file.name.endswith('.tiff') or file.name.endswith('.tif')]
+
+    data_dicts_train = [
+        {"image": image_name, "label": label_name}
+        for image_name, label_name in zip(images_train, segs_train)
+    ]
+    data_dicts_val = [
+        {"image": image_name, "label": label_name}
+        for image_name, label_name in zip(images_val, segs_val)
+    ]
+
+    return data_dicts_train, data_dicts_val
+    
+
 
 def main(args):
 
@@ -67,47 +103,9 @@ def main(args):
     assert images_val_path.exists(), f"val images path {images_val_path} does not exist"
     assert images_segs_val_path.exists(), f"val labels path {images_segs_val_path} does not exist"
 
-
-    # images train
-    file_names = os.listdir(images_train_path)
-    images_train = [os.path.join(images_train_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
-
-    # segs/labels train
-    file_names = os.listdir(images_segs_train_path)
-    segs_train = [os.path.join(images_segs_train_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
-
-    # images val
-    file_names = os.listdir(images_val_path)
-    images_val = [os.path.join(images_val_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
-
-    # segs/labels val
-    file_names = os.listdir(images_segs_val_path)
-    segs_val = [os.path.join(images_segs_val_path, file) for file in file_names if file.endswith('.tiff') or file.endswith('.tif')]
-
-    # -------------------------------------------------------
-    # Set deterministic training for reproducibility
-    # -------------------------------------------------------
+    data_dicst_train, data_dicts_val = load_images(images_train_path, images_segs_train_path, images_val_path, images_segs_val_path)
 
     set_determinism(seed=0)
-
-    # -------------------------------------------------------
-    # creating dictionary for images ('images', 'labels')
-    # -------------------------------------------------------
-
-    data_dicts_train = [
-        {"image": image_name, "label": label_name}
-        for image_name, label_name in zip(images_train, segs_train)
-    ]
-    data_dicts_val = [
-        {"image": image_name, "label": label_name}
-        for image_name, label_name in zip(images_val, segs_val)
-    ] 
-    print("train data: ", data_dicts_train)
-    print("val data: ", data_dicts_val)
-
-    # -------------------------------------------------------
-    # creating dictionary for images ('images', 'labels')
-    # -------------------------------------------------------
 
     # saving data_dicts for inference code
     with open(os.path.join(root_dir, "data_dicts.pickle"), 'wb') as f:
