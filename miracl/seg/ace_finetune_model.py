@@ -5,59 +5,32 @@ In this code we load the trained model and fine tuned it.
 
 
 """
-
-# -------------------------------------------------------
-# load libraries
-# -------------------------------------------------------
-
+import argparse
 import os
+import pickle
+
 import numpy as np
-from monai.utils import set_determinism
-from monai.data import CacheDataset, DataLoader, decollate_batch, Dataset
-from monai.losses import DiceLoss, DiceCELoss, DiceFocalLoss, TverskyLoss
-from monai.networks.nets import UNet, DynUNet, UNETR
-from monai.transforms import (
-    AsDiscrete,
-    AsDiscreted,
-    Compose,
-    LoadImaged,
-    RandCropByPosNegLabeld,
-    ScaleIntensityd,
-    EnsureTyped,
-    EnsureType,
-    AddChanneld,
-    RandAffined,
-    Rand3DElasticd,
-    RandZoomd,
-    RandAdjustContrastd,
-    ScaleIntensityRangePercentilesd,
-    OneOf,
-    RandGaussianSharpend,
-    RandGaussianSmoothd,
-    RandGaussianNoised,
-    RandCoarseDropoutd,
-    ToTensord,
-    RandFlipd,
-    RandShiftIntensityd,
-    RandHistogramShiftd,
-    RandAxisFlipd,
-    Transform
-    
-)
+import tifffile
+import torch
+import yaml
+from monai.data import CacheDataset, DataLoader, decollate_batch
+from monai.inferers import sliding_window_inference
+from monai.losses import DiceCELoss, DiceFocalLoss, DiceLoss, TverskyLoss
+from monai.metrics import (ConfusionMatrixMetric, DiceMetric,
+                           HausdorffDistanceMetric)
 #from monai.utils import first
 from monai.networks.layers import Norm
-from monai.metrics import DiceMetric, ConfusionMatrixMetric, HausdorffDistanceMetric
-from monai.inferers import sliding_window_inference
-import torch
-import argparse
-from datetime import datetime
-import fnmatch
-import pickle
-from torchio.transforms import RandomAffine
+from monai.networks.nets import UNETR, DynUNet, UNet
+from monai.transforms import (AddChanneld, AsDiscrete, Compose, EnsureType,
+                              EnsureTyped, OneOf, RandAdjustContrastd,
+                              RandAxisFlipd, RandCropByPosNegLabeld,
+                              RandGaussianNoised, RandGaussianSharpend,
+                              RandGaussianSmoothd, RandHistogramShiftd,
+                              ScaleIntensityd, ScaleIntensityRangePercentilesd,
+                              ToTensord, Transform)
+from monai.utils import set_determinism
 from skimage.util import random_noise
-import shutil
-import yaml
-import tifffile
+from torchio.transforms import RandomAffine
 
 # -------------------------------------------------------
 # create parser
