@@ -51,7 +51,7 @@ def load_images(
         images_segs_train_path: Path,
         images_val_path: Path,
         images_segs_val_path: Path
-    ) -> Tuple[Dict[str, List[Path]], Dict[str, List[Path]]]:
+    ) -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
 
     # images train
     file_names = images_train_path.iterdir()
@@ -70,17 +70,96 @@ def load_images(
     segs_val = [file for file in file_names if file.name.endswith('.tiff') or file.name.endswith('.tif')]
 
     data_dicts_train = [
-        {"image": image_name, "label": label_name}
+        {"image": str(image_name), "label": str(label_name)}
         for image_name, label_name in zip(images_train, segs_train)
     ]
     data_dicts_val = [
-        {"image": image_name, "label": label_name}
+        {"image": str(image_name), "label": str(label_name)}
         for image_name, label_name in zip(images_val, segs_val)
     ]
 
     return data_dicts_train, data_dicts_val
+
+class RandomSaltPepper(Transform):
+    def __call__(self, image_dict):
+        # randomly apply salt and pepper noise on 1 percent of the data
+        image_dict["image"] = torch.tensor(random_noise(image_dict["image"], mode='s&p', amount=0.001, clip=True))
+        return image_dict
+    
+class ImageLoadEmptyLabel(Transform):
+    def __call__(self, image_dict):
+        # load the .tiff files they are HxWxD
+        image_dict['image'] = tifffile.imread(image_dict['image'])
+
+        # change the order axis of the image from DHW to HWD
+        image_dict['image'] = np.moveaxis(image_dict['image'], 0, 2)
+        image_dict['image'] = np.moveaxis(image_dict['image'], 0, 1)
+
+        if ("vessel" in image_dict['label']) or ("vent" in image_dict['label']):
+            image_dict['label'] = np.zeros((image_dict["image"].shape)).astype(np.uint8)
+            
+        else:
+            image_dict['label'] = tifffile.imread(image_dict['label'])[201:]
+            image_dict['label'] = (image_dict['label'] > 0.65).astype(np.uint8)
+            # change the order axis of the image from DHW to HWD
+            image_dict['label'] = np.moveaxis(image_dict['label'], 0, 2)
+            image_dict['label'] = np.moveaxis(image_dict['label'], 0, 1)
+
+        return image_dict
+    
+class FixZeroLabel(Transform):
+    def __call__(self, image_dict):
+        if torch.sum(image_dict["label"]) < 1:
+            image_dict['label'][0, 100, 100, 100] = 1
+        return image_dict
     
 
+def get_transforms(
+        crop_size: Tuple[int, int, int],
+        N_crops: int,
+        data_aug_prob: float,
+    ) -> Tuple[Compose, Compose]:
+    train_transforms = Compose(
+        [
+            ImageLoadEmptyLabel(),
+            AddChanneld(keys=["image", "label"]),
+            ScaleIntensityRangePercentilesd(keys=["image"], lower=0.05, upper=99.95, b_min=0, b_max=1, clip=True, relative=False),
+            # changing 255 index to 1, making sure that the label values are between 0 and 1
+            ScaleIntensityd(keys=["label"]),
+            OneOf(transforms=[
+                RandomAffine(include=["image", "label"], p=data_aug_prob, degrees=(30,30,30),
+                            scales=(0.5, 2), translation=(0.1,0.1,0.1),
+                            default_pad_value='mean', label_keys='label'),
+                RandomSaltPepper(),
+                RandAdjustContrastd(keys=["image"], prob=data_aug_prob, gamma=(0.5, 4)),
+                RandGaussianSharpend(keys=["image"], prob=data_aug_prob),
+                RandGaussianSmoothd(keys=["image"], prob=data_aug_prob),
+                RandGaussianNoised(keys=["image"], prob=data_aug_prob, std=0.02),
+                RandHistogramShiftd(keys=["image"], num_control_points=10, prob=data_aug_prob),
+            ]),
+            ToTensord(keys=["image", "label"]),    
+            RandAxisFlipd(keys=["image", "label"], prob=data_aug_prob),
+            FixZeroLabel(),
+            RandCropByPosNegLabeld(
+                keys=["image", "label"], label_key="label",
+                spatial_size=crop_size, pos=1, neg=1,
+                num_samples=N_crops, image_key="image", image_threshold=0,
+            ),
+            EnsureTyped(keys=["image", "label"]),
+        ]
+    )
+
+    val_transforms = Compose(
+        [
+            ImageLoadEmptyLabel(),
+            AddChanneld(keys=["image", "label"]),
+            ScaleIntensityRangePercentilesd(keys=["image"], lower=0.05, upper=99.95, b_min=0, b_max=1, clip=True, relative=False),
+            ScaleIntensityd(keys=["label"]),
+            EnsureTyped(keys=["image", "label"]),
+        ]
+    )
+
+    return train_transforms, val_transforms
 
 def main(args):
 
@@ -103,116 +182,24 @@ def main(args):
     assert images_val_path.exists(), f"val images path {images_val_path} does not exist"
     assert images_segs_val_path.exists(), f"val labels path {images_segs_val_path} does not exist"
 
-    data_dicst_train, data_dicts_val = load_images(images_train_path, images_segs_train_path, images_val_path, images_segs_val_path)
+    data_dicts_train, data_dicts_val = load_images(images_train_path, images_segs_train_path, images_val_path, images_segs_val_path)
 
     set_determinism(seed=0)
 
     # saving data_dicts for inference code
-    with open(os.path.join(root_dir, "data_dicts.pickle"), 'wb') as f:
+    with (root_dir / "data_dicts.pickle").open('wb') as f:
         pickle.dump([data_dicts_train, data_dicts_val], f)  
             
     print('selecting ', len(data_dicts_train), ' images as train dataset ...')
     print('selecting ', len(data_dicts_val), ' images as validation dataset ...')
 
-    # -------------------------------------------------------
-    # Define transforms for image and segmentation
-    # -------------------------------------------------------
-
-    class random_salt_pepper(Transform):
-        def __call__(self, image_dict):
-            # randomly apply salt and pepper noise on 1 percent of the data
-            image_dict["image"] = torch.tensor(random_noise(image_dict["image"], mode='s&p', amount=0.001, clip=True))
-            return image_dict
-
-    # return image_dict
-    class MyLoadImage(Transform):
-        def __call__(self, image_dict):
-            # load the .tiff files they are HxWxD
-            # img_path = image_dict['image']
-            image_dict['image'] = tifffile.imread(image_dict['image'])
-            # print(f"image max: {image_dict['image'].max()}, image shape: {image_dict['image'].shape}")
-            # print('img_path: ', img_path)
-            # change the order axis of the image from DHW to HWD
-            image_dict['image'] = np.moveaxis(image_dict['image'], 0, 2)
-            image_dict['image'] = np.moveaxis(image_dict['image'], 0, 1)
-
-            # img_path = image_dict['image']
-            if ("vessel" in image_dict['label']) or ("vent" in image_dict['label']):
-                image_dict['label'] = np.zeros((image_dict["image"].shape)).astype(np.uint8)
-                
-            else:
-
-                image_dict['label'] = tifffile.imread(image_dict['label'])[201:]
-                image_dict['label'] = (image_dict['label'] > 0.65).astype(np.uint8)
-                # print('img_path: ', img_path)
-                # change the order axis of the image from DHW to HWD
-                image_dict['label'] = np.moveaxis(image_dict['label'], 0, 2)
-                image_dict['label'] = np.moveaxis(image_dict['label'], 0, 1)
-
-
-            # image_dict['label'][100, 100, 100] = 1
-
-            # print(f"label max: {image_dict['label'].max()}, label shape: {image_dict['label'].shape}")
-            return image_dict    
-
-    class fix_all_zero_label_issue(Transform):
-
-        def __call__(self, image_dict):
-
-            if torch.sum(image_dict["label"]) < 1:
-
-                image_dict['label'][0, 100, 100, 100] = 1
-
-            return image_dict
-
     # fdata axis should be H * W * D
-    temp_value= cfg['general'].get('crop_size', 128)
-    crop_size = (temp_value, temp_value, temp_value)
+    dim_size= cfg['general'].get('crop_size', 128)
+    crop_size = (dim_size, dim_size, dim_size)
     N_crops = cfg['general'].get('crop_number', 3)
     data_aug_prob = cfg['general'].get('data_aug_prob', 0.1)
-    train_transforms = Compose(
-        [
-            MyLoadImage(),
-            AddChanneld(keys=["image", "label"]),
-            ScaleIntensityRangePercentilesd(keys=["image"], lower=0.05, upper=99.95, b_min=0, b_max=1, clip=True, relative=False),
-            # changing 255 index to 1, making sure that the label values are between 0 and 1
-            ScaleIntensityd(keys=["label"]),
-            OneOf(transforms=[
-                RandomAffine(include=["image", "label"], p=data_aug_prob, degrees=(30,30,30),
-                            scales=(0.5, 2), translation=(0.1,0.1,0.1),
-                            default_pad_value='mean', label_keys='label'),
-                random_salt_pepper(),
-                RandAdjustContrastd(keys=["image"], prob=data_aug_prob, gamma=(0.5, 4)),
-                RandGaussianSharpend(keys=["image"], prob=data_aug_prob),
-                RandGaussianSmoothd(keys=["image"], prob=data_aug_prob),
-                RandGaussianNoised(keys=["image"], prob=data_aug_prob, std=0.02),
-                RandHistogramShiftd(keys=["image"], num_control_points=10, prob=data_aug_prob),
-            ]),
-            ToTensord(keys=["image", "label"]),    
-            RandAxisFlipd(keys=["image", "label"], prob=data_aug_prob),
-            fix_all_zero_label_issue(),
-            RandCropByPosNegLabeld(
-                keys=["image", "label"], label_key="label",
-                spatial_size=crop_size, pos=1, neg=1,
-                num_samples=N_crops, image_key="image", image_threshold=0,
-            ),
-            EnsureTyped(keys=["image", "label"]),
-        ]
-    )
-
-    val_transforms = Compose(
-        [
-            MyLoadImage(),
-            AddChanneld(keys=["image", "label"]),
-            ScaleIntensityRangePercentilesd(keys=["image"], lower=0.05, upper=99.95, b_min=0, b_max=1, clip=True, relative=False),
-            ScaleIntensityd(keys=["label"]),
-            EnsureTyped(keys=["image", "label"]),
-        ]
-    )
-
-    # -------------------------------------------------------
-    # Define CacheDataset and DataLoader for training and validation¶
-    # -------------------------------------------------------
+    
+    train_transforms, val_transforms = get_transforms(crop_size, N_crops, data_aug_prob)
 
     cache_rate_train = cfg['general'].get('cache_rate_train', 0.05)
     train_ds = CacheDataset(data=data_dicts_train, transform=train_transforms, cache_rate=cache_rate_train, num_workers=2)
