@@ -161,6 +161,23 @@ def get_transforms(
 
     return train_transforms, val_transforms
 
+def get_data_loaders(
+        data_dicts_train: List[Dict[str, str]],
+        data_dicts_val: List[Dict[str, str]],
+        train_transforms: Compose,
+        val_transforms: Compose,
+        cache_rate_train: float,
+        cache_rate_val: float,
+        batch_size: int,
+    ) -> Tuple[DataLoader, DataLoader]:
+    train_ds = CacheDataset(data=data_dicts_train, transform=train_transforms, cache_rate=cache_rate_train, num_workers=2)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=4)
+
+    val_ds = CacheDataset(data=data_dicts_val, transform=val_transforms, cache_rate=cache_rate_val, num_workers=2)
+    val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)
+
+    return train_loader, val_loader
+
 def main(args):
 
     root_dir = Path(args['output'])
@@ -202,18 +219,10 @@ def main(args):
     train_transforms, val_transforms = get_transforms(crop_size, N_crops, data_aug_prob)
 
     cache_rate_train = cfg['general'].get('cache_rate_train', 0.05)
-    train_ds = CacheDataset(data=data_dicts_train, transform=train_transforms, cache_rate=cache_rate_train, num_workers=2)
-    #train_ds = Dataset(data=data_dicts_train, transform=train_transforms)
-    train_loader = DataLoader(train_ds, batch_size=cfg['general'].get('batch_size', 8), shuffle=True, num_workers=4)
-
+    batch_size = cfg['general'].get('batch_size', 8)
     cache_rate_val = cfg['general'].get('cache_rate_val', 0.01)
-    val_ds = CacheDataset(data=data_dicts_val, transform=val_transforms, cache_rate=cache_rate_val, num_workers=2)
-    #val_ds = Dataset(data=data_dicts_val, transform=val_transforms)
-    val_loader = DataLoader(val_ds, batch_size=1, num_workers=4)
-
-    # -------------------------------------------------------
-    # Create Model, Loss, Optimizer
-    # -------------------------------------------------------
+    
+    train_loader, val_loader = get_data_loaders(data_dicts_train, data_dicts_val, train_transforms, val_transforms, cache_rate_train, cache_rate_val, batch_size)
 
     print('creating the model ...')
 
