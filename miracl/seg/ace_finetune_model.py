@@ -279,6 +279,207 @@ def configure_optimizers(
 
     return optimizer, loss_function
 
+def get_metrics() -> Tuple[DiceMetric, HausdorffDistanceMetric, ConfusionMatrixMetric]:
+    dice_metric = DiceMetric(include_background=False, reduction="mean")
+    metrics = ConfusionMatrixMetric(include_background=False,
+                                    metric_name = ["sensitivity", 
+                                                "precision", 
+                                                "f1 score"])
+    hausdorff_metric = HausdorffDistanceMetric(include_background=False, percentile=95)
+
+    return dice_metric, hausdorff_metric, metrics
+
+
+def train(
+        model: torch.nn.Module,
+        model_name: str,
+        cfg: Dict[str, Dict[str, str]],
+        train_loader: DataLoader,
+        val_loader: DataLoader,
+        device: torch.device,
+        optimizer: torch.optim.Optimizer,
+        loss_function: torch.nn.Module,
+        crop_size: Tuple[int, int, int],
+        dice_metric: DiceMetric,
+        hausdorff_metric: HausdorffDistanceMetric,
+        metrics: ConfusionMatrixMetric,
+        root_dir: Path
+    ) -> Tuple[List[float], List[float], List[float], List[np.ndarray]]:
+
+    max_epochs = cfg['general'].get('max_epochs', 200)
+    val_interval = cfg['general'].get('validation_interval', 2)
+    save_result_interval = cfg['general'].get('checkpoint_period', 10)
+    early_stop_patience_cnt = 0
+    best_metric = -1
+    best_metric_epoch = -1
+    epoch_loss_values = []
+    dice_metric_values = []
+    hd_metric_values = []
+    metrics_values = []
+    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
+    post_label = Compose([EnsureType(), AsDiscrete(to_onehot=2)])
+    scaler = torch.cuda.amp.GradScaler()
+    for epoch in range(max_epochs):
+
+        epoch_loss = train_model_epoch(
+            model, model_name, optimizer, loss_function, train_loader, device, epoch, max_epochs, scaler,
+        )
+        
+        epoch_loss_values.append(epoch_loss)
+        print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
+
+        if (epoch + 1) % val_interval == 0:
+            metric, hd, metrics_list_cpu = val_model_epoch(
+                model, val_loader, device, crop_size, post_pred, post_label, dice_metric, hausdorff_metric, metrics,
+            )
+
+
+            dice_metric_values.append(metric)
+            hd_metric_values.append(hd)
+            metrics_values.append(metrics_list_cpu)
+            
+            sen = metrics_list_cpu[0]
+            prec = metrics_list_cpu[1]
+            f1 = metrics_list_cpu[2]
+            
+            if metric > best_metric:
+                best_metric = metric
+                best_metric_epoch = epoch + 1
+                early_stop_patience_cnt = 0
+                torch.save(model.state_dict(), str(root_dir / "best_metric_model.pth"))
+                print("saved new best metric model")
+            else:
+                early_stop_patience_cnt += 1
+                
+            if early_stop_patience_cnt >= cfg['general'].get('early_stop_patience', 10):
+                break
+            
+            print(
+                f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
+                f"\ncurrent epoch: {epoch + 1} current mean hd: {hd:.4f}"
+                f"\nbest mean dice: {best_metric:.4f}"
+                f" at epoch: {best_metric_epoch}"
+                f"\ncurrent sen: {sen[0]:.4f}"
+                f"\ncurrent prec: {prec[0]:.4f}"
+                f"\ncurrent f1: {f1[0]:.4f}"
+            )
+    
+                
+        if (epoch + 1) % save_result_interval == 0:
+            
+            with (root_dir / "results.pickle").open('wb') as f:
+                pickle.dump([epoch_loss_values, dice_metric_values, hd_metric_values, metrics_values], f)
+            
+            torch.save(model.state_dict(), str(root_dir / "last_trained_model.pth"))
+            
+
+
+    print(
+        f"train completed, best_metric: {best_metric:.4f} "
+        f"at epoch: {best_metric_epoch}")
+    
+    return epoch_loss_values, dice_metric_values, hd_metric_values, metrics_values
+    
+
+def train_model_epoch(
+        model: torch.nn.Module,
+        model_name: str,
+        optimizer: torch.optim.Optimizer,
+        loss_function: torch.nn.Module,
+        train_loader: DataLoader,
+        device: torch.device,
+        epoch: int,
+        max_epochs: int,
+        scaler: torch.cuda.amp.GradScaler,
+    ) -> torch.Tensor:
+    print("-" * 10)
+    print(f"epoch {epoch + 1}/{max_epochs}")
+    model.train()
+    epoch_loss = 0
+    step = 0
+    for batch_data in train_loader:
+        step += 1
+        inputs, labels = (
+            batch_data["image"].to(device),
+            batch_data["label"].to(device),
+        )
+
+        optimizer.zero_grad()
+        with torch.cuda.amp.autocast():
+            outputs = model(inputs)
+            loss: torch.Tensor
+            if model_name == 'dynunet':
+                loss = compute_train_loss(outputs, labels)
+            else:
+                loss = loss_function(outputs, labels)
+    
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
+        epoch_loss += loss.item()
+        print(
+            f"{step}/{len(train_loader)}, "
+            f"train_loss: {loss.item():.4f}")
+        
+    epoch_loss /= step
+
+    return epoch_loss
+
+
+def val_model_epoch(
+        model: torch.nn.Module,
+        val_loader: DataLoader,
+        device: torch.device,
+        crop_size: Tuple[int, int, int],
+        post_pred: Compose,
+        post_label: Compose,
+        dice_metric: DiceMetric,
+        hausdorff_metric: HausdorffDistanceMetric,
+        metrics: ConfusionMatrixMetric,
+    ) -> Tuple[float, float, List[np.ndarray]]:
+
+    model.eval()
+    with torch.no_grad():
+        RI_subj_id = 1
+        for val_data in val_loader:
+            val_inputs, val_labels = (
+                val_data["image"].to(device),
+                val_data["label"].to(device),
+            )
+            # print(val_inputs.shape)
+            # print(val_labels.shape)
+            roi_size = crop_size
+            sw_batch_size = 4
+            with torch.cuda.amp.autocast():
+                val_outputs = sliding_window_inference(
+                    val_inputs, roi_size, sw_batch_size, model)
+            val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
+            val_labels = [post_label(i) for i in decollate_batch(val_labels)]
+            # compute metric for current iteration
+            dice_metric(y_pred=val_outputs, y=val_labels)
+            metrics(y_pred=val_outputs, y=val_labels)
+            hausdorff_metric(y_pred=val_outputs, y=val_labels)
+            RI_subj_id += 1
+        
+        # aggregate the final mean dice result
+        metric = dice_metric.aggregate().item()
+        hd = hausdorff_metric.aggregate().item()
+        metrics_list = metrics.aggregate()
+        metrics_list_cpu = []
+        for value in metrics_list:
+            metrics_list_cpu.append(value.cpu().numpy())
+            
+
+        # reset the status for next validation round
+        dice_metric.reset()
+        metrics.reset()
+        hausdorff_metric.reset()
+    
+    return metric, hd, metrics_list_cpu
+        
+
+    
+
 def main(args):
 
     root_dir = Path(args['output'])
@@ -329,160 +530,15 @@ def main(args):
 
     optimizer, loss_function = configure_optimizers(model, cfg, device)
 
-    # -------------------------------------------------------
-    # dice and ConfusionMatrix from MONAI
-    # -------------------------------------------------------
+    dice_metric, hausdorff_metric, metrics = get_metrics()
 
-    dice_metric = DiceMetric(include_background=False, reduction="mean")
-    metrics = ConfusionMatrixMetric(include_background=False,
-                                    metric_name = ["sensitivity", 
-                                                "precision", 
-                                                "f1 score"])
-    hausdorff_metric = HausdorffDistanceMetric(include_background=False, percentile=95)
+    
+    epoch_loss_values, dice_metric_values, hd_metric_values, metrics_values = train(model, model_name, cfg, train_loader, val_loader, device, optimizer, loss_function, crop_size, dice_metric, hausdorff_metric, metrics, root_dir)
 
-    # -------------------------------------------------------
-    # Execute a typical PyTorch training process
-    # -------------------------------------------------------
-
-    max_epochs = cfg['general'].get('max_epochs', 200)
-    val_interval = cfg['general'].get('validation_interval', 2)
-    save_result_interval = cfg['general'].get('checkpoint_period', 10)
-    early_stop_patience_cnt = 0
-    best_metric = -1
-    best_metric_epoch = -1
-    epoch_loss_values = []
-    dice_metric_values = []
-    hd_metric_values = []
-    metrics_values = []
-    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2)])
-    post_label = Compose([EnsureType(), AsDiscrete(to_onehot=2)])
-    scaler = torch.cuda.amp.GradScaler()
-    for epoch in range(max_epochs):
-        print("-" * 10)
-        print(f"epoch {epoch + 1}/{max_epochs}")
-        model.train()
-        epoch_loss = 0
-        step = 0
-        for batch_data in train_loader:
-            step += 1
-            inputs, labels = (
-                batch_data["image"].to(device),
-                batch_data["label"].to(device),
-            )
-            # print(inputs.shape)
-            # print(labels.shape)
-            optimizer.zero_grad()
-            with torch.cuda.amp.autocast():
-                outputs = model(inputs)
-                if model_name == 'dynunet':
-                    loss = compute_train_loss(outputs, labels)
-                else:
-                    loss = loss_function(outputs, labels)
-        
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
-            epoch_loss += loss.item()
-            print(
-                f"{step}/{len(train_loader)}, "
-                f"train_loss: {loss.item():.4f}")
-            
-        epoch_loss /= step
-        epoch_loss_values.append(epoch_loss)
-        print(f"epoch {epoch + 1} average loss: {epoch_loss:.4f}")
-        
-
-        if (epoch + 1) % val_interval == 0:
-            model.eval()
-            with torch.no_grad():
-                RI_subj_id = 1
-                for val_data in val_loader:
-                    val_inputs, val_labels = (
-                        val_data["image"].to(device),
-                        val_data["label"].to(device),
-                    )
-                    # print(val_inputs.shape)
-                    # print(val_labels.shape)
-                    roi_size = crop_size
-                    sw_batch_size = 4
-                    with torch.cuda.amp.autocast():
-                        val_outputs = sliding_window_inference(
-                            val_inputs, roi_size, sw_batch_size, model)
-                    val_outputs = [post_pred(i) for i in decollate_batch(val_outputs)]
-                    val_labels = [post_label(i) for i in decollate_batch(val_labels)]
-                    # compute metric for current iteration
-                    dice_metric(y_pred=val_outputs, y=val_labels)
-                    metrics(y_pred=val_outputs, y=val_labels)
-                    hausdorff_metric(y_pred=val_outputs, y=val_labels)
-                    RI_subj_id += 1
-                
-                # aggregate the final mean dice result
-                metric = dice_metric.aggregate().item()
-                hd = hausdorff_metric.aggregate().item()
-                metrics_list = metrics.aggregate()
-                metrics_list_cpu = []
-                for value in metrics_list:
-                    metrics_list_cpu.append(value.cpu().numpy())
-                    
-
-                # reset the status for next validation round
-                dice_metric.reset()
-                metrics.reset()
-                hausdorff_metric.reset()
-
-                dice_metric_values.append(metric)
-                hd_metric_values.append(hd)
-                metrics_values.append(metrics_list_cpu)
-                
-                sen = metrics_list_cpu[0]
-                prec = metrics_list_cpu[1]
-                f1 = metrics_list_cpu[2]
-                
-                if metric > best_metric:
-                    best_metric = metric
-                    best_metric_epoch = epoch + 1
-                    early_stop_patience_cnt = 0
-                    torch.save(model.state_dict(), os.path.join(
-                        root_dir, "best_metric_model.pth"))
-                    print("saved new best metric model")
-                else:
-                    early_stop_patience_cnt += 1
-                    
-                if early_stop_patience_cnt >= cfg['general'].get('early_stop_patience', 10):
-                    break
-                
-                print(
-                    f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
-                    f"\ncurrent epoch: {epoch + 1} current mean hd: {hd:.4f}"
-                    f"\nbest mean dice: {best_metric:.4f}"
-                    f" at epoch: {best_metric_epoch}"
-                    f"\ncurrent sen: {sen[0]:.4f}"
-                    f"\ncurrent prec: {prec[0]:.4f}"
-                    f"\ncurrent f1: {f1[0]:.4f}"
-                )
-                
-        if (epoch + 1) % save_result_interval == 0:
-            
-            with open(os.path.join(root_dir, "results.pickle"), 'wb') as f:
-                pickle.dump([epoch_loss_values, dice_metric_values, hd_metric_values, metrics_values], f)
-            
-            torch.save(model.state_dict(), os.path.join(root_dir, "last_trained_model.pth"))
-            
-
-
-    print(
-        f"train completed, best_metric: {best_metric:.4f} "
-        f"at epoch: {best_metric_epoch}")
-
-    # -------------------------------------------------------
-    # saving epoch_loss_values and metric_values and last trained model
-    # -------------------------------------------------------
-
-    with open(os.path.join(root_dir, "results.pickle"), 'wb') as f:
+    with (root_dir / "results.pickle").open('wb') as f:
         pickle.dump([epoch_loss_values, dice_metric_values, hd_metric_values, metrics_values], f)
 
-    torch.save(model.state_dict(), os.path.join(
-        root_dir, "last_trained_model.pth"))
+    torch.save(model.state_dict(), str(root_dir / "last_trained_model.pth"))
     print("saved last trained model")
 
 
