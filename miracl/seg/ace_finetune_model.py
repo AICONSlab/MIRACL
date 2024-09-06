@@ -32,30 +32,22 @@ from monai.utils import set_determinism
 from skimage.util import random_noise
 from torchio.transforms import RandomAffine
 
-# -------------------------------------------------------
-# create parser
-# -------------------------------------------------------
-# Add the arguments
-# Create the parser
-my_parser = argparse.ArgumentParser(description='Working directory')
-my_parser.add_argument('-o','--output', help='output directory', required=True)
-my_parser.add_argument('-c','--config', help='path of config file', required=True)
-my_parser.add_argument('-t','--train', help='train imgs directory should contain .tif or .tiff raw images', required=True)
-my_parser.add_argument('-tl','--train_label', help='train ground truth imgs directory should contain .tif or .tiff raw images', required=True)
-my_parser.add_argument('-v','--validation', help='validation imgs directory should contain .tif or .tiff raw images', required=True)
-my_parser.add_argument('-vl','--validation_label', help='validation ground truth imgs directory should contain .tif or .tiff raw images', required=True)
+
+def parsefn():
+
+    parser = argparse.ArgumentParser(description='ACE Finetune Model')
+    parser.add_argument('-o','--output', help='output directory', type=str, required=True)
+    parser.add_argument('-c','--config', help='path of config file', type=str, required=True)
+    parser.add_argument('--train-images', help='train images directory should contain .tif or .tiff raw images', type=str, required=True)
+    parser.add_argument('--train-labels', help='train ground truth images directory should contain .tif or .tiff raw images', type=str, required=True)
+    parser.add_argument('--val-images', help='validation images directory should contain .tif or .tiff raw images', type=str, required=True)
+    parser.add_argument('--val-labels', help='validation ground truth images directory should contain .tif or .tiff raw images', type=str, required=True)
+
+    return parser
 
 
 def main(args):
-    
-    # -------------------------------------------------------
-    # get args parameters and files
-    # -------------------------------------------------------
 
-     # Execute the parse_args() method
-    args = vars(my_parser.parse_args())
-
-    # root_dir is where results will be stored
     root_dir = args['output']
     isExist = os.path.exists(root_dir)
     if not isExist: os.mkdir(root_dir)
@@ -499,5 +491,9 @@ def main(args):
 
 if __name__ == '__main__':
     # Execute the parse_args() method
-    args = vars(my_parser.parse_args())
+    parser = parsefn()
+    args = parser.parse_args()
+
+    args = vars(args)
+
     main(args)
