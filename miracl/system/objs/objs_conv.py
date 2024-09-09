@@ -128,8 +128,28 @@ class ConvTiffNiiObjs:
         cli_nargs=3,
         module="tiff_nii",
         module_group="conv",
-        obj_default=[0, 0, 0],
+        obj_default=[0, 0, 3],
         gui_widget_type=WidgetType.LINE_EDIT,
+        line_edit_settings=LineEditConfig(input_restrictions=InputRestrictionType.INT),
+    )
+
+    center_test = MiraclObj(
+        id="8ea2f396-6c8c-46f7-9c5b-2768ef765a22",
+        name="ctn_center_test",
+        tags=["tiff_nii", "conv", "ace_flow"],
+        cli_s_flag="ct",
+        cli_l_flag="center_test",
+        flow={"ace": {"cli_s_flag": "ctnc", "cli_l_flag": "ctn_center"}},
+        cli_obj_type=ArgumentType.INTEGER,
+        cli_help="Nii center (default: 0 0 0 ) corresponding to Allen atlas nii template",
+        gui_group={"ace_flow": "conversion"},
+        gui_label=["Nii center"],
+        version_added="2.4.0",
+        cli_nargs=3,
+        module="tiff_nii",
+        module_group="conv",
+        obj_default=[0, 0, 3],
+        gui_widget_type=WidgetType.SPINBOX,
         line_edit_settings=LineEditConfig(input_restrictions=InputRestrictionType.INT),
     )
 

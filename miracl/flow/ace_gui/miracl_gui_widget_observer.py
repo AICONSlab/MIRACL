@@ -1,7 +1,11 @@
 from PyQt5.QtWidgets import QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit
+import logging
 from miracl import miracl_logger
 
-logger = miracl_logger.logger
+# logger = miracl_logger.logger
+logger = miracl_logger.get_logger(__name__)
+logger.setLevel(logging.WARNING)
+spinbox_debugger = miracl_logger.get_logger("spinbox_debugger")
 
 
 # class WidgetObserver:

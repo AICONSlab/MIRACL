@@ -25,10 +25,15 @@ from typing import List, Union, Dict, Any, Tuple
 from enum import Enum
 
 # Import logger
+import logging
 from miracl import miracl_logger
 
 # Initialize logger
-logger = miracl_logger.logger
+# logger = miracl_logger.logger
+logger = miracl_logger.get_logger(__name__)
+logger.setLevel(logging.WARNING)
+spinbox_debugger = miracl_logger.get_logger("spinbox_debugger")
+# spinbox_debugger.setLevel(logging.WARNING)
 
 
 class SectionLabel:
@@ -112,6 +117,10 @@ class WidgetFactory:
                     layout.addRow(label, widget)
                 elif obj.gui_widget_type == WidgetType.SPINBOX:
                     widget = WidgetFactory.create_spinbox(obj, parent)
+                    if hasattr(widget, "inputs"):
+                        spinbox_debugger.debug(
+                            f"\n\n\n\n\n\n\n\nWIDGET RETURNED: {widget.inputs}\n\n\n\n\n"
+                        )
                     widget.setObjectName(obj.name)
                     layout.addRow(label, widget)
                 elif obj.gui_widget_type == WidgetType.DOUBLE_SPINBOX:
@@ -154,163 +163,78 @@ class WidgetFactory:
 
         return dropdown
 
-    # @staticmethod
-    # def create_line_edit(obj: MiraclObj, parent: QWidget) -> QLineEdit:
-    #     """Create a line edit widget from a MiraclObj."""
-    #     line_edit: QLineEdit = QLineEdit(parent)
-    #
-    #     # Set placeholder text and default value
-    #     if obj.obj_default is not None:
-    #         placeholder_text = str(obj.obj_default)
-    #         line_edit.setText(placeholder_text)
-    #     else:
-    #         placeholder_text = "None"
-    #
-    #     line_edit.setPlaceholderText(placeholder_text)
-    #
-    #     WidgetFactory.setup_widget(line_edit, obj)
-    #
-    #     # Set maximum length if available
-    #     if hasattr(obj, "max_length"):
-    #         line_edit.setMaxLength(obj.max_length)
-    #
-    #     # Set validator if input_restrictions are specified
-    #     if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
-    #         validator = WidgetFactory.create_line_edit_validator(
-    #             obj.line_edit_settings.input_restrictions
-    #         )
-    #         line_edit.setValidator(validator)
-    #
-    #     return line_edit
-
-    # @staticmethod
-    # def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
-    #     """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
-    #     if isinstance(obj.obj_default, list):
-    #         # Create multiple text fields
-    #         container = QWidget(parent)
-    #         layout = QHBoxLayout(container)
-    #         layout.setContentsMargins(0, 0, 0, 0)
-    #         layout.setSpacing(5)  # Adjust spacing between fields as needed
-    #
-    #         inputs = []
-    #         for default_value in obj.obj_default:
-    #             input_field = QLineEdit(container)
-    #             input_field.setText(str(default_value))
-    #             input_field.setPlaceholderText(str(default_value))
-    #
-    #             # Use the existing validator method with input restrictions
-    #             if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
-    #                 validator = WidgetFactory.create_line_edit_validator(
-    #                     obj.line_edit_settings.input_restrictions
-    #                 )
-    #                 input_field.setValidator(validator)
-    #
-    #             layout.addWidget(input_field)
-    #             inputs.append(input_field)
-    #
-    #         # Attach the list of QLineEdit widgets to the container
-    #         container.inputs = inputs
-    #
-    #         return container  # Return the container widget
-    #     else:
-    #         # Handle single line edit case
-    #         line_edit = QLineEdit(parent)
-    #         if obj.obj_default is not None:
-    #             line_edit.setText(str(obj.obj_default))
-    #             line_edit.setPlaceholderText(str(obj.obj_default))
-    #         else:
-    #             line_edit.setPlaceholderText("None")
-    #
-    #         # Use the existing validator method with input restrictions
-    #         if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
-    #             validator = WidgetFactory.create_line_edit_validator(
-    #                 obj.line_edit_settings.input_restrictions
-    #             )
-    #             line_edit.setValidator(validator)
-    #
-    #         return line_edit  # Return the single QLineEdit
-
-    # @staticmethod
-    # def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
-    #     """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
-    #     if isinstance(obj.obj_default, list):
-    #         # Create multiple text fields
-    #         container = QWidget(parent)
-    #         container.setObjectName(obj.name)  # Set the object name for the container
-    #         layout = QHBoxLayout(container)
-    #         layout.setContentsMargins(0, 0, 0, 0)
-    #         layout.setSpacing(5)  # Adjust spacing between fields as needed
-    #
-    #         inputs = []  # Initialize the list to hold QLineEdit widgets
-    #         for default_value in obj.obj_default:
-    #             input_field = QLineEdit(container)
-    #             input_field.setText(str(default_value))
-    #             input_field.setPlaceholderText(str(default_value))
-    #
-    #             # Use the existing validator method with input restrictions
-    #             if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
-    #                 validator = WidgetFactory.create_line_edit_validator(
-    #                     obj.line_edit_settings.input_restrictions
-    #                 )
-    #                 input_field.setValidator(validator)
-    #
-    #             layout.addWidget(input_field)
-    #             inputs.append(input_field)  # Add the QLineEdit to the inputs list
-    #
-    #         # Attach the list of QLineEdit widgets to the container
-    #         container.inputs = inputs  # Set the inputs attribute on the container
-    #
-    #         return container  # Return the container widget
-    #     else:
-    #         # Handle single line edit case
-    #         line_edit = QLineEdit(parent)
-    #         if obj.obj_default is not None:
-    #             line_edit.setText(str(obj.obj_default))
-    #             line_edit.setPlaceholderText(str(obj.obj_default))
-    #         else:
-    #             line_edit.setPlaceholderText("None")
-    #
-    #         # Use the existing validator method with input restrictions
-    #         if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
-    #             validator = WidgetFactory.create_line_edit_validator(
-    #                 obj.line_edit_settings.input_restrictions
-    #             )
-    #             line_edit.setValidator(validator)
-    #
-    #         return line_edit  # Return the single QLineEdit
-
     @staticmethod
-    def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
-        """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
-        if isinstance(obj.obj_default, list):
-            # Create multiple text fields
-            container = QWidget(parent)
-            container.setObjectName(obj.name)  # Set the object name for the container
-            layout = QHBoxLayout(container)
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.setSpacing(5)  # Adjust spacing between fields as needed
+    def create_multiple_widgets(
+        obj: MiraclObj, parent: QWidget, widget_type: str
+    ) -> QWidget:
+        """Create multiple instances of a specified widget type based on obj.obj_default."""
+        container = QWidget(parent)
+        container.setObjectName(obj.name)  # Set the object name for the container
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(5)
 
-            inputs = []  # Initialize the list to hold QLineEdit widgets
-            for default_value in obj.obj_default:
+        inputs = []  # List to hold the created widgets
+
+        # Create the appropriate widget based on the widget_type
+        for default_value in obj.obj_default:  # Iterate over the list
+            if widget_type == "line_edit":
                 input_field = QLineEdit(container)
                 input_field.setText(str(default_value))
                 input_field.setPlaceholderText(str(default_value))
-
-                # Use the existing validator method with input restrictions
+                # Apply input restrictions if applicable
                 if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
                     validator = WidgetFactory.create_line_edit_validator(
                         obj.line_edit_settings.input_restrictions
                     )
                     input_field.setValidator(validator)
 
-                layout.addWidget(input_field)
-                inputs.append(input_field)  # Add the QLineEdit to the inputs list
+            elif widget_type == "spinbox":
+                input_field = QSpinBox(container)
+                input_field.setValue(
+                    int(default_value)
+                )  # Ensure default_value is an integer
+                WidgetFactory.setup_widget(
+                    input_field, obj
+                )  # Assuming this sets up the widget
+                WidgetFactory.set_spinbox_ranges(
+                    input_field, obj
+                )  # Assuming this sets ranges
 
-            # Attach the list of QLineEdit widgets to the container
-            container.inputs = inputs  # Set the inputs attribute on the container
+            elif widget_type == "double_spinbox":  # Additional widget type for floats
+                input_field = QDoubleSpinBox(container)
+                input_field.setValue(
+                    float(default_value)
+                )  # Ensure default_value is a float
+                WidgetFactory.setup_widget(
+                    input_field, obj
+                )  # Assuming this sets up the widget
+                WidgetFactory.set_spinbox_ranges(
+                    input_field, obj
+                )  # Assuming this sets ranges
 
-            return container  # Return the container widget
+            # Add the input field to the layout and the inputs list
+            layout.addWidget(input_field)
+            inputs.append(input_field)
+
+        container.inputs = inputs  # Attach the list of widgets to the container
+
+        # Debug statements to check the created widgets
+        spinbox_debugger.debug(f"Created widgets for {obj.name}:")
+        spinbox_debugger.debug(f"\n\n\nINPUTS: {container.inputs}\n\n\n\n")
+        spinbox_debugger.debug(f"container: {container}")
+
+        return container
+
+    @staticmethod
+    def create_line_edit(obj: MiraclObj, parent: QWidget) -> QWidget:
+        """Create a line edit widget or multiple line edit widgets from a MiraclObj."""
+        logger.debug(f"LINE EDIT CALLED: {obj.obj_default}")
+
+        if isinstance(obj.obj_default, list):
+            # Call create_multiple_widgets only once for lists
+            logger.debug(f"Creating multiple line edit widgets for: {obj.obj_default}")
+            return WidgetFactory.create_multiple_widgets(obj, parent, "line_edit")
         else:
             # Handle single line edit case
             line_edit = QLineEdit(parent)
@@ -320,13 +244,13 @@ class WidgetFactory:
             else:
                 line_edit.setPlaceholderText("None")
 
-            # Use the existing validator method with input restrictions
             if obj.line_edit_settings and obj.line_edit_settings.input_restrictions:
                 validator = WidgetFactory.create_line_edit_validator(
                     obj.line_edit_settings.input_restrictions
                 )
                 line_edit.setValidator(validator)
 
+            logger.debug(f"Single line edit created: {line_edit}")
             return line_edit  # Return the single QLineEdit
 
     @staticmethod
@@ -379,14 +303,18 @@ class WidgetFactory:
         return validator
 
     @staticmethod
-    def create_spinbox(obj: MiraclObj, parent: QWidget) -> QSpinBox:
-        """Create a standard spinbox widget from a MiraclObj."""
-        spinbox: QSpinBox = QSpinBox(parent)
-        spinbox.setValue(obj.obj_default)
-        WidgetFactory.setup_widget(spinbox, obj)
-        WidgetFactory.set_spinbox_ranges(spinbox, obj)
-
-        return spinbox
+    def create_spinbox(obj: MiraclObj, parent: QWidget) -> QWidget:
+        """Create a spinbox widget or multiple spinbox widgets from a MiraclObj."""
+        logger.debug(f"SPINBOX CALLED: {obj.obj_default}")
+        if isinstance(obj.obj_default, list):
+            return WidgetFactory.create_multiple_widgets(obj, parent, "spinbox")
+        else:
+            # Handle single spinbox case
+            spinbox = QSpinBox(parent)
+            spinbox.setValue(obj.obj_default)
+            WidgetFactory.setup_widget(spinbox, obj)  # Setup the widget
+            WidgetFactory.set_spinbox_ranges(spinbox, obj)  # Set ranges
+            return spinbox  # Return the single QSpinBox
 
     @staticmethod
     def create_double_spinbox(obj: MiraclObj, parent: QWidget) -> QDoubleSpinBox:

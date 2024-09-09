@@ -1,22 +1,27 @@
 import logging
 import sys
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
-file_handler = logging.FileHandler("debug.log")
-file_handler.setLevel(logging.DEBUG)
+def get_logger(name):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)  # Default level can be set to DEBUG
 
-stream_handler = logging.StreamHandler(sys.stdout)
-stream_handler.setLevel(logging.DEBUG)
+    # Check if handlers already exist to avoid duplicates
+    if not logger.hasHandlers():
+        file_handler = logging.FileHandler("debug.log")
+        file_handler.setLevel(logging.DEBUG)
 
-# INFO: Use %(name)s instead of %(filename)s to get logger script name
-formatter = logging.Formatter(
-    "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
-)
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)
 
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+        formatter = logging.Formatter(
+            "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
+        )
 
-stream_handler.setFormatter(formatter)
-logger.addHandler(stream_handler)
+        file_handler.setFormatter(formatter)
+        stream_handler.setFormatter(formatter)
+
+        logger.addHandler(file_handler)
+        logger.addHandler(stream_handler)
+
+    return logger

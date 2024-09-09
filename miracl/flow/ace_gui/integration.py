@@ -27,10 +27,15 @@ from miracl.system.objs.objs_reg import RegWarpClarObjs as reg_warp_clar
 from miracl.system.objs.objs_conv import ConvTiffNiiObjs as conv_tiff_nii
 
 # Import logger
+import logging
 from miracl import miracl_logger
 
 # Initialize logger
-logger = miracl_logger.logger
+# logger = miracl_logger.logger
+logger = miracl_logger.get_logger(__name__)
+logger.setLevel(logging.WARNING)
+spinbox_debugger = miracl_logger.get_logger("spinbox_debugger")
+# spinbox_debugger.setLevel(logging.WARNING)
 
 
 class MainWindow(QMainWindow):
@@ -71,28 +76,29 @@ class MainWindow(QMainWindow):
 
         # Method to create tabs
         widget_dict: Dict = {
-            "Main": [
-                SectionLabel("Single or multi method arguments"),
-                flow_ace.single,
-                SectionLabel("Required arguments"),
-                seg_ace.out_dir,
-                seg_ace.model_type,
-                SectionLabel("Useful/important arguments"),
-                seg_ace.gpu_index,
-                conv_tiff_nii.down,
-                reg_clar_allen.voxel_size,
-                seg_vox.downsample,
-                reg_warp_clar.voxel_size,
-            ],
+            # "Main": [
+            #     SectionLabel("Single or multi method arguments"),
+            #     flow_ace.single,
+            #     SectionLabel("Required arguments"),
+            #     seg_ace.out_dir,
+            #     seg_ace.model_type,
+            #     SectionLabel("Useful/important arguments"),
+            #     seg_ace.gpu_index,
+            #     conv_tiff_nii.down,
+            #     reg_clar_allen.voxel_size,
+            #     seg_vox.downsample,
+            #     reg_warp_clar.voxel_size,
+            # ],
             "Conversion": [
-                conv_tiff_nii.channum,
-                conv_tiff_nii.chanprefix,
-                conv_tiff_nii.channame,
-                conv_tiff_nii.outnii,
+                # conv_tiff_nii.channum,
+                # conv_tiff_nii.chanprefix,
+                # conv_tiff_nii.channame,
+                # conv_tiff_nii.outnii,
                 conv_tiff_nii.center,
-                conv_tiff_nii.downzdim,
-                conv_tiff_nii.prevdown,
-                conv_tiff_nii.percentile_thr,
+                conv_tiff_nii.center_test,
+                # conv_tiff_nii.downzdim,
+                # conv_tiff_nii.prevdown,
+                # conv_tiff_nii.percentile_thr,
             ],
         }
 
@@ -121,10 +127,15 @@ class MainWindow(QMainWindow):
 
         # Access the obj_dicts for each tab
         # print(f"SINGLE: {self.miracl_obj_dict[flow_ace.single.name].cli_l_flag}")
-        logger.debug(f"Check self.miracl_obj_dict: \n{self.miracl_obj_dict}\n")
-        logger.debug(f"Check self.widget_dict: \n{self.widget_dict}\n")
-        logger.debug(self.tab_controller.get_current_widget_values())
+        spinbox_debugger.debug(
+            f"Check self.miracl_obj_dict: \n{self.miracl_obj_dict}\n"
+        )
+        spinbox_debugger.debug(f"Check self.widget_dict: \n{self.widget_dict}\n")
+        spinbox_debugger.debug(self.tab_controller.get_current_widget_values())
         logger.debug(self.tab_controller)
+        # logger.debug(
+        #     f"\n\n\n\n\n\nHERE: {self.widget_dict['ctn_center'].inputs}\n\n\n\n\n"
+        # )
 
     def add_io_buttons(self):
         """Add IO buttons to the layout."""
@@ -183,6 +194,7 @@ class MainWindow(QMainWindow):
         :type value: any
         """
         logger.debug(f"Value changed in {name}: {value}")
+        spinbox_debugger.debug(f"Value changed in {name}: {value}")
 
 
 def main():

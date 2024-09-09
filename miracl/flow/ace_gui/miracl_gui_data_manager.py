@@ -25,7 +25,8 @@ from typing import Dict
 # Import logger
 from miracl import miracl_logger
 
-logger = miracl_logger.logger
+# logger = miracl_logger.logger
+logger = miracl_logger.get_logger(__name__)
 
 
 class DataManager:

@@ -13,7 +13,8 @@ from miracl.stats import (
     miracl_stats_ace_parser,
 )
 
-logger = miracl_logger.logger
+# logger = miracl_logger.logger
+logger = miracl_logger.get_logger(__name__)
 
 MIRACL_HOME = Path(os.environ["MIRACL_HOME"])
 
@@ -39,6 +40,7 @@ class ACEClusterwise(Clusterwise):
         print("  plotting p-values...")
         subprocess.Popen(pvalue_plot_cmd, shell=True).wait()
 
+
 class ACECorrelation(Correlation):
     def correlate(self, args, corr_output_folder, p_value, f_obs, mean_diff):
         print("  correlating...")
@@ -60,10 +62,12 @@ class Interface:
             args.pcs_control = args.control
             args.pcs_treated = args.treated
             # assert they are not None
-            assert args.pcs_control is not None, \
-                "Control group voxelized segmented tif file path is required (--control)."
-            assert args.pcs_treated is not None, \
-                "Treated group voxelized segmented tif file path is required (--treated)."
+            assert (
+                args.pcs_control is not None
+            ), "Control group voxelized segmented tif file path is required (--control)."
+            assert (
+                args.pcs_treated is not None
+            ), "Treated group voxelized segmented tif file path is required (--treated)."
 
         ace_flow_cluster_output_folder = FolderCreator.create_folder(
             args.sa_output_folder, "clust_final"
@@ -122,7 +126,8 @@ class GetCorrInput:
             raise FileNotFoundError(
                 f"'{Path(file_path.name)}' does not exist at '{dir_path}'. Did you run the ACE workflow yet?"
             )
-        
+
+
 class ConstructPvalueCmd:
     """Class for constructing the p-value command used by
     `miracl/stats/miracl_stats_ace_pvalue.py`
@@ -177,7 +182,7 @@ class ConstructPvalueCmd:
         final_result = arg_checker(axial_result, dim, "figure dimensions", "f")
 
         return final_result
-    
+
     @staticmethod
     def construct_final_pvalue_cmd(
         args: argparse.Namespace,
