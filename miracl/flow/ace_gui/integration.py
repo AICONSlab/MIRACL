@@ -131,7 +131,9 @@ class MainWindow(QMainWindow):
             f"Check self.miracl_obj_dict: \n{self.miracl_obj_dict}\n"
         )
         spinbox_debugger.debug(f"Check self.widget_dict: \n{self.widget_dict}\n")
-        spinbox_debugger.debug(self.tab_controller.get_current_widget_values())
+        spinbox_debugger.debug(
+            f"ACTUAL VALUES FROM WIDGETS: {self.tab_controller.get_current_widget_values()}"
+        )
         logger.debug(self.tab_controller)
         # logger.debug(
         #     f"\n\n\n\n\n\nHERE: {self.widget_dict['ctn_center'].inputs}\n\n\n\n\n"
