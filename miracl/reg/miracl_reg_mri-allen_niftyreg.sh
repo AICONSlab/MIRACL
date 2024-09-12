@@ -90,7 +90,7 @@ fi
 
 # Init atlas dir
 
-atlasdir=${MIRACL_HOME}/atlases
+atlasdir=${ATLASES_HOME}
 
 
 # GUI for MRI input imgs
@@ -272,42 +272,40 @@ fi
 
 # If want to warp multi-res / hemi lbls
 
-if [[ -z ${lbls} ]]; then
+# Add default for $hemi to prevent script from failing if no arg is provided by user
+# FYI, parameter expansion only sets the default if $hemi is unset or null 
+: ${hemi:=combined}
+#
+# Also check for None
+if [ "$hemi" = "None" ]; then
+    hemi="combined"
+fi
 
-    if [[ -z ${hemi} ]]; then
-
+if [[ -z ${lbls} || ${lbls} == "None" ]]; then
+    if [[ -z ${hemi} || ${hemi} == "None" ]]; then
         hemi=combined
-
     else
-
         if [ "${hemi}" != "combined" ] && [ "${hemi}" != "split" ]; then
-
-            printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+            printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split\n"
             exit 1
         fi
-
     fi
 
-    if [[ -z ${vox} ]]; then
-
+    if [[ -z ${vox} || ${vox} == "None" ]]; then
         vox=10
-
     else
-
         if [ "${vox}" != 10 ] && [ "${vox}" != 25 ] && [ "${vox}" != 50 ] ; then
-
-            printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+            printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50\n"
             exit 1
         fi
-
     fi
 
     lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
 fi
 
+
 # no orient
-if [[ -z ${noort} ]]; then
+if [[ -z ${noort} || ${noort} == "None" ]]; then
     noort=0
 else
 
@@ -611,14 +609,17 @@ function main()
 
     # aladin 
     ifdsntexistrun ${alad_xfm} "Registering MRI data to allen atlas using affine reg" \
-    reg_aladin -ref ${allenref} -flo ${mrlnk} -%i 95 -sym -res ${alad_out} -aff ${alad_xfm} -maxit 10 -ln 4
+    # reg_aladin -ref ${allenref} -flo ${mrlnk} -%i 95 -sym -res ${alad_out} -aff ${alad_xfm} -maxit 10 -ln 4
+    reg_aladin -ref ${allenref} -flo ${mrlnk} -%i 95 -res ${alad_out} -aff ${alad_xfm} -maxit 10 -ln 4
+    # reg_aladin -ref /data/projects/josmann/LD23_chronic_afni/LD23chronic_anat_thr_brain_deobliqued_c3dRSP.nii.gz  -flo /data/projects/josmann/DSURQE_40micron_average_LSP_thr_brain_c3dRSP.nii.gz -res /data/projects/josmann/LD23chronic_niftireg_pi90ln4c3dRSP.nii.gz -pi 90 -aff /data/projects/josmann/niftiregpi90RSP_affine.txt
 
     # reg_f3d
     cpp=${regdir}/mr_allen_cpp.nii.gz
     f3d_out=${regdirfinal}/mr_allen_f3d.nii.gz
 
     ifdsntexistrun ${f3d_out} "Registering MRI data to allen atlas using deformable transformation" \
-    reg_f3d -flo ${alad_out} -ref ${allenref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -6
+    # reg_f3d -flo ${alad_out} -ref ${allenref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -6
+    reg_f3d -flo ${alad_out} -ref ${allenref} -res ${f3d_out} -cpp ${cpp} -be 1e-3 -sx -6
 
 	#---------------------------
 
@@ -638,12 +639,17 @@ function main()
  	ifdsntexistrun ${inv_aff} "Inverting affine transform" \
  	reg_transform -ref ${mrlnk} -invAffine ${alad_xfm} ${inv_aff}
 
- 	# comb inv aff & def
- 	comb_def=${regdir}/allen_mr_comb_def.nii.gz
  	inv_cpp=${regdir}/mr_allen_cpp_backward.nii.gz
 
+ 	ifdsntexistrun ${inv_cpp} "Inverting control point grid" \
+  reg_transform -ref ${mrlnk} -invNrr ${cpp} ${allenref} ${inv_cpp}
+
+ 	# comb inv aff & def
+ 	comb_def=${regdir}/allen_mr_comb_def.nii.gz
  	ifdsntexistrun ${comb_def} "Combing affine transform and deformable field" \
- 	reg_transform -ref ${mrlnk} -aff2def ${inv_aff} ${allenref} ${inv_cpp} ${comb_def}
+ 	# reg_transform -ref ${mrlnk} -aff2def ${inv_aff} ${allenref} ${inv_cpp} ${comb_def}
+  # reg_transform -ref ${mrlnk} -def ${comb_def} ${inv_aff}
+  reg_transform -ref ${mrlnk} -comp ${inv_cpp} ${inv_aff} ${comb_def}
 
  	# resample lbls
  	ifdsntexistrun ${wrplbls} "Resampling Allen labels to MRI space" \
