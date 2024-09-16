@@ -9,6 +9,7 @@ RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(ge
     # breaks parsing. Temporary fix only. In the long run,
     # scripts should be refactored to work with current version!
     pip install setuptools==65.6.0 && \
+    # pip install git+https://github.com/huggingface/huggingface_hub@v0.24.7 && \
     pip install -e /code/ "botocore >= 1.20.110"
 ENV MIRACL_HOME=/code/miracl
 ENV ATLASES_HOME=/code/atlases
@@ -49,16 +50,19 @@ ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATH
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 ###############################################################################
-#--- Allen atlas alias ----
+#--- Reference Atlases ---
+# RUN huggingface-cli download AICONSlab/MIRACL --repo-type dataset --revision dev --include "atlases/*" --local-dir "/code/"  # This is much better but unfortunately the version of the HF cli is incompatible with MIRACL currently
 
-WORKDIR /tmp
-RUN mkdir -p /code/atlases/ara && \
-    wget -P /code/atlases https://www.dropbox.com/sh/j31vurlp6h4lvod/AAAIKpYJQizkAte3Ju5DZYj8a --content-disposition && \
-    unzip /code/atlases/ara.zip -x / -d /code/atlases/ara
+RUN apt-get update && apt-get install git-lfs -y
+RUN git lfs clone --branch dev https://huggingface.co/datasets/AICONSlab/MIRACL.git /tmp/hf_atlases && \
+    cp -r /tmp/hf_atlases/atlases /code && \
+    rm -rf /tmp/hf_atlases
+
 
 # RUN conda install -y --no-update-deps pyqt=5
 
 ENV aradir "/code/atlases/ara"
+ENV fischerdir "/code/atlases/fischer"
 
 # Templates (atlas images)
 ENV allen10 "/code/atlases/ara/template/average_template_10um.nii.gz"
