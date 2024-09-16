@@ -9,7 +9,6 @@ RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(ge
     # breaks parsing. Temporary fix only. In the long run,
     # scripts should be refactored to work with current version!
     pip install setuptools==65.6.0 && \
-    # pip install git+https://github.com/huggingface/huggingface_hub@v0.24.7 && \
     pip install -e /code/ "botocore >= 1.20.110"
 ENV MIRACL_HOME=/code/miracl
 ENV ATLASES_HOME=/code/atlases
