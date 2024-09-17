@@ -11,14 +11,14 @@ function usage() {
 
   cat <<usage
 
-	1) Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain or Fischer Reference rat brain Atlas
-	2) Warps Allen/Fischer annotations to the MRI space
+	1) Registers in-vivo or ex-vivo MRI data to Allen/Dsurqe Reference mouse brain or Fischer Reference rat brain Atlas
+	2) Warps Allen/Dsurqe/Fischer annotations to the MRI space
 
 	if no inputs are given function will run in GUI mode
 
 	For command-line / scripting
 
-	Usage: miracl reg mri_allen_fischer_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [atlas]
+	Usage: miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [atlas]
 
     Example: miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -29,10 +29,10 @@ function usage() {
     optional arguments:
         r.  set base dir for reg output (default: cwd)
         o.  orient code (default: RSP)
-            to orient nifti from original orientation to "standard/Allen/Fischer" orientation
+            to orient nifti from original orientation to "standard/Allen/Fischer/Dsurqe" orientation
         a.  atlas (default: allen)
-            use 'allen' for mouse models and 'fischer' atlas for rat Fischer models
-            accepted inputs are: <allen> or <fischer>
+            use 'allen' or 'dsurqe' for mouse models and 'fischer' atlas for rat models
+            accepted inputs are: <allen>, <dsurqe> or <fischer>
         l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
             input labels could be at a different depth than default labels
         f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
@@ -248,9 +248,9 @@ if [[ -z ${atl} || ${atl} == "None" ]]; then
 
 else
 
-  if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ]; then
+  if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ] && [ "${atl}" != "dsurqe" ]; then
 
-    printf "ERROR: < -a => (atl) > only takes as inputs: allen or fischer"
+    printf "ERROR: < -a => (atl) > only takes as inputs: allen, dsurqe or fischer"
     exit 1
 
   fi
@@ -341,8 +341,13 @@ elif [ "${atl}" == "fischer" ]; then
   vox=60
   lbls=${atlasdir}/fischer/annotation/Fischer344_template_labels.nii.gz
 
+elif [ "${atl}" == "dsurqe" ]; then
+
+  vox=40
+  lbls=${atlasdir}/dsurqe/annotation/DSURQE_40micron_labels.nii.gz
+
 else
-  printf "ERROR: < -a => (atl) > Only accepted atlases (inputs) are: 'allen' or 'fischer'"
+  printf "ERROR: < -a => (atl) > Only accepted atlases (inputs) are: 'allen', 'fischer', or 'dsurqe"
   exit 1
 fi
 
@@ -622,10 +627,18 @@ function main() {
     # elif [[ "${bulb}" == 1 ]]; then
     atlref=${atlasdir}/ara/template/average_template_50um.nii.gz
     # fi
-  else
+  elif [ "${atl}" == "dsurqe" ]; then
 
+    atlref=${atlasdir}/dsurqe/template/DSURQE_40micron_average.nii.gz
+
+  elif [ "${atl}" == "fischer" ]; then
     # Fischer atlas template
     atlref=${atlasdir}/fischer/template/Fischer344_template_stripped.nii.gz
+
+  else
+
+    printf "ERROR: < -a => (atl) > only takes as inputs: allen, dsurge or fischer"
+    exit 1
 
   fi
   #---------------------------
@@ -681,7 +694,7 @@ function main() {
   reg_transform -ref "${mrlnk}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
 
   # resample lbls
-  ifdsntexistrun "${wrplbls}" "Resampling '${atl}' labels to MRI space" \
+  ifdsntexistrun "${wrplbls}" "Resampling ${atl^} labels to MRI space" \
     reg_resample -ref "${mrlnk}" -flo "${lbls}" -trans "${comb_def}" -res "${wrplbls}" -inter 0
 
   #---------------------------
