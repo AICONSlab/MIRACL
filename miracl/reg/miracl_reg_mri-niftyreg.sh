@@ -661,7 +661,7 @@ function main() {
   cpp=${regdir}/mr_"${atl}"_cpp.nii.gz
   f3d_out=${regdirfinal}/mr_"${atl}"_f3d.nii.gz
 
-  ifdsntexistrun "${f3d_out}" "Registering MRw data to '${atl}' atlas using deformable transformation"
+  ifdsntexistrun "${f3d_out}" "Registering MRw data to ${atl^} atlas using deformable transformation"
   # reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -15
   reg_f3d -flo "${alad_out}" -ref "${atlref}" -res "${f3d_out}" -cpp "${cpp}" -be 1e-3 -sx -15
 
