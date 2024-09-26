@@ -2,8 +2,8 @@
 
 # get version
 function getversion() {
-  ver=$(cat "$MIRACL_HOME/version.txt")
-  printf "\n MIRACL pipeline v. %s \n" "$ver"
+  ver=$(cat "$MIRACL_HOME"/version.txt)
+  printf "\n MIRACL pipeline v%s \n" "$ver"
 }
 
 # help/usage function
@@ -11,14 +11,14 @@ function usage() {
 
   cat <<usage
 
-	1) Registers in-vivo or ex-vivo MRI data to Allen/Dsurqe Reference mouse brain or Fischer Reference rat brain Atlas
-	2) Warps Allen/Dsurqe/Fischer annotations to the MRI space
+	1) Registers in-vivo or ex-vivo MRI data to Allen/Dsurqe Reference mouse brain or Fischer/Waxholm Reference rat brain Atlas
+	2) Warps Allen/Dsurqe/Fischer/Waxholm annotations to the MRI space
 
 	if no inputs are given function will run in GUI mode
 
 	For command-line / scripting
 
-	Usage: miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [atlas]
+	Usage: miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [ atlas ] -e [ bending energy ] -x [ grid spacing x-axis ]
 
     Example: miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
 
@@ -29,15 +29,17 @@ function usage() {
     optional arguments:
         r.  set base dir for reg output (default: cwd)
         o.  orient code (default: RSP)
-            to orient nifti from original orientation to "standard/Allen/Fischer/Dsurqe" orientation
+            to orient nifti from original orientation to 'standard/Allen/Fischer/Dsurqe/Waxholm' orientation
         a.  atlas (default: allen)
-            use 'allen' or 'dsurqe' for mouse models and 'fischer' atlas for rat models
-            accepted inputs are: <allen>, <dsurqe> or <fischer>
+            use 'allen' or 'dsurqe' for mouse models and 'fischer' or 'waxholm' atlas for rat models
+            accepted inputs are: <allen>, <dsurqe>, <fischer> or <waxholm>
         l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
             input labels could be at a different depth than default labels
         f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
-        n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+        n.  no orientation needed (input image in 'standard' orientation), binary option (default: 0 -> orient)
         s.  skull strip or not, binary option (default: 1 -> skull-strip)
+        e.  weight of the bending energy (second derivative of the transformation) penalty term (default: 1e-3)
+        x.  final grid spacing along the x axis in mm (in voxel if negative value) (default: -15)
 
     Allen atlas related arguments:
         m.  hemisphere mirror (default: combined)
@@ -118,7 +120,7 @@ if [[ "$#" -gt 1 ]]; then
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:r:o:l:m:v:b:s:f:n:a:" opt; do
+  while getopts ":i:r:o:l:m:v:b:s:f:n:a:e:x:" opt; do
 
     case "${opt}" in
 
@@ -161,6 +163,12 @@ if [[ "$#" -gt 1 ]]; then
       ;;
     a)
       atl=${OPTARG}
+      ;;
+    e)
+      be=${OPTARG}
+      ;;
+    x)
+      sx=${OPTARG}
       ;;
     *)
       usage
@@ -248,9 +256,9 @@ if [[ -z ${atl} || ${atl} == "None" ]]; then
 
 else
 
-  if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ] && [ "${atl}" != "dsurqe" ]; then
+  if [ "${atl}" != "allen" ] && [ "${atl}" != "fischer" ] && [ "${atl}" != "dsurqe" ] && [ "${atl}" != "waxholm" ]; then
 
-    printf "ERROR: < -a => (atl) > only takes as inputs: allen, dsurqe or fischer"
+    printf "ERROR: < -a => (atl) > only takes as inputs: allen, dsurqe, fischer or waxholm"
     exit 1
 
   fi
@@ -288,6 +296,15 @@ exec 2>&1
 # orient code
 if [[ -z ${ort} ]]; then
   ort=RSP
+fi
+
+# Check if be or sx are empty, null, or None, and set to default if so
+if [[ -z "$be" || "$be" == "null" || "$be" == "None" ]]; then
+  be=1e-3
+fi
+
+if [[ -z "$sx" || "$sx" == "null" || "$sx" == "None" ]]; then
+  sx=-15
 fi
 
 # Add default for $hemi to prevent script from failing if no arg is provided by user
@@ -346,8 +363,13 @@ elif [ "${atl}" == "dsurqe" ]; then
   vox=40
   lbls=${atlasdir}/dsurqe/annotation/DSURQE_40micron_labels.nii.gz
 
+elif [ "${atl}" == "waxholm" ]; then
+
+  vox=39
+  lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
+
 else
-  printf "ERROR: < -a => (atl) > Only accepted atlases (inputs) are: 'allen', 'fischer', or 'dsurqe"
+  printf "ERROR: < -a => (atl) > Only accepted atlases (inputs) are: 'allen', 'fischer', 'dsurqe' or 'waxholm'"
   exit 1
 fi
 
@@ -635,6 +657,10 @@ function main() {
     # Fischer atlas template
     atlref=${atlasdir}/fischer/template/Fischer344_template_stripped.nii.gz
 
+  elif [ "${atl}" == "fischer" ]; then
+    # Waxholm atlas template
+    atlref=${atlasdir}/waxholm/template/WHS_SD_rat_T2star_v1.01.nii.gz
+
   else
 
     printf "ERROR: < -a => (atl) > only takes as inputs: allen, dsurge or fischer"
@@ -654,7 +680,7 @@ function main() {
   alad_out=${regdir}/mr_"${atl}"_aladin.nii.gz
 
   # aladin
-  ifdsntexistrun "${alad_xfm}" "Registering MRI data to '${atl}' atlas using affine reg" \
+  ifdsntexistrun "${alad_xfm}" "Registering MRI data to ${atl^} atlas using affine reg" \
     reg_aladin -ref "${atlref}" -flo "${mrlnk}" -%i 95 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15 -ln 4
 
   # reg_f3d
@@ -663,7 +689,10 @@ function main() {
 
   ifdsntexistrun "${f3d_out}" "Registering MRw data to ${atl^} atlas using deformable transformation"
   # reg_f3d -flo ${alad_out} -ref ${atlref} -res ${f3d_out} -cpp ${cpp} -sym -be 1e-3 -sx -15
-  reg_f3d -flo "${alad_out}" -ref "${atlref}" -res "${f3d_out}" -cpp "${cpp}" -be 1e-3 -sx -15
+  # reg_f3d -flo "${alad_out}" -ref "${atlref}" -res "${f3d_out}" -cpp "${cpp}" -be 1e-3 -sx -15
+  set -x
+  reg_f3d -flo "${alad_out}" -ref "${atlref}" -res "${f3d_out}" -cpp "${cpp}" -be "${be}" -sx "${sx}"
+  set +x
 
   #---------------------------
 
@@ -678,24 +707,30 @@ function main() {
   # inv affine
   inv_aff=${regdir}/mr_"${atl}"_affine_inv.xfm
 
-  ifdsntexistrun "${inv_aff}" "Inverting affine transform" \
-    reg_transform -ref "${mrlnk}" -invAffine "${alad_xfm}" "${inv_aff}"
+  ifdsntexistrun "${inv_aff}" "Inverting affine transform"
+  # reg_transform -ref "${mrlnk}" -invAffine "${alad_xfm}" "${inv_aff}"
+  reg_transform -ref "${atlref}" -invAffine "${alad_xfm}" "${inv_aff}"
 
   inv_cpp=${regdir}/mr_"${atl}"_cpp_backward.nii.gz
 
-  ifdsntexistrun "${inv_cpp}" "Inverting control point grid" \
-    reg_transform -ref "${mrlnk}" -invNrr "${cpp}" "${atlref}" "${inv_cpp}"
+  ifdsntexistrun "${inv_cpp}" "Inverting control point grid"
+  # reg_transform -ref "${mrlnk}" -invNrr "${cpp}" "${atlref}" "${inv_cpp}"
+  # reg_transform -ref "${atlref}" -invNrr "${cpp}" "${atlref}" "${inv_cpp}"
+  reg_transform -ref "${atlref}" -invNrr "${cpp}" "${alad_out}" "${inv_cpp}"
 
   # comb inv aff & def
   comb_def=${regdir}/"${atl}"_mr_comb_def.nii.gz
 
   ifdsntexistrun "${comb_def}" "Combing affine transform and deformable field"
   # reg_transform -ref ${inmr} -comp ${inv_aff} ${inv_cpp} ${comb_def}
-  reg_transform -ref "${mrlnk}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
+  # reg_transform -ref "${mrlnk}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
+  # reg_transform -ref "${inmr}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
+  reg_transform -ref "${atlref}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
 
   # resample lbls
-  ifdsntexistrun "${wrplbls}" "Resampling ${atl^} labels to MRI space" \
-    reg_resample -ref "${mrlnk}" -flo "${lbls}" -trans "${comb_def}" -res "${wrplbls}" -inter 0
+  ifdsntexistrun "${wrplbls}" "Resampling ${atl^} labels to MRI space"
+  # reg_resample -ref "${mrlnk}" -flo "${lbls}" -trans "${comb_def}" -res "${wrplbls}" -inter 0
+  reg_resample -ref "${inmr}" -flo "${lbls}" -trans "${comb_def}" -res "${wrplbls}" -inter 0
 
   #---------------------------
 
