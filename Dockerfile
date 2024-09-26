@@ -62,6 +62,8 @@ RUN git lfs clone --branch dev https://huggingface.co/datasets/AICONSlab/MIRACL.
 
 ENV aradir "/code/atlases/ara"
 ENV fischerdir "/code/atlases/fischer"
+ENV dsurqedir "/code/atlases/dsurqe"
+ENV waxholmdir "/code/atlases/waxholm"
 
 # Templates (atlas images)
 ENV allen10 "/code/atlases/ara/template/average_template_10um.nii.gz"
