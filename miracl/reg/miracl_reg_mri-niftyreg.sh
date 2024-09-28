@@ -47,12 +47,12 @@ function usage() {
             accepted inputs are: <split> or <combined>
         v.  labels voxel size/Resolution in um (default: 10)
             accepted inputs are: 10, 25 or 50
-            If l. is specified (m & v cannot be specified)
+            if l. is specified (m & v cannot be specified)
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
-	-----------------------------------
+	------------------------------
 	registration based on NiftyReg
-	-----------------------------------
+	------------------------------
 
 usage
   getversion >&2
