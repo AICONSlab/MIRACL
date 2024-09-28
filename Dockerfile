@@ -52,11 +52,10 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /us
 #--- Reference Atlases ---
 # RUN huggingface-cli download AICONSlab/MIRACL --repo-type dataset --revision dev --include "atlases/*" --local-dir "/code/"  # This is much better but unfortunately the version of the HF cli is incompatible with MIRACL currently
 
-RUN apt-get update && apt-get install git-lfs -y
-RUN git lfs clone --branch dev https://huggingface.co/datasets/AICONSlab/MIRACL.git /tmp/hf_atlases && \
-    cp -r /tmp/hf_atlases/atlases /code && \
-    rm -rf /tmp/hf_atlases
-
+RUN wget -q --show-progress -O /code/atlases.tar.gz https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/atlases/atlases.tar
+.gz && \
+    tar -xzvf /code/atlases.tar.gz -C /code/atlases && \
+    rm -rf /code/atlases.tar.gz
 
 # RUN conda install -y --no-update-deps pyqt=5
 
