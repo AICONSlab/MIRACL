@@ -68,3 +68,7 @@ MIRACL.egg-info/
 # Docker Compose yaml files #
 #############################
 docker-compose.yml
+
+# Sphinx
+########
+/docs/_build/
