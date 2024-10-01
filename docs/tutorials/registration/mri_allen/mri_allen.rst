@@ -3,65 +3,73 @@ MRI whole-brain registration to Allen Atlas
 
 This registration method performs the following tasks:
 
-#. Registers in-vivo or ex-vivo MRI data to Allen Reference mouse brain Atlas
-#. Warps Allen annotations to the MRI space
+#. Registers in-vivo or ex-vivo MRI data to Allen/DSURQE reference mouse brain atlases or 
+   Fischer/Waxholm reference rat brain atlases
+#. Warps chosen atlas annotations to the MRI space
 
 GUI
 ===
 
-Invoke with ``$ miraclGUI`` and select from main menu or run:
+.. note::
+   The Niftyreg module GUI is currently under construction but will be back online soon.
 
-.. code-block::
+..
+  GUI
+  ===
 
-   $ miracl reg mri_allen_nifty
+  Invoke with ``$ miraclGUI`` and select from main menu or run:
 
-The following window will open:
+  .. code-block::
 
-.. image:: ./images/MIRACL_registration_mri-reg_menu.png
+     $ miracl reg mri_allen_nifty
 
-Click on ``Select In-vivo or Ex-vivo MRI`` and choose the input MRI nii 
-(preferable T2-w) using the dialog window. Then set the registration options:
+  The following window will open:
 
-.. table::
+  .. image:: ./images/MIRACL_registration_mri-reg_menu.png
 
-   =======================  ==========================================================================================================================================================  ============
-   Parameter	              Description	                                                                                                                                                Default
-   =======================  ==========================================================================================================================================================  ============
-   Orient code	            Orient nifti from original orientation to 'standard/Allen' orientation.	                                                                                    ``RSP``
-   Labels Hemi	                                                                                                                                                                        ``combined``
+  Click on ``Select In-vivo or Ex-vivo MRI`` and choose the input MRI nii 
+  (preferable T2-w) using the dialog window. Then set the registration options:
 
-                            Warp allen labels with hemisphere split (Left different than Right labels) or combined (Left and Right labels are the same/mirrored). Accepted inputs are:
+  .. table::
 
-                            * ``split``
-                            * ``combined``
-   Labels resolution [vox]	                                                                                                                                                            ``10``
+     =======================  ==========================================================================================================================================================  ============
+     Parameter	              Description	                                                                                                                                                Default
+     =======================  ==========================================================================================================================================================  ============
+     Orient code	            Orient nifti from original orientation to 'standard/Allen' orientation.	                                                                                    ``RSP``
+     Labels Hemi	                                                                                                                                                                        ``combined``
 
-                            Labels voxel size/resolution in um. Accepted inputs are:
+                              Warp allen labels with hemisphere split (Left different than Right labels) or combined (Left and Right labels are the same/mirrored). Accepted inputs are:
 
-                            * ``10``
-                            * ``25``
-                            * ``50``
-   Olfactory bulb included	                                                                                                                                                            ``0``
+                              * ``split``
+                              * ``combined``
+     Labels resolution [vox]	                                                                                                                                                            ``10``
 
-                            Specify whether the olfactory bulb is included in brain. Accepted inputs are:
+                              Labels voxel size/resolution in um. Accepted inputs are:
 
-                            * ``0`` (not included)
-                            * ``1`` (included)
-   skull strip	                                                                                                                                                                        ``1``
+                              * ``10``
+                              * ``25``
+                              * ``50``
+     Olfactory bulb included	                                                                                                                                                            ``0``
 
-                            Strip skull. Accepted inputs are:
+                              Specify whether the olfactory bulb is included in brain. Accepted inputs are:
 
-                            * ``0`` (don't strip)
-                            * ``1`` (strip)
-   No orient	                                                                                                                                                                          ``0``
+                              * ``0`` (not included)
+                              * ``1`` (included)
+     skull strip	                                                                                                                                                                        ``1``
 
-                            No orientation needed (input image in 'standard' orientation). Accepted inputs are:
+                              Strip skull. Accepted inputs are:
 
-                            * ``0`` (orient)
-                            * ``1`` (don't orient)
-   =======================  ==========================================================================================================================================================  ============
+                              * ``0`` (don't strip)
+                              * ``1`` (strip)
+     No orient	                                                                                                                                                                          ``0``
 
-Click ``Enter`` and ``Run`` to start the registration process.
+                              No orientation needed (input image in 'standard' orientation). Accepted inputs are:
+
+                              * ``0`` (orient)
+                              * ``1`` (don't orient)
+     =======================  ==========================================================================================================================================================  ============
+
+  Click ``Enter`` and ``Run`` to start the registration process.
 
 Command-line
 ============
@@ -70,13 +78,13 @@ Usage:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ]
+  $ miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [ atlas ] -e [ bending energy ] -x [ grid spacing x-axis ]
 
 Example:
 
 .. code-block::
 
-   $ miracl reg mri_allen_nifty -i inv_mri.nii.gz -o RSP -m combined -v 25
+   $ miracl reg mri_nifty -i inv_mri.nii.gz -o RSP -a fischer
 
 Arguments:
 
@@ -85,21 +93,31 @@ Arguments:
    arguments (required):
 
      i.  input MRI nii
-        Preferably T2-weighted
+         Preferably T2-weighted
 
    optional arguments:
-   
+
+     r.  set base dir for reg output (default: cwd)
      o.  orient code (default: RSP)
-         to orient nifti from original orientation to "standard/Allen" orientation
+         to orient nifti from original orientation to 'standard/Allen/Fischer/Dsurqe/Waxholm' orientation
+     a.  atlas (default: allen)
+         use 'allen' or 'dsurqe' for mouse models and 'fischer' or 'waxholm' atlas for rat models
+         accepted inputs are: <allen>, <dsurqe>, <fischer> or <waxholm>
+     l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz - for Allen atlas)
+         input labels could be at a different depth than default labels
+     f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
+     n.  no orientation needed (input image in 'standard' orientation), binary option (default: 0 -> orient)
+     s.  skull strip or not, binary option (default: 1 -> skull-strip)
+     e.  weight of the bending energy (second derivative of the transformation) penalty term (default: 1e-3)
+     x.  final grid spacing along the x axis in mm (in voxel if negative value) (default: -15)
+
+   Allan atlas related arguments:
+
      m.  hemisphere mirror (default: combined)
          warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
          accepted inputs are: <split> or <combined>
      v.  labels voxel size/Resolution in um (default: 10)
          accepted inputs are: 10, 25 or 50
-     l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz )
-         input labels could be at a different depth than default labels
-         If l. is specified (m & v cannot be specified)
+         if l. is specified (m & v cannot be specified)
      b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
-     s.  skull strip or not, binary option (default: 1 -> skull-strip)
-     f.  FSL skull striping fractional intensity (default: 0.3), smaller values give larger brain outlines
-     n.  No orientation needed (input image in "standard" orientation), binary option (default: 0 -> orient)
+
