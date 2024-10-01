@@ -710,14 +710,18 @@ function main() {
 
   ifdsntexistrun "${inv_aff}" "Inverting affine transform"
   # reg_transform -ref "${mrlnk}" -invAffine "${alad_xfm}" "${inv_aff}"
+  set -x
   reg_transform -ref "${atlref}" -invAffine "${alad_xfm}" "${inv_aff}"
+  set +x
 
   inv_cpp=${regdir}/mr_"${atl}"_cpp_backward.nii.gz
 
   ifdsntexistrun "${inv_cpp}" "Inverting control point grid"
   # reg_transform -ref "${mrlnk}" -invNrr "${cpp}" "${atlref}" "${inv_cpp}"
   # reg_transform -ref "${atlref}" -invNrr "${cpp}" "${atlref}" "${inv_cpp}"
+  set -x
   reg_transform -ref "${atlref}" -invNrr "${cpp}" "${alad_out}" "${inv_cpp}"
+  set +x
 
   # comb inv aff & def
   comb_def=${regdir}/"${atl}"_mr_comb_def.nii.gz
