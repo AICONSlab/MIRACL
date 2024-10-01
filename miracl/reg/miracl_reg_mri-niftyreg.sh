@@ -294,7 +294,7 @@ exec 2>&1
 # set defaults and assert (check for input errors)
 
 # orient code
-if [[ -z ${ort} ]]; then
+if [[ -z ${ort} || ${ort} == "None" || ${ort} == "null" ]]; then
   ort=RSP
 fi
 
@@ -387,7 +387,8 @@ else
 fi
 
 # skull strip
-if [[ -z ${skull} || ${noort} == "None" ]]; then
+# if [[ -z ${skull} || ${noort} == "None" ]]; then
+if { [[ -z ${skull} ]] || [[ ${skull} == "None" ]] || [[ ${skull} == "null" ]]; } && { [[ ${noort} == "None" ]] || [[ ${noort} == "0" ]]; }; then
   skull=1
 else
 
