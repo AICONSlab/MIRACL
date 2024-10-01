@@ -1,5 +1,5 @@
-MRI whole-brain registration to Allen Atlas
-###########################################
+MRI whole-brain registration to mouse/rat atlases
+#################################################
 
 This registration method performs the following tasks:
 
@@ -78,7 +78,7 @@ Usage:
 
 .. code-block::
 
-  $ miracl reg mri_allen_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [ atlas ] -e [ bending energy ] -x [ grid spacing x-axis ]
+  $ miracl reg mri_nifty -i [ input invivo or exvivo MRI nii ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -b [ olfactory bulb ] -s [ skull strip ] -n [ no orient needed ] -a [ atlas ] -e [ bending energy ] -x [ grid spacing x-axis ]
 
 Example:
 
