@@ -52,7 +52,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /us
 #--- Reference Atlases ---
 # RUN huggingface-cli download AICONSlab/MIRACL --repo-type dataset --revision dev --include "atlases/*" --local-dir "/code/"  # This is much better but unfortunately the version of the HF cli is incompatible with MIRACL currently
 
-RUN wget -q --show-progress -O /code/atlases.tar.gz https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/atlases/atlases.tar.gz && \
+RUN wget -q --show-progress --no-check-certificate -O /code/atlases.tar.gz https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/atlases/atlases.tar.gz && \
     tar -xzvf /code/atlases.tar.gz -C /code/atlases && \
     rm -rf /code/atlases.tar.gz
 
