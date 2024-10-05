@@ -299,11 +299,11 @@ if [[ -z ${ort} || ${ort} == "None" || ${ort} == "null" ]]; then
 fi
 
 # Check if be or sx are empty, null, or None, and set to default if so
-if [[ -z "$be" || "$be" == "null" || "$be" == "None" ]]; then
+if [[ -z "${be}" || "${be}" == "null" || "${be}" == "None" ]]; then
   be=1e-3
 fi
 
-if [[ -z "$sx" || "$sx" == "null" || "$sx" == "None" ]]; then
+if [[ -z "${sx}" || "${sx}" == "null" || "${sx}" == "None" ]]; then
   sx=-15
 fi
 
@@ -592,13 +592,23 @@ function main() {
 
   # Orient
   ortmr=${regdir}/mr_bias_thr_ort.nii.gz
+  # test_trim=${regdir}/trim.nii.gz
 
   if [[ "${noort}" == 0 ]]; then
 
+    echo "ORIENTING"
+    echo "${ort}"
     orientimg "${thrmr}" "${ort}" Cubic short "${ortmr}"
+    # echo "TRIMMING"
+    # set -x
+    # c3d "${ortmr}" -info
+    # c3d "${ortmr}" -trim 10vox -o "${ortmr}"
+    # c3d "${test_trim}" -info
+    # set +x
 
   else
 
+    echo "NOT ORIENTING"
     ortmr=${thrmr}
 
   fi
@@ -681,8 +691,9 @@ function main() {
   alad_out=${regdir}/mr_"${atl}"_aladin.nii.gz
 
   # aladin
-  ifdsntexistrun "${alad_xfm}" "Registering MRI data to ${atl^} atlas using affine reg" \
-    reg_aladin -ref "${atlref}" -flo "${mrlnk}" -%i 95 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15 -ln 4
+  ifdsntexistrun "${alad_xfm}" "Registering MRI data to ${atl^} atlas using affine reg"
+  # reg_aladin -ref "${atlref}" -flo "${mrlnk}" -%i 95 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15 -ln 4
+  reg_aladin -ref "${atlref}" -flo "${mrlnk}" -pi 90 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15
 
   # reg_f3d
   cpp=${regdir}/mr_"${atl}"_cpp.nii.gz
@@ -728,14 +739,15 @@ function main() {
 
   ifdsntexistrun "${comb_def}" "Combing affine transform and deformable field"
   # reg_transform -ref ${inmr} -comp ${inv_aff} ${inv_cpp} ${comb_def}
-  # reg_transform -ref "${mrlnk}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
-  # reg_transform -ref "${inmr}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
-  reg_transform -ref "${atlref}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
+  reg_transform -ref "${mrlnk}" -comp "${inv_aff}" "${inv_cpp}" "${comb_def}"
 
   # resample lbls
   ifdsntexistrun "${wrplbls}" "Resampling ${atl^} labels to MRI space"
   # reg_resample -ref "${mrlnk}" -flo "${lbls}" -trans "${comb_def}" -res "${wrplbls}" -inter 0
   reg_resample -ref "${inmr}" -flo "${lbls}" -trans "${comb_def}" -res "${wrplbls}" -inter 0
+
+  # Copy mr.nii.gz to reg_final
+  cp "${mrlnk}" "${regdirfinal}"/.
 
   #---------------------------
 
