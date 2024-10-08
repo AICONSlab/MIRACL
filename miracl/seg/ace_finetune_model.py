@@ -348,7 +348,7 @@ def build_model(
         model = torch.nn.DataParallel(model)
         model.to(device)
 
-    model_state = cfg["general"].get("model_state", "untrained")
+    model_state = cfg["general"].get("model_state", "trained")
     model_path = cfg["general"].get("model_trained_path")
     if model_state == "trained":
         model.load_state_dict(torch.load(model_path))

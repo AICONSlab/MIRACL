@@ -8,7 +8,6 @@ general:
   max_epochs: 300
   validation_interval: 1
   early_stop_patience: 50
-  model_state: 'trained'
   model_trained_path: '/code/miracl/seg/models/unetr/best_metric_model.pth'
   data_aug_prob: 0.7
   cache_rate_train: 1
