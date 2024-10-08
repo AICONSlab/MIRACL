@@ -9,7 +9,7 @@ general:
   validation_interval: 1
   early_stop_patience: 50
   model_state: 'trained'
-  model_trained_path: '/data2/projects/ahmadreza/ace_analysis_completed/ace_finetune_model_new/models/unetr/best_metric_model.pth'
+  model_trained_path: '/code/miracl/seg/models/unetr/best_metric_model.pth'
   data_aug_prob: 0.7
   cache_rate_train: 1
   cache_rate_val: 1
