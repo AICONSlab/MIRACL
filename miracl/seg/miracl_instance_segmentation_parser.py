@@ -83,7 +83,7 @@ class MIRACLInstanceSegParser(argparse.ArgumentParser):
             type=float,
             required=False,
             default=0.0,
-            help="Percentage of brain patch skip (default: %(default)s)",
+            help="Percentage of brain patch skip (default: %(default)s, between 0.0 and 1.0)",
         )
         optional_args.add_argument(
             "--no-stack",
