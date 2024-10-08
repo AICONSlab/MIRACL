@@ -65,7 +65,7 @@ class MIRACLInstanceSegParser(argparse.ArgumentParser):
             required=False,
             nargs="+",
             default=["area", "centroid", "bbox", "label"],
-            help="Properties to compute for each neurone (default: %(default)s)",
+            help="Properties to compute for each neuron (default: %(default)s)",
         )
         # Parser for glob pattern i.e. pattern to match files
         optional_args.add_argument(
