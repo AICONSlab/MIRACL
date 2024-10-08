@@ -19,11 +19,6 @@ unet:
   channels_initial: 16
   num_res_unit: 2
   dropout: 0.2
-dynunet:
-  n_layers: 5
-  filters_initial: 16
-  dropout: 0.25
-  res_block: True
 unetr:
   feature_size: 16
   hidden_size: 768
