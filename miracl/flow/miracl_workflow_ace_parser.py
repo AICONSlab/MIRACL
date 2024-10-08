@@ -50,8 +50,10 @@ class ACEWorkflowParser:
   1) Segments images with ACE
   2) Convert raw tif/tiff files to nifti for registration
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
-  4) Voxelizes segmentation results into density maps with Allen atlas resolution
-  5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
+  4) Voxelizes high-resolution segmentation results into density maps with Allen atlas resolution
+  5) Warps voxelied segmentation maps from native space to Allen atlas
+  6) Generates group-wise heatmaps of cell density using the average of voxelized and warped segmentation maps in each group
+  7) Computes group-level statistics/correlation using cluster-wise analysis on voxelized and warped segmentation maps""",
             usage=f"""{FULL_PROG_NAME}
         [-s SINGLE_TIFF_DIR]
         [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
@@ -67,7 +69,10 @@ class ACEWorkflowParser:
         [-rwcv {{10,25,50}}]
         [--rerun-registration TRUE/FALSE]
         [--rerun-segmentation TRUE/FALSE]
-        [--rerun-conversion TRUE/FALSE]""",
+        [--rerun-instance-segmentation TRUE/FALSE]
+        [--rerun-conversion TRUE/FALSE]
+        [--no-instance-segmentation]
+        [--no-validate-clusters]""",
         )
 
         # Define custom headers for args to separate required and optional
