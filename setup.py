@@ -66,7 +66,8 @@ setup(
         "svgwrite==1.4.3",
         "loguru==0.6.0",
         'mne==1.3.1',
-        'imagecodecs==2021.11.20'
+        'imagecodecs==2021.11.20',
+        'torchio==0.18.92'
     ],
     entry_points={
         "console_scripts": ["miracl=miracl.cli:main"],
