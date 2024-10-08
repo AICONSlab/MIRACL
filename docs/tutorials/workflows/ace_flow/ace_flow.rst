@@ -136,7 +136,10 @@ The following information will be printed to the terminal:
         [-rwcv {10,25,50}]
         [--rerun-registration TRUE/FALSE]
         [--rerun-segmentation TRUE/FALSE]
+        [--rerun-instance-segmentation TRUE/FALSE]
         [--rerun-conversion TRUE/FALSE]
+        [--no-instance-segmentation]
+        [--no-validate-clusters]
 
       1) Segments images with ACE
       2) Convert raw tif/tiff files to nifti for registration
@@ -184,14 +187,26 @@ The following information will be printed to the terminal:
       -rwcv {10,25,50}, --rwc_voxel_size {10,25,50}
                               voxel size/Resolution in um for warping (default: 25)
       --rerun-registration TRUE/FALSE
-                              Whether to rerun registration step of flow; TRUE =>
+                              whether to rerun registration step of flow; TRUE =>
                               Force re-run (default: false)
       --rerun-segmentation TRUE/FALSE
-                              Whether to rerun segmentation step of flow; TRUE =>
+                              whether to rerun segmentation step of flow; TRUE =>
                               Force re-run (default: false)
+      --rerun-instance-segmentation TRUE/FALSE
+                              whether to rerun instance segmentation step of flow;
+                              TRUE => Force re-run (default: false)
       --rerun-conversion TRUE/FALSE
-                              Whether to rerun conversion step of flow; TRUE =>
+                              whether to rerun conversion step of flow; TRUE =>
                               Force re-run (default: false)
+      --no-instance-segmentation
+                              Do not run instance segmentation (default: False).
+                              Instance seg is used to identify and label neurons in
+                              the image. It is useful for counting and downstream
+                              tasks.
+      --no-validate-clusters
+                              Do not validate clusters (default: False). Validate
+                              clusters is used to get native space statistics for
+                              each subject based on the ouput of ACE TFCE stats.
 
    --------------------------------------------------
    
