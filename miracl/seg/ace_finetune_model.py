@@ -157,15 +157,10 @@ class ImageLoadEmptyLabel(Transform):
         image_dict["image"] = np.moveaxis(image_dict["image"], 0, 2)
         image_dict["image"] = np.moveaxis(image_dict["image"], 0, 1)
 
-        if ("vessel" in image_dict["label"]) or ("vent" in image_dict["label"]):
-            image_dict["label"] = np.zeros((image_dict["image"].shape)).astype(np.uint8)
-
-        else:
-            image_dict["label"] = tifffile.imread(image_dict["label"])[201:]
-            image_dict["label"] = (image_dict["label"] > 0.65).astype(np.uint8)
-            # change the order axis of the image from DHW to HWD
-            image_dict["label"] = np.moveaxis(image_dict["label"], 0, 2)
-            image_dict["label"] = np.moveaxis(image_dict["label"], 0, 1)
+        image_dict["label"] = tifffile.imread(image_dict["label"])
+        # change the order axis of the image from DHW to HWD
+        image_dict["label"] = np.moveaxis(image_dict["label"], 0, 2)
+        image_dict["label"] = np.moveaxis(image_dict["label"], 0, 1)
 
         return image_dict
 
