@@ -50,8 +50,10 @@ class ACEWorkflowParser:
   1) Segments images with ACE
   2) Convert raw tif/tiff files to nifti for registration
   3) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
-  4) Voxelizes segmentation results into density maps with Allen atlas resolution
-  5) Warps downsampled CLARITY data/channels from native space to Allen atlas""",
+  4) Voxelizes high-resolution segmentation results into density maps with Allen atlas resolution
+  5) Warps voxelied segmentation maps from native space to Allen atlas
+  6) Generates group-wise heatmaps of cell density using the average of voxelized and warped segmentation maps in each group
+  7) Computes group-level statistics/correlation using cluster-wise analysis on voxelized and warped segmentation maps""",
             usage=f"""{FULL_PROG_NAME}
         [-s SINGLE_TIFF_DIR]
         [-c CONTROL_BASE_DIR CONTROL_TIFF_DIR_EXAMPLE]
@@ -67,7 +69,10 @@ class ACEWorkflowParser:
         [-rwcv {{10,25,50}}]
         [--rerun-registration TRUE/FALSE]
         [--rerun-segmentation TRUE/FALSE]
-        [--rerun-conversion TRUE/FALSE]""",
+        [--rerun-instance-segmentation TRUE/FALSE]
+        [--rerun-conversion TRUE/FALSE]
+        [--no-instance-segmentation]
+        [--no-validate-clusters]""",
         )
 
         # Define custom headers for args to separate required and optional
@@ -90,6 +95,7 @@ class ACEWorkflowParser:
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
         stats_args = parser.add_argument_group("optional statistics arguments")
+        validate_clusters_args = parser.add_argument_group("optional validate clusters arguments")
 
         # INFO: ACE main parser
 
@@ -219,6 +225,14 @@ class ACEWorkflowParser:
         )
 
         useful_args.add_argument(
+            "--rerun-instance-segmentation",
+            default="false",
+            help="whether to rerun instance segmentation step of flow; TRUE => Force re-run (default: %(default)s)",
+            type=parser_true_or_false,
+            metavar="TRUE/FALSE",
+        )
+
+        useful_args.add_argument(
             "--rerun-conversion",
             default="false",
             help="whether to rerun conversion step of flow; TRUE => Force re-run (default: %(default)s)",
@@ -305,7 +319,7 @@ class ACEWorkflowParser:
             type=float,
             required=False,
             default=0.0,
-            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s; default: %(default)s)",
+            help="percentage threshold of patch that is brain to skip during segmentation (type: %(type)s between 0 and 100; default: %(default)s)",
         )
 
         # INFO: Conversion parser
@@ -576,77 +590,64 @@ class ACEWorkflowParser:
         # INFO: Cluster-wise stats parser
 
         perm_args.add_argument(
-            "-pcsa",
-            "--pcs_atlas_dir",
-            help="path of atlas directory",
-            default="miracl_home",
-        )
-        perm_args.add_argument(
-            "-pcsn",
-            "--pcs_num_perm",
+            "-sctpn",
+            "--sctp_num_perm",
             type=int,
             help="number of permutations (default: %(default)s)",
             default=500,
         )
         perm_args.add_argument(
-            "-pcsr",
-            "--pcs_img_resolution",
-            type=int,
-            help="resolution of images in um (default: %(default)s)",
-            default=25,
-        )
-        perm_args.add_argument(
-            "-pcsfwhm",
-            "--pcs_smoothing_fwhm",
+            "-sctpfwhm",
+            "--sctp_smoothing_fwhm",
             type=int,
             help="fwhm of Gaussian kernel in pixel (default: %(default)s)",
             default=3,
         )
         perm_args.add_argument(
-            "-pcsstart",
-            "--pcs_tfce_start",
+            "-sctpstart",
+            "--sctp_tfce_start",
             type=float,
             help="tfce threshold start (default: %(default)s)",
             default=0.01,
         )
         perm_args.add_argument(
-            "-pcsstep",
-            "--pcs_tfce_step",
+            "-sctpstep",
+            "--sctp_tfce_step",
             type=float,
             help="tfce threshold step (default: %(default)s)",
             default=5,
         )
         perm_args.add_argument(
-            "-pcsc",
-            "--pcs_cpu_load",
+            "-sctpc",
+            "--sctp_cpu_load",
             type=float,
             help="Percent of cpus used for parallelization (default: %(default)s)",
             default=0.9,
         )
         perm_args.add_argument(
-            "-pcsh",
-            "--pcs_tfce_h",
+            "-sctph",
+            "--sctp_tfce_h",
             type=float,
             help="tfce H power (default: %(default)s)",
             default=2,
         )
         perm_args.add_argument(
-            "-pcse",
-            "--pcs_tfce_e",
+            "-sctpe",
+            "--sctp_tfce_e",
             type=float,
             help="tfce E power (default: %(default)s)",
             default=0.5,
         )
         perm_args.add_argument(
-            "-pcssp",
-            "--pcs_step_down_p",
+            "-sctpsp",
+            "--sctp_step_down_p",
             type=float,
             help="step down p-value (default: %(default)s)",
             default=0.3,
         )
         perm_args.add_argument(
-            "-pcsm",
-            "--pcs_mask_thr",
+            "-sctpm",
+            "--sctp_mask_thr",
             type=int,
             help="percentile to be used for binarizing difference of the mean (default: %(default)s)",
             default=95,
@@ -790,6 +791,44 @@ class ACEWorkflowParser:
             type=str,
             help="Output filenames (default: %(default)s)",
             default="pvalue_heatmap",
+        )
+
+        useful_args.add_argument(
+            "--no-instance-segmentation",
+            action="store_false",
+            default=False,
+            help="""Do not run instance segmentation (default: %(default)s).
+    Instance seg is used to identify and label neurons in the image. It is useful for
+    counting and downstream tasks.""",
+        )
+
+        useful_args.add_argument(
+            "--no-validate-clusters",
+            action="store_false",
+            default=False,
+            help="""Do not validate clusters (default: %(default)s).
+    Validate clusters is used to get native space statistics for each subject
+    based on the ouput of ACE TFCE stats.""",
+        )
+
+        # validate clusters args
+        validate_clusters_args.add_argument(
+            "--vc_skip",
+            default=50,
+            type=int,
+            help="Number of slices to skip in the z direction (default: %(default)s)",
+        )
+        validate_clusters_args.add_argument(
+            "--vc_min_area",
+            default=0,
+            type=int,
+            help="Minimum area of a neuron to be considered (default: %(default)s)",
+        )
+        validate_clusters_args.add_argument(
+            "--vc_pvalue_thr",
+            default=0.01,
+            type=float,
+            help="P-value threshold for binarizing p value (default: %(default)s)",
         )
 
         # INFO: help section

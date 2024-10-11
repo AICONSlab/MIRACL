@@ -295,7 +295,7 @@ def cluster_fn(
 
 def main(args, output_dir_arg):
     control_dir = args.pcs_control
-    treated_dir = args.treated
+    treated_dir = args.pcs_treated
     out_dir = output_dir_arg
     num_perm = args.sctp_num_perm
     atl_dir = args.u_atlas_dir

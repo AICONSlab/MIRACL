@@ -10,3 +10,5 @@ Functions to segment tiff image files.
    :caption: Table of contents:
 
    ace_seg/ace_seg
+   count_neurons/count_neurons
+   instance_seg/instance_seg

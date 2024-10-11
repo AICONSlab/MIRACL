@@ -193,7 +193,7 @@ def parsefn():
     parser.add_argument("-si",
                         "--side",
                         type=str,
-                        choices=["rh", "lh"],
+                        choices=["rh", "lh", "None"],
                         default=None,
                         help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",)
     parser.add_argument("--mask",
@@ -253,11 +253,13 @@ def parse_inputs(parser, args):
 
     # Validate paths
     path_check(*g1)
-    path_check(*g2)
+    if g2 != None:
+        path_check(*g2)
     path_check(outdir)
 
     # assert g1 and g2 are the same length
-    assert len(g1) == len(g2), "g1 and g2 must contain the same number of arguments"
+    if g2 != None:
+        assert len(g1) == len(g2), "g1 and g2 must contain the same number of arguments"
     assert len(g1) in [1, 2], "g1 and g2 must contain 1 or 2 arguments"
 
     # assert g1, g2, outdir directories are all different
@@ -327,7 +329,9 @@ def parse_inputs(parser, args):
     find_value(3, [len(outfile)], False,
                 "-o Must enter three arguments. Detected {} Arguments: {} \n Names must use underscore instead of space. \n Ex. ACCEPTABLE -o control_group treated_group difference_group \n UNACCEPTABLE -o control group treated group difference group".format(
                     len(outfile), outfile))
-    multi = True
+    
+    if g2 != None:
+        multi = True
 
     # change side to "left" or "right"
     side = {"rh": "right", "lh": "left"}.get(side, None)
