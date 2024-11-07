@@ -1,14 +1,14 @@
-import sys
 import argparse
-from miracl.stats import (
-    miracl_stats_paired_ttest_ipsi_contra,
-    miracl_stats_voxel_wise,
-    miracl_stats_paired_ttest_group,
-    miracl_plot_single_subj,
-    miracl_stats_heatmap_group,
-    miracl_stats_ace_interface,
-    miracl_stats_ace_parser,
-)
+import sys
+
+from miracl.stats import (miracl_plot_single_subj,
+                          miracl_stats_ace_cluster_neuron_count,
+                          miracl_stats_ace_interface, miracl_stats_ace_parser,
+                          miracl_stats_ace_validate_clusters,
+                          miracl_stats_heatmap_group,
+                          miracl_stats_paired_ttest_group,
+                          miracl_stats_paired_ttest_ipsi_contra,
+                          miracl_stats_voxel_wise)
 
 
 def run_paired_ttest(parser, args):
@@ -33,6 +33,14 @@ def heatmap_group(parser, args):
 
 def ace(parser, args):
     miracl_stats_ace_interface.main(args)
+
+
+def ace_neuron_count(parser, args):
+    miracl_stats_ace_cluster_neuron_count.main(args)
+
+
+def ace_validate_clusters(parser, args):
+    miracl_stats_ace_validate_clusters.main(args)
 
 
 def get_parser():
@@ -109,6 +117,26 @@ def get_parser():
         help="run ACE stats",
     )
     parser_ace.set_defaults(func=ace)
+
+    ace_neuron_parser = miracl_stats_ace_cluster_neuron_count.parsefn()
+    parser_ace_neuron = subparsers.add_parser(
+        miracl_stats_ace_cluster_neuron_count.PROG_NAME,
+        parents=[ace_neuron_parser],
+        add_help=False,
+        usage=ace_neuron_parser.usage,
+        help="run ACE neuron count stats",
+    )
+    parser_ace_neuron.set_defaults(func=ace_neuron_count)
+
+    ace_validate_parser = miracl_stats_ace_validate_clusters.parsefn()
+    parser_ace_validate = subparsers.add_parser(
+        miracl_stats_ace_validate_clusters.PROG_NAME,
+        parents=[ace_validate_parser],
+        add_help=False,
+        usage=ace_validate_parser.usage,
+        help="run ACE validate clusters stats",
+    )
+    parser_ace_validate.set_defaults(func=ace_validate_clusters)
 
     return parser
 

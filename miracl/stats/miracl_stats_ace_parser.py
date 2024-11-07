@@ -124,7 +124,7 @@ class ACEStatsParser:
             "--sctp_tfce_step",
             type=float,
             help="tfce threshold step",
-            default=10,
+            default=5,
         )
         perm_args.add_argument(
             "-sctpc",
@@ -138,14 +138,14 @@ class ACEStatsParser:
             "--sctp_tfce_h",
             type=float,
             help="tfce H power",
-            default=2
+            default=0.5,
         )
         perm_args.add_argument(
             "-sctpe",
             "--sctp_tfce_e",
             type=float,
             help="tfce E power",
-            default=0.5
+            default=2.0,
         )
         perm_args.add_argument(
             "-sctpsp",
