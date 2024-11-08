@@ -50,6 +50,8 @@ to `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
 
 These models will be included by default in a future release once ACE is published.
 
+.. _model_directory_specification:
+
 .. note::
    
    The DL models must be in a specific directory structure to be used by the ACE workflow.
@@ -460,3 +462,50 @@ More information on the ``miracl stats ace`` function can be found
 .. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
 
 .. include:: ../../../directives/tutorial_notebook_links.txt
+
+
+ACE Fine-Tuning
+===============
+
+ACE can be used with lightsheet microscopy datasets from other cellular 
+markers with different morphological features compared to c-Fos 
+(which ACE models were trained on) by fine-tuning the 
+pre-trained model(s). To fine-tune ACE, you need:
+
+1. A directory of 3D training images in tiff format.
+2. A directory of 3D training binary ground-truth images in tiff format.
+3. A directory of 3D validation images in tiff format.
+4. A directory of 3D validation binary ground-truth images in tiff format.
+5. Access to a GPU and a pre-trained model.
+
+.. note::
+
+   The images (both train and validation) and ground-truth labels must have
+   a size of at least 128x128x128 voxels.
+
+
+To fine-tune the model, you can use the following command:
+
+.. code-block::
+
+   $ miracl seg ace_finetune \
+      --train-images ./train_dir/ \
+      --train-labels ./train_gt_dir/ \
+      --val-images ./val_dir/ \
+      --val-labels ./val_gt_dir/ \
+      --output ./output_dir/ \
+      --config /code/miracl/seg/ace_finetune_model_config.yml
+
+The ``ace_finetune_model_config.yml`` file contains the model architecture 
+and hyperparameters for the fine-tuning process.
+
+.. note::
+
+   Please do not change the sections of the config file labelled
+   ``unet:`` and ``unetr:``. These sections contain the model architecture.
+   If a user is changing the model architecture, this is no longer considered
+   fine-tuning. Further, the script will raise an error since the user 
+   is trying to load in model weights for a different model architecture.
+
+The script will output the fine-tuned model weights in the output directory. The
+user can then :ref:`use this model to run the ACE workflow above<_model_directory_specification>`.

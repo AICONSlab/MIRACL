@@ -3,11 +3,17 @@ import os
 import subprocess
 import sys
 
-from miracl.seg import (ace_interface, ace_parser,
-                        miracl_instance_segmentation_interface,
-                        miracl_instance_segmentation_parser,
-                        miracl_seg_count_neurons_json, miracl_seg_feat_extract,
-                        miracl_seg_feats_cortex, miracl_seg_voxelize_parallel)
+from miracl.seg import (
+    ace_interface,
+    ace_parser,
+    miracl_seg_feat_extract,
+    miracl_seg_voxelize_parallel,
+    miracl_seg_feats_cortex,
+    miracl_instance_segmentation_interface,
+    miracl_instance_segmentation_parser,
+    miracl_seg_count_neurons_json,
+    ace_finetune_model,
+)
 
 
 def run_seg_clar(parser, args):
@@ -53,6 +59,11 @@ def run_voxelize(parser, args):
 
 def run_ace(parser, args):
     ace_interface.main(args=args)
+
+
+def run_ace_finetune(parser, args):
+    args = vars(args)
+    ace_finetune_model.main(args=args)
 
 
 def run_instance_parallel(parser, args):
@@ -128,9 +139,22 @@ def get_parser():
 
     parser_ace.set_defaults(func=run_ace)
 
+    # ace finetune
+    ace_finetune_parser = ace_finetune_model.parsefn()
+    parser_ace_finetune = subparsers.add_parser(
+        "ace_finetune",
+        parents=[ace_finetune_parser],
+        add_help=False,
+        usage=ace_finetune_parser.usage,
+        help="Fine-tune ACE model",
+    )
+
+    parser_ace_finetune.set_defaults(func=run_ace_finetune)
 
     # ace instance segmentation
-    instance_parser_class = miracl_instance_segmentation_parser.MIRACLInstanceSegParser()
+    instance_parser_class = (
+        miracl_instance_segmentation_parser.MIRACLInstanceSegParser()
+    )
     instance_parsefn = instance_parser_class.parsefn()
     parser_instance = subparsers.add_parser(
         miracl_instance_segmentation_parser.PROG_NAME,
@@ -155,7 +179,6 @@ def get_parser():
     )
 
     parser_count_neurons_json.set_defaults(func=run_count_neurons_json)
-    
 
     return parser
 
