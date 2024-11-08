@@ -1,13 +1,17 @@
-import os
-import sys
 import argparse
+import os
 import subprocess
+import sys
+
 from miracl.seg import (
+    ace_interface,
+    ace_parser,
     miracl_seg_feat_extract,
     miracl_seg_voxelize_parallel,
     miracl_seg_feats_cortex,
-    ace_parser,
-    ace_interface,
+    miracl_instance_segmentation_interface,
+    miracl_instance_segmentation_parser,
+    miracl_seg_count_neurons_json,
     ace_finetune_model,
 )
 
@@ -60,6 +64,14 @@ def run_ace(parser, args):
 def run_ace_finetune(parser, args):
     args = vars(args)
     ace_finetune_model.main(args=args)
+
+
+def run_instance_parallel(parser, args):
+    miracl_instance_segmentation_interface.main(args=args)
+
+
+def run_count_neurons_json(parser, args):
+    miracl_seg_count_neurons_json.main(args)
 
 
 def get_parser():
@@ -138,6 +150,35 @@ def get_parser():
     )
 
     parser_ace_finetune.set_defaults(func=run_ace_finetune)
+
+    # ace instance segmentation
+    instance_parser_class = (
+        miracl_instance_segmentation_parser.MIRACLInstanceSegParser()
+    )
+    instance_parsefn = instance_parser_class.parsefn()
+    parser_instance = subparsers.add_parser(
+        miracl_instance_segmentation_parser.PROG_NAME,
+        parents=[instance_parsefn],
+        add_help=False,
+        usage=instance_parsefn.usage,
+        description=instance_parsefn.description,
+        help="Instance segmentation step of ACE segmentation",
+    )
+
+    parser_instance.set_defaults(func=run_instance_parallel)
+
+    # count_neurons_json
+    count_neurons_json_parser = miracl_seg_count_neurons_json.parsefn()
+    parser_count_neurons_json = subparsers.add_parser(
+        miracl_seg_count_neurons_json.PROG_NAME,
+        parents=[count_neurons_json_parser],
+        add_help=False,
+        usage=count_neurons_json_parser.usage,
+        description=count_neurons_json_parser.description,
+        help="Count neurons in json file",
+    )
+
+    parser_count_neurons_json.set_defaults(func=run_count_neurons_json)
 
     return parser
 

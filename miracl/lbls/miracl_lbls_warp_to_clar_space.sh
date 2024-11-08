@@ -330,22 +330,21 @@ function warpallenlbls()
 	local tiflbls=${12}
 
 	# Up lbls
-    local inclar=${13}
-    local reslbls=${14}
-    local outputname=${15}
+    local reslbls=${13}
+    local outputname=${14}
 
     # Vox
-    local vox=${16}
+    local vox=${15}
 
     # Res clar
-    local smclarres=${17}
+    local smclarres=${16}
 
     # lbls to high res tiff
-    local orgclar=${18}
-    local tiflblszstack=${19}
-    local tifdirreg=${20}
-    local tifdirregfinal=${21}
-    local lblsname=${22}
+    local orgclar=${17}
+    local tiflblszstack=${18}
+    local tifdirreg=${19}
+    local tifdirregfinal=${20}
+    local lblsname=${21}
 
 
     # Upsample ref
@@ -504,7 +503,7 @@ function main()
     smclar=${regdir}/clar.nii.gz
 
     # last file made in niftis folder
-    inclar=`ls -r ${motherdir}/niftis/*down* | tail -n 1`
+    # inclar=`ls -r ${motherdir}/niftis/*down* | tail -n 1`
 
     # printf "inclar: ${inclar}"
 
@@ -532,7 +531,7 @@ function main()
 
 
 	warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} ${regdir} ${interpolation} ${outputtype} \
-		${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${outputname} ${vox} ${smclarres} \
+		${ortlbls} ${swplbls} ${tiflbls} ${reslbls} ${outputname} ${vox} ${smclarres} \
 		${clardir} ${tiflblszstack} ${tifdirreg} ${tifdirregfinal} ${lblsname} ${regdir}
 
 

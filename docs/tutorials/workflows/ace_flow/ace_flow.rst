@@ -138,7 +138,10 @@ The following information will be printed to the terminal:
         [-rwcv {10,25,50}]
         [--rerun-registration TRUE/FALSE]
         [--rerun-segmentation TRUE/FALSE]
+        [--rerun-instance-segmentation TRUE/FALSE]
         [--rerun-conversion TRUE/FALSE]
+        [--no-instance-segmentation]
+        [--no-validate-clusters]
 
       1) Segments images with ACE
       2) Convert raw tif/tiff files to nifti for registration
@@ -186,17 +189,29 @@ The following information will be printed to the terminal:
       -rwcv {10,25,50}, --rwc_voxel_size {10,25,50}
                               voxel size/Resolution in um for warping (default: 25)
       --rerun-registration TRUE/FALSE
-                              Whether to rerun registration step of flow; TRUE =>
+                              whether to rerun registration step of flow; TRUE =>
                               Force re-run (default: false)
       --rerun-segmentation TRUE/FALSE
-                              Whether to rerun segmentation step of flow; TRUE =>
+                              whether to rerun segmentation step of flow; TRUE =>
                               Force re-run (default: false)
+      --rerun-instance-segmentation TRUE/FALSE
+                              whether to rerun instance segmentation step of flow;
+                              TRUE => Force re-run (default: false)
       --rerun-conversion TRUE/FALSE
-                              Whether to rerun conversion step of flow; TRUE =>
+                              whether to rerun conversion step of flow; TRUE =>
                               Force re-run (default: false)
+      --no-instance-segmentation
+                              Do not run instance segmentation (default: False).
+                              Instance seg is used to identify and label neurons in
+                              the image. It is useful for counting and downstream
+                              tasks.
+      --no-validate-clusters
+                              Do not validate clusters (default: False). Validate
+                              clusters is used to get native space statistics for
+                              each subject based on the ouput of ACE TFCE stats.
 
    --------------------------------------------------
-   
+
    Use -hv or --help_verbose flag for more verbose help
 
 .. note::
@@ -249,6 +264,12 @@ Main outputs
    final_ctn_down_<CONVERSION DOWNSAMPLE RATIO>_rca_voxel_size_<REGISTRATION VOXEL SIZE>/ # main output folder
    |-- seg_final/
       |-- ...
+      |-- generated_patches/
+         |-- cc_patches/
+            |-- neuron_info_final.json
+            |-- ...
+      |-- cc_slices/
+         |-- ...
    |-- conv_final/
       |-- <CONVERSION NAME>.nii.gz
    |-- clar_allen_reg/
@@ -273,9 +294,17 @@ Main outputs
       |-- p_values.nii.gz
       |-- pvalue_heatmap_mean_plot.tiff
    |-- corr_final/
+   |-- neuron_info_json/
+      |-- ...
+   |-- validate_clusters_final/
+      |-- sig_clusters_summary.csv
 
 - ``seg_final``: Contains the segmentation output (binary) including model(s) outputs (and
   uncertainty estimates) in slice format that match with the raw data naming.
+  ``generated_patches/`` contains the 3D binary segmentation output (and model uncertainty estimates).
+  It also contains the 3D instance segmentation output in the ``cc_patches/`` directory paired
+  with the neuron info dictionary. Lastly the ``cc_slices/``directory contains instance segmentation 
+  output in slice format in the  with the raw data naming.
 - ``conv_final``: Contains the conversion (tiff to nifti) output. The name of this file depends
   on the parameters used in conversion. This will be the only file in this directory.
 - ``clar_allen_reg``: Contains the registration outputs / preliminary files.
@@ -308,6 +337,11 @@ Main outputs
   projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
   as ``-log10(p-value)``.
 - ``corr_final``: Contains the correlation analysis output including correlation maps and p_value maps.
+- ``neuron_info_json``: Contains the neuron info dictionary of each subject in json format.
+  This is used to place all dictionaries in a central directory for easier use by the workflow.
+- ``validate_clusters_final``: Contains pre-processed nifti p-value cluster files in atlas space and
+  a summary of the properties of the significant clusters in CSV format, including the 
+  number of neurons for each subject in native space.
 
 
 
