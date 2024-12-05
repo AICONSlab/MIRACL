@@ -20,13 +20,13 @@ either of the following methods:
 
    * **Docker**:
 
-     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
+     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish), ``24.04`` (Noble Numbat)
 
      * **Debian**: ``13`` (trixie)
 
    * **Singularity**:
 
-     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish)
+     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish), ``24.04`` (Noble Numbat)
 
      * **Gentoo**: ``2.14``
 
@@ -108,6 +108,16 @@ either of the following methods:
       .. code-block::
 
          $ ./install.sh
+
+      .. attention::
+
+         In order for the ``./install.sh`` script to work, :program:`Docker` should
+         **NOT** be used with ``sudo``. The installation script creates a user
+         in the Docker container that matches the ``uid`` and ``gid`` of the host
+         user. This user should **NOT** be ``root`` which is the case when 
+         :program:`Docker` commands are executed with ``sudo``. For more information
+         on how to add a ``docker`` user to use :program:`Docker` without ``sudo``
+         visit the official :program:`Docker` `documentation <https://docs.docker.com/engine/install/linux-postinstall/>`_.
 
       .. attention::
 
