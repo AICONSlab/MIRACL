@@ -16,55 +16,61 @@
 # VARIABLES #
 #############
 
-# Set variables base state
-# Detect OS (Linux/MacOs)
-os=$(uname -s)
+# Enforce strict error handling
+set -euo pipefail
 
-# Detect username
-SUDO_USER_CHECK=${SUDO_USER:-$USER}
+function initialize_variables() {
+  # Set variables base state
+  # Detect OS (Linux/MacOs)
+  os=$(uname -s)
 
-# Script version
-version="2.0.1-beta"
+  # Detect username
+  SUDO_USER_CHECK=${SUDO_USER:-$USER}
 
-# Service name
-service_name="miracl"
+  # Script version
+  version="2.0.1-beta"
 
-# Set default image name
-image_name="aicons/miracl"
+  # Service name
+  service_name="miracl"
 
-# Set default container name
-container_name="miracl"
+  # Set default image name
+  image_name="aicons/miracl"
 
-# Set default image version
-miracl_version="latest"
+  # Set default container name
+  container_name="miracl"
 
-# Version file version
-miracl_version_file=$(cat ./miracl/version.txt)
+  # Set default image version
+  miracl_version="latest"
 
-# Set container memory size limit
-if [[ "$os" == "Linux" ]]; then
-  shm_mem=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
-elif [[ "$os" == "Darwin" ]]; then
-  shm_mem=$(sysctl hw.memsize | awk '{printf "%dmb", int($2/1024/1024*0.85)}')
-else
-  echo "Unsupported operating system: $os"
-  exit 1
-fi
+  # Version file version
+  miracl_version_file=$(cat ./miracl/version.txt)
 
-# Set array to capture volumes
-volumes=()
+  # Set container memory size limit
+  if [[ "$os" == "Linux" ]]; then
+    shm_mem=$(grep MemTotal /proc/meminfo | awk '{printf "%dmb", int($2/1024*0.85)}')
+  elif [[ "$os" == "Darwin" ]]; then
+    shm_mem=$(sysctl hw.memsize | awk '{printf "%dmb", int($2/1024/1024*0.85)}')
+  else
+    echo "Unsupported operating system: $os"
+    exit 1
+  fi
 
-# Base usage
-base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
+  # Set array to capture volumes
+  volumes=()
+
+  # Base usage
+  base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
+}
+
+initialize_variables
 
 ##########
 # PARSER #
 ##########
 
-# Usage function
 function usage() {
 
-  cat <<usage
+  cat <<help_menu
 
  $base_usage
 
@@ -88,11 +94,10 @@ function usage() {
  Script version: $version
  MIRACL version: $miracl_version_file
 
-usage
+help_menu
 
 }
 
-# Args parser
 function parse_args() {
   # Parse command line arguments
   while getopts ":n:i:c:t:ged:v:lsmh" opt; do
@@ -183,17 +188,13 @@ function parse_args() {
 
 parse_args "$@"
 
-echo "This is service_name: $service_name"
-echo "This is image_name: $image_name"
-echo "This is container_name: $container_name"
-exit 1
-
 ##################
 # DOCKER COMPOSE #
 ##################
 
-# Generate docker-compose.yml file
-cat >docker-compose.yml <<EOF
+function populate_docker_compose() {
+  # Generate docker-compose.yml file
+  cat >docker-compose.yml <<EOF
 version: "3.3"
 services:
   $service_name:
@@ -207,9 +208,9 @@ services:
     shm_size: ${shm_mem}
 EOF
 
-if [[ $gpu ]]; then
+  if [[ $gpu ]]; then
 
-  cat >>docker-compose.yml <<EOF
+    cat >>docker-compose.yml <<EOF
     deploy:
       resources:
         reservations:
@@ -219,39 +220,48 @@ if [[ $gpu ]]; then
               capabilities: [gpu]
 EOF
 
-fi
+  fi
 
-# Append required volumes
-cat >>docker-compose.yml <<EOF
+  # Append required volumes
+  cat >>docker-compose.yml <<EOF
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
 EOF
 
-# Append MIRACL scripts folder mounting
-if [[ -z $dev ]]; then
+  # Append MIRACL scripts folder mounting
+  if [[ -z $dev ]]; then
 
-  install_script_dir=$(dirname "$(readlink -f "$0")")
+    install_script_dir=$(dirname "$(readlink -f "$0")")
 
-  cat >>docker-compose.yml <<EOF
+    cat >>docker-compose.yml <<EOF
       - ${install_script_dir}/miracl:/code/miracl
 EOF
 
-fi
+  fi
 
-# Add additional volumes
-for v in "${volumes[@]}"; do
-  echo "      - $v" >>docker-compose.yml
-done
+  # Add additional volumes
+  for v in "${volumes[@]}"; do
+    echo "      - $v" >>docker-compose.yml
+  done
+}
+
+populate_docker_compose
 
 ##############
 # DOCKERFILE #
 ##############
 
-# Information that needs to be added to Dockerfile
-# to create pseudo host user. This is required to
-# make X11 work correclty with miraclGUI
-USER_TEXT=$(
-  cat <<END
+# Function to remove user text in Dockerfile if it is already present
+function rm_USER_TEXT() {
+  sed -i '/STARTUNCOMMENT/,/STOPUNCOMMENT/{//!d}' Dockerfile
+}
+
+function populate_dockerfile() {
+  # Information that needs to be added to Dockerfile
+  # to create pseudo host user. This is required to
+  # make X11 work correclty with miraclGUI
+  USER_TEXT=$(
+    cat <<END
 # Setup host user as container user\n\
 ARG USER_ID=\$USER_ID\n\
 ARG GROUP_ID=\$GROUP_ID\n\
@@ -264,97 +274,99 @@ RUN chown -R \$USER:\$USER /code\n\
 USER \$USER\n\
 WORKDIR /home/\$USER
 END
-)
+  )
 
-# Function to remove user text in Dockerfile if it is already present
-function rm_USER_TEXT() {
-  sed -i '/STARTUNCOMMENT/,/STOPUNCOMMENT/{//!d}' Dockerfile
+  # Check if $USER_TEXT strings are already present and delete if true
+  if [ "$(sed -n '/#STARTUNCOMMENT#/{n;p;}' Dockerfile)" != "#STOPUNCOMMENT#" ]; then
+    rm_USER_TEXT
+  fi
 }
 
-# Check if $USER_TEXT strings are already present and delete if true
-if [ "$(sed -n '/#STARTUNCOMMENT#/{n;p;}' Dockerfile)" != "#STOPUNCOMMENT#" ]; then
-  rm_USER_TEXT
-fi
+populate_dockerfile
 
 #########
 # BUILD #
 #########
 
-# Check if Docker is installed
-if [ -x "$(command -v docker)" ]; then
-  printf "\nDocker installation found.\n"
-  # Adding host user requirements to Dockerfile
-  sed -i "/#STARTUNCOMMENT#/a $USER_TEXT" Dockerfile
-  # Change user in docker-compose.yml to host user
-  HOST_USER=$(whoami)
-  export HOST_USER
-  sed -i "s/\(\/home\/\).*\(\/.Xauthority:\/home\/\).*\(\/.Xauthority\)/\1$HOST_USER\2$HOST_USER\3/g" docker-compose.yml
+function build_docker() {
+  # Check if Docker is installed
+  if [ -x "$(command -v docker)" ]; then
+    printf "\nDocker installation found.\n"
+    # Adding host user requirements to Dockerfile
+    sed -i "/#STARTUNCOMMENT#/a $USER_TEXT" Dockerfile
+    # Change user in docker-compose.yml to host user
+    HOST_USER=$(whoami)
+    export HOST_USER
+    sed -i "s/\(\/home\/\).*\(\/.Xauthority:\/home\/\).*\(\/.Xauthority\)/\1$HOST_USER\2$HOST_USER\3/g" docker-compose.yml
 
-  ######################################
-  # Build MIRACL image from Dockerfile #
-  ######################################
+    ######################################
+    # Build MIRACL image from Dockerfile #
+    ######################################
 
-  # Printing information about build process and docker-compose.yml to stdout
-  printf "\n[+] Building MIRACL and creating docker-compose.yml with the following parameters:\n"
-  printf " User: %s\n" "$HOST_USER"
-  printf " pid: %s\n" "$(id -u)"
-  printf " gid: %s\n" "$(id -g)"
-  printf " Max shared memory: %s\n" "$shm_mem"
-  printf " Service name: %s\n" "$service_name"
-  printf " Image name: %s\n" "$image_name:$miracl_version"
-  printf " Container name: %s\n" "$container_name"
-  printf " GPU passthrough: %s\n" "${gpu:-false}"
-  printf " Script dir mounted: %s\n" "${dev:-true}"
-  printf " Log file: %s\n" "${write_log:-false}"
-  for v in "${!volumes[@]}"; do
-    printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
-  done
+    # Printing information about build process and docker-compose.yml to stdout
+    printf "\n[+] Building MIRACL and creating docker-compose.yml with the following parameters:\n"
+    printf " User: %s\n" "$HOST_USER"
+    printf " pid: %s\n" "$(id -u)"
+    printf " gid: %s\n" "$(id -g)"
+    printf " Max shared memory: %s\n" "$shm_mem"
+    printf " Service name: %s\n" "$service_name"
+    printf " Image name: %s\n" "$image_name:$miracl_version"
+    printf " Container name: %s\n" "$container_name"
+    printf " GPU passthrough: %s\n" "${gpu:-false}"
+    printf " Script dir mounted: %s\n" "${dev:-true}"
+    printf " Log file: %s\n" "${write_log:-false}"
+    for v in "${!volumes[@]}"; do
+      printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
+    done
 
-  # Pass user name, UID and GID to Dockerfile
-  function docker_build() {
-    docker build \
-      --build-arg USER_ID="$(id -u)" \
-      --build-arg GROUP_ID="$(id -g)" \
-      --build-arg USER="$HOST_USER" \
-      -t "$image_name":"$miracl_version" .
-  }
+    # Pass user name, UID and GID to Dockerfile
+    function docker_build() {
+      docker build \
+        --build-arg USER_ID="$(id -u)" \
+        --build-arg GROUP_ID="$(id -g)" \
+        --build-arg USER="$HOST_USER" \
+        -t "$image_name":"$miracl_version" .
+    }
 
-  # Check for log flag
-  if [ "${write_log}" ]; then
-    docker_build | tee build.log
-  else
-    docker_build
-  fi
-
-  # Check if build process exited without errors
-  build_status_code=$?
-  if [ $build_status_code -eq 0 ]; then
-    printf "\nBuild was successful! Checking Docker Compose installation.\n"
-    # Remove $USER_TEXT from Dockerfile
-    rm_USER_TEXT
-
-    # Test if docker-compose is installed
-    # Should come by default with Docker-Desktop
-    if [ -x "$(command -v docker-compose)" ]; then
-      printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$(docker-compose --version)"
-    elif dcex=$(docker compose version); then
-      printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$dcex"
+    # Check for log flag
+    if [ "${write_log}" ]; then
+      docker_build | tee build.log
     else
-      printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
+      docker_build
     fi
-  else
-    # Return error code if build was not successful
-    printf "\nBuild not successful! An error occured with exit code: %s\n" $build_status_code
-    # Remove $USER_TEXT from Dockerfile
-    rm_USER_TEXT
-    # Exit with custom status code
-    exit $build_status_code
-  fi
 
-else
-  di_status_code=$?
-  printf "\nDocker installation not found. Please install Docker first.\n"
-  printf "Exiting with status code %s\n" $di_status_code
-  # Exit with custom status code
-  exit $di_status_code
-fi
+    # Check if build process exited without errors
+    build_status_code=$?
+    if [ $build_status_code -eq 0 ]; then
+      printf "\nBuild was successful! Checking Docker Compose installation.\n"
+      # Remove $USER_TEXT from Dockerfile
+      rm_USER_TEXT
+
+      # Test if docker-compose is installed
+      # Should come by default with Docker-Desktop
+      if [ -x "$(command -v docker-compose)" ]; then
+        printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$(docker-compose --version)"
+      elif dcex=$(docker compose version); then
+        printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$dcex"
+      else
+        printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
+      fi
+    else
+      # Return error code if build was not successful
+      printf "\nBuild not successful! An error occured with exit code: %s\n" $build_status_code
+      # Remove $USER_TEXT from Dockerfile
+      rm_USER_TEXT
+      # Exit with custom status code
+      exit $build_status_code
+    fi
+
+  else
+    di_status_code=$?
+    printf "\nDocker installation not found. Please install Docker first.\n"
+    printf "Exiting with status code %s\n" $di_status_code
+    # Exit with custom status code
+    exit $di_status_code
+  fi
+}
+
+build_docker
