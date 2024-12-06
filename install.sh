@@ -28,6 +28,16 @@ function check_for_sudo() {
   fi
 }
 
+function random_docker_names_generator() {
+  random_surnames=("darwin" "einstein" "newton" "tesla" "curie" "turing" "hawking" "feynman" "planck" "galilei" "schrödinger" "heisenberg" "kepler" "lovelace" "hubble" "boyle" "maxwell" "faraday" "bohr" "pauling" "copernicus" "mendeleev" "roentgen" "koch" "lamarck" "linnaeus" "mendel" "galileo" "linus" "franklin" "ramanujan" "euler" "knuth" "cavendish" "brahe" "boyle" "murray" "sagan" "piccard" "watt" "alhazen" "nobel" "gates" "hertz" "berzelius" "fermi" "mendel" "nash" "snell" "poincaré" "galois" "descartes" "laplace" "riemann" "wheeler" "shannon" "dijkstra" "sherrington" "bardeen" "gibbs" "witten" "hughes" "dunlop" "fleming" "wright" "jefferson" "seaborg" "mendel" "bardeen" "planck" "gibbs" "witten" "hughes" "fleming" "kepler" "charles" "bohr" "karl" "pauling" "coulomb" "bragg" "hubble" "schmidt" "kirk" "spock" "mccoy" "sulu" "ura" "scott" "pike" "mudd" "rand" "checkov" "uhura" "crushar" "worf" "data" "riker" "laforge" "troi" "picard" "crusher" "guinan" "yar" "worf" "tasha" "troi" "dax" "sisko" "kira" "bashir" "odo" "quark" "jacob" "gold" "bashir" "kassidy" "janeway" "chakotay" "seven" "kim" "neelix" "paris" "tuvok" "balana")
+
+  random_surname=${random_surnames[$RANDOM % ${#random_surnames[@]}]}
+  random_digits=$((RANDOM % 100000))
+
+  random_container_name="MIRACL_${random_surname}_${random_digits}"
+  random_image_name="${random_container_name}_img"
+}
+
 function initialize_variables() {
   # Set variables base state
   # Detect OS (Linux/MacOs)
@@ -40,10 +50,10 @@ function initialize_variables() {
   service_name="miracl"
 
   # Set default image name
-  image_name="aicons/miracl"
+  image_name="${random_image_name}"
 
   # Set default container name
-  container_name="miracl"
+  container_name="${random_container_name}"
 
   # Set default image version
   miracl_version="latest"
@@ -460,6 +470,7 @@ function build_docker() {
 # Run interactive prompt if no flags are provided
 function main() {
   check_for_sudo
+  random_docker_names_generator
   initialize_variables
   if [ $# -eq 0 ]; then
     interactive_prompt
