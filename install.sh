@@ -68,6 +68,92 @@ function initialize_variables() {
   base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
 }
 
+######################
+# INTERACTIVE PROMPT #
+######################
+
+# Function to prompt for valid input
+function prompt_yes_no() {
+  local prompt="$1"
+  local var_name="$2"
+  local default_value="$3"
+  local alt_value="$4"
+
+  while true; do
+    read -r -p "$prompt ($alt_value/$default_value): " input
+
+    # Set the default value if no input is given
+    input="${input:-$default_value}"
+
+    # Normalize input to lowercase for case insensitivity
+    case "${input,,}" in
+    y | yes)
+      eval "$var_name=true"
+      break
+      ;;
+    n | no)
+      eval "$var_name=false"
+      break
+      ;;
+    *)
+      echo "Invalid input. Please enter 'y', 'n', 'Y', 'N', 'Yes', or 'No' or press enter to use the default value."
+      ;;
+    esac
+  done
+}
+
+function validate_input() {
+  local input_var="$1"
+  echo "$input_var" | grep -qP '^[a-zA-Z0-9._/-]+$' || {
+    echo "Error: Invalid name '$input_var'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed."
+    return 1 # Invalid input
+  }
+
+  return 0
+}
+
+function prompt_image_name() {
+  default_image_name="${image_name}"
+  while true; do
+    read -r -p "Enter Docker image name (default: '${default_image_name}'): " input_image_name
+    image_name="${input_image_name:-${default_image_name}}"
+
+    if validate_input "$image_name"; then
+      break
+    fi
+  done
+}
+
+function prompt_container_name() {
+  default_container_name="${container_name}"
+  while true; do
+    read -r -p "Enter Docker container name (default: '${default_container_name}'): " input_container_name
+    container_name="${input_container_name:-${default_container_name}}"
+
+    if validate_input "$container_name"; then
+      break
+    fi
+  done
+}
+
+# Interactive prompt function
+function interactive_prompt() {
+  echo "No flags provided, starting interactive prompt..."
+
+  prompt_image_name
+  prompt_container_name
+  prompt_yes_no "Enable GPU in Docker container (required for ACE)" gpu "N" "y"
+  prompt_yes_no "Disable script directory mounting" dev "N" "y"
+  prompt_yes_no "Write build log" write_log "N" "y"
+
+  # Print final variable values for verification
+  echo "GPU enabled: $gpu"
+  echo "Script directory mounting: $dev"
+  echo "Write build log: $write_log"
+  echo "Docker image name: $image_name"
+  echo "Docker container name: $container_name"
+}
+
 ##########
 # PARSER #
 ##########
@@ -367,9 +453,17 @@ function build_docker() {
   fi
 }
 
+##############
+# MAIN LOGIC #
+##############
+
+# Run interactive prompt if no flags are provided
 function main() {
   check_for_sudo
   initialize_variables
+  if [ $# -eq 0 ]; then
+    interactive_prompt
+  fi
   parse_args "$@"
   populate_docker_compose
   populate_dockerfile
