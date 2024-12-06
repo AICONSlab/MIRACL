@@ -19,13 +19,19 @@
 # Enforce strict error handling
 set -euo pipefail
 
+function check_for_sudo() {
+  SUDO_USER_CHECK=${SUDO_USER:-$USER}
+
+  if [ "$(id -u)" -eq 0 ]; then
+    printf "\nError: This script will not work with 'sudo'. Please run it without 'sudo', as the user on your host system (%s) who will be using MIRACL.\n\nInfo: In case you are using 'sudo' because docker requires 'sudo' privileges, create a 'docker' group and add your host user to it. This should allow you to use Docker without 'sudo'.\n\nInfo: For more information on how to create a 'docker' group and add your host user, visit the official Docker docs: https://docs.docker.com/engine/install/linux-postinstall/\n\n" "${SUDO_USER_CHECK}"
+    exit 1
+  fi
+}
+
 function initialize_variables() {
   # Set variables base state
   # Detect OS (Linux/MacOs)
   os=$(uname -s)
-
-  # Detect username
-  SUDO_USER_CHECK=${SUDO_USER:-$USER}
 
   # Script version
   version="2.0.1-beta"
@@ -61,8 +67,6 @@ function initialize_variables() {
   # Base usage
   base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
 }
-
-initialize_variables
 
 ##########
 # PARSER #
@@ -186,8 +190,6 @@ function parse_args() {
   shift "$((OPTIND - 1))"
 }
 
-parse_args "$@"
-
 ##################
 # DOCKER COMPOSE #
 ##################
@@ -245,8 +247,6 @@ EOF
   done
 }
 
-populate_docker_compose
-
 ##############
 # DOCKERFILE #
 ##############
@@ -281,8 +281,6 @@ END
     rm_USER_TEXT
   fi
 }
-
-populate_dockerfile
 
 #########
 # BUILD #
@@ -369,4 +367,14 @@ function build_docker() {
   fi
 }
 
-build_docker
+function main() {
+  check_for_sudo
+  initialize_variables
+  parse_args "$@"
+  populate_docker_compose
+  populate_dockerfile
+  build_docker
+}
+
+# Run
+main "$@"
