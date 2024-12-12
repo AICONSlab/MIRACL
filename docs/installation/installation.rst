@@ -100,6 +100,12 @@ either of the following methods:
       .. code-block::
 
          $ git clone https://www.github.com/mgoubran/MIRACL
+
+      Change into the newly created directory where you cloned 
+      :program:`MIRACL` to:
+
+      .. code-block::
+
          $ cd MIRACL
 
       Build the latest :program:`MIRACL` image using the installation script we 
