@@ -20,10 +20,10 @@
 set -euo pipefail
 
 function check_for_sudo() {
-  SUDO_USER_CHECK=${SUDO_USER:-$USER}
+  local logged_in_user=$(logname)
 
   if [ "$(id -u)" -eq 0 ]; then
-    printf "\nError: This script will not work with 'sudo'. Please run it without 'sudo', as the user on your host system (%s) who will be using MIRACL.\n\nInfo: In case you are using 'sudo' because docker requires 'sudo' privileges, create a 'docker' group and add your host user to it. This should allow you to use Docker without 'sudo'.\n\nInfo: For more information on how to create a 'docker' group and add your host user, visit the official Docker docs: https://docs.docker.com/engine/install/linux-postinstall/\n\n" "${SUDO_USER_CHECK}"
+    printf "\nError: This script will not work with 'sudo'. Please run it without 'sudo', as the user on your host system (%s) who will be using MIRACL.\n\nInfo: In case you are using 'sudo' because docker requires 'sudo' privileges, create a 'docker' group and add your host user to it. This should allow you to use Docker without 'sudo'.\n\nInfo: For more information on how to create a 'docker' group and add your host user, visit the official Docker docs: https://docs.docker.com/engine/install/linux-postinstall/\n" "${logged_in_user}"
     exit 1
   fi
 }
@@ -31,10 +31,12 @@ function check_for_sudo() {
 function random_docker_names_generator() {
   random_surnames=("darwin" "einstein" "newton" "tesla" "curie" "turing" "hawking" "feynman" "planck" "galilei" "schroedinger" "heisenberg" "kepler" "lovelace" "hubble" "maxwell" "faraday" "bohr" "pauling" "copernicus" "mendeleev" "roentgen" "koch" "lamarck" "linnaeus" "mendel" "stallman" "torvalds" "moolenaar" "ramanujan" "euler" "knuth" "cavendish" "brahe" "boyle" "murray" "sagan" "watt" "alhazen" "nobel" "gates" "hertz" "berzelius" "fermi" "nash" "snell" "galois" "descartes" "laplace" "riemann" "wheeler" "shannon" "dijkstra" "sherrington" "gibbs" "dunlop" "fleming" "wright" "jefferson" "seaborg" "bardeen" "witten" "hughes" "charles" "bohr" "karl" "pauling" "coulomb" "bragg" "hubble" "schmidt" "kirk" "spock" "mccoy" "sulu" "ura" "scott" "pike" "mudd" "rand" "checkov" "uhura" "data" "riker" "laforge" "picard" "crusher" "guinan" "yar" "worf" "troi" "dax" "sisko" "kira" "bashir" "odo" "quark" "jacob" "bashir" "kassidy" "janeway" "chakotay" "seven" "kim" "neelix" "paris" "tuvok" "balana")
 
+  local logged_in_user=$(logname)
+
   random_surname=${random_surnames[$RANDOM % ${#random_surnames[@]}]}
   random_digits=$((RANDOM % 100000))
 
-  random_container_name="MIRACL_${random_surname}_${random_digits}"
+  random_container_name="miracl_${logged_in_user}_${random_surname}_${random_digits}"
   random_image_name="${random_container_name}_img"
 }
 
@@ -71,6 +73,21 @@ function initialize_variables() {
     exit 1
   fi
 
+  # Set default for GPU passthrough
+  # Setting the flag enables GPU passthrough
+  : "${gpu:=false}"
+
+  # Set default for mounting MIRACL's script folder into container
+  # Setting the flag disables mounting
+  : "${dev:=false}"
+
+  # Set default to write log file
+  # Setting flag writes log file
+  : "${write_log:=false}"
+
+  # Set default for interactive prompt data location
+  interactive_prompt_data_location=false
+
   # Set array to capture volumes
   volumes=()
 
@@ -98,11 +115,11 @@ function prompt_yes_no() {
     # Normalize input to lowercase for case insensitivity
     case "${input,,}" in
     y | yes)
-      eval "$var_name=true"
+      eval "${var_name}=true"
       break
       ;;
     n | no)
-      eval "$var_name=false"
+      eval "${var_name}=false"
       break
       ;;
     *)
@@ -112,10 +129,10 @@ function prompt_yes_no() {
   done
 }
 
-function validate_input() {
+function validate_name_input() {
   local input_var="$1"
-  echo "$input_var" | grep -qP '^[a-zA-Z0-9._/-]+$' || {
-    echo "Error: Invalid name '$input_var'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed."
+  echo "${input_var}" | grep -qP '^[a-zA-Z0-9._/-]+$' || {
+    echo "Error: Invalid name '${input_var}'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed."
     return 1 # Invalid input
   }
 
@@ -128,7 +145,7 @@ function prompt_image_name() {
     read -r -p "Enter Docker image name (default: '${default_image_name}'): " input_image_name
     image_name="${input_image_name:-${default_image_name}}"
 
-    if validate_input "$image_name"; then
+    if validate_name_input "${image_name}"; then
       break
     fi
   done
@@ -140,7 +157,39 @@ function prompt_container_name() {
     read -r -p "Enter Docker container name (default: '${default_container_name}'): " input_container_name
     container_name="${input_container_name:-${default_container_name}}"
 
-    if validate_input "$container_name"; then
+    if validate_name_input "$container_name"; then
+      break
+    fi
+  done
+}
+
+function validate_data_path_input() {
+  local input_var="$1"
+  if [ -d "${1}" ]; then
+    return 0
+  else
+    echo "The path you enter does not exist on the host system. Please enter a valid path."
+    return 1
+  fi
+}
+
+function prompt_data_folder() {
+  interactive_data_location_container="/data"
+  while true; do
+    read -e -r -p "Enter the location of your data on your host system (default: None). If you choose a location, your data will be mounted at '/data' in your container: " input_data_location_host
+
+    interactive_data_location_host="${input_data_location_host:-false}"
+
+    if [[ ${interactive_data_location_host} != false ]]; then
+      interactive_data_location_host="${interactive_data_location_host%/}"  # Remove trailing slash
+      if [[ "${interactive_data_location_host}" != /* ]]; then  # Prepend slash if not present 
+        interactive_data_location_host="/${interactive_data_location_host}"
+      fi
+      if validate_data_path_input "${interactive_data_location_host}"; then
+        interactive_prompt_data_location="${interactive_data_location_host}:${interactive_data_location_container}"
+        break 
+      fi
+    else
       break
     fi
   done
@@ -153,15 +202,17 @@ function interactive_prompt() {
   prompt_image_name
   prompt_container_name
   prompt_yes_no "Enable GPU in Docker container (required for ACE)" gpu "N" "y"
-  prompt_yes_no "Disable script directory mounting" dev "N" "y"
-  prompt_yes_no "Write build log" write_log "N" "y"
+  # prompt_yes_no "Disable script directory mounting" dev "N" "y"  # Currently disabled to not give beginner user too many options
+  # prompt_yes_no "Write build log" write_log "N" "y"  # Currently disabled to not give beginner user too many options
+  prompt_data_folder
 
   # Print final variable values for verification
-  echo "GPU enabled: $gpu"
-  echo "Script directory mounting: $dev"
-  echo "Write build log: $write_log"
+  # echo "Script directory mounting: $dev"  # Currently disabled to not give beginner user too many options
+  # echo "Write build log: $write_log"  # Currently disabled to not give beginner user too many options
   echo "Docker image name: $image_name"
   echo "Docker container name: $container_name"
+  echo "GPU enabled: $gpu"
+  echo "Data location: $interactive_prompt_data_location"
 }
 
 ##########
@@ -183,7 +234,7 @@ function usage() {
    -c, specify container name (default: 'miracl')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
-   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled)
+   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled; set flag to disable)
    -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
    -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
@@ -237,7 +288,7 @@ function parse_args() {
       ;;
 
     e)
-      dev=false
+      dev=true
       ;;
 
     d)
@@ -327,17 +378,22 @@ EOF
 EOF
 
   # Append MIRACL scripts folder mounting
-  if [[ -z $dev ]]; then
+  # if [[ -z $dev ]]; then
+  if [[ ${dev} == false ]]; then
 
     install_script_dir=$(dirname "$(readlink -f "$0")")
 
     cat >>docker-compose.yml <<EOF
       - ${install_script_dir}/miracl:/code/miracl
 EOF
-
   fi
 
   # Add additional volumes
+  # Check if interactive data location was provided
+  if [[ ${interactive_prompt_data_location} != false ]]; then 
+      volumes+=("${interactive_prompt_data_location}")
+  fi
+
   for v in "${volumes[@]}"; do
     echo "      - $v" >>docker-compose.yml
   done
@@ -406,9 +462,9 @@ function build_docker() {
     printf " Service name: %s\n" "$service_name"
     printf " Image name: %s\n" "$image_name:$miracl_version"
     printf " Container name: %s\n" "$container_name"
-    printf " GPU passthrough: %s\n" "${gpu:-false}"
-    printf " Script dir mounted: %s\n" "${dev:-true}"
-    printf " Log file: %s\n" "${write_log:-false}"
+    printf " GPU passthrough: %s\n" "${gpu}"
+    printf " Script dir mounting disabled: %s\n" "${dev}"
+    printf " Log file: %s\n" "${write_log}"
     for v in "${!volumes[@]}"; do
       printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
     done
