@@ -209,10 +209,10 @@ function interactive_prompt() {
   # Print final variable values for verification
   # echo "Script directory mounting: $dev"  # Currently disabled to not give beginner user too many options
   # echo "Write build log: $write_log"  # Currently disabled to not give beginner user too many options
-  echo "Docker image name: $image_name"
-  echo "Docker container name: $container_name"
-  echo "GPU enabled: $gpu"
-  echo "Data location: $interactive_prompt_data_location"
+  # echo "Docker image name: $image_name"
+  # echo "Docker container name: $container_name"
+  # echo "GPU enabled: $gpu"
+  # echo "Data location: $interactive_prompt_data_location"
 }
 
 ##########
@@ -378,7 +378,6 @@ EOF
 EOF
 
   # Append MIRACL scripts folder mounting
-  # if [[ -z $dev ]]; then
   if [[ ${dev} == false ]]; then
 
     install_script_dir=$(dirname "$(readlink -f "$0")")
