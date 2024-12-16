@@ -45,6 +45,8 @@ setup(
         "torch==1.13.1",
         "torchaudio==0.13.1",
         "torchvision==0.14.1",
+        "torchio==0.18.92",
+        "typer==0.11.1",
         "opencv-python==4.2.0.32",
         "tifffile==2021.11.2",
         "nibabel==4.0.2",
@@ -65,9 +67,8 @@ setup(
         "scikit-learn==1.0.2",
         "svgwrite==1.4.3",
         "loguru==0.6.0",
-        'mne==1.3.1',
-        'imagecodecs==2021.11.20',
-        'torchio==0.18.92'
+        "mne==1.3.1",
+        "imagecodecs==2021.11.20",
     ],
     entry_points={
         "console_scripts": ["miracl=miracl.cli:main"],
