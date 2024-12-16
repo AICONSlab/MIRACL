@@ -20,7 +20,8 @@
 set -euo pipefail
 
 function check_for_sudo() {
-  local logged_in_user=$(logname)
+  local logged_in_user
+  logged_in_user=$(logname)
 
   if [ "$(id -u)" -eq 0 ]; then
     printf "\nError: This script will not work with 'sudo'. Please run it without 'sudo', as the user on your host system (%s) who will be using MIRACL.\n\nInfo: In case you are using 'sudo' because docker requires 'sudo' privileges, create a 'docker' group and add your host user to it. This should allow you to use Docker without 'sudo'.\n\nInfo: For more information on how to create a 'docker' group and add your host user, visit the official Docker docs: https://docs.docker.com/engine/install/linux-postinstall/\n" "${logged_in_user}"
@@ -31,7 +32,8 @@ function check_for_sudo() {
 function random_docker_names_generator() {
   random_surnames=("darwin" "einstein" "newton" "tesla" "curie" "turing" "hawking" "feynman" "planck" "galilei" "schroedinger" "heisenberg" "kepler" "lovelace" "hubble" "maxwell" "faraday" "bohr" "pauling" "copernicus" "mendeleev" "roentgen" "koch" "lamarck" "linnaeus" "mendel" "stallman" "torvalds" "moolenaar" "ramanujan" "euler" "knuth" "cavendish" "brahe" "boyle" "murray" "sagan" "watt" "alhazen" "nobel" "gates" "hertz" "berzelius" "fermi" "nash" "snell" "galois" "descartes" "laplace" "riemann" "wheeler" "shannon" "dijkstra" "sherrington" "gibbs" "dunlop" "fleming" "wright" "jefferson" "seaborg" "bardeen" "witten" "hughes" "charles" "bohr" "karl" "pauling" "coulomb" "bragg" "hubble" "schmidt" "kirk" "spock" "mccoy" "sulu" "ura" "scott" "pike" "mudd" "rand" "checkov" "uhura" "data" "riker" "laforge" "picard" "crusher" "guinan" "yar" "worf" "troi" "dax" "sisko" "kira" "bashir" "odo" "quark" "jacob" "bashir" "kassidy" "janeway" "chakotay" "seven" "kim" "neelix" "paris" "tuvok" "balana")
 
-  local logged_in_user=$(logname)
+  local logged_in_user
+  logged_in_user=$(logname)
 
   random_surname=${random_surnames[$RANDOM % ${#random_surnames[@]}]}
   random_digits=$((RANDOM % 100000))
@@ -62,6 +64,11 @@ function initialize_variables() {
 
   # Version file version
   miracl_version_file=$(cat ./miracl/version.txt)
+
+  if [[ ! ${miracl_version_file} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Invalid version number format. Please check './miracl/version.txt' and make sure the version number is in the correct format (e.g. '2.4.0' or '1.14.2')"
+    exit 1
+  fi
 
   # Set container memory size limit
   if [[ "$os" == "Linux" ]]; then
@@ -181,13 +188,13 @@ function prompt_data_folder() {
     interactive_data_location_host="${input_data_location_host:-false}"
 
     if [[ ${interactive_data_location_host} != false ]]; then
-      interactive_data_location_host="${interactive_data_location_host%/}"  # Remove trailing slash
-      if [[ "${interactive_data_location_host}" != /* ]]; then  # Prepend slash if not present 
+      interactive_data_location_host="${interactive_data_location_host%/}" # Remove trailing slash
+      if [[ "${interactive_data_location_host}" != /* ]]; then             # Prepend slash if not present
         interactive_data_location_host="/${interactive_data_location_host}"
       fi
       if validate_data_path_input "${interactive_data_location_host}"; then
         interactive_prompt_data_location="${interactive_data_location_host}:${interactive_data_location_container}"
-        break 
+        break
       fi
     else
       break
@@ -229,21 +236,21 @@ function usage() {
 
  Options:
 
-   -n, name of the Docker service (default: 'miracl')
-   -i, specify image name (default: 'aicons/miracl')
-   -c, specify container name (default: 'miracl')
-   -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
-   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
-   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: enabled; set flag to disable)
+   -n, name of the Docker service (randomized default: '${container_name}')
+   -i, specify image name (randomized default: '${image_name}')
+   -c, specify container name (default: '${service_name}')
+   -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: '${miracl_version}')
+   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: ${gpu})
+   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: ${dev}; set flag to disable)
    -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
-   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
+   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: ${write_log})
    -s, print version of build script and exit
    -m, print version of MIRACL on current Git branch and exit
    -h, print this help menu and exit
 
- Script version: $version
- MIRACL version: $miracl_version_file
+ Script version: ${version}
+ MIRACL version: ${miracl_version_file}
 
 help_menu
 
@@ -389,8 +396,8 @@ EOF
 
   # Add additional volumes
   # Check if interactive data location was provided
-  if [[ ${interactive_prompt_data_location} != false ]]; then 
-      volumes+=("${interactive_prompt_data_location}")
+  if [[ ${interactive_prompt_data_location} != false ]]; then
+    volumes+=("${interactive_prompt_data_location}")
   fi
 
   for v in "${volumes[@]}"; do
