@@ -303,7 +303,7 @@ Main outputs
   uncertainty estimates) in slice format that match with the raw data naming.
   ``generated_patches/`` contains the 3D binary segmentation output (and model uncertainty estimates).
   It also contains the 3D instance segmentation output in the ``cc_patches/`` directory paired
-  with the neuron info dictionary. Lastly the ``cc_slices/``directory contains instance segmentation 
+  with the neuron info dictionary. Lastly the ``cc_slices/`` directory contains instance segmentation 
   output in slice format in the  with the raw data naming.
 - ``conv_final``: Contains the conversion (tiff to nifti) output. The name of this file depends
   on the parameters used in conversion. This will be the only file in this directory.
@@ -508,4 +508,4 @@ and hyperparameters for the fine-tuning process.
    is trying to load in model weights for a different model architecture.
 
 The script will output the fine-tuned model weights in the output directory. The
-user can then :ref:`use this model to run the ACE workflow above<_model_directory_specification>`.
+user can then :ref:`use this model to run the ACE workflow above<model_directory_specification>`.
