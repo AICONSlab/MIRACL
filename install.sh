@@ -364,7 +364,7 @@ services:
     shm_size: ${shm_mem}
 EOF
 
-  if [[ $gpu ]]; then
+  if [[ "${gpu}" == true ]]; then
 
     cat >>docker-compose.yml <<EOF
     deploy:
