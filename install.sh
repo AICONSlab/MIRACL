@@ -348,6 +348,30 @@ function parse_args() {
 # DOCKER COMPOSE #
 ##################
 
+#!/bin/bash
+
+function check_gpu() {
+  # Check if nvidia-smi is available (NVIDIA driver installed)
+  if ! command -v nvidia-smi &> /dev/null; then
+      echo "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed."
+      exit 1
+  fi
+
+  # Check if any GPUs are detected by nvidia-smi
+  gpu_count=$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)
+
+  if [[ "$gpu_count" -gt 0 ]]; then
+      echo "Found $gpu_count Nvidia GPU(s) on your system."
+      
+      # Optionally: Check if CUDA is supported
+      cuda_version=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader,nounits)
+      echo "CUDA supported with driver version $cuda_version."
+  else
+      echo "No Nvidia GPUs found or GPUs are not accessible."
+      exit 1
+  fi
+}
+
 function populate_docker_compose() {
   # Generate docker-compose.yml file
   cat >docker-compose.yml <<EOF
@@ -365,6 +389,8 @@ services:
 EOF
 
   if [[ "${gpu}" == true ]]; then
+
+    check_gpu
 
     cat >>docker-compose.yml <<EOF
     deploy:
