@@ -12,8 +12,6 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_maple3_generate_patch import (
     GeneratePatch as seg_mapl3_genpatch,
 )
 
-# print(f"Object import test: {seg_mapl3_genpatch.input}")
-
 
 class Mapl3Parser:
     """
