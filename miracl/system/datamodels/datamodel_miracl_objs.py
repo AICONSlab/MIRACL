@@ -147,12 +147,12 @@ class MiraclObj(BaseModel):
         default=None, description="Used for MIRACL interfaces to pass directory paths"
     )
 
-    obj_default: Optional[Union[Path, int, float, List[Any], str, Dict[str, Any]]] = (
-        Field(
-            None,
-            description="Default obj value for arg, if any, for e.g. cli or gui",
-            example=25,
-        )
+    obj_default: Optional[
+        Union[Path, int, float, List[Any], str, Dict[str, Any], bool]
+    ] = Field(
+        None,
+        description="Default obj value for arg, if any, for e.g. cli or gui",
+        example=25,
     )
 
     depends_on: Optional[List[str]] = Field(
@@ -380,7 +380,7 @@ class MiraclObj(BaseModel):
         if value is None:
             return value
 
-        allowed_types = (Path, int, float, list, str, dict)
+        allowed_types = (Path, int, float, list, str, dict, bool)
 
         if not isinstance(value, allowed_types):
             raise ValueError(
