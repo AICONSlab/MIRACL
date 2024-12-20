@@ -25,6 +25,7 @@ def create_parser_arguments(
         "cli_choices": "choices",
         "obj_default": "default",
         "cli_required": "required",
+        "cli_action": "action",
     }
 
     # Dict to return parser args groups for custom ACE flow help
