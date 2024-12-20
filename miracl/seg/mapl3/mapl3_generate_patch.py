@@ -13,7 +13,7 @@ input:
     1) a directory containing .tiff or .tif light sheet image corresponding to depth
     2) a directory for saving the generated image patches
 output:
-    Image patches with the size of ZxYxX
+    Image patches with the size of ZxYxX 
 
 """
 
@@ -21,12 +21,9 @@ output:
 # import libraries
 #######################################
 
+import sys
 import skimage.io as io
 import os
-import sys
-from miracl.system.objs.objs_seg.objs_mapl3.objs_maple3_generate_patch import (
-    GeneratePatch as obj_generate_patch,
-)
 
 # import fnmatch
 import numpy as np
@@ -40,15 +37,17 @@ from scipy.ndimage import binary_fill_holes, binary_erosion, binary_dilation
 import json
 from joblib import Parallel, delayed, parallel_config
 import multiprocessing
+import argparse
+from miracl import miracl_logger
 
-# import argparse
+logger = miracl_logger.logger
 
-# # -------------------------------------------------------
-# # create parser
-# # -------------------------------------------------------
+# -------------------------------------------------------
+# create parser
+# -------------------------------------------------------
 # my_parser = argparse.ArgumentParser(description="Working directory")
-#
-# # Add the arguments
+
+# Add the arguments
 # my_parser.add_argument(
 #     "-i",
 #     "--input",
@@ -82,26 +81,26 @@ import multiprocessing
 #     default=0.3,
 #     type=float,
 # )
-
-
-# -------------------------------------------------------
-# function for windowing
-# -------------------------------------------------------
-def blockshaped(arr, nrows, ncols):
-    """
-    Return an array of shape (n, nrows, ncols) where
-    n * nrows * ncols = arr.size
-    If arr is a 2D array, the returned array should look like n subblocks with
-    each subblock preserving the "physical" layout of arr.
-    """
-    h, w = arr.shape
-    assert h % nrows == 0, "{} rows is not evenly divisble by {}".format(h, nrows)
-    assert w % ncols == 0, "{} cols is not evenly divisble by {}".format(w, ncols)
-    return (
-        arr.reshape(h // nrows, nrows, -1, ncols)
-        .swapaxes(1, 2)
-        .reshape(-1, nrows, ncols)
-    )
+#
+#
+# # -------------------------------------------------------
+# # function for windowing
+# # -------------------------------------------------------
+# def blockshaped(arr, nrows, ncols):
+#     """
+#     Return an array of shape (n, nrows, ncols) where
+#     n * nrows * ncols = arr.size
+#     If arr is a 2D array, the returned array should look like n subblocks with
+#     each subblock preserving the "physical" layout of arr.
+#     """
+#     h, w = arr.shape
+#     assert h % nrows == 0, "{} rows is not evenly divisble by {}".format(h, nrows)
+#     assert w % ncols == 0, "{} cols is not evenly divisble by {}".format(w, ncols)
+#     return (
+#         arr.reshape(h // nrows, nrows, -1, ncols)
+#         .swapaxes(1, 2)
+#         .reshape(-1, nrows, ncols)
+#     )
 
 
 # -------------------------------------------------------
@@ -190,30 +189,38 @@ def image_saver(
 # -------------------------------------------------------
 
 
-def main(args):
+def main(
+    generate_patch_input_folder,
+    generate_patch_output_folder,
+    generate_patch_cpu_load,
+    generate_patch_patch_size,
+    generate_patch_gamma,
+):
+
+    # For dev
+    logger.debug("IN GENERATE PATCH SCRIPT:")
+    logger.debug(f"Input file: {generate_patch_input_folder.dirpath}")
+    logger.debug(f"Output file: {generate_patch_output_folder.dirpath}")
+    logger.debug(f"CPU load: {generate_patch_cpu_load.content}")
+    logger.debug(f"Patch size: {generate_patch_patch_size.content}")
+    logger.debug(f"Gamma: {generate_patch_gamma.content}")
 
     # get the arguments
-    # cpu_load = args.cpu_load
-    # input_path = args.input
-    # output_dir = args.output
-    # patch_size = args.patch_size
-    # gamma = args.gamma
-
-    # print("IN SUBFN:")
-    # print(f"{cpu_load}, {input_path}, {output_dir}, {patch_size}, {gamma}")
-
-    print("IN SUBFN:")
-    print(f"Input file: {args[obj_generate_patch.input.cli_l_flag]}")
-    print(f"Output file: {args[obj_generate_patch.output.cli_l_flag]}")
-    print(f"CPU load: {args[obj_generate_patch.cpu_load.cli_l_flag]}")
-    print(f"Patch size: {args[obj_generate_patch.patch_size.cli_l_flag]}")
-    print(f"Gamma: {args[obj_generate_patch.gamma.cli_l_flag]}")
+    input_path = generate_patch_input_folder.dirpath
+    output_dir = generate_patch_output_folder.dirpath
+    cpu_load = generate_patch_cpu_load.content
+    patch_size = generate_patch_patch_size.content
+    gamma = generate_patch_gamma.content
 
     sys.exit()
 
     # get the number of cpus
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpu_load * cpus)
+
+    isExist = os.path.exists(output_dir)
+    if not isExist:
+        os.mkdir(output_dir)
 
     print(f"  \nSubject: {input_path} has been found!")
     print(f"  \npatches will be saved to: {output_dir}")
@@ -236,12 +243,18 @@ def main(args):
 
     # iterate over the stack of images
     percentage_brain_patch = {}
+    # write the height, width, and depth of the image in to th json file dict
+    img = io.imread(os.path.join(input_path, stack_index_img[0][0]))
+    percentage_brain_patch["img_depth"] = len(img_list_name)
+    percentage_brain_patch["img_height"] = img.shape[0]
+    percentage_brain_patch["img_width"] = img.shape[1]
+
     for idx1, stack in enumerate(stack_index_img):
         img_list = []
         img_list_binary = []
 
         print(f"  \nProcessing image slices for Z-dim...\n")
-        for idx2, file in enumerate(stack):
+        for file in stack:
             print("  Slice: ", file)
             fname_input_img = os.path.join(input_path, file)
             img = io.imread(fname_input_img)
@@ -310,7 +323,8 @@ def main(args):
     )
 
 
-# if __name__ == "__main__":
-# Execute the parse_args() method
-# args = vars(my_parser.parse_args())
-# main(args)
+if __name__ == "__main__":
+
+    # Execute the parse_args() method
+    args = vars(my_parser.parse_args())
+    main(args)

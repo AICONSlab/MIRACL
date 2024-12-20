@@ -8,7 +8,7 @@ from argparse import (
 )
 
 from miracl.system.utilfns.utilfn_cli_parser_creator import create_parser_arguments
-from miracl.system.objs.objs_seg.objs_mapl3.objs_maple3_generate_patch import (
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch import (
     GeneratePatch as seg_mapl3_genpatch,
 )
 
