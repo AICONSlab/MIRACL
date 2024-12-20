@@ -321,10 +321,3 @@ def main(
     print(
         f"  \nIn total, {len(percentage_brain_patch)} patches have been saved to '{output_dir}'!"
     )
-
-
-if __name__ == "__main__":
-
-    # Execute the parse_args() method
-    args = vars(my_parser.parse_args())
-    main(args)
