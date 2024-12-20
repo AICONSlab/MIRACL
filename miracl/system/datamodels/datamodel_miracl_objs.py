@@ -1,6 +1,6 @@
 from typing import Any, Optional, List, Union, Tuple, Dict
 from typing_extensions import Literal
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, DirectoryPath, FilePath
 from enum import Enum
 from argparse import ArgumentTypeError
 from pathlib import Path
@@ -139,6 +139,14 @@ class MiraclObj(BaseModel):
     )
 
     # GENERAL
+    content: Optional[Any] = Field(
+        None, description="Content associated with flag variable input"
+    )
+
+    dirpath: Optional[DirectoryPath] = Field(
+        default=None, description="Used for MIRACL interfaces to pass directory paths"
+    )
+
     obj_default: Optional[Union[Path, int, float, List[Any], str, Dict[str, Any]]] = (
         Field(
             None,
@@ -380,6 +388,16 @@ class MiraclObj(BaseModel):
             )
 
         return value
+
+    @validator("content", always=True)
+    def validate_content(cls, v, values):
+        obj_type = values.get("cli_obj_type")
+        if obj_type is not None and v is not None:
+            try:
+                return obj_type.python_type(v)
+            except ValueError:
+                raise ValueError(f"Cannot convert {v} to {obj_type.python_type}")
+        return v
 
     ################
     # CLASS CONFIG #
