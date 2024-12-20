@@ -11,6 +11,9 @@ from miracl.system.utilfns.utilfn_cli_parser_creator import create_parser_argume
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch import (
     GeneratePatch as seg_mapl3_genpatch,
 )
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel import (
+    PreprocessingParallel as seg_preprocessing_parallel,
+)
 
 
 class Mapl3Parser:
@@ -46,6 +49,21 @@ class Mapl3Parser:
                     seg_mapl3_genpatch.cpu_load,
                     seg_mapl3_genpatch.patch_size,
                     seg_mapl3_genpatch.gamma,
+                ],
+            },
+            "preprocessing_parallel": {
+                "title": "parallel preprocessing",
+                "description": "arguments passed to parallel preprocessing fn",
+                "args": [
+                    seg_preprocessing_parallel.cpu_load,
+                    seg_preprocessing_parallel.cl_percentage,
+                    seg_preprocessing_parallel.cl_lsm_footprint,
+                    seg_preprocessing_parallel.cl_back_footprint,
+                    seg_preprocessing_parallel.cl_back_downsample,
+                    seg_preprocessing_parallel.lsm_vs_back_weight,
+                    seg_preprocessing_parallel.deconv_bin_thr,
+                    seg_preprocessing_parallel.deconv_sigma,
+                    seg_preprocessing_parallel.save_intermediate_results,
                 ],
             },
         }
