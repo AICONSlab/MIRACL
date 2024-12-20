@@ -1,6 +1,4 @@
 from miracl.system.datamodels.datamodel_miracl_objs import (
-    InputRestrictionType,
-    LineEditConfig,
     MiraclObj,
     ArgumentType,
     WidgetType,
@@ -35,7 +33,7 @@ class GeneratePatch:
         cli_l_flag="output",
         flow={"mapl3": {"cli_s_flag": "mgpo", "cli_l_flag": "mgp_output"}},
         cli_obj_type=ArgumentType.STRING,
-        cli_help="path of output directory (default: None)",
+        cli_help="path of output directory which will include all results from MAPL3 in separate folders (default: None)",
         cli_required=True,
         gui_label=["Output folder"],
         gui_group={"mapl3": "main"},
