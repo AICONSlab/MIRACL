@@ -33,6 +33,7 @@ a directory containing image patches with the size of ZxYxX that are preprocesse
     
 """
 
+import sys
 import numpy as np
 import tifffile
 import scipy.ndimage as ndimage
@@ -48,93 +49,90 @@ logger = miracl_logger.logger
 # -------------------------------------------------------
 # create parser
 # -------------------------------------------------------
-my_parser = argparse.ArgumentParser(description="Working directory")
-
-# INPUT DIR HERE IS GENERATED PATCHES DIRECTORY
-# OUTPUT DIR HERE WILL BE CREATED IN INTERFACE
-
-# Add the arguments
-my_parser.add_argument(
-    "-i",
-    "--input",
-    help="input directory containing tif/tiff raw 3D image patches",
-    required=True,
-)
-my_parser.add_argument(
-    "-o", "--out_dir", help="path of output directory", required=True
-)
-my_parser.add_argument(
-    "-cpu",
-    "--cpu_load",
-    help="fraction of cpus to be used for parallelization between 0-1",
-    required=False,
-    default=0.7,
-    type=float,
-)
-my_parser.add_argument(
-    "-clp",
-    "--cl_percentage",
-    help="percentage used in percentile filter between 0-1",
-    required=False,
-    default=0.25,
-    type=float,
-)
-my_parser.add_argument(
-    "-cllf",
-    "--cl_lsm_footprint",
-    help="structure for estimating lsm stripes 1x1xVALUE",
-    required=False,
-    default=100,
-    type=int,
-)
-my_parser.add_argument(
-    "-clbf",
-    "--cl_back_footprint",
-    help="structure for estimating backgroud default is VALUExVALUExVALUE",
-    required=False,
-    default=16,
-    type=int,
-)
-my_parser.add_argument(
-    "-clbd",
-    "--cl_back_downsample",
-    help="downsample ratio applied for background stimation; patch size should be devidable by this value",
-    required=False,
-    default=8,
-    type=int,
-)
-my_parser.add_argument(
-    "-lvbw",
-    "--lsm_vs_back_weight",
-    help="lsm signal vs background weight",
-    required=False,
-    default=2,
-    type=int,
-)
-my_parser.add_argument(
-    "-dbt",
-    "--deconv_bin_thr",
-    help="threshold uses to detect high intensity voxels for psuedo deconvolution between 0-100",
-    required=False,
-    default=95,
-    type=int,
-)
-my_parser.add_argument(
-    "-ds",
-    "--deconv_sigma",
-    help="sigma of Gaussian blurring filter in the psuedo deconvolution",
-    required=False,
-    default=3,
-    type=int,
-)
-my_parser.add_argument(
-    "-sirf",
-    "--save_intermediate_results_flag",
-    help="whether to save intermediate results for debugging",
-    required=False,
-    default=False,
-    action="store_true",
-)
+# my_parser = argparse.ArgumentParser(description="Working directory")
+#
+# # Add the arguments
+# my_parser.add_argument(
+#     "-i",
+#     "--input",
+#     help="input directory containing tif/tiff raw 3D image patches",
+#     required=True,
+# )
+# my_parser.add_argument(
+#     "-o", "--out_dir", help="path of output directory", required=True
+# )
+# my_parser.add_argument(
+#     "-cpu",
+#     "--cpu_load",
+#     help="fraction of cpus to be used for parallelization between 0-1",
+#     required=False,
+#     default=0.7,
+#     type=float,
+# )
+# my_parser.add_argument(
+#     "-clp",
+#     "--cl_percentage",
+#     help="percentage used in percentile filter between 0-1",
+#     required=False,
+#     default=0.25,
+#     type=float,
+# )
+# my_parser.add_argument(
+#     "-cllf",
+#     "--cl_lsm_footprint",
+#     help="structure for estimating lsm stripes 1x1xVALUE",
+#     required=False,
+#     default=100,
+#     type=int,
+# )
+# my_parser.add_argument(
+#     "-clbf",
+#     "--cl_back_footprint",
+#     help="structure for estimating backgroud default is VALUExVALUExVALUE",
+#     required=False,
+#     default=16,
+#     type=int,
+# )
+# my_parser.add_argument(
+#     "-clbd",
+#     "--cl_back_downsample",
+#     help="downsample ratio applied for background stimation; patch size should be devidable by this value",
+#     required=False,
+#     default=8,
+#     type=int,
+# )
+# my_parser.add_argument(
+#     "-lvbw",
+#     "--lsm_vs_back_weight",
+#     help="lsm signal vs background weight",
+#     required=False,
+#     default=2,
+#     type=int,
+# )
+# my_parser.add_argument(
+#     "-dbt",
+#     "--deconv_bin_thr",
+#     help="threshold uses to detect high intensity voxels for psuedo deconvolution between 0-100",
+#     required=False,
+#     default=95,
+#     type=int,
+# )
+# my_parser.add_argument(
+#     "-ds",
+#     "--deconv_sigma",
+#     help="sigma of Gaussian blurring filter in the psuedo deconvolution",
+#     required=False,
+#     default=3,
+#     type=int,
+# )
+# my_parser.add_argument(
+#     "-sirf",
+#     "--save_intermediate_results_flag",
+#     help="whether to save intermediate results for debugging",
+#     required=False,
+#     default=False,
+#     action="store_true",
+# )
 
 # -------------------------------------------------------
 # background estimation function
@@ -323,33 +321,51 @@ def my_filter(
 # -------------------------------------------------------
 
 
-def main(args):
+def main(
+    generate_patch_output_folder,
+    preprocess_parallel_cpu_load,
+    preprocess_parallel_cl_percentage,
+    preprocess_parallel_cl_lsm_footprint,
+    preprocess_parallel_cl_back_footprint,
+    preprocess_parallel_cl_back_downsample,
+    preprocess_parallel_cl_lsm_vs_back_weight,
+    preprocess_parallel_deconv_bin_thr,
+    preprocess_parallel_deconv_sigma,
+    preprocess_parallel_save_intermediate_results,
+):
 
-    # get the arguments
-    cpu_load = args["cpu_load"]
-    input_file_path = args["input"]
-    out_dir = args["out_dir"]
-    correct_lightsheet_perc = args["cl_percentage"]
-    correct_lightsheet_lsm_footprint = tuple([1, 1, args["cl_lsm_footprint"]])
-    correct_lightsheet_back_footprint = tuple([args["cl_back_footprint"]] * 3)
-    correct_lightsheet_back_downsample = args["cl_back_downsample"]
-    correct_lightsheet_lsm_vs_back = args["lsm_vs_back_weight"]
-    deconvolve_bin_thr = args["deconv_bin_thr"]
-    deconvolve_sigma = args["deconv_sigma"]
-    save_intermediate_results_flag = args["save_intermediate_results_flag"]
+    cpu_load = preprocess_parallel_cpu_load.content
+    input_file_path = generate_patch_output_folder.dirpath
+    out_dir = "PLACEHOLDER"
+    correct_lightsheet_perc = preprocess_parallel_cl_percentage.content
+    correct_lightsheet_lsm_footprint = tuple(
+        [1, 1, preprocess_parallel_cl_lsm_footprint.content]
+    )
+    correct_lightsheet_back_footprint = tuple(
+        [preprocess_parallel_cl_back_footprint.content] * 3
+    )
+    correct_lightsheet_back_downsample = preprocess_parallel_cl_back_downsample.content
+    correct_lightsheet_lsm_vs_back = preprocess_parallel_cl_lsm_vs_back_weight.content
+    deconvolve_bin_thr = preprocess_parallel_deconv_bin_thr.content
+    deconvolve_sigma = preprocess_parallel_deconv_sigma.content
+    save_intermediate_results_flag = (
+        preprocess_parallel_save_intermediate_results.content
+    )
 
     print(
-        f"the following parameters will be used: \n",
-        f"1. light sheet correction: ",
+        "the following parameters will be used: \n",
+        "1. light sheet correction: ",
         f"perc = {correct_lightsheet_perc}",
         f"lsm_foot = {correct_lightsheet_lsm_footprint}",
         f"back_foot = {correct_lightsheet_back_footprint}",
         f"back_downsample = {correct_lightsheet_back_downsample}"
         f"lsm_vs_back = {correct_lightsheet_lsm_vs_back} \n",
-        f"2. psuedo deconv.: ",
+        "2. psuedo deconv.: ",
         f"binarization thr = {deconvolve_bin_thr}",
-        f"bluring sigma = {deconvolve_sigma}",
+        f"blurring sigma = {deconvolve_sigma}",
     )
+
+    sys.exit()
 
     # create out dir
     isExist = os.path.exists(out_dir)
@@ -388,7 +404,7 @@ def main(args):
         )
 
 
-if __name__ == "__main__":
-    # Execute the parse_args() method
-    args = vars(my_parser.parse_args())
-    main(args)
+# if __name__ == "__main__":
+#     # Execute the parse_args() method
+#     args = vars(my_parser.parse_args())
+#     main(args)

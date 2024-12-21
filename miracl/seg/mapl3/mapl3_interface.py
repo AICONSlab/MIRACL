@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from miracl.seg.mapl3.mapl3_cli_parser import Mapl3Parser
 
 import miracl.seg.mapl3.mapl3_generate_patch as mapl3_generate_patch
-from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
+import miracl.seg.mapl3.mapl3_preprocessing_parallel as mapl3_preprocessing_parallel
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch import (
     GeneratePatch as obj_generate_patch,
 )
@@ -34,7 +34,19 @@ class GeneratePatch(ABC):
 
 class PreprocessingParallel(ABC):
     @abstractmethod
-    def preprocess(self, generate_patch_output_folder):
+    def preprocess(
+        self,
+        generate_patch_output_folder,
+        preprocess_parallel_cpu_load,
+        preprocess_parallel_cl_percentage,
+        preprocess_parallel_cl_lsm_footprint,
+        preprocess_parallel_cl_back_footprint,
+        preprocess_parallel_cl_back_downsample,
+        preprocess_parallel_cl_lsm_vs_back_weight,
+        preprocess_parallel_deconv_bin_thr,
+        preprocess_parallel_deconv_sigma,
+        preprocess_parallel_save_intermediate_results,
+    ):
         pass
 
 
@@ -102,6 +114,19 @@ class MAPL3PreprocessingParallel(PreprocessingParallel):
         logger.debug(f"deconv_sigma: {preprocess_parallel_deconv_sigma.content}")
         logger.debug(
             f"save_intermediate_results: {preprocess_parallel_save_intermediate_results.content}"
+        )
+
+        mapl3_preprocessing_parallel.main(
+            generate_patch_output_folder,
+            preprocess_parallel_cpu_load,
+            preprocess_parallel_cl_percentage,
+            preprocess_parallel_cl_lsm_footprint,
+            preprocess_parallel_cl_back_footprint,
+            preprocess_parallel_cl_back_downsample,
+            preprocess_parallel_cl_lsm_vs_back_weight,
+            preprocess_parallel_deconv_bin_thr,
+            preprocess_parallel_deconv_sigma,
+            preprocess_parallel_save_intermediate_results,
         )
 
 
