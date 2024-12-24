@@ -17,6 +17,12 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel im
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_inference import (
     Inference as seg_inference,
 )
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_skeletonization import (
+    Skeletonization as seg_skeletonization,
+)
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking import (
+    PatchStacking as seg_patch_stacking,
+)
 
 
 class Mapl3Parser:
@@ -74,12 +80,30 @@ class Mapl3Parser:
                 "description": "arguments passed to inference fn",
                 "args": [
                     seg_inference.config,
-                    seg_inference.output,
                     seg_inference.model_path,
                     seg_inference.tissue_percentage_threshold,
                     seg_inference.gpu_index,
                     seg_inference.binarization_threshold,
                     seg_inference.save_prob_map,
+                ],
+            },
+            "skeletonization": {
+                "title": "skeletonization",
+                "description": "arguments passed to skeletonization fn",
+                "args": [
+                    seg_skeletonization.remove_small_obj_thr,
+                    seg_skeletonization.cpu_load,
+                    seg_skeletonization.dilate_distance_transform,
+                    seg_skeletonization.eccentricity_thr,
+                    seg_skeletonization.orientation_thr,
+                ],
+            },
+            "patch_stacking": {
+                "title": "patch stacking",
+                "description": "arguments passed to patch stacking fn",
+                "args": [
+                    seg_patch_stacking.cpu_load,
+                    seg_patch_stacking.keep_image_type,
                 ],
             },
         }

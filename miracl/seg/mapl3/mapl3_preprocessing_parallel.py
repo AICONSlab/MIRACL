@@ -324,6 +324,7 @@ def my_filter(
 def main(
     generate_patch_output_folder,
     preprocess_parallel_cpu_load,
+    preprocess_parallel_output_folder,
     preprocess_parallel_cl_percentage,
     preprocess_parallel_cl_lsm_footprint,
     preprocess_parallel_cl_back_footprint,
@@ -336,7 +337,7 @@ def main(
 
     cpu_load = preprocess_parallel_cpu_load.content
     input_file_path = generate_patch_output_folder.dirpath
-    out_dir = "PLACEHOLDER"
+    out_dir = preprocess_parallel_output_folder.dirpath
     correct_lightsheet_perc = preprocess_parallel_cl_percentage.content
     correct_lightsheet_lsm_footprint = tuple(
         [1, 1, preprocess_parallel_cl_lsm_footprint.content]

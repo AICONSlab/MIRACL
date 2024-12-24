@@ -199,20 +199,20 @@ def main(
 
     # For dev
     logger.debug("IN GENERATE PATCH SCRIPT:")
-    logger.debug(f"Input file: {generate_patch_input_folder.dirpath}")
-    logger.debug(f"Output file: {generate_patch_output_folder.dirpath}")
+    logger.debug(
+        f"Input folder with raw files: {generate_patch_input_folder.input_dirpath}"
+    )
+    logger.debug(f"Output folder for MAPL3: {generate_patch_output_folder.dirpath}")
     logger.debug(f"CPU load: {generate_patch_cpu_load.content}")
     logger.debug(f"Patch size: {generate_patch_patch_size.content}")
     logger.debug(f"Gamma: {generate_patch_gamma.content}")
 
     # get the arguments
-    input_path = generate_patch_input_folder.dirpath
+    input_path = generate_patch_input_folder.input_dirpath
     output_dir = generate_patch_output_folder.dirpath
     cpu_load = generate_patch_cpu_load.content
     patch_size = generate_patch_patch_size.content
     gamma = generate_patch_gamma.content
-
-    sys.exit()
 
     # get the number of cpus
     cpus = multiprocessing.cpu_count()

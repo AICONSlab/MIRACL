@@ -16,6 +16,7 @@ Outputs:
 # load libraries
 import os
 import argparse
+import sys
 from monai.inferers import sliding_window_inference
 from monai.transforms import (
     AsDiscrete,
@@ -34,7 +35,7 @@ import numpy as np
 import yaml
 import tifffile
 import yaml
-import model_init
+import mapl3_inference_model_init
 import json
 import multiprocessing
 import concurrent
@@ -238,7 +239,7 @@ def create_model(cfg):
         if patch_wise_attn_down:
             atten_dim_patch = int(atten_dim_patch / patch_wise_attn_down_factor)
         print(
-            "Attention dimenstion / embedding size for pacth wise attention is: ",
+            "Attention dimenstion / embedding size for patch wise attention is: ",
             atten_dim_patch,
         )
 
@@ -264,7 +265,7 @@ def create_model(cfg):
 
     else:
         # load the model
-        model = model_init.ResidualUNet3D(
+        model = mapl3_inference_model_init.ResidualUNet3D(
             in_channels=in_channels,
             out_channels=out_channels,
             final_sigmoid=final_sigmoid,
@@ -419,6 +420,7 @@ def main(
     inference_tissue_percentage_threshold,
     inference_gpu_index,
     inference_binarization_threshold,
+    inference_save_prob_map,
 ):
     # -------------------------------------------------------
     # get the args
@@ -428,17 +430,27 @@ def main(
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
     print("config file is loaded ...")
 
-    output_dir = args["output_path"]
-    isExist = os.path.exists(output_dir)
-    if not isExist:
-        os.mkdir(output_dir)
-
+    output_dir = inference_output_folder.dirpath
+    # isExist = os.path.exists(output_dir)
+    # if not isExist:
+    #     os.mkdir(output_dir)
     input_path = generate_patch_output_folder.dirpath
     percentage_brain_patch_skip = inference_tissue_percentage_threshold.content
     model_path = inference_model_path.filepath
     gpu_index = inference_gpu_index.content
     binarization_threshold = inference_binarization_threshold.content
-    save_prob_map_flag = args["save_prob_map_flag"]
+    save_prob_map_flag = inference_save_prob_map.content
+
+    logger.debug("INSIDE INFERENCE:")
+    logger.debug(f"config_path: {config_path}")
+    logger.debug(f"output_dir: {output_dir}")
+    logger.debug(f"input_path: {input_path}")
+    logger.debug(f"percentage_brain_patch_skip: {percentage_brain_patch_skip}")
+    logger.debug(f"model_path: {model_path}")
+    logger.debug(f"gpu_index: {gpu_index}")
+    logger.debug(f"binarization_threshold: {binarization_threshold}")
+    logger.debug(f"save_prob_map_flag: {save_prob_map_flag}")
+
     # -------------------------------------------------------
     # Read generate_patch directory / created by generate_patch.py
     # -------------------------------------------------------

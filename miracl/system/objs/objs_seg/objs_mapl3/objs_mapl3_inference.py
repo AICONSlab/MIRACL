@@ -25,25 +25,6 @@ class Inference:
         gui_widget_type=WidgetType.PATH_INPUT,
     )
 
-    output = MiraclObj(
-        id="740e2bea-d79e-4bdb-b298-680c810d295f",
-        name="mi_output",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="mi_o",
-        cli_l_flag="mi_output",
-        flow={"mapl3": {"cli_s_flag": "mi_o", "cli_l_flag": "mi_output"}},
-        cli_action=ArgumentAction.STORE_TRUE,
-        cli_help="if flag is set (True), results will be saved (default: %(default)s)",
-        cli_required=False,
-        obj_default=False,
-        gui_label=["Save output"],
-        gui_group={"mapl3": "main"},
-        module="mapl3",
-        module_group="seg",
-        version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
-    )
-
     model_path = MiraclObj(
         id="3373b6c0-e88f-480f-8f21-4c5194d8eeb4",
         name="model_path",
@@ -133,10 +114,10 @@ class Inference:
         cli_s_flag="mi_s",
         cli_l_flag="mi_save_prob_map",
         flow={"mapl3": {"cli_s_flag": "mi_s", "cli_l_flag": "mi_save_prob_map"}},
-        cli_action=ArgumentAction.STORE_TRUE,
+        cli_action=ArgumentAction.STORE_FALSE,
         cli_help="set to save prob map (default: %(default)s)",
         cli_required=False,
-        obj_default=False,
+        obj_default=True,
         gui_label=["Save prob map"],
         gui_group={"mapl3": "main"},
         module="mapl3",
