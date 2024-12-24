@@ -34,8 +34,7 @@ from monai.data import CacheDataset, DataLoader, decollate_batch, Dataset
 import numpy as np
 import yaml
 import tifffile
-import yaml
-import mapl3_inference_model_init
+from miracl.seg.mapl3 import mapl3_inference_model_init
 import json
 import multiprocessing
 import concurrent
@@ -603,4 +602,3 @@ def main(
         ) / 60  # Convert seconds to minutes
         print(f"Execution time on GPU: {execution_time_minutes:.6f} minutes")
     print("Inference complete!")
-

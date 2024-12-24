@@ -31,13 +31,13 @@
 # }
 
 
-from mapl3_inference_building_blocks import (
+from miracl.seg.mapl3.mapl3_inference_building_blocks import (
     DoubleConv,
     ResNetBlock,
     create_decoders,
     create_encoders,
 )
-from mapl3_inference_transformer_block import Block, Mlp
+from miracl.seg.mapl3.mapl3_inference_transformer_block import Block, Mlp
 import torch.nn as nn
 import torch
 from torch.nn.functional import interpolate
@@ -893,4 +893,3 @@ class ResidualUNet3D(AbstractUNet):
             norm_layer_voxel=norm_layer_voxel,
             deep_supervision=deep_supervision,
         )
-
