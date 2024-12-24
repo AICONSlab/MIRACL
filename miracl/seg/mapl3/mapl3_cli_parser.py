@@ -14,6 +14,9 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch import (
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel import (
     PreprocessingParallel as seg_preprocessing_parallel,
 )
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_inference import (
+    Inference as seg_inference,
+)
 
 
 class Mapl3Parser:
@@ -64,6 +67,19 @@ class Mapl3Parser:
                     seg_preprocessing_parallel.deconv_bin_thr,
                     seg_preprocessing_parallel.deconv_sigma,
                     seg_preprocessing_parallel.save_intermediate_results,
+                ],
+            },
+            "inference": {
+                "title": "inference",
+                "description": "arguments passed to inference fn",
+                "args": [
+                    seg_inference.config,
+                    seg_inference.output,
+                    seg_inference.model_path,
+                    seg_inference.tissue_percentage_threshold,
+                    seg_inference.gpu_index,
+                    seg_inference.binarization_threshold,
+                    seg_inference.save_prob_map,
                 ],
             },
         }

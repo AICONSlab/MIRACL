@@ -11,7 +11,10 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel im
     PreprocessingParallel as obj_preprocess_parallel,
 )
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_interface_folder import (
-    InterfaceFolder as obj_interface_folder,
+    InterfaceSubfolders as obj_subfolders,
+)
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_inference import (
+    Inference as obj_inference,
 )
 from miracl import miracl_logger
 
@@ -48,6 +51,52 @@ class PreprocessingParallel(ABC):
         preprocess_parallel_save_intermediate_results,
     ):
         pass
+
+
+class Inference(ABC):
+    @abstractmethod
+    def run_inference(
+        self,
+        generate_patch_output_folder,
+        inference_output_folder,
+        inference_config,
+        inference_model_path,
+        inference_tissue_percentage_threshold,
+        inference_gpu_index,
+        inference_binarization_threshold,
+        inference_save_prob_map,
+    ):
+        pass
+
+
+class MAPL3Inference(Inference):
+
+    def run_inference(
+        self,
+        generate_patch_output_folder,
+        inference_output_folder,
+        inference_config,
+        inference_model_path,
+        inference_tissue_percentage_threshold,
+        inference_gpu_index,
+        inference_binarization_threshold,
+        inference_save_prob_map,
+    ):
+        logger.debug("INFERENCE IN INTERFACE:")
+        logger.debug(
+            f"Generated patches output: {generate_patch_output_folder.dirpath}"
+        )
+        logger.debug(f"Config file: {inference_config.filepath}")
+        logger.debug(f"Model path: {inference_model_path.filepath}")
+        logger.debug(f"Ouput folder path: {inference_output_folder.dirpath}")
+        logger.debug(
+            f"Tissue percentage threshold: {inference_tissue_percentage_threshold.content}"
+        )
+        logger.debug(f"GPU index: {inference_gpu_index.content}")
+        logger.debug(
+            f"Binarization threshold: {inference_binarization_threshold.content}"
+        )
+        logger.debug(f"Save prob map: {inference_save_prob_map.content}")
 
 
 class MAPL3GeneratePatch(GeneratePatch):
@@ -116,18 +165,19 @@ class MAPL3PreprocessingParallel(PreprocessingParallel):
             f"save_intermediate_results: {preprocess_parallel_save_intermediate_results.content}"
         )
 
-        mapl3_preprocessing_parallel.main(
-            generate_patch_output_folder,
-            preprocess_parallel_cpu_load,
-            preprocess_parallel_cl_percentage,
-            preprocess_parallel_cl_lsm_footprint,
-            preprocess_parallel_cl_back_footprint,
-            preprocess_parallel_cl_back_downsample,
-            preprocess_parallel_cl_lsm_vs_back_weight,
-            preprocess_parallel_deconv_bin_thr,
-            preprocess_parallel_deconv_sigma,
-            preprocess_parallel_save_intermediate_results,
-        )
+        if production:
+            mapl3_preprocessing_parallel.main(
+                generate_patch_output_folder,
+                preprocess_parallel_cpu_load,
+                preprocess_parallel_cl_percentage,
+                preprocess_parallel_cl_lsm_footprint,
+                preprocess_parallel_cl_back_footprint,
+                preprocess_parallel_cl_back_downsample,
+                preprocess_parallel_cl_lsm_vs_back_weight,
+                preprocess_parallel_deconv_bin_thr,
+                preprocess_parallel_deconv_sigma,
+                preprocess_parallel_save_intermediate_results,
+            )
 
 
 def main():
@@ -137,7 +187,14 @@ def main():
     # Parse the command-line arguments
     args = vars(parser.parser.parse_args())
 
-    # Assign cli input args to Pydantic objects
+    #############################################
+    # ASSIGN CLI INPUT ARGS TO PYDANTIC OBJECTS #
+    #############################################
+
+    ##################
+    # GENERATE PATCH #
+    ##################
+
     generate_patch_input_folder = obj_generate_patch.input
     generate_patch_input_folder.dirpath = args[generate_patch_input_folder.cli_l_flag]
 
@@ -155,13 +212,19 @@ def main():
     generate_patch_gamma = obj_generate_patch.gamma
     generate_patch_gamma.content = args[generate_patch_gamma.cli_l_flag]
 
-    seg_output_folder = obj_interface_folder.output
+    seg_output_folder = obj_subfolders.seg_output
     seg_output_folder.dirpath = mapl3_results_folder.dirpath / "mapl3_seg"
 
-    generate_patch_output_folder = obj_generate_patch.output
+    generate_patch_output_folder = obj_subfolders.generated_patches_output
     generate_patch_output_folder.dirpath = (
         seg_output_folder.dirpath / "generated_patches"
     )
+
+    ###########################################################################
+
+    #######################
+    # PREPROCESS PARALLEL #
+    #######################
 
     preprocess_parallel_cpu_load = obj_preprocess_parallel.cpu_load
     preprocess_parallel_cpu_load.content = args[preprocess_parallel_cpu_load.cli_l_flag]
@@ -210,8 +273,45 @@ def main():
         preprocess_parallel_save_intermediate_results.cli_l_flag
     ]
 
+    ###########################################################################
+
+    #############
+    # INFERENCE #
+    #############
+
+    inference_config = obj_inference.config
+    inference_config.filepath = args[inference_config.cli_l_flag]
+
+    inference_model_path = obj_inference.model_path
+    inference_model_path.filepath = args[inference_model_path.cli_l_flag]
+
+    print(f"HERHERHERHEHREHE: {args[inference_model_path.cli_l_flag]}")
+    print(f"HERHERHEHREHREHR: {inference_model_path.filepath}")
+
+    inference_output_folder = obj_subfolders.inference_output
+    inference_output_folder.dirpath = mapl3_results_folder.dirpath / "mapl3_inference"
+
+    inference_tissue_percentage_threshold = obj_inference.tissue_percentage_threshold
+    inference_tissue_percentage_threshold.content = args[
+        inference_tissue_percentage_threshold.cli_l_flag
+    ]
+
+    inference_gpu_index = obj_inference.gpu_index
+    inference_gpu_index.content = args[inference_gpu_index.cli_l_flag]
+
+    inference_binarization_threshold = obj_inference.binarization_threshold
+    inference_binarization_threshold.content = args[
+        inference_binarization_threshold.cli_l_flag
+    ]
+
+    inference_save_prob_map = obj_inference.save_prob_map
+    inference_save_prob_map.content = args[inference_save_prob_map.cli_l_flag]
+
+    ###########################################################################
+
     patch_generator = MAPL3GeneratePatch()
     parallel_preprocessor = MAPL3PreprocessingParallel()
+    inference = MAPL3Inference()
 
     patch_generator.generate_patch(
         generate_patch_input_folder,
@@ -232,6 +332,17 @@ def main():
         preprocess_parallel_deconv_bin_thr,
         preprocess_parallel_deconv_sigma,
         preprocess_parallel_save_intermediate_results,
+    )
+
+    inference.run_inference(
+        generate_patch_output_folder,
+        inference_output_folder,
+        inference_config,
+        inference_model_path,
+        inference_tissue_percentage_threshold,
+        inference_gpu_index,
+        inference_binarization_threshold,
+        inference_save_prob_map,
     )
 
 
