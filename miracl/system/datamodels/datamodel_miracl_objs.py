@@ -1,6 +1,13 @@
 from typing import Any, Optional, List, Union, Tuple, Dict
 from typing_extensions import Literal
-from pydantic import BaseModel, Field, validator, DirectoryPath, FilePath
+from pydantic import (
+    BaseModel,
+    Field,
+    validator,
+    DirectoryPath,
+    FilePath,
+    field_validator,
+)
 from enum import Enum
 from argparse import ArgumentTypeError
 from pathlib import Path
@@ -124,6 +131,7 @@ class MiraclObj(BaseModel):
         ...,
         description="Unique id for object",
         example="67b62f10-a6b6-4d61-9e2c-19819373265d",
+        frozen=True,
     )
 
     name: str = Field(
@@ -143,9 +151,56 @@ class MiraclObj(BaseModel):
         None, description="Content associated with flag variable input"
     )
 
-    dirpath: Optional[DirectoryPath] = Field(
-        default=None, description="Used for MIRACL interfaces to pass directory paths"
+    input_dirpath_field: Optional[DirectoryPath] = Field(
+        default=None,
+        description="Input folder path for raw data",
+        alias="input_dirpath",
     )
+
+    @property
+    def input_dirpath(self) -> Optional[DirectoryPath]:
+        return self.input_dirpath_field
+
+    @input_dirpath.setter
+    def input_dirpath(self, value: Optional[DirectoryPath]):
+        if self.input_dirpath_field is None:
+            self.input_dirpath_field = value
+        else:
+            raise ValueError("input_dirpath cannot be changed once set")
+
+    dirpath_field: Optional[DirectoryPath] = Field(
+        default=None,
+        description="Used for MIRACL interfaces to pass directory paths. This uses an alias and can only be set once.",
+        alias="dirpath",
+    )
+
+    @property
+    def dirpath(self) -> Optional[DirectoryPath]:
+        return self.dirpath_field
+
+    @dirpath.setter
+    def dirpath(self, value: Optional[DirectoryPath]):
+        if self.dirpath_field is None:
+            self.dirpath_field = value
+        else:
+            raise ValueError("dirpath cannot be changed once set")
+
+    filepath_field: Optional[FilePath] = Field(
+        default=None,
+        description="Used for MIRACL interfaces to pass file paths. This uses an alias and can only be set once.",
+        alias="filepath",
+    )
+
+    @property
+    def filepath(self) -> Optional[FilePath]:
+        return self.filepath_field
+
+    @filepath.setter
+    def filepath(self, value: Optional[FilePath]):
+        if self.filepath_field is None:
+            self.filepath_field = value
+        else:
+            raise ValueError("dirpath cannot be changed once set")
 
     obj_default: Optional[
         Union[Path, int, float, List[Any], str, Dict[str, Any], bool]
@@ -398,6 +453,15 @@ class MiraclObj(BaseModel):
             except ValueError:
                 raise ValueError(f"Cannot convert {v} to {obj_type.python_type}")
         return v
+
+    # Automatically create folder if it doesn't exist
+    @field_validator("dirpath_field", mode="before")
+    def create_directory_if_not_exists(cls, value):
+        if value is not None:
+            path = Path(value)
+            path.mkdir(parents=True, exist_ok=True)
+            return path
+        return value
 
     ################
     # CLASS CONFIG #
