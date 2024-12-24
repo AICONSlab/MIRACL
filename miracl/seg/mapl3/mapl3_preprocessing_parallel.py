@@ -358,14 +358,12 @@ def main(
         f"perc = {correct_lightsheet_perc}",
         f"lsm_foot = {correct_lightsheet_lsm_footprint}",
         f"back_foot = {correct_lightsheet_back_footprint}",
-        f"back_downsample = {correct_lightsheet_back_downsample}"
+        f"back_downsample = {correct_lightsheet_back_downsample}",
         f"lsm_vs_back = {correct_lightsheet_lsm_vs_back} \n",
         "2. psuedo deconv.: ",
         f"binarization thr = {deconvolve_bin_thr}",
         f"blurring sigma = {deconvolve_sigma}",
     )
-
-    sys.exit()
 
     # create out dir
     isExist = os.path.exists(out_dir)
