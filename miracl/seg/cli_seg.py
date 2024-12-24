@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 
+from miracl.seg.mapl3 import mapl3_cli_parser, mapl3_interface
 from miracl.seg import (
     ace_interface,
     ace_parser,
@@ -55,6 +56,10 @@ def run_feat_extract_ctx(parser, args):
 
 def run_voxelize(parser, args):
     miracl_seg_voxelize_parallel.main(args)
+
+
+def run_mapl3(parser, args):
+    mapl3_interface.main()
 
 
 def run_ace(parser, args):
@@ -124,6 +129,19 @@ def get_parser():
     )
 
     parser_voxelize.set_defaults(func=run_voxelize)
+
+    # MAPL3
+    mapl3_parser_class = mapl3_cli_parser.Mapl3Parser
+    mapl3_parsefn = mapl3_parser_class.parsefn()
+    parser_mapl3 = subparsers.add_parser(
+        "mapl3",
+        parents=[mapl3_parsefn],
+        add_help=False,
+        usage=mapl3_parsefn.usage,
+        help="mapping axonal projection in light sheet microscopy in 3d",
+    )
+
+    parser_mapl3.set_defaults(func=run_mapl3)
 
     # ace
     ace_parser_class = ace_parser.aceParser()
