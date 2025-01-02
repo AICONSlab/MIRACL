@@ -55,7 +55,7 @@ setup(
         "statsmodels==0.13.0",
         "allensdk==2.15.1",
         "lightning-python==1.2.1",
-        "joblib==1.2.0",
+        "joblib==1.3.2",
         "matplotlib==3.4.2",
         "argcomplete==2.0.0",
         "dipy==1.6.0",
