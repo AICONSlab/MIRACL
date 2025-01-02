@@ -356,6 +356,9 @@ class MAPL3Skeletonization(Skeletonization):
 
 
 def main():
+
+    sys.argv = sys.argv[2:]
+
     # Create an instance of the parser
     parser = Mapl3Parser()
 

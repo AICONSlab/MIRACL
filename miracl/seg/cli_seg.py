@@ -131,7 +131,7 @@ def get_parser():
     parser_voxelize.set_defaults(func=run_voxelize)
 
     # MAPL3
-    mapl3_parser_class = mapl3_cli_parser.Mapl3Parser
+    mapl3_parser_class = mapl3_cli_parser.Mapl3Parser()
     mapl3_parsefn = mapl3_parser_class.parsefn()
     parser_mapl3 = subparsers.add_parser(
         "mapl3",
