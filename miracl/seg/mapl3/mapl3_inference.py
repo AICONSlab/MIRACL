@@ -428,11 +428,7 @@ def main(
     with open(config_path, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
     print("config file is loaded ...")
-
     output_dir = inference_output_folder.dirpath
-    # isExist = os.path.exists(output_dir)
-    # if not isExist:
-    #     os.mkdir(output_dir)
     input_path = preprocess_parallel_output_folder.dirpath
     percentage_brain_patch_skip = inference_tissue_percentage_threshold.content
     model_path = inference_model_path.filepath
@@ -440,15 +436,17 @@ def main(
     binarization_threshold = inference_binarization_threshold.content
     save_prob_map_flag = inference_save_prob_map.content
 
-    logger.debug("INSIDE INFERENCE:")
-    logger.debug(f"config_path: {config_path}")
-    logger.debug(f"output_dir: {output_dir}")
-    logger.debug(f"input_path: {input_path}")
-    logger.debug(f"percentage_brain_patch_skip: {percentage_brain_patch_skip}")
-    logger.debug(f"model_path: {model_path}")
-    logger.debug(f"gpu_index: {gpu_index}")
-    logger.debug(f"binarization_threshold: {binarization_threshold}")
-    logger.debug(f"save_prob_map_flag: {save_prob_map_flag}")
+    logger.info("#########")
+    logger.info("INFERENCE")
+    logger.info("#########")
+    logger.info(f"Config file: {config_path}")
+    logger.info(f"Ouput folder: {output_dir}")
+    logger.info(f"Preprocessed patches folder: {input_path}")
+    logger.info(f"Percentage brain patch skip: {percentage_brain_patch_skip}")
+    logger.info(f"Model path: {model_path}")
+    logger.info(f"GPU index: {gpu_index}")
+    logger.info(f"Binarization threshold: {binarization_threshold}")
+    logger.info(f"Save prob map flag: {save_prob_map_flag}")
 
     # -------------------------------------------------------
     # Read generate_patch directory / created by generate_patch.py
