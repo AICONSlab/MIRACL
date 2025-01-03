@@ -100,27 +100,25 @@ def main(
     patch_stacking_keep_image_type,
 ):
 
-    logger.debug("IN PATCH STACKING SCRIPT:")
-    logger.debug(
-        f"patch_stacking_output_folder: {patch_stacking_output_folder.dirpath}"
+    logger.info("##############")
+    logger.info("PATCH STACKING")
+    logger.info("##############")
+    logger.info(
+        f"Generated patches input folder: {patch_stacking_output_folder.dirpath}"
     ),
-    logger.debug(
-        f"generate_patch_input_folder: {generate_patch_input_folder.input_dirpath}"
+    logger.info(f"RAW data: {generate_patch_input_folder.input_dirpath}"),
+    logger.info(
+        f"Skeletonization output folder: {skeletonization_output_folder.dirpath}"
     ),
-    logger.debug(
-        f"skeletonization_output_folder: {skeletonization_output_folder.dirpath}"
-    ),
-    logger.debug(f"patch_stacking_cpu_load: {patch_stacking_cpu_load.content}"),
-    logger.debug(
-        f"patch_stacking_keep_image_type: {patch_stacking_keep_image_type.content}"
-    ),
+    logger.info(f"CPU load: {patch_stacking_cpu_load.content}"),
+    logger.info(f"Keep image type: {patch_stacking_keep_image_type.content}"),
 
     # get the arguments
-    cpu_load = args["cpu_load"]
-    input_path = args["input"]
-    output_dir = args["out_dir"]
-    input_raw = args["input_raw"]
-    image_type = args["image_type"]
+    cpu_load = patch_stacking_cpu_load.content
+    input_path = patch_stacking_output_folder.dirpath
+    output_dir = skeletonization_output_folder.dirpath
+    input_raw = generate_patch_input_folder.input_dirpath
+    image_type = patch_stacking_keep_image_type.content
 
     # get the number of cpus
     cpus = multiprocessing.cpu_count()
