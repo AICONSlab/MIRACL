@@ -284,14 +284,16 @@ def main(
     eccentricity_thr = skeletonization_eccentricity_thr.content
     orientation_thr = skeletonization_orientation_thr.content
 
-    logger.debug("INSIDE SKELETONIZATION:")
-    logger.debug(f"input_file_path: {input_file_path}")
-    logger.debug(f"out_dir: {out_dir}")
-    logger.debug(f"min_size_thr: {min_size_thr}")
-    logger.debug(f"cpu_load: {cpu_load}")
-    logger.debug(f"dilate_distance_transform_flag: {dilate_distance_transform_flag}")
-    logger.debug(f"eccentricity_thr: {eccentricity_thr}")
-    logger.debug(f"orientation_thr: {orientation_thr}")
+    logger.info("###############")
+    logger.info("SKELETONIZATION")
+    logger.info("###############")
+    logger.info(f"Inference output folder: {input_file_path}")
+    logger.info(f"Skeletonization output folder: {out_dir}")
+    logger.info(f"Remove small obj thr: {min_size_thr}")
+    logger.info(f"CPU load: {cpu_load}")
+    logger.info(f"Dilate distance transform: {dilate_distance_transform_flag}")
+    logger.info(f"Eccentricity thr: {eccentricity_thr}")
+    logger.info(f"Orientation thr: {orientation_thr}")
 
     # create out dir
     # isExist = os.path.exists(out_dir)
