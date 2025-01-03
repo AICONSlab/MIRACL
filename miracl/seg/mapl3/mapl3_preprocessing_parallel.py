@@ -353,6 +353,18 @@ def main(
         preprocess_parallel_save_intermediate_results.content
     )
 
+    logger.info(f"Generated patches folder: {input_file_path}")
+    logger.info(f"Preprocessing output folder: {out_dir}")
+    logger.info(f"CPU load: {cpu_load}")
+    logger.info(f"Percentage percentile filter: {correct_lightsheet_perc}")
+    logger.info(f"LSM footprint: {correct_lightsheet_lsm_footprint}")
+    logger.info(f"Back footprint: {correct_lightsheet_back_footprint}")
+    logger.info(f"Back downsample: {correct_lightsheet_back_downsample}")
+    logger.info(f"LSM vs back: {correct_lightsheet_lsm_vs_back}")
+    logger.info(f"Pseudo deconv threshold: {deconvolve_bin_thr}")
+    logger.info(f"Sigma of gauss blur filter: {deconvolve_sigma}")
+    logger.info(f"Save intermediate results: {save_intermediate_results_flag}")
+
     print(
         "the following parameters will be used: \n",
         "1. light sheet correction: ",
