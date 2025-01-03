@@ -37,6 +37,7 @@ setup(
         "Topic :: Scientific/Engineering :: Image Recognition",
     ],
     install_requires=[
+        "pydantic==2.5.3",
         "numpy==1.21.6",
         "pandas==1.3.5",
         "scipy==1.6.2",
