@@ -272,7 +272,7 @@ class MAPL3Inference(Inference):
 
         if inference_enabled:
             mapl3_inference.main(
-                generate_patch_output_folder,
+                preprocess_parallel_output_folder,
                 inference_output_folder,
                 inference_config,
                 inference_model_path,

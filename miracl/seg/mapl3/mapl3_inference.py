@@ -412,7 +412,7 @@ def run_inference_on_gpu(
 
 # main function
 def main(
-    generate_patch_output_folder,
+    preprocess_parallel_output_folder,
     inference_output_folder,
     inference_config,
     inference_model_path,
@@ -433,7 +433,7 @@ def main(
     # isExist = os.path.exists(output_dir)
     # if not isExist:
     #     os.mkdir(output_dir)
-    input_path = generate_patch_output_folder.dirpath
+    input_path = preprocess_parallel_output_folder.dirpath
     percentage_brain_patch_skip = inference_tissue_percentage_threshold.content
     model_path = inference_model_path.filepath
     gpu_index = inference_gpu_index.content
