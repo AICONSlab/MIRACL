@@ -100,23 +100,10 @@ def main(
     patch_stacking_keep_image_type,
 ):
 
-    logger.info("##############")
-    logger.info("PATCH STACKING")
-    logger.info("##############")
-    logger.info(
-        f"Generated patches input folder: {patch_stacking_output_folder.dirpath}"
-    ),
-    logger.info(f"RAW data: {generate_patch_input_folder.input_dirpath}"),
-    logger.info(
-        f"Skeletonization output folder: {skeletonization_output_folder.dirpath}"
-    ),
-    logger.info(f"CPU load: {patch_stacking_cpu_load.content}"),
-    logger.info(f"Keep image type: {patch_stacking_keep_image_type.content}"),
-
     # get the arguments
     cpu_load = patch_stacking_cpu_load.content
-    input_path = patch_stacking_output_folder.dirpath
-    output_dir = skeletonization_output_folder.dirpath
+    input_path = skeletonization_output_folder.dirpath
+    output_dir = patch_stacking_output_folder.dirpath
     input_raw = generate_patch_input_folder.input_dirpath
     image_type = patch_stacking_keep_image_type.content
 
@@ -124,12 +111,25 @@ def main(
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpu_load * cpus)
 
-    isExist = os.path.exists(output_dir)
-    if not isExist:
-        os.mkdir(output_dir)
+    logger.info("##############")
+    logger.info("PATCH STACKING")
+    logger.info("##############")
+    logger.info(f"Skeletonization folder: {input_path}"),
+    logger.info(f"RAW data: {input_raw}"),
+    logger.info(f"Generated patches output folder: {output_dir}"),
+    logger.info(f"CPU load: {cpu_load}"),
+    logger.info(f"Keep image type: {image_type}"),
 
-    print(f"  \npath: {input_path} has been found!")
-    print(f"  \nslices will be saved to: {output_dir}")
+    (
+        print(f"\nPath: '{input_path}' has been found!")
+        if input_path.exists()
+        else exit(f"\nError: Path '{input_path}' does not exist.")
+    )
+    (
+        print(f"Slices will be saved to: '{output_dir}'")
+        if output_dir.exists()
+        else exit(f"Error: Path '{output_dir}' does not exist.")
+    )
 
     # get the slices in the directory
     img_list_name = []
