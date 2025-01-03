@@ -353,6 +353,9 @@ def main(
         preprocess_parallel_save_intermediate_results.content
     )
 
+    logger.info("###################")
+    logger.info("PREPROCESS PARALLEL")
+    logger.info("###################")
     logger.info(f"Generated patches folder: {input_file_path}")
     logger.info(f"Preprocessing output folder: {out_dir}")
     logger.info(f"CPU load: {cpu_load}")
@@ -379,9 +382,9 @@ def main(
     )
 
     # create out dir
-    isExist = os.path.exists(out_dir)
-    if not isExist:
-        os.mkdir(out_dir)
+    # isExist = os.path.exists(out_dir)
+    # if not isExist:
+    #     os.mkdir(out_dir)
 
     # List all files in the input path
     file_names = os.listdir(input_file_path)
