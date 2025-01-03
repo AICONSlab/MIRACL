@@ -41,8 +41,10 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking import (
 #############
 
 logger = miracl_logger.logger
+production = True  # Set to run all modules
+# Set 'production' to False and set modules you want to run to True
 generate_patch_enabled = False
-preprocess_parallel_enabled = True
+preprocess_parallel_enabled = False
 inference_enabled = False
 skeletonization_enabled = False
 patch_stacking_enabled = False
@@ -160,7 +162,7 @@ class MAPL3GeneratePatch(GeneratePatch):
         logger.debug(f"generate_patch_patch_size: {generate_patch_patch_size.content}")
         logger.debug(f"generate_patch_gamma: {generate_patch_gamma.content}")
 
-        if generate_patch_enabled:
+        if production or generate_patch_enabled:
             mapl3_generate_patch.main(
                 generate_patch_input_folder,
                 generate_patch_output_folder,
@@ -223,7 +225,7 @@ class MAPL3PreprocessingParallel(PreprocessingParallel):
             f"preprocess_parallel_save_intermediate_results: {preprocess_parallel_save_intermediate_results.content}"
         )
 
-        if preprocess_parallel_enabled:
+        if production or preprocess_parallel_enabled:
             mapl3_preprocessing_parallel.main(
                 generate_patch_output_folder,
                 preprocess_parallel_output_folder,
@@ -270,7 +272,7 @@ class MAPL3Inference(Inference):
         )
         logger.debug(f"inference_save_prob_map: {inference_save_prob_map.content}")
 
-        if inference_enabled:
+        if production or inference_enabled:
             mapl3_inference.main(
                 preprocess_parallel_output_folder,
                 inference_output_folder,
@@ -316,7 +318,7 @@ class MAPL3Skeletonization(Skeletonization):
             f"skeletonization_orientation_thr: {skeletonization_orientation_thr.content}"
         )
 
-        if skeletonization_enabled:
+        if production or skeletonization_enabled:
             mapl3_skeletonization.main(
                 inference_output_folder,
                 skeletonization_output_folder,
@@ -355,7 +357,7 @@ class MAPL3PatchStacking(PatchStacking):
             f"patch_stacking_keep_image_type: {patch_stacking_keep_image_type.content}"
         )
 
-        if patch_stacking_enabled:
+        if production or patch_stacking_enabled:
             mapl3_patch_stacking.main(
                 patch_stacking_output_folder,
                 generate_patch_input_folder,
