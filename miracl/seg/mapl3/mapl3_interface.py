@@ -41,7 +41,11 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking import (
 #############
 
 logger = miracl_logger.logger
-production = False
+generate_patch_enabled = False
+preprocess_parallel_enabled = True
+inference_enabled = False
+skeletonization_enabled = False
+patch_stacking_enabled = False
 
 ###############################################################################
 
@@ -126,43 +130,6 @@ class PatchStacking(ABC):
         pass
 
 
-class MAPL3PatchStacking(PatchStacking):
-
-    def stack_patches(
-        self,
-        patch_stacking_output_folder,
-        generate_patch_input_folder,
-        skeletonization_output_folder,
-        patch_stacking_cpu_load,
-        patch_stacking_keep_image_type,
-    ):
-        logger.debug("###########################")
-        logger.debug("PATCH STACKING IN INTERFACE")
-        logger.debug("###########################")
-        logger.debug(
-            f"patch_stacking_output_folder: {patch_stacking_output_folder.dirpath}"
-        )
-        logger.debug(
-            f"generate_patch_input_folder: {generate_patch_input_folder.input_dirpath}"
-        )
-        logger.debug(
-            f"skeletonization_output_folder: {skeletonization_output_folder.dirpath}"
-        )
-        logger.debug(f"patch_stacking_cpu_load: {patch_stacking_cpu_load.content}")
-        logger.debug(
-            f"patch_stacking_keep_image_type: {patch_stacking_keep_image_type.content}"
-        )
-
-        if production:
-            mapl3_patch_stacking.main(
-                patch_stacking_output_folder,
-                generate_patch_input_folder,
-                skeletonization_output_folder,
-                patch_stacking_cpu_load,
-                patch_stacking_keep_image_type,
-            )
-
-
 ###############################################################################
 
 ####################
@@ -189,11 +156,11 @@ class MAPL3GeneratePatch(GeneratePatch):
         logger.debug(
             f"generate_patch_output_folder: {generate_patch_output_folder.dirpath}"
         )
-        logger.debug(f"CPU load: {generate_patch_cpu_load.content}")
-        logger.debug(f"Patch size: {generate_patch_patch_size.content}")
-        logger.debug(f"Gamma: {generate_patch_gamma.content}")
+        logger.debug(f"generate_patch_cpu_load: {generate_patch_cpu_load.content}")
+        logger.debug(f"generate_patch_patch_size: {generate_patch_patch_size.content}")
+        logger.debug(f"generate_patch_gamma: {generate_patch_gamma.content}")
 
-        if production:
+        if generate_patch_enabled:
             mapl3_generate_patch.main(
                 generate_patch_input_folder,
                 generate_patch_output_folder,
@@ -228,29 +195,38 @@ class MAPL3PreprocessingParallel(PreprocessingParallel):
         logger.debug(
             f"preprocess_parallel_output_folder: {preprocess_parallel_output_folder.dirpath}"
         )
-        logger.debug(f"cpu_load: {preprocess_parallel_cpu_load.content}")
-        logger.debug(f"cl_percentage: {preprocess_parallel_cl_percentage.content}")
         logger.debug(
-            f"cl_lsm_footprint: {preprocess_parallel_cl_lsm_footprint.content}"
+            f"preprocess_parallel_cpu_load: {preprocess_parallel_cpu_load.content}"
         )
         logger.debug(
-            f"cl_back_footprint: {preprocess_parallel_cl_back_footprint.content}"
+            f"preprocess_parallel_cl_percentage: {preprocess_parallel_cl_percentage.content}"
         )
         logger.debug(
-            f"cl_back_downsample: {preprocess_parallel_cl_back_downsample.content}"
+            f"preprocess_parallel_cl_lsm_footprint: {preprocess_parallel_cl_lsm_footprint.content}"
         )
         logger.debug(
-            f"cl_lsm_vs_back_weight: {preprocess_parallel_cl_lsm_vs_back_weight.content}"
+            f"preprocess_parallel_cl_back_footprint: {preprocess_parallel_cl_back_footprint.content}"
         )
-        logger.debug(f"deconv_bin_thr: {preprocess_parallel_deconv_bin_thr.content}")
-        logger.debug(f"deconv_sigma: {preprocess_parallel_deconv_sigma.content}")
         logger.debug(
-            f"save_intermediate_results: {preprocess_parallel_save_intermediate_results.content}"
+            f"preprocess_parallel_cl_back_downsample: {preprocess_parallel_cl_back_downsample.content}"
+        )
+        logger.debug(
+            f"preprocess_parallel_cl_lsm_vs_back_weight: {preprocess_parallel_cl_lsm_vs_back_weight.content}"
+        )
+        logger.debug(
+            f"preprocess_parallel_deconv_bin_thr: {preprocess_parallel_deconv_bin_thr.content}"
+        )
+        logger.debug(
+            f"preprocess_parallel_deconv_sigma: {preprocess_parallel_deconv_sigma.content}"
+        )
+        logger.debug(
+            f"preprocess_parallel_save_intermediate_results: {preprocess_parallel_save_intermediate_results.content}"
         )
 
-        if production:
+        if preprocess_parallel_enabled:
             mapl3_preprocessing_parallel.main(
                 generate_patch_output_folder,
+                preprocess_parallel_output_folder,
                 preprocess_parallel_cpu_load,
                 preprocess_parallel_cl_percentage,
                 preprocess_parallel_cl_lsm_footprint,
@@ -282,19 +258,19 @@ class MAPL3Inference(Inference):
         logger.debug(
             f"Generated patches output: {preprocess_parallel_output_folder.dirpath}"
         )
-        logger.debug(f"Config file: {inference_config.filepath}")
-        logger.debug(f"Model path: {inference_model_path.filepath}")
-        logger.debug(f"Ouput folder path: {inference_output_folder.dirpath}")
+        logger.debug(f"inference_config: {inference_config.filepath}")
+        logger.debug(f"inference_model_path: {inference_model_path.filepath}")
+        logger.debug(f"inference_output_folder: {inference_output_folder.dirpath}")
         logger.debug(
-            f"Tissue percentage threshold: {inference_tissue_percentage_threshold.content}"
+            f"inference_tissue_percentage_threshold: {inference_tissue_percentage_threshold.content}"
         )
-        logger.debug(f"GPU index: {inference_gpu_index.content}")
+        logger.debug(f"inference_gpu_index: {inference_gpu_index.content}")
         logger.debug(
-            f"Binarization threshold: {inference_binarization_threshold.content}"
+            f"inference_binarization_threshold: {inference_binarization_threshold.content}"
         )
-        logger.debug(f"Save prob map: {inference_save_prob_map.content}")
+        logger.debug(f"inference_save_prob_map: {inference_save_prob_map.content}")
 
-        if production:
+        if inference_enabled:
             mapl3_inference.main(
                 generate_patch_output_folder,
                 inference_output_folder,
@@ -329,14 +305,18 @@ class MAPL3Skeletonization(Skeletonization):
         logger.debug(
             f"skeletonization_remove_small_obj_thr: {skeletonization_remove_small_obj_thr.content}"
         )
-        logger.debug(f"cpu_load: {skeletonization_cpu_load.content}")
+        logger.debug(f"skeletonization_cpu_load: {skeletonization_cpu_load.content}")
         logger.debug(
-            f"dilate_distance_transform: {skeletonization_dilate_distance_transform.content}"
+            f"skeletonization_dilate_distance_transform: {skeletonization_dilate_distance_transform.content}"
         )
-        logger.debug(f"eccentricity_thr: {skeletonization_eccentricity_thr.content}")
-        logger.debug(f"orientation_thr: {skeletonization_orientation_thr.content}")
+        logger.debug(
+            f"skeletonization_eccentricity_thr: {skeletonization_eccentricity_thr.content}"
+        )
+        logger.debug(
+            f"skeletonization_orientation_thr: {skeletonization_orientation_thr.content}"
+        )
 
-        if production:
+        if skeletonization_enabled:
             mapl3_skeletonization.main(
                 inference_output_folder,
                 skeletonization_output_folder,
@@ -345,6 +325,43 @@ class MAPL3Skeletonization(Skeletonization):
                 skeletonization_dilate_distance_transform,
                 skeletonization_eccentricity_thr,
                 skeletonization_orientation_thr,
+            )
+
+
+class MAPL3PatchStacking(PatchStacking):
+
+    def stack_patches(
+        self,
+        patch_stacking_output_folder,
+        generate_patch_input_folder,
+        skeletonization_output_folder,
+        patch_stacking_cpu_load,
+        patch_stacking_keep_image_type,
+    ):
+        logger.debug("###########################")
+        logger.debug("PATCH STACKING IN INTERFACE")
+        logger.debug("###########################")
+        logger.debug(
+            f"patch_stacking_output_folder: {patch_stacking_output_folder.dirpath}"
+        )
+        logger.debug(
+            f"generate_patch_input_folder: {generate_patch_input_folder.input_dirpath}"
+        )
+        logger.debug(
+            f"skeletonization_output_folder: {skeletonization_output_folder.dirpath}"
+        )
+        logger.debug(f"patch_stacking_cpu_load: {patch_stacking_cpu_load.content}")
+        logger.debug(
+            f"patch_stacking_keep_image_type: {patch_stacking_keep_image_type.content}"
+        )
+
+        if patch_stacking_enabled:
+            mapl3_patch_stacking.main(
+                patch_stacking_output_folder,
+                generate_patch_input_folder,
+                skeletonization_output_folder,
+                patch_stacking_cpu_load,
+                patch_stacking_keep_image_type,
             )
 
 
@@ -357,6 +374,7 @@ class MAPL3Skeletonization(Skeletonization):
 
 def main():
 
+    # Workaround to not parse the `seg mapl3` part of the MIRACL command
     sys.argv = sys.argv[2:]
 
     # Create an instance of the parser
