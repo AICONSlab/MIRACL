@@ -197,16 +197,6 @@ def main(
     generate_patch_gamma,
 ):
 
-    # For dev
-    logger.debug("IN GENERATE PATCH SCRIPT:")
-    logger.debug(
-        f"Input folder with raw files: {generate_patch_input_folder.input_dirpath}"
-    )
-    logger.debug(f"Output folder for MAPL3: {generate_patch_output_folder.dirpath}")
-    logger.debug(f"CPU load: {generate_patch_cpu_load.content}")
-    logger.debug(f"Patch size: {generate_patch_patch_size.content}")
-    logger.debug(f"Gamma: {generate_patch_gamma.content}")
-
     # get the arguments
     input_path = generate_patch_input_folder.input_dirpath
     output_dir = generate_patch_output_folder.dirpath
@@ -214,16 +204,27 @@ def main(
     patch_size = generate_patch_patch_size.content
     gamma = generate_patch_gamma.content
 
+    logger.info("################")
+    logger.info("GENERATE PATCHES")
+    logger.info("################")
+    logger.info(f"Input folder with raw files: {input_path}")
+    logger.info(f"Base output folder for MAPL3: {output_dir}")
+    logger.info(f"CPU load: {cpu_load}")
+    logger.info(f"Patch size: {patch_size}")
+    logger.info(f"Gamma: {gamma}")
+
     # get the number of cpus
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpu_load * cpus)
 
-    isExist = os.path.exists(output_dir)
-    if not isExist:
-        os.mkdir(output_dir)
+    # isExist = os.path.exists(output_dir)
+    # if not isExist:
+    #     os.mkdir(output_dir)
 
-    print(f"  \nSubject: {input_path} has been found!")
-    print(f"  \npatches will be saved to: {output_dir}")
+    if input_path.exists():
+        print(f"\nSubject: {input_path} has been found!")
+    if output_dir.exists():
+        print(f"Patches will be saved to: {output_dir}")
 
     # get the slices in the directory
     img_list_name = []
