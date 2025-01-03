@@ -323,8 +323,8 @@ def my_filter(
 
 def main(
     generate_patch_output_folder,
-    preprocess_parallel_cpu_load,
     preprocess_parallel_output_folder,
+    preprocess_parallel_cpu_load,
     preprocess_parallel_cl_percentage,
     preprocess_parallel_cl_lsm_footprint,
     preprocess_parallel_cl_back_footprint,
