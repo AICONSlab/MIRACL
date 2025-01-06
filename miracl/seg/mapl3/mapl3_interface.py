@@ -387,6 +387,9 @@ class MAPL3PatchStacking(PatchStacking):
 def main(parser_var):
 
     # Workaround to not parse the `seg mapl3` part of the MIRACL command
+    # It's important to note here that the interface has to be called
+    # through MIRACL's cli parser because the submodule and module from the
+    # miracl command will be removed with the below command
     sys.argv = sys.argv[2:]
 
     # Create an instance of the parser
@@ -404,6 +407,7 @@ def main(parser_var):
     # GENERATE PATCH #
     ##################
 
+    # Folder with raw tiff files
     generate_patch_input_folder = obj_generate_patch.input
     generate_patch_input_folder.input_dirpath = args[
         generate_patch_input_folder.cli_l_flag
@@ -643,6 +647,8 @@ def main(parser_var):
         patch_stacking_cpu_load,
         patch_stacking_keep_image_type,
     )
+
+    return {"generate_patch_input_folder": generate_patch_input_folder}
 
 
 ###############################################################################
