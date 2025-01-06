@@ -384,13 +384,14 @@ class MAPL3PatchStacking(PatchStacking):
 ########
 
 
-def main():
+def main(parser_var):
 
     # Workaround to not parse the `seg mapl3` part of the MIRACL command
     sys.argv = sys.argv[2:]
 
     # Create an instance of the parser
-    parser = Mapl3Parser()
+    # parser = Mapl3Parser()
+    parser = parser_var
 
     # Parse the command-line arguments
     args = vars(parser.parser.parse_args())
@@ -414,6 +415,7 @@ def main():
     )  # Input of "output_folder" flag
 
     mapl3_results_folder_seg = mapl3_results_folder.dirpath / "seg"
+
     generate_patch_cpu_load = obj_generate_patch.cpu_load
     generate_patch_cpu_load.content = args[generate_patch_cpu_load.cli_l_flag]
 
@@ -646,4 +648,4 @@ def main():
 ###############################################################################
 
 if __name__ == "__main__":
-    main()
+    main(Mapl3Parser())

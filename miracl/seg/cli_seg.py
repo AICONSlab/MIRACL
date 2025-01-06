@@ -59,7 +59,7 @@ def run_voxelize(parser, args):
 
 
 def run_mapl3(parser, args):
-    mapl3_interface.main()
+    mapl3_interface.main(mapl3_cli_parser.Mapl3Parser())
 
 
 def run_ace(parser, args):
