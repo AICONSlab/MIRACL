@@ -266,6 +266,7 @@ def aa_skeletonize(
 
 def main(
     inference_output_folder,
+    generate_patch_output_folder,
     skeletonization_output_folder,
     skeletonization_remove_small_obj_thr,
     skeletonization_cpu_load,
@@ -277,6 +278,7 @@ def main(
     # Execute the parse_args() method
     # args = vars(my_parser.parse_args())
     input_file_path = inference_output_folder.dirpath
+    json_path = generate_patch_output_folder.dirpath
     out_dir = skeletonization_output_folder.dirpath
     min_size_thr = skeletonization_remove_small_obj_thr.content
     cpu_load = skeletonization_cpu_load.content
@@ -288,6 +290,7 @@ def main(
     logger.info("SKELETONIZATION")
     logger.info("###############")
     logger.info(f"Inference output folder: {input_file_path}")
+    logger.info(f"json file folder path: {json_path}")
     logger.info(f"Skeletonization output folder: {out_dir}")
     logger.info(f"Remove small obj thr: {min_size_thr}")
     logger.info(f"CPU load: {cpu_load}")

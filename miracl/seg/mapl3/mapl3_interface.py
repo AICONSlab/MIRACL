@@ -41,8 +41,7 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking import (
 #############
 
 logger = miracl_logger.logger
-production = True  # Set to run all modules
-# Set 'production' to False and set modules you want to run to True
+production = False  # Set 'production' to False and set modules you want to run to True
 generate_patch_enabled = False
 preprocess_parallel_enabled = False
 inference_enabled = False
@@ -93,6 +92,7 @@ class Inference(ABC):
     def run_inference(
         self,
         preprocess_parallel_output_folder: MiraclObj,
+        generate_patch_output_folder: MiraclObj,
         inference_output_folder: MiraclObj,
         inference_config: MiraclObj,
         inference_model_path: MiraclObj,
@@ -109,6 +109,7 @@ class Skeletonization(ABC):
     def run_skeletonization(
         self,
         inference_output_folder,
+        generate_patch_output_folder,
         skeletonization_output_folder,
         skeletonization_remove_small_obj_thr,
         skeletonization_cpu_load,
@@ -246,6 +247,7 @@ class MAPL3Inference(Inference):
     def run_inference(
         self,
         preprocess_parallel_output_folder,
+        generate_patch_output_folder,
         inference_output_folder,
         inference_config,
         inference_model_path,
@@ -258,7 +260,10 @@ class MAPL3Inference(Inference):
         logger.debug("INFERENCE IN INTERFACE")
         logger.debug("######################")
         logger.debug(
-            f"Generated patches output: {preprocess_parallel_output_folder.dirpath}"
+            f"Processed generated patches output: {preprocess_parallel_output_folder.dirpath}"
+        )
+        logger.debug(
+            f"Generated patches folder i.e. json file location: {generate_patch_output_folder.dirpath}"
         )
         logger.debug(f"inference_config: {inference_config.filepath}")
         logger.debug(f"inference_model_path: {inference_model_path.filepath}")
@@ -275,6 +280,7 @@ class MAPL3Inference(Inference):
         if production or inference_enabled:
             mapl3_inference.main(
                 preprocess_parallel_output_folder,
+                generate_patch_output_folder,
                 inference_output_folder,
                 inference_config,
                 inference_model_path,
@@ -290,6 +296,7 @@ class MAPL3Skeletonization(Skeletonization):
     def run_skeletonization(
         self,
         inference_output_folder: MiraclObj,
+        generate_patch_output_folder: MiraclObj,
         skeletonization_output_folder: MiraclObj,
         skeletonization_remove_small_obj_thr: MiraclObj,
         skeletonization_cpu_load: MiraclObj,
@@ -301,6 +308,7 @@ class MAPL3Skeletonization(Skeletonization):
         logger.debug("SKELETONIZATION IN INTERFACE")
         logger.debug("############################")
         logger.debug(f"inference_output_folder: {inference_output_folder.dirpath}")
+        logger.debug(f"json file folder path: {generate_patch_output_folder.dirpath}")
         logger.debug(
             f"skeletonization_output_folder: {skeletonization_output_folder.dirpath}"
         )
@@ -321,6 +329,7 @@ class MAPL3Skeletonization(Skeletonization):
         if production or skeletonization_enabled:
             mapl3_skeletonization.main(
                 inference_output_folder,
+                generate_patch_output_folder,
                 skeletonization_output_folder,
                 skeletonization_remove_small_obj_thr,
                 skeletonization_cpu_load,
@@ -602,6 +611,7 @@ def main():
 
     inference.run_inference(
         preprocess_parallel_output_folder,
+        generate_patch_output_folder,
         inference_output_folder,
         inference_config,
         inference_model_path,
@@ -613,6 +623,7 @@ def main():
 
     skeletonization.run_skeletonization(
         inference_output_folder,
+        generate_patch_output_folder,
         skeletonization_output_folder,
         skeletonization_remove_small_obj_thr,
         skeletonization_cpu_load,

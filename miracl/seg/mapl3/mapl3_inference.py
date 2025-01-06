@@ -7,9 +7,9 @@ Main Inputs:
     model, config, and transforms
     path to the generated patches
 Outputs:
-    a directory conatining: 
+    a directory conatining:
         probability maps
-        binary outputs 
+        binary outputs
 
 """
 
@@ -413,6 +413,7 @@ def run_inference_on_gpu(
 # main function
 def main(
     preprocess_parallel_output_folder,
+    generate_patch_output_folder,
     inference_output_folder,
     inference_config,
     inference_model_path,
@@ -430,6 +431,7 @@ def main(
     print("config file is loaded ...")
     output_dir = inference_output_folder.dirpath
     input_path = preprocess_parallel_output_folder.dirpath
+    json_path = generate_patch_output_folder.dirpath
     percentage_brain_patch_skip = inference_tissue_percentage_threshold.content
     model_path = inference_model_path.filepath
     gpu_index = inference_gpu_index.content
@@ -441,6 +443,7 @@ def main(
     logger.info("#########")
     logger.info(f"Config file: {config_path}")
     logger.info(f"Ouput folder: {output_dir}")
+    logger.info(f"json file location: {json_path}")
     logger.info(f"Preprocessed patches folder: {input_path}")
     logger.info(f"Percentage brain patch skip: {percentage_brain_patch_skip}")
     logger.info(f"Model path: {model_path}")
@@ -462,7 +465,7 @@ def main(
 
     if percentage_brain_patch_skip > 0:
         # load in percentage_brain_patch.json
-        with open(os.path.join(input_path, "percentage_brain_patch.json")) as f:
+        with open(os.path.join(json_path, "percentage_brain_patch.json")) as f:
             percentage_brain_patch = json.load(f)
 
         # filter through images val based on percentage threshold
