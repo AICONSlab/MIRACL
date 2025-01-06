@@ -1,5 +1,6 @@
 import sys
 from abc import abstractmethod, ABC
+from pathlib import Path
 
 # Import MIRACL BaseModel and utility fns
 from miracl.seg.mapl3.mapl3_cli_parser import Mapl3Parser
@@ -408,10 +409,11 @@ def main():
     ]
 
     mapl3_results_folder = obj_generate_patch.output
-    mapl3_results_folder.dirpath = args[
-        mapl3_results_folder.cli_l_flag
-    ]  # Input of "output_folder" flag
+    mapl3_results_folder.dirpath = (
+        Path(args[mapl3_results_folder.cli_l_flag]) / "mapl3"
+    )  # Input of "output_folder" flag
 
+    mapl3_results_folder_seg = mapl3_results_folder.dirpath / "seg"
     generate_patch_cpu_load = obj_generate_patch.cpu_load
     generate_patch_cpu_load.content = args[generate_patch_cpu_load.cli_l_flag]
 
@@ -423,7 +425,7 @@ def main():
 
     generate_patch_output_folder = obj_subfolders.generated_patches_output
     generate_patch_output_folder.dirpath = (
-        mapl3_results_folder.dirpath / "mapl3_generated_patches"
+        mapl3_results_folder_seg / "mapl3_generated_patches"
     )
     UtilfnsPaths.ensure_folder_exists(generate_patch_output_folder.dirpath)
 
@@ -435,7 +437,7 @@ def main():
 
     preprocess_parallel_output_folder = obj_subfolders.preprocessed_patches_output
     preprocess_parallel_output_folder.dirpath = (
-        mapl3_results_folder.dirpath / "mapl3_preprocessed_patches"
+        mapl3_results_folder_seg / "mapl3_preprocessed_patches"
     )
     UtilfnsPaths.ensure_folder_exists(preprocess_parallel_output_folder.dirpath)
 
@@ -499,7 +501,7 @@ def main():
     inference_model_path.filepath = args[inference_model_path.cli_l_flag]
 
     inference_output_folder = obj_subfolders.inference_output
-    inference_output_folder.dirpath = mapl3_results_folder.dirpath / "mapl3_inference"
+    inference_output_folder.dirpath = mapl3_results_folder_seg / "mapl3_inference"
     UtilfnsPaths.ensure_folder_exists(inference_output_folder.dirpath)
 
     inference_tissue_percentage_threshold = obj_inference.tissue_percentage_threshold
@@ -531,7 +533,7 @@ def main():
 
     skeletonization_output_folder = obj_subfolders.skeletonization_output
     skeletonization_output_folder.dirpath = (
-        mapl3_results_folder.dirpath / "mapl3_skeletonization"
+        mapl3_results_folder_seg / "mapl3_skeletonization"
     )
     UtilfnsPaths.ensure_folder_exists(skeletonization_output_folder.dirpath)
 
@@ -563,7 +565,7 @@ def main():
 
     patch_stacking_output_folder = obj_subfolders.patch_stacking_output
     patch_stacking_output_folder.dirpath = (
-        mapl3_results_folder.dirpath / "mapl3_patch_stacking"
+        mapl3_results_folder_seg / "mapl3_patch_stacking"
     )
     UtilfnsPaths.ensure_folder_exists(patch_stacking_output_folder.dirpath)
 
