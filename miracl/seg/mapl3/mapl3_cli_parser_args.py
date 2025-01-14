@@ -1,5 +1,5 @@
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch import (
-    GeneratePatch as seg_mapl3_genpatch,
+    GeneratePatch as seg_genpatch,
 )
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel import (
     PreprocessingParallel as seg_preprocessing_parallel,
@@ -19,11 +19,11 @@ groups_dict = {
         "title": "generate patch arguments",
         "description": "arguments passed to generate patch fn",
         "args": [
-            seg_mapl3_genpatch.input,
-            seg_mapl3_genpatch.output,
-            seg_mapl3_genpatch.cpu_load,
-            seg_mapl3_genpatch.patch_size,
-            seg_mapl3_genpatch.gamma,
+            seg_genpatch.input,
+            seg_genpatch.output,
+            seg_genpatch.cpu_load,
+            seg_genpatch.patch_size,
+            seg_genpatch.gamma,
         ],
     },
     "preprocessing_parallel": {
@@ -72,4 +72,12 @@ groups_dict = {
             seg_patch_stacking.keep_image_type,
         ],
     },
+}
+
+object_dict = {
+    "seg_genpatch": seg_genpatch,
+    "seg_preprocessing_parallel": seg_preprocessing_parallel,
+    "seg_inference": seg_inference,
+    "seg_skeletonization": seg_skeletonization,
+    "seg_patch_stacking": seg_patch_stacking,
 }

@@ -7,7 +7,7 @@ from argparse import (
     Namespace,
 )
 
-from miracl.system.utilfns.utilfn_cli_parser_creator import create_parser_arguments
+from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
 from miracl.seg.mapl3.mapl3_cli_parser_args import groups_dict
 
 
@@ -35,7 +35,8 @@ class Mapl3Parser:
         )
 
         # Create parser args
-        create_parser_arguments(parser, groups_dict, "module")
+        parser_processor = MiraclArgumentProcessor(parser)
+        parser_processor.create_parser_arguments(groups_dict, "module")
 
         return parser
 

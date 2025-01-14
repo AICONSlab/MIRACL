@@ -5,6 +5,34 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
 
 
 class InterfaceSubfolders:
+    mapl3_results_base_folder = MiraclObj(
+        id="8d30d81b-4a29-4b6d-bc76-f6b9f8126530",
+        name="mapl3_results_base_folder",
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli_s_flag="gp_bo",
+        cli_l_flag="gp_base_output",
+        flow={"mapl3": {"cli_s_flag": "gp_bo", "cli_l_flag": "gp_base_output"}},
+        cli_obj_type=ArgumentType.STRING,
+        cli_help="Folder object for interface generated base output subfolder",
+        module="mapl3",
+        module_group="seg",
+        version_added="2.4.0",
+    )
+
+    mapl3_results_seg_folder = MiraclObj(
+        id="1dd00b5e-9a9e-472b-b556-ff8e4202324b",
+        name="mapl3_results_seg_folder",
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli_s_flag="gp_so",
+        cli_l_flag="gp_seg_output",
+        flow={"mapl3": {"cli_s_flag": "gp_so", "cli_l_flag": "gp_seg_output"}},
+        cli_obj_type=ArgumentType.STRING,
+        cli_help="Folder object for interface generated segmentation output subfolder",
+        module="mapl3",
+        module_group="seg",
+        version_added="2.4.0",
+    )
+
     generated_patches_output = MiraclObj(
         id="d0e788f5-6802-4c88-bd52-b31ec432d309",
         name="generated_patches_output",
