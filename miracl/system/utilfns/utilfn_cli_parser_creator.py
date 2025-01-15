@@ -212,17 +212,17 @@ from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
 
 
 class MiraclArgumentProcessor:
-    def __init__(self, parser: ArgumentParser):
+    def __init__(self):
         """
         Initialize the MiraclArgumentProcessor with an ArgumentParser.
 
         :param parser: The ArgumentParser instance to be used for creating arguments
         """
-        self.parser = parser
         self.argument_groups = {}
 
     def create_parser_arguments(
         self,
+        parser: ArgumentParser,
         groups_dict: Dict[str, Dict[str, Union[str, List[Any]]]],
         module_type: str = "module",
     ) -> None:
@@ -249,7 +249,7 @@ class MiraclArgumentProcessor:
             title = cast(str, group_info["title"])
             description = cast(Optional[str], group_info.get("description"))
 
-            current_group = self.parser.add_argument_group(
+            current_group = parser.add_argument_group(
                 title=title, description=description
             )
             self.argument_groups[group_name] = current_group

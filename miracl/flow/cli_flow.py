@@ -6,6 +6,8 @@ import sys
 from miracl.flow import miracl_workflow_ace_interface
 from miracl.flow.miracl_workflow_ace_parser import ACEWorkflowParser
 from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
+from miracl.flow.mapl3 import mapl3_workflow_main
+from miracl.flow.mapl3 import mapl3_workflow_cli_parser
 
 
 def run_reg_clar(parser, args):
@@ -155,6 +157,10 @@ def run_ace(parser, args):
         miracl_workflow_ace_interface.main(args)
 
 
+def run_mapl3_workflow(parser, args):
+    sys.argv = sys.argv[2:]
+    mapl3_workflow_main.main()
+
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -286,6 +292,19 @@ def get_parser():
         formatter_class=ace_parser.formatter_class,
     )
     parser_ace.set_defaults(func=run_ace)
+
+    # MAPL3
+    mapl3_workflow_parser_class = mapl3_workflow_cli_parser.Mapl3WorkflowParser()
+    mapl3_workflow_parsefn = mapl3_workflow_parser_class.parsefn()
+    parser_mapl3_workflow = subparsers.add_parser(
+        "mapl3",
+        parents=[mapl3_workflow_parsefn],
+        add_help=False,
+        usage=mapl3_workflow_parsefn.usage,
+        help="mapping axonal projection in light sheet microscopy in 3d",
+    )
+
+    parser_mapl3_workflow.set_defaults(func=run_mapl3_workflow)
 
     return parser
 

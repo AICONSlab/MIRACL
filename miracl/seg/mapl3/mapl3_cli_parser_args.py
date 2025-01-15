@@ -14,7 +14,7 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking import (
     PatchStacking as seg_patch_stacking,
 )
 
-groups_dict = {
+mapl3_groups_dict = {
     "generate_patch": {
         "title": "generate patch arguments",
         "description": "arguments passed to generate patch fn",
@@ -74,7 +74,7 @@ groups_dict = {
     },
 }
 
-object_dict = {
+mapl3_object_dict = {
     "seg_genpatch": seg_genpatch,
     "seg_preprocessing_parallel": seg_preprocessing_parallel,
     "seg_inference": seg_inference,

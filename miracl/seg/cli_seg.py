@@ -3,7 +3,9 @@ import os
 import subprocess
 import sys
 
-from miracl.seg.mapl3 import mapl3_cli_parser, mapl3_interface
+from miracl.seg.mapl3 import mapl3_cli_parser
+from miracl.seg.mapl3 import mapl3_main
+
 from miracl.seg import (
     ace_interface,
     ace_parser,
@@ -59,7 +61,8 @@ def run_voxelize(parser, args):
 
 
 def run_mapl3(parser, args):
-    mapl3_interface.main(mapl3_cli_parser.Mapl3Parser())
+    sys.argv = sys.argv[2:]
+    mapl3_main.main()
 
 
 def run_ace(parser, args):

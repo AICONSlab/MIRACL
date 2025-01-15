@@ -1,18 +1,21 @@
+"""
+This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca) for
+Ahmadreza Attapour's (a.attarpour@mail.utoronto.ca) MAPL3 implementation into
+Maged Goubran's MIRACL.
+
+This code is the parser for the the MAPL3 workflow.
+"""
+
 from argparse import (
-    ArgumentError,
     ArgumentParser,
-    RawDescriptionHelpFormatter,
-    _HelpAction,
-    SUPPRESS,
-    Namespace,
 )
 
-from miracl.system.utilfns.utilfn_cli_parser_creator import create_parser_arguments
-from miracl.seg.mapl3.mapl3_cli_parser_args import groups_dict
-from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import reg_flow_groups_dict
+from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
+from miracl.seg.mapl3.mapl3_cli_parser_args import mapl3_groups_dict
+from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import reg_groups_dict
 
 
-class Mapl3Parser:
+class Mapl3WorkflowParser:
     """
     Command-line argument parser for MAPL3.
 
@@ -35,15 +38,17 @@ class Mapl3Parser:
             add_help=True,
         )
 
-        # Combine the MAPL3 parser with the additional args of the flow
-        combined_groups_dict = {**groups_dict, **reg_flow_groups_dict}
+        # Combine the MAPL3 module parser with the additional args of the flow,
+        # in this case the registration module
+        combined_groups_dict = {**mapl3_groups_dict, **reg_groups_dict}
 
         # Create parser args
-        create_parser_arguments(parser, combined_groups_dict, "mapl3")
+        parser_processor = MiraclArgumentProcessor()
+        parser_processor.create_parser_arguments(parser, combined_groups_dict, "mapl3")
 
         return parser
 
 
 if __name__ == "__main__":
-    args_parser = Mapl3Parser()
+    args_parser = Mapl3WorkflowParser()
     args = args_parser.parser.parse_args()

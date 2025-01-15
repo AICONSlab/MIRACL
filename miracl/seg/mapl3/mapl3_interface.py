@@ -6,16 +6,17 @@ Maged Goubran's MIRACL.
 This code is an interface for the the MAPL3 segmentation module.
 """
 
-import sys
+# import sys
+# import inspect
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
 # Import MIRACL BaseModel and utility fns
-from miracl.seg.mapl3.mapl3_cli_parser import Mapl3Parser
+# from miracl.seg.mapl3.mapl3_cli_parser import Mapl3Parser
 from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
 
 # from miracl.system.utilfns.utilfns_paths import UtilfnsPaths
-from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
+# from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
 from miracl import miracl_logger
 
 # Import MAPL3 scripts
@@ -26,7 +27,7 @@ import miracl.seg.mapl3.mapl3_skeletonization as mapl3_skeletonization
 import miracl.seg.mapl3.mapl3_patch_stacking as mapl3_patch_stacking
 
 # Import MAPL3 objects
-from miracl.seg.mapl3.mapl3_cli_parser_args import object_dict as seg_mapl3_objs
+from miracl.seg.mapl3.mapl3_cli_parser_args import mapl3_object_dict as seg_mapl3_objs
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_interface_folder import (
     InterfaceSubfolders as mapl3_interface_folders,
 )
@@ -361,29 +362,44 @@ class MAPL3PatchStacking(PatchStacking):
 ########
 
 
-def main(parser_var):
+# def main(parser_var, objs):
+def main(objs):
     # Workaround to not parse the `seg mapl3` part of the MIRACL command
     # It's important to note here that the interface has to be called
     # through MIRACL's cli parser because the submodule and module from the
     # miracl command will be removed with the below command
     # FIX: Could this be done in MIRACL's cli parser instead?
-    sys.argv = sys.argv[2:]
-
-    # Create an instance of the parser
-    parser = parser_var
-
-    # Parse the command-line arguments
-    args = vars(parser.parser.parse_args())
-
-    #############################################
-    # ASSIGN CLI INPUT ARGS TO PYDANTIC OBJECTS #
-    #############################################
-
-    # Process the results of the parsed cli args
-    # Processing here refers to assigning the results to their respective
-    # objects/attribute
-    processor = MiraclArgumentProcessor(parser)
-    processor.process_miracl_objects(seg_mapl3_objs, args)
+    # sys.argv = sys.argv[2:]
+    #
+    # if isinstance(parser_var, dict):
+    #     # It's a dictionary of parsed arguments
+    #     args = parser_var
+    #     # Use args directly
+    # elif inspect.isclass(type(parser_var)):
+    #     # It's a parser instance
+    #     parser = parser_var
+    #     args = vars(parser.parser.parse_args())
+    #     # Use args parsed from the parser
+    # else:
+    #     raise ValueError(
+    #         "Input must be either a parser instance or a dictionary of parsed arguments"
+    #     )
+    #
+    # # # Create an instance of the parser
+    # # parser = parser_var
+    # #
+    # # # Parse the command-line arguments
+    # # args = vars(parser.parser.parse_args())
+    #
+    # #############################################
+    # # ASSIGN CLI INPUT ARGS TO PYDANTIC OBJECTS #
+    # #############################################
+    #
+    # # Process the results of the parsed cli args
+    # # Processing here refers to assigning the results to their respective
+    # # objects/attribute
+    # processor = MiraclArgumentProcessor()
+    # processor.process_miracl_objects(objs, args)
 
     ########################
     # CREATE MAPL3 FOLDERS #
@@ -392,7 +408,7 @@ def main(parser_var):
     # NOTE: Do I need another check here with the utils fn for filepaths?
 
     mapl3_interface_folders.mapl3_results_base_folder.dirpath = (
-        seg_mapl3_objs["seg_genpatch"].output.dirpath / "mapl3"
+        objs["seg_genpatch"].output.dirpath / "mapl3"
     )
 
     # Create segmentation subfolder under base folder
@@ -443,11 +459,11 @@ def main(parser_var):
 
     patch_generator.generate_patch(
         GeneratePatchParams(
-            input_folder=seg_mapl3_objs["seg_genpatch"].input,
+            input_folder=objs["seg_genpatch"].input,
             output_folder=mapl3_interface_folders.generated_patches_output,
-            cpu_load=seg_mapl3_objs["seg_genpatch"].cpu_load,
-            patch_size=seg_mapl3_objs["seg_genpatch"].patch_size,
-            gamma=seg_mapl3_objs["seg_genpatch"].gamma,
+            cpu_load=objs["seg_genpatch"].cpu_load,
+            patch_size=objs["seg_genpatch"].patch_size,
+            gamma=objs["seg_genpatch"].gamma,
         )
     )
 
@@ -455,23 +471,15 @@ def main(parser_var):
         PreprocessingParallelParams(
             generate_patch_output_folder=mapl3_interface_folders.generated_patches_output,
             output_folder=mapl3_interface_folders.preprocessed_patches_output,
-            cpu_load=seg_mapl3_objs["seg_preprocessing_parallel"].cpu_load,
-            cl_percentage=seg_mapl3_objs["seg_preprocessing_parallel"].cl_percentage,
-            cl_lsm_footprint=seg_mapl3_objs[
-                "seg_preprocessing_parallel"
-            ].cl_lsm_footprint,
-            cl_back_footprint=seg_mapl3_objs[
-                "seg_preprocessing_parallel"
-            ].cl_back_footprint,
-            cl_back_downsample=seg_mapl3_objs[
-                "seg_preprocessing_parallel"
-            ].cl_back_downsample,
-            cl_lsm_vs_back_weight=seg_mapl3_objs[
-                "seg_preprocessing_parallel"
-            ].lsm_vs_back_weight,
-            deconv_bin_thr=seg_mapl3_objs["seg_preprocessing_parallel"].deconv_bin_thr,
-            deconv_sigma=seg_mapl3_objs["seg_preprocessing_parallel"].deconv_sigma,
-            save_intermediate_results=seg_mapl3_objs[
+            cpu_load=objs["seg_preprocessing_parallel"].cpu_load,
+            cl_percentage=objs["seg_preprocessing_parallel"].cl_percentage,
+            cl_lsm_footprint=objs["seg_preprocessing_parallel"].cl_lsm_footprint,
+            cl_back_footprint=objs["seg_preprocessing_parallel"].cl_back_footprint,
+            cl_back_downsample=objs["seg_preprocessing_parallel"].cl_back_downsample,
+            cl_lsm_vs_back_weight=objs["seg_preprocessing_parallel"].lsm_vs_back_weight,
+            deconv_bin_thr=objs["seg_preprocessing_parallel"].deconv_bin_thr,
+            deconv_sigma=objs["seg_preprocessing_parallel"].deconv_sigma,
+            save_intermediate_results=objs[
                 "seg_preprocessing_parallel"
             ].save_intermediate_results,
         )
@@ -482,16 +490,14 @@ def main(parser_var):
             preprocess_parallel_output_folder=mapl3_interface_folders.preprocessed_patches_output,
             generate_patch_output_folder=mapl3_interface_folders.generated_patches_output,
             output_folder=mapl3_interface_folders.inference_output,
-            config=seg_mapl3_objs["seg_inference"].config,
-            model_path=seg_mapl3_objs["seg_inference"].model_path,
-            tissue_percentage_threshold=seg_mapl3_objs[
+            config=objs["seg_inference"].config,
+            model_path=objs["seg_inference"].model_path,
+            tissue_percentage_threshold=objs[
                 "seg_inference"
             ].tissue_percentage_threshold,
-            gpu_index=seg_mapl3_objs["seg_inference"].gpu_index,
-            binarization_threshold=seg_mapl3_objs[
-                "seg_inference"
-            ].binarization_threshold,
-            save_prob_map=seg_mapl3_objs["seg_inference"].save_prob_map,
+            gpu_index=objs["seg_inference"].gpu_index,
+            binarization_threshold=objs["seg_inference"].binarization_threshold,
+            save_prob_map=objs["seg_inference"].save_prob_map,
         )
     )
 
@@ -500,15 +506,13 @@ def main(parser_var):
             inference_output_folder=mapl3_interface_folders.inference_output,
             generate_patch_output_folder=mapl3_interface_folders.generated_patches_output,
             output=mapl3_interface_folders.skeletonization_output,
-            remove_small_obj_thr=seg_mapl3_objs[
-                "seg_skeletonization"
-            ].remove_small_obj_thr,
-            cpu_load=seg_mapl3_objs["seg_skeletonization"].cpu_load,
-            dilate_distance_transform=seg_mapl3_objs[
+            remove_small_obj_thr=objs["seg_skeletonization"].remove_small_obj_thr,
+            cpu_load=objs["seg_skeletonization"].cpu_load,
+            dilate_distance_transform=objs[
                 "seg_skeletonization"
             ].dilate_distance_transform,
-            eccentricity_thr=seg_mapl3_objs["seg_skeletonization"].eccentricity_thr,
-            orientation_thr=seg_mapl3_objs["seg_skeletonization"].orientation_thr,
+            eccentricity_thr=objs["seg_skeletonization"].eccentricity_thr,
+            orientation_thr=objs["seg_skeletonization"].orientation_thr,
         )
     )
 
@@ -517,17 +521,27 @@ def main(parser_var):
             generate_patch_input_folder=mapl3_interface_folders.generated_patches_output,
             skeletonization_output_folder=mapl3_interface_folders.skeletonization_output,
             output=mapl3_interface_folders.patch_stacking_output,
-            cpu_load=seg_mapl3_objs["seg_patch_stacking"].cpu_load,
-            keep_image_type=seg_mapl3_objs["seg_patch_stacking"].keep_image_type,
+            cpu_load=objs["seg_patch_stacking"].cpu_load,
+            keep_image_type=objs["seg_patch_stacking"].keep_image_type,
         )
     )
 
-    return {
-        "generate_patch_input_folder": mapl3_interface_folders.generated_patches_output.dirpath
+    mapl3_subfolders_objs_dict = {
+        "mapl3_results_base_folder": mapl3_interface_folders.mapl3_results_base_folder,
+        "mapl3_results_seg_folder": mapl3_interface_folders.mapl3_results_seg_folder,
+        "generated_patches_output": mapl3_interface_folders.generated_patches_output,
+        "preprocessed_patches_output": mapl3_interface_folders.preprocessed_patches_output,
+        "inference_output": mapl3_interface_folders.inference_output,
+        "skeletonization_output": mapl3_interface_folders.skeletonization_output,
+        "patch_stacking_output": mapl3_interface_folders.patch_stacking_output,
     }
+
+    # For use in workflow
+    return mapl3_subfolders_objs_dict
 
 
 ###############################################################################
 
 if __name__ == "__main__":
-    main(Mapl3Parser())
+    # main(Mapl3Parser(), seg_mapl3_objs)
+    main(seg_mapl3_objs)

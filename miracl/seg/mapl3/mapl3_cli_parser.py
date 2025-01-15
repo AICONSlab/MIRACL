@@ -1,14 +1,17 @@
+"""
+This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca) for
+Ahmadreza Attapour's (a.attarpour@mail.utoronto.ca) MAPL3 implementation into
+Maged Goubran's MIRACL.
+
+This code is the parser for the the MAPL3 segmentation module.
+"""
+
 from argparse import (
-    ArgumentError,
     ArgumentParser,
-    RawDescriptionHelpFormatter,
-    _HelpAction,
-    SUPPRESS,
-    Namespace,
 )
 
 from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
-from miracl.seg.mapl3.mapl3_cli_parser_args import groups_dict
+from miracl.seg.mapl3.mapl3_cli_parser_args import mapl3_groups_dict
 
 
 class Mapl3Parser:
@@ -35,8 +38,8 @@ class Mapl3Parser:
         )
 
         # Create parser args
-        parser_processor = MiraclArgumentProcessor(parser)
-        parser_processor.create_parser_arguments(groups_dict, "module")
+        parser_processor = MiraclArgumentProcessor()
+        parser_processor.create_parser_arguments(parser, mapl3_groups_dict, "module")
 
         return parser
 
