@@ -6,6 +6,7 @@ from miracl import miracl_logger
 from miracl.seg.mapl3.mapl3_cli_parser_args import mapl3_object_dict as seg_mapl3_objs
 from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import (
     reg_object_dict as reg_mapl3_objs,
+    conv_object_dict as conv_mapl3_objs,
 )
 
 from miracl.flow.mapl3 import mapl3_workflow_interface
@@ -19,8 +20,7 @@ def main():
     args = vars(parser.parser.parse_args())
 
     # Combine objects dicts
-    seg_mapl3_objs.update(reg_mapl3_objs)
-    mapl3_workflow_objs = seg_mapl3_objs
+    mapl3_workflow_objs = {**seg_mapl3_objs, **reg_mapl3_objs, **conv_mapl3_objs}
 
     # Assign the parsed args to the attributes of their respective object
     processor = MiraclArgumentProcessor()

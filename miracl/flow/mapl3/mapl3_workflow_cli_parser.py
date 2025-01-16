@@ -12,7 +12,10 @@ from argparse import (
 
 from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
 from miracl.seg.mapl3.mapl3_cli_parser_args import mapl3_groups_dict
-from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import reg_groups_dict
+from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import (
+    reg_groups_dict,
+    conv_groups_dict,
+)
 
 
 class Mapl3WorkflowParser:
@@ -40,7 +43,11 @@ class Mapl3WorkflowParser:
 
         # Combine the MAPL3 module parser with the additional args of the flow,
         # in this case the registration module
-        combined_groups_dict = {**mapl3_groups_dict, **reg_groups_dict}
+        combined_groups_dict = {
+            **mapl3_groups_dict,
+            **conv_groups_dict,
+            **reg_groups_dict,
+        }
 
         # Create parser args
         parser_processor = MiraclArgumentProcessor()
