@@ -527,9 +527,9 @@ function build_docker() {
       # Test if docker-compose is installed
       # Should come by default with Docker-Desktop
       if [ -x "$(command -v docker-compose)" ]; then
-        printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$(docker-compose --version)"
+        printf "Docker Compose installation found (%s).\n\nRun 'docker-compose up -d'\n\nto start the container in the background and then run\n\n'docker exec -it ${container_name} bash'\n\nto enter the container.\n\n" "$(docker-compose --version)"
       elif dcex=$(docker compose version); then
-        printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$dcex"
+        printf "Docker Compose installation found (%s). Run\n\n'docker compose up -d'\n\nor use Docker Desktop (if installed) to start the container in the background and then run\n\n'docker exec -it ${container_name} bash'\n\nto enter the container.\n\n" "$dcex"
       else
         printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
       fi
