@@ -348,6 +348,30 @@ function parse_args() {
 # DOCKER COMPOSE #
 ##################
 
+#!/bin/bash
+
+function check_gpu() {
+  # Check if nvidia-smi is available (NVIDIA driver installed)
+  if ! command -v nvidia-smi &> /dev/null; then
+      echo "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed."
+      exit 1
+  fi
+
+  # Check if any GPUs are detected by nvidia-smi
+  gpu_count=$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)
+
+  if [[ "$gpu_count" -gt 0 ]]; then
+      echo "Found $gpu_count Nvidia GPU(s) on your system."
+      
+      # Optionally: Check if CUDA is supported
+      cuda_version=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader,nounits)
+      echo "CUDA supported with driver version $cuda_version."
+  else
+      echo "No Nvidia GPUs found or GPUs are not accessible."
+      exit 1
+  fi
+}
+
 function populate_docker_compose() {
   # Generate docker-compose.yml file
   cat >docker-compose.yml <<EOF
@@ -364,7 +388,9 @@ services:
     shm_size: ${shm_mem}
 EOF
 
-  if [[ $gpu ]]; then
+  if [[ "${gpu}" == true ]]; then
+
+    check_gpu
 
     cat >>docker-compose.yml <<EOF
     deploy:
@@ -501,9 +527,9 @@ function build_docker() {
       # Test if docker-compose is installed
       # Should come by default with Docker-Desktop
       if [ -x "$(command -v docker-compose)" ]; then
-        printf "Docker Compose installation found (%s). Run 'docker-compose up -d' to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$(docker-compose --version)"
+        printf "Docker Compose installation found (%s).\n\nRun 'docker-compose up -d'\n\nto start the container in the background and then run\n\n'docker exec -it ${container_name} bash'\n\nto enter the container.\n\n" "$(docker-compose --version)"
       elif dcex=$(docker compose version); then
-        printf "Docker Compose installation found (%s). Run 'docker compose up -d' or use Docker Desktop (if installed) to start the container in the background and then run 'docker exec -it ${container_name} bash' to enter the container.\n" "$dcex"
+        printf "Docker Compose installation found (%s). Run\n\n'docker compose up -d'\n\nor use Docker Desktop (if installed) to start the container in the background and then run\n\n'docker exec -it ${container_name} bash'\n\nto enter the container.\n\n" "$dcex"
       else
         printf "Docker Compose installation not found. Please install Docker Compose plugin or standalone version to run the MIRACL container. Instructions on how to install Docker Compose can be found here: https://docs.docker.com/compose/install/\n"
       fi
