@@ -1,13 +1,27 @@
+"""
+This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca) for
+Ahmadreza Attapour's (a.attarpour@mail.utoronto.ca) MAPL3 implementation into
+AICONs lab's MIRACL.
+
+This code is an interface for the the MAPL3 workflow.
+"""
+
+# Import Python libs to load MIRACL env var, handle file/folder paths as Path
+# objects and to call Bash modules (reg) from this Python script
 from os import environ
 from pathlib import Path
 import subprocess
+from typing import Dict, Any
 
+# Import class modules to construct interface in Python
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
 # Import MAPL3 module interface for implementation into the workflow interface
 from miracl.seg.mapl3 import mapl3_interface
 from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
+
+# Subfolder objs used to create results folders for modules in workflow
 from miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_interface_folders import (
     WorkflowInterfaceSubfolders,
 )
@@ -21,6 +35,7 @@ from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import (
 
 from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
 from miracl import miracl_logger
+from logging import Logger
 
 ###############################################################################
 
@@ -28,7 +43,7 @@ from miracl import miracl_logger
 # DEBUGGING #
 #############
 
-logger = miracl_logger.logger
+logger: Logger = miracl_logger.logger
 
 ############
 # ENV VARS #
@@ -38,20 +53,48 @@ MIRACL_HOME = Path(environ["MIRACL_HOME"])
 
 ###############################################################################
 
+####################
+# ABSTRACT METHODS #
+####################
+
 
 @dataclass
 class Mapl3InterfaceParams:
+    """
+    Parameters for the MAPL3 interface.
+
+    :param objs: Dictionary containing MAPL3 objects
+    :type objs: dict
+    """
+
     objs: dict
 
 
 class Interface(ABC):
     @abstractmethod
-    def call_mapl3_interface(self, params: Mapl3InterfaceParams) -> None:
+    def call_mapl3_interface(self, params: Mapl3InterfaceParams) -> Dict[str, Any]:
+        """
+        Abstract method to call the MAPL3 interface.
+
+        :param params: Parameters for the MAPL3 interface
+        :type params: Mapl3InterfaceParams
+        :return: Dictionary containing MAPL3 subfolder objects
+        :rtype: Dict[str, Any]
+        """
         pass
 
 
 @dataclass
 class ConversionParams:
+    """
+    Parameters for the conversion process.
+
+    :param mapl3_objs: Dictionary containing MAPL3 objects
+    :type mapl3_objs: dict
+    :param conv_output: Output object for conversion
+    :type conv_output: MiraclObj
+    """
+
     mapl3_objs: dict
     conv_output: MiraclObj
 
@@ -59,11 +102,31 @@ class ConversionParams:
 class Conversion(ABC):
     @abstractmethod
     def call_miracl_conversion(self, params: ConversionParams) -> None:
+        """
+        Abstract method to call the MIRACL's conversion module.
+
+        :param params: Parameters for the conversion process
+        :type params: ConversionParams
+        :return: None
+        """
         pass
 
 
 @dataclass
 class RegistrationParams:
+    """
+    Parameters for the registration process.
+
+    :param mapl3_objs: Dictionary containing MAPL3 objects
+    :type mapl3_objs: dict
+    :param subfolder_objs: Dictionary containing subfolder objects
+    :type subfolder_objs: dict
+    :param reg_output: Output object for registration
+    :type reg_output: MiraclObj
+    :param nii_file: Path to the NIfTI file
+    :type nii_file: Path
+    """
+
     mapl3_objs: dict
     subfolder_objs: dict
     reg_output: MiraclObj
@@ -73,12 +136,35 @@ class RegistrationParams:
 class Registration(ABC):
     @abstractmethod
     def call_miracl_registration(self, params: RegistrationParams) -> None:
+        """
+        Abstract method to call MIRACL's registration module.
+
+        :param params: Parameters for the registration process
+        :type params: RegistrationParams
+        :return: None
+        """
         pass
+
+
+###############################################################################
+
+####################
+# CONCRETE CLASSES #
+####################
 
 
 class MAPL3Interface(Interface):
 
-    def call_mapl3_interface(self, params: Mapl3InterfaceParams):
+    def call_mapl3_interface(self, params: Mapl3InterfaceParams) -> Dict[str, Any]:
+        """
+        Call the MAPL3 interface for segmentation.
+
+        :param params: Parameters for the MAPL3 interface
+        :type params: Mapl3InterfaceParams
+        :return: Dictionary of MAPL3 subfolder objects
+        :rtype: dict
+        """
+
         logger.debug("##################################")
         logger.debug("SEGMENTATION IN WORKFLOW INTERFACE")
         logger.debug("##################################")
@@ -89,7 +175,15 @@ class MAPL3Interface(Interface):
 
 class MIRACLConversion(Conversion):
 
-    def call_miracl_conversion(self, params: ConversionParams):
+    def call_miracl_conversion(self, params: ConversionParams) -> None:
+        """
+        Call the MIRACL's conversion module.
+
+        :param params: Parameters for the conversion process
+        :type params: ConversionParams
+        :return: None
+        """
+
         logger.debug("################################")
         logger.debug("CONVERSION IN WORKFLOW INTERFACE")
         logger.debug("################################")
@@ -131,7 +225,15 @@ class MIRACLConversion(Conversion):
 
 class MIRACLRegistration(Registration):
 
-    def call_miracl_registration(self, params: RegistrationParams):
+    def call_miracl_registration(self, params: RegistrationParams) -> None:
+        """
+        Call MIRACL's registration module.
+
+        :param params: Parameters for the registration process
+        :type params: RegistrationParams
+        :return: None
+        """
+
         logger.debug("##################################")
         logger.debug("REGISTRATION IN WORKFLOW INTERFACE")
         logger.debug("##################################")
@@ -172,7 +274,20 @@ class MIRACLRegistration(Registration):
         subprocess.Popen(reg_cmd, shell=True).wait()
 
 
-def main(objs):
+def main(objs: dict) -> None:
+    """
+    Main function to run the MAPL3 workflow.
+
+    This function orchestrates the MAPL3 interface, conversion, and registration modules.
+
+    :param objs: Dictionary containing MAPL3 objects
+    :type objs: dict
+    :return: None
+    """
+
+    #####################
+    # METHOD INVOCATION #
+    #####################
 
     mapl3_interface = MAPL3Interface()
     miracl_registration = MIRACLRegistration()
@@ -202,16 +317,15 @@ def main(objs):
     )
 
     # Construct NIFTI file string from conv output
-    nii_file_outnii = objs["conv_tiff_to_nii"].outnii.content
-    nii_file_down = objs["conv_tiff_to_nii"].down.content
-    nii_file_down = (
-        f"0{nii_file_down}" if 1 <= nii_file_down <= 9 else str(nii_file_down)
+    nii_file_outnii: str = objs["conv_tiff_to_nii"].outnii.content
+    nii_file_down_int: int = objs["conv_tiff_to_nii"].down.content
+    nii_file_down: str = (
+        f"0{nii_file_down_int}"
+        if 1 <= int(nii_file_down_int) <= 9
+        else str(nii_file_down_int)
     )
-    nii_file_channame = objs["conv_tiff_to_nii"].channame.content
-    logger.debug(
-        f"NII_FILE_TEST: {nii_file_outnii}_{nii_file_down}dx_down_{nii_file_channame}_chan.nii.gz"
-    )
-    nii_file_from_conv = (
+    nii_file_channame: str = objs["conv_tiff_to_nii"].channame.content
+    nii_file_from_conv: Path = (
         WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath
         / f"{nii_file_outnii}_{nii_file_down}dx_down_{nii_file_channame}_chan.nii.gz"
     )
@@ -228,14 +342,18 @@ def main(objs):
 
 
 if __name__ == "__main__":
-    parser = Mapl3WorkflowParser()
-    args = vars(parser.parser.parse_args())
+    parser: Mapl3WorkflowParser = Mapl3WorkflowParser()
+    args: Dict[str, Any] = vars(parser.parser.parse_args())
 
     # Combine objects dicts
-    mapl3_workflow_objs = {**seg_mapl3_objs, **reg_mapl3_objs, **conv_mapl3_objs}
+    mapl3_workflow_objs: Dict[str, Any] = {
+        **seg_mapl3_objs,
+        **reg_mapl3_objs,
+        **conv_mapl3_objs,
+    }
 
     # Assign the parsed args to the attributes of their respective object
-    processor = MiraclArgumentProcessor()
+    processor: MiraclArgumentProcessor = MiraclArgumentProcessor()
     processor.process_miracl_objects(mapl3_workflow_objs, args)
 
     main(mapl3_workflow_objs)
