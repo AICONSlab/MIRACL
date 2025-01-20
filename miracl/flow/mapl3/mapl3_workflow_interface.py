@@ -67,6 +67,7 @@ class RegistrationParams:
     mapl3_objs: dict
     subfolder_objs: dict
     reg_output: MiraclObj
+    nii_file: Path
 
 
 class Registration(ABC):
@@ -93,6 +94,9 @@ class MIRACLConversion(Conversion):
         logger.debug("CONVERSION IN WORKFLOW INTERFACE")
         logger.debug("################################")
 
+        # RAW TIFF files folder is a variables from the genpatch MAPL3 module
+        # The output folder for the conversion results is generated here in
+        # the workflow
         conv_cmd = f"{MIRACL_HOME}/conv/miracl_conv_convertTIFFtoNII.py \
         --{params.mapl3_objs['conv_tiff_to_nii'].tiff_folder.cli_l_flag} \
         {params.mapl3_objs['seg_genpatch'].input.dirpath} \
@@ -132,9 +136,13 @@ class MIRACLRegistration(Registration):
         logger.debug("REGISTRATION IN WORKFLOW INTERFACE")
         logger.debug("##################################")
 
+        # The file path to the converted NIFTI files comes from the conversion
+        # RAW TIFF files folder is a variables from the genpatch MAPL3 module
+        # The output folder for the registration results is generated here in
+        # the workflow
         reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
         -{params.mapl3_objs['reg_clar_allen_reg'].nii_folder.cli_s_flag} \
-        {params.mapl3_objs['reg_clar_allen_reg'].nii_folder.dirpath} \
+        {params.nii_file} \
         -{params.mapl3_objs['reg_clar_allen_reg'].tiff_folder.cli_s_flag} \
         {params.subfolder_objs['patch_stacking_output'].dirpath} \
         -{params.mapl3_objs['reg_clar_allen_reg'].output_path.cli_s_flag} \
@@ -180,6 +188,7 @@ def main(objs):
         mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "conv"
     )
 
+    # Run conversion
     miracl_conversion.call_miracl_conversion(
         ConversionParams(
             mapl3_objs=objs,
@@ -192,12 +201,28 @@ def main(objs):
         mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "reg"
     )
 
-    # Run registration using MAPL3 and subfolder objs
+    # Construct NIFTI file string from conv output
+    nii_file_outnii = objs["conv_tiff_to_nii"].outnii.content
+    nii_file_down = objs["conv_tiff_to_nii"].down.content
+    nii_file_down = (
+        f"0{nii_file_down}" if 1 <= nii_file_down <= 9 else str(nii_file_down)
+    )
+    nii_file_channame = objs["conv_tiff_to_nii"].channame.content
+    logger.debug(
+        f"NII_FILE_TEST: {nii_file_outnii}_{nii_file_down}dx_down_{nii_file_channame}_chan.nii.gz"
+    )
+    nii_file_from_conv = (
+        WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath
+        / f"{nii_file_outnii}_{nii_file_down}dx_down_{nii_file_channame}_chan.nii.gz"
+    )
+
+    # Run registration
     miracl_registration.call_miracl_registration(
         RegistrationParams(
             mapl3_objs=objs,
             subfolder_objs=mapl3_subfolders_objs_dict,
             reg_output=WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder,
+            nii_file=nii_file_from_conv,
         )
     )
 
