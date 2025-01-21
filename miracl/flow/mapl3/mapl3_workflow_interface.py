@@ -37,6 +37,8 @@ from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProces
 from miracl import miracl_logger
 from logging import Logger
 
+from miracl.system.utilfns.utilfns_paths import UtilfnsPaths
+
 ###############################################################################
 
 #############
@@ -302,6 +304,9 @@ def main(objs: dict) -> None:
     WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath = (
         mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "conv"
     )
+    UtilfnsPaths.ensure_folder_exists(
+        WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath
+    )
 
     # Run conversion
     miracl_conversion.call_miracl_conversion(
@@ -314,6 +319,9 @@ def main(objs: dict) -> None:
     # Assign base registration output folder
     WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder.dirpath = (
         mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "reg"
+    )
+    UtilfnsPaths.ensure_folder_exists(
+        WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder.dirpath
     )
 
     # Construct NIFTI file string from conv output
@@ -329,6 +337,7 @@ def main(objs: dict) -> None:
         WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath
         / f"{nii_file_outnii}_{nii_file_down}dx_down_{nii_file_channame}_chan.nii.gz"
     )
+    UtilfnsPaths.ensure_file_exists(nii_file_from_conv)
 
     # Run registration
     miracl_registration.call_miracl_registration(
