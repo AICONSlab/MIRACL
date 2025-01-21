@@ -33,6 +33,6 @@ We recommend using MIRACL with the Docker or Singularity containers we provide b
 
 ___
 
-Copyright (c) 2023 Maged Goubran
+Copyright (c) 2025 Maged Goubran
 
 All Rights Reserved
