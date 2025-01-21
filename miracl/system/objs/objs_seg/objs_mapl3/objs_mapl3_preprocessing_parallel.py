@@ -180,7 +180,7 @@ class PreprocessingParallel:
             }
         },
         cli_action=ArgumentAction.STORE_TRUE,
-        cli_help="whether to save intermediate results for debugging (default: %(default)s)",
+        cli_help="whether to save intermediate results for debugging - set flag to save results (default: %(default)s)",
         obj_default=False,
         gui_label=["Save intermediate results"],
         gui_group={"mapl3": "main"},

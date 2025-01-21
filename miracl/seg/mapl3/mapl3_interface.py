@@ -1,22 +1,19 @@
 """
 This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca) for
 Ahmadreza Attapour's (a.attarpour@mail.utoronto.ca) MAPL3 implementation into
-Maged Goubran's MIRACL.
+AICONs lab's MIRACL.
 
 This code is an interface for the the MAPL3 segmentation module.
 """
 
-# import sys
-# import inspect
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
+from typing import Dict, Any
 
 # Import MIRACL BaseModel and utility fns
-# from miracl.seg.mapl3.mapl3_cli_parser import Mapl3Parser
 from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
 
-# from miracl.system.utilfns.utilfns_paths import UtilfnsPaths
-# from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
+from miracl.system.utilfns.utilfns_paths import UtilfnsPaths
 from miracl import miracl_logger
 
 # Import MAPL3 scripts
@@ -55,6 +52,21 @@ patch_stacking_enabled = False
 
 @dataclass
 class GeneratePatchParams:
+    """
+    Parameters for generating patches.
+
+    :param input_folder: Input folder containing RAW TIFF files
+    :type input_folder: MiraclObj
+    :param output_folder: Output folder for generated patches
+    :type output_folder: MiraclObj
+    :param cpu_load: CPU load for parallelization
+    :type cpu_load: MiraclObj
+    :param patch_size: Size of patches to generate
+    :type patch_size: MiraclObj
+    :param gamma: Gamma for gamma correction algo
+    :type gamma: MiraclObj
+    """
+
     input_folder: MiraclObj
     output_folder: MiraclObj
     cpu_load: MiraclObj
@@ -73,6 +85,33 @@ class GeneratePatch(ABC):
 
 @dataclass
 class PreprocessingParallelParams:
+    """
+    Parameters for parallel preprocessing.
+
+    :param generate_patch_output_folder: Folder with generated patches
+    :type generate_patch_output_folder: MiraclObj
+    :param output_folder: Output folder for preprocessing results
+    :type output_folder: MiraclObj
+    :param cpu_load: CPU load for parallelization
+    :type cpu_load: MiraclObj
+    :param cl_percentage: Percentage used in percentile filter
+    :type cl_percentage: MiraclObj
+    :param cl_lsm_footprint: Estimating LSM stripes
+    :type cl_lsm_footprint: MiraclObj
+    :param cl_back_footprint: Estimating backgroud default
+    :type cl_back_footprint: MiraclObj
+    :param cl_back_downsample: Estimating background default
+    :type cl_back_downsample: MiraclObj
+    :param cl_lsm_vs_back_weight: lsm signal vs background weight
+    :type cl_lsm_vs_back_weight: MiraclObj
+    :param deconv_bin_thr: Binary threshold for high intensity voxels for pseudo deconvolution
+    :type deconv_bin_thr: MiraclObj
+    :param deconv_sigma: Sigma value for pseudo deconvolution
+    :type deconv_sigma: MiraclObj
+    :param save_intermediate_results: Flag to save intermediate results
+    :type save_intermediate_results: MiraclObj
+    """
+
     generate_patch_output_folder: MiraclObj
     output_folder: MiraclObj
     cpu_load: MiraclObj
@@ -97,6 +136,29 @@ class PreprocessingParallel(ABC):
 
 @dataclass
 class InferenceParams:
+    """
+    Parameters for inference.
+
+    :param preprocess_parallel_output_folder: Folder with parallel preprocessing results
+    :type preprocess_parallel_output_folder: MiraclObj
+    :param generate_patch_output_folder: Folder with patch generation results
+    :type generate_patch_output_folder: MiraclObj
+    :param output_folder: Output folder for inference results
+    :type output_folder: MiraclObj
+    :param config: Path to config file used during training to define model
+    :type config: MiraclObj
+    :param model_path: Path to the trained model
+    :type model_path: MiraclObj
+    :param tissue_percentage_threshold: Whether to use json file to filter empty patches
+    :type tissue_percentage_threshold: MiraclObj
+    :param gpu_index: GPU index to use for inference
+    :type gpu_index: MiraclObj
+    :param binarization_threshold: Threshold for model probability map binarization
+    :type binarization_threshold: MiraclObj
+    :param save_prob_map: Flag to save probability map
+    :type save_prob_map: MiraclObj
+    """
+
     preprocess_parallel_output_folder: MiraclObj
     generate_patch_output_folder: MiraclObj
     output_folder: MiraclObj
@@ -119,6 +181,27 @@ class Inference(ABC):
 
 @dataclass
 class SkeletonizationParams:
+    """
+    Parameters for skeletonization.
+
+    :param inference_output_folder: Folder with inference results
+    :type inference_output_folder: MiraclObj
+    :param generate_patch_output_folder: Folder with patch generation results
+    :type generate_patch_output_folder: MiraclObj
+    :param output: Output folder for skeletonization results
+    :type output: MiraclObj
+    :param remove_small_obj_thr: Threshold for removing small objects
+    :type remove_small_obj_thr: MiraclObj
+    :param cpu_load: CPU load for parallelization
+    :type cpu_load: MiraclObj
+    :param dilate_distance_transform: Whether to dilate distance transform
+    :type dilate_distance_transform: MiraclObj
+    :param eccentricity_thr: Threshold for removing small objects based on eccentricity
+    :type eccentricity_thr: MiraclObj
+    :param orientation_thr: Threshold for removing small objects based on orientation
+    :type orientation_thr: MiraclObj
+    """
+
     inference_output_folder: MiraclObj
     generate_patch_output_folder: MiraclObj
     output: MiraclObj
@@ -140,6 +223,21 @@ class Skeletonization(ABC):
 
 @dataclass
 class PatchStackingParams:
+    """
+    Parameters for patch stacking.
+
+    :param generate_patch_input_folder: Folder with generated patches
+    :type generate_patch_input_folder: MiraclObj
+    :param skeletonization_output_folder: Folder with skeletonization results
+    :type skeletonization_output_folder: MiraclObj
+    :param output: Output folder for stacked patches
+    :type output: MiraclObj
+    :param cpu_load: CPU load for parallelization
+    :type cpu_load: MiraclObj
+    :param keep_image_type: Flag to keep image type same as patches type
+    :type keep_image_type: MiraclObj
+    """
+
     generate_patch_input_folder: MiraclObj
     skeletonization_output_folder: MiraclObj
     output: MiraclObj
@@ -165,7 +263,14 @@ class MAPL3GeneratePatch(GeneratePatch):
     def generate_patch(
         self,
         params: GeneratePatchParams,
-    ):
+    ) -> None:
+        """
+        Generate patches.
+
+        :param params: Parameters for generating patches
+        :type params: GeneratePatchParams
+        """
+
         logger.debug("###########################")
         logger.debug("GENERATE PATCH IN INTERFACE")
         logger.debug("###########################")
@@ -190,7 +295,14 @@ class MAPL3PreprocessingParallel(PreprocessingParallel):
     def preprocess(
         self,
         params: PreprocessingParallelParams,
-    ):
+    ) -> None:
+        """
+        Run parallel preprocessing.
+
+        :param params: Parameters for parallel preprocessing
+        :type params: PreprocessingParallelParams
+        """
+
         logger.debug("################################")
         logger.debug("PREPROCESS PARALLEL IN INTERFACE")
         logger.debug("################################")
@@ -245,7 +357,14 @@ class MAPL3Inference(Inference):
     def run_inference(
         self,
         params: InferenceParams,
-    ):
+    ) -> None:
+        """
+        Run inference.
+
+        :param params: Parameters for inference
+        :type params: InferenceParams
+        """
+
         logger.debug("######################")
         logger.debug("INFERENCE IN INTERFACE")
         logger.debug("######################")
@@ -287,6 +406,13 @@ class MAPL3Skeletonization(Skeletonization):
         self,
         params: SkeletonizationParams,
     ) -> None:
+        """
+        Run skeletonization.
+
+        :param params: Parameters for skeletonization
+        :type params: SkeletonizationParams
+        """
+
         logger.debug("############################")
         logger.debug("SKELETONIZATION IN INTERFACE")
         logger.debug("############################")
@@ -329,7 +455,14 @@ class MAPL3PatchStacking(PatchStacking):
     def stack_patches(
         self,
         params: PatchStackingParams,
-    ):
+    ) -> None:
+        """
+        Run patch stacking.
+
+        :param params: Parameters for patch stacking
+        :type params: PatchStackingParams
+        """
+
         logger.debug("###########################")
         logger.debug("PATCH STACKING IN INTERFACE")
         logger.debug("###########################")
@@ -363,57 +496,35 @@ class MAPL3PatchStacking(PatchStacking):
 
 
 # def main(parser_var, objs):
-def main(objs):
-    # Workaround to not parse the `seg mapl3` part of the MIRACL command
-    # It's important to note here that the interface has to be called
-    # through MIRACL's cli parser because the submodule and module from the
-    # miracl command will be removed with the below command
-    # FIX: Could this be done in MIRACL's cli parser instead?
-    # sys.argv = sys.argv[2:]
-    #
-    # if isinstance(parser_var, dict):
-    #     # It's a dictionary of parsed arguments
-    #     args = parser_var
-    #     # Use args directly
-    # elif inspect.isclass(type(parser_var)):
-    #     # It's a parser instance
-    #     parser = parser_var
-    #     args = vars(parser.parser.parse_args())
-    #     # Use args parsed from the parser
-    # else:
-    #     raise ValueError(
-    #         "Input must be either a parser instance or a dictionary of parsed arguments"
-    #     )
-    #
-    # # # Create an instance of the parser
-    # # parser = parser_var
-    # #
-    # # # Parse the command-line arguments
-    # # args = vars(parser.parser.parse_args())
-    #
-    # #############################################
-    # # ASSIGN CLI INPUT ARGS TO PYDANTIC OBJECTS #
-    # #############################################
-    #
-    # # Process the results of the parsed cli args
-    # # Processing here refers to assigning the results to their respective
-    # # objects/attribute
-    # processor = MiraclArgumentProcessor()
-    # processor.process_miracl_objects(objs, args)
+def main(objs: Dict[str, Any]) -> Dict[str, MiraclObj]:
+    """
+    Main function to run the MAPL3 module/pipeline.
+
+    :param objs: Dictionary containing MAPL3 objects
+    :type objs: Dict[str, Any]
+    :return: Dictionary of MAPL3 subfolder objects
+    :rtype: Dict[str, MiraclObj]
+    """
 
     ########################
     # CREATE MAPL3 FOLDERS #
     ########################
 
-    # NOTE: Do I need another check here with the utils fn for filepaths?
+    # FIX: Do I need another check here with the utils fn for filepaths?
 
     mapl3_interface_folders.mapl3_results_base_folder.dirpath = (
         objs["seg_genpatch"].output.dirpath / "mapl3"
+    )
+    UtilfnsPaths.ensure_folder_exists(
+        mapl3_interface_folders.mapl3_results_base_folder.dirpath
     )
 
     # Create segmentation subfolder under base folder
     mapl3_interface_folders.mapl3_results_seg_folder.dirpath = (
         mapl3_interface_folders.mapl3_results_base_folder.dirpath / "seg"
+    )
+    UtilfnsPaths.ensure_folder_exists(
+        mapl3_interface_folders.mapl3_results_seg_folder.dirpath
     )
 
     # Create folder with generated patches
@@ -421,28 +532,41 @@ def main(objs):
         mapl3_interface_folders.mapl3_results_seg_folder.dirpath
         / "mapl3_generated_patches"
     )
+    UtilfnsPaths.ensure_folder_exists(
+        mapl3_interface_folders.generated_patches_output.dirpath
+    )
 
     # Create folder for preprocess parallel
     mapl3_interface_folders.preprocessed_patches_output.dirpath = (
         mapl3_interface_folders.mapl3_results_seg_folder.dirpath
         / "mapl3_preprocessed_patches"
     )
+    UtilfnsPaths.ensure_folder_exists(
+        mapl3_interface_folders.preprocessed_patches_output.dirpath
+    )
 
     # Create folder for inference
     mapl3_interface_folders.inference_output.dirpath = (
         mapl3_interface_folders.mapl3_results_seg_folder.dirpath / "mapl3_inference"
     )
+    UtilfnsPaths.ensure_folder_exists(mapl3_interface_folders.inference_output.dirpath)
 
     # Create folder for skeletonization
     mapl3_interface_folders.skeletonization_output.dirpath = (
         mapl3_interface_folders.mapl3_results_seg_folder.dirpath
         / "mapl3_skeletonization"
     )
+    UtilfnsPaths.ensure_folder_exists(
+        mapl3_interface_folders.skeletonization_output.dirpath
+    )
 
     # Create folder for patch stacking
     mapl3_interface_folders.patch_stacking_output.dirpath = (
         mapl3_interface_folders.mapl3_results_seg_folder.dirpath
         / "mapl3_patch_stacking"
+    )
+    UtilfnsPaths.ensure_folder_exists(
+        mapl3_interface_folders.patch_stacking_output.dirpath
     )
 
     ###########################################################################
@@ -543,5 +667,4 @@ def main(objs):
 ###############################################################################
 
 if __name__ == "__main__":
-    # main(Mapl3Parser(), seg_mapl3_objs)
     main(seg_mapl3_objs)

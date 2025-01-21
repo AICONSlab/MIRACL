@@ -223,7 +223,7 @@ class ConvTiffNiiObjs:
             "mapl3": {"cli_s_flag": "mctn_c", "cli_l_flag": "mctn_center"},
         },
         cli_obj_type=ArgumentType.LIST,
-        cli_help="Nii center (default: 0 0 0 ) corresponding to Allen atlas nii template",
+        cli_help="Nii center (default: 0 0 3 ) corresponding to Allen atlas nii template",
         gui_group={"ace_flow": "conversion", "mapl3:": "conversion"},
         gui_label=["Nii center"],
         version_added="2.4.0",
