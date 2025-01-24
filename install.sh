@@ -84,6 +84,10 @@ function initialize_variables() {
   # Setting the flag enables GPU passthrough
   : "${gpu:=false}"
 
+  # Set default for the result from the GPU checks for err msg in final
+  # user output msg
+  gpu_check_results=true
+
   # Set default for mounting MIRACL's script folder into container
   # Setting the flag disables mounting
   : "${dev:=false}"
@@ -232,7 +236,9 @@ function usage() {
 
  $base_usage
 
-   Automatically build MIRACL Docker image with pseudo host user
+   Automatically build MIRACL Docker image with pseudo host user.
+
+   If no flags are passed, an interactive prompt will be started to guide you through the installation.
 
  Options:
 
@@ -352,23 +358,20 @@ function parse_args() {
 
 function check_gpu() {
   # Check if nvidia-smi is available (NVIDIA driver installed)
-  if ! command -v nvidia-smi &> /dev/null; then
-      echo "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed."
-      exit 1
+  if ! command -v nvidia-smi &>/dev/null; then
+    echo "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed." >&2
+    return 1
   fi
 
   # Check if any GPUs are detected by nvidia-smi
-  gpu_count=$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)
+  gpu_count=$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits | wc -l)
 
   if [[ "$gpu_count" -gt 0 ]]; then
-      echo "Found $gpu_count Nvidia GPU(s) on your system."
-      
-      # Optionally: Check if CUDA is supported
-      cuda_version=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader,nounits)
-      echo "CUDA supported with driver version $cuda_version."
+    echo "Found $gpu_count Nvidia GPU(s) on your system."
+    return 0
   else
-      echo "No Nvidia GPUs found or GPUs are not accessible."
-      exit 1
+    echo "No Nvidia GPUs found or GPUs are not accessible." >&2
+    return 1
   fi
 }
 
@@ -390,9 +393,11 @@ EOF
 
   if [[ "${gpu}" == true ]]; then
 
-    check_gpu
-
-    cat >>docker-compose.yml <<EOF
+    if ! check_gpu; then
+      echo "Warning: GPU support requested but no GPU's found or accessible. Continuing without GPU support."
+      gpu_check_results=false
+    else
+      cat >>docker-compose.yml <<EOF
     deploy:
       resources:
         reservations:
@@ -401,7 +406,7 @@ EOF
               count: all
               capabilities: [gpu]
 EOF
-
+    fi
   fi
 
   # Append required volumes
@@ -520,12 +525,31 @@ function build_docker() {
     # Check if build process exited without errors
     build_status_code=$?
     if [ $build_status_code -eq 0 ]; then
-      printf "\nBuild was successful! Checking Docker Compose installation.\n"
+      printf "\nBuild was successful!\n"
       # Remove $USER_TEXT from Dockerfile
       rm_USER_TEXT
 
+      if [[ "${gpu_check_results}" == "false" ]]; then
+        printf "\n##############################################################"
+        printf "\n\nNote: You requested GPU forwarding but no Nvidia GPU's were detected during the initial system check.\n\nIf you think the checks were incorrect, please add the following to your 'docker-compose.yml':\n\n"
+        cat <<EOF
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+EOF
+
+        printf "\n\nAdd this under the 'shm_size' entry with 'deploy' being at the same indentation level."
+        printf "\n\n##############################################################\n\n"
+      fi
+
       # Test if docker-compose is installed
       # Should come by default with Docker-Desktop
+      printf "Checking Docker Compose installation...\n\n"
+
       if [ -x "$(command -v docker-compose)" ]; then
         printf "Docker Compose installation found (%s).\n\nRun 'docker-compose up -d'\n\nto start the container in the background and then run\n\n'docker exec -it ${container_name} bash'\n\nto enter the container.\n\n" "$(docker-compose --version)"
       elif dcex=$(docker compose version); then
