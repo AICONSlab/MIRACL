@@ -32,6 +32,7 @@ from monai.transforms import (
     Transform,
 )
 import torch
+import torch.nn.functional as F
 from monai.data import CacheDataset, DataLoader, decollate_batch
 import json
 
@@ -175,7 +176,7 @@ def generate_output_single(
             val_outputs = sliding_window_inference(
                 val_inputs, roi_size, sw_batch_size, model_out
             )
-
+            val_outputs = F.softmax(val_outputs, dim=1)[:,1:,...]
             val_outputs = [post_pred(z) for z in decollate_batch(val_outputs)]
             # save the images as .tiff file readable by Fiji
             for j in range(len(val_outputs)):
@@ -299,7 +300,7 @@ def generate_output_MC(
 
                 # clear val_outputs_stack for memory efficiency
                 # del val_outputs_stack
-
+                MC_outputs = F.softmax(MC_outputs, dim=1)[:,1:,...]
                 # prepare the MC outputs for calculating the metrics
                 MC_outputs = [
                     post_pred(z) for z in decollate_batch(MC_outputs.unsqueeze(0))
@@ -379,7 +380,7 @@ def generate_output_ensemble(
                 val_outputs = (
                     torch.Tensor(np.mean(val_outputs, axis=0)).unsqueeze(0).to(device)
                 )
-
+                val_outputs = F.softmax(val_outputs, dim=1)[:,1:,...]
                 val_outputs = [post_pred(z) for z in decollate_batch(val_outputs)]
 
                 # save the images as .tiff file readable by Fiji
@@ -561,11 +562,13 @@ def generate_output_ensemble_of_ensembles(
                 # save each model's output
                 # MC_outputs1_temp = torch.Tensor(MC_outputs1).to(device)
                 # prepare the MC outputs for calculating the metrics
+                MC_outputs1_temp = F.softmax(MC_outputs1, dim=1)[:,1:,...]
                 MC_outputs1_temp = [
                     post_pred(z) for z in decollate_batch(MC_outputs1.unsqueeze(0))
                 ]
                 # MC_outputs2_temp = torch.Tensor(MC_outputs2).to(device)
                 # prepare the MC outputs for calculating the metrics
+                MC_outputs2_temp = F.softmax(MC_outputs2, dim=1)[:,1:,...]
                 MC_outputs2_temp = [
                     post_pred(z) for z in decollate_batch(MC_outputs2.unsqueeze(0))
                 ]
@@ -575,17 +578,17 @@ def generate_output_ensemble_of_ensembles(
                     uncertainty1,
                     MC_outputs1_temp[0][1, :, :, :].detach().cpu(),
                 ]
-                save_tiff_MC_dropout(
-                    img_list, input_path, data_dicts_test[RI_subj_id - 1], "unet_"
-                )
+                # save_tiff_MC_dropout(
+                #     img_list, input_path, data_dicts_test[RI_subj_id - 1], "unet_"
+                # )
 
                 img_list = [
                     uncertainty2,
                     MC_outputs2_temp[0][1, :, :, :].detach().cpu(),
                 ]
-                save_tiff_MC_dropout(
-                    img_list, input_path, data_dicts_test[RI_subj_id - 1], "unetr_"
-                )
+                # save_tiff_MC_dropout(
+                #     img_list, input_path, data_dicts_test[RI_subj_id - 1], "unetr_"
+                # )
 
                 # combine the MC_outputs together to get the average of the two models
                 val_outputs_stack = np.stack([MC_outputs1.detach().cpu(), MC_outputs2.detach().cpu()], axis=0)
@@ -598,6 +601,7 @@ def generate_output_ensemble_of_ensembles(
                 del val_outputs_stack
 
                 # prepare the MC outputs for calculating the metrics
+                val_outputs = F.softmax(val_outputs, dim=1)[:,1:,...]
                 val_outputs = [
                     post_pred(i) for i in decollate_batch(val_outputs.unsqueeze(0))
                 ]
@@ -679,7 +683,7 @@ def deploy_functions(
     model_out, test_transforms = ace_prepare_model_transform.generate_model_transforms(
         model_name, CFG_PATH
     )
-    post_pred = Compose([EnsureType(), AsDiscrete(argmax=True, to_onehot=2, threshold=binarization_threshold)])
+    post_pred = Compose([EnsureType(), AsDiscrete(threshold=binarization_threshold), AsDiscrete(to_onehot=2)])
 
     with open(CFG_PATH, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)

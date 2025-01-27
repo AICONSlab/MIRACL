@@ -4,14 +4,13 @@ ACE Workflow
 **A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
 1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/blob/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__
-   and :ref:`refer to example section<example_anchor>`) to map brain-wide local/laminar neuronal activity.
+   very large LSFM datasets (:ref:`refer to example section<example_anchor>`) 
+   to map brain-wide local/laminar neuronal activity.
 2. Optimized cluster-wise statistical analysis with a threshold-free 
    enhancement approach to chart subpopulation-specific effects at the laminar 
    and local level, without restricting the analysis to atlas-defined regions 
-   (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/blob/dev/sample_data/ace/ace_sample_data_stats.zip>`__ 
-   and :ref:`refer to example section<example_anchor>`).
-3. Modules for providing DL model uncertainty estimates and fine-tuning (in a future release).
+   (:ref:`refer to example section<example_anchor>`).
+3. Modules for providing DL model uncertainty estimates and fine-tuning.
 4. Interface with MIRACL registration.
 5. Ability to map the connectivity between clusters of activations.
 
@@ -22,26 +21,9 @@ To install the ACE workflow, refer to the MIRACL installation guide:
 
 - :doc:`Installation guide <../../../installation/installation>`
 
-Video Tutorial
-==============
-
-`Video tutorial <https://www.youtube.com/playlist?list=PLZeAd6YsEkyhWsHuym5dTV2wjQ299ekm8>`_
-
-- This video tutorial covers the following topics:
-   - MIRACL installation validation
-   - Download sample data
-   - Run ACE on a single subject (Mode 2) including deep learning
-     segmentation of cFos+ cells, registration, voxelization, and warping
-   - Analyze the results of the above step
-   - Run ACE cluster-wise statistical algorithm between two groups to map
-     local cell activation
-   - Analyze the results of the above step
-
-.. TODO: update the tutorial link
-
 .. note::
 
-   Make sure that you set the GPU option during installation using the ``-g`` flag.
+   Make sure that you set the GPU option during installation.
    Once the installation is complete, enter the ``docker`` container using ``docker exec -it <CONTAINER_NAME> bash``
    and run the ``nvidia-smi`` command to ensure your GPU is detected.
 
@@ -49,6 +31,8 @@ The ACE workflow can only be run with pre-trained DL models. To get access to th
 to `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
 
 These models will be included by default in a future release once ACE is published.
+
+.. _model_directory_specification:
 
 .. note::
    
@@ -83,6 +67,23 @@ These models will be included by default in a future release once ACE is publish
    directory to the docker container at ``/code/miracl/``. Thus, copying the model
    files to the right location **outside** the docker container will make them
    available inside the container.
+
+Video Tutorial
+==============
+
+`Video tutorial <https://www.youtube.com/playlist?list=PLZeAd6YsEkyhWsHuym5dTV2wjQ299ekm8>`_
+
+- This video tutorial covers the following topics:
+   - MIRACL installation validation
+   - Download sample data
+   - Run ACE on a single subject (Mode 2) including deep learning
+     segmentation of cFos+ cells, registration, voxelization, and warping
+   - Analyze the results of the above step
+   - Run ACE cluster-wise statistical algorithm between two groups to map
+     local cell activation
+   - Analyze the results of the above step
+
+.. TODO: update the tutorial link
 
 
 Main Inputs
@@ -136,7 +137,10 @@ The following information will be printed to the terminal:
         [-rwcv {10,25,50}]
         [--rerun-registration TRUE/FALSE]
         [--rerun-segmentation TRUE/FALSE]
+        [--rerun-instance-segmentation TRUE/FALSE]
         [--rerun-conversion TRUE/FALSE]
+        [--no-instance-segmentation]
+        [--no-validate-clusters]
 
       1) Segments images with ACE
       2) Convert raw tif/tiff files to nifti for registration
@@ -184,17 +188,29 @@ The following information will be printed to the terminal:
       -rwcv {10,25,50}, --rwc_voxel_size {10,25,50}
                               voxel size/Resolution in um for warping (default: 25)
       --rerun-registration TRUE/FALSE
-                              Whether to rerun registration step of flow; TRUE =>
+                              whether to rerun registration step of flow; TRUE =>
                               Force re-run (default: false)
       --rerun-segmentation TRUE/FALSE
-                              Whether to rerun segmentation step of flow; TRUE =>
+                              whether to rerun segmentation step of flow; TRUE =>
                               Force re-run (default: false)
+      --rerun-instance-segmentation TRUE/FALSE
+                              whether to rerun instance segmentation step of flow;
+                              TRUE => Force re-run (default: false)
       --rerun-conversion TRUE/FALSE
-                              Whether to rerun conversion step of flow; TRUE =>
+                              whether to rerun conversion step of flow; TRUE =>
                               Force re-run (default: false)
+      --no-instance-segmentation
+                              Do not run instance segmentation (default: False).
+                              Instance seg is used to identify and label neurons in
+                              the image. It is useful for counting and downstream
+                              tasks.
+      --no-validate-clusters
+                              Do not validate clusters (default: False). Validate
+                              clusters is used to get native space statistics for
+                              each subject based on the ouput of ACE TFCE stats.
 
    --------------------------------------------------
-   
+
    Use -hv or --help_verbose flag for more verbose help
 
 .. note::
@@ -247,6 +263,12 @@ Main outputs
    final_ctn_down_<CONVERSION DOWNSAMPLE RATIO>_rca_voxel_size_<REGISTRATION VOXEL SIZE>/ # main output folder
    |-- seg_final/
       |-- ...
+      |-- generated_patches/
+         |-- cc_patches/
+            |-- neuron_info_final.json
+            |-- ...
+      |-- cc_slices/
+         |-- ...
    |-- conv_final/
       |-- <CONVERSION NAME>.nii.gz
    |-- clar_allen_reg/
@@ -271,9 +293,17 @@ Main outputs
       |-- p_values.nii.gz
       |-- pvalue_heatmap_mean_plot.tiff
    |-- corr_final/
+   |-- neuron_info_json/
+      |-- ...
+   |-- validate_clusters_final/
+      |-- sig_clusters_summary.csv
 
 - ``seg_final``: Contains the segmentation output (binary) including model(s) outputs (and
   uncertainty estimates) in slice format that match with the raw data naming.
+  ``generated_patches/`` contains the 3D binary segmentation output (and model uncertainty estimates).
+  It also contains the 3D instance segmentation output in the ``cc_patches/`` directory paired
+  with the neuron info dictionary. Lastly the ``cc_slices/`` directory contains instance segmentation 
+  output in slice format in the  with the raw data naming.
 - ``conv_final``: Contains the conversion (tiff to nifti) output. The name of this file depends
   on the parameters used in conversion. This will be the only file in this directory.
 - ``clar_allen_reg``: Contains the registration outputs / preliminary files.
@@ -306,13 +336,21 @@ Main outputs
   projected onto the Allen atlas space (``pvalue_heatmap_mean_plot.tiff``). All p-values are expressed
   as ``-log10(p-value)``.
 - ``corr_final``: Contains the correlation analysis output including correlation maps and p_value maps.
+- ``neuron_info_json``: Contains the neuron info dictionary of each subject in json format.
+  This is used to place all dictionaries in a central directory for easier use by the workflow.
+- ``validate_clusters_final``: Contains pre-processed nifti p-value cluster files in atlas space and
+  a summary of the properties of the significant clusters in CSV format, including the 
+  number of neurons for each subject in native space.
 
 
 
 .. _example_anchor:
 
+Examples
+========
+
 Example of running ACE flow on multiple subjects (Mode 1):
-==========================================================
+----------------------------------------------------------
 
 .. code-block::
 
@@ -324,8 +362,8 @@ Example of running ACE flow on multiple subjects (Mode 1):
       --sa_resolution 1.4 1.4 5.0
 
 
-Example of running ACE on single subject (Mode 2) (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
-======================================================================================================================================================================================
+Example of running ACE on single subject (Mode 2: Segmentation & Registration): 
+-------------------------------------------------------------------------------
 
 .. note::
 
@@ -341,6 +379,8 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
    This will open an interface where you can select which data
    you want to download. For this tutorial, you will need to
    download option ``1``.
+
+   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`_.
 
 .. code-block::
 
@@ -366,8 +406,8 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
    The user can also run the ACE segmentation module or the ACE cluster-wise analysis module separately.
    Examples of running these modules separately are provided below.
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
-==========================================================================================================================================================================================================
+Example of running ACE on one single subject (Mode 2: Segmentation Only):
+-------------------------------------------------------------------------
 
 .. note::
 
@@ -384,6 +424,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
    you want to download. For this tutorial, you will need to
    download option ``1``.
 
+   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`_.
+
 .. code-block::
 
    $ miracl seg ace \
@@ -393,8 +435,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
       --sa_batch_size 2
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`__):
-===============================================================================================================================================================================================================================
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps:
+--------------------------------------------------------------------------------------------
 
 .. note::
 
@@ -411,13 +453,15 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
    you want to download. For this tutorial, you will need to
    download option ``2``.
 
-   .. code-block::
+   Alternatively, download stats sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`_.
 
-      $ miracl stats ace \
-         --control ./ctrl/ \
-         --treated ./treated/ \
-         --sa_output_folder ./output_dir \
-         --rwc_voxel_size 25
+.. code-block::
+
+   $ miracl stats ace \
+      --control ./ctrl/ \
+      --treated ./treated/ \
+      --sa_output_folder ./output_dir \
+      --rwc_voxel_size 25
 
 More information on the ``miracl stats ace`` function can be found
 :doc:`here <../../stats/ace_cluster/ace_cluster>`.
@@ -426,3 +470,51 @@ More information on the ``miracl stats ace`` function can be found
 .. |linktoworkshop| replace:: :doc:`here <../../../downloads/workshops/2024/stanford_20_03_2024/stanford_20_03_2024>`
 
 .. include:: ../../../directives/tutorial_notebook_links.txt
+
+
+ACE Fine-Tuning
+===============
+
+ACE can be used with lightsheet microscopy datasets from other cellular 
+markers with different morphological features compared to c-Fos 
+(which ACE models were trained on) by fine-tuning the 
+pre-trained model(s). To fine-tune ACE, you need:
+
+1. A directory of 3D training images in tiff format.
+2. A directory of 3D training binary ground-truth images in tiff format.
+3. A directory of 3D validation images in tiff format.
+4. A directory of 3D validation binary ground-truth images in tiff format.
+5. Access to a GPU and a pre-trained model.
+
+.. note::
+
+   The images (both train and validation) and ground-truth labels must have
+   a size of at least 128x128x128 voxels.
+
+
+To fine-tune the model, you can use the following command:
+
+.. code-block::
+
+   $ miracl seg ace_finetune \
+      --train-images ./train_dir/ \
+      --train-labels ./train_gt_dir/ \
+      --val-images ./val_dir/ \
+      --val-labels ./val_gt_dir/ \
+      --output ./output_dir/ \
+      --config /code/miracl/seg/ace_finetune_model_config.yml
+
+The ``ace_finetune_model_config.yml`` file contains the model architecture 
+and hyperparameters for the fine-tuning process.
+
+.. note::
+
+   Please do not change the sections of the config file labelled
+   ``unet:`` and ``unetr:``. These sections contain the model architecture.
+   If a user is changing the model architecture, this is no longer considered
+   fine-tuning. Further, the script will raise an error since the user 
+   is trying to load in model weights for a different model architecture.
+
+The script will output the fine-tuned model weights in the output directory. The
+user can then :ref:`use this model to run the ACE workflow above<model_directory_specification>`.
+

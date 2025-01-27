@@ -47,7 +47,7 @@ We recommend using MIRACL with the Docker or Singularity containers we provide
 but it can also be installed locally. See our 
 :doc:`installation instructions <./installation/installation>` for more information.
 
-Copyright © 2023 :email:`Maged Goubran <maged.goubran@utoronto.ca>` @ 
+Copyright © 2025 :email:`Maged Goubran <maged.goubran@utoronto.ca>` @ 
 `AICONS Lab <https://aiconslab.github.io/>`_.
 
 All Rights Reserved.

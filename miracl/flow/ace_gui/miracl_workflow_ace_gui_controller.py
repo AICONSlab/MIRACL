@@ -7,7 +7,7 @@ Description:
     Controller for ACE flow GUI from MVC design.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann
@@ -157,7 +157,9 @@ class MainWindow(QMainWindow):
 
         # segmentation
         segmentation_tab = self.tab_manager.segmentation_tab
-        segmentation_tab_flags = flag_creator.create_segmentation_flags(segmentation_tab)
+        segmentation_tab_flags = flag_creator.create_segmentation_flags(
+            segmentation_tab
+        )
 
         # Voxelizing/warping
         voxelizing_warping_tab = self.tab_manager.voxelizing_warping_tab
@@ -182,7 +184,9 @@ class MainWindow(QMainWindow):
         # Run ACE
         ace_gui_controller_path = Path(__file__).resolve()
         ace_interface_dir = ace_gui_controller_path.parent.parent
-        ace_interface_script_path = ace_interface_dir / "miracl_workflow_ace_interface.py"
+        ace_interface_script_path = (
+            ace_interface_dir / "miracl_workflow_ace_interface.py"
+        )
         full_command = f"python {str(ace_interface_script_path)} {wu.craft_flags(main_tab_flags)} {wu.craft_flags(conversion_tab_flags)} {wu.craft_flags(segmentation_tab_flags)} {wu.craft_flags(clarity_registration_tab_flags)} {wu.craft_flags(voxelizing_warping_tab_flags)} {wu.craft_flags(clusterwise_tab_flags)} {wu.craft_flags(correlation_stats_tab_flags)} {wu.craft_flags(heatmap_tab_flags)}"  # Crafts cmd
         full_command_split = shlex.split(full_command)  # Split cmd for subprocess use
         logger.debug(f"FULL COMMAND: {full_command_split}")
@@ -212,7 +216,7 @@ class MainWindow(QMainWindow):
             stderr_lines = stderr.strip().split("\n")
             error_message = "\n".join(stderr_lines[-1:])
             QMessageBox.critical(None, "Error", error_message)
-            return False  
+            return False
 
         print("Command executed successfully!")
         return True
@@ -256,6 +260,7 @@ class MainWindow(QMainWindow):
         # args_parser = miracl_workflow_ace_parser.ACEWorkflowParser()
         # test_dict = wu.extract_help_texts(args_parser)
         # print(test_dict["single"])
+
 
 def main():
     app = QApplication([])

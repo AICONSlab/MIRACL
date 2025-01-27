@@ -7,7 +7,7 @@ Description:
     View for conversion.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann
@@ -73,7 +73,11 @@ class ConversionTab(QWidget):
             self.conversion_center_input_2,
             self.conversion_center_input_3,
         ) = wu.create_three_text_input_widget(
-            conversion_layout, "Nii center:", help_dict["ctn_center"], ["0", "0", "0"], ["int", "int", "int"]
+            conversion_layout,
+            "Nii center:",
+            help_dict["ctn_center"],
+            ["0", "0", "0"],
+            ["int", "int", "int"],
         )
 
         self.conversion_dx_z_input = wu.create_digit_spinbox(
