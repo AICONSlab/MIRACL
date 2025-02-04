@@ -58,6 +58,7 @@ RUN mkdir -p /code/atlases/ara && \
 
 # RUN conda install -y --no-update-deps pyqt=5
 
+# Add atlas ENV vars
 ENV aradir "/code/atlases/ara"
 
 # Templates (atlas images)
@@ -87,6 +88,16 @@ RUN ln -sf "/code/depends/ants/antsRegistrationMIRACL_MRI.sh" /usr/bin/ants_mira
 ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
+
+###############################################################################
+#--- ACE models ---
+
+# Download UNet
+RUN wget -P /code/miracl/seg/models/unet --content-disposition https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/best_metric_model.pth?download=true
+#Download UNETR
+RUN wget -P /code/miracl/seg/models/unetr --content-disposition https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/best_metric_model.pth?download=true
+
+###############################################################################
 
 #STARTUNCOMMENT#
 #STOPUNCOMMENT#
