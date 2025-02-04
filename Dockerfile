@@ -98,6 +98,7 @@ RUN wget -P /code/miracl/seg/models/unet --content-disposition https://huggingfa
 RUN wget -P /code/miracl/seg/models/unetr --content-disposition https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/best_metric_model.pth?download=true
 
 ###############################################################################
+#--- Singularity directives ---
 
 #STARTUNCOMMENT#
 #STOPUNCOMMENT#
@@ -106,4 +107,3 @@ RUN wget -P /code/miracl/seg/models/unetr --content-disposition https://huggingf
 
 # Temporarily uncommented to allow interactive shell access to Docker container
 #ENTRYPOINT ["/opt/miniconda/bin/miracl"]
-
