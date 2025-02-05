@@ -143,8 +143,8 @@ function prompt_yes_no() {
 function validate_name_input() {
   local input_var="$1"
   echo "${input_var}" | grep -qP '^[a-zA-Z0-9._/-]+$' || {
-    echo "Error: Invalid name '${input_var}'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed."
-    return 1 # Invalid input
+    printf "Error: Invalid name '%s'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed.\n" "${input_var}"
+    return 1
   }
 
   return 0
@@ -179,7 +179,7 @@ function validate_data_path_input() {
   if [ -d "${1}" ]; then
     return 0
   else
-    echo "The path you enter does not exist on the host system. Please enter a valid path."
+    printf "The path you enter does not exist on the host system. Please enter a valid path.\n"
     return 1
   fi
 }
@@ -359,7 +359,7 @@ function parse_args() {
 function check_gpu() {
   # Check if nvidia-smi is available (NVIDIA driver installed)
   if ! command -v nvidia-smi &>/dev/null; then
-    echo "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed." >&2
+    printf "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed.\n" >&2
     return 1
   fi
 
@@ -394,7 +394,7 @@ EOF
   if [[ "${gpu}" == true ]]; then
 
     if ! check_gpu; then
-      echo "Warning: GPU support requested but no GPU's found or accessible. Continuing without GPU support."
+      printf "Warning: GPU support requested but no GPU's found or accessible. Continuing without GPU support.\n"
       gpu_check_results=false
     else
       cat >>docker-compose.yml <<EOF
