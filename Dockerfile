@@ -92,13 +92,17 @@ ENV IN_DOCKER_CONTAINER Yes
 ###############################################################################
 #--- ACE models ---
 
+# Change permissions of models folder
+RUN chmod -R 777 /code/miracl/seg/models
 # Download UNet
-RUN wget -P /code/miracl/seg/models/unet --content-disposition https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/best_metric_model.pth?download=true
+RUN wget -O /code/miracl/seg/models/unet/best_metric_model.pth https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/best_metric_model.pth?download=true && \
+    ls -l /code/miracl/seg/models/unet
 #Download UNETR
-RUN wget -P /code/miracl/seg/models/unetr --content-disposition https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/best_metric_model.pth?download=true
+RUN wget -O /code/miracl/seg/models/unetr/best_metric_model.pth https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/best_metric_model.pth?download=true && \
+    ls -l /code/miracl/seg/models/unetr
 
 ###############################################################################
-#--- Singularity directives ---
+#--- Docker X11 forwarding directives ---
 
 #STARTUNCOMMENT#
 #STOPUNCOMMENT#
