@@ -469,13 +469,18 @@ EOF
 EOF
 
   # Append MIRACL scripts folder mounting
-  if [[ ${dev} == false ]]; then
-
-    install_script_dir=$(dirname "$(readlink -f "$0")")
-
+  install_script_dir=$(dirname "$(readlink -f "$0")")
+  if [[ ${dev} == "false" ]]; then
     cat >>docker-compose.yml <<EOF
       - ${install_script_dir}/miracl:/code/miracl
 EOF
+  elif [[ "${dev}" == "true" ]]; then
+    cat >>docker-compose.yml <<EOF
+      # - ${install_script_dir}/miracl:/code/miracl
+EOF
+  else
+    echo "Error: 'dev' must be either 'true' or 'false'."
+    exit 1
   fi
 
   # Add additional volumes
@@ -630,6 +635,14 @@ EOF
         printf "For UNet: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/%s?download=true'\n" "${UNET_MODEL_PATH}" "${MODEL_NAMES}"
         printf "For UNETR: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/%s?download=true'\n" "${UNETR_MODEL_PATH}" "${MODEL_NAMES}"
 
+        printf "\n\n##############################################################\n\n"
+      fi
+
+      if [[ ${dev} == "true" ]]; then
+        if [[ "${gpu_check_results}" == "true" || "${models_download_check_results}" == "true" ]]; then
+          printf "\n##############################################################\n\n"
+        fi
+        printf "Mounting the miracl code folder into the Docker container was disabled. You can uncomment the following line in your 'docker-compose.yml' under the 'volumes' header to enable it:\n\n  - %s" "${install_script_dir}/miracl:/code/miracl"
         printf "\n\n##############################################################\n\n"
       fi
 
