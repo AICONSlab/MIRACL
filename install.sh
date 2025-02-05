@@ -581,22 +581,15 @@ function build_docker() {
       fi
       build_args+=("-t" "$image_name:$miracl_version" ".")
 
-      docker build "${build_args[@]}"
-
-      # docker build --progress=plain --no-cache \
-      # docker build \
-      #   --build-arg USER_ID="$(id -u)" \
-      #   --build-arg GROUP_ID="$(id -g)" \
-      #   --build-arg USER="$HOST_USER" \
-      #   -t "$image_name":"$miracl_version" .
+      # Check for log flag
+      if [[ "${write_log}" == "true" ]]; then
+        docker build "${build_args[@]}" 2>&1 | tee build.log
+      else
+        docker build "${build_args[@]}"
+      fi
     }
 
-    # Check for log flag
-    if [ "${write_log}" ]; then
-      docker_build | tee build.log
-    else
-      docker_build
-    fi
+    docker_build
 
     # Check if build process exited without errors
     build_status_code=$?
@@ -629,7 +622,7 @@ EOF
 
       if [[ "${models_download_check_results}" == "false" ]]; then
         if [[ "${gpu_check_results}" == "true" ]]; then
-          printf "\n\n##############################################################\n\n"
+          printf "\n##############################################################\n\n"
         fi
         printf "One or more pre-trained DL models were not downloaded.\nPlease download them manually as they are required to run ACE.\nNavigate to the root directory of your MIRACL repo and use:\n"
         printf "For UNet: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/%s?download=true'\n" "${UNET_MODEL_PATH}" "${MODEL_NAMES}"
