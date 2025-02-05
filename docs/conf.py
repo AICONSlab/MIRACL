@@ -91,7 +91,8 @@ html_context = {
     "display_github": True,
     "github_user": "AICONSlab",
     "github_repo": "MIRACL",
-    "github_version": "master/",
+    "github_version": "master",
+    "conf_py_path": "/docs/",
 }
 
 # Output file base name for HTML help builder.
