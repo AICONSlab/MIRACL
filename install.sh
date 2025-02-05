@@ -88,6 +88,9 @@ function initialize_variables() {
   # user output msg
   gpu_check_results=true
 
+  # Set default for the models check err msg in final user output msg
+  models_download_check_results=true
+
   # Set default for mounting MIRACL's script folder into container
   # Setting the flag disables mounting
   : "${dev:=false}"
@@ -96,6 +99,15 @@ function initialize_variables() {
   # Setting flag writes log file
   : "${write_log:=false}"
 
+  # Set default for verbose output of installation steps
+  # Setting the flag enables verbose output
+  : "${enable_verbose:=false}"
+
+  # Set default for using Docker's build cache
+  # Cache is disabled by default to guarantee clean installations
+  # Setting the flag uses cache
+  : "${enable_docker_build_cache:=false}"
+
   # Set default for interactive prompt data location
   interactive_prompt_data_location=false
 
@@ -103,7 +115,7 @@ function initialize_variables() {
   volumes=()
 
   # Base usage
-  base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
+  base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-a] [-b] [-s] [-m] [-h]"
 }
 
 ######################
@@ -143,8 +155,8 @@ function prompt_yes_no() {
 function validate_name_input() {
   local input_var="$1"
   echo "${input_var}" | grep -qP '^[a-zA-Z0-9._/-]+$' || {
-    echo "Error: Invalid name '${input_var}'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed."
-    return 1 # Invalid input
+    printf "Error: Invalid name '%s'. Only alphanumeric characters, dashes (-), underscores (_), forward slashes (/), and periods (.) are allowed.\n" "${input_var}"
+    return 1
   }
 
   return 0
@@ -179,7 +191,7 @@ function validate_data_path_input() {
   if [ -d "${1}" ]; then
     return 0
   else
-    echo "The path you enter does not exist on the host system. Please enter a valid path."
+    printf "The path you enter does not exist on the host system. Please enter a valid path.\n"
     return 1
   fi
 }
@@ -230,6 +242,12 @@ function interactive_prompt() {
 # PARSER #
 ##########
 
+# Invert default bool for help text
+function return_opposite() {
+  local input="${1}"
+  [[ "${input}" == "true" ]] && echo "false" || [[ "${input}" == "false" ]] && echo "true" || echo "Invalid input. Please provide 'true' or 'false.'"
+}
+
 function usage() {
 
   cat <<help_menu
@@ -246,11 +264,13 @@ function usage() {
    -i, specify image name (randomized default: '${image_name}')
    -c, specify container name (default: '${service_name}')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: '${miracl_version}')
-   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: ${gpu})
-   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: ${dev}; set flag to disable)
+   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: ${gpu}; set flag to set to $(return_opposite "${gpu}"))
+   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: ${dev}; set flag to set to $(return_opposite "${dev}"))
    -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
-   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: ${write_log})
+   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: ${write_log}; set flag to set to $(return_opposite "${write_log}"))
+   -a, enable verbose output of installation steps. Useful for debugging, also in combination with '-l' (default: ${enable_verbose}; set flag to set to $(return_opposite "${enable_verbose}"))
+   -b, enable Docker build cache. Build cache is disabled to guarantee clean installations for the same local repo (default: ${enable_docker_build_cache}; set flag to set to $(return_opposite "${enable_docker_build_cache}"))
    -s, print version of build script and exit
    -m, print version of MIRACL on current Git branch and exit
    -h, print this help menu and exit
@@ -264,7 +284,7 @@ help_menu
 
 function parse_args() {
   # Parse command line arguments
-  while getopts ":n:i:c:t:ged:v:lsmh" opt; do
+  while getopts ":n:i:c:t:ged:v:lsmabh" opt; do
     case ${opt} in
 
     n)
@@ -318,6 +338,14 @@ function parse_args() {
       write_log=true
       ;;
 
+    a)
+      enable_verbose=true
+      ;;
+
+    b)
+      enable_docker_build_cache=true
+      ;;
+
     s)
       echo -e "v$version"
       exit 0
@@ -359,7 +387,7 @@ function parse_args() {
 function check_gpu() {
   # Check if nvidia-smi is available (NVIDIA driver installed)
   if ! command -v nvidia-smi &>/dev/null; then
-    echo "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed." >&2
+    printf "ERROR: nvidia-smi command not found. Make sure the NVIDIA driver and CUDA are installed.\n" >&2
     return 1
   fi
 
@@ -373,6 +401,31 @@ function check_gpu() {
     echo "No Nvidia GPUs found or GPUs are not accessible." >&2
     return 1
   fi
+}
+
+# Define the model download consts globally
+MODEL_NAMES="best_metric_model.pth"
+UNET_MODEL_PATH="./miracl/seg/models/unet"
+UNETR_MODEL_PATH="./miracl/seg/models/unetr"
+
+function download_models() {
+  printf "Downloading pre-trained ACE DL models to local repo...\n\n"
+
+  for MODEL_PATH in "${UNET_MODEL_PATH}" "${UNETR_MODEL_PATH}"; do
+    # Construct the full URL for each model
+    MODEL_URL="https://huggingface.co/AICONSlab/ACE/resolve/main/models/$(basename "${MODEL_PATH}")/${MODEL_NAMES}?download=true"
+
+    # Download the model if it doesn't exist already
+    wget -q --show-progress -O "${MODEL_PATH}/${MODEL_NAMES}" "${MODEL_URL}"
+
+    # Check if the file exists after download
+    if [ ! -f "${MODEL_PATH}/${MODEL_NAMES}" ]; then
+      printf "\nError: Failed to download the model. The file does not exist at %s/%s\n\n" "${MODEL_PATH}" "${MODEL_NAMES}"
+      models_download_check_results=false
+    else
+      printf "Model successfully downloaded at %s/%s\n\n" "${MODEL_PATH}" "${MODEL_NAMES}"
+    fi
+  done
 }
 
 function populate_docker_compose() {
@@ -394,7 +447,7 @@ EOF
   if [[ "${gpu}" == true ]]; then
 
     if ! check_gpu; then
-      echo "Warning: GPU support requested but no GPU's found or accessible. Continuing without GPU support."
+      printf "Warning: GPU support requested but no GPU's found or accessible. Continuing without GPU support.\n"
       gpu_check_results=false
     else
       cat >>docker-compose.yml <<EOF
@@ -416,13 +469,18 @@ EOF
 EOF
 
   # Append MIRACL scripts folder mounting
-  if [[ ${dev} == false ]]; then
-
-    install_script_dir=$(dirname "$(readlink -f "$0")")
-
+  install_script_dir=$(dirname "$(readlink -f "$0")")
+  if [[ ${dev} == "false" ]]; then
     cat >>docker-compose.yml <<EOF
       - ${install_script_dir}/miracl:/code/miracl
 EOF
+  elif [[ "${dev}" == "true" ]]; then
+    cat >>docker-compose.yml <<EOF
+      # - ${install_script_dir}/miracl:/code/miracl
+EOF
+  else
+    echo "Error: 'dev' must be either 'true' or 'false'."
+    exit 1
   fi
 
   # Add additional volumes
@@ -502,30 +560,43 @@ function build_docker() {
     printf " GPU passthrough: %s\n" "${gpu}"
     printf " Script dir mounting disabled: %s\n" "${dev}"
     printf " Log file: %s\n" "${write_log}"
+    printf " Verbose: %s\n" "${enable_verbose}"
+    printf " Docker build cache: %s\n" "${enable_docker_build_cache}"
     for v in "${!volumes[@]}"; do
       printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
     done
 
-    # Pass user name, UID and GID to Dockerfile
+    # Construct build cmd with user name, UID and GID passed to Dockerfile
     function docker_build() {
-      docker build \
-        --build-arg USER_ID="$(id -u)" \
-        --build-arg GROUP_ID="$(id -g)" \
-        --build-arg USER="$HOST_USER" \
-        -t "$image_name":"$miracl_version" .
+      local build_args=()
+
+      build_args+=("--build-arg" "USER_ID=$(id -u)")
+      build_args+=("--build-arg" "GROUP_ID=$(id -g)")
+      build_args+=("--build-arg" "USER=$HOST_USER")
+      if [[ "${enable_verbose}" == true ]]; then
+        build_args+=("--progress=plain")
+      fi
+      if [[ "${enable_docker_build_cache}" == false ]]; then
+        build_args+=("--no-cache")
+      fi
+      build_args+=("-t" "$image_name:$miracl_version" ".")
+
+      # Check for log flag
+      if [[ "${write_log}" == "true" ]]; then
+        docker build "${build_args[@]}" 2>&1 | tee build.log
+      else
+        docker build "${build_args[@]}"
+      fi
     }
 
-    # Check for log flag
-    if [ "${write_log}" ]; then
-      docker_build | tee build.log
-    else
-      docker_build
-    fi
+    docker_build
 
     # Check if build process exited without errors
     build_status_code=$?
     if [ $build_status_code -eq 0 ]; then
-      printf "\nBuild was successful!\n"
+      printf "\n#####################\n"
+      printf "Build was successful!\n"
+      printf "#####################\n\n"
       # Remove $USER_TEXT from Dockerfile
       rm_USER_TEXT
 
@@ -543,6 +614,28 @@ function build_docker() {
 EOF
 
         printf "\n\nAdd this under the 'shm_size' entry with 'deploy' being at the same indentation level."
+        printf "\n\n##############################################################\n\n"
+      fi
+
+      # Download ACE models
+      download_models
+
+      if [[ "${models_download_check_results}" == "false" ]]; then
+        if [[ "${gpu_check_results}" == "true" ]]; then
+          printf "\n##############################################################\n\n"
+        fi
+        printf "One or more pre-trained DL models were not downloaded.\nPlease download them manually as they are required to run ACE.\nNavigate to the root directory of your MIRACL repo and use:\n"
+        printf "For UNet: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/%s?download=true'\n" "${UNET_MODEL_PATH}" "${MODEL_NAMES}"
+        printf "For UNETR: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/%s?download=true'\n" "${UNETR_MODEL_PATH}" "${MODEL_NAMES}"
+
+        printf "\n\n##############################################################\n\n"
+      fi
+
+      if [[ ${dev} == "true" ]]; then
+        if [[ "${gpu_check_results}" == "true" || "${models_download_check_results}" == "true" ]]; then
+          printf "\n##############################################################\n\n"
+        fi
+        printf "Mounting the miracl code folder into the Docker container was disabled. You can uncomment the following line in your 'docker-compose.yml' under the 'volumes' header to enable it:\n\n  - %s" "${install_script_dir}/miracl:/code/miracl"
         printf "\n\n##############################################################\n\n"
       fi
 

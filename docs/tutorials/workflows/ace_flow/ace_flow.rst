@@ -27,10 +27,7 @@ To install the ACE workflow, refer to the MIRACL installation guide:
    Once the installation is complete, enter the ``docker`` container using ``docker exec -it <CONTAINER_NAME> bash``
    and run the ``nvidia-smi`` command to ensure your GPU is detected.
 
-The ACE workflow can only be run with pre-trained DL models. To get access to these models please reach out
-to `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
-
-These models will be included by default in a future release once ACE is published.
+As of MIRACL version `2.4.2` the pre-trained DL models are publicly available and will have automatically been downloaded when you installed MIRACL.
 
 .. _model_directory_specification:
 
