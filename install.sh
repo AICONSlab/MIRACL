@@ -99,6 +99,15 @@ function initialize_variables() {
   # Setting flag writes log file
   : "${write_log:=false}"
 
+  # Set default for verbose output of installation steps
+  # Setting the flag enables verbose output
+  : "${enable_verbose:=false}"
+
+  # Set default for using Docker's build cache
+  # Cache is disabled by default to guarantee clean installations
+  # Setting the flag uses cache
+  : "${enable_docker_build_cache:=false}"
+
   # Set default for interactive prompt data location
   interactive_prompt_data_location=false
 
@@ -106,7 +115,7 @@ function initialize_variables() {
   volumes=()
 
   # Base usage
-  base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]"
+  base_usage="Usage: ./$(basename "$0") [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-a] [-b] [-s] [-m] [-h]"
 }
 
 ######################
@@ -233,6 +242,12 @@ function interactive_prompt() {
 # PARSER #
 ##########
 
+# Invert default bool for help text
+function return_opposite() {
+  local input="${1}"
+  [[ "${input}" == "true" ]] && echo "false" || [[ "${input}" == "false" ]] && echo "true" || echo "Invalid input. Please provide 'true' or 'false.'"
+}
+
 function usage() {
 
   cat <<help_menu
@@ -249,11 +264,13 @@ function usage() {
    -i, specify image name (randomized default: '${image_name}')
    -c, specify container name (default: '${service_name}')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: '${miracl_version}')
-   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: ${gpu})
-   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: ${dev}; set flag to disable)
+   -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: ${gpu}; set flag to set to $(return_opposite "${gpu}"))
+   -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: ${dev}; set flag to set to $(return_opposite "${dev}"))
    -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
    -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
-   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: ${write_log})
+   -l, write logfile of build process to 'build.log' in MIRACL root directory (default: ${write_log}; set flag to set to $(return_opposite "${write_log}"))
+   -a, enable verbose output of installation steps. Useful for debugging, also in combination with '-l' (default: ${enable_verbose}; set flag to set to $(return_opposite "${enable_verbose}"))
+   -b, enable Docker build cache. Build cache is disabled to guarantee clean installations for the same local repo (default: ${enable_docker_build_cache}; set flag to set to $(return_opposite "${enable_docker_build_cache}"))
    -s, print version of build script and exit
    -m, print version of MIRACL on current Git branch and exit
    -h, print this help menu and exit
@@ -267,7 +284,7 @@ help_menu
 
 function parse_args() {
   # Parse command line arguments
-  while getopts ":n:i:c:t:ged:v:lsmh" opt; do
+  while getopts ":n:i:c:t:ged:v:lsmabh" opt; do
     case ${opt} in
 
     n)
@@ -319,6 +336,14 @@ function parse_args() {
 
     l)
       write_log=true
+      ;;
+
+    a)
+      enable_verbose=true
+      ;;
+
+    b)
+      enable_docker_build_cache=true
       ;;
 
     s)
@@ -530,18 +555,35 @@ function build_docker() {
     printf " GPU passthrough: %s\n" "${gpu}"
     printf " Script dir mounting disabled: %s\n" "${dev}"
     printf " Log file: %s\n" "${write_log}"
+    printf " Verbose: %s\n" "${enable_verbose}"
+    printf " Docker build cache: %s\n" "${enable_docker_build_cache}"
     for v in "${!volumes[@]}"; do
       printf " Volume %s: %s\n" "$v" "${volumes[$v]}"
     done
 
-    # Pass user name, UID and GID to Dockerfile
+    # Construct build cmd with user name, UID and GID passed to Dockerfile
     function docker_build() {
+      local build_args=()
+
+      build_args+=("--build-arg" "USER_ID=$(id -u)")
+      build_args+=("--build-arg" "GROUP_ID=$(id -g)")
+      build_args+=("--build-arg" "USER=$HOST_USER")
+      if [[ "${enable_verbose}" == true ]]; then
+        build_args+=("--progress=plain")
+      fi
+      if [[ "${enable_docker_build_cache}" == false ]]; then
+        build_args+=("--no-cache")
+      fi
+      build_args+=("-t" "$image_name:$miracl_version" ".")
+
+      docker build "${build_args[@]}"
+
       # docker build --progress=plain --no-cache \
-      docker build \
-        --build-arg USER_ID="$(id -u)" \
-        --build-arg GROUP_ID="$(id -g)" \
-        --build-arg USER="$HOST_USER" \
-        -t "$image_name":"$miracl_version" .
+      # docker build \
+      #   --build-arg USER_ID="$(id -u)" \
+      #   --build-arg GROUP_ID="$(id -g)" \
+      #   --build-arg USER="$HOST_USER" \
+      #   -t "$image_name":"$miracl_version" .
     }
 
     # Check for log flag
