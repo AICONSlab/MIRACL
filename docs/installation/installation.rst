@@ -260,7 +260,7 @@ either of the following methods:
            -h, print this help menu and exit
 
          Script version: 2.0.1-beta
-         MIRACL version: 2.4.1
+         MIRACL version: 2.4.2
 
       Let's have a closer look at the most important flags.
 

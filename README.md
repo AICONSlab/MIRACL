@@ -19,16 +19,13 @@ ___
 
 \*\***NEW WORKFLOW/FEATURE RELEASE**\*\*
 
-We have released our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning 
-segmentation models and advanced statistical methods to enable unbiased and generalizable brain-wide mapping of 3D alterations in neuronal activity, 
-morphology, or connectivity at the sub-regional and laminar levels beyond atlas-defined regions.
+We have released our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning segmentation models and advanced statistical methods to enable unbiased and generalizable brain-wide mapping of 3D alterations in neuronal activity, morphology, or connectivity at the sub-regional and laminar levels beyond atlas-defined regions.
 
-ACE is now available. Tutorials and usage examples for ACE can be found in our [docs](https://miracl.readthedocs.io/en/latest/tutorials/workflows/ace_flow/ace_flow.html).
-To get access to the models, please contact [Ahmadreza Attarpour](mailto:a.attarpour@mail.utoronto.ca?subject=[MIRACL]%20ACE%20models%20request).
+ACE is now available. Tutorials and usage examples for ACE can be found in our [docs](https://miracl.readthedocs.io/en/latest/tutorials/workflows/ace_flow/ace_flow.html). As of MIRACL version `2.4.2` the pre-trained DL models are publicly available and will automatically be downloaded during installation.
 
 ___
 
-We recommend using MIRACL with the Docker or Singularity containers we provide but it can also be installed locally.  For more details, see our 
+We recommend using MIRACL with the Docker or Singularity containers we provide. Legacy instructions for installing MIRACL locally are available but we recommend against it. For more details, see our 
 [docs](https://miracl.readthedocs.io).
 
 ___
