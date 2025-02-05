@@ -88,6 +88,9 @@ function initialize_variables() {
   # user output msg
   gpu_check_results=true
 
+  # Set default for the models check err msg in final user output msg
+  models_download_check_results=true
+
   # Set default for mounting MIRACL's script folder into container
   # Setting the flag disables mounting
   : "${dev:=false}"
@@ -375,6 +378,31 @@ function check_gpu() {
   fi
 }
 
+# Define the model download consts globally
+MODEL_NAMES="best_metric_model.pth"
+UNET_MODEL_PATH="./miracl/seg/models/unet"
+UNETR_MODEL_PATH="./miracl/seg/models/unetr"
+
+function download_models() {
+  printf "Downloading pre-trained ACE DL models to local repo...\n\n"
+
+  for MODEL_PATH in "${UNET_MODEL_PATH}" "${UNETR_MODEL_PATH}"; do
+    # Construct the full URL for each model
+    MODEL_URL="https://huggingface.co/AICONSlab/ACE/resolve/main/models/$(basename "${MODEL_PATH}")/${MODEL_NAMES}?download=true"
+
+    # Download the model if it doesn't exist already
+    wget -q --show-progress -O "${MODEL_PATH}/${MODEL_NAMES}" "${MODEL_URL}"
+
+    # Check if the file exists after download
+    if [ ! -f "${MODEL_PATH}/${MODEL_NAMES}" ]; then
+      printf "\nError: Failed to download the model. The file does not exist at %s/%s\n\n" "${MODEL_PATH}" "${MODEL_NAMES}"
+      models_download_check_results=false
+    else
+      printf "Model successfully downloaded at %s/%s\n\n" "${MODEL_PATH}" "${MODEL_NAMES}"
+    fi
+  done
+}
+
 function populate_docker_compose() {
   # Generate docker-compose.yml file
   cat >docker-compose.yml <<EOF
@@ -508,6 +536,7 @@ function build_docker() {
 
     # Pass user name, UID and GID to Dockerfile
     function docker_build() {
+      # docker build --progress=plain --no-cache \
       docker build \
         --build-arg USER_ID="$(id -u)" \
         --build-arg GROUP_ID="$(id -g)" \
@@ -525,7 +554,9 @@ function build_docker() {
     # Check if build process exited without errors
     build_status_code=$?
     if [ $build_status_code -eq 0 ]; then
-      printf "\nBuild was successful!\n"
+      printf "\n#####################\n"
+      printf "Build was successful!\n"
+      printf "#####################\n\n"
       # Remove $USER_TEXT from Dockerfile
       rm_USER_TEXT
 
@@ -543,6 +574,20 @@ function build_docker() {
 EOF
 
         printf "\n\nAdd this under the 'shm_size' entry with 'deploy' being at the same indentation level."
+        printf "\n\n##############################################################\n\n"
+      fi
+
+      # Download ACE models
+      download_models
+
+      if [[ "${models_download_check_results}" == "false" ]]; then
+        if [[ "${gpu_check_results}" == "true" ]]; then
+          printf "\n\n##############################################################\n\n"
+        fi
+        printf "One or more pre-trained DL models were not downloaded.\nPlease download them manually as they are required to run ACE.\nNavigate to the root directory of your MIRACL repo and use:\n"
+        printf "For UNet: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/%s?download=true'\n" "${UNET_MODEL_PATH}" "${MODEL_NAMES}"
+        printf "For UNETR: wget -P %s --content-disposition 'https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/%s?download=true'\n" "${UNETR_MODEL_PATH}" "${MODEL_NAMES}"
+
         printf "\n\n##############################################################\n\n"
       fi
 
