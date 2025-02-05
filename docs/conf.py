@@ -10,8 +10,8 @@ project = "MIRACL"
 copyright = "2025, Maged Goubran @ AICONS Lab"
 author = "Maged Goubran"
 # Version and release set to the same since no separation is needed
-version = "2.2.6"
-release = "2.2.6"
+version = "2.4.2"
+release = "2.4.2"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
