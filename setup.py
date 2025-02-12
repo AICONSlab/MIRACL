@@ -37,6 +37,7 @@ setup(
         "Topic :: Scientific/Engineering :: Image Recognition",
     ],
     install_requires=[
+        "pydantic==2.5.3",
         "numpy==1.21.6",
         "pandas==1.3.5",
         "scipy==1.6.2",
@@ -55,7 +56,7 @@ setup(
         "statsmodels==0.13.0",
         "allensdk==2.15.1",
         "lightning-python==1.2.1",
-        "joblib==1.2.0",
+        "joblib==1.3.2",
         "matplotlib==3.4.2",
         "argcomplete==2.0.0",
         "dipy==1.6.0",
