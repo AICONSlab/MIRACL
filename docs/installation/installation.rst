@@ -15,25 +15,58 @@ either of the following methods:
    has been deprecated. Please use :program:`Docker` or :program:`Singularity`
    instead.
 
+.. important::
+   :program:`MIRACL` has been tested on:
+
+   * **Docker**:
+
+     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish), ``24.04`` (Noble Numbat)
+
+     * **Debian**: ``13`` (trixie)
+
+   * **Singularity**:
+
+     * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish), ``24.04`` (Noble Numbat)
+
+     * **Gentoo**: ``2.14``
+
+   * **Apptainer**:
+
+     * **Ubuntu**: ``20.04`` (Focal Fossa)
+
+     * **Gentoo**: ``2.14``
+
+   We strongly recommend that you use one of the above Linux versions to run
+   :program:`MIRACL`!
+
+.. note::
+   Hardware requirements for :program:`MIRACL` are heavily dependent on the 
+   type/size of your data as well as the analyses you are running. While 
+   some modules and datasets can be less computationally expensive, others 
+   require a lot of resources. As a point of reference, the least powerful 
+   system that we are testing :program:`MIRACL` on, uses a ``24-Core Threadripper`` 
+   with ``128GB RAM`` and two ``NVIDIA RTX A6000 GPUs``.
+
 .. tabs::
 
    .. tab:: Docker
 
-      We provide a build script to automatically create a :program:`Docker` 
+      We provide a installation script to automatically create a :program:`Docker` 
       image for you that can be run using :program:`Docker Compose`. This 
       method does not require a manual installation of :program:`MIRACL` and 
-      works on Linux, macOS and Windows (using WSL 2).
+      works on Linux and in the WSL2 on Windows. Theoretically, :program:`MIRACL`
+      should also work on MacOS but we do not officially support it.
 
       .. tip::
-         This is our recommended method for running :program:`MIRACL` on local 
-         machines and servers
+         Docker is our recommended method for running :program:`MIRACL` on 
+         local machines and servers
 
       Docker is well suited if you want to run :program:`MIRACL` on a local 
       machine or local server. If you need to run :program:`MIRACL` on a 
-      cluster, see our instructions for installing :program:`Singularity`. If 
-      you don't have Docker installed on your computer, do that first. Make 
+      cluster, see our instructions for installing :program:`Apptainer/Singularity`. 
+      If you don't have Docker installed on your computer, do that first. Make 
       sure your installation includes :program:`Docker Compose` as it is 
-      required to run the build script we provide. Note that :program:`Docker 
+      required to run the installation script we provide. Note that :program:`Docker 
       Compose` is included as part of the :program:`Docker Desktop` 
       installation by default.
 
@@ -42,9 +75,9 @@ either of the following methods:
          <h2>Getting started</h2>
 
       First, it is important to understand how the container is built. There 
-      is a base image in the docker folder that installs :program:`Python` and 
-      dependencies. Then the ``Dockerfile`` in the base of the repository 
-      builds the ``mgoubran/miracl`` image from that base. When the build 
+      is a base image in the ``docker`` folder that installs :program:`Python` 
+      and dependencies. Then the ``Dockerfile`` in the base of the repository 
+      builds the :program:`Docker` image from that base. When the build 
       happens, it cats the ``version.txt`` file in the repository to save a 
       versioned base, but then the build uses the tag revised-base-latest that 
       is always the latest base. The base container is built from this folder 
@@ -63,23 +96,71 @@ either of the following methods:
 
       Clone the :program:`MIRACL` repo to your machine:
 
+      .. _git clone target:
+
       .. code-block::
 
          $ git clone https://www.github.com/mgoubran/MIRACL
+
+      Change into the newly created directory where you cloned 
+      :program:`MIRACL` to:
+
+      .. code-block::
+
          $ cd MIRACL
 
-      Build the latest :program:`MIRACL` image using the build script we 
+      Build the latest :program:`MIRACL` image using the installation script we 
       provide:
 
       .. code-block::
 
-         $ ./build.sh
+         $ ./install.sh
+
+      .. attention::
+
+         In order for the ``./install.sh`` script to work, :program:`Docker` 
+         should **NOT** be used with ``sudo``. Our script checks and exits if 
+         it is being run with ``sudo`` priviledges. The reason for this behavior 
+         is that the installation script creates a user in the Docker container 
+         that matches the ``uid`` and ``gid`` of the host user which is required
+         correct X11 forwarding. This user should **NOT** be ``root`` which is 
+         the case when :program:`Docker` commands are executed with ``sudo``. 
+         For more information on how to add a ``docker`` user to use 
+         :program:`Docker` without ``sudo`` visit the official :program:`Docker` 
+         `documentation <https://docs.docker.com/engine/install/linux-postinstall/>`_.
 
       .. error::
          Make sure that the script can be executed. If it can't and you are 
-         the owner of the file, use ``chmod u+x build.sh`` to make it 
-         executable. Prefix with ``sudo`` if you are not the owner of the file 
-         or change permissions for ``g`` and/or ``o``.
+         the owner of the file, use ``chmod u+x install.sh`` to make it 
+         executable. Prefix the ``chmod`` command with ``sudo`` if you are not 
+         the owner of the file or change permissions for ``g`` and/or ``o``.
+
+      Running the script without any flags will start an interactive installation 
+      process that will run you through an abbreviated version of the installation.
+
+      .. code-block:: 
+
+         $ ./install.sh
+         No flags provided, starting interactive prompt...
+         Enter Docker image name (default: 'miracl_mgoubran_kirk_4918_img'):
+         Enter Docker container name (default: 'miracl_mgoubran_kirk_4918'):
+         Enable GPU in Docker container (required for ACE) (y/N): y
+         Enter the location of your data on your host system (default: None). If you choose a location, your data will be mounted at '/data' in your container: /data5/projects/
+
+
+      Press enter for the image and container prompts to choose the default names
+      or enter your preferred names. GPU forwarding will be disabled by default 
+      so enter ``y``, ``Y``, ``Yes``, or ``YES`` at the prompt to enable it. 
+      Lastly, you will be prompted for the location of your data on the host 
+      system. Provide the full path to your location. It will be mounted under 
+      ``/data`` in the container. Once you entered all prompts, :program:`MIRACL` 
+      will be installed automatically.
+
+      .. note::
+
+         This installation method should be sufficient for 90% of users. However,
+         If you require more fine grained control see our ``Additional build 
+         options`` section further below.
 
       Once the image has successfully been built, run the container using 
       :program:`Docker Compose`:
@@ -102,23 +183,6 @@ either of the following methods:
 
          $ docker exec -it miracl bash
       
-      Files that are saved while using :program:`MIRACL` should be saved to 
-      volumes mounted into the container in order to make them persistent. To 
-      mount volumes, just add them to the ``docker-compose.yml`` in the base 
-      directory under volumes.
-      
-      .. danger::
-         Do not delete the volume that is already mounted which mounts 
-         your ``.Xauthority``! This is important for X11 to work correctly.
-      
-      Example:
-      
-      .. code-block::
-
-         volumes:
-               - '/home/mgoubran/.Xauthority:/home/mgoubran/.Xauthority'
-               - '/home/mgoubran/mydata:/home/mgoubran/mydata'
-
       .. raw:: html
 
          <h2>Stopping the container</h2>
@@ -134,42 +198,183 @@ either of the following methods:
 
       .. raw:: html
 
-         <h2>Additional build options</h2>
+         <h2>Mounting additional drives</h2>
 
-      .. raw:: html
-
-         <h3>Image and container naming</h3>
-      
-      Naming is done automatically when using our build script which includes 
-      a default naming scheme. By default, the image is named 
-      ``mgoubran/miracl:latest`` and the container is tagged with ``miracl``.
-      
-      You can easily change the defaults if your usecase requires it by 
-      running our build script with the following options:
-      
-      .. code-block::
-
-         $ ./build -i <image_name> -c <container_name>
-      
-      Options:
-      
-      .. code-block::
-
-         -i, Specify image name (default: mgroubran/miracl)
-         -c, Specify container name (default: miracl)
+      Files that are saved while using :program:`MIRACL` should be saved to 
+      volumes mounted into the container in order to make them persistent. You 
+      might have already mounted at least one data location when you used the 
+      interactive installation menu or several if you used the flags outlined 
+      in the ``Additional build options`` sections below. However, if you need
+      to mount additional volumes, you can easily do that by adding them to the 
+      ``docker-compose.yml`` in the base directory under the ``volumes`` section.
       
       Example:
       
       .. code-block::
 
-         $ ./build -i josmann/miracl -c miracl_dev_version
+         volumes:
+               - '/home/mgoubran/.Xauthority:/home/mgoubran/.Xauthority'
+               - '/home/mgoubran/mydata:/home/mgoubran/mydata'  # This is the additional volume
+
+      .. danger::
+         Do not delete the ``.Xauthority`` volume that is already mounted. It 
+         mounts your ``.Xauthority`` file which is important for X11 to work 
+         correctly.
       
-      .. tip::
-         Use ``./build -h`` to show additional options
+      The format of mounting volumes is ``</host/path>:</container/path>`` (note
+      that the delimiter is ``:`` but that there are no trailing ``/``). In the 
+      above example, the host path ``/home/mgoubran/mydata`` is mounted to the 
+      container path ``/home/mgoubran/mydata``. The names for the paths on the 
+      host system do not need to match the names for the locations inside the 
+      container. The above example could therefore also be ``/home/mgoubran/mydata:/data``.
+
+      .. raw:: html
+
+         <h2>Additional build options</h2>
+
+      The interactive installation method described above should be sufficient
+      90% of users. However, if you need more finegrained control or advanced
+      options, use the flags described in this section.
+
+      To start, use ``./install.sh -h`` to see all optional flags:
+
+      .. code-block::
+
+         Usage: ./install.sh [-n service_name] [-i image_name] [-c container_name] [-t {auto, x.x.x}] [-g] [-e] [-v vol:vol] [-l] [-s] [-m] [-h]
+
+           Automatically build MIRACL Docker image with pseudo host user
+
+         Options:
+
+           -n, name of the Docker service (randomized default: 'miracl_mgrouban_hughes_11707')
+           -i, specify image name (randomized default: 'miracl_mgrouban_hughes_11707_img')
+           -c, specify container name (default: 'miracl')
+           -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: 'latest')
+           -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: false)
+           -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: false; set flag to disable)
+           -d, set shared memory (shm) size (e.g. '1024mb', '16gb' or '512gb') which is important for e.g ACE (default: int(MemTotal/1024)*0.85 of host machine)
+           -v, mount volumes for MIRACL in docker-compose.yml, using a separate flag for each additional volume (format: '/path/on/host:/path/in/container'; default: none)
+           -l, write logfile of build process to 'build.log' in MIRACL root directory (default: false)
+           -s, print version of build script and exit
+           -m, print version of MIRACL on current Git branch and exit
+           -h, print this help menu and exit
+
+         Script version: 2.0.1-beta
+         MIRACL version: 2.4.2
+
+      Let's have a closer look at the most important flags.
+
+      .. raw:: html
+
+         <h3>Image and container naming</h3>
+
+      By default, the installation script will choose names for the image and
+      container randomly, using the following syntax:
+
+      .. code-block::
+
+         <miracl>_<usernamehostuser>_<randomname>_<randomdigitsbetween0and99999>
+
+      The image name will also be appended with ``<_img>`` do distinguish it
+      from the container name. We do this to avoid conflicts with previous
+      or dangling installations of :program:`MIRACL`. Is you are confident that
+      you will not duplicate your image or container names, set the ``-i`` and
+      ``-c`` flags to choose your preferred names:
+
+      .. code-block::
+
+         $ ./install.sh -i <image_name> -c <container_name>
+      
+      Example:
+      
+      .. code-block::
+
+         $ ./install.sh -i josmann/miracl_dev_img -c miracl_dev
       
       .. raw:: html
 
-         <h2>MIRACL versions</h2>
+         <h3>GPU forwarding</h3>
+
+      If you want to add GPU (Nvidia/CUDA) support to your :program:`MIRACL`
+      container, you can do so by running the installation script with the ``-g`` 
+      flag:
+
+      .. code-block::
+
+         $ ./install.sh -g
+
+      This is required for :program:`MIRACL` modules like :doc:`ACE <../tutorials/workflows/ace_flow/ace_flow>`.
+
+      .. raw:: html
+
+         <h3>Disable script directory mounting</h3>
+         
+      Our installation script mounts the ``miracl`` folder from inside your 
+      cloned :program:`MIRACL` Git folder by default. The ``miracl`` folder 
+      contains all of :program:`MIRACL's` modules and workflow code. This 
+      behavior is useful when you want to make real-time changes to e.g. a module for 
+      fit your specific needs on the fly as the changes will persist across 
+      restarts. In case this behavior is not desired, e.g. when testing changes 
+      that you don't want to be permanent, use the ``-e`` flag to disable 
+      automatic mounting.
+
+      .. raw:: html
+
+         <h3>Set shared memory size</h3>
+
+      It is not always desirable to let your host system share all of its 
+      available memory with the :program:`MIRACL` container. By default, 
+      the memory that will be shared by :program:`MIRACL` is calculated as
+      follows:
+
+      .. code-block::
+
+         int(MemTotal/1024)*0.85 of host machine
+
+      If you want to increase or limit the memory availabe to :program:`MIRACL`,
+      set it manually using the ``-d`` flag. Example sizes are ``1024mb``, 
+      ``16gb``, or ``512gb``.
+
+      Example:
+
+      .. code-block::
+
+         $ ./install.sh -d 512gb
+
+      This will set the shared memory size to ``512gb``.
+
+      .. raw:: html
+
+         <h3>Mount additional volumes</h3>
+
+      Use the ``-v`` flag if you need to mount several volumes or files from 
+      your host system to your :program:`MIRACL` :program:`Docker` container.
+      Use a separate flag for each additional volume with this format: 
+      ``-v '/path/on/host:/path/in/container'``. Make sure that you use a 
+      separate ``-v`` flag for each separate volume!
+
+      Example:
+
+      .. code-block::
+
+         $ ./install -v /data5:/data5 -v /configfile:/configfile -v /data4:/additional_data
+
+      This will automatically add the volumes to your ``docker-compose.yml`` 
+      configuration under the ``volumes`` section where you can further edit 
+      or remove them as needed.
+
+      .. hint::
+
+         Combine any of the above flags if you want to use several of them 
+         together e.g.:
+
+         .. code-block::
+        
+           $ ./miracl -i josmann/miracl_dev_img -c miracl_dev -g -v /data:/data -v /config:/config
+
+      .. raw:: html
+
+         <h3>MIRACL versions</h3>
       
       By default, :program:`Docker` images will be built using the latest 
       version of :program:`MIRACL`. If you need to build a :program:`Docker` 
@@ -214,19 +419,20 @@ either of the following methods:
          $ git checkout tags/v2.2.4 -b miracl_v2.2.4
       
       4. If you are reverting to a version of MIRACL >= ``2.2.4``, you can 
-         build the image for your chosen version by running the build script 
-         with the ``-t`` flag:
+         build the image for your chosen version by running the installation
+         script with the ``-t`` flag:
       
       .. code-block::
 
-         $ ./build.sh -t
+         $ ./install.sh -t
       
       .. note::
          If you want to build an image for a version of MIRACL <= ``2.2.4`` 
          either follow the build instructions of the particular version or 
-         download the latest build script using e.g. ``wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/build.sh``
-         (overwrites current build script if present) and run it with the 
-         ``-t`` flag.
+         download the latest installation script using e.g. 
+         ``wget https://raw.githubusercontent.com/AICONSlab/MIRACL/master/install.sh``
+         (overwrites current installation script if present) and run it with 
+         the ``-t`` flag.
       
       5. From here you can follow our instructions for building 
          :program:`MIRACL` from scratch starting with ``docker compose up -d``. 
@@ -297,6 +503,12 @@ either of the following methods:
 
    .. tab:: Windows (WSL2)
 
+      .. warning::
+         Support for installing :program:`MIRACL` **locally** in the 
+         :program:`WSL` has been deprecated in version ``2.2.6`` of 
+         :program:`MIRACL`. The recommended way to install :program:`MIRACL`
+         on Windows is to use Docker in the :program:`WSL`.
+
       The Windows Subsystem for Linux (:program:`WSL`) creates an environment 
       that allows users to run versions of :program:`Linux` without having to 
       set up a virtual machine or a different computer.
@@ -309,13 +521,9 @@ either of the following methods:
       To install WSL, users can follow the instructions from 
       `Microsoft <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
       More comprehensive instructions can be found
-      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`_.
+      `here <https://www.windowscentral.com/install-windows-subsystem-linux-windows-10>`__.
       Upgrading from :program:`WSL1` to :program:`WSL2` is recommended, due to 
       :program:`WSL2`’s `benefits <https://docs.microsoft.com/en-us/windows/wsl/compare-versions>`_.
-
-      .. warning::
-         Support for installing :program:`MIRACL` locally in the WSL has been 
-         deprecated in version ``2.2.6`` of :program:`MIRACL`.
 
       Once the :program:`WSL` has been installed you can proceed to install
       :program:`Docker`.
@@ -330,7 +538,7 @@ either of the following methods:
          <h2>Installing Docker on Windows</h2>
       
       1. Download the :program:`Docker Desktop` installer for Windows from 
-         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`_ 
+         `here <https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe>`__ 
          or from the `release notes <https://docs.docker.com/desktop/release-notes/>`_.
       2. Double-click :program:`Docker Desktop Installer.exe` to run the 
          installer. By default, :program:`Docker Desktop` is installed at 
