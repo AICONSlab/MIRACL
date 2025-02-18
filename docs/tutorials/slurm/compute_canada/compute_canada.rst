@@ -108,7 +108,7 @@ Once you are logged in to the container, load the GUI from the shell:
    $ miraclGUI
 
 .. note::
-   Please consult our :doc:`Troubleshooting <../../../troubleshooting/troubleshooting_singularity>` 
+   Please consult our :doc:`Troubleshooting <../../../troubleshooting/troubleshooting_apptainer>` 
    section on :program:`Apptainer` if you experience problems with opening 
    :program:`MIRACL's` GUI on Compute Canada
 
