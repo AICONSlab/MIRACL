@@ -25,7 +25,7 @@ ACE is now available. Tutorials and usage examples for ACE can be found in our [
 
 ___
 
-We recommend using MIRACL with the Docker or Singularity containers we provide. Legacy instructions for installing MIRACL locally are available but we recommend against it. For more details, see our 
+We recommend using MIRACL with the Docker or Apptainer containers we provide. Legacy instructions for installing MIRACL locally are available but we recommend against it. For more details, see our 
 [docs](https://miracl.readthedocs.io).
 
 ___

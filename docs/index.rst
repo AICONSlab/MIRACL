@@ -43,7 +43,7 @@ The tutorial for using ACE can be found `here <https://miracl.readthedocs.io/en/
 
 ------
 
-We recommend using MIRACL with the Docker or Singularity containers we provide 
+We recommend using MIRACL with the Docker or Apptainer containers we provide 
 but it can also be installed locally. See our 
 :doc:`installation instructions <./installation/installation>` for more information.
 
