@@ -505,7 +505,7 @@ either of the following methods:
 
       .. note::
 
-         Replace the version number with the version of MIRACL you want to download.
+         Replace the version number with the version of :program:`MIRACL` you want to download.
 
       .. raw:: html
 
