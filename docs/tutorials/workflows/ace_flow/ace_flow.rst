@@ -377,7 +377,7 @@ Example of running ACE on single subject (Mode 2: Segmentation & Registration):
    you want to download. For this tutorial, you will need to
    download option ``1``.
 
-   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`_.
+   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__.
 
 .. code-block::
 
@@ -421,7 +421,7 @@ Example of running ACE on one single subject (Mode 2: Segmentation Only):
    you want to download. For this tutorial, you will need to
    download option ``1``.
 
-   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`_.
+   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__.
 
 .. code-block::
 

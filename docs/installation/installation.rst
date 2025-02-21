@@ -6,38 +6,33 @@ either of the following methods:
 
 .. important::
    :program:`Docker` is our recommended method for running :program:`MIRACL` 
-   on local machines and servers. We recommend :program:`Singularity` to run 
+   on local machines and servers. We recommend :program:`Apptainer` to run 
    :program:`MIRACL` in a cluster environment (e.g. Compute Canada).
 
 .. attention::
    Support for installing :program:`MIRACL` locally (i.e. on your host 
-   system directly without using :program:`Docker` or :program:`Singularity`) 
-   has been deprecated. Please use :program:`Docker` or :program:`Singularity`
+   system directly without using :program:`Docker` or :program:`Apptainer`) 
+   has been deprecated. Please use :program:`Docker` or :program:`Apptainer`
    instead.
 
 .. important::
    :program:`MIRACL` has been tested on:
 
-   * **Docker**:
+   * **Docker (version 27.3.1, build ce12230)**:
 
      * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish), ``24.04`` (Noble Numbat)
 
      * **Debian**: ``13`` (trixie)
 
-   * **Singularity**:
+   * **Apptainer (version 1.3.5)**:
 
      * **Ubuntu**: ``20.04`` (Focal Fossa), ``22.04`` (Jammy Jellyfish), ``24.04`` (Noble Numbat)
 
      * **Gentoo**: ``2.14``
 
-   * **Apptainer**:
-
-     * **Ubuntu**: ``20.04`` (Focal Fossa)
-
-     * **Gentoo**: ``2.14``
-
-   We strongly recommend that you use one of the above Linux versions to run
-   :program:`MIRACL`!
+   We strongly recommend that you use one of the above Linux versions but 
+   :program:`MIRACL` will most likely work on other versions of Linux as long
+   as :program:`Docker` or :program:`Apptainer` are installed and working.
 
 .. note::
    Hardware requirements for :program:`MIRACL` are heavily dependent on the 
@@ -63,7 +58,7 @@ either of the following methods:
 
       Docker is well suited if you want to run :program:`MIRACL` on a local 
       machine or local server. If you need to run :program:`MIRACL` on a 
-      cluster, see our instructions for installing :program:`Apptainer/Singularity`. 
+      cluster, see our instructions for installing :program:`Apptainer`. 
       If you don't have Docker installed on your computer, do that first. Make 
       sure your installation includes :program:`Docker Compose` as it is 
       required to run the installation script we provide. Note that :program:`Docker 
@@ -439,22 +434,22 @@ either of the following methods:
          Our script will automatically detect the version of the branch you 
          checked out and tag the image accordingly.
 
-   .. tab:: Singularity
+   .. tab:: Apptainer
 
-      Unlike :program:`Docker`, :program:`Singularity` is well suited to run in 
+      Unlike :program:`Docker`, :program:`Apptainer` is well suited to run in 
       a cluster environment (like Sherlock at Stanford or Compute Canada). We 
       provide the latest version of :program:`MIRACL` as a 
-      :program:`Singularity` container that can be conveniently pulled from 
-      cloud storage.
+      :program:`Apptainer` container that can be conveniently build from our 
+      :program:`Docker` image on Dockerhub or downloaded from HuggingFace.
 
       .. tip::
-         This is our recommended method for running :program:`MIRACL` in a 
-         SLURM cluster environment such as Compute Canada or Sherlock @ 
-         Stanford
+         :program:`Apptainer` is our recommended method for running 
+         :program:`MIRACL` in a SLURM cluster environment such as Compute 
+         Canada or Sherlock @ Stanford
 
       .. raw:: html
 
-         <h2>Download container</h2>
+         <h2>Build from Docker</h2>
 
       First, log in to the cluster:
       
@@ -465,22 +460,53 @@ either of the following methods:
       ``<cluster>`` could be ``sherlock.stanford.edu`` or 
       ``cedar.computecanada.ca`` for example
       
-      Once logged in, change the directory to your scratch space and pull 
-      (download) the :program:`Singularity` container:
-      
+      Once logged in, make sure that the :program:`Apptainer` binary is 
+      available. On SLURM cluster you might have to load it as a module. Once
+      you confirmed, that :program:`Apptainer` is installed and working,
+      navigate to the folder you want to create the :program:`Apptainer`
+      container in. On a SLURM cluster that could be your scratch folder:
+
       .. code-block::
 
          $ cd $SCRATCH
-         $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
+
+      Once there use the following command to create the container off of the 
+      :program:`MIRACL` image hosted on DockerHub:
+
+      .. code-block::
+
+         $ apptainer build miracl.sif docker://mgoubran/miracl:latest
+
+      The building process should start and the container will be available 
+      once the process has finished.
+
+      .. raw:: html
+
+         <h2>Download container</h2>
+
+      If, for some reason, the :program:`Apptainer` image cannot be built using
+      our DockerHub image, you can directly download a pre-compiled image of
+      :program:`MIRACL` that we host on HuggingFace.
+
+      To do so, log in to your cluster as described above and navigate to the
+      folder you want to save the :program:`Apptainer` binary in. Like in the
+      example above that could be your scratch folder. Once in the target
+      folder, run either of the the following commands to start the download:
+
+      .. code-block::
+
+         $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v242.sif
       
-      .. attention::
-         ``singularity pull`` requires :program:`Singularity` version ``3.0.0`` 
-         or higher. Please refer to our 
-         :doc:`Troubleshooting section <../troubleshooting/troubleshooting_singularity>`
-         ("Can I build a Singularity container from the latest MIRACL 
-         image on Docker Hub") if you are using an older version of 
-         :program:`Singularity`.
-      
+      or
+
+      .. code-block::
+
+         $ curl -L -O https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v242.sif
+
+      .. note::
+
+         Replace the version number with the version of :program:`MIRACL` you want to download.
+
       .. raw:: html
 
          <h2>Interaction</h2>
@@ -489,17 +515,21 @@ either of the following methods:
       
       .. code-block::
 
-         $ singularity shell miracl_latest.sif bash
+         $ apptainer shell miracl_latest.sif bash
       
       Use the ``-B`` flag to bind a data directory to the container:
       
       .. code-block::
 
-         $ singularity shell -B /data:/data miracl_latest.sif bash
+         $ apptainer shell -B /data:/data miracl_latest.sif bash
+
+      Use the ``--nv`` flag to forward your Nvidia GPU into the container.
+
+         $ apptainer shell --nv -B /data:/data miracl_latest.sif bash
       
       .. SeeAlso::
          For running functions on clusters please check our 
-         :program:`Singularity` tutorials for Compute Canada and Sherlock
+         :program:`Apptainer` tutorials for Compute Canada and Sherlock
 
    .. tab:: Windows (WSL2)
 
@@ -604,7 +634,7 @@ either of the following methods:
       .. warning::
          Support for this installation method has been discontinued starting
          with version of ``2.2.6`` of :program:`MIRACL`. Please use :program:`Docker` 
-         or :program:`Singularity` instead.
+         or :program:`Apptainer` instead.
 
       .. warning::
          THIS INSTALLATION METHOD HAS BEEN DEPRECATED!
