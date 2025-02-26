@@ -4,14 +4,13 @@ ACE Workflow
 **A**\ I-based **C**\ artography of **E**\ nsembles (**ACE**) pipeline highlights:
 
 1. Cutting-edge vision transformer and CNN-based DL architectures trained on 
-   very large LSFM datasets (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/blob/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__
-   and :ref:`refer to example section<example_anchor>`) to map brain-wide local/laminar neuronal activity.
+   very large LSFM datasets (:ref:`refer to example section<example_anchor>`) 
+   to map brain-wide local/laminar neuronal activity.
 2. Optimized cluster-wise statistical analysis with a threshold-free 
    enhancement approach to chart subpopulation-specific effects at the laminar 
    and local level, without restricting the analysis to atlas-defined regions 
-   (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/blob/dev/sample_data/ace/ace_sample_data_stats.zip>`__ 
-   and :ref:`refer to example section<example_anchor>`).
-3. Modules for providing DL model uncertainty estimates and fine-tuning (in a future release).
+   (:ref:`refer to example section<example_anchor>`).
+3. Modules for providing DL model uncertainty estimates and fine-tuning.
 4. Interface with MIRACL registration.
 5. Ability to map the connectivity between clusters of activations.
 
@@ -22,33 +21,13 @@ To install the ACE workflow, refer to the MIRACL installation guide:
 
 - :doc:`Installation guide <../../../installation/installation>`
 
-Video Tutorial
-==============
-
-`Video tutorial <https://www.youtube.com/playlist?list=PLZeAd6YsEkyhWsHuym5dTV2wjQ299ekm8>`_
-
-- This video tutorial covers the following topics:
-   - MIRACL installation validation
-   - Download sample data
-   - Run ACE on a single subject (Mode 2) including deep learning
-     segmentation of cFos+ cells, registration, voxelization, and warping
-   - Analyze the results of the above step
-   - Run ACE cluster-wise statistical algorithm between two groups to map
-     local cell activation
-   - Analyze the results of the above step
-
-.. TODO: update the tutorial link
-
 .. note::
 
-   Make sure that you set the GPU option during installation using the ``-g`` flag.
+   Make sure that you set the GPU option during installation.
    Once the installation is complete, enter the ``docker`` container using ``docker exec -it <CONTAINER_NAME> bash``
    and run the ``nvidia-smi`` command to ensure your GPU is detected.
 
-The ACE workflow can only be run with pre-trained DL models. To get access to these models please reach out
-to `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
-
-These models will be included by default in a future release once ACE is published.
+As of MIRACL version `2.4.2` the pre-trained DL models are publicly available and will have automatically been downloaded when you installed MIRACL.
 
 .. _model_directory_specification:
 
@@ -85,6 +64,23 @@ These models will be included by default in a future release once ACE is publish
    directory to the docker container at ``/code/miracl/``. Thus, copying the model
    files to the right location **outside** the docker container will make them
    available inside the container.
+
+Video Tutorial
+==============
+
+`Video tutorial <https://www.youtube.com/playlist?list=PLZeAd6YsEkyhWsHuym5dTV2wjQ299ekm8>`_
+
+- This video tutorial covers the following topics:
+   - MIRACL installation validation
+   - Download sample data
+   - Run ACE on a single subject (Mode 2) including deep learning
+     segmentation of cFos+ cells, registration, voxelization, and warping
+   - Analyze the results of the above step
+   - Run ACE cluster-wise statistical algorithm between two groups to map
+     local cell activation
+   - Analyze the results of the above step
+
+.. TODO: update the tutorial link
 
 
 Main Inputs
@@ -347,8 +343,11 @@ Main outputs
 
 .. _example_anchor:
 
+Examples
+========
+
 Example of running ACE flow on multiple subjects (Mode 1):
-==========================================================
+----------------------------------------------------------
 
 .. code-block::
 
@@ -360,8 +359,8 @@ Example of running ACE flow on multiple subjects (Mode 1):
       --sa_resolution 1.4 1.4 5.0
 
 
-Example of running ACE on single subject (Mode 2) (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
-======================================================================================================================================================================================
+Example of running ACE on single subject (Mode 2: Segmentation & Registration): 
+-------------------------------------------------------------------------------
 
 .. note::
 
@@ -377,6 +376,8 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
    This will open an interface where you can select which data
    you want to download. For this tutorial, you will need to
    download option ``1``.
+
+   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`_.
 
 .. code-block::
 
@@ -402,8 +403,8 @@ Example of running ACE on single subject (Mode 2) (`link to sample data <https:/
    The user can also run the ACE segmentation module or the ACE cluster-wise analysis module separately.
    Examples of running these modules separately are provided below.
 
-Example of running only ACE segmentation module on one single subject (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`__):
-==========================================================================================================================================================================================================
+Example of running ACE on one single subject (Mode 2: Segmentation Only):
+-------------------------------------------------------------------------
 
 .. note::
 
@@ -420,6 +421,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
    you want to download. For this tutorial, you will need to
    download option ``1``.
 
+   Alternatively, download mode 2 sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip>`_.
+
 .. code-block::
 
    $ miracl seg ace \
@@ -429,8 +432,8 @@ Example of running only ACE segmentation module on one single subject (`link to 
       --sa_batch_size 2
 
 
-Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps (`link to sample data <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`__):
-===============================================================================================================================================================================================================================
+Example of running only ACE cluster wise analysis on voxelized and warped segmentation maps:
+--------------------------------------------------------------------------------------------
 
 .. note::
 
@@ -447,13 +450,15 @@ Example of running only ACE cluster wise analysis on voxelized and warped segmen
    you want to download. For this tutorial, you will need to
    download option ``2``.
 
-   .. code-block::
+   Alternatively, download stats sample data `here <https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip>`_.
 
-      $ miracl stats ace \
-         --control ./ctrl/ \
-         --treated ./treated/ \
-         --sa_output_folder ./output_dir \
-         --rwc_voxel_size 25
+.. code-block::
+
+   $ miracl stats ace \
+      --control ./ctrl/ \
+      --treated ./treated/ \
+      --sa_output_folder ./output_dir \
+      --rwc_voxel_size 25
 
 More information on the ``miracl stats ace`` function can be found
 :doc:`here <../../stats/ace_cluster/ace_cluster>`.
@@ -509,3 +514,4 @@ and hyperparameters for the fine-tuning process.
 
 The script will output the fine-tuned model weights in the output directory. The
 user can then :ref:`use this model to run the ACE workflow above<model_directory_specification>`.
+

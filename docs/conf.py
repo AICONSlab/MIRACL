@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "MIRACL"
-copyright = "2023, Maged Goubran @ AICONS Lab"
+copyright = "2025, Maged Goubran @ AICONS Lab"
 author = "Maged Goubran"
 # Version and release set to the same since no separation is needed
 version = "2.2.6"

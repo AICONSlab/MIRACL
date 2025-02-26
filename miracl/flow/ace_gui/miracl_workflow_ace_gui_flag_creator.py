@@ -7,7 +7,7 @@ Description:
     Creates flag dictionaries for use in controller.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann
@@ -21,19 +21,26 @@ from .miracl_workflow_ace_gui_widget_utils import WidgetUtils as wu
 
 REG_BOOL_FLAGS = "set_bool"
 
+
 class flag_creator:
     @staticmethod
     def create_main_tab_flags(main_tab, method_checkbox):
         main_tab_flags = {
-            "-s": wu.get_tab_var(main_tab, "single_method_path_input", "textfield")
-            if not method_checkbox.isChecked()
-            else None,
-            "-c": f"{wu.get_tab_var(main_tab, 'multi_method_ctrl_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_ctrl_tif_path_input', 'textfield')}"
-            if method_checkbox.isChecked()
-            else None,
-            "-t": f"{wu.get_tab_var(main_tab, 'multi_method_treated_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_treated_tif_path_input', 'textfield')}"
-            if method_checkbox.isChecked()
-            else None,
+            "-s": (
+                wu.get_tab_var(main_tab, "single_method_path_input", "textfield")
+                if not method_checkbox.isChecked()
+                else None
+            ),
+            "-c": (
+                f"{wu.get_tab_var(main_tab, 'multi_method_ctrl_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_ctrl_tif_path_input', 'textfield')}"
+                if method_checkbox.isChecked()
+                else None
+            ),
+            "-t": (
+                f"{wu.get_tab_var(main_tab, 'multi_method_treated_path_input', 'textfield')} {wu.get_tab_var(main_tab, 'multi_method_treated_tif_path_input', 'textfield')}"
+                if method_checkbox.isChecked()
+                else None
+            ),
             "--sa_output_folder": wu.get_tab_var(
                 main_tab, "output_folder_path_input", "textfield"
             ),
@@ -59,18 +66,28 @@ class flag_creator:
             "--rwc_voxel_size": wu.get_tab_var(
                 main_tab, "warping_voxel_size_input", "multiplechoice"
             ),
-            "--rerun-registration": "true"
-            if wu.get_tab_var(main_tab, "rerun_registration_input", "multiplechoice")
-            == "yes"
-            else "false",
-            "--rerun-segmentation": "true"
-            if wu.get_tab_var(main_tab, "rerun_segmentation_input", "multiplechoice")
-            == "yes"
-            else "false",
-            "--rerun-conversion": "true"
-            if wu.get_tab_var(main_tab, "rerun_conversion_input", "multiplechoice")
-            == "yes"
-            else "false",
+            "--rerun-registration": (
+                "true"
+                if wu.get_tab_var(
+                    main_tab, "rerun_registration_input", "multiplechoice"
+                )
+                == "yes"
+                else "false"
+            ),
+            "--rerun-segmentation": (
+                "true"
+                if wu.get_tab_var(
+                    main_tab, "rerun_segmentation_input", "multiplechoice"
+                )
+                == "yes"
+                else "false"
+            ),
+            "--rerun-conversion": (
+                "true"
+                if wu.get_tab_var(main_tab, "rerun_conversion_input", "multiplechoice")
+                == "yes"
+                else "false"
+            ),
         }
         return main_tab_flags
 
@@ -116,23 +133,34 @@ class flag_creator:
             "--sa_batch_size": wu.get_tab_var(
                 segmentation_tab, "segmentation_batch_size_input", "spinbox"
             ),
-            "--sa_monte_carlo": "1"
-            if wu.get_tab_var(
-                segmentation_tab, "segmentation_monte_carlo_input", "multiplechoice"
-            )
-            == "yes"
-            else "0",
-            "--sa_visualize_results": REG_BOOL_FLAGS if wu.get_tab_var(
-                segmentation_tab,
-                "segmentation_visualize_results_input",
-                "multiplechoice",
-            ) == "yes" else None,
-            "--sa_uncertainty_map": REG_BOOL_FLAGS
-            if wu.get_tab_var(
-                segmentation_tab, "segmentation_uncertainty_map_input", "multiplechoice"
-            )
-            == "yes"
-            else None,
+            "--sa_monte_carlo": (
+                "1"
+                if wu.get_tab_var(
+                    segmentation_tab, "segmentation_monte_carlo_input", "multiplechoice"
+                )
+                == "yes"
+                else "0"
+            ),
+            "--sa_visualize_results": (
+                REG_BOOL_FLAGS
+                if wu.get_tab_var(
+                    segmentation_tab,
+                    "segmentation_visualize_results_input",
+                    "multiplechoice",
+                )
+                == "yes"
+                else None
+            ),
+            "--sa_uncertainty_map": (
+                REG_BOOL_FLAGS
+                if wu.get_tab_var(
+                    segmentation_tab,
+                    "segmentation_uncertainty_map_input",
+                    "multiplechoice",
+                )
+                == "yes"
+                else None
+            ),
             "--sa_binarization_threshold": wu.get_tab_var(
                 segmentation_tab, "segmentation_binarization_thr_input", "spinbox"
             ),
@@ -155,38 +183,54 @@ class flag_creator:
             "--rca_allen_atlas": wu.get_tab_var(
                 clarity_registration_tab, "reg_cust_allen_atlas_path_input", "textfield"
             ),
-            "--rca_side": "rh"
-            if wu.get_tab_var(
-                clarity_registration_tab, "reg_side_input", "multiplechoice"
-            )
-            == "right hemisphere"
-            else "lh",
-            "--rca_no_mosaic_fig": None
-            if wu.get_tab_var(
-                clarity_registration_tab, "reg_mosaic_figure_input", "multiplechoice"
-            )
-            == "yes"
-            else REG_BOOL_FLAGS,
-            "--rca_olfactory_bulb": "1"
-            if wu.get_tab_var(
-                clarity_registration_tab, "reg_olfactory_bulb_input", "multiplechoice"
-            )
-            == "included"
-            else "0",
-            "--rca_skip_cor": REG_BOOL_FLAGS
-            if wu.get_tab_var(
-                clarity_registration_tab,
-                "reg_util_int_correction_input",
-                "multiplechoice",
-            )
-            == "skip"
-            else None,
-            "--rca_warp": REG_BOOL_FLAGS
-            if wu.get_tab_var(
-                clarity_registration_tab, "reg_warp_to_allen_input", "multiplechoice"
-            )
-            == "yes"
-            else None,
+            "--rca_side": (
+                "rh"
+                if wu.get_tab_var(
+                    clarity_registration_tab, "reg_side_input", "multiplechoice"
+                )
+                == "right hemisphere"
+                else "lh"
+            ),
+            "--rca_no_mosaic_fig": (
+                None
+                if wu.get_tab_var(
+                    clarity_registration_tab,
+                    "reg_mosaic_figure_input",
+                    "multiplechoice",
+                )
+                == "yes"
+                else REG_BOOL_FLAGS
+            ),
+            "--rca_olfactory_bulb": (
+                "1"
+                if wu.get_tab_var(
+                    clarity_registration_tab,
+                    "reg_olfactory_bulb_input",
+                    "multiplechoice",
+                )
+                == "included"
+                else "0"
+            ),
+            "--rca_skip_cor": (
+                REG_BOOL_FLAGS
+                if wu.get_tab_var(
+                    clarity_registration_tab,
+                    "reg_util_int_correction_input",
+                    "multiplechoice",
+                )
+                == "skip"
+                else None
+            ),
+            "--rca_warp": (
+                REG_BOOL_FLAGS
+                if wu.get_tab_var(
+                    clarity_registration_tab,
+                    "reg_warp_to_allen_input",
+                    "multiplechoice",
+                )
+                == "yes"
+                else None
+            ),
         }
 
         return clarity_registration_tab_flags
