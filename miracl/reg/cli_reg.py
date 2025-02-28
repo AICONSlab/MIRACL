@@ -225,14 +225,14 @@ def get_parser():
         "-n",
         "--cn",
         metavar="",
-        default="",
+        default="-999999",
         help="Chan # for extracting single channel from multiple channel data (default: Null)",
     )
     parser_clar_allen.add_argument(
         "-x",
         "--cp",
         metavar="",
-        default="",
+        default="-999999",
         help="Chan prefix (string before channel number in file name). ex: C00",
     )
     parser_clar_allen.add_argument("-h", "--help", action="store_true")

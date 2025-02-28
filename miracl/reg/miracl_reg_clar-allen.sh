@@ -836,13 +836,7 @@ function warpallenlbls() {
   # Print calculated downsampling factor
   # printf "\nUsing downsampling factor $df.\n"
 
-  # # get img dim
-  # alldim=$(PrintHeader ${inclar} 2)
-  # x=${alldim%%x*}
-  # yz=${alldim#*x}
-  # y=${yz%x*}
-  # z=${alldim##*x}
-
+  # get img dim
   alldim=$(PrintHeader "${inclar}" 2)
   IFS='x' read -ra dimensions <<<"$alldim"
   x="${dimensions[0]}"
@@ -869,12 +863,6 @@ function warpallenlbls() {
   # c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
 
   # get tiflbls dim
-  # tiflblsdim=$(PrintHeader ${tiflbls} 2)
-  # tiflblsx=${tiflblsdim%%x*}
-  # tiflblsyz=${tiflblsdim#*x}
-  # tiflblsy=${tiflblsyz%x*}
-  # z=${tiflblsdim##*x} ;
-
   tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_10um_clar_vox.tif 2)
   IFS='x' read -ra dimensions <<<"$tiflblsdim"
   tiflblsx="${dimensions[0]}"
@@ -889,38 +877,21 @@ function warpallenlbls() {
 
   # get num slices (z dim)
   orgclar=$(realpath "${orgclar}")
-  # orgclarz=`ls ${orgclar}/*.tif* | wc -l`
-  # orgclarz=$(ls "${orgclar}"/*C01* | wc -l)
-  # firstslice=${orgclar}/$(ls ${orgclar} | head -n1)
-  # firstslice=$(ls "${orgclar}"/*C01* | head -n 1)
 
-  # Check if cn or cp are unset
-  if [[ -z "${cn}" && -z "${cp}" ]]; then
+  if [[ "${cn}" == "-999999" && "${cp}" == "-999999" ]]; then
     orgclarz=$(ls "${orgclar}"/*.tif* | wc -l)
     firstslice="${orgclar}/$(ls "${orgclar}" | head -n1)"
   else
     find_channel_files() {
-      local channel_pattern="${cp}${cn}"
-      find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
+        local channel_pattern="${cp}${cn}"
+        find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
     }
-
+    
     orgclarz=$(find_channel_files | wc -l)
     firstslice=$(find_channel_files -print | head -n 1)
   fi
 
-  # find_channel_files() {
-  #     local channel_pattern="${cp}${cn}"
-  #     find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
-  # }
-  #
-  # orgclarz=$(find_channel_files | wc -l)
-  # firstslice=$(find_channel_files -print | head -n 1)
-
   # get first_slice dim
-  # firstslicedim=$(PrintHeader ${firstslice} 2)
-  # firstslicex=${firstslicedim%%x*}
-  # firstslicey=${firstslicedim##*x}
-
   firstslicedim=$(PrintHeader "${firstslice}" 2)
   IFS='x' read -ra dimensions <<<"${firstslicedim}"
   firstslicex="${dimensions[0]}"
