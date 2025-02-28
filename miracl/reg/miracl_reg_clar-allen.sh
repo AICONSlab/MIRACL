@@ -915,7 +915,7 @@ function warpallenlbls() {
   firstlbl="${tifdirreg}"/lbls_slice_000000.tif
 
   # Create a series of 2D TIFF files, one for each slice in the original 3D stack
-  ifdsntexistrun "${firstlbl}" "Extracting tiff slices" c3d "${tiflblszstack}" -slice z 0:-1 -type ushort -oo "${tifdirreg}"/lbls_slice_%06d.tif
+  python /code/miracl/reg/miracl_reg_clar-allen_utility.py "${tiflblszstack}" "${tifdirreg}" "lbls_slice_%06d.tif"
 
   # Start loop from zero index
   loop_z=$(python -c "print(${orgclarz}-1)")
