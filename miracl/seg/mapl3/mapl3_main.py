@@ -28,7 +28,11 @@ def main() -> None:
 
     # Assign the parsed args to the attributes of their respective object
     processor: MiraclArgumentProcessor = MiraclArgumentProcessor()
-    processor.process_miracl_objects(seg_mapl3_objs, args)
+    processor.process_miracl_objects(
+        seg_mapl3_objs,
+        args,
+        MiraclArgumentProcessor.ModuleType.MODULE,
+    )
 
     # Call the MAPL3 module interface
     mapl3_interface.main(seg_mapl3_objs)

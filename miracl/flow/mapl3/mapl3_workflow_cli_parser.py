@@ -51,7 +51,12 @@ class Mapl3WorkflowParser:
 
         # Create parser args
         parser_processor = MiraclArgumentProcessor()
-        parser_processor.create_parser_arguments(parser, combined_groups_dict, "mapl3")
+        # parser_processor.create_parser_arguments(parser, combined_groups_dict, "mapl3")
+        parser_processor.create_parser_arguments(
+            parser,
+            combined_groups_dict,
+            MiraclArgumentProcessor.ModuleType.FLOW_MAPL3,
+        )
 
         return parser
 

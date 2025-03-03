@@ -363,6 +363,10 @@ if __name__ == "__main__":
 
     # Assign the parsed args to the attributes of their respective object
     processor: MiraclArgumentProcessor = MiraclArgumentProcessor()
-    processor.process_miracl_objects(mapl3_workflow_objs, args)
+    processor.process_miracl_objects(
+        mapl3_workflow_objs,
+        args,
+        MiraclArgumentProcessor.ModuleType.FLOW_MAPL3,
+    )
 
     main(mapl3_workflow_objs)

@@ -39,7 +39,12 @@ class Mapl3Parser:
 
         # Create parser args
         parser_processor = MiraclArgumentProcessor()
-        parser_processor.create_parser_arguments(parser, mapl3_groups_dict, "module")
+        # parser_processor.create_parser_arguments(parser, mapl3_groups_dict, "module")
+        parser_processor.create_parser_arguments(
+            parser,
+            mapl3_groups_dict,
+            MiraclArgumentProcessor.ModuleType.MODULE,
+        )
 
         return parser
 
