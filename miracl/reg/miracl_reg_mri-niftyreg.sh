@@ -644,7 +644,12 @@ function main() {
 
   # make MRI copy
   mrlnk=${regdir}/mr.nii.gz
+  mrlnkres=${regdir}/mr_res.nii.gz
   if [[ ! -f ${mrlnk} ]]; then cp "${orghdmr}" "${mrlnk}"; fi
+  echo ""
+  printf " Resampling mr.nii.gz...\n"
+  ResampleImage 3 "${mrlnk}" "${mrlnkres}" 0.15x0.15x1.0 0
+  mrlnk=${mrlnkres}
 
   #---------------------------
 
@@ -668,7 +673,7 @@ function main() {
     # Fischer atlas template
     atlref=${atlasdir}/fischer/template/Fischer344_template_stripped.nii.gz
 
-  elif [ "${atl}" == "fischer" ]; then
+  elif [ "${atl}" == "waxholm" ]; then
     # Waxholm atlas template
     atlref=${atlasdir}/waxholm/template/WHS_SD_rat_T2star_v1.01.nii.gz
 
@@ -693,7 +698,8 @@ function main() {
   # aladin
   ifdsntexistrun "${alad_xfm}" "Registering MRI data to ${atl^} atlas using affine reg"
   # reg_aladin -ref "${atlref}" -flo "${mrlnk}" -%i 95 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15 -ln 4
-  reg_aladin -ref "${atlref}" -flo "${mrlnk}" -pi 90 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15
+  # reg_aladin -ref "${atlref}" -flo "${mrlnk}" -pi 90 -res "${alad_out}" -aff "${alad_xfm}" -maxit 15
+  reg_aladin -ref "${atlref}" -flo "${mrlnk}" -res "${alad_out}" -aff "${alad_xfm}" -maxit 15
 
   # reg_f3d
   cpp=${regdir}/mr_"${atl}"_cpp.nii.gz
