@@ -43,31 +43,37 @@ def run_clar_allen(parser, args):
             )
 
 
-def run_mri_allen_ants(parser, args):
+def run_mri_ants(parser, args):
     miracl_home = os.environ["MIRACL_HOME"]
     args = vars(args)
 
-    if sys.argv[-2] == "reg" and sys.argv[-1] == "mri_allen_ants":
-        subprocess.Popen("%s/reg/miracl_reg_mri-allen.sh" % miracl_home, shell=True)
+    if sys.argv[-2] == "reg" and sys.argv[-1] == "mri_ants":
+        # subprocess.Popen("%s/reg/miracl_reg_mri-ants.sh" % miracl_home, shell=True)
+        subprocess.Popen("%s/reg/miracl_reg_mri-ants.sh -h" % miracl_home, shell=True)
     else:
         if args["help"]:
             subprocess.Popen(
-                "%s/reg/miracl_reg_mri-allen.sh -h" % miracl_home, shell=True
+                "%s/reg/miracl_reg_mri-ants.sh -h" % miracl_home, shell=True
             )
         else:
-            bash_args = "-i %s -o %s -m %s -v %s -l %s -b %s -s %s -f %s" % (
-                args["in_nii"],
-                args["ort"],
-                args["hemi"],
-                args["vox_res"],
-                args["lbls"],
-                args["bulb"],
-                args["skull"],
-                args["bet"],
+            bash_args = (
+                "-i %s -o %s -a %s -l %s -m %s -v %s -b %s -s %s -f %s -n %s"
+                % (
+                    args["in_nii"],
+                    args["ort"],
+                    args["atlas"],
+                    args["lbls"],
+                    args["hemi"],
+                    args["vox_res"],
+                    args["bulb"],
+                    args["skull"],
+                    args["bet"],
+                    args["noort"],
+                )
             )
 
             subprocess.check_call(
-                "%s/reg/miracl_reg_mri-allen.sh %s" % (miracl_home, bash_args),
+                "%s/reg/miracl_reg_mri-ants.sh %s" % (miracl_home, bash_args),
                 shell=True,
                 stderr=subprocess.STDOUT,
             )
@@ -230,43 +236,48 @@ def get_parser():
     parser_clar_allen.set_defaults(func=run_clar_allen)
 
     # mri allen ants
-    parser_mri_allen = subparsers.add_parser(
-        "mri_allen_ants",
+    parser_mri_ants = subparsers.add_parser(
+        "mri_ants",
         add_help=False,
-        help="MRI registration to Allen atlas using ANTs",
+        help="MRI registration to mouse/rat atlases using ANTs",
     )
-    parser_mri_allen.add_argument(
+    parser_mri_ants.add_argument(
         "-i",
         "--in_nii",
         metavar="",
         help="input nifti",
     )
-    parser_mri_allen.add_argument(
+    parser_mri_ants.add_argument(
         "-o",
         "--ort",
         metavar="",
         help="orientation tag",
     )
-    parser_mri_allen.add_argument(
-        "-m", "--hemi", metavar="", help="whole brain or hemi"
+    parser_mri_ants.add_argument(
+        "-a", "--atlas", metavar="", help="which atlas to use for registration"
     )
-    parser_mri_allen.add_argument(
-        "-v", "--vox_res", metavar="", help="voxel resolution"
-    )
-    parser_mri_allen.add_argument(
+    parser_mri_ants.add_argument("-m", "--hemi", metavar="", help="whole brain or hemi")
+    parser_mri_ants.add_argument("-v", "--vox_res", metavar="", help="voxel resolution")
+    parser_mri_ants.add_argument(
         "-l",
         "--lbls",
         metavar="",
         help="input labels",
     )
-    parser_mri_allen.add_argument("-b", "--bulb", metavar="", help="olfactory bulb")
-    parser_mri_allen.add_argument("-s", "--skull", metavar="", help="skull strip")
-    parser_mri_allen.add_argument(
+    parser_mri_ants.add_argument("-b", "--bulb", metavar="", help="olfactory bulb")
+    parser_mri_ants.add_argument("-s", "--skull", metavar="", help="skull strip")
+    parser_mri_ants.add_argument(
         "-f", "--bet", metavar="", help="bet fractional intensity"
     )
-    parser_mri_allen.add_argument("-h", "--help", action="store_true")
+    parser_mri_ants.add_argument(
+        "-n",
+        "--noort",
+        metavar="",
+        help="no orientation needed (input image in 'standard' orientation), binary option (default: 0 -> orient)",
+    )
+    parser_mri_ants.add_argument("-h", "--help", action="store_true")
 
-    parser_mri_allen.set_defaults(func=run_mri_allen_ants)
+    parser_mri_ants.set_defaults(func=run_mri_ants)
 
     # mri nifty
     parser_mri_nifty = subparsers.add_parser(
@@ -362,7 +373,7 @@ def get_parser():
 
     # warp clar
     parser_warp_clar = subparsers.add_parser(
-        "warp_clar", add_help=False, help="Warp CLARITY data to Allen space"
+        "warp_clar", add_help=False, help="warp CLARITY data to Allen space"
     )
     parser_warp_clar.add_argument("-i", "--in_nii", metavar="", help="input nifti")
     parser_warp_clar.add_argument(
@@ -384,7 +395,7 @@ def get_parser():
 
     # warp mr
     parser_warp_mr = subparsers.add_parser(
-        "warp_mr", add_help=False, help="Warp MRI data to Allen space"
+        "warp_mr", add_help=False, help="warp MRI data to Allen space"
     )
     parser_warp_mr.add_argument("-i", "--in_nii", metavar="", help="input nifti")
     parser_warp_mr.add_argument("-r", "--reg_dir", metavar="", help="registration dir")
@@ -402,7 +413,7 @@ def get_parser():
         parents=[check_reg_parser],
         add_help=False,
         usage=check_reg_parser.usage,
-        help="Check registration",
+        help="check registration",
     )
     parser_check_reg.set_defaults(func=run_check_reg)
 
