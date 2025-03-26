@@ -73,6 +73,11 @@ nestedict = {
                 'name': 'Multiple mice',
                 'script': 'miracl flow mul',
                 'helpmsg': 'Wrapper for running a MIRACL script on multiple mice'
+            },
+            4: {
+                'name': 'ACE',
+                'script': 'miracl flow ace',
+                'helpmsg': 'Wrapper for running ACE'
             }
         }
     },
@@ -324,7 +329,7 @@ def main():
     vbox = QtWidgets.QVBoxLayout(mainwidget)
 
     pic = QtWidgets.QLabel()
-    pixmap = QtGui.QPixmap("%s/docs/gallery/icon.png" % miracl_home)
+    pixmap = QtGui.QPixmap("%s/docs/gallery/images/icon.png" % miracl_home)
     pixmaps = pixmap.scaled(300, 200)  # QtCore.Qt.KeepAspectRatio
     pic.setPixmap(pixmaps)
     pic.setAlignment(QtCore.Qt.AlignCenter)

@@ -41,7 +41,8 @@ function usage()
 
         arguments (optional):
 			s. Segmentation channel (ex. green) - required if voxelized seg is input
-      v. Voxel resolution (10 or 25; default: 25um)
+			v. Voxel resolution (10 or 25; default: 25um)
+			l. input Allen labels to warp (default: average_template_{vox}um.nii.gz)
 
 	-----------------------------------
 
@@ -112,7 +113,7 @@ if [[ "$#" -gt 1 ]]; then
 
 	printf "\n Running in script mode \n"
 
-	while getopts ":r:i:o:s:v:" opt; do
+	while getopts ":r:i:o:s:v:l:" opt; do
 
 	    case "${opt}" in
 
@@ -135,6 +136,10 @@ if [[ "$#" -gt 1 ]]; then
             v)
               voxres=${OPTARG}
               ;;
+			l)
+			lbls="${OPTARG}"
+			;;
+
         	*)
             	usage            	
             	;;
@@ -173,6 +178,11 @@ if [[ "$#" -gt 1 ]]; then
     usage
     printf "\nVoxel resolution does not match 10 or 25! Exiting!\n\n"
     exit 1
+  fi
+
+  if [[ -n ${lbls} && ${lbls} != "None" ]]; then
+	allenref=${lbls}
+	printf "\n Allen labels to warp: ${allenref} \n"
   fi
 
 else

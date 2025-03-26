@@ -12,17 +12,19 @@ def main(args):
         print("CUDA available!")
 
         input_folder_arg = args.single
-        ace_flow_seg_output_folder = Path(args.sa_output_folder) / "seg_final"
-        output_folder_arg = ace_flow_seg_output_folder if ace_flow_seg_output_folder.is_dir() else Path(args.sa_output_folder)
+        output_folder_arg = Path(args.sa_output_folder) / "seg_final"
         model_type_arg = args.sa_model_type
         voxel_resolutions_arg = args.sa_resolution
         image_sizes_arg = args.sa_image_size
         number_workers_arg = args.sa_nr_workers
         cache_rate_arg = args.sa_cache_rate
-        sw_batch_size_arg = args.sa_sw_batch_size
-        monte_dropout_arg = args.sa_monte_dropout
+        batch_size_arg = args.sa_batch_size
         visualize_results_arg = args.sa_visualize_results
         uncertainty_map_arg = args.sa_uncertainty_map
+        forward_passes_arg = args.sa_monte_carlo
+        gpu_index_arg = args.sa_gpu_index
+        binarization_threshold_arg = args.sa_binarization_threshold
+        percentage_brain_patch_skip_arg = args.sa_percentage_brain_patch_skip
 
         print("The following parameters will be used:\n")
         print(f"  Input folder:      {input_folder_arg}")
@@ -32,10 +34,13 @@ def main(args):
         print(f"  Image sizes:       {image_sizes_arg}")
         print(f"  Number workers:    {number_workers_arg}")
         print(f"  Cache rate:        {cache_rate_arg}")
-        print(f"  sw batch size:     {sw_batch_size_arg}")
-        print(f"  Monte dropout:     {monte_dropout_arg}")
+        print(f"  sw batch size:     {batch_size_arg}")
         print(f"  Visualize results: {visualize_results_arg}")
         print(f"  Uncertainty map:   {uncertainty_map_arg}\n")
+        print(f"  Forward passes:    {forward_passes_arg}\n")
+        print(f"  GPU index:         {gpu_index_arg}\n")
+        print(f"  Binarization threshold: {binarization_threshold_arg}\n")
+        print(f"  Percentage brain patch skip: {percentage_brain_patch_skip_arg}\n")
 
         # TODO: Add program logic here
 
@@ -45,6 +50,8 @@ def main(args):
         # print(f"Out: {tmp_out}")
 
         # INFO: ace_generate_patch.py
+        if not output_folder_arg.exists():
+            output_folder_arg.mkdir(parents=True)
 
         patches_folder = ace_generate_patch.generate_patch_main(
             input_folder=input_folder_arg,
@@ -59,10 +66,13 @@ def main(args):
         ace_deploy_model.deploy_functions(
             chosen_model=model_type_arg,
             patch_dir_var=patches_folder,
-            sw_batch_size_var=sw_batch_size_arg,
-            monte_var=monte_dropout_arg,
+            batch_size_var=batch_size_arg,
             cache_rate_var=cache_rate_arg,
-            num_workers_var=number_workers_arg
+            num_workers_var=number_workers_arg,
+            forward_passes_var=forward_passes_arg,
+            gpu_index=gpu_index_arg,
+            binarization_threshold=binarization_threshold_arg,
+            percentage_brain_patch_skip=percentage_brain_patch_skip_arg
         )
 
         # INFO: ace_patch_stacking.py
@@ -71,7 +81,7 @@ def main(args):
                 patches_path=patches_folder,
                 main_input_folder_path=input_folder_arg,
                 output_folder_path=output_folder_arg,
-                monte_carlo=monte_dropout_arg,
+                monte_carlo=True if forward_passes_arg > 0 else False,
                 model_name_var=model_type_arg
                 )
 
