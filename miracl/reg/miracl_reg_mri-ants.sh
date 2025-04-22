@@ -774,12 +774,36 @@ function main() {
 
   # make MRI copy
   mrlnk=${regdir}/mr.nii.gz
-  mrlnkres=${regdir}/mr_res.nii.gz
   if [[ ! -f "${mrlnk}" ]]; then cp "${smmr}" "${mrlnk}"; fi
-  echo ""
-  printf " Resampling mr.nii.gz...\n"
-  ResampleImage 3 "${mrlnk}" "${mrlnkres}" 0.15x0.15x1.0 0
-  mrlnk=${mrlnkres}
+
+  read vox_xdim vox_ydim vox_zdim <<<$(c3d "${inmr}" -info-full |
+    grep 'pixdim\[[1-3]\]' |
+    awk '{print $3}' |
+    xargs)
+
+  if [[ -z "${vox_xdim}" || -z "${vox_ydim}" || -z "${vox_zdim}" ]]; then
+    printf "Error: Failed to extract voxel dimensions from %s.\n" "${mrlnk}" >&2
+    exit 1
+  fi
+
+  if [[ "${atl}" == "fischer" || "${atl}" == "waxholm" ]]; then
+
+    upsample_factor=2
+    vox_zdim_upsampled=$(echo "scale=3; ${vox_zdim} / ${upsample_factor}" | bc)
+
+    echo ""
+    printf " Voxel dims are x: %s; y: %s; z: %s\n" "${vox_xdim}" "${vox_ydim}" "${vox_zdim}"
+    mrlnkres=${regdir}/mr_res.nii.gz
+    printf " Resampling mr.nii.gz...\n"
+    ResampleImage 3 "${mrlnk}" "${mrlnkres}" "${vox_xdim}"x"${vox_ydim}"x"${vox_zdim_upsampled}" 0 &&
+      printf " Resampling successful: %s -> %s\n" "${mrlnk}" "${mrlnkres}" || {
+      printf " Resampling failed with code %d\n" $? >&2
+      exit $?
+    }
+
+    mrlnk=${mrlnkres}
+
+  fi
 
   #---------------------------
 
@@ -886,6 +910,17 @@ function main() {
   #    warpinmratlas ${inmr} RSP Cubic short ${ortinmr} ${allenhres} ${initform} ${antsaff} ${antsinvwarp} ${regorgmr}
 
   if [[ ! -f ${regmratlas} ]]; then cp ${antsinvmr} ${regmratlas}; fi
+
+  if [[ "${atl}" == "fischer" || "${atl}" == "waxholm" ]]; then
+
+    imgspclbls=${regdirfinal}/${lblsname}_imagespace_ants.nii.gz
+    printf " Resampling %s into image space...\n" "${wrplbls}"
+    ResampleImage 3 "${wrplbls}" "${imgspclbls}" "${vox_xdim}"x"${vox_ydim}"x"${vox_zdim}" 0 &&
+      printf " Resampling successful: %s -> %s\n" "${wrplbls}" "${imgspclbls}" || {
+      printf " Resampling failed with code %d\n" $? >&2
+      exit $?
+    }
+  fi
 
 }
 
