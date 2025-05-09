@@ -52,8 +52,8 @@ function usage() {
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
         w.  warp high-res clarity to Allen space (default: 0)
-        n.  Chan # for extracting single channel from multiple channel data (default: Null)
-        x.  Chan prefix (string before channel number in file name). ex: C00
+        n.  chan # for extracting single channel from multiple channel data (default: none)
+        x.  chan prefix (string before channel number in file name). ex: C00 (default: none)
 
 
 	----------
