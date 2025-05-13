@@ -262,31 +262,69 @@ def get_parser():
         "-o",
         "--ort",
         metavar="",
+        default="RSP",
         help="orientation tag",
     )
     parser_mri_ants.add_argument(
-        "-a", "--atlas", metavar="", help="which atlas to use for registration"
+        "-a",
+        "--atlas",
+        metavar="",
+        default="allen",
+        help="which atlas to use for registration",
     )
-    parser_mri_ants.add_argument("-m", "--hemi", metavar="", help="whole brain or hemi")
-    parser_mri_ants.add_argument("-v", "--vox_res", metavar="", help="voxel resolution")
+    parser_mri_ants.add_argument(
+        "-m",
+        "--hemi",
+        metavar="",
+        help="whole brain or hemi",
+    )
+    parser_mri_ants.add_argument(
+        "-v",
+        "--vox_res",
+        metavar="",
+        default=10,
+        help="voxel resolution",
+    )
     parser_mri_ants.add_argument(
         "-l",
         "--lbls",
         metavar="",
         help="input labels",
     )
-    parser_mri_ants.add_argument("-b", "--bulb", metavar="", help="olfactory bulb")
-    parser_mri_ants.add_argument("-s", "--skull", metavar="", help="skull strip")
     parser_mri_ants.add_argument(
-        "-f", "--bet", metavar="", help="bet fractional intensity"
+        "-b",
+        "--bulb",
+        metavar="",
+        default=0,
+        type=int,
+        choices=[0, 1],
+        help="olfactory bulb",
+    )
+    parser_mri_ants.add_argument(
+        "-s",
+        "--skull",
+        metavar="",
+        type=int,
+        default=1,
+        choices=[0, 1],
+        help="skull strip",
+    )
+    parser_mri_ants.add_argument(
+        "-f",
+        "--bet",
+        metavar="",
+        default=0.3,
+        help="bet fractional intensity",
     )
     parser_mri_ants.add_argument(
         "-n",
         "--noort",
+        type=int,
+        default=0,
+        choices=[0, 1],
         metavar="",
         help="no orientation needed (input image in 'standard' orientation), binary option (default: 0 -> orient)",
     )
-    parser_mri_ants.add_argument("-h", "--help", action="store_true")
     parser_mri_ants.add_argument(
         "-u",
         "--upsmpl_fct",
@@ -294,6 +332,11 @@ def get_parser():
         default=2,
         type=int_or_float,
         help="upsample factor",
+    )
+    parser_mri_ants.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
     )
 
     parser_mri_ants.set_defaults(func=run_mri_ants)
