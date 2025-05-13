@@ -5,6 +5,16 @@ import subprocess
 from miracl.reg import miracl_reg_check_results
 
 
+def int_or_float(value):
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"{value} is not an int or float")
+
+
 def run_clar_allen(parser, args):
     miracl_home = os.environ["MIRACL_HOME"]
     args = vars(args)
@@ -57,7 +67,7 @@ def run_mri_ants(parser, args):
             )
         else:
             bash_args = (
-                "-i %s -o %s -a %s -l %s -m %s -v %s -b %s -s %s -f %s -n %s"
+                "-i %s -o %s -a %s -l %s -m %s -v %s -b %s -s %s -f %s -n %s -u %s"
                 % (
                     args["in_nii"],
                     args["ort"],
@@ -69,6 +79,7 @@ def run_mri_ants(parser, args):
                     args["skull"],
                     args["bet"],
                     args["noort"],
+                    args["upsmpl_fct"],
                 )
             )
 
@@ -276,6 +287,14 @@ def get_parser():
         help="no orientation needed (input image in 'standard' orientation), binary option (default: 0 -> orient)",
     )
     parser_mri_ants.add_argument("-h", "--help", action="store_true")
+    parser_mri_ants.add_argument(
+        "-u",
+        "--upsmpl_fct",
+        metavar="",
+        default=2,
+        type=int_or_float,
+        help="upsample factor",
+    )
 
     parser_mri_ants.set_defaults(func=run_mri_ants)
 

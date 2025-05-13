@@ -146,7 +146,7 @@ if [[ "$#" -gt 1 ]]; then
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:o:a:l:m:v:b:s:f:n:" opt; do
+  while getopts ":i:o:a:l:m:v:b:s:f:n:u:" opt; do
 
     case "${opt}" in
 
@@ -187,6 +187,10 @@ if [[ "$#" -gt 1 ]]; then
 
     n)
       noort="${OPTARG}"
+      ;;
+
+    u)
+      upsmpl_fct="${OPTARG}"
       ;;
 
     *)
@@ -719,6 +723,7 @@ function main() {
   printf "  skull: %s\n" "${skull}"
   printf "  frac:  %s\n" "${frac}"
   printf "  noort: %s\n" "${noort}"
+  printf "  Upsmpl_fct: %s\n" "${upsmpl_fct}"
 
   # 1) Process MRI
 
@@ -788,8 +793,7 @@ function main() {
 
   if [[ "${atl}" == "fischer" || "${atl}" == "waxholm" ]]; then
 
-    upsample_factor=2
-    vox_zdim_upsampled=$(echo "scale=3; ${vox_zdim} / ${upsample_factor}" | bc)
+    vox_zdim_upsampled=$(echo "scale=3; ${vox_zdim} / ${upsmpl_fct}" | bc)
 
     echo ""
     printf " Voxel dims are x: %s; y: %s; z: %s\n" "${vox_xdim}" "${vox_ydim}" "${vox_zdim}"
