@@ -310,6 +310,11 @@ if [[ -z ${ort} ]]; then
   ort=RSP
 fi
 
+# check if atlas is set and if not set, set it to default 'allen'
+if [[ -z ${atl} ]]; then
+  atl="allen"
+fi
+
 if [ "${atl}" == "allen" ]; then
 
   if [[ -z ${lbls} || ${lbls} == "None" ]]; then
