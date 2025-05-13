@@ -924,6 +924,21 @@ function main() {
       printf " Resampling failed with code %d\n" $? >&2
       exit $?
     }
+
+    # Create stats csv
+    if [[ "${atl}" == "waxholm" ]]; then
+      resampled_imgspclbls=${regdir}/${lblsname}_imagespace_ants_resampled.nii.gz
+      extracted_stats=${regdir}/${lblsname}_extracted_stats.tsv
+      reg_final_extracted_stats=${regdirfinal}/${lblsname}_stats.csv
+      printf " Extracting stats from segmentation...\n"
+      # Transform segmentation according to label reference header
+      antsApplyTransforms -d 3 -i "${imgspclbls}" -r "${inmr}" -n NearestNeighbor -o "${resampled_imgspclbls}"
+      # Extract ROI stats
+      ImageIntensityStatistics 3 "${inmr}" "${resampled_imgspclbls}" >"${extracted_stats}"
+      # Combine extracted stats with Waxholm labels (convenient)
+      python /code/miracl/reg/miracl_reg_merge_stats_lbls.py --extracted "${extracted_stats}" --labels /code/atlases/waxholm/annotation/WHS_SD_rat_atlas_v4_stats.csv --output "${reg_final_extracted_stats}"
+    fi
+
   fi
 
 }
