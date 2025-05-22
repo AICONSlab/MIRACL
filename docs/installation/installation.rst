@@ -525,6 +525,8 @@ either of the following methods:
 
       Use the ``--nv`` flag to forward your Nvidia GPU into the container.
 
+      .. code-block::
+
          $ apptainer shell --nv -B /data:/data miracl_latest.sif bash
       
       .. SeeAlso::
