@@ -30,8 +30,7 @@ We recommend using MIRACL with the Docker or Apptainer containers we provide. Le
 
 ___
 
-Attention: We changed the license for **MIRACL** from `GPL-3.0` to `CC BY-NC-ND` as of version `2.5.0`. For more information read our [LICENSE.md](LICENSE.md) or go to the [Creative Commons](https://creativecommons.org/licenses/by-nc-nd/4.
-0/legalcode.en) website.
+Attention: We changed the license for **MIRACL** from `GPL-3.0` to `CC BY-NC-ND` as of version `2.5.0`. For more information read our [LICENSE.md](LICENSE.md) or go to the [Creative Commons](https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en) website.
 
 ___
 Copyright (c) 2025 Maged Goubran
