@@ -1,4 +1,4 @@
-[![GitHub license](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-FFA500.svg?labelColor=lightgrey)](https://github.com/mgoubran/MIRACL/blob/master/LICENSE.md) ![Docker pulls](https://img.shields.io/docker/pulls/mgoubran/miracl) [![CirclCI status](https://img.shields.io/circleci/build/github/AICONSlab/MIRACL)](https://circleci.com/gh/AICONSlab/MIRACL) [![GitHub stars](https://img.shields.io/github/stars/AICONSlab/MIRACL?style=social)](https://github.com/AICONSlab/MIRACL/stargazers)
+[![GitHub license](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-FFA500.svg)](https://github.com/mgoubran/MIRACL/blob/master/LICENSE.md) ![Docker pulls](https://img.shields.io/docker/pulls/mgoubran/miracl) [![CirclCI status](https://img.shields.io/circleci/build/github/AICONSlab/MIRACL)](https://circleci.com/gh/AICONSlab/MIRACL) [![GitHub stars](https://img.shields.io/github/stars/AICONSlab/MIRACL?style=social)](https://github.com/AICONSlab/MIRACL/stargazers)
 
 <p align="center">
   <img src="docs/gallery/images/icon.png" alt="alt text" width="400" height="250"/>
