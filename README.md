@@ -1,4 +1,4 @@
-[![GitHub license](https://img.shields.io/github/license/mgoubran/MIRACL)](https://github.com/mgoubran/MIRACL/blob/master/LICENSE.md) ![Docker Pulls](https://img.shields.io/docker/pulls/mgoubran/miracl)
+[![GitHub license](https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-FFA500.svg)](https://github.com/mgoubran/MIRACL/blob/master/LICENSE.md) ![Docker pulls](https://img.shields.io/docker/pulls/mgoubran/miracl) [![CirclCI status](https://img.shields.io/circleci/build/github/AICONSlab/MIRACL)](https://circleci.com/gh/AICONSlab/MIRACL) [![GitHub stars](https://img.shields.io/github/stars/AICONSlab/MIRACL?style=social)](https://github.com/AICONSlab/MIRACL/stargazers)
 
 <p align="center">
   <img src="docs/gallery/images/icon.png" alt="alt text" width="400" height="250"/>
@@ -30,7 +30,7 @@ We recommend using MIRACL with the Docker or Apptainer containers we provide. Le
 
 ___
 
-Attention: We changed the license for **MIRACL** from `GPL-3.0` to `CC BY-NC-ND` as of version `2.5.0`. For more information read our [LICENSE.md](LICENSE.md) or go to the [Creative Commons](https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en) website.
+Attention: We changed the license for **MIRACL** from `GPL-3.0` to `CC BY-NC-ND 4.0` as of version `2.5.0`. For more information read our [LICENSE.md](LICENSE.md) or go directly to the [Creative Commons](https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en) website.
 
 ___
 Copyright (c) 2025 Maged Goubran
