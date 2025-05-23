@@ -1,10 +1,10 @@
-Singularity
-###########
+Apptainer
+#########
 
 .. include:: ../directives/troubleshooting_icon_directive.rst
 
-|question| Can I build a Singularity container from the latest MIRACL image on Docker Hub
------------------------------------------------------------------------------------------
+|question| Can I build a Apptainer container from the latest MIRACL image on Docker Hub
+---------------------------------------------------------------------------------------
 
 Absolutely! To do so, however, you will need to grab a development node after 
 logging in to the cluster. If you try pulling from the login node, you will 
@@ -26,15 +26,15 @@ Once you have your node, you can then build the container:
 .. code-block::
 
    $ cd $SCRATCH
-   $ singularity build miracl_latest.sif docker://mgoubran/miracl:latest
+   $ apptainer build miracl_latest.sif docker://mgoubran/miracl:latest
 
 |question| Processes that require TrackVis or Diffusion Toolkit are not working
 -------------------------------------------------------------------------------
 
 .. include:: ../directives/trackvis_dtk_directive.rst
 
-|question| I get the following error whenever I try to run the GUI from within the Singularity container on Compute Canada
---------------------------------------------------------------------------------------------------------------------------
+|question| I get the following error whenever I try to run the GUI from within the Apptainer container on Compute Canada
+------------------------------------------------------------------------------------------------------------------------
 
 .. code-block::
 
@@ -48,16 +48,16 @@ terminal. You should use VNC instead. Follow the instructions
 `here <https://docs.alliancecan.ca/wiki/VNC>`_. Once you are connected to your 
 login or compute node with VNC, you will see a desktop environment. Open a 
 terminal there and follow :doc:`our tutorials <../tutorials/slurm/index>` on how 
-to use :program:`MIRACL` with :program:`Singularity` on clusters.
+to use :program:`MIRACL` with :program:`Apptainer` on clusters.
 
 If you for some reason need to run the :program:`MIRACL` GUI directly in the 
-terminal, using a :program:`Singularity` container and X11, try the following 
+terminal, using a :program:`Apptainer` container and X11, try the following 
 workarounds:
 
 Login Nodes
 ^^^^^^^^^^^
 
-Exit your :program:`Singularity` container and start a VNC server (for 3600sec 
+Exit your :program:`Apptainer` container and start a VNC server (for 3600sec 
 or more as required) on your login node:
 
 .. code-block::
@@ -76,13 +76,13 @@ username:
    If no socket is available for your username, log out and log back in to your 
    login node
 
-Start another :program:`Singularity` container and try to run ``miraclGUI`` 
+Start another :program:`Apptainer` container and try to run ``miraclGUI`` 
 again from within it.
 
 Compute Nodes
 ^^^^^^^^^^^^^
 
-Exit your :program:`Singularity` container and set an environment variable on 
+Exit your :program:`Apptainer` container and set an environment variable on 
 your allocated compute node:
 
 .. code-block::
@@ -95,5 +95,5 @@ Start a VNC server:
 
    vncserver
 
-Start another :program:`Singularity` container and try to run ``miraclGUI`` 
+Start another :program:`Apptainer` container and try to run ``miraclGUI`` 
 again from within it.

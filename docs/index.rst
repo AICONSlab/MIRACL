@@ -19,15 +19,23 @@ Welcome to MIRACL's documentation!
    gallery/gallery
    downloads/index
 
-.. |license_img| image:: https://img.shields.io/github/license/mgoubran/MIRACL
-   :width: 117px
+.. |license_img| image:: https://img.shields.io/badge/license-CC%20BY--NC--ND%204.0-FFA500.svg
+   :width: 180px
+   :height: 22px
+
+.. |downloads_img| image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=docker%20pulls
+   :width: 130px
    :height: 23px
 
-.. |downloads_img| image:: https://img.shields.io/docker/pulls/mgoubran/miracl?label=Docker%2FRelease%20Downloads
-   :width: 230px
+.. |circleci_img| image:: https://img.shields.io/circleci/build/github/AICONSlab/MIRACL
+   :width: 100px
    :height: 23px
 
-|license_img| |downloads_img|
+.. |githubstars_img| image:: https://img.shields.io/github/stars/AICONSlab/MIRACL?style=social
+   :width: 90px
+   :height: 23px
+
+|license_img| |downloads_img| |circleci_img| |githubstars_img|
 
 .. image:: ./images/MIRACL_icon.png
     :width: 550px
@@ -43,9 +51,15 @@ The tutorial for using ACE can be found `here <https://miracl.readthedocs.io/en/
 
 ------
 
-We recommend using MIRACL with the Docker or Singularity containers we provide 
+We recommend using MIRACL with the Docker or Apptainer containers we provide 
 but it can also be installed locally. See our 
 :doc:`installation instructions <./installation/installation>` for more information.
+
+------
+
+**Attention**: We changed the license for **MIRACL** from ``GPL-3.0`` to ``CC BY-NC-ND 4.0`` as of version ``2.5.0``. For more information read our `LICENSE.md <https://github.com/AICONSlab/MIRACL/blob/master/LICENSE.md>`_ or go directly to the `Creative Commons <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>`_ website.
+
+------
 
 Copyright © 2025 :email:`Maged Goubran <maged.goubran@utoronto.ca>` @ 
 `AICONS Lab <https://aiconslab.github.io/>`_.

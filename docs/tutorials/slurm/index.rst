@@ -2,9 +2,11 @@ HPC/SLURM clusters
 ##################
 
 :program:`MIRACL` was built with HPC/SLURM clusters in mind. We recommend 
-:program:`Singularity` as it is well suited to run in a cluster environment. 
-We provide a :program:`Singularity` container of :program:`MIRACL's` latest 
-version that can be pulled to a node directly from our online repo.
+:program:`Apptainer` as it is well suited to run in a cluster environment. 
+We provide an :program:`Apptainer` container of :program:`MIRACL's` latest 
+version that can be dowloaded to a node directly from our online repo.
+Alternatively, you can build an :program:`Apptainer` off of our 
+:program:`MIRACL` :program:`Docker` images hosted on DockerHub.
 
 We provide tutorials on how to use :program:`MIRACL` on Compute Canada and 
 Sherlock (supercomputer at Stanford university) but the principles explained 

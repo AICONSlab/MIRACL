@@ -25,26 +25,38 @@ Move to your scratch folder:
 
    $ cd SCRATCH
 
-Pull (download) Singularity container:
+Build or download your :program:`MIRACL` container:
+
+Building from DockerHub image:
 
 .. code-block::
 
-   $ singularity pull miracl_latest.sif library://aiconslab/miracl/miracl:latest
+   $ apptainer build miracl.sif docker://mgoubran/miracl:latest
 
-.. attention::
+To download a :program:`MIRACL` Apptainer binary directly, use either of the 
+following commands:
 
-   ``singularity pull`` requires :program:`Singularity` version ``3.0.0`` or 
-   higher. Please refer to our Troubleshooting section ("Q: Can I build a 
-   :program:`Singularity` container from the latest MIRACL image on Docker 
-   Hub") if you are using an older version of :program:`Singularity`.
+.. code-block::
+
+$ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v242.sif
+
+or
+
+.. code-block::
+
+$ curl -L -O https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v242.sif
+
+.. note::
+
+   Replace the version number with the version of MIRACL you want to download.
 
 .. tip::
 
-   If you have a particular :program:`Singularity` container of 
+   If you have a particular :program:`Apptainer` container of 
    :program:`MIRACL` that you want to use on Sherlock, just copy it to the 
    servers directly using e.g. :program:`scp` or :program:`rsync` instead of 
    pulling (downloading) the latest version of :program:`MIRACL` from the 
-   :program:`Singularity` registry
+   :program:`Apptainer` registry
 
 Copying your data to Sherlock
 =============================
@@ -86,11 +98,15 @@ Start interactive session:
 
    $ sdev
 
-Start :program:`Singularity` with binded data:
+Start :program:`Apptainer` with bound data:
 
 .. code-block::
 
-   $ singularity shell miracl_latest.sif bash
+   $ apptainer shell miracl_latest.sif bash
+
+.. note::
+   Use `--nv` to forward your Nvidia GPU into the container and `-B` to bind 
+   volumes to the container.
 
 Within the shell, load the GUI:
 
@@ -157,13 +173,13 @@ following lines:
    #SBATCH --cpus-per-task=12
    #SBATCH --mem=32G
 
-   module load singularity
+   module load apptainer
    
-   singularity exec ${SCRATCH}/miracl_latest.sif miracl flow reg_clar -f ${SCRATCH}/clarity_registration/input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
+   apptainer exec ${SCRATCH}/miracl_latest.sif miracl flow reg_clar -f ${SCRATCH}/clarity_registration/input_clar -n "-d 5 -ch autofluo" -r "-o ARS -m combined -v 25"
 
 .. attention::
    Note that the ``miracl`` function call comes after invoking the 
-   :program:`Singularity` call ``singularity exec ${SCRATCH}/miracl_latest.sif`` 
+   :program:`Apptainer` call ``apptainer exec ${SCRATCH}/miracl_latest.sif`` 
    and that full file paths were used for the ``.sif`` container and the 
    input data
 
