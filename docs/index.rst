@@ -57,7 +57,7 @@ but it can also be installed locally. See our
 
 ------
 
-**Attention**: We changed the license for **MIRACL** from ``GPL-3.0`` to ``CC BY-NC-ND 4.0`` as of version ``2.5.0``. For more information read our `LICENSE.md <LICENSE.md>`_ or go directly to the `Creative Commons <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>`_ website.
+**Attention**: We changed the license for **MIRACL** from ``GPL-3.0`` to ``CC BY-NC-ND 4.0`` as of version ``2.5.0``. For more information read our `LICENSE.md <https://github.com/AICONSlab/MIRACL/blob/master/LICENSE.md>`_ or go directly to the `Creative Commons <https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.en>`_ website.
 
 ------
 
