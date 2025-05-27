@@ -21,7 +21,7 @@ set -euo pipefail
 
 function check_for_sudo() {
   local logged_in_user
-  logged_in_user=$(logname)
+  logged_in_user=$(whoami)
 
   if [ "$(id -u)" -eq 0 ]; then
     printf "\nError: This script will not work with 'sudo'. Please run it without 'sudo', as the user on your host system (%s) who will be using MIRACL.\n\nInfo: In case you are using 'sudo' because docker requires 'sudo' privileges, create a 'docker' group and add your host user to it. This should allow you to use Docker without 'sudo'.\n\nInfo: For more information on how to create a 'docker' group and add your host user, visit the official Docker docs: https://docs.docker.com/engine/install/linux-postinstall/\n" "${logged_in_user}"
@@ -33,7 +33,7 @@ function random_docker_names_generator() {
   random_surnames=("darwin" "einstein" "newton" "tesla" "curie" "turing" "hawking" "feynman" "planck" "galilei" "schroedinger" "heisenberg" "kepler" "lovelace" "hubble" "maxwell" "faraday" "bohr" "pauling" "copernicus" "mendeleev" "roentgen" "koch" "lamarck" "linnaeus" "mendel" "stallman" "torvalds" "moolenaar" "ramanujan" "euler" "knuth" "cavendish" "brahe" "boyle" "murray" "sagan" "watt" "alhazen" "nobel" "gates" "hertz" "berzelius" "fermi" "nash" "snell" "galois" "descartes" "laplace" "riemann" "wheeler" "shannon" "dijkstra" "sherrington" "gibbs" "dunlop" "fleming" "wright" "jefferson" "seaborg" "bardeen" "witten" "hughes" "charles" "bohr" "karl" "pauling" "coulomb" "bragg" "hubble" "schmidt" "kirk" "spock" "mccoy" "sulu" "ura" "scott" "pike" "mudd" "rand" "checkov" "uhura" "data" "riker" "laforge" "picard" "crusher" "guinan" "yar" "worf" "troi" "dax" "sisko" "kira" "bashir" "odo" "quark" "jacob" "bashir" "kassidy" "janeway" "chakotay" "seven" "kim" "neelix" "paris" "tuvok" "balana")
 
   local logged_in_user
-  logged_in_user=$(logname)
+  logged_in_user=$(whoami)
 
   random_surname=${random_surnames[$RANDOM % ${#random_surnames[@]}]}
   random_digits=$((RANDOM % 100000))
