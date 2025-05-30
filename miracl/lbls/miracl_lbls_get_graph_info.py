@@ -47,7 +47,7 @@ def get_lbl_info(lbl):
     about the region. 
     '''
     # read graph
-    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_combined.csv" % ATLAS_DIR
+    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_split.csv" % ATLAS_DIR
     aragraph = pd.read_csv(arastrctcsv)
 
     try:  # get the data from the atlas, exit if the label doesnt match
@@ -72,7 +72,7 @@ def main(args):
     lbl = parse_inputs(parser, args)
 
     # read graph
-    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_combined.csv" % ATLAS_DIR
+    arastrctcsv = "%s/ara/ara_mouse_structure_graph_hemi_split.csv" % ATLAS_DIR
     aragraph = pd.read_csv(arastrctcsv)
 
     try:  # get the data from the atlas, exit if the label doesnt match
