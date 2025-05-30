@@ -440,12 +440,12 @@ if [[ "$#" -gt 1 ]]; then
     chanp=""
   fi
 
-  if [[ "${vx}" == None ]] || ! [[ "${vx}" =~ ^[0-9]+$ ]];
+  if [[ "${vx}" == "None" ]] || ! [[ "${vx}" =~ ^[0-9]+([.][0-9]+)?$ ]];  # modified to allow decimal values
   then
     vx=5
   fi
 
-  if [[ "${vz}" == None ]] || ! [[ "${vz}" =~ ^[0-9]+$ ]];
+  if [[ "${vz}" == "None" ]] || ! [[ "${vz}" =~ ^[0-9]+([.][0-9]+)?$ ]];  # modified to allow decimal values
   then
     vz=5
   fi
@@ -477,7 +477,7 @@ if [[ "$#" -gt 1 ]]; then
 
   if [[ "${downz}" == "None" ]];
   then
-    downz=1
+    downz=5
   fi
 
   # This is a temporary fix as the range-kutta method does not currently work
@@ -603,7 +603,7 @@ else
     printf "\n Chosen vz: $vz \n"
 
     downz="$(echo -e "${arr[16]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    if [[ -z "${downz}" ]]; then downz=1; fi
+    if [[ -z "${downz}" ]]; then downz=5; fi
     printf "\n Chosen down-sample in z: $downz \n"
 
     dilationfx="$(echo -e "${arr[17]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
