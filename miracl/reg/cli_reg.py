@@ -18,17 +18,18 @@ def run_clar_allen(parser, args):
             )
         else:
             bash_args = (
-                "-i %s -r %s -o %s -m %s -v %s -l %s -f %s -p %s -a %s -w %s -b %s -s %s -c %s -n %s -x %s"
+                "-i %s -r %s -o %s -a %s -m %s -v %s -l %s -f %s -p %s -t %s -w %s -b %s -s %s -c %s -n %s -x %s"
                 % (
                     args["in_nii"],  # -i
                     args["reg_out"],  # -r
                     args["ort"],  # -o
+                    args["atlas"],  # -a
                     args["hemi"],  # -m
                     args["vox_res"],  # -v
                     args["lbls"],  # -l
                     args["fig"],  # -f
                     args["pass_int"],  # -p
-                    args["atlas"],  # -a
+                    args["cust_atlas"],  # -t
                     args["warp"],  # -w
                     args["bulb"],  # -b
                     args["side"],  # -s
@@ -182,7 +183,12 @@ def get_parser():
         add_help=False,
         help="whole-brain CLARITY registration to Allen atlas",
     )
-    parser_clar_allen.add_argument("-i", "--in_nii", metavar="", help="input nifti")
+    parser_clar_allen.add_argument(
+        "-i",
+        "--in_nii",
+        metavar="",
+        help="input nifti",
+    )
     parser_clar_allen.add_argument(
         "-r",
         "--reg_out",
@@ -191,13 +197,32 @@ def get_parser():
         help="output registration dir",
     )
     parser_clar_allen.add_argument(
-        "-o", "--ort", metavar="", default="ARS", help="orientation tag"
+        "-o",
+        "--ort",
+        metavar="",
+        default="ARS",
+        help="orientation tag",
     )
     parser_clar_allen.add_argument(
-        "-m", "--hemi", metavar="", default="combined", help="whole brain or hemi"
+        "-a",
+        "--atlas",
+        metavar="",
+        default="allen",
+        help="which atlas to use (default: %(default)s)",
     )
     parser_clar_allen.add_argument(
-        "-v", "--vox_res", metavar="", default=10, help="voxel resolution"
+        "-m",
+        "--hemi",
+        metavar="",
+        default="combined",
+        help="whole brain or hemi",
+    )
+    parser_clar_allen.add_argument(
+        "-v",
+        "--vox_res",
+        metavar="",
+        default=10,
+        help="voxel resolution",
     )
     parser_clar_allen.add_argument(
         "-b",
@@ -206,20 +231,51 @@ def get_parser():
         default=0,
         help="olfactory bulb included in brain, binary option",
     )
-    parser_clar_allen.add_argument("-s", "--side", metavar="", help="voxel resolution")
-    parser_clar_allen.add_argument("-a", "--atlas", metavar="", help="custom atlas")
-    parser_clar_allen.add_argument("-l", "--lbls", metavar="", help="custom labels")
     parser_clar_allen.add_argument(
-        "-p", "--pass_int", metavar="", default=0, help="skip intensity correction"
+        "-s",
+        "--side",
+        metavar="",
+        help="voxel resolution",
     )
     parser_clar_allen.add_argument(
-        "-f", "--fig", metavar="", default=1, help="save mosaic figure of results"
+        "-t",
+        "--cust_atlas",
+        metavar="",
+        help="custom atlas",
     )
     parser_clar_allen.add_argument(
-        "-w", "--warp", metavar="", default=0, help="warp high resolution clarity"
+        "-l",
+        "--lbls",
+        metavar="",
+        help="custom labels",
     )
     parser_clar_allen.add_argument(
-        "-c", "--clar_dir", metavar="", default="", help="original clarity tiff folder"
+        "-p",
+        "--pass_int",
+        metavar="",
+        default=0,
+        help="skip intensity correction",
+    )
+    parser_clar_allen.add_argument(
+        "-f",
+        "--fig",
+        metavar="",
+        default=1,
+        help="save mosaic figure of results",
+    )
+    parser_clar_allen.add_argument(
+        "-w",
+        "--warp",
+        metavar="",
+        default=0,
+        help="warp high resolution clarity",
+    )
+    parser_clar_allen.add_argument(
+        "-c",
+        "--clar_dir",
+        metavar="",
+        default="",
+        help="original clarity tiff folder",
     )
     parser_clar_allen.add_argument(
         "-n",
@@ -235,7 +291,11 @@ def get_parser():
         default="-999999",
         help="Chan prefix (string before channel number in file name). ex: C00",
     )
-    parser_clar_allen.add_argument("-h", "--help", action="store_true")
+    parser_clar_allen.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+    )
 
     parser_clar_allen.set_defaults(func=run_clar_allen)
 
@@ -245,21 +305,59 @@ def get_parser():
         add_help=False,
         help="MRI registration to Allen atlas using ANTs",
     )
-    parser_mri_allen.add_argument("-i", "--in_nii", metavar="", help="input nifti")
-    parser_mri_allen.add_argument("-o", "--ort", metavar="", help="orientation tag")
     parser_mri_allen.add_argument(
-        "-m", "--hemi", metavar="", help="whole brain or hemi"
+        "-i",
+        "--in_nii",
+        metavar="",
+        help="input nifti",
     )
     parser_mri_allen.add_argument(
-        "-v", "--vox_res", metavar="", help="voxel resolution"
+        "-o",
+        "--ort",
+        metavar="",
+        help="orientation tag",
     )
-    parser_mri_allen.add_argument("-l", "--lbls", metavar="", help="input labels")
-    parser_mri_allen.add_argument("-b", "--bulb", metavar="", help="olfactory bulb")
-    parser_mri_allen.add_argument("-s", "--skull", metavar="", help="skull strip")
     parser_mri_allen.add_argument(
-        "-f", "--bet", metavar="", help="bet fractional intensity"
+        "-m",
+        "--hemi",
+        metavar="",
+        help="whole brain or hemi",
     )
-    parser_mri_allen.add_argument("-h", "--help", action="store_true")
+    parser_mri_allen.add_argument(
+        "-v",
+        "--vox_res",
+        metavar="",
+        help="voxel resolution",
+    )
+    parser_mri_allen.add_argument(
+        "-l",
+        "--lbls",
+        metavar="",
+        help="input labels",
+    )
+    parser_mri_allen.add_argument(
+        "-b",
+        "--bulb",
+        metavar="",
+        help="olfactory bulb",
+    )
+    parser_mri_allen.add_argument(
+        "-s",
+        "--skull",
+        metavar="",
+        help="skull strip",
+    )
+    parser_mri_allen.add_argument(
+        "-f",
+        "--bet",
+        metavar="",
+        help="bet fractional intensity",
+    )
+    parser_mri_allen.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+    )
 
     parser_mri_allen.set_defaults(func=run_mri_allen_ants)
 

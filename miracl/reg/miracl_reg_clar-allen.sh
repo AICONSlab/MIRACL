@@ -11,9 +11,9 @@ function usage() {
 
   cat <<usage
 
-	1) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas
-	2) Warps Allen annotations to the original high-res CLARITY space
-	3) Warps the higher-resolution CLARITY to Allen space
+	1) Registers CLARITY data (down-sampled images) to Allen Reference mouse brain atlas or Waxholm Reference rat brain atlas
+	2) Warps atlas annotations to the original high-res CLARITY space
+	3) Warps the higher-resolution CLARITY to atlas space
 
     For GUI
 
@@ -22,7 +22,7 @@ function usage() {
 
 	For command-line / scripting
 
-	Usage: miracl reg clar_allen -i [ input clarity nii ] -c [ clarity tiff stack ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
+	Usage: miracl reg clar_allen -i [ input clarity nii ] -c [ clarity tiff stack ] -a [ atlas ] -o [ orient code ] -m [ hemi mirror ] -v [ labels vox ] -l [ input labels ] -s [ side if hemisphere ony ] -b [ olfactory buld included ]
 
     Example: miracl reg clar_allen -i reference_channel_05x_down.nii.gz -c LSFM_clar_tiff_chan1 -o ARS -m combined -v 25
 
@@ -30,44 +30,48 @@ function usage() {
         i.  input down-sampled clarity nii
             Preferably auto-fluorescence channel data (or Thy1_EYFP if no auto chan)
             file name should have "##x_down" like "05x_down" (meaning 5x downsampled)  -> ex. stroke13_05x_down_Ref_chan.nii.gz
-            [this should be accurate as it is used for allen label upsampling to clarity]
-        c.	original clarity tiff folder (stack) - folder used as input to convert from tiff to nii 
+            [this should be accurate as it is used for atlas label upsampling to clarity]
+        c.  original clarity tiff folder (stack) - folder used as input to convert from tiff to nii 
 
     optional arguments:
+        a.  atlas (default: allen)
+            use 'allen' for mouse models and 'waxholm' atlas for rat models
+            accepted inputs are: <allen> or <waxholm>
         r.  output (results) directory (default: working directory)
-        o.  orient code (default: ALS)
-            to orient nifti from original orientation to "standard/Allen" orientation
-        m.  hemisphere mirror (default: combined)
-            warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
-			accepted inputs are: <split> or <combined>
-        v.  labels voxel size/Resolution in um (default: 10)
-			accepted inputs are: 10, 25 or 50
-        l.  input Allen labels to warp (default: annotation_hemi_combined_10um.nii.gz)
-			input labels could be at a different depth than default labels
-			If l. is specified (m & v cannot be specified)
-        a.  input custom Allen atlas (for example for registering sections)
-        s.  side, if only registering a hemisphere instead of whole brain
-            accepted inputs are: rh (right hemisphere) or lh (left)
-        f.  save mosaic figure (.png) of allen labels registered to clarity (default: 1)
-        b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
+        o.  orient code (default: ARS)
+            to orient nifti from original orientation to "standard/atlas" orientation
+        l.  input atlas labels to warp (default: annotation_hemi_combined_10um.nii.gz)
+            input labels could be at a different depth than default labels
+            If l. is specified (m & v cannot be specified)
+        t.  input custom atlas (for example for registering sections)
+        f.  save mosaic figure (.png) of atlas labels registered to clarity (default: 1)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
-        w.  warp high-res clarity to Allen space (default: 0)
+        w.  warp high-res clarity to atlas space (default: 0)
         n.  chan # for extracting single channel from multiple channel data (default: none)
         x.  chan prefix (string before channel number in file name). ex: C00 (default: none)
+
+    Allen atlas related arguments:
+        m.  hemisphere mirror (default: combined)
+            warp Allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
+            accepted inputs are: <split> or <combined>
+        s.  side, if only registering a hemisphere instead of whole brain
+            accepted inputs are: rh (right hemisphere) or lh (left)
+        v.  labels voxel size/Resolution in um (default: 10)
+            accepted inputs are: 10, 25 or 50
+        b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
 
 	----------
 	Main Outputs
-        reg_final/clar_allen_space.nii.gz: Clarity data in Allen reference space
+        reg_final/clar_<atlas>_space.nii.gz: Clarity data in atlas reference space
         reg_final/clar_downsample_res(vox)um.nii.gz : Clarity data downsampled and oriented to "standard"
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Allen labels registered to downsampled Clarity
-        reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Allen labels registered to oriented Clarity
-        reg_final/annotation_hemi_(hemi)_(vox)um/lbls_clar_slice....tif : Tiff stack of Allen labels registered to original (full-resolution) Clarity
-
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar_downsample.nii.gz : Atlas labels registered to downsampled Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um_clar_vox.tif : Atlas labels registered to oriented Clarity
+        reg_final/annotation_hemi_(hemi)_(vox)um/lbls_clar_slice....tif : Tiff stack of Atlas labels registered to original (full-resolution) Clarity
 
         - To visualize results use: miracl reg check
 
-        - Full resolution Allen labels in original clarity space (.tif) can be visualized using Fiji or Napari
+        - Full resolution Allen/Waxholm labels in original clarity space (.tif) can be visualized using Fiji or Napari
 
     -----------------------------------
     registration based on ANTs
@@ -106,7 +110,7 @@ fi
 
 # Init atlas dir
 
-atlasdir=$(dirname ${MIRACL_HOME})/atlases
+atlasdir=$(dirname "${MIRACL_HOME}")/atlases
 
 # GUI for CLARITY input imgs
 
@@ -115,11 +119,11 @@ function choose_file_gui() {
   local ftype=$2
   local _inpath=$3
 
-  filepath=$(${MIRACL_HOME}/conv/miracl_conv_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
+  filepath=$("${MIRACL_HOME}"/conv/miracl_conv_file_folder_gui.py -f file -s "$openstr" -t "$ftype")
 
   filepath=$(echo "${filepath}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  eval ${_inpath}="'$filepath'"
+  eval "${_inpath}"="'$filepath'"
 
 }
 
@@ -129,7 +133,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:m:v:l:f:p:a:w:b:s:n:x:" opt; do
+  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:" opt; do
 
     case "${opt}" in
 
@@ -147,6 +151,10 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
     o)
       ort="${OPTARG}"
+      ;;
+
+    a)
+      atlas="${OPTARG}"
       ;;
 
     m)
@@ -169,8 +177,8 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
       prebias="${OPTARG}"
       ;;
 
-    a)
-      atlas="${OPTARG}"
+    t)
+      cust_atlas="${OPTARG}"
       ;;
 
     w)
@@ -294,12 +302,12 @@ fi
 if [[ -z ${work_dir} ]] || [[ "${work_dir}" == "None" ]]; then
 
   regdirfinal=${PWD}/reg_final
-  regdir=${PWD}/clar_allen_reg
+  regdir=${PWD}/clar_${atlas}_reg
 
 else
 
   regdirfinal=${work_dir}/reg_final
-  regdir=${work_dir}/clar_allen_reg
+  regdir=${work_dir}/clar_${atlas}_reg
 
 fi
 
@@ -312,7 +320,7 @@ fi
 
 # output log file of script
 
-exec > >(tee -i "${regdir}"/clar_allen_script.log)
+exec > >(tee -i "${regdir}"/clar_${atlas}_script.log)
 exec 2>&1
 
 #---------------------------
@@ -325,39 +333,54 @@ if [[ -z ${ort} ]] || [[ "${ort}" == "None" ]]; then
 fi
 ## if A-P flipped (PLS) & if R-L -> ALS
 
-# If want to warp multi-res / hemi lbls
-if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
+if [[ -z "${atlas}" ]]; then
+  atlas="allen"
+fi
 
-  if [[ -z ${hemi} ]] || [[ "${hemi}" == "None" ]]; then
+if [ "${atlas}" == "allen" ]; then
 
-    hemi=combined
+  # If want to warp multi-res / hemi lbls
+  if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
 
-  else
+    if [[ -z ${hemi} ]] || [[ "${hemi}" == "None" ]]; then
 
-    if [[ "${hemi}" != "combined" ]] && [[ "${hemi}" != "split" ]]; then
+      hemi=combined
 
-      printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
-      exit 1
+    else
+
+      if [[ "${hemi}" != "combined" ]] && [[ "${hemi}" != "split" ]]; then
+
+        printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+        exit 1
+      fi
+
     fi
+
+    if [[ -z ${vox} ]] || [[ "${vox}" == "None" ]]; then
+
+      vox=10
+
+    else
+
+      if [[ "${vox}" != 10 ]] && [[ "${vox}" != 25 ]] && [[ "${vox}" != 50 ]]; then
+
+        printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+        exit 1
+      fi
+
+    fi
+
+    lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
 
   fi
 
-  if [[ -z ${vox} ]] || [[ "${vox}" == "None" ]]; then
+elif [ "${atlas}" == "waxholm" ]; then
+  vox=39
+  lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
 
-    vox=10
-
-  else
-
-    if [[ "${vox}" != 10 ]] && [[ "${vox}" != 25 ]] && [[ "${vox}" != 50 ]]; then
-
-      printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
-      exit 1
-    fi
-
-  fi
-
-  lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-
+else
+  printf "ERROR: < -a => (atlas) > Only accepted atlases (inputs) are: 'allen' or 'waxholm'"
+  exit 1
 fi
 
 # lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
@@ -432,15 +455,16 @@ printf "i: Down-sampled nii file: %s\n" "${inclar}"
 printf "c: Clarity tiff folder: %s\n" "${orgclar}"
 printf "r: Output directory: %s\n" "${work_dir}"
 printf "o: Orientation code: %s\n" "${ort}"
+printf "a: Atlas: %s\n" "${atlas}"
 printf "m: Hemisphere: %s\n" "${hemi}"
-printf "v: Labels voxel: size%s\n" "${vox}"
+printf "v: Labels voxel size: %s\n" "${vox}"
 printf "b: Olfactory bulb included: %s\n" "${bulb}"
 printf "s: Side: %s\n" "${side}"
-printf "a: Custom Allen atlas: %s\n" "${atlas}"
-printf "l: Allen labels to warp: %s\n" "${lbls}"
+printf "t: Custom atlas: %s\n" "${cust_atlas}"
+printf "l: Atlas labels to warp: %s\n" "${lbls}"
 printf "p: Prebias: %s\n" "${prebias}"
 printf "f: Save Mosaic figure: %s\n" "${savefig}"
-printf "w: Warp high-res clarity to Allen space: %s\n" "${warphres}"
+printf "w: Warp high-res clarity to atlas space: %s\n" "${warphres}"
 printf "n: Channel #: %s\n" "${cn}"
 printf "x: Channel prefix: %s\n" "${cp}"
 printf "\n######################################################\n"
@@ -670,11 +694,11 @@ function croptosmall() {
 
 # 2a) initialize registration Function
 
-function initclarallenreg() {
+function initclaratlasreg() {
 
   # Init imgs
   clarroi=$1
-  allenref=$2
+  atlasref=$2
 
   # Init tform
   initform=$3
@@ -686,34 +710,34 @@ function initclarallenreg() {
   localiter=$7
 
   # Out imgs
-  initallen=$8
+  initatlas=$8
 
   # Init reg
   ifdsntexistrun "${initform}" "Initializing registration ..." \
-    antsAffineInitializer 3 "${clarroi}" "${allenref}" "${initform}" "${deg}" "${radfrac}" "${useprincax}" "${localiter}" 2>/dev/null &
+    antsAffineInitializer 3 "${clarroi}" "${atlasref}" "${initform}" "${deg}" "${radfrac}" "${useprincax}" "${localiter}" 2>/dev/null &
 
   # kill after 3 min (gcc issue)
-  if [[ ! -f "${initallen}" ]]; then
+  if [[ ! -f "${initatlas}" ]]; then
     sleep 180
 
     kill -9 $(ps -e | grep antsAffineInit | awk '{print $1}')
   fi
 
-  # Warp Allen
-  ifdsntexistrun "${initallen}" "initializing Allen template" \
-    antsApplyTransforms -i "${allenref}" -r "${clarroi}" -t "${initform}" -o "${initallen}"
+  # Warp atlas
+  ifdsntexistrun "${initatlas}" "initializing atlas template" \
+    antsApplyTransforms -i "${atlasref}" -r "${clarroi}" -t "${initform}" -o "${initatlas}"
 
 }
 
 #---------------------------
 
-# 2b) Register to Allen atlas Function
+# 2b) Register to atlas atlas Function
 
-function regclarallen() {
+function regclaratlas() {
 
   # Reg inputs
   local clarroi=$1
-  local initallen=$2
+  local initatlas=$2
 
   # Reg parms
   local trans=$3
@@ -723,24 +747,24 @@ function regclarallen() {
   local thrds=$7
 
   # Reg out
-  local antsallen=$8
+  local antsatlas=$8
 
-  # convert init allen into int
-  c3d "${initallen}" -type int -o "${initallen}"
+  # convert init atlas into int
+  c3d "${initatlas}" -type int -o "${initatlas}"
 
-  # Perform ANTs registration between CLARITY and Allen atlas
+  # Perform ANTs registration between CLARITY and atlas
 
-  ifdsntexistrun "${antsallen}" "Registering CLARITY data to allen atlas ... this will take a while" \
-    ants_miracl_clar -d 3 -f "${clarroi}" -m "${initallen}" -o "${regdir}/allen_clar_ants" -t "${trans}" -p "${prec}" \
+  ifdsntexistrun "${antsatlas}" "Registering CLARITY data to ${atlas} atlas ... this will take a while" \
+    ants_miracl_clar -d 3 -f "${clarroi}" -m "${initatlas}" -o "${regdir}/${atlas}_clar_ants" -t "${trans}" -p "${prec}" \
     -n "${thrds}" -s "${spldist}" -r "${rad}" | tee "${regdir}"/ants_reg.log
 
 }
 
 #---------------------------
 
-# 3) Warp Allen labels to original CLARITY Function
+# 3) Warp atlas labels to original CLARITY Function
 
-function warpallenlbls() {
+function warpatlaslbls() {
 
   # In imgs
   local smclar=$1
@@ -800,14 +824,14 @@ function warpallenlbls() {
   # c3d ${smclarres} -type ushort -o ${smclarres}
 
   # warp to registered clarity
-  ifdsntexistrun "${wrplbls}" "Applying ants deformation to Allen labels" \
+  ifdsntexistrun "${wrplbls}" "Applying ants deformation to ${atlas} labels" \
     antsApplyTransforms -d 3 -r "${smclarres}" -i "${lbls}" -n MultiLabel -t "${antswarp}" "${antsaff}" "${initform}" \
     -o "${wrplbls}" --float
 
   # get org tag
   ortmatrix=$(PrintHeader "${inclar}" 4 | tr 'x' ' ')
 
-  ifdsntexistrun "${ortlbls}" "Orienting Allen labels" SetDirectionByMatrix "${wrplbls}" "${ortlbls}" "${ortmatrix}"
+  ifdsntexistrun "${ortlbls}" "Orienting ${atlas} labels" SetDirectionByMatrix "${wrplbls}" "${ortlbls}" "${ortmatrix}"
 
   # swap dim (x=>y / y=>x)
   # ifdsntexistrun ${swplbls} "Swapping label dimensions" \
@@ -824,7 +848,7 @@ function warpallenlbls() {
     padvox=12
   fi
 
-  printf "\n pad vox: "${padvox}" \n"
+  printf "\n pad vox: %s\n" "${padvox}"
 
   ifdsntexistrun "${tiflbls}" "Un-padding high res tif" c3d "${unpadtif}" -pad -"${padvox}"% -"${padvox}"% -o "${tiflbls}"
 
@@ -863,7 +887,9 @@ function warpallenlbls() {
   # c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
 
   # get tiflbls dim
-  tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_10um_clar_vox.tif 2)
+  # tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_"${vox}"um_clar_vox.tif 2)
+  printf "tiflbls: %s\n" "${tiflbls}"
+  tiflblsdim=$(PrintHeader "${tiflbls}" 2)
   IFS='x' read -ra dimensions <<<"$tiflblsdim"
   tiflblsx="${dimensions[0]}"
   tiflblsy="${dimensions[1]}"
@@ -883,10 +909,10 @@ function warpallenlbls() {
     firstslice="${orgclar}/$(ls "${orgclar}" | head -n1)"
   else
     find_channel_files() {
-        local channel_pattern="${cp}${cn}"
-        find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
+      local channel_pattern="${cp}${cn}"
+      find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
     }
-    
+
     orgclarz=$(find_channel_files | wc -l)
     firstslice=$(find_channel_files -print | head -n 1)
   fi
@@ -915,7 +941,7 @@ function warpallenlbls() {
   firstlbl="${tifdirreg}"/lbls_slice_000000.tif
 
   # Create a series of 2D TIFF files, one for each slice in the original 3D stack
-  python /code/miracl/reg/miracl_reg_clar-allen_utility.py "${tiflblszstack}" "${tifdirreg}" "lbls_slice_%06d.tif"
+  python /code/miracl/reg/miracl_reg_clar-atlas_utility.py "${tiflblszstack}" "${tifdirreg}" "lbls_slice_%06d.tif"
 
   # Start loop from zero index
   loop_z=$(python -c "print(${orgclarz}-1)")
@@ -945,7 +971,7 @@ function warpallenlbls() {
   ifdsntexistrun "${wrplblsorg}" "Resampling labels to original space" \
     ResampleImage 3 "${wrplbls}" "${wrplblsorg}" "${orgspacing}" 0 1
 
-  ifdsntexistrun "${orgortlbls}" "Orienting Allen labels to original space" \
+  ifdsntexistrun "${orgortlbls}" "Orienting ${atlas} labels to original space" \
     SetDirectionByMatrix "${wrplblsorg}" "${orgortlbls}" "${ortmatrix}"
 
   # extract region
@@ -975,9 +1001,9 @@ function warpallenlbls() {
 
 #---------------------------
 
-# 4a) Warp input CLARITY to Allen Function
+# 4a) Warp input CLARITY to atlas Function
 
-function warpinclarallen() {
+function warpinclaratlas() {
 
   # Ort clar
   inclar=$1
@@ -986,8 +1012,8 @@ function warpinclarallen() {
   ortclartype=$4
   orthresclar=$5
 
-  # Reg to allen
-  allenhres=$6
+  # Reg to atlas
+  atlashres=$6
   initform=$7
   antsaff=$8
   antsinvwarp=$9
@@ -999,16 +1025,16 @@ function warpinclarallen() {
 
   # Apply warps
   ifdsntexistrun "${regorgclar}" "Applying ants deformation to input CLARITY" \
-    antsApplyTransforms -r "${allenhres}" -i "${orthresclar}" -n Bspline \
+    antsApplyTransforms -r "${atlashres}" -i "${orthresclar}" -n Bspline \
     -t [ "${initform}," 1 ] [ "${antsaff}," 1 ] "${antsinvwarp}" -o "${regorgclar}" --float
 
 }
 
 #---------------------------
 
-# 4b) Warp down 3x CLARITY (high res) to Allen Function
+# 4b) Warp down 3x CLARITY (high res) to atlas Function
 
-function warphresclarallen() {
+function warphresclaratlas() {
 
   # Ort clar
   hresclar=$1
@@ -1017,8 +1043,8 @@ function warphresclarallen() {
   ortclartype=$4
   orthresclar=$5
 
-  # Reg to allen
-  allenhres=$6
+  # Reg to atlas
+  atlashres=$6
   initform=$7
   antsaff=$8
   antsinvwarp=$9
@@ -1030,7 +1056,7 @@ function warphresclarallen() {
 
   # Apply warps
   ifdsntexistrun "${regorgclar}" "Applying ants deformation to high-res CLARITY" \
-    antsApplyTransforms -r "${allenhres}" -i "${orthresclar}" -n Bspline \
+    antsApplyTransforms -r "${atlashres}" -i "${orthresclar}" -n Bspline \
     -t [ "${initform}", 1 ] [ "${antsaff}," 1 ] "${antsinvwarp}" -o "${regorgclar}" --float
 
 }
@@ -1138,24 +1164,28 @@ function main() {
 
   # 2a) initialize registration
 
-  # Allen atlas template
-  if [[ -z "${atlas}" ]] || [[ "${atlas}" == "None" ]]; then
-    if [[ "${bulb}" == 0 ]]; then
-      allenref=${atlasdir}/ara/template/average_template_25um_OBmasked${side}.nii.gz
+  # Atlas template
+  if [[ -z "${cust_atlas}" ]] || [[ "${cust_atlas}" == "None" ]]; then
+    if [ "${atlas}" == "allen" ]; then
+      if [[ "${bulb}" == 0 ]]; then
+        atlasref=${atlasdir}/ara/template/average_template_25um_OBmasked${side}.nii.gz
 
-    elif [[ "${bulb}" == 1 ]]; then
-      allenref=${atlasdir}/ara/template/average_template_25um${side}.nii.gz
-
+      elif [[ "${bulb}" == 1 ]]; then
+        atlasref=${atlasdir}/ara/template/average_template_25um${side}.nii.gz
+      fi
+    elif [[ "${atlas}" == "waxholm" ]]; then
+      atlasref=${atlasdir}/waxholm/template/WHS_SD_rat_T2star_v1.01.nii.gz
     fi
   else
     # custom input Allen atlas
-    allenref=${atlas}
+    atlasref=${cust_atlas}
 
     custom_lbls=${regdir}/${lblsname}.nii.gz
-    c3d "${allenref}" "${lbls}" -reslice-identity -o "${custom_lbls}"
+    c3d "${atlasref}" "${lbls}" -reslice-identity -o "${custom_lbls}"
     lbls=${custom_lbls}
-
   fi
+
+  printf "Altas template used: %s" "${atlasref}"
 
   initform=${regdir}/init_tform.mat
 
@@ -1166,14 +1196,14 @@ function main() {
   useprincax=0  # rotation searched around principal axis
   localiter=500 # num of iteration for optimization at search point
 
-  # Out Allen
-  initallen=${regdir}/init_allen.nii.gz
+  # Out atlas
+  initatlas=${regdir}/init_"${atlas}".nii.gz
 
-  initclarallenreg "${clarlnk}" "${allenref}" "${initform}" "${deg}" "${radfrac}" "${useprincax}" "${localiter}" "${initallen}"
+  initclaratlasreg "${clarlnk}" "${atlasref}" "${initform}" "${deg}" "${radfrac}" "${useprincax}" "${localiter}" "${initatlas}"
 
   #---------------------------
 
-  # 2b) Register to Allen atlas
+  # 2b) Register to atlas
 
   # Parameters:
 
@@ -1188,18 +1218,18 @@ function main() {
   # get num of threads
   thrds=$(nproc)
 
-  # Out Allen
-  antsallen=${regdir}/allen_clar_antsWarped.nii.gz
+  # Out atlas
+  antsatlas=${regdir}/"${atlas}"_clar_antsWarped.nii.gz
 
-  regclarallen "${clarroi}" "${initallen}" "${trans}" "${spldist}" "${rad}" "${prec}" "${thrds}" "${antsallen}"
+  regclaratlas "${clarroi}" "${initatlas}" "${trans}" "${spldist}" "${rad}" "${prec}" "${thrds}" "${antsatlas}"
 
   #---------------------------
 
-  # 3) Warp Allen labels to original CLARITY (down sampled 2x)
+  # 3) Warp atlas labels to original CLARITY (down sampled 2x)
 
   # Tforms
-  antswarp=${regdir}/allen_clar_ants1Warp.nii.gz
-  antsaff=${regdir}/allen_clar_ants0GenericAffine.mat
+  antswarp=${regdir}/"${atlas}"_clar_ants1Warp.nii.gz
+  antsaff=${regdir}/"${atlas}"_clar_ants0GenericAffine.mat
 
   # Out lbls
   wrplbls=${regdirfinal}/${lblsname}_clar_downsample.nii.gz
@@ -1222,29 +1252,29 @@ function main() {
 
   # orgclar, tiflbls_zstack , tifdir_reg, tifdir_regfinal
 
-  warpallenlbls "${smclar}" "${lbls}" "${antswarp}" "${antsaff}" "${initform}" "${wrplbls}" \
+  warpatlaslbls "${smclar}" "${lbls}" "${antswarp}" "${antsaff}" "${initform}" "${wrplbls}" \
     "${ortlbls}" "${swplbls}" "${tiflbls}" "${inclar}" "${reslbls}" "${restif}" "${vox}" \
     "${smclarres}" "${inclar}" "${orgortlbls}" "${lblsorgnii}" "${wrplblsorg}" "${unpadtif}" \
     "${orgclar}" "${tiflblszstack}" "${tifdirreg}" "${tifdirregfinal}"
 
   #---------------------------
 
-  # 4) Warp input CLARITY to Allen
+  # 4) Warp input CLARITY to atlas
 
   # ort hres clar
   ortinclar="${regdir}"/clar_ort.nii.gz
 
-  # hres Allen
-  allenhres="${atlasdir}"/ara/template/average_template_10um.nii.gz
+  # hres atlas
+  atlashres="${atlasdir}"/ara/template/average_template_10um.nii.gz
 
   # ants inv warp
-  antsinvwarp="${regdir}"/allen_clar_ants1InverseWarp.nii.gz
+  antsinvwarp="${regdir}"/${atlas}_clar_ants1InverseWarp.nii.gz
 
   # out warp hres clar
-  regorgclar="${regdirfinal}"/clar_allen_space.nii.gz
+  regorgclar="${regdirfinal}"/clar_${atlas}_space.nii.gz
 
   if [[ "${warphres}" == 1 ]]; then
-    warpinclarallen "${inclar}" "${ort}" Cubic uint "${ortinclar}" "${allenhres}" \
+    warpinclaratlas "${inclar}" "${ort}" Cubic uint "${ortinclar}" "${atlashres}" \
       "${initform}" "${antsaff}" "${antsinvwarp}" "${regorgclar}"
   fi
 
@@ -1256,7 +1286,7 @@ function main() {
   custom_lut="${atlasdir}"/ara/ara_ants_lut.txt
   rgb_lbls="${regdir}"/"${lblsname}"_clar_downsample_rgb.nii.gz
   lbl_mask="${regdir}"/"${lblsname}"_clar_downsample_mask.nii.gz
-  mosaic="${regdirfinal}"/allen_labels_to_clar_mosaic.png
+  mosaic="${regdirfinal}"/${atlas}_labels_to_clar_mosaic.png
 
   if [[ "${savefig}" == 1 ]]; then
     createtiledimg "${smclarres}" "${clipped}" "${wrplbls}" "${rgb_lbls}" "${lbl_mask}" "${custom_lut}" "${mosaic}" "${hemi}"
@@ -1274,7 +1304,7 @@ END=$(date +%s)
 DIFF=$((END - START))
 DIFF=$((DIFF / 60))
 
-miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minutes"
+miracl utils end_state -f "Registration and atlas labels warping" -t "$DIFF minutes"
 
 # TODOs
 # TODOlp: add settings file to read for pars
@@ -1282,4 +1312,3 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 # create output file for successful completion
 command="${vox}\n${ort}"
 echo -e "${command}" >"${work_dir}/reg_final/reg_command.log"
-
