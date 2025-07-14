@@ -384,11 +384,12 @@ base=$(basename "${lbls}")
 lblsname=${base%%.*}
 
 # olfactory bulb
-if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]]; then
+if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]] || [[ "${bulb}" == "0" ]]; then
   bulb=0
 
   # remove olfactory bulb from labels
   custom_lbls=${regdir}/${lblsname}.nii.gz
+  printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
   c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
 
   if [[ "${hemi}" == "split" ]]; then
@@ -883,10 +884,10 @@ function warpallenlbls() {
     firstslice="${orgclar}/$(ls "${orgclar}" | head -n1)"
   else
     find_channel_files() {
-        local channel_pattern="${cp}${cn}"
-        find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
+      local channel_pattern="${cp}${cn}"
+      find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
     }
-    
+
     orgclarz=$(find_channel_files | wc -l)
     firstslice=$(find_channel_files -print | head -n 1)
   fi
@@ -1282,4 +1283,3 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 # create output file for successful completion
 command="${vox}\n${ort}"
 echo -e "${command}" >"${work_dir}/reg_final/reg_command.log"
-
