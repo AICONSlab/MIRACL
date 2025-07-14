@@ -722,15 +722,15 @@ fi
 # Generate label mask at depth of ROI
 deep_lbls=annotation_hemi_${hemi}_??um_clar_space_downsample_depth_${depth}.nii.gz
 
-if [[ ! -f ${deep_lbls} ]]; then
+if ! compgen -G "$deep_lbls" > /dev/null; then
 
     printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
     echo "miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}"
     miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
 
-    echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
-    c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
+    # echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
+    # c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
 else
 
@@ -865,12 +865,12 @@ for dog_sigma in ${dog//,/ }; do
                 if [[ ! -f "${tracts}" ]]; then
                     if [[ -n "${rk2}" ]]; then
                         printf "\n miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask}  \
-                                   -dog ${dog_sigma} -gauss ${gauss_sigma} -angle ${angle_val} -sl ${step} -o ${out_dir} -sl -r \n"
+                                   --dog ${dog_sigma} --gauss ${gauss_sigma} --angle ${angle_val} -sl ${step} -o ${out_dir} -sl -r \n"
                         miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask} \
                                                          -g ${dog_sigma} -k ${gauss_sigma} -a ${angle_val} -sl ${step} -o ${out_dir} -r
                     else
                         printf "\n miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask}  \
-                                   -dog ${dog_sigma} -gauss ${gauss_sigma} -angle ${angle_val} -sl ${step} -o ${out_dir} \n"
+                                   --dog ${dog_sigma} --gauss ${gauss_sigma} --angle ${angle_val} -sl ${step} -o ${out_dir} \n"
                         miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask} \
                                                          -g ${dog_sigma} -k ${gauss_sigma} -a ${angle_val} -sl ${step} -o ${out_dir}
                     fi
