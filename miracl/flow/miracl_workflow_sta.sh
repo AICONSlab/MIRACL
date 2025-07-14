@@ -60,6 +60,7 @@ function usage()
             -a: [ Tracking angle threshold ]
 
         optional arguments:
+            -w: Working directory (default: current working directory)
             -d: Downsample ratio (default: 5)
             -c: Output channel name
             -n: Chan # for extracting single channel from multiple channel data (default: 0)
@@ -235,6 +236,11 @@ if [[ "$#" -gt 1 ]]; then
         down="$2"
         shift
         ;;
+      
+      -w|--work_dir)
+        work_dir="$2"
+        shift
+        ;;
 
       -c|--chan)
         chan="$2"
@@ -383,11 +389,10 @@ if [[ "$#" -gt 1 ]]; then
     
   if [[ "${down}" == None ]];
 	then
-		down=5
-  else
-    # Check if downsample value is single digit and prepend 0 if true
-    printf -v down "%02d" $down
+		down="05"
 	fi
+  # Check if downsample value is single digit and prepend 0 if true
+  printf -v down "%02d" $down
 
   if [[ "${hemi}" == None ]] || ([[ "${hemi}" != "split" ]] && [[ "${hemi}" != "combined" ]]);
   then
@@ -413,6 +418,13 @@ if [[ "$#" -gt 1 ]]; then
     angle="25,35"
   fi
 
+  if [[ "${work_dir}" == None ]];
+  then
+    work_dir=$(pwd)
+  else
+    printf "\n Working directory set to ${work_dir} \n"
+  fi
+
   if [[ "${chan}" == None ]];
   then
     chan="virus"
@@ -428,12 +440,12 @@ if [[ "$#" -gt 1 ]]; then
     chanp=""
   fi
 
-  if [[ "${vx}" == None ]] || ! [[ "${vx}" =~ ^[0-9]+$ ]];
+  if [[ "${vx}" == "None" ]] || ! [[ "${vx}" =~ ^[0-9]+([.][0-9]+)?$ ]];  # modified to allow decimal values
   then
     vx=5
   fi
 
-  if [[ "${vz}" == None ]] || ! [[ "${vz}" =~ ^[0-9]+$ ]];
+  if [[ "${vz}" == "None" ]] || ! [[ "${vz}" =~ ^[0-9]+([.][0-9]+)?$ ]];  # modified to allow decimal values
   then
     vz=5
   fi
@@ -465,7 +477,7 @@ if [[ "$#" -gt 1 ]]; then
 
   if [[ "${downz}" == "None" ]];
   then
-    downz=1
+    downz=5
   fi
 
   # This is a temporary fix as the range-kutta method does not currently work
@@ -591,7 +603,7 @@ else
     printf "\n Chosen vz: $vz \n"
 
     downz="$(echo -e "${arr[16]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
-    if [[ -z "${downz}" ]]; then downz=1; fi
+    if [[ -z "${downz}" ]]; then downz=5; fi
     printf "\n Chosen down-sample in z: $downz \n"
 
     dilationfx="$(echo -e "${arr[17]}" | cut -d ':' -f 2 | tr -d '[:space:]')"
@@ -655,19 +667,19 @@ fi
 # ---------------------------
 # Call conversion to nii
 
-nii_file=${indir}/${nii}_${down}x_down_${chan}_chan.nii.gz
+nii_file=${work_dir}/conv_final/${nii}_${down}x_down_${chan}_chan.nii.gz
 
 if [[ ! -f ${nii_file} ]]; then
 
     printf "\n Running conversion to nii with the following command: \n"
 
     if [[ -n ${chanp} ]]; then
-        printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan} -cn ${chann} -cp ${chanp} \n"
-        miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} \
+        printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -w ${work_dir} -dz ${downz} -ch ${chan} -cn ${chann} -cp ${chanp} \n"
+        miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -w ${work_dir} -dz ${downz} \
                                        -ch ${chan} -cn ${chann} -cp ${chanp} -vx ${vx} -vz ${vz}
     else
-        printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan}\n"
-        miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -dz ${downz} -ch ${chan} -vx ${vx} -vz ${vz}
+        printf "\n miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -w ${work_dir} -dz ${downz} -ch ${chan}\n"
+        miracl conv tiff_nii -f ${indir} -d ${down} -o ${nii} -w ${work_dir} -dz ${downz} -ch ${chan} -vx ${vx} -vz ${vz}
     fi
 
 else
@@ -710,15 +722,15 @@ fi
 # Generate label mask at depth of ROI
 deep_lbls=annotation_hemi_${hemi}_??um_clar_space_downsample_depth_${depth}.nii.gz
 
-if [[ ! -f ${deep_lbls} ]]; then
+if ! compgen -G "$deep_lbls" > /dev/null; then
 
     printf "\n Generating grand parent labels for ${lbl} at depth ${depth} \n"
 
     echo "miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}"
     miracl lbls gp_at_depth -l ${reg_lbls} -d ${depth}
 
-    echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
-    c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
+    # echo "c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}"
+    # c3d ${reg_lbls} ${deep_lbls} -copy-transform -o ${deep_lbls}
 
 else
 
@@ -853,12 +865,12 @@ for dog_sigma in ${dog//,/ }; do
                 if [[ ! -f "${tracts}" ]]; then
                     if [[ -n "${rk2}" ]]; then
                         printf "\n miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask}  \
-                                   -dog ${dog_sigma} -gauss ${gauss_sigma} -angle ${angle_val} -sl ${step} -o ${out_dir} -sl -r \n"
+                                   --dog ${dog_sigma} --gauss ${gauss_sigma} --angle ${angle_val} -sl ${step} -o ${out_dir} -sl -r \n"
                         miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask} \
                                                          -g ${dog_sigma} -k ${gauss_sigma} -a ${angle_val} -sl ${step} -o ${out_dir} -r
                     else
                         printf "\n miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask}  \
-                                   -dog ${dog_sigma} -gauss ${gauss_sigma} -angle ${angle_val} -sl ${step} -o ${out_dir} \n"
+                                   --dog ${dog_sigma} --gauss ${gauss_sigma} --angle ${angle_val} -sl ${step} -o ${out_dir} \n"
                         miracl sta track_tensor -i ${nii_file} -b ${brain_mask} -s ${lbl_mask} \
                                                          -g ${dog_sigma} -k ${gauss_sigma} -a ${angle_val} -sl ${step} -o ${out_dir}
                     fi

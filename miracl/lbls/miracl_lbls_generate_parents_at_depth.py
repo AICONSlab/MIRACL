@@ -247,10 +247,12 @@ def main(args):
     for pastlbl, pastparent in pastparents.items():
         replacechildren(data, parentdata, pastlbl, pastparent)
 
-    vx = img.header.get_zooms()[0]
+    # vx = img.header.get_zooms()[0]
     orgname = basename(nii).split('.')[0]
     outnii = '%s_depth_%s.nii.gz' % (orgname, d)
-    saveniiparents(parentdata, vx, outnii)
+    # saveniiparents(parentdata, vx, outnii)
+    parentnii = nib.Nifti1Image(parentdata, img.affine)
+    nib.save(parentnii, outnii)
 
     if inlbls == "Allen":
         # orient

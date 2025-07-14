@@ -864,7 +864,7 @@ function warpallenlbls() {
   # c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
 
   # get tiflbls dim
-  tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_"${vox}"um_clar_vox.tif 2)
+  tiflblsdim=$(PrintHeader "${tiflbls}" 2)
   IFS='x' read -ra dimensions <<<"$tiflblsdim"
   tiflblsx="${dimensions[0]}"
   tiflblsy="${dimensions[1]}"
