@@ -491,7 +491,7 @@ function main()
 
 	# printf "\n\nwarpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}\n\n"
 
-	warpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic short \
+	warpclartoallen ${allenref} ${inimg} ${antswarp} ${antsaff} ${initform} ${wrpclar} ${ort} Cubic ushort \
 	 ${ortclar} ${init_allen} ${comb_def} ${org_clar} ${res_org_clar} ${cp_clar} ${res_vos} ${swp_vox} ${channel}
 
 
