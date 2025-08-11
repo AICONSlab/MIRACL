@@ -29,7 +29,7 @@ warnings.simplefilter("ignore", UserWarning)
 
 
 def helpmsg(name=None):
-    return ''' Converts Tiff images to Nifti 
+    return """ Converts Tiff images to Nifti 
 
     A GUI will open to choose your:
 
@@ -62,7 +62,7 @@ def helpmsg(name=None):
       -pct, --percentile_thr Percentile value for thresholding extreme values (default: 0)
       -h, --help            Show this help message and exit
 
-    '''
+    """
 
 
 def folder_dialog(self, msg):
@@ -80,44 +80,119 @@ def folder_dialog(self, msg):
 
 
 def parsefn():
-    if len(sys.argv) >= 3 and sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
-        parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
-                                         add_help=False)
+    if len(sys.argv) >= 3 and sys.argv[-2] == "conv" and sys.argv[-1] == "tiff_nii":
+        parser = argparse.ArgumentParser(
+            description="",
+            usage=helpmsg(),
+            formatter_class=RawTextHelpFormatter,
+            add_help=False,
+        )
     else:
-        parser = argparse.ArgumentParser(description='', usage=helpmsg(), formatter_class=RawTextHelpFormatter,
-                                         add_help=False)
+        parser = argparse.ArgumentParser(
+            description="",
+            usage=helpmsg(),
+            formatter_class=RawTextHelpFormatter,
+            add_help=False,
+        )
         # parser = argparse.ArgumentParser(description=helpmsg(), formatter_class=RawTextHelpFormatter, add_help=False,
         #                                  usage='%(prog)s -f [folder] -d [down-sample ratio] -cn [chann #]'
         #                                        ' -cp [chann prefix] -ch [out chann name] -o [out nii name] -vx [x-y res]'
         #                                        ' -vz [z res] -c [center] -dz [down-sample in z]')
 
-        required = parser.add_argument_group('required arguments')
-        required.add_argument('-f', '--folder', type=str, required=True, metavar='dir',
-                              help="Input CLARITY TIFF folder/dir")
+        required = parser.add_argument_group("required arguments")
+        required.add_argument(
+            "-f",
+            "--folder",
+            type=str,
+            required=True,
+            metavar="dir",
+            help="Input CLARITY TIFF folder/dir",
+        )
 
-        optional = parser.add_argument_group('optional arguments')
+        optional = parser.add_argument_group("optional arguments")
 
-        optional.add_argument('-w', '--work_dir', type=str, metavar='', default=os.path.abspath(os.getcwd()),
-                              help="Output directory (default: working directory)")
-        optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
-        optional.add_argument('-cn', '--channum', type=int, metavar='',
-                              help="Chan # for extracting single channel from multiple channel data (default: 0)")
-        optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
-                              help="Chan prefix (string before channel number in file name). ex: C00")
-        optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
-        optional.add_argument('-o', '--outnii', type=str, metavar='',
-                              help="Output nii name (script will append downsample ratio & channel info to given name)")
-        optional.add_argument('-vx', '--resx', type=float, metavar='',
-                              help="Original resolution in x-y plane in um (default: 5)")
-        optional.add_argument('-vz', '--resz', type=float, metavar='',
-                              help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ")
-        optional.add_argument('-c', '--center', type=int, nargs='+', metavar='',
-                              help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template")
-        optional.add_argument('-dz', '--downzdim', type=int, metavar='',
-                              help="Down-sample in z dimension, binary argument, (default: 1) => yes")
-        optional.add_argument('-pd', '--prevdown', type=int, metavar='',
-                              help="Previous down-sample ratio, if already downs-sampled")
-        optional.add_argument('-pct', '--percentile_thr', type=float, metavar="", help="Percentile value for thresholding extreme values (default: None)")
+        optional.add_argument(
+            "-w",
+            "--work_dir",
+            type=str,
+            metavar="",
+            default=os.path.abspath(os.getcwd()),
+            help="Output directory (default: working directory)",
+        )
+        optional.add_argument(
+            "-d", "--down", type=int, metavar="", help="Down-sample ratio (default: 5)"
+        )
+        optional.add_argument(
+            "-cn",
+            "--channum",
+            type=int,
+            metavar="",
+            help="Chan # for extracting single channel from multiple channel data (default: 0)",
+        )
+        optional.add_argument(
+            "-cp",
+            "--chanprefix",
+            type=str,
+            metavar="",
+            help="Chan prefix (string before channel number in file name). ex: C00",
+        )
+        optional.add_argument(
+            "-ch",
+            "--channame",
+            type=str,
+            metavar="",
+            help="Output chan name (default: eyfp) ",
+        )
+        optional.add_argument(
+            "-o",
+            "--outnii",
+            type=str,
+            metavar="",
+            help="Output nii name (script will append downsample ratio & channel info to given name)",
+        )
+        optional.add_argument(
+            "-vx",
+            "--resx",
+            type=float,
+            metavar="",
+            help="Original resolution in x-y plane in um (default: 5)",
+        )
+        optional.add_argument(
+            "-vz",
+            "--resz",
+            type=float,
+            metavar="",
+            help="Original thickness (z-axis resolution / spacing between slices) in um (default: 5) ",
+        )
+        optional.add_argument(
+            "-c",
+            "--center",
+            type=int,
+            nargs="+",
+            metavar="",
+            help="Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template",
+        )
+        optional.add_argument(
+            "-dz",
+            "--downzdim",
+            type=int,
+            metavar="",
+            help="Down-sample in z dimension, binary argument, (default: 1) => yes",
+        )
+        optional.add_argument(
+            "-pd",
+            "--prevdown",
+            type=int,
+            metavar="",
+            help="Previous down-sample ratio, if already downs-sampled",
+        )
+        optional.add_argument(
+            "-pct",
+            "--percentile_thr",
+            type=float,
+            metavar="",
+            help="Percentile value for thresholding extreme values (default: None)",
+        )
 
         # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -128,33 +203,52 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    if sys.argv[-2] == 'conv' and sys.argv[-1] == 'tiff_nii':
+    if sys.argv[-2] == "conv" and sys.argv[-1] == "tiff_nii":
 
         print("Running in GUI mode")
 
-        title = 'Tiff to Nii conversion'
-        dirs = ['Input tiff folder']
-        fields = ['Output dir (def = working dir)', 'Out nii name (def = clarity)', 'Downsample ratio (def = 5)',
-                  'chan # (def = 1)', 'chan prefix','Out chan name (def = eyfp)', 'Resolution (x,y) (def = 5 "um")',
-                  'Thickness (z) (def = 5 "um")','center (def = 0,0,0)', 'Downsample in z (def = 1)',
-                  'Prev Downsampling (def = 1 -> not downsampled)']
+        title = "Tiff to Nii conversion"
+        dirs = ["Input tiff folder"]
+        fields = [
+            "Output dir (def = working dir)",
+            "Out nii name (def = clarity)",
+            "Downsample ratio (def = 5)",
+            "chan # (def = 1)",
+            "chan prefix",
+            "Out chan name (def = eyfp)",
+            'Resolution (x,y) (def = 5 "um")',
+            'Thickness (z) (def = 5 "um")',
+            "center (def = 0,0,0)",
+            "Downsample in z (def = 1)",
+            "Prev Downsampling (def = 1 -> not downsampled)",
+        ]
         # field_names = ['outnii', 'd', 'chann', 'chanp', 'chan', 'vx', 'vz', 'cent', 'downz', 'pd']
 
         app = QApplication(sys.argv)
-        menu, linedits, labels = gui_opts.OptsMenu(title=title, dirs=dirs, fields=fields, helpfun=helpmsg())
+        menu, linedits, labels = gui_opts.OptsMenu(
+            title=title, dirs=dirs, fields=fields, helpfun=helpmsg()
+        )
         menu.show()
         app.exec_()
         app.processEvents()
 
         indirstr = labels[dirs[0]].text()
         indir = str(indirstr.split(":")[1]).lstrip()
-        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+        assert os.path.exists(indir), (
+            "%s does not exist ... please check path and rerun script" % indir
+        )
 
         # Initialize default params
 
-        work_dir = str(linedits[fields[0]].text()) if linedits[fields[0]].text() else Path.cwd().resolve()
+        work_dir = (
+            str(linedits[fields[0]].text())
+            if linedits[fields[0]].text()
+            else Path.cwd().resolve()
+        )
 
-        outnii = str(linedits[fields[1]].text()) if linedits[fields[1]].text() else 'clarity'
+        outnii = (
+            str(linedits[fields[1]].text()) if linedits[fields[1]].text() else "clarity"
+        )
         # assert isinstance(outnii, str), '-outnii not a string'
 
         d = int(linedits[fields[2]].text()) if linedits[fields[2]].text() else 5
@@ -165,11 +259,11 @@ def parse_inputs(parser, args):
 
         chanp = str(linedits[fields[4]].text()) if linedits[fields[4]].text() else None
 
-        chan = str(linedits[fields[5]].text()) if linedits[fields[5]].text() else 'eyfp'
+        chan = str(linedits[fields[5]].text()) if linedits[fields[5]].text() else "eyfp"
 
-        vx = float(linedits[fields[6]].text()) if linedits[fields[6]].text() else 5.
+        vx = float(linedits[fields[6]].text()) if linedits[fields[6]].text() else 5.0
 
-        vz = float(linedits[fields[7]].text()) if linedits[fields[7]].text() else 5.
+        vz = float(linedits[fields[7]].text()) if linedits[fields[7]].text() else 5.0
 
         cent = linedits[fields[8]].text() if linedits[fields[8]].text() else [0, 0, 0]
 
@@ -177,7 +271,9 @@ def parse_inputs(parser, args):
 
         pd = int(linedits[fields[10]].text()) if linedits[fields[10]].text() else 1
 
-        pct_thr = float(linedits[fields[11]].text()) if linedits[fields[11]].text() else 0.0
+        pct_thr = (
+            float(linedits[fields[11]].text()) if linedits[fields[11]].text() else 0.0
+        )
 
     else:
 
@@ -187,19 +283,24 @@ def parse_inputs(parser, args):
         assert isinstance(args.folder, str)
         indir = args.folder
 
-        assert os.path.exists(indir), '%s does not exist ... please check path and rerun script' % indir
+        assert os.path.exists(indir), (
+            "%s does not exist ... please check path and rerun script" % indir
+        )
 
         work_dir = args.work_dir
 
         if args.outnii is None:
-            outnii = 'clarity'
+            outnii = "clarity"
         else:
             assert isinstance(args.outnii, str)
             outnii = args.outnii
 
         if args.down is None:
             d = 5
-            print("\n down-sample ratio not specified ... choosing default value of %d" % d)
+            print(
+                "\n down-sample ratio not specified ... choosing default value of %d"
+                % d
+            )
         else:
             assert isinstance(args.down, int)
             d = args.down
@@ -212,15 +313,20 @@ def parse_inputs(parser, args):
             chann = args.channum
 
             if args.chanprefix is None:
-                sys.exit('-cp (channel prefix) not specified ')
+                sys.exit("-cp (channel prefix) not specified ")
 
         # chanp = args.chanprefix if args.chanprefix is not None else None
-        chanp = args.chanprefix if args.chanprefix != "None" else None if args.chanprefix is not None else None
-
+        chanp = (
+            args.chanprefix
+            if args.chanprefix != "None"
+            else None if args.chanprefix is not None else None
+        )
 
         if args.channame is None:
-            chan = 'eyfp'
-            print("\n channel name not specified ... choosing default value of %s" % chan)
+            chan = "eyfp"
+            print(
+                "\n channel name not specified ... choosing default value of %s" % chan
+            )
         else:
             assert isinstance(args.channame, str)
             chan = args.channame
@@ -256,22 +362,37 @@ def parse_inputs(parser, args):
     vx /= float(1000)  # in um
     vz /= float(1000)
 
-    return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr
+    return (
+        indir,
+        work_dir,
+        outnii,
+        d,
+        chann,
+        chanp,
+        chan,
+        vx,
+        vz,
+        cent,
+        downz,
+        pd,
+        pct_thr,
+    )
 
 
 # ---------
 # Logging fn
 
+
 def scriptlog(logname):
     class StreamToLogger(object):
         """
-       Fake file-like stream object that redirects writes to a logger instance.
-       """
+        Fake file-like stream object that redirects writes to a logger instance.
+        """
 
         def __init__(self, logger, log_level=logging.INFO):
             self.logger = logger
             self.log_level = log_level
-            self.linebuf = ''
+            self.linebuf = ""
 
         def write(self, buf):
             for line in buf.rstrip().splitlines():
@@ -283,15 +404,16 @@ def scriptlog(logname):
     logging.basicConfig(
         level=logging.DEBUG,
         filename="%s" % logname,
-        format='%(asctime)s:%(message)s',
-        filemode='w')
+        format="%(asctime)s:%(message)s",
+        filemode="w",
+    )
 
-    stdout_logger = logging.getLogger('STDOUT')
+    stdout_logger = logging.getLogger("STDOUT")
     handler = logging.StreamHandler()
     stdout_logger.addHandler(handler)
     sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
 
-    stderr_logger = logging.getLogger('STDERR')
+    stderr_logger = logging.getLogger("STDERR")
     stderr_logger.addHandler(handler)
     sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
@@ -300,8 +422,9 @@ def scriptlog(logname):
 
 # sort fn
 
+
 def numericalsort(value):
-    numbers = re.compile(r'(\d+)')
+    numbers = re.compile(r"(\d+)")
     parts = numbers.split(value)
     parts[1::2] = map(int, parts[1::2])
     return parts
@@ -309,12 +432,12 @@ def numericalsort(value):
 
 # ---------
 
+
 def converttiff2nii(d, i, x, newdata, tifx):
-    """
-    """
+    """ """
 
     # down ratio
-    down = (1.0 / int(d))
+    down = 1.0 / int(d)
 
     sys.stdout.write("\r processing slice %d ..." % i)
     sys.stdout.flush()
@@ -340,6 +463,7 @@ def percentile_threshold(data, percentile_thr):
     thresholded_img = np.clip(data, percentile_001, percentile_9999)
 
     return thresholded_img
+
 
 def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
     # array type
@@ -372,7 +496,7 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
         print("\n\n down-sampling in the z dimension")
 
         sp_inter = 1 if data_array.shape[0] < 5000 else 0
-        down = (1.0 / int(dz))
+        down = 1.0 / int(dz)
         zoom = [1, 1, down]
         data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)
 
@@ -391,11 +515,14 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
 
 # ---------
 
+
 def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
-    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr = parse_inputs(parser, args)
+    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr = (
+        parse_inputs(parser, args)
+    )
 
     print("\n Converting with the following settings:")
     print(f"  indir:      {indir}")
@@ -416,18 +543,22 @@ def main(args):
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)
 
+    sys.exit()
+
     # Get file list
 
     # sort files
     if chanp is None:
         file_list = sorted(glob.glob("%s/*.tif*" % indir), key=numericalsort)
     else:
-        file_list = sorted(glob.glob("%s/*%s%01d*.tif*" % (indir, chanp, chann)), key=numericalsort)
+        file_list = sorted(
+            glob.glob("%s/*%s%01d*.tif*" % (indir, chanp, chann)), key=numericalsort
+        )
 
     # make out dir
     # If function is called as part of the ACE workflow, the output directory
     # of the ACE workflow will be used
-    ace_flow_conv_output_folder = os.path.join(work_dir, 'conv_final')
+    ace_flow_conv_output_folder = os.path.join(work_dir, "conv_final")
     # outdir = ace_flow_conv_output_folder if Path(ace_flow_conv_output_folder).is_dir else os.path.join(work_dir, 'niftis')
     outdir = ace_flow_conv_output_folder
 
@@ -437,7 +568,7 @@ def main(args):
     # convert tiff files in //
     print("\n converting TIFF images to NII in parallel using %02d cpus \n" % ncpus)
 
-    memap = '%s/tmp_array_memmap.map' % outdir
+    memap = "%s/tmp_array_memmap.map" % outdir
 
     tif = cv2.imread(file_list[0], -1)
 
@@ -446,10 +577,14 @@ def main(args):
     tifxd = int(round(float(tifx) / d))
     tifyd = int(round(float(tify) / d))
 
-    newdata = np.memmap(memap, dtype=float, shape=(len(file_list), tifxd, tifyd), mode='w+')
+    newdata = np.memmap(
+        memap, dtype=float, shape=(len(file_list), tifxd, tifyd), mode="w+"
+    )
 
     Parallel(n_jobs=ncpus, backend="threading")(
-        delayed(converttiff2nii)(d, i, x, newdata, tifx) for i, x in enumerate(file_list))
+        delayed(converttiff2nii)(d, i, x, newdata, tifx)
+        for i, x in enumerate(file_list)
+    )
 
     # stack slices
 
@@ -460,18 +595,20 @@ def main(args):
     # for prev down-sampled
     nd = d * pd
 
-    stackname = '%s/%s_%02dx_down_%s_chan.nii.gz' % (outdir, outnii, nd, chan)
+    stackname = "%s/%s_%02dx_down_%s_chan.nii.gz" % (outdir, outnii, nd, chan)
 
     nvx = vx * pd
     nvz = vz * pd
-    
+
     newdata = percentile_threshold(newdata, pct_thr) if pct_thr > 0 else newdata
     savenii(newdata, d, stackname, downz, nvx, nvz, cent)
 
     # clear tmp memmap
     os.remove(memap)
 
-    print("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - starttime))
+    print(
+        "\n conversion done in %s ... Have a good day!\n" % (datetime.now() - starttime)
+    )
 
 
 if __name__ == "__main__":

@@ -32,8 +32,12 @@ from miracl.flow.mapl3.mapl3_workflow_cli_parser_args import (
     reg_object_dict as reg_mapl3_objs,
     conv_object_dict as conv_mapl3_objs,
 )
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_interface_folder import (
+    InterfaceSubfolders as mapl3_interface_folders,
+)
 
 from miracl.system.utilfns.utilfn_cli_parser_creator import MiraclArgumentProcessor
+from miracl.system.utilfns.utilfn_mapl3_base_folder import MAPL3BaseFolderHandler
 from miracl import miracl_logger
 from logging import Logger
 
@@ -121,8 +125,8 @@ class RegistrationParams:
 
     :param mapl3_objs: Dictionary containing MAPL3 objects
     :type mapl3_objs: dict
-    :param subfolder_objs: Dictionary containing subfolder objects
-    :type subfolder_objs: dict
+    # :param subfolder_objs: Dictionary containing subfolder objects
+    # :type subfolder_objs: dict
     :param reg_output: Output object for registration
     :type reg_output: MiraclObj
     :param nii_file: Path to the NIfTI file
@@ -130,7 +134,7 @@ class RegistrationParams:
     """
 
     mapl3_objs: dict
-    subfolder_objs: dict
+    # subfolder_objs: dict
     reg_output: MiraclObj
     nii_file: Path
 
@@ -248,7 +252,7 @@ class MIRACLRegistration(Registration):
         -{params.mapl3_objs['reg_clar_allen_reg'].nii_folder.cli_s_flag} \
         {params.nii_file} \
         -{params.mapl3_objs['reg_clar_allen_reg'].tiff_folder.cli_s_flag} \
-        {params.subfolder_objs['patch_stacking_output'].dirpath} \
+        {params.mapl3_objs['seg_genpatch'].input.dirpath} \
         -{params.mapl3_objs['reg_clar_allen_reg'].output_path.cli_s_flag} \
         {params.reg_output.dirpath} \
         -{params.mapl3_objs['reg_clar_allen_reg'].orient_code.cli_s_flag} \
@@ -295,14 +299,20 @@ def main(objs: dict) -> None:
     miracl_registration = MIRACLRegistration()
     miracl_conversion = MIRACLConversion()
 
-    # Run MAPL3 module interface and return subfolder objs dict
-    mapl3_subfolders_objs_dict = mapl3_interface.call_mapl3_interface(
-        Mapl3InterfaceParams(objs=objs)
+    # Check if the base folder for the results is correct
+    # This will also be checked in the MAPL3 module interface
+    # The reason for the duplication is that the base folder needs to be
+    # available in the module as well as in the workflow
+    MAPL3BaseFolderHandler.handle_dirpath(
+        mapl3_interface_folders.mapl3_results_base_folder,
+        objs["seg_results_folder"].output,
     )
 
     # Assign base conversion output folder
     WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath = (
-        mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "conv"
+        # mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "conv"
+        mapl3_interface_folders.mapl3_results_base_folder.dirpath
+        / "conv"
     )
     UtilfnsPaths.ensure_folder_exists(
         WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath
@@ -318,7 +328,9 @@ def main(objs: dict) -> None:
 
     # Assign base registration output folder
     WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder.dirpath = (
-        mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "reg"
+        # mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "reg"
+        mapl3_interface_folders.mapl3_results_base_folder.dirpath
+        / "reg"
     )
     UtilfnsPaths.ensure_folder_exists(
         WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder.dirpath
@@ -343,10 +355,14 @@ def main(objs: dict) -> None:
     miracl_registration.call_miracl_registration(
         RegistrationParams(
             mapl3_objs=objs,
-            subfolder_objs=mapl3_subfolders_objs_dict,
+            # subfolder_objs=mapl3_subfolders_objs_dict,
             reg_output=WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder,
             nii_file=nii_file_from_conv,
         )
+    )
+    # Run MAPL3 module interface and return subfolder objs dict
+    mapl3_subfolders_objs_dict = mapl3_interface.call_mapl3_interface(
+        Mapl3InterfaceParams(objs=objs)
     )
 
 

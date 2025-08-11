@@ -14,6 +14,7 @@ from typing import Dict, Any
 from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
 
 from miracl.system.utilfns.utilfns_paths import UtilfnsPaths
+from miracl.system.utilfns.utilfn_mapl3_base_folder import MAPL3BaseFolderHandler
 from miracl import miracl_logger
 
 # Import MAPL3 scripts
@@ -512,12 +513,24 @@ def main(objs: Dict[str, Any]) -> Dict[str, MiraclObj]:
 
     # FIX: Do I need another check here with the utils fn for filepaths?
 
-    mapl3_interface_folders.mapl3_results_base_folder.dirpath = (
-        objs["seg_genpatch"].output.dirpath / "mapl3"
+    logger.debug(f"objs dict: {objs}")
+
+    # Check if the base folder for the results is correct
+    # This is necessary in case the MAPL3 module is called as part of a
+    # workflow that needed the base results folder before calling the MAPL3
+    # module
+    MAPL3BaseFolderHandler.handle_dirpath(
+        mapl3_interface_folders.mapl3_results_base_folder,
+        objs["seg_results_folder"].output,
     )
-    UtilfnsPaths.ensure_folder_exists(
-        mapl3_interface_folders.mapl3_results_base_folder.dirpath
-    )
+    # mapl3_interface_folders.mapl3_results_base_folder.dirpath = (
+    #     # objs["seg_genpatch"].output.dirpath / "mapl3"
+    #     objs["seg_results_folder"].output.dirpath
+    #     / "mapl3"
+    # )
+    # UtilfnsPaths.ensure_folder_exists(
+    #     mapl3_interface_folders.mapl3_results_base_folder.dirpath
+    # )
 
     # Create segmentation subfolder under base folder
     mapl3_interface_folders.mapl3_results_seg_folder.dirpath = (

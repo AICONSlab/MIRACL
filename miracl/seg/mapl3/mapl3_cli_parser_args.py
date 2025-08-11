@@ -1,3 +1,6 @@
+from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_base import (
+    MAPL3Base as seg_results_folder,
+)
 from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch import (
     GeneratePatch as seg_genpatch,
 )
@@ -15,11 +18,18 @@ from miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking import (
 )
 
 mapl3_groups_dict = {
+    "results_folder": {
+        "title": "REQUIRED ARGS",
+        "description": "args required to run MAPL3",
+        "args": [
+            seg_results_folder.output,
+            seg_genpatch.input,
+        ],
+    },
     "generate_patch": {
         "title": "generate patch arguments",
         "description": "arguments passed to generate patch fn",
         "args": [
-            seg_genpatch.input,
             seg_genpatch.output,
             seg_genpatch.cpu_load,
             seg_genpatch.patch_size,
@@ -75,6 +85,7 @@ mapl3_groups_dict = {
 }
 
 mapl3_object_dict = {
+    "seg_results_folder": seg_results_folder,
     "seg_genpatch": seg_genpatch,
     "seg_preprocessing_parallel": seg_preprocessing_parallel,
     "seg_inference": seg_inference,
