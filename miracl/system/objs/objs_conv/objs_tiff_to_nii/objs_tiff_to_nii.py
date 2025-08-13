@@ -6,6 +6,9 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     WidgetType,
 )
 from pathlib import Path
+from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+    CliGroup,
+)
 
 
 class ConvTiffNiiObjs:
@@ -16,7 +19,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="f",
         cli_l_flag="folder",
         flow={
-            "ace": {"cli_s_flag": "actn_f", "cli_l_flag": "actn_folder"},
+            "ace": {
+                "cli_s_flag": "actn_f",
+                "cli_l_flag": "actn_folder",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_f", "cli_l_flag": "mctn_folder"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -37,7 +44,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="w",
         cli_l_flag="work_dir",
         flow={
-            "ace": {"cli_s_flag": "actn_w", "cli_l_flag": "actn_work_dir"},
+            "ace": {
+                "cli_s_flag": "actn_w",
+                "cli_l_flag": "actn_work_dir",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_w", "cli_l_flag": "mctn_work_dir"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -57,7 +68,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="d",
         cli_l_flag="down",
         flow={
-            "ace": {"cli_s_flag": "actn_d", "cli_l_flag": "actn_down"},
+            "ace": {
+                "cli_s_flag": "actn_d",
+                "cli_l_flag": "actn_down",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_d", "cli_l_flag": "mctn_down"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -79,7 +94,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="cn",
         cli_l_flag="channum",
         flow={
-            "ace": {"cli_s_flag": "actn_cn", "cli_l_flag": "actn_channum"},
+            "ace": {
+                "cli_s_flag": "actn_cn",
+                "cli_l_flag": "actn_channum",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_cn", "cli_l_flag": "mctn_channum"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -104,7 +123,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="cp",
         cli_l_flag="chanprefix",
         flow={
-            "ace": {"cli_s_flag": "actn_cp", "cli_l_flag": "actn_chanprefix"},
+            "ace": {
+                "cli_s_flag": "actn_cp",
+                "cli_l_flag": "actn_chanprefix",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_cp", "cli_l_flag": "mctn_chanprefix"},
         },
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
@@ -129,7 +152,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="ch",
         cli_l_flag="channame",
         flow={
-            "ace": {"cli_s_flag": "actn_ch", "cli_l_flag": "actn_channame"},
+            "ace": {
+                "cli_s_flag": "actn_ch",
+                "cli_l_flag": "actn_channame",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_ch", "cli_l_flag": "mctn_channame"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -153,7 +180,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="o",
         cli_l_flag="outnii",
         flow={
-            "ace": {"cli_s_flag": "actn_o", "cli_l_flag": "actn_outnii"},
+            "ace": {
+                "cli_s_flag": "actn_o",
+                "cli_l_flag": "actn_outnii",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_o", "cli_l_flag": "mctn_outnii"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -177,7 +208,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="vx",
         cli_l_flag="resx",
         flow={
-            "ace": {"cli_s_flag": "actn_vx", "cli_l_flag": "actn_resx"},
+            "ace": {
+                "cli_s_flag": "actn_vx",
+                "cli_l_flag": "actn_resx",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_vx", "cli_l_flag": "mctn_resx"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -198,7 +233,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="vz",
         cli_l_flag="resz",
         flow={
-            "ace": {"cli_s_flag": "actn_vz", "cli_l_flag": "actn_resz"},
+            "ace": {
+                "cli_s_flag": "actn_vz",
+                "cli_l_flag": "actn_resz",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_vz", "cli_l_flag": "mctn_resz"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -219,7 +258,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="c",
         cli_l_flag="center",
         flow={
-            "ace": {"cli_s_flag": "actn_c", "cli_l_flag": "actn_center"},
+            "ace": {
+                "cli_s_flag": "actn_c",
+                "cli_l_flag": "actn_center",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_c", "cli_l_flag": "mctn_center"},
         },
         cli_obj_type=ArgumentType.LIST,
@@ -242,7 +285,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="dz",
         cli_l_flag="downzdim",
         flow={
-            "ace": {"cli_s_flag": "actn_dz", "cli_l_flag": "actn_downzdim"},
+            "ace": {
+                "cli_s_flag": "actn_dz",
+                "cli_l_flag": "actn_downzdim",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_dz", "cli_l_flag": "mctn_downzdim"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -263,7 +310,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="pd",
         cli_l_flag="prevdown",
         flow={
-            "ace": {"cli_s_flag": "actn_pd", "cli_l_flag": "actn_prevdown"},
+            "ace": {
+                "cli_s_flag": "actn_pd",
+                "cli_l_flag": "actn_prevdown",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_pd", "cli_l_flag": "mctn_prevdown"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -284,7 +335,11 @@ class ConvTiffNiiObjs:
         cli_s_flag="pct",
         cli_l_flag="percentile_thr",
         flow={
-            "ace": {"cli_s_flag": "actn_pct", "cli_l_flag": "actn_percentile_thr"},
+            "ace": {
+                "cli_s_flag": "actn_pct",
+                "cli_l_flag": "actn_percentile_thr",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
             "mapl3": {"cli_s_flag": "mctn_pct", "cli_l_flag": "mctn_percentile_thr"},
         },
         cli_obj_type=ArgumentType.FLOAT,

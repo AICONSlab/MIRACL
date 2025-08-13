@@ -21,7 +21,8 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_i",
                 "cli_l_flag": "arca_input",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REQUIRED,
+                "required": True,
             },
             "mapl3": {"cli_s_flag": "mrca_i", "cli_l_flag": "mrca_input"},
         },
