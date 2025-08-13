@@ -1,17 +1,30 @@
 from typing import Any, Optional, List, Union, Tuple, Dict
-from typing_extensions import Literal
+from typing_extensions import Literal, TypedDict
 from pydantic import (
     BaseModel,
     Field,
     validator,
+    root_validator,
     DirectoryPath,
     FilePath,
+    FieldValidationInfo,
     field_validator,
 )
-from enum import Enum
+from miracl.system.datamodels.miraclobj_enums import (
+    ModuleType,
+    ArgumentType,
+    ArgumentAction,
+    WidgetType,
+    InputRestrictionType,
+)
+
+from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+    CliGroup,
+)
+
 from argparse import ArgumentTypeError
 from pathlib import Path
-
+import re
 
 ############
 # UTIL FNS #
@@ -32,53 +45,7 @@ def parser_true_or_false(arg: str) -> bool:
 # ENUMS #
 #########
 
-
-class ArgumentType(str, Enum):
-    STRING = "str"
-    INTEGER = "int"
-    FLOAT = "float"
-    BOOLEAN = "bool"
-    LIST = "list"
-    CUSTOM_BOOL = "custom_bool"
-
-    @property
-    def python_type(self):
-        return {
-            "str": str,
-            "int": int,
-            "float": float,
-            "bool": bool,
-            "list": list,
-            "custom_bool": parser_true_or_false,
-        }[self.value]
-
-
-class ArgumentAction(str, Enum):
-    STORE = "store"
-    STORE_CONST = "store_const"
-    STORE_TRUE = "store_true"
-    STORE_FALSE = "store_false"
-    APPEND = "append"
-    APPEND_CONST = "append_const"
-    COUNT = "count"
-    HELP = "help"
-    VERSION = "version"
-
-
-class WidgetType(str, Enum):
-    LINE_EDIT = "line_edit"  # Text input (QLineEdit)
-    SPINBOX = "spinbox"  # Integer input (QSpinBox)
-    DOUBLE_SPINBOX = "double_spinbox"  # Float input (QDoubleSpinBox)
-    DROPDOWN = "dropdown"  # Multiple choice (QComboBox)
-    PATH_INPUT = "path_input"  # Custom path input
-
-
-class InputRestrictionType(str, Enum):
-    STR = "str"
-    STRCON = "strcon"
-    ALPHANUMERIC = "alphanumeric"
-    INT = "numeric"
-
+# Imported from miracl.system.datamodels.miraclobj_enums
 
 #################
 # CUSTOM FIELDS #
@@ -200,7 +167,7 @@ class MiraclObj(BaseModel):
         if self.filepath_field is None:
             self.filepath_field = value
         else:
-            raise ValueError("dirpath cannot be changed once set")
+            raise ValueError("filepath cannot be changed once set")
 
     obj_default: Optional[
         Union[Path, int, float, List[Any], str, Dict[str, Any], bool]
@@ -274,6 +241,12 @@ class MiraclObj(BaseModel):
         example=("height", "width", "depth"),
     )
 
+    cli_group: Optional[CliGroup] = Field(
+        None,
+        description="Argparse group the object belongs to when used in a stand-alone module",
+        example=CliGroup.SEGMENTATION,
+    )
+
     # GUI
     gui_choice_override: Optional[GuiChoiceOverrideConfig] = Field(
         None,
@@ -340,15 +313,24 @@ class MiraclObj(BaseModel):
         example="ace",
     )
 
-    flow: Optional[
-        Dict[
-            Literal["ace", "sta", "mapl3"],
-            Dict[Literal["cli_s_flag", "cli_l_flag"], str],
-        ]
-    ] = Field(
+    class FlowConfig(TypedDict, total=False):
+        cli_s_flag: str
+        cli_l_flag: str
+        required: bool
+        disabled: bool
+        cli_group: Optional[CliGroup]
+
+    flow: Optional[Dict[Literal["ace", "sta", "mapl3"], FlowConfig]] = Field(
         None,
         description="Flags for flow that the module is a part of",
-        example={"ace": {"cli_s_flag": "s", "cli_l_flag": "s_seg"}},
+        example={
+            "ace": {
+                "cli_s_flag": "s",
+                "cli_l_flag": "s_seg",
+                "required": True,
+                "disabled": True,
+            }
+        },
     )
 
     module_group: Literal[
@@ -452,6 +434,25 @@ class MiraclObj(BaseModel):
                 return obj_type.python_type(v)
             except ValueError:
                 raise ValueError(f"Cannot convert {v} to {obj_type.python_type}")
+        return v
+
+    @field_validator("cli_s_flag", "cli_l_flag", mode="before")
+    def check_flag(cls, v: str, info: FieldValidationInfo):
+        flag_name = info.field_name
+        obj_id = info.data.get("id", "unknown-id")
+        module_type_str = info.data.get("module", "unknown-module")
+
+        if not v:
+            raise ValueError(
+                f"Empty flag '{flag_name}' for object '{obj_id}' in module '{module_type_str}'"
+            )
+
+        if not re.match(r"^[a-zA-Z0-9_-]+$", v):
+            raise ValueError(
+                f"Invalid characters in flag '{flag_name}' ('{v}') "
+                f"for object '{obj_id}' in module '{module_type_str}'"
+            )
+
         return v
 
     # Automatically create folder if it doesn't exist

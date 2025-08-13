@@ -5,6 +5,9 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     WidgetType,
 )
 from pathlib import Path
+from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+    CliGroup,
+)
 
 
 class ClarAllen:
@@ -15,7 +18,11 @@ class ClarAllen:
         cli_s_flag="i",
         cli_l_flag="input",
         flow={
-            "ace": {"cli_s_flag": "arca_i", "cli_l_flag": "arca_input"},
+            "ace": {
+                "cli_s_flag": "arca_i",
+                "cli_l_flag": "arca_input",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_i", "cli_l_flag": "mrca_input"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -36,7 +43,11 @@ class ClarAllen:
         cli_s_flag="c",
         cli_l_flag="tiff_input",
         flow={
-            "ace": {"cli_s_flag": "arca_ti", "cli_l_flag": "arca_tiff_input"},
+            "ace": {
+                "cli_s_flag": "arca_ti",
+                "cli_l_flag": "arca_tiff_input",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_ti", "cli_l_flag": "mrca_tiff_input"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -57,7 +68,11 @@ class ClarAllen:
         cli_s_flag="r",
         cli_l_flag="output",
         flow={
-            "ace": {"cli_s_flag": "arca_r", "cli_l_flag": "arca_output"},
+            "ace": {
+                "cli_s_flag": "arca_r",
+                "cli_l_flag": "arca_output",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_r", "cli_l_flag": "mrca_output"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -77,7 +92,11 @@ class ClarAllen:
         cli_s_flag="o",
         cli_l_flag="orient_code",
         flow={
-            "ace": {"cli_s_flag": "arca_o", "cli_l_flag": "arca_orient_code"},
+            "ace": {
+                "cli_s_flag": "arca_o",
+                "cli_l_flag": "arca_orient_code",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_o", "cli_l_flag": "mrca_orient_code"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -98,7 +117,11 @@ class ClarAllen:
         cli_s_flag="v",
         cli_l_flag="voxel_size",
         flow={
-            "ace": {"cli_s_flag": "arca_v", "cli_l_flag": "arca_voxel_size"},
+            "ace": {
+                "cli_s_flag": "arca_v",
+                "cli_l_flag": "arca_voxel_size",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_v", "cli_l_flag": "mrca_voxel_size"},
         },
         obj_default=10,
@@ -121,7 +144,11 @@ class ClarAllen:
         cli_s_flag="m",
         cli_l_flag="hemi",
         flow={
-            "ace": {"cli_s_flag": "arca_m", "cli_l_flag": "arca_hemi"},
+            "ace": {
+                "cli_s_flag": "arca_m",
+                "cli_l_flag": "arca_hemi",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_m", "cli_l_flag": "mrca_hemi"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -142,7 +169,11 @@ class ClarAllen:
         cli_s_flag="l",
         cli_l_flag="allen_label",
         flow={
-            "ace": {"cli_s_flag": "arca_l", "cli_l_flag": "arca_allen_label"},
+            "ace": {
+                "cli_s_flag": "arca_l",
+                "cli_l_flag": "arca_allen_label",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_l", "cli_l_flag": "mrca_allen_label"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -162,7 +193,11 @@ class ClarAllen:
         cli_s_flag="a",
         cli_l_flag="allen_atlas",
         flow={
-            "ace": {"cli_s_flag": "arca_a", "cli_l_flag": "arca_allen_atlas"},
+            "ace": {
+                "cli_s_flag": "arca_a",
+                "cli_l_flag": "arca_allen_atlas",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_a", "cli_l_flag": "mrca_allen_atlas"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -182,7 +217,11 @@ class ClarAllen:
         cli_s_flag="s",
         cli_l_flag="side",
         flow={
-            "ace": {"cli_s_flag": "arca_s", "cli_l_flag": "arca_side"},
+            "ace": {
+                "cli_s_flag": "arca_s",
+                "cli_l_flag": "arca_side",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_s", "cli_l_flag": "mrca_side"},
         },
         cli_obj_type=ArgumentType.STRING,
@@ -207,7 +246,11 @@ class ClarAllen:
         cli_s_flag="f",
         cli_l_flag="no_mosaic_fig",
         flow={
-            "ace": {"cli_s_flag": "arcan_m", "cli_l_flag": "arca_no_mosaic_fig"},
+            "ace": {
+                "cli_s_flag": "arcan_m",
+                "cli_l_flag": "arca_no_mosaic_fig",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrcan_m", "cli_l_flag": "mrca_no_mosaic_fig"},
         },
         cli_help="set to '1' to save mosaic figure (.png) of allen labels registered to clarity. Set to '0' to not save the mosaic figure (default: %(default)s)",
@@ -233,7 +276,11 @@ class ClarAllen:
         cli_s_flag="b",
         cli_l_flag="olfactory_bulb",
         flow={
-            "ace": {"cli_s_flag": "arca_b", "cli_l_flag": "arca_olfactory_bulb"},
+            "ace": {
+                "cli_s_flag": "arca_b",
+                "cli_l_flag": "arca_olfactory_bulb",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_b", "cli_l_flag": "mrca_olfactory_bulb"},
         },
         cli_obj_type=ArgumentType.INTEGER,
@@ -258,7 +305,11 @@ class ClarAllen:
         cli_s_flag="p",
         cli_l_flag="skip_cor",
         flow={
-            "ace": {"cli_s_flag": "arca_p", "cli_l_flag": "arca_skip_cor"},
+            "ace": {
+                "cli_s_flag": "arca_p",
+                "cli_l_flag": "arca_skip_cor",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_p", "cli_l_flag": "mrca_skip_cor"},
         },
         cli_help="if utilfn intensity correction already ran, skip correction inside registration. '0' means don't skip, '1' means skip (default: %(default)s)",
@@ -283,7 +334,11 @@ class ClarAllen:
         cli_s_flag="w",
         cli_l_flag="warp",
         flow={
-            "ace": {"cli_s_flag": "arca_w", "cli_l_flag": "arca_warp"},
+            "ace": {
+                "cli_s_flag": "arca_w",
+                "cli_l_flag": "arca_warp",
+                "cli_group": CliGroup.REGISTRATION,
+            },
             "mapl3": {"cli_s_flag": "mrca_w", "cli_l_flag": "mrca_warp"},
         },
         cli_help="warp high-res clarity to Allen space. '0' means do not warp, '1' means warp (default: %(default)s)",
