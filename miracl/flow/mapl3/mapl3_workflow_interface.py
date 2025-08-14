@@ -160,7 +160,6 @@ class Registration(ABC):
 
 
 class MAPL3Interface(Interface):
-
     def call_mapl3_interface(self, params: Mapl3InterfaceParams) -> Dict[str, Any]:
         """
         Call the MAPL3 interface for segmentation.
@@ -180,7 +179,6 @@ class MAPL3Interface(Interface):
 
 
 class MIRACLConversion(Conversion):
-
     def call_miracl_conversion(self, params: ConversionParams) -> None:
         """
         Call the MIRACL's conversion module.
@@ -230,7 +228,6 @@ class MIRACLConversion(Conversion):
 
 
 class MIRACLRegistration(Registration):
-
     def call_miracl_registration(self, params: RegistrationParams) -> None:
         """
         Call MIRACL's registration module.
@@ -311,8 +308,7 @@ def main(objs: dict) -> None:
     # Assign base conversion output folder
     WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath = (
         # mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "conv"
-        mapl3_interface_folders.mapl3_results_base_folder.dirpath
-        / "conv"
+        mapl3_interface_folders.mapl3_results_base_folder.dirpath / "conv"
     )
     UtilfnsPaths.ensure_folder_exists(
         WorkflowInterfaceSubfolders.mapl3_workflow_conv_folder.dirpath
@@ -329,8 +325,7 @@ def main(objs: dict) -> None:
     # Assign base registration output folder
     WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder.dirpath = (
         # mapl3_subfolders_objs_dict["mapl3_results_base_folder"].dirpath / "reg"
-        mapl3_interface_folders.mapl3_results_base_folder.dirpath
-        / "reg"
+        mapl3_interface_folders.mapl3_results_base_folder.dirpath / "reg"
     )
     UtilfnsPaths.ensure_folder_exists(
         WorkflowInterfaceSubfolders.mapl3_workflow_reg_folder.dirpath

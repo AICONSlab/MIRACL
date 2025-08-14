@@ -2,10 +2,8 @@ from enum import Enum
 
 
 class CliGroup(Enum):
-    SEGMENTATION = ("segmentation", "Args related to segmentation processing")
-    REGISTRATION = ("registration", "Args for image registration")
+    REG_CLAR_ALLEN = ("registration", "Args for CLARITY Allen image registration")
     CONV_TIFF_NII = ("conversion", "Args for image conversion from tiff to nifti")
-    SKELETONIZATION = ("skeletonization", "Args for skeletonization tasks")
     REQUIRED = ("required", "required arguments")
 
     @property

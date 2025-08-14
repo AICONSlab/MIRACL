@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict, Type
 import re
 from argparse import Namespace
 
@@ -176,3 +176,42 @@ def deserialize_parsed_args_to_objects(
             obj.content = value
 
     return miracl_objs
+
+
+def build_flag_map_from_class(obj_class: Type) -> Dict[str, object]:
+    """
+    Build a CLI flag-to-value mapping from the MiraclObj attributes of a container class.
+
+    This inspects the given class (not instance) for attributes that are instances
+    of `MiraclObj`, and produces a dictionary mapping the argument's long CLI flag
+    (prefixed with `--`) to its content value (`content`).
+
+    Args:
+        obj_class (Type): The class containing `MiraclObj` attributes. For example,
+            a module definition class like `ClarAllen` or `ConvTiffNiiObjs`.
+
+    Returns:
+        Dict[str, object]: A mapping of CLI long flags (e.g., `'--output'`)
+        to their content values.
+
+    Example:
+        >>> from miracl.system.objs.objs_reg.objs_clar_allen.objs_clar_allen_reg import ClarAllen
+        >>> flag_map = build_flag_map_from_class(ClarAllen)
+        >>> print(flag_map)
+        {'--input': None, '--tiff_input': None, '--output': PosixPath('/current/dir'), ...}
+
+    Notes:
+        - Works with classes where `MiraclObj` instances are defined as class attributes.
+        - Only the `cli_l_flag` and `content` properties are used.
+        - This is useful for building runtime templates for registry runners or CLI builders.
+    """
+    mapping: Dict[str, object] = {}
+    for _, attr_value in vars(obj_class).items():
+        if isinstance(attr_value, MiraclObj) and hasattr(attr_value, "cli_l_flag"):
+            val = (
+                attr_value.content
+                if attr_value.content is not None
+                else attr_value.obj_default
+            )
+            mapping[f"--{attr_value.cli_l_flag}"] = val
+    return mapping

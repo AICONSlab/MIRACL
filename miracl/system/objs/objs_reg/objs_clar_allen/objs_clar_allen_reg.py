@@ -5,7 +5,7 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     WidgetType,
 )
 from pathlib import Path
-from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+from miracl.system.enums.enums_base_modules import (
     CliGroup,
 )
 
@@ -47,7 +47,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_ti",
                 "cli_l_flag": "arca_tiff_input",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_ti", "cli_l_flag": "mrca_tiff_input"},
         },
@@ -72,7 +72,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_r",
                 "cli_l_flag": "arca_output",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_r", "cli_l_flag": "mrca_output"},
         },
@@ -96,7 +96,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_o",
                 "cli_l_flag": "arca_orient_code",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_o", "cli_l_flag": "mrca_orient_code"},
         },
@@ -121,7 +121,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_v",
                 "cli_l_flag": "arca_voxel_size",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_v", "cli_l_flag": "mrca_voxel_size"},
         },
@@ -148,7 +148,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_m",
                 "cli_l_flag": "arca_hemi",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_m", "cli_l_flag": "mrca_hemi"},
         },
@@ -173,7 +173,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_l",
                 "cli_l_flag": "arca_allen_label",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_l", "cli_l_flag": "mrca_allen_label"},
         },
@@ -197,7 +197,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_a",
                 "cli_l_flag": "arca_allen_atlas",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_a", "cli_l_flag": "mrca_allen_atlas"},
         },
@@ -221,7 +221,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_s",
                 "cli_l_flag": "arca_side",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_s", "cli_l_flag": "mrca_side"},
         },
@@ -250,7 +250,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arcan_m",
                 "cli_l_flag": "arca_no_mosaic_fig",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrcan_m", "cli_l_flag": "mrca_no_mosaic_fig"},
         },
@@ -280,7 +280,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_b",
                 "cli_l_flag": "arca_olfactory_bulb",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_b", "cli_l_flag": "mrca_olfactory_bulb"},
         },
@@ -309,7 +309,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_p",
                 "cli_l_flag": "arca_skip_cor",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_p", "cli_l_flag": "mrca_skip_cor"},
         },
@@ -338,7 +338,7 @@ class ClarAllen:
             "ace": {
                 "cli_s_flag": "arca_w",
                 "cli_l_flag": "arca_warp",
-                "cli_group": CliGroup.REGISTRATION,
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
             },
             "mapl3": {"cli_s_flag": "mrca_w", "cli_l_flag": "mrca_warp"},
         },

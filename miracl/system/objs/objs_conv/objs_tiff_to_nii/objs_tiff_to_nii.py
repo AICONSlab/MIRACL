@@ -6,7 +6,7 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     WidgetType,
 )
 from pathlib import Path
-from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+from miracl.system.enums.enums_base_modules import (
     CliGroup,
 )
 

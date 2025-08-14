@@ -18,7 +18,10 @@ from miracl.system.datamodels.miraclobj_enums import (
     InputRestrictionType,
 )
 
-from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+# from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
+#    CliGroup,
+# )
+from miracl.system.enums.enums_base_modules import (
     CliGroup,
 )
 
@@ -244,7 +247,7 @@ class MiraclObj(BaseModel):
     cli_group: Optional[CliGroup] = Field(
         None,
         description="Argparse group the object belongs to when used in a stand-alone module",
-        example=CliGroup.SEGMENTATION,
+        example=CliGroup.CONV_TIFF_NII,
     )
 
     # GUI
