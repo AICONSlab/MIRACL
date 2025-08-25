@@ -495,13 +495,13 @@ either of the following methods:
 
       .. code-block::
 
-         $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v250.sif
+         $ wget https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v251.sif
       
       or
 
       .. code-block::
 
-         $ curl -L -O https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v250.sif
+         $ curl -L -O https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/apptainer/versions/miracl_v251.sif
 
       .. note::
 
