@@ -1045,86 +1045,9 @@ class RegistrationChecker:
         else:
             raise FileNotFoundError("Converted nifti file not found!")
 
-        # NOTE: Check if the provided orientation code needs to be overriden
-
+        # NOTE: Check which orientation code to use
         scan_orient = ACEWorkflowParser.resolve_orientation(args)
         print(f"  Using orientation code: '{scan_orient}'")
-
-        # Copy orientation code input in case it doesn't need to be overriden
-        # scan_orient = args.rca_orient_code
-        #
-        # def get_valid_orientation_from_file(file_path: Path) -> str:
-        #     if not file_path.exists():
-        #         raise FileNotFoundError(
-        #             f"Orientation file doesn't exist at '{file_path}'."
-        #         )
-        #
-        #     orientation = file_path.read_text().strip()
-        #     if (
-        #         len(orientation) == 3
-        #         and orientation.isupper()
-        #         and orientation.isalpha()
-        #     ):
-        #         return orientation
-        #
-        #     raise ValueError(
-        #         f"Orientation code '{orientation}' is incorrect. Must be exactly 3 uppercase letters. Aborting."
-        #     )
-        #
-        # sep_orient_file = Path(args.single) / "orientation.txt"
-        #
-        # logger.debug(f"rca_sep_orient_code val: {args.rca_sep_orient_code}")
-        # logger.debug(
-        #     f"rca_autodetect_sep_orient_code val: {args.rca_autodetect_sep_orient_code}"
-        # )
-        # logger.debug(f"Folder path: {args.single}")
-        #
-        # if args.rca_sep_orient_code:
-        #     scan_orient = get_valid_orientation_from_file(sep_orient_file)
-        #     print(f"  Using orientation code: '{scan_orient}'")
-        #
-        # elif args.rca_autodetect_sep_orientation_code:
-        #     if sep_orient_file.exists():
-        #         scan_orient = get_valid_orientation_from_file(sep_orient_file)
-        #         print(f"  Overriding orientation code with: '{scan_orient}'")
-        #     else:
-        #         print(f"  No 'orientation.txt' found, using default: '{scan_orient}'")
-
-        # if args.rca_sep_orient_code:
-        #     sep_orient_file = Path(args.single) / "orientation.txt"
-        #     if Path(sep_orient_file).exists():
-        #         separate_orientation = sep_orient_file.read_text().strip()
-        #         if (
-        #             len(separate_orientation) == 3
-        #             and separate_orientation.isupper()
-        #             and separate_orientation.isalpha()
-        #         ):
-        #             scan_orient = separate_orientation
-        #             print(f"  Using orientation code: '{scan_orient}'")
-        #         else:
-        #             raise ValueError(
-        #                 f"Orientation code '{separate_orientation}' is incorrect. Must be exactly 3 uppercase letters. Aborting."
-        #             )
-        #     else:
-        #         raise FileNotFoundError(
-        #             f"Orientation file doesn't exist at '{sep_orient_file}'. Please provide a 'orientation.txt' for EACH subject when using '--rca_sep_orient_code'."
-        #         )
-        #
-        # if args.rca_autodetect_sep_orientation_code:
-        #     sep_orient_file = Path(args.single) / "orientation.txt"
-        #     if Path(sep_orient_file).exists():
-        #         separate_orientation = sep_orient_file.read_text().strip()
-        #         if (
-        #             len(separate_orientation) == 3
-        #             and separate_orientation.isupper()
-        #             and separate_orientation.isalpha()
-        #         ):
-        #             scan_orient = separate_orientation
-        #             print(f"  Using orientation code: '{scan_orient}'")
-        #         else:
-        #             raise ValueError(
-        #                 f"Orientation code '{separate_orientation}' is incorrect. Must be exactly 3 uppercase letters. Aborting."
-        #             )
 
         reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
         -i {converted_nii_file} \
