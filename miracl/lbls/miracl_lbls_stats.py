@@ -19,11 +19,22 @@ import nibabel as nib
 from miracl import ATLAS_DIR
 
 
-def helpmsg():
-    return """miracl_lbls_stats.py [options]
+# Dependencies:
 
-Description:
-    Computes Allen Brain Atlas label statistics for a given input volume.
+#     ImageMaths (ANTs)
+#     Python 2.7
+
+
+PROG_NAME = "lbls_stats"
+
+
+def parsefn():
+    if len(sys.argv) >= 3 and sys.argv[-2] == "lbl" and sys.argv[-1] == "stats":
+        parser = argparse.ArgumentParser(description="", usage=helpmsg())
+    else:
+        parser = argparse.ArgumentParser(
+            description="""miracl lbls_stats -i INVOL -l LBLS [-s SORT] [-m HEMI] [-d DEPTH]
+                         [-r RATIO] [-o OUTFILE] [-h]
 
 Modes:
     GUI Mode (default):
@@ -35,20 +46,6 @@ Modes:
     Command-line / Scripting Mode:
         Use the following arguments to run without GUI.
 
-Required arguments:
-    -i, --invol       Path to the input volume (e.g., NIfTI file)
-    -l, --lbls        Path to the registered Allen labels volume
-
-Optional arguments:
-    -o, --outfile     Output CSV filename (default: clarity_label_statistics.csv)
-    -s, --sort        Sort output by one of:
-                      Mean | StdD | Max | Min | Count | Vol(mm^3)
-                      (default: Mean)
-    -m, --hemi        Labels hemisphere type:
-                      combined (default) or split
-    -d, --depth       Labels depth to filter (integer; default: all depths)
-    -r, --ratio       Tractography (.trk) file to compute tract ratio statistics
-
 Examples:
     # Run with GUI
     miracl_lbls_stats.py lbls stats
@@ -59,63 +56,65 @@ Examples:
 Notes:
     - Input volumes must be registered to the Allen atlas space.
     - Output CSV contains label statistics merged with Allen ontology info.
-"""
+            """,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            add_help=False,
+        )
 
-    # Dependencies:
-
-    #     ImageMaths (ANTs)
-    #     Python 2.7
-
-
-def parsefn():
-    if len(sys.argv) >= 3 and sys.argv[-2] == "lbl" and sys.argv[-1] == "stats":
-        parser = argparse.ArgumentParser(description="", usage=helpmsg())
-    else:
-        parser = argparse.ArgumentParser(description="", usage=helpmsg())
-
-        parser.add_argument(
+        required = parser.add_argument_group("required arguments")
+        required.add_argument(
             "-i",
             "--invol",
+            required=True,
             type=str,
             help="Input volume",
         )
-        parser.add_argument(
+        required.add_argument(
             "-l",
             "--lbls",
+            required=True,
             type=str,
             help="Registerd Allen labels",
         )
-        parser.add_argument(
+
+        optional = parser.add_argument_group("additional arguments")
+        optional.add_argument(
             "-s",
             "--sort",
             type=str,
-            help="Sort by Mean, StdD, Max, Min, Count or Vol(mm^3)",
+            help="Sort by Mean, StdD, Max, Min, Count or Vol(mm^3) (default: 'Mean')",
             default="Mean",
         )
-        parser.add_argument(
+        optional.add_argument(
             "-m",
             "--hemi",
             type=str,
-            help="Labels hemi, 'combined' or 'split'",
+            help="Labels hemi, 'combined' or 'split' (default: 'combined')",
         )
-        parser.add_argument(
+        optional.add_argument(
             "-d",
             "--depth",
             type=int,
-            help="Labels depth",
+            help="Labels depth (default: None)",
         )
-        parser.add_argument(
+        optional.add_argument(
             "-r",
             "--ratio",
             type=str,
-            help="Tractography (.trk) file used to generate tract ratio",
+            help="Tractography (.trk) file used to generate tract ratio (default: None)",
         )
-        parser.add_argument(
+        optional.add_argument(
             "-o",
             "--outfile",
             type=str,
-            help="Output CSV filename",
+            help="Output CSV filename (default: %(default)s)",
             default="clarity_label_statistics.csv",
+        )
+        optional.add_argument(
+            "-h",
+            "--help",
+            action="help",
+            help="show this help message and exit",
         )
 
         return parser
