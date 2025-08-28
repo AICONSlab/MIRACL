@@ -53,10 +53,10 @@ The rest of the arguments are optional:
                               Mean -> mean intensity values
 
                               Count -> number of voxels
-   \-m, \-\-hemi     ``str``  Labels hemi, options are:                              ``Combined``
+   \-m, \-\-hemi     ``str``  Labels hemi, options are:                              ``combined``
         
-                              * ``Combined``
-                              * ``Split``
+                              * ``combined``
+                              * ``split``
 
    \-d, \-\-depth    ``int``  Labels depth                                           ``None`` i.e. not used
    \-r, \-\-ratio    ``str``  Tractography (.trk) file used to generate tract ratio  ``None`` i.e. not used
