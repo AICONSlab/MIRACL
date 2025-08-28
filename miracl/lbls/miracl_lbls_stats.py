@@ -110,8 +110,12 @@ def parse_inputs(parser, args):
 
         outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
         sort = 'Mean' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
-        hemi = 'Combined' if not linedits[fields[2]].text() else str(linedits[fields[2]].text())
         label_depth = '' if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+        hemi = (
+            "combined"
+            if not linedits[fields[2]].text()
+            else str(linedits[fields[2]].text())
+        )
 
     else:
         print("\n running in script mode \n")
