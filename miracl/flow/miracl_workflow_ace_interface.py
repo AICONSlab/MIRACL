@@ -1046,7 +1046,7 @@ class RegistrationChecker:
             raise FileNotFoundError("Converted nifti file not found!")
 
         # NOTE: Check which orientation code to use
-        scan_orient = ACEWorkflowParser.resolve_orientation(args)
+        scan_orient = RegistrationChecker.resolve_orientation(args)
         print(f"  Using orientation code: '{scan_orient}'")
 
         reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
