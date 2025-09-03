@@ -215,7 +215,7 @@ The following information will be printed to the terminal:
    We added two new flags in case orientations differ between subjects in the group comparison analysis:
 
 .. code-block::
-
+ 
    -rcaso, --rca_sep_orient_code
                         set flag if orientations differ between individual
                         subjects (default i.e. flag not set: False). This
