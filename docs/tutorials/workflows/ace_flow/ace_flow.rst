@@ -210,6 +210,36 @@ The following information will be printed to the terminal:
 
    Use -hv or --help_verbose flag for more verbose help
 
+.. versionadded:: 2.5.2
+ 
+   We added two new flags in case orientations differ between subjects in the group comparison analysis:
+
+.. code-block::
+ 
+   -rcaso, --rca_sep_orient_code
+                        set flag if orientations differ between individual
+                        subjects (default i.e. flag not set: False). This
+                        requires an 'orientation.txt' file at the root of the
+                        RAW Tiff data folder (i.e. in the folder where all RAW
+                        Tiff images are stored) for EACH subject containing
+                        only the respective orientation of the subject which
+                        must be exactly 3 uppercase letters (e.g. 'ALS' or
+                        'PLI'). This will override '--rca_orient_code' so make
+                        sure that the 'orientation.txt' file exists in each
+                        subject's RAW Tiff folder
+   -rcaao, --rca_autodetect_sep_orient_code
+                        same as '--rca_sep_orient_code' except that it only
+                        expects an 'orientation.txt' file for subjects that
+                        have a different orientation from the one provided to
+                        '--rca_orient_code' (default i.e. flag not set:
+                        False). This will use the value provided to '--
+                        rca_orient_code' by default unless an
+                        'orientation.txt' file is detected in the RAW Tiff
+                        folder of a subject, in which case the value from the
+                        'orientation.txt' file will be used. This is useful if
+                        you have many subjects with the same orientation and
+                        only a few exceptions
+
 .. note::
 
    There are a number of optional arguments including TFCE cluster-wise analysis parameters that can be provided to the
