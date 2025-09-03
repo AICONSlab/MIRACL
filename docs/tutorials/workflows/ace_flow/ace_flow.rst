@@ -227,7 +227,7 @@ The following information will be printed to the terminal:
                         'PLI'). This will override '--rca_orient_code' so make
                         sure that the 'orientation.txt' file exists in each
                         subject's RAW Tiff folder
-  -rcaao, --rca_autodetect_sep_orient_code
+   -rcaao, --rca_autodetect_sep_orient_code
                         same as '--rca_sep_orient_code' except that it only
                         expects an 'orientation.txt' file for subjects that
                         have a different orientation from the one provided to
