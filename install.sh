@@ -260,9 +260,9 @@ function usage() {
 
  Options:
 
-   -n, name of the Docker service (randomized default: '${container_name}')
+   -n, name of the Docker service (randomized default: '${service_name}')
    -i, specify image name (randomized default: '${image_name}')
-   -c, specify container name (default: '${service_name}')
+   -c, specify container name (default: '${container_name}')
    -t, set when using specific MIRACL tag/version. Use 'auto' to parse from 'miracl/version.txt' or specify version as floating point value in format 'x.x.x' (default: '${miracl_version}')
    -g, enable Nvidia GPU passthrough mode for Docker container which is required for some of MIRACL's scripts e.g. ACE segmentation (default: ${gpu}; set flag to set to $(return_opposite "${gpu}"))
    -e, disable mounting MIRACL's script directory into Docker container. Mounting is useful if you want host changes to propagate to the container directly (default: ${dev}; set flag to set to $(return_opposite "${dev}"))

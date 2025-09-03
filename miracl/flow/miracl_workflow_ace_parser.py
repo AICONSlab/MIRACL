@@ -95,7 +95,9 @@ class ACEWorkflowParser:
         heatmap_args = parser.add_argument_group("optional heatmap arguments")
         optional_args = parser.add_argument_group("optional arguments")
         stats_args = parser.add_argument_group("optional statistics arguments")
-        validate_clusters_args = parser.add_argument_group("optional validate clusters arguments")
+        validate_clusters_args = parser.add_argument_group(
+            "optional validate clusters arguments"
+        )
 
         # INFO: ACE main parser
 
@@ -504,6 +506,18 @@ class ACEWorkflowParser:
             default=0,
             help="warp high-res clarity to Allen space (default: False)",
         )
+        reg_args.add_argument(
+            "-rcaso",
+            "--rca_sep_orient_code",
+            action="store_true",
+            help="set flag if orientations differ between individual subjects (default i.e. flag not set: %(default)s). This requires an 'orientation.txt' file at the root of the RAW Tiff data folder (i.e. in the folder where all RAW Tiff images are stored) for EACH subject containing only the respective orientation of the subject which must be exactly 3 uppercase letters (e.g. 'ALS' or 'PLI'). This will override '--rca_orient_code' so make sure that the 'orientation.txt' file exists in each subject's RAW Tiff folder",
+        )
+        reg_args.add_argument(
+            "-rcaao",
+            "--rca_autodetect_sep_orient_code",
+            action="store_true",
+            help="same as '--rca_sep_orient_code' except that it only expects an 'orientation.txt' file for subjects that have a different orientation from the one provided to '--rca_orient_code` (default i.e. flag not set: %(default)s). This will use the value provided to '--rca_orient_code` by default unless an 'orientation.txt' file is detected in the RAW Tiff folder of a subject, in which case the value from the 'orientation.txt' file will be used. This is useful if you have many subjects with the same orientation and only a few exceptions",
+        )
 
         # INFO: Voxelization parser
 
@@ -653,7 +667,7 @@ class ACEWorkflowParser:
             default=95,
         )
 
-        # INFO: Corrlation parser
+        # INFO: Correlation parser
 
         corr_args.add_argument(
             "-cft",
@@ -886,8 +900,7 @@ class ACEWorkflowParser:
         return parser
 
     def validate_args(self, args) -> argparse.Namespace:
-
-         # check that control and treated are not passed with single
+        # check that control and treated are not passed with single
         if (args.control and args.treated) and args.single:
             self.parser.error(
                 "-c/--control and -t/--treated must be passed together without -s/--single",
@@ -898,16 +911,17 @@ class ACEWorkflowParser:
                 "-s/--single cannot be passed with either -c/--control or -t/--treated",
             )
         # check that control and treated are always passed together
-        elif (args.control and not args.treated) or (
-            args.treated and not args.control
-        ):
-            self.parser.error(
-                "-c/--control and -t/--treated must be passed together"
-            )
+        elif (args.control and not args.treated) or (args.treated and not args.control):
+            self.parser.error("-c/--control and -t/--treated must be passed together")
         # check that something is passed
         elif not args.single and not args.control and not args.treated:
             self.parser.error(
                 "either [-s/--single] or [-c/--control and -t/--treated] must be passed",
+            )
+
+        if args.rca_sep_orient_code and args.rca_autodetect_sep_orient_code:
+            self.parser.error(
+                "'--rca_sep_orient_code' and '--rca_autodetect_sep_orient_code' cannot be used at the same time. Choose one."
             )
 
         required_args = ["sa_output_folder", "sa_model_type", "sa_resolution"]
@@ -919,7 +933,7 @@ class ACEWorkflowParser:
                 error_encountered = True
 
         if error_encountered:
-            self.parser.error(error_string[:-2])              
+            self.parser.error(error_string[:-2])
 
         return args
 

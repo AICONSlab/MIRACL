@@ -12,8 +12,7 @@ from typing import List, Optional
 from miracl import miracl_logger
 from miracl.flow import miracl_workflow_ace_parser
 from miracl.seg import ace_interface, miracl_instance_segmentation_interface
-from miracl.stats import (miracl_stats_ace_interface,
-                          miracl_stats_ace_validate_clusters)
+from miracl.stats import miracl_stats_ace_interface, miracl_stats_ace_validate_clusters
 
 logger = miracl_logger.logger
 
@@ -71,16 +70,17 @@ class Heatmap(ABC):
 
 class ValidateClusters(ABC):
     @abstractmethod
-    def validate(self,
-                 args,
-                 validate_clusters_output_folder,
-                 p_value_path,
-                 f_stat_path,
-                 mean_diff_path,
-                 neuron_info_dir,
-                 tif_extension,
-                 ace_output_extension,
-                 ):
+    def validate(
+        self,
+        args,
+        validate_clusters_output_folder,
+        p_value_path,
+        f_stat_path,
+        mean_diff_path,
+        neuron_info_dir,
+        tif_extension,
+        ace_output_extension,
+    ):
         pass
 
 
@@ -103,17 +103,18 @@ class ACESegmentation(Segmentation):
         logger.debug(f"Example args: {args.sa_model_type}")
         ace_interface.main(args=args)
 
+
 class ACEInstanceSegmentation(InstanceSegmentation):
     """ACE Instance Segmentation module used for segmenting the input images
     into a connected component representation (labeled).
-    
+
     :param InstanceSegmentation: base abstract class for instance segmentation
     :type InstanceSegmentation: ABC
     """
 
     def segment(self, args: argparse.Namespace, seg_dir: Path):
         """Main method for instance segmentation module. Calls the `miracl seg instance` module.
-        
+
         :param args: command line arguments needed for MIRACL ACE instance seg module.
         :type args: argparse.Namespace
         :param seg_dir: path to the segmentation output folder ('seg_final/')
@@ -132,6 +133,7 @@ class ACEInstanceSegmentation(InstanceSegmentation):
             cpu_load=0.4,
         )
         miracl_instance_segmentation_interface.main(args=args_instance)
+
 
 class ACEConversion(Conversion):
     """ACE Conversion module used for converting the segmented tif files to nifti.
@@ -257,7 +259,8 @@ class ACEWarping(Warping):
         # move the output file to the right folder
         warp_file = list((Path.cwd() / "reg_final").glob("voxelized_*.nii.gz"))[0]
         shutil.move(
-            str(warp_file), str(voxelized_segmented_tif.parent.parent / "warp_final" / warp_file.name)
+            str(warp_file),
+            str(voxelized_segmented_tif.parent.parent / "warp_final" / warp_file.name),
         )
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
@@ -306,16 +309,17 @@ class ACEValidateClusters(ValidateClusters):
     :type ValidateClusters: ABC
     """
 
-    def validate(self,
-                 args: argparse.Namespace,
-                 validate_clusters_output_folder: Path,
-                 p_value_path: Path,
-                 f_stat_path: Path,
-                 mean_diff_path: Path,
-                 neuron_info_dir: Path,
-                 tif_extension: str,
-                 ace_output_extension: str,
-                 ):
+    def validate(
+        self,
+        args: argparse.Namespace,
+        validate_clusters_output_folder: Path,
+        p_value_path: Path,
+        f_stat_path: Path,
+        mean_diff_path: Path,
+        neuron_info_dir: Path,
+        tif_extension: str,
+        ace_output_extension: str,
+    ):
         """Main method for validation module. Calls `miracl stats ace_validate_clusters` module.
 
         :param args: command line arguments needed for MIRACL stats module.
@@ -356,6 +360,7 @@ class ACEValidateClusters(ValidateClusters):
             min_area=args.vc_min_area,
         )
         miracl_stats_ace_validate_clusters.main(args=validate_args)
+
 
 class ACEWorkflows:
     """Class used for executing each step in ACE workflow.
@@ -568,15 +573,14 @@ class ACEWorkflows:
                 if rerun_seg:
                     self.segmentation.segment(args)
 
-                run_instance_seg = InstanceSegmentationChecker.check_instance_segmentation(
-                    args, ace_flow_seg_output_folder
+                run_instance_seg = (
+                    InstanceSegmentationChecker.check_instance_segmentation(
+                        args, ace_flow_seg_output_folder
+                    )
                 )
 
                 if run_instance_seg:
-                    self.instance_segmentation.segment(
-                        args,
-                        ace_flow_seg_output_folder
-                    )
+                    self.instance_segmentation.segment(args, ace_flow_seg_output_folder)
 
                 rerun_conv = ConversionChecker.check_conversion(
                     args, ace_flow_conv_output_folder
@@ -602,7 +606,12 @@ class ACEWorkflows:
                 fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
                 stacked_tif = ace_flow_vox_output_folder / "stacked_seg_tif.tif"
                 StackTiffs.check_folders(fiji_file, stacked_tif)
-                StackTiffs.stacking(fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo > 0)
+                StackTiffs.stacking(
+                    fiji_file,
+                    stacked_tif,
+                    ace_flow_seg_output_folder,
+                    args.sa_monte_carlo > 0,
+                )
                 self.voxelization.voxelize(args, stacked_tif)
 
                 (
@@ -628,7 +637,10 @@ class ACEWorkflows:
                 neuron_info_json_file = list(
                     ace_flow_seg_output_folder.rglob("neuron_info_final.json")
                 )[0]
-                shutil.copy(neuron_info_json_file, neuron_info_json_folder / f"{subject.name}_neuron_info.json")
+                shutil.copy(
+                    neuron_info_json_file,
+                    neuron_info_json_folder / f"{subject.name}_neuron_info.json",
+                )
 
             nifti_save_location[type_] = list(
                 ace_flow_warp_output_folder.glob("*voxelized_*.nii.gz")
@@ -661,17 +673,25 @@ class ACEWorkflows:
         self.heatmap.create_heatmap(heatmap_cmd)
 
         run_validate_clusters = not args.no_validate_clusters
-        
+
         if run_validate_clusters:
             self.validate_clusters.validate(
                 args=args,
                 validate_clusters_output_folder=ace_flow_validate_clusters_output_folder,
-                p_value_path=Path(args.sa_output_folder) / "clust_final" / "p_values.nii.gz",
-                f_stat_path=Path(args.sa_output_folder) / "clust_final" / "f_obs.nii.gz",
-                mean_diff_path=Path(args.sa_output_folder) / "clust_final" / "diff_mean.nii.gz",
+                p_value_path=Path(args.sa_output_folder)
+                / "clust_final"
+                / "p_values.nii.gz",
+                f_stat_path=Path(args.sa_output_folder)
+                / "clust_final"
+                / "f_obs.nii.gz",
+                mean_diff_path=Path(args.sa_output_folder)
+                / "clust_final"
+                / "diff_mean.nii.gz",
                 neuron_info_dir=neuron_info_json_folder,
                 tif_extension=tiff_extension,
-                ace_output_extension=str(Path(tiff_extension).parent / per_subject_final_folder),
+                ace_output_extension=str(
+                    Path(tiff_extension).parent / per_subject_final_folder
+                ),
             )
 
 
@@ -935,7 +955,7 @@ class RegistrationChecker:
         reg_folder: Path,
     ) -> bool:
         """Checks if registration needs to be run based on user input and the file structure.
-        If the user want to run registration (with the --rerun-registration flag), we run it. 
+        If the user want to run registration (with the --rerun-registration flag), we run it.
         Otherwise we check that all the necessary files are inplace before skipping.
         If they are not, we re-reun registration.
 
@@ -983,6 +1003,33 @@ class RegistrationChecker:
             )
 
     @staticmethod
+    def get_valid_orientation_from_file(file_path: Path) -> str:
+        if not file_path.exists():
+            raise FileNotFoundError(f"Orientation file doesn't exist at '{file_path}'.")
+
+        orientation = file_path.read_text().strip()
+        if len(orientation) == 3 and orientation.isupper() and orientation.isalpha():
+            return orientation
+
+        raise ValueError(
+            f"Orientation code '{orientation}' is incorrect. Must be exactly 3 uppercase letters. Aborting."
+        )
+
+    @staticmethod
+    def resolve_orientation(args: argparse.Namespace) -> str:
+        """Resolve orientation code from CLI args, possibly overridden by a file."""
+
+        sep_orient_file = Path(args.single) / "orientation.txt"
+
+        if args.rca_sep_orient_code:
+            return RegistrationChecker.get_valid_orientation_from_file(sep_orient_file)
+
+        if args.rca_autodetect_sep_orient_code and sep_orient_file.exists():
+            return RegistrationChecker.get_valid_orientation_from_file(sep_orient_file)
+
+        return args.rca_orient_code
+
+    @staticmethod
     def get_registration_cmd(args: argparse.Namespace, **kwargs) -> str:
         """Generates the command to be run by the MIRACL registration module.
 
@@ -998,10 +1045,14 @@ class RegistrationChecker:
         else:
             raise FileNotFoundError("Converted nifti file not found!")
 
+        # NOTE: Check which orientation code to use
+        scan_orient = RegistrationChecker.resolve_orientation(args)
+        print(f"  Using orientation code: '{scan_orient}'")
+
         reg_cmd = f"{MIRACL_HOME}/reg/miracl_reg_clar-allen.sh \
         -i {converted_nii_file} \
         -r {args.sa_output_folder} \
-        -o {args.rca_orient_code} \
+        -o {scan_orient} \
         -m {args.rca_hemi} \
         -v {args.rca_voxel_size} \
         -l {args.rca_allen_label} \
@@ -1079,7 +1130,7 @@ class SegmentationChecker:
         if not list(seg_folder.glob("*.tif")):
             SegmentationChecker._clear_seg_folders(seg_folder)
             return True
-        
+
         print("  Skipping segmentation...")
         return False
 
@@ -1149,20 +1200,20 @@ class InstanceSegmentationChecker:
         if not sorted(seg_folder.glob("cc_slices/*.tif")):
             InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
             return True
-        
+
         # check for cc_patches
         if not (seg_folder / "generated_patches" / "cc_patches").is_dir():
             InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
             return True
-        
+
         # check for json in cc_patches
         if not sorted(seg_folder.glob("generated_patches/cc_patches/*.json")):
             InstanceSegmentationChecker._clear_instance_seg_folders(seg_folder)
             return True
-        
+
         print("  Skipping instance segmentation...")
         return False
-        
+
     @staticmethod
     def _clear_instance_seg_folders(seg_folder: Path):
         """Clears the results from the instance segmentation folder.
@@ -1177,12 +1228,12 @@ class InstanceSegmentationChecker:
                 for file in (seg_folder / "cc_slices").glob("*"):
                     if file.is_file() and file.name.endswith(".tif"):
                         file.unlink()
-                
+
             if (seg_folder / "generated_patches" / "cc_patches").is_dir():
                 for file in (seg_folder / "generated_patches" / "cc_patches").glob("*"):
                     if file.is_file():
                         file.unlink()
-        
+
         seg_folder.mkdir(parents=True, exist_ok=True)
 
 
