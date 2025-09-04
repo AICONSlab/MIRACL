@@ -211,7 +211,7 @@ The following information will be printed to the terminal:
    Use -hv or --help_verbose flag for more verbose help
 
 .. versionadded:: 2.5.2
- 
+
    We added two new flags in case orientations differ between subjects in the group comparison analysis:
 
 .. code-block::
