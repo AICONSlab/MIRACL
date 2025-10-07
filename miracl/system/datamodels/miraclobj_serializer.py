@@ -1,5 +1,4 @@
 from typing import List, Tuple, Union, Dict, Type
-import re
 from argparse import Namespace
 
 # FIX: Import ModuleType from centralized ENUMS file
@@ -84,9 +83,10 @@ def miraclobj_to_argparse(
     """
 
     flags: List[str] = []
-    kwargs = {
-        "help": getattr(obj, "cli_help", "No help available"),
-    }
+    kwargs = {}
+    if not hasattr(obj, "cli_help") or not obj.cli_help:
+        raise ValueError(f"Missing required 'cli_help' attribute for object {obj.id}")
+    kwargs["help"] = obj.cli_help
 
     if module_type_str == ModuleType.MODULE.value:
         if obj.cli_s_flag:
@@ -185,6 +185,9 @@ def build_flag_map_from_class(obj_class: Type) -> Dict[str, object]:
     This inspects the given class (not instance) for attributes that are instances
     of `MiraclObj`, and produces a dictionary mapping the argument's long CLI flag
     (prefixed with `--`) to its content value (`content`).
+
+    If content = None, the default value will be used. Content is guaranteed for required
+    objects by parser checks.
 
     Args:
         obj_class (Type): The class containing `MiraclObj` attributes. For example,
