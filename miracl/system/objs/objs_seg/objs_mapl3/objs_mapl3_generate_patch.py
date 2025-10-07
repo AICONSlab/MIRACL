@@ -3,6 +3,9 @@ from miracl.system.datamodels.datamodel_miracl_objs import (
     ArgumentType,
     WidgetType,
 )
+from miracl.system.enums.enums_base_modules import (
+    CliGroup,
+)
 
 
 class GeneratePatch:
@@ -12,7 +15,13 @@ class GeneratePatch:
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="i",
         cli_l_flag="input",
-        flow={"mapl3": {"cli_s_flag": "mgp_i", "cli_l_flag": "mgp_input"}},
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mgp_i",
+                "cli_l_flag": "mgp_input",
+                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+            }
+        },
         cli_obj_type=ArgumentType.STRING,
         cli_help="input directory containing .tiff or .tif slices (default: None)",
         cli_required=True,
@@ -25,17 +34,49 @@ class GeneratePatch:
         gui_widget_type=WidgetType.PATH_INPUT,
     )
 
-    output = MiraclObj(
+    brain_mask = MiraclObj(
+        id="f644d316-8ec5-4c12-be1d-bf6c9375b785",
+        name="mgp_brain_mask",
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli_s_flag="m",
+        cli_l_flag="brain_mask",
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mgp_m",
+                "cli_l_flag": "mgp_brain_mask",
+                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+            }
+        },
+        cli_obj_type=ArgumentType.BOOLEAN,
+        cli_help="input directory containing .tiff or .tif brain mask slices if not passed it will compute mask (default: %(default)s)",
+        cli_required=False,
+        obj_default=False,
+        gui_label=["Brain mask"],
+        gui_group={"mapl3": "main"},
+        gui_order=[2],
+        module="mapl3",
+        module_group="seg",
+        version_added="2.4.0",
+        gui_widget_type=WidgetType.PATH_INPUT,
+    )
+
+    out_dir = MiraclObj(
         id="beffa5d5-23c9-4152-8688-94724b6a829f",
-        name="mgp_output",
+        name="mgp_out_dir",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="o",
-        cli_l_flag="output",
-        flow={"mapl3": {"cli_s_flag": "mgp_o", "cli_l_flag": "mgp_output"}},
+        cli_l_flag="out_dir",
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mgp_o",
+                "cli_l_flag": "mgp_out_dir",
+                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+            }
+        },
         cli_obj_type=ArgumentType.STRING,
-        cli_help="path of output directory (default: None)",
+        cli_help="output directory for patches (default: None)",
         cli_required=True,
-        gui_label=["Output folder"],
+        gui_label=["Output directory for patches"],
         gui_group={"mapl3": "main"},
         gui_order=[2],
         module="mapl3",
@@ -50,7 +91,13 @@ class GeneratePatch:
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="c",
         cli_l_flag="cpu_load",
-        flow={"mapl3": {"cli_s_flag": "mgp_c", "cli_l_flag": "mgp_cpu_load"}},
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mgp_c",
+                "cli_l_flag": "mgp_cpu_load",
+                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+            }
+        },
         cli_obj_type=ArgumentType.FLOAT,
         cli_help="fraction of cpus to be used for parallelization. Value needs to be between 0-1 (default: %(default)s)",
         cli_required=False,
@@ -70,12 +117,18 @@ class GeneratePatch:
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="p",
         cli_l_flag="patch_size",
-        flow={"mapl3": {"cli_s_flag": "mgp_p", "cli_l_flag": "mgp_patch_size"}},
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mgp_p",
+                "cli_l_flag": "mgp_patch_size",
+                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+            }
+        },
         cli_obj_type=ArgumentType.INTEGER,
-        cli_help="the outputs will be patch size x patch size x patch size (default: %(default)s)",
+        cli_help="the outputs will be patch size x patch size x patch size (ZxYxX; default: %(default)s)",
         cli_required=False,
         obj_default=256,
-        gui_label=["Path size"],
+        gui_label=["Patch size"],
         gui_group={"mapl3": "main"},
         gui_order=[4],
         module="mapl3",
@@ -84,18 +137,24 @@ class GeneratePatch:
         gui_widget_type=WidgetType.SPINBOX,
     )
 
-    gamma = MiraclObj(
-        id="a9fe8607-1a25-450e-8c71-401d4c12ff74",
-        name="mgp_gamma",
+    brain_mask_erosion = MiraclObj(
+        id="9ab2d1d3-65bf-4ee4-85b0-2016ef5cc233",
+        name="mgp_brain_mask_erosion",
         tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="g",
-        cli_l_flag="gamma",
-        flow={"mapl3": {"cli_s_flag": "mgp_g", "cli_l_flag": "mgp_gamma"}},
-        cli_obj_type=ArgumentType.FLOAT,
-        cli_help="gamma for gamma correction algorithm (default: %(default)s)",
+        cli_s_flag="e",
+        cli_l_flag="brain_mask_erosion_flag",
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mgp_e",
+                "cli_l_flag": "mgp_brain_mask_erosion",
+                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+            }
+        },
+        cli_obj_type=ArgumentType.BOOLEAN,
+        cli_help="set if you want to erode the brain mask (default: %(default)s)",
         cli_required=False,
-        obj_default=0.3,
-        gui_label=["Gamma"],
+        obj_default=False,
+        gui_label=["Erode brain mask"],
         gui_group={"mapl3": "main"},
         gui_order=[5],
         module="mapl3",
