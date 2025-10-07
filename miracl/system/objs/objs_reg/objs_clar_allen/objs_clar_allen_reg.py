@@ -13,7 +13,7 @@ from miracl.system.enums.enums_base_modules import (
 class ClarAllen:
     nii_folder = MiraclObj(
         id="c38437cd-7055-4572-8cb0-64ccf53ab755",
-        name="nii_folder",
+        name="rca_nii_folder",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="i",
         cli_l_flag="input",
@@ -39,7 +39,7 @@ class ClarAllen:
 
     tiff_folder = MiraclObj(
         id="0a3dc6fa-2f97-4979-ab12-00739784e4d2",
-        name="tiff_folder",
+        name="rca_tiff_folder",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="c",
         cli_l_flag="tiff_input",
@@ -64,7 +64,7 @@ class ClarAllen:
 
     output_path = MiraclObj(
         id="original clarity tiff folder (stack) - folder used as input to convert from tiff to nii",
-        name="output",
+        name="rca_output",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="r",
         cli_l_flag="output",
