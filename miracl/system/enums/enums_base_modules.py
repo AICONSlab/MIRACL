@@ -2,9 +2,22 @@ from enum import Enum
 
 
 class CliGroup(Enum):
-    REG_CLAR_ALLEN = ("registration", "Args for CLARITY Allen image registration")
-    CONV_TIFF_NII = ("conversion", "Args for image conversion from tiff to nifti")
-    REQUIRED = ("required", "required arguments")
+    REG_CLAR_ALLEN = (
+        "registration",
+        "Args for CLARITY Allen image registration",
+    )
+    CONV_TIFF_NII = (
+        "conversion",
+        "Args for image conversion from tiff to nifti",
+    )
+    MAPL3_GENERATE_PATCH = (
+        "generate patch",
+        "Args for generating patches from Z-stack .tif files",
+    )
+    REQUIRED = (
+        "required",
+        "required arguments",
+    )
 
     @property
     def description(self):
