@@ -7,5 +7,6 @@ from miracl.system.registry.utilfns import build_flag_map_from_class
 
 conv_tiff_nii_dict = {
     "script": "/code/miracl/conversion.py",
-    "flag_map": build_flag_map_from_class(ConvTiffNiiObjs),
+    # "flag_map": build_flag_map_from_class(ConvTiffNiiObjs),
+    "obj_class": ConvTiffNiiObjs,
 }

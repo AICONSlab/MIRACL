@@ -7,5 +7,6 @@ from miracl.system.datamodels.miraclobj_serializer import build_flag_map_from_cl
 
 reg_clar_allen_dict = {
     "script": "/code/miracl/registration.py",
-    "flag_map": build_flag_map_from_class(ClarAllen),
+    # "flag_map": build_flag_map_from_class(ClarAllen),
+    "obj_class": ClarAllen,
 }
