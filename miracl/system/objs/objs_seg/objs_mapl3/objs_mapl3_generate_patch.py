@@ -1,5 +1,5 @@
-from miracl.system.datamodels.datamodel_miracl_objs import (
-    MiraclObj,
+from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
+from miracl.system.datamodels.miraclobj_enums import (
     ArgumentType,
     WidgetType,
 )
@@ -9,7 +9,7 @@ from miracl.system.enums.enums_base_modules import (
 
 
 class GeneratePatch:
-    input = MiraclObj(
+    input: MiraclObj = MiraclObj(
         id="8a82f37b-3d5a-45da-8ccb-d13728f13fb3",
         name="mgp_input",
         tags=["mapl3", "seg", "mapl3_flow"],
@@ -19,7 +19,8 @@ class GeneratePatch:
             "mapl3": {
                 "cli_s_flag": "mgp_i",
                 "cli_l_flag": "mgp_input",
-                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+                "cli_group": CliGroup.REQUIRED,
+                "required": True,
             }
         },
         cli_obj_type=ArgumentType.STRING,
@@ -34,7 +35,7 @@ class GeneratePatch:
         gui_widget_type=WidgetType.PATH_INPUT,
     )
 
-    brain_mask = MiraclObj(
+    brain_mask: MiraclObj = MiraclObj(
         id="f644d316-8ec5-4c12-be1d-bf6c9375b785",
         name="mgp_brain_mask",
         tags=["mapl3", "seg", "mapl3_flow"],
@@ -60,7 +61,7 @@ class GeneratePatch:
         gui_widget_type=WidgetType.PATH_INPUT,
     )
 
-    out_dir = MiraclObj(
+    out_dir: MiraclObj = MiraclObj(
         id="beffa5d5-23c9-4152-8688-94724b6a829f",
         name="mgp_out_dir",
         tags=["mapl3", "seg", "mapl3_flow"],
@@ -70,7 +71,8 @@ class GeneratePatch:
             "mapl3": {
                 "cli_s_flag": "mgp_o",
                 "cli_l_flag": "mgp_out_dir",
-                "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+                "cli_group": CliGroup.REQUIRED,
+                "required": True,
             }
         },
         cli_obj_type=ArgumentType.STRING,
@@ -85,7 +87,7 @@ class GeneratePatch:
         gui_widget_type=WidgetType.PATH_INPUT,
     )
 
-    cpu_load = MiraclObj(
+    cpu_load: MiraclObj = MiraclObj(
         id="98dcf83e-aa71-4da5-aae8-c102fd100bdd",
         name="mgp_cpu_load",
         tags=["mapl3", "seg", "mapl3_flow"],
@@ -111,7 +113,7 @@ class GeneratePatch:
         gui_widget_type=WidgetType.DOUBLE_SPINBOX,
     )
 
-    patch_size = MiraclObj(
+    patch_size: MiraclObj = MiraclObj(
         id="ebd46db3-d2f5-4c45-af3c-0e5c26a66520",
         name="mgp_patch_size",
         tags=["mapl3", "seg", "mapl3_flow"],
@@ -137,7 +139,7 @@ class GeneratePatch:
         gui_widget_type=WidgetType.SPINBOX,
     )
 
-    brain_mask_erosion = MiraclObj(
+    brain_mask_erosion: MiraclObj = MiraclObj(
         id="9ab2d1d3-65bf-4ee4-85b0-2016ef5cc233",
         name="mgp_brain_mask_erosion",
         tags=["mapl3", "seg", "mapl3_flow"],
