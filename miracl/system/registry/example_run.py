@@ -13,26 +13,37 @@ reg.register_from_template("registration", reg_clar_allen_dict, default_runner)
 reg.register_from_template("generate_patch", mapl3_generate_patch_dict, default_runner)
 
 # Run with defaults
+# reg.run("conversion")
+# print("")
+# reg.run("registration")
+
+cli_builder = MiraclCLIBuilder(reg)
+
+parser = cli_builder.build_parser()
+args, parsed_objs = cli_builder.parse()
+
+
+print("")
 reg.run("conversion")
 print("")
 reg.run("registration")
 print("")
-reg.run("generate_patch")
-print("")
-
-reg.run(
-    "registration",
-    overrides={
-        "--output": "/tmp/from_conversion/output.nii.gz",
-        "--orient_code": "LPI",
-    },
-)
+# reg.run("generate_patch")
 reg.run(
     "generate_patch",
     overrides={
-        "--input": "/tmp/from_conversion/output.nii.gz",
+        "--mgp_input": "/tmp/from_conversion/output.nii.gz",
     },
 )
+print("")
+
+# reg.run(
+#     "registration",
+#     overrides={
+#         "--output": "/tmp/from_conversion/output.nii.gz",
+#         "--orient_code": "LPI",
+#     },
+# )
 
 # class_info = reg.get_info()
 # for key in class_info.keys():
@@ -40,9 +51,10 @@ reg.run(
 #
 # print([entry["obj_class"] for entry in class_info.values()])
 
-cli_builder = MiraclCLIBuilder(reg, module_type="ace")
-
-parser = cli_builder.build_parser()
-args, parsed_objs = cli_builder.parse()
-
+# cli_builder = MiraclCLIBuilder(reg)
+#
+# parser = cli_builder.build_parser()
+# args, parsed_objs = cli_builder.parse()
+#
 print(f"args: {args}")
+print("")
