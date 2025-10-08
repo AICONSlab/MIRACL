@@ -24,7 +24,11 @@ class ConvTiffNiiObjs:
                 "cli_l_flag": "actn_folder",
                 "cli_group": CliGroup.CONV_TIFF_NII,
             },
-            "mapl3": {"cli_s_flag": "mctn_f", "cli_l_flag": "mctn_folder"},
+            "mapl3": {
+                "cli_s_flag": "mctn_f",
+                "cli_l_flag": "mctn_folder",
+                "cli_group": CliGroup.CONV_TIFF_NII,
+            },
         },
         cli_obj_type=ArgumentType.STRING,
         cli_help="Input CLARITY TIFF folder/dir",
