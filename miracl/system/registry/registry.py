@@ -6,31 +6,45 @@ from miracl.system.datamodels.miraclobj_serializer import build_flag_map_from_cl
 
 class RegistryTemplate(TypedDict):
     script: str
-    flag_map: Dict[str, object]
+    # flag_map: Dict[str, object]
     obj_class: Type
+    module_type: str
 
 
 class MiraclRegistry:
     def __init__(self):
         self._registry = {}
 
-    def register(self, name: str, script: str, mapping: dict, runner, obj_class: Type):
+    def register(
+        self,
+        name: str,
+        script: str,
+        # mapping: dict,
+        runner,
+        obj_class: Type,
+        module_type: str,
+    ):
         self._registry[name] = {
             "script": script,
-            "mapping": mapping,
+            # "mapping": mapping,
             "runner": runner,
             "obj_class": obj_class,
+            "module_type": module_type,
         }
 
     def register_from_template(self, name: str, template: RegistryTemplate, runner):
         """Register a module from a standard { 'script', 'flag_map' } template"""
-        flag_map = build_flag_map_from_class(template["obj_class"])
+        flag_map = build_flag_map_from_class(
+            template["obj_class"],
+            template["module_type"],
+        )
         self.register(
             name,
             template["script"],
-            flag_map,
+            # flag_map,
             runner,
             template["obj_class"],
+            template["module_type"],
         )
 
     def get(self, name: str) -> dict:
@@ -47,8 +61,13 @@ class MiraclRegistry:
 
         entry = self._registry[name]
 
+        obj_class = entry["obj_class"]
+        module_type = entry["module_type"]
+
+        flag_map = build_flag_map_from_class(obj_class, module_type)
         # Copy mapping so we don't modify stored defaults
-        final_mapping = entry["mapping"].copy()
+        # final_mapping = entry["mapping"].copy()
+        final_mapping = flag_map.copy()
 
         # Apply overrides if provided
         if overrides:
