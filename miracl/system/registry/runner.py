@@ -1,5 +1,7 @@
-def default_runner(script: str, mapping: dict):
-    # mapping: { "--flag": default_value }
+from typing import Optional, Dict
+
+
+def default_runner(script: str, mapping: Dict[str, Optional[str]]):
     parts = [script]
     for flag, value in mapping.items():
         if value is not None:
