@@ -28,6 +28,7 @@ class ConvTiffNiiObjs:
                 "cli_s_flag": "mctn_f",
                 "cli_l_flag": "mctn_folder",
                 "cli_group": CliGroup.CONV_TIFF_NII,
+                "disabled": True,
             },
         },
         cli_obj_type=ArgumentType.STRING,

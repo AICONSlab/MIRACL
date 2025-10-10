@@ -54,6 +54,37 @@ class MiraclRegistry:
         """Return the entire registry dictionary"""
         return self._registry
 
+    def get_class(self, name: str) -> Type:
+        """
+        Return the full obj_class for the given module name.
+
+        Args:
+            name (str): The module name registered in the registry.
+
+        Returns:
+            Type: The class containing all MiraclObj objects.
+        """
+        if name not in self._registry:
+            raise ValueError(f"Module '{name}' not found in registry")
+        return self._registry[name]["obj_class"]
+
+    # def get_class(
+    #     self,
+    #     name: str,
+    #     include_all: bool = True,
+    # ) -> Dict[str, object]:
+    #     if name not in self._registry:
+    #         raise ValueError(f"Module '{name}' not found in registry")
+    #
+    #     entry = self._registry[name]
+    #     obj_class = entry["obj_class"]
+    #     module_type = entry["module_type"]
+    #
+    #     # Return the flattened flag map, optionally including disabled flags
+    #     return build_flag_map_from_class(
+    #         obj_class, module_type, include_all=include_all
+    #     )
+
     # UPDATED: now supports overrides
     def run(self, name: str, overrides: Optional[Dict] = None):
         if name not in self._registry:

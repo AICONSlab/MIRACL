@@ -20,7 +20,7 @@ class GeneratePatch:
                 "cli_s_flag": "mgp_i",
                 "cli_l_flag": "mgp_input",
                 "cli_group": CliGroup.REQUIRED,
-                "required": True,
+                "disabled": True,
             }
         },
         cli_obj_type=ArgumentType.STRING,
