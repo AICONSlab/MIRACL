@@ -63,7 +63,7 @@ class ClarAllen:
     )
 
     output_path = MiraclObj(
-        id="original clarity tiff folder (stack) - folder used as input to convert from tiff to nii",
+        id="52276705-5d74-4929-b4fa-4b0d2959520d",
         name="rca_output",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="r",
