@@ -96,3 +96,6 @@ reg.run(
     },
 )
 print("")
+
+# NOTE: Something like reg.override_flag("conversion", "tiff_folder") and
+# reg.override_content("workflow_connectors", "mapl3_workflow_raw_tiff_folder")
