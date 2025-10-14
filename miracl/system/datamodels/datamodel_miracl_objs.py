@@ -314,20 +314,13 @@ class MiraclObj(BaseModel):
         example="ace",
     )
 
-    # class FlowConfig(TypedDict, total=False):
-    #     cli_s_flag: str
-    #     cli_l_flag: str
-    #     required: bool
-    #     disabled: bool
-    #     cli_group: Optional[CliGroup]
-
-    class RequiredFlowConfig(TypedDict):
+    class RequiredFlowConfig(TypedDict, total=True):
         cli_s_flag: str
         cli_l_flag: str
 
     class OptionalFlowConfig(TypedDict, total=False):
-        required: bool
-        disabled: bool
+        required: bool  # Defaults to False
+        disabled: bool  # Defaults to False
         cli_group: Optional[CliGroup]
 
     class FlowConfig(RequiredFlowConfig, OptionalFlowConfig):
