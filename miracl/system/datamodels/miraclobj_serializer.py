@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union, Dict, Type
+from typing import List, Tuple, Union, Dict, Type, Callable, Sequence
 from argparse import Namespace
 
 # FIX: Import ModuleType from centralized ENUMS file
@@ -51,13 +51,17 @@ def should_include_in_cli(obj: MiraclObj, module_type: ModuleType) -> bool:
     return not flow_cfg.get("disabled", False)
 
 
+DeserializeParsedArgsToObjectsArgValue = Union[str, int, float, bool, None, List[str]]
+
+
 def deserialize_parsed_args_to_objects(
-    parsed_args: Union[Namespace, dict], miracl_objs: List[MiraclObj]
+    parsed_args: Union[Namespace, Dict[str, DeserializeParsedArgsToObjectsArgValue]],
+    miracl_objs: List[MiraclObj],
 ) -> List[MiraclObj]:
     """
     Given parsed CLI arguments (Namespace or dict) and a list of MiraclObj instances,
     assign each parsed argument value to the corresponding MiraclObj.content by matching
-    parsed argument keys to MiraclObj.name (dest).
+    parsed argument keys to MiraclObj.id (used as argparse 'dest').
 
     Args:
         parsed_args (Namespace or dict): Parsed CLI arguments from argparse.
@@ -70,53 +74,19 @@ def deserialize_parsed_args_to_objects(
     if isinstance(parsed_args, Namespace):
         parsed_args = vars(parsed_args)
 
-    name_to_obj = {obj.name: obj for obj in miracl_objs}
+    # name_to_obj = {obj.name: obj for obj in miracl_objs}
+    id_to_obj = {str(obj.id): obj for obj in miracl_objs}
 
     for dest, value in parsed_args.items():
-        obj = name_to_obj.get(dest)
+        # obj = name_to_obj.get(dest)
+        # print(f"Looking up dest={dest}")
+        obj = id_to_obj.get(dest)
         if obj:
             # Assign the parsed value to content
+            # print(f"Matched to obj.name={obj.name}")
             obj.content = value
 
     return miracl_objs
-
-
-def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
-    """
-    Return the CLI flags (short and long) for the given MiraclObj, respecting
-    the provided module_type context.
-
-    Args:
-        obj (MiraclObj): The MiraclObj to inspect.
-        module_type (ModuleType): The module or workflow context enum.
-
-    Returns:
-        List[str]: List of CLI flags (e.g., ['-i', '--input']). Empty list if
-        argument is disabled or no flags are defined.
-    """
-    flags = []
-
-    if module_type == ModuleType.MODULE:  # If it's a module, not a workflow
-        if obj.cli_s_flag:
-            flags.append(f"-{obj.cli_s_flag}")
-        if obj.cli_l_flag:
-            flags.append(f"--{obj.cli_l_flag}")
-        return flags
-
-    # For workflow types
-    if not obj.flow or module_type.value not in obj.flow:
-        return []
-
-    flow_cfg = obj.flow[module_type.value]
-    if flow_cfg.get("disabled", False):
-        return []
-
-    if flow_cfg.get("cli_s_flag"):
-        flags.append(f"-{flow_cfg['cli_s_flag']}")
-    if flow_cfg.get("cli_l_flag"):
-        flags.append(f"--{flow_cfg['cli_l_flag']}")
-
-    return flags
 
 
 def build_flag_map_from_class(
@@ -152,12 +122,68 @@ def build_flag_map_from_class(
     return mapping
 
 
+def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
+    """
+    Return the CLI flags (short and long) for the given MiraclObj, respecting
+    the provided module_type context.
+
+    Args:
+        obj (MiraclObj): The MiraclObj to inspect.
+        module_type (ModuleType): The module or workflow context enum.
+
+    Returns:
+        List[str]: List of CLI flags (e.g., ['-i', '--input']). Empty list if
+        argument is disabled or no flags are defined.
+    """
+    flags: List[str] = []
+
+    if module_type == ModuleType.MODULE:  # If it's a module, not a workflow
+        if obj.cli_s_flag:
+            flags.append(f"-{obj.cli_s_flag}")
+        if obj.cli_l_flag:
+            flags.append(f"--{obj.cli_l_flag}")
+        return flags
+
+    # For workflow types
+    if not obj.flow or module_type not in obj.flow:
+        return []
+
+    flow_cfg = obj.flow[module_type.value]
+    if flow_cfg.get("disabled", False):
+        return []
+
+    # if flow_cfg.get("cli_s_flag"):
+    #     flags.append(f"-{flow_cfg['cli_s_flag']}")
+    # if flow_cfg.get("cli_l_flag"):
+    #     flags.append(f"--{flow_cfg['cli_l_flag']}")
+    try:
+        flags.append(f"-{flow_cfg['cli_s_flag']}")
+        flags.append(f"--{flow_cfg['cli_l_flag']}")
+    except KeyError as e:
+        raise KeyError(
+            f"Missing required CLI flag in flow config for '{obj.name}': {e}"
+        )
+
+    return flags
+
+
+MiraclObjToArgparseKwargValue = Union[
+    str, int, float, bool, None, Callable[[str], object], Sequence[str]
+]
+
+
 def miraclobj_to_argparse(
     obj: MiraclObj,
     module_type: ModuleType,
-) -> Tuple[List[str], dict]:
+) -> Tuple[List[str], Dict[str, MiraclObjToArgparseKwargValue]]:
     """
     Convert a `MiraclObj` instance into CLI flags and corresponding argparse kwargs.
+
+    This includes:
+    - Generating CLI flags using module-specific config (e.g. `-f`, `--folder`)
+    - Assigning a UUID as the `dest` to ensure uniqueness across arguments
+    - Choosing a display name for help output using `cli_metavar` or falling back to `obj.name.upper()`
+    - Populating additional argparse options like `type`, `required`, `default`, `nargs`, `choices`, and `action`
 
     Args:
         obj (MiraclObj): The argument definition object.
@@ -165,7 +191,7 @@ def miraclobj_to_argparse(
 
     Returns:
         Tuple[List[str], dict]: Tuple of (flags, kwargs) suitable for argparse's
-        add_argument method.
+        `add_argument` method.
     """
 
     flags = get_cli_flags_for_obj(obj, module_type)
@@ -176,9 +202,12 @@ def miraclobj_to_argparse(
     if not obj.cli_help:
         raise ValueError(f"Missing required 'cli_help' for object {obj.id}")
 
-    kwargs = {
+    kwargs: Dict[str, MiraclObjToArgparseKwargValue] = {
         "help": obj.cli_help,
-        "dest": obj.name,
+        "dest": str(obj.id),
+        "metavar": obj.cli_metavar
+        if obj.cli_metavar not in (None, "")
+        else obj.name.upper(),
     }
 
     # Determine if argument is required
@@ -188,12 +217,14 @@ def miraclobj_to_argparse(
         flow_cfg = obj.flow.get(module_type.value, {}) if obj.flow else {}
         kwargs["required"] = flow_cfg.get("required", False)
 
+    # FIX: Add all options from argparser docs -> also add in datamodel
+
     # Add other argparse options if present
     if getattr(obj, "cli_obj_type", None) is not None:
         kwargs["type"] = obj.cli_obj_type.python_type
 
-    if getattr(obj, "cli_metavar", None) is not None:
-        kwargs["metavar"] = obj.cli_metavar
+    # if getattr(obj, "cli_metavar", None) is not None:
+    #     kwargs["metavar"] = obj.cli_metavar
 
     if getattr(obj, "cli_nargs", None) is not None:
         kwargs["nargs"] = obj.cli_nargs
