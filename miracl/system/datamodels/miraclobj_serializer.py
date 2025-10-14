@@ -138,16 +138,37 @@ def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
     flags: List[str] = []
 
     if module_type == ModuleType.MODULE:  # If it's a module, not a workflow
-        if obj.cli_s_flag:
+        # if obj.cli_s_flag:
+        #     flags.append(f"-{obj.cli_s_flag}")
+        # if obj.cli_l_flag:
+        #     flags.append(f"--{obj.cli_l_flag}")
+        # return flags
+        try:
             flags.append(f"-{obj.cli_s_flag}")
-        if obj.cli_l_flag:
-            flags.append(f"--{obj.cli_l_flag}")
+            flags.append(f"-{obj.cli_l_flag}")
+        except KeyError as e:
+            raise KeyError(
+                f"Missing required CLI flag in flow config for '{obj.name}': {e}"
+            )
+
         return flags
 
     # For workflow types
-    if not obj.flow or module_type not in obj.flow:
-        return []
+    # Check if the flow attribute is present
+    if obj.flow is None:
+        raise ValueError(
+            f"Missing ('{obj.flow}') required flow attribute for '{obj.name}'"
+        )
+    # Check if the ModuleType keys are present
+    if module_type not in obj.flow:
+        raise KeyError(
+            f"Missing required ModuleType for '{obj.name}' flow: {module_type}"
+        )
 
+    # if not obj.flow or module_type not in obj.flow:
+    #     return []
+
+    # If the object should not be included in the workflow, return empty flag dict
     flow_cfg = obj.flow[module_type.value]
     if flow_cfg.get("disabled", False):
         return []
