@@ -18,9 +18,6 @@ from miracl.system.datamodels.miraclobj_enums import (
     InputRestrictionType,
 )
 
-# from miracl.system.objs.objs_flow.objs_mapl3_workflow.enums_mapl3_workflow import (
-#    CliGroup,
-# )
 from miracl.system.enums.enums_base_modules import (
     CliGroup,
 )
@@ -317,14 +314,26 @@ class MiraclObj(BaseModel):
         example="ace",
     )
 
-    class FlowConfig(TypedDict, total=False):
+    # class FlowConfig(TypedDict, total=False):
+    #     cli_s_flag: str
+    #     cli_l_flag: str
+    #     required: bool
+    #     disabled: bool
+    #     cli_group: Optional[CliGroup]
+
+    class RequiredFlowConfig(TypedDict):
         cli_s_flag: str
         cli_l_flag: str
+
+    class OptionalFlowConfig(TypedDict, total=False):
         required: bool
         disabled: bool
         cli_group: Optional[CliGroup]
 
-    flow: Optional[Dict[Literal["ace", "sta", "mapl3"], FlowConfig]] = Field(
+    class FlowConfig(RequiredFlowConfig, OptionalFlowConfig):
+        pass
+
+    flow: Optional[Dict[Literal["ace", "mapl3"], FlowConfig]] = Field(
         None,
         description="Flags for flow that the module is a part of",
         example={
