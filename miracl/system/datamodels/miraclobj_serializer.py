@@ -138,11 +138,6 @@ def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
     flags: List[str] = []
 
     if module_type == ModuleType.MODULE:  # If it's a module, not a workflow
-        # if obj.cli_s_flag:
-        #     flags.append(f"-{obj.cli_s_flag}")
-        # if obj.cli_l_flag:
-        #     flags.append(f"--{obj.cli_l_flag}")
-        # return flags
         try:
             flags.append(f"-{obj.cli_s_flag}")
             flags.append(f"-{obj.cli_l_flag}")
@@ -173,10 +168,6 @@ def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
     if flow_cfg.get("disabled", False):
         return []
 
-    # if flow_cfg.get("cli_s_flag"):
-    #     flags.append(f"-{flow_cfg['cli_s_flag']}")
-    # if flow_cfg.get("cli_l_flag"):
-    #     flags.append(f"--{flow_cfg['cli_l_flag']}")
     try:
         flags.append(f"-{flow_cfg['cli_s_flag']}")
         flags.append(f"--{flow_cfg['cli_l_flag']}")
@@ -220,6 +211,32 @@ def miraclobj_to_argparse(
     if not flags:
         return [], {}
 
+    # if module_type == ModuleType.MODULE:
+    #     include = {
+    #         "id",
+    #         "name",
+    #         "cli_s_flag",
+    #         "cli_l_flag",
+    #         "cli_obj_type",
+    #         "cli_help",
+    #         "cli_metavar",
+    #         "cli_nargs",
+    #         "cli_choices",
+    #         "obj_default",
+    #         "cli_required",
+    #         "cli_action",
+    #         "content",
+    #     }
+    # else:
+    #     include = {
+    #         "id": True,
+    #         "name": True,
+    #         "flow": {module_type},
+    #         "content": True,
+    #     }
+    #
+    # selected_data = obj.model_dump(include=include)
+
     if not obj.cli_help:
         raise ValueError(f"Missing required 'cli_help' for object {obj.id}")
 
@@ -235,7 +252,15 @@ def miraclobj_to_argparse(
     if module_type == ModuleType.MODULE:
         kwargs["required"] = obj.cli_required if obj.cli_required is not None else False
     else:
-        flow_cfg = obj.flow.get(module_type.value, {}) if obj.flow else {}
+        if obj.flow:
+            flow_cfg = obj.flow.get(module_type.value)
+            if flow_cfg is None:
+                raise ValueError(
+                    f"Missing flow configuration for module type '{module_type.value}' in flow for '{obj.name}'"
+                )
+        else:
+            raise ValueError(f"Missing 'flow' configuration for '{obj.name}'")
+        # flow_cfg = obj.flow.get(module_type.value, {}) if obj.flow else {}
         kwargs["required"] = flow_cfg.get("required", False)
 
     # FIX: Add all options from argparser docs -> also add in datamodel
@@ -243,9 +268,6 @@ def miraclobj_to_argparse(
     # Add other argparse options if present
     if getattr(obj, "cli_obj_type", None) is not None:
         kwargs["type"] = obj.cli_obj_type.python_type
-
-    # if getattr(obj, "cli_metavar", None) is not None:
-    #     kwargs["metavar"] = obj.cli_metavar
 
     if getattr(obj, "cli_nargs", None) is not None:
         kwargs["nargs"] = obj.cli_nargs
@@ -258,5 +280,8 @@ def miraclobj_to_argparse(
 
     if getattr(obj, "cli_action", None) is not None:
         kwargs["action"] = obj.cli_action.value
+
+    if getattr(obj, "cli_const", None) is not None:
+        kwargs["const"] = obj.cli_const
 
     return flags, kwargs
