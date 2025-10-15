@@ -107,7 +107,7 @@ def build_flag_map_from_class(
     """
     mapping: Dict[str, object] = {}
 
-    for _, attr_value in vars(obj_class).items():
+    for attr_value in vars(obj_class).values():
         if isinstance(attr_value, MiraclObj):
             flags = get_cli_flags_for_obj(attr_value, module_type)
             long_flags = [f for f in flags if f.startswith("--")]
