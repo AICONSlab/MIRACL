@@ -191,9 +191,9 @@ class MiraclRegistry:
         attr_instance = getattr(cls, obj_name)
 
         if module_type == ModuleType.MODULE:
-            return attr_instance.get("cli_l_flag")
+            return f"--{attr_instance.get('cli_l_flag')}"
         else:
-            return attr_instance.flow.get(module_type, {}).get("cli_l_flag")
+            return f"--{attr_instance.flow.get(module_type, {}).get('cli_l_flag')}"
 
     def get_override_value(
         self,
