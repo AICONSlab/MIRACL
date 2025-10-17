@@ -5,7 +5,7 @@ from miracl.system.objs.objs_conv.objs_tiff_to_nii.objs_tiff_to_nii import (
 from miracl.system.datamodels.miraclobj_enums import ModuleType
 
 conv_tiff_nii_dict = {
-    "script": "/code/miracl/conversion.py",
+    "script": "python /code/miracl/conv/miracl_conv_convertTIFFtoNII.py",
     "obj_class": ConvTiffNiiObjs,
     "module_type": ModuleType.FLOW_MAPL3,
 }
