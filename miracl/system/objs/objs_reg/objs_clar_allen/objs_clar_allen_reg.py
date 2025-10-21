@@ -12,7 +12,6 @@ from miracl.system.enums.enums_base_modules import (
 
 class ClarAllen:
     nii_folder = MiraclObj(
-        id="c38437cd-7055-4572-8cb0-64ccf53ab755",
         name="rca_nii_folder",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="i",
@@ -43,7 +42,6 @@ class ClarAllen:
     )
 
     tiff_folder = MiraclObj(
-        id="0a3dc6fa-2f97-4979-ab12-00739784e4d2",
         name="rca_tiff_folder",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="c",
@@ -73,7 +71,6 @@ class ClarAllen:
     )
 
     output_path = MiraclObj(
-        id="52276705-5d74-4929-b4fa-4b0d2959520d",
         name="rca_output",
         tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
         cli_s_flag="r",
@@ -102,7 +99,6 @@ class ClarAllen:
     )
 
     orient_code = MiraclObj(
-        id="b0ae9b32-a66f-4eba-a39b-c238b752fb51",
         name="rca_orient_code",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="o",
@@ -131,7 +127,6 @@ class ClarAllen:
     )
 
     voxel_size = MiraclObj(
-        id="3894569b-1935-49fe-b9e0-e518b0bbd661",
         name="rca_voxel_size",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="v",
@@ -162,7 +157,6 @@ class ClarAllen:
     )
 
     hemi = MiraclObj(
-        id="867580eb-ea69-426b-97ae-82b52d8d730d",
         name="rca_hemi",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="m",
@@ -191,7 +185,6 @@ class ClarAllen:
     )
 
     allen_label = MiraclObj(
-        id="496d1355-fd08-4ab5-9aaf-ee2cc8d122d0",
         name="rca_allen_label",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="l",
@@ -219,7 +212,6 @@ class ClarAllen:
     )
 
     allen_atlas = MiraclObj(
-        id="3ea0859d-2cb9-4304-bfa6-0dab29207a74",
         name="rca_allen_atlas",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="a",
@@ -247,7 +239,6 @@ class ClarAllen:
     )
 
     side = MiraclObj(
-        id="e3719c74-0b5a-4bdf-a336-d533a1faf7ec",
         name="rca_side",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="s",
@@ -280,7 +271,6 @@ class ClarAllen:
     )
 
     no_mosaic_fig = MiraclObj(
-        id="0c3b2cac-4cb3-4b32-86fb-b1a64a49452a",
         name="rca_no_mosaic_fig",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="f",
@@ -314,7 +304,6 @@ class ClarAllen:
     )
 
     olfactory_bulb = MiraclObj(
-        id="dfd47b33-6f66-4a41-b42a-6264bb478f87",
         name="rca_olfactory_bulb",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="b",
@@ -347,7 +336,6 @@ class ClarAllen:
     )
 
     skip_cor = MiraclObj(
-        id="a58b7a5a-c253-41cd-87bb-ef3f9b232cb6",
         name="rca_skip_cor",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="p",
@@ -380,7 +368,6 @@ class ClarAllen:
     )
 
     warp = MiraclObj(
-        id="faaca013-3a95-4a3e-be24-f85e74841a83",
         name="rca_warp",
         tags=["clar_allen", "reg", "ace_flow"],
         cli_s_flag="w",

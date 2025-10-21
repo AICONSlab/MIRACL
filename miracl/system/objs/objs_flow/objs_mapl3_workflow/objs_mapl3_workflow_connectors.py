@@ -48,7 +48,6 @@ class MAPL3_connectors:
     # )
 
     mapl3_workflow_raw_tiff_folder: MiraclObj = MiraclObj(
-        id="c644fdb9-cb4f-447f-9fcb-60f6c01dbd4c",
         name="mapl3_workflow_raw_tiff_folder",
         tags=["mapl3", "flow", "mapl3_flow"],
         cli_s_flag="mwfc_rtf",
@@ -71,7 +70,6 @@ class MAPL3_connectors:
     )
 
     mapl3_workflow_results_folder: MiraclObj = MiraclObj(
-        id="6fab42c7-df09-4443-a86e-b274ed4d4ef1",
         name="mapl3_workflow_results_folder",
         tags=["mapl3", "flow", "mapl3_flow"],
         cli_s_flag="mwfc_crf",

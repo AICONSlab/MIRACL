@@ -13,7 +13,6 @@ from miracl.system.enums.enums_base_modules import (
 
 class ConvTiffNiiObjs:
     tiff_folder = MiraclObj(
-        id="4c91e02e-e8f6-4a07-8e07-464d258aa044",
         name="ctn_tiff_folder",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="f",
@@ -43,7 +42,6 @@ class ConvTiffNiiObjs:
     )
 
     output_folder = MiraclObj(
-        id="c4706ac7-f289-45c5-a7ac-8bb093ea6cb0",
         name="ctn_output_folder",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="w",
@@ -72,7 +70,6 @@ class ConvTiffNiiObjs:
     )
 
     down = MiraclObj(
-        id="87682780-e060-43a3-850a-08252c3f52a5",
         name="ctn_down",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="d",
@@ -102,7 +99,6 @@ class ConvTiffNiiObjs:
     )
 
     channum = MiraclObj(
-        id="6576193e-df63-4e5f-a417-b6dcf509412d",
         name="ctn_channum",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="cn",
@@ -136,7 +132,6 @@ class ConvTiffNiiObjs:
     )
 
     chanprefix = MiraclObj(
-        id="b5f0c95d-4b45-490b-832a-f2f989309ced",
         name="ctn_chanprefix",
         cli_s_flag="cp",
         cli_l_flag="chanprefix",
@@ -168,7 +163,6 @@ class ConvTiffNiiObjs:
     )
 
     channame = MiraclObj(
-        id="9bc9b99b-78e2-46db-8711-f05adc6f507d",
         name="ctn_channame",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="ch",
@@ -200,7 +194,6 @@ class ConvTiffNiiObjs:
     )
 
     outnii = MiraclObj(
-        id="7eb5121f-8520-4848-9911-9eada299aabf",
         name="ctn_outnii",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="o",
@@ -232,7 +225,6 @@ class ConvTiffNiiObjs:
     )
 
     resx = MiraclObj(
-        id="9b2e70f6-c843-4be4-bd03-9343840c70f2",
         name="ctn_resx",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="vx",
@@ -261,7 +253,6 @@ class ConvTiffNiiObjs:
     )
 
     resz = MiraclObj(
-        id="9b2e70f6-c843-4be4-bd03-9343840c70f2",
         name="ctn_resz",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="vz",
@@ -290,7 +281,6 @@ class ConvTiffNiiObjs:
     )
 
     center = MiraclObj(
-        id="8ea2f396-6c8c-46f7-9c5b-2768ef765a22",
         name="ctn_center",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="c",
@@ -321,7 +311,6 @@ class ConvTiffNiiObjs:
     )
 
     downzdim = MiraclObj(
-        id="9c7e4953-87eb-4979-aae4-0fb774a77f82",
         name="ctn_downzdim",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="dz",
@@ -350,7 +339,6 @@ class ConvTiffNiiObjs:
     )
 
     prevdown = MiraclObj(
-        id="8b53183d-389a-40f6-b8b5-4fd1cac90fc8",
         name="ctn_prevdown",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="pd",
@@ -379,7 +367,6 @@ class ConvTiffNiiObjs:
     )
 
     percentile_thr = MiraclObj(
-        id="8f676ee1-5621-40a7-befd-2d1e94ed6312",
         name="ctn_percentile_thr",
         tags=["tiff_nii", "conv", "ace_flow", "mapl3_flow"],
         cli_s_flag="pct",
