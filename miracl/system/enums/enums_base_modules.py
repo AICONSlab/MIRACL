@@ -14,6 +14,22 @@ class CliGroup(Enum):
         "generate patch",
         "Args for generating patches from Z-stack .tif files",
     )
+    MAPL3_PREPROCESSING_PARALLEL = (
+        "preprocessing parallel",
+        "Args for preprocessing RAW LSFM data in parallel",
+    )
+    MAPL3_INFERENCE = (
+        "inference",
+        "Args for inference",
+    )
+    MAPL3_PATCH_STACKING = (
+        "patch stacking",
+        "Args for patch stacking",
+    )
+    MAPL3_RAW_DATA_NORMALIZATION = (
+        "RAW data normalization",
+        "Args for RAW data normalization",
+    )
     REQUIRED = (
         "required",
         "required arguments",
