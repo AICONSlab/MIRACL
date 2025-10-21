@@ -30,6 +30,10 @@ class CliGroup(Enum):
         "RAW data normalization",
         "Args for RAW data normalization",
     )
+    MAPL3_SKELETONIZATION = (
+        "skeletonization",
+        "Args for skeletonization",
+    )
     REQUIRED = (
         "required",
         "required arguments",
