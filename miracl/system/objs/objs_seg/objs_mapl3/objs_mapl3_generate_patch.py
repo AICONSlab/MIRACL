@@ -10,7 +10,6 @@ from miracl.system.enums.enums_base_modules import (
 
 class GeneratePatch:
     input: MiraclObj = MiraclObj(
-        id="8a82f37b-3d5a-45da-8ccb-d13728f13fb3",
         name="mgp_input",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="i",
@@ -36,7 +35,6 @@ class GeneratePatch:
     )
 
     brain_mask: MiraclObj = MiraclObj(
-        id="f644d316-8ec5-4c12-be1d-bf6c9375b785",
         name="mgp_brain_mask",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="m",
@@ -46,12 +44,12 @@ class GeneratePatch:
                 "cli_s_flag": "mgp_m",
                 "cli_l_flag": "mgp_brain_mask",
                 "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
+                "disabled": True,
             }
         },
-        cli_obj_type=ArgumentType.BOOLEAN,
+        cli_obj_type=ArgumentType.STRING,
         cli_help="input directory containing .tiff or .tif brain mask slices if not passed it will compute mask (default: %(default)s)",
         cli_required=False,
-        obj_default=False,
         gui_label=["Brain mask"],
         gui_group={"mapl3": "main"},
         gui_order=[2],
@@ -62,7 +60,6 @@ class GeneratePatch:
     )
 
     out_dir: MiraclObj = MiraclObj(
-        id="beffa5d5-23c9-4152-8688-94724b6a829f",
         name="mgp_out_dir",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="o",
@@ -73,6 +70,7 @@ class GeneratePatch:
                 "cli_l_flag": "mgp_out_dir",
                 "cli_group": CliGroup.REQUIRED,
                 "required": True,
+                "disabled": True,
             }
         },
         cli_obj_type=ArgumentType.STRING,
@@ -88,7 +86,6 @@ class GeneratePatch:
     )
 
     cpu_load: MiraclObj = MiraclObj(
-        id="98dcf83e-aa71-4da5-aae8-c102fd100bdd",
         name="mgp_cpu_load",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="c",
@@ -114,7 +111,6 @@ class GeneratePatch:
     )
 
     patch_size: MiraclObj = MiraclObj(
-        id="ebd46db3-d2f5-4c45-af3c-0e5c26a66520",
         name="mgp_patch_size",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="p",
@@ -140,19 +136,18 @@ class GeneratePatch:
     )
 
     brain_mask_erosion: MiraclObj = MiraclObj(
-        id="9ab2d1d3-65bf-4ee4-85b0-2016ef5cc233",
-        name="mgp_brain_mask_erosion",
+        name="mgp_brain_mask_erosion_flag",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="e",
         cli_l_flag="brain_mask_erosion_flag",
         flow={
             "mapl3": {
                 "cli_s_flag": "mgp_e",
-                "cli_l_flag": "mgp_brain_mask_erosion",
+                "cli_l_flag": "mgp_brain_mask_erosion_flag",
                 "cli_group": CliGroup.MAPL3_GENERATE_PATCH,
             }
         },
-        cli_obj_type=ArgumentType.BOOLEAN,
+        cli_obj_type=ArgumentType.CUSTOM_BOOL,
         cli_help="set if you want to erode the brain mask (default: %(default)s)",
         cli_required=False,
         obj_default=False,
