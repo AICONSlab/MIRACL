@@ -1,22 +1,30 @@
 """
 This code is written by Ahmadreza Attarpour, a.attarpour@mail.utoronto.ca
-Modified for implementation into MIRACL by Jonas Osmann, j.osmann@alumni.utoronto.ca
-this is the inference mode code when the model is trained and ready to use
+this is the inference mode code for the 3D segmentation model
+The code loads the trained model and performs inference on the test dataset
+The code is written in a way that can be used for both single and multiple GPUs
 
 Main Inputs:
-    model, config, and transforms
-    path to the generated patches
-Outputs:
-    a directory conatining:
-        probability maps
-        binary outputs
+- config: path of the config file used during training to define the model
+- output_path: if passed it saves the results
+- model_path: path of the trained model
+- input_dir: path to input directory containing patches
+- gpu_index: gpu index to be used; if you wanna use all the available gpus pass all; default it uses index 0
+- binarization_threshold: threshold to binarize the model probabilty map; between 0-1
+- save_prob_map_flag: a flag to whether save the prob map
+- metadata: path to metadata JSON file (optional); it should be either original one or after classification label is added
+- tissue_percentage_threshold: threshold between 0-100 to filter empty patches; if this is not passed, patches will be filtered based on classification label (required if metadata is provided)
+
+Output:
+- The code saves the output (binary and probability output (optional) as .tif files readable by Fiji
 
 """
 
 # load libraries
 import os
-import argparse
 import sys
+from pathlib import Path
+import argparse
 from monai.inferers import sliding_window_inference
 from monai.transforms import (
     AsDiscrete,
@@ -34,72 +42,220 @@ from monai.data import CacheDataset, DataLoader, decollate_batch, Dataset
 import numpy as np
 import yaml
 import tifffile
-from miracl.seg.mapl3 import mapl3_inference_model_init
+import yaml
+import model_init
 import json
 import multiprocessing
 import concurrent
 import time
-from miracl import miracl_logger
+from monai.networks.nets import UNETR
+from miracl.system.utilfns.utilfns_cli_parser import str2bool, none_or_float
 
-logger = miracl_logger.logger
+# Create the parser
+my_parser = argparse.ArgumentParser(description="Working directory")
 
-# # Create the parser
-# my_parser = argparse.ArgumentParser(description="Working directory")
-#
-# # Add the arguments
-# my_parser.add_argument(
-#     "-c",
-#     "--config",
-#     help="path of config file used during training to defien the model",
-#     required=True,
-# )
-# my_parser.add_argument(
-#     "-o",
-#     "--output_path",
-#     help="if passed it saves the results",
-#     required=False,
-#     default=False,
-# )
-# my_parser.add_argument(
-#     "-m", "--model_path", help="path of trained model", required=True
-# )
-# my_parser.add_argument(
-#     "-i",
-#     "--input_dir",
-#     help="path to input directory containing patches",
-#     required=True,
-# )
-# my_parser.add_argument(
-#     "-p",
-#     "--tissue_precentage_threshold",
-#     help="whether to use json file to filter empty patches if passsed must be threshold between 0 and 1",
-#     required=False,
-#     default=0,
-#     type=float,
-# )
-# my_parser.add_argument(
-#     "-g",
-#     "--gpu_index",
-#     help="gpu index to be used; if you wanna use all the available gpus pass all; default it uses index 0",
-#     required=False,
-#     default=0,
-# )
-# my_parser.add_argument(
-#     "-t",
-#     "--binarization_threshold",
-#     help="threshold to binarize the model probabilty map; between 0-1",
-#     required=False,
-#     default=0.5,
-#     type=float,
-# )
-# my_parser.add_argument(
-#     "-s",
-#     "--save_prob_map_flag",
-#     help="a flag to whether save the prob map",
-#     required=False,
-#     default=False,
-#     action="store_true",
-# )
+# Add the arguments
+my_parser.add_argument(
+    "-c",
+    "--config",
+    help="path of config file used during training to defien the model",
+    required=True,
+)
+my_parser.add_argument(
+    "-o",
+    "--output_path",
+    help="output directory",
+    required=True,
+    default=False,
+)
+my_parser.add_argument(
+    "-m",
+    "--model_path",
+    help="path of trained model",
+    required=True,
+)
+my_parser.add_argument(
+    "-i",
+    "--input_dir",
+    help="path to input directory containing patches",
+    required=True,
+)
+my_parser.add_argument(
+    "-g",
+    "--gpu_index",
+    help="gpu index to be used; if you wanna use all the available gpus pass all; default it uses index 0",
+    required=False,
+    default=0,
+)
+my_parser.add_argument(
+    "-t",
+    "--binarization_threshold",
+    help="threshold to binarize the model probabilty map; between 0-1",
+    required=False,
+    default=0.5,
+    type=float,
+)
+my_parser.add_argument(
+    "-s",
+    "--save_prob_map_flag",
+    help="a flag to whether save the prob map",
+    required=False,
+    default=False,
+    type=str2bool,
+    # action="store_true",
+)
+my_parser.add_argument(
+    "-j",
+    "--metadata",
+    help="path to metadata JSON file (optional,)",
+    required=False,
+    default=None,
+)
+my_parser.add_argument(
+    "-p",
+    "--tissue_percentage_threshold",
+    help="threshold between 0-100 to filter empty patches",
+    required=False,
+    default=None,
+    type=none_or_float,
+)
+
+
+# load the data
+def create_datadicts(
+    input_file_path, metadata_path=None, percentage_brain_patch_skip=None
+):
+    # -------------------------------------------------------
+    # Read generate_patch directory / created by generate_patch.py
+    # -------------------------------------------------------
+    print("preparing dataset ...")
+
+    # List all files in the input path
+    file_names = os.listdir(input_file_path)
+
+    if metadata_path is not None:
+        if percentage_brain_patch_skip is None:
+            # Load metadata
+            with open(os.path.join(metadata_path)) as f:
+                metadata = json.load(f)["patches"]
+
+            # Filter filenames to include only .tif or .tiff files
+            file_names_paths = [
+                file
+                for file in file_names
+                if file.endswith(".tiff") or file.endswith(".tif")
+            ]
+
+            # Create a dictionary to map filenames to their tissue_percentage
+            metadata_dict = {
+                patch["filename"]: patch["classification_label"] for patch in metadata
+            }
+
+            # Filter non-empty images (classification_label > 0)
+            images_non_empty = [
+                os.path.join(input_file_path, image)
+                for image in file_names_paths
+                if metadata_dict.get(image, 0) > 0  # Use .get() to handle missing files
+            ]
+            images_non_empty.sort()
+
+            # Filter non-empty images (classification_label = 0)
+            images_empty = [
+                os.path.join(input_file_path, image)
+                for image in file_names_paths
+                if metadata_dict.get(image, 0) <= 0  # Opposite condition
+            ]
+            images_empty.sort()
+
+            # save output for empty patches
+            # save_empty_out(output_dir, images_empty, save_prob_map_flag)
+
+            print(
+                f"metadata file is selected and percentage tissue thr is not selected, so patches will be filtered based on the classification label \n",
+                f"the following files will be processed: \n",
+                f"Number of empty patches: {len(images_empty)} \n",
+                f"Number of non-empty patches: {len(images_non_empty)}",
+            )
+
+            # file_names_paths = [os.path.join(input_file_path, file) for file in images_non_empty]
+            data_dicts = [{"image": image_name} for image_name in images_non_empty]
+            print("Data dicts are ready!")
+            print(f"Some samples from data dicts: {data_dicts[:3]}")
+            print(
+                f"In total we have {len(data_dicts)} data dicts that the model will be deployed on"
+            )
+
+        elif percentage_brain_patch_skip is not None:
+            # Load metadata
+            with open(os.path.join(metadata_path)) as f:
+                metadata = json.load(f)["patches"]
+
+            # Filter filenames to include only .tif or .tiff files
+            file_names_paths = [
+                file
+                for file in file_names
+                if file.endswith(".tiff") or file.endswith(".tif")
+            ]
+
+            # Create a dictionary to map filenames to their tissue_percentage
+            metadata_dict = {
+                patch["filename"]: patch["tissue_percentage"] for patch in metadata
+            }
+
+            # Filter non-empty images (tissue_percentage > threshold)
+            images_non_empty = [
+                os.path.join(input_file_path, image)
+                for image in file_names_paths
+                if metadata_dict.get(image, 0)
+                > percentage_brain_patch_skip  # Use .get() to handle missing files
+            ]
+            images_non_empty.sort()
+
+            # Filter empty images (tissue_percentage <= threshold)
+            images_empty = [
+                os.path.join(input_file_path, image)
+                for image in file_names_paths
+                if metadata_dict.get(image, 0)
+                <= percentage_brain_patch_skip  # Opposite condition
+            ]
+            images_empty.sort()
+
+            # save output for empty patches
+            # save_empty_out(output_dir, images_empty, save_prob_map_flag)
+
+            print(
+                f"metadata file is selected and percentage tissue thr is selected, so patches will be filtered based on the thr \n",
+                f"the following files will be processed: \n",
+                f"Number of empty patches: {len(images_empty)} \n",
+                f"Number of non-empty patches: {len(images_non_empty)}",
+            )
+
+            # file_names_paths = [os.path.join(input_file_path, file) for file in images_non_empty]
+            data_dicts = [{"image": image_name} for image_name in images_non_empty]
+            print("Data dicts are ready!")
+            print(f"Some samples from data dicts: {data_dicts[:3]}")
+            print(
+                f"In total we have {len(data_dicts)} data dicts that the model will be deployed on"
+            )
+
+    else:
+        file_names_paths = [
+            os.path.join(input_file_path, file)
+            for file in file_names
+            if file.endswith(".tiff") or file.endswith(".tif")
+        ]
+        print(
+            f"metadata file is not selected, and all files will be processed: \n",
+            f"Number of patches: {len(file_names_paths)}",
+        )
+        data_dicts = [{"image": image_name} for image_name in file_names_paths]
+        print("Data dicts are ready!")
+        print(f"Some samples from data dicts: {data_dicts[:3]}")
+        print(
+            f"In total we have {len(data_dicts)} data dicts that the model will be deployed on"
+        )
+
+    return data_dicts
 
 
 # create dataloader
@@ -108,7 +264,7 @@ def create_dataloader(cfg, data_dicts, gpu_id):
     class MyLoadImage(Transform):
         def __call__(self, image_dict):
             # load the .tiff files they are HxWxD
-            image_dict["img_path"] = image_dict["image"]
+            image_dict["img_file_name"] = os.path.basename(image_dict["image"])
             image_dict["image"] = tifffile.imread(image_dict["image"])
 
             # change the order axis of the image from DHW to HWD
@@ -155,7 +311,6 @@ def create_dataloader(cfg, data_dicts, gpu_id):
 
 # create model
 def create_model(cfg):
-
     print("creating the model ...")
 
     # load the config
@@ -238,7 +393,7 @@ def create_model(cfg):
         if patch_wise_attn_down:
             atten_dim_patch = int(atten_dim_patch / patch_wise_attn_down_factor)
         print(
-            "Attention dimenstion / embedding size for patch wise attention is: ",
+            "Attention dimenstion / embedding size for pacth wise attention is: ",
             atten_dim_patch,
         )
 
@@ -247,24 +402,23 @@ def create_model(cfg):
 
     model_name = cfg["general"].get("model_name")
     if model_name == "unetr":
-        # model = UNETR(
-        #     spatial_dims=3,
-        #     in_channels=1,
-        #     out_channels=2,
-        #     img_size=main_input_img_size,
-        #     feature_size=cfg['unetr'].get('feature_size', 16),
-        #     hidden_size=cfg['unetr'].get('hidden_size', 768),
-        #     mlp_dim=cfg['unetr'].get('mlp_dim', 3072),
-        #     num_heads=cfg['unetr'].get('num_heads', 12),
-        #     dropout_rate=cfg['unetr'].get('dropout', 0.2),
-        #     res_block=cfg['unetr'].get('res_block', True),
-        #     norm_name='batch'
-        #     )
-        print("!!!")
+        model = UNETR(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            img_size=main_input_img_size,
+            feature_size=cfg["unetr"].get("feature_size", 16),
+            hidden_size=cfg["unetr"].get("hidden_size", 768),
+            mlp_dim=cfg["unetr"].get("mlp_dim", 3072),
+            num_heads=cfg["unetr"].get("num_heads", 12),
+            dropout_rate=cfg["unetr"].get("dropout", 0.2),
+            res_block=cfg["unetr"].get("res_block", True),
+            norm_name="batch",
+        )
 
     else:
         # load the model
-        model = mapl3_inference_model_init.ResidualUNet3D(
+        model = model_init.ResidualUNet3D(
             in_channels=in_channels,
             out_channels=out_channels,
             final_sigmoid=final_sigmoid,
@@ -317,24 +471,15 @@ def create_model(cfg):
     return model
 
 
-# This will take image, prediction, labels, and save them in the root dir
-def image_saver(root_dir, name, outputs=None, thr=0.5, save_prob=False):
-    name_parts = name.split("/")
-    name = name_parts[-4] + "_" + name_parts[-1]
+def save_empty_out(root_dir, img_list_name, save_prob=False):
+    for img in img_list_name:
+        D, H, W = (tifffile.memmap(img)).shape
 
-    post_pred = Compose(
-        [EnsureType(), AsDiscrete(threshold=thr), AsDiscrete(to_onehot=2)]
-    )
+        name = os.basename(img)
 
-    outputs = torch.nn.functional.softmax(outputs, dim=1)[:, 1:, ...]
-
-    if save_prob:
-
-        out = outputs.cpu().detach().numpy()[0, 0, ...]
-        out = np.moveaxis(out, 1, 0)
-        out = np.moveaxis(out, 2, 0)
+        out = np.zeros((D, H, W), dtype=np.bool_)
         tifffile.imwrite(
-            os.path.join(root_dir, f"out_prob_{name}"),
+            os.path.join(root_dir, "out", name),
             out,
             metadata={
                 "DimensionOrder": "ZYX",
@@ -346,15 +491,42 @@ def image_saver(root_dir, name, outputs=None, thr=0.5, save_prob=False):
             },
         )
 
-        outputs = [post_pred(i) for i in decollate_batch(outputs)]
+        if save_prob:
+            out = np.zeros((D, H, W), dtype=np.float32)
+            tifffile.imwrite(
+                os.path.join(root_dir, "out_prob", name),
+                out,
+                metadata={
+                    "DimensionOrder": "ZYX",
+                    "SizeC": 1,
+                    "SizeT": 1,
+                    "SizeX": out.shape[0],
+                    "SizeY": out.shape[1],
+                    "SizeZ": out.shape[2],
+                },
+            )
 
-        out = outputs[0].cpu().detach().numpy()[1, ...]
+
+# This will take image, prediction, labels, and save them in the root dir
+def image_saver(root_dir, name, outputs=None, thr=0.5, save_prob=False):
+    post_pred = Compose(
+        [
+            EnsureType(),
+            AsDiscrete(threshold=thr),
+            AsDiscrete(to_onehot=outputs.shape[1]),
+        ]
+    )
+
+    # only for the first channel (axons)
+    outputs = torch.nn.functional.softmax(outputs, dim=1)[:, 1:2, ...]
+
+    if save_prob:
+        out = outputs.cpu().detach().numpy()[0, 0, ...]
         out = np.moveaxis(out, 1, 0)
         out = np.moveaxis(out, 2, 0)
-
         tifffile.imwrite(
-            os.path.join(root_dir, f"out_{name}"),
-            out.astype(np.bool_),
+            os.path.join(root_dir, "out_prob", name),
+            out,
             metadata={
                 "DimensionOrder": "ZYX",
                 "SizeC": 1,
@@ -364,6 +536,25 @@ def image_saver(root_dir, name, outputs=None, thr=0.5, save_prob=False):
                 "SizeZ": out.shape[2],
             },
         )
+
+    outputs = [post_pred(i) for i in decollate_batch(outputs)]
+
+    out = outputs[0].cpu().detach().numpy()[1, ...]
+    out = np.moveaxis(out, 1, 0)
+    out = np.moveaxis(out, 2, 0)
+
+    tifffile.imwrite(
+        os.path.join(root_dir, "out", name),
+        out.astype(np.bool_),
+        metadata={
+            "DimensionOrder": "ZYX",
+            "SizeC": 1,
+            "SizeT": 1,
+            "SizeX": out.shape[0],
+            "SizeY": out.shape[1],
+            "SizeZ": out.shape[2],
+        },
+    )
 
 
 # Parallel Inference function
@@ -378,7 +569,6 @@ def run_inference_on_gpu(
     gpu_id,
     core_ids,
 ):
-
     print(f"Starting inference on GPU {gpu_id} ...")
     # Set CPU core affinity for this DataLoader's process (Linux only)
     os.sched_setaffinity(0, core_ids)
@@ -389,18 +579,16 @@ def run_inference_on_gpu(
     sw_batch_size = 1
 
     with torch.no_grad():
-
         for i, data in enumerate(dataloader):
-
             inputs = data["image"].to(device)
-            print(f"Processing {data['img_path'][0]} on {device}")
+            print(f"Processing {data['img_file_name'][0]} on {device}")
 
             outputs = sliding_window_inference(inputs, roi_size, sw_batch_size, model)
 
             # save the images as .tiff file readable by Fiji
             image_saver(
                 root_dir=output_dir,
-                name=data["img_path"][0],
+                name=data["img_file_name"][0],
                 outputs=outputs,
                 thr=bin_thr,
                 save_prob=save_prob_map_flag,
@@ -411,87 +599,57 @@ def run_inference_on_gpu(
 
 
 # main function
-def main(
-    preprocess_parallel_output_folder,
-    generate_patch_output_folder,
-    inference_output_folder,
-    inference_config,
-    inference_model_path,
-    inference_tissue_percentage_threshold,
-    inference_gpu_index,
-    inference_binarization_threshold,
-    inference_save_prob_map,
-):
+def main(args):
     # -------------------------------------------------------
     # get the args
     # -------------------------------------------------------
-    config_path = inference_config.filepath
+    input_file_path = args["input_dir"]
+    model_path = args["model_path"]
+    gpu_index = args["gpu_index"]
+    binarization_threshold = args["binarization_threshold"]
+    save_prob_map_flag = args["save_prob_map_flag"]
+    percentage_brain_patch_skip = args["tissue_percentage_threshold"]
+    metadata_path = args["metadata"]
+    config_path = args["config"]
+
     with open(config_path, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-    print("config file is loaded ...")
-    output_dir = inference_output_folder.dirpath
-    input_path = preprocess_parallel_output_folder.dirpath
-    json_path = generate_patch_output_folder.dirpath
-    percentage_brain_patch_skip = inference_tissue_percentage_threshold.content
-    model_path = inference_model_path.filepath
-    gpu_index = inference_gpu_index.content
-    binarization_threshold = inference_binarization_threshold.content
-    save_prob_map_flag = inference_save_prob_map.content
+    print(f"\nconfig file is loaded ...")
 
-    logger.info("#########")
-    logger.info("INFERENCE")
-    logger.info("#########")
-    logger.info(f"Config file: {config_path}")
-    logger.info(f"Ouput folder: {output_dir}")
-    logger.info(f"json file location: {json_path}")
-    logger.info(f"Preprocessed patches folder: {input_path}")
-    logger.info(f"Percentage brain patch skip: {percentage_brain_patch_skip}")
-    logger.info(f"Model path: {model_path}")
-    logger.info(f"GPU index: {gpu_index}")
-    logger.info(f"Binarization threshold: {binarization_threshold}")
-    logger.info(f"Save prob map flag: {save_prob_map_flag}")
+    # create the output director(ies)
+    output_dir = Path(args["output_path"]) / "inference"
+
+    print("\n Running inference with the following settings:")
+    print(f"  Patches folder path:    {input_file_path}")
+    print(f"  Model path:             {model_path}")
+    print(f"  GPU index:              {gpu_index}")
+    print(f"  Binarization threshold: {binarization_threshold}")
+    print(f"  Save probability map:   {save_prob_map_flag}")
+    print(f"  Tissue % threshold:     {percentage_brain_patch_skip}")
+    print(f"  Metadata path:          {metadata_path}")
+    print(f"  Config path:            {config_path}")
+    print(f"  Output dir:             {output_dir}")
+
+    sys.exit()
+
+    isExist = os.path.exists(output_dir)
+    if not isExist:
+        os.mkdir(output_dir)
+        output_dir_out = os.path.join(output_dir, "out")
+        if not os.path.exists(output_dir_out):
+            os.mkdir(output_dir_out)
+
+        if save_prob_map_flag:
+            output_dir_out_prob = os.path.join(output_dir, "out_prob")
+            if not os.path.exists(output_dir_out_prob):
+                os.mkdir(output_dir_out_prob)
 
     # -------------------------------------------------------
-    # Read generate_patch directory / created by generate_patch.py
+    # load the data
     # -------------------------------------------------------
-    print("preparing dataset ...")
-
-    images_val = []
-
-    with os.scandir(input_path) as entries:
-        for entry in entries:
-            if entry.is_file() and entry.name.lower().endswith((".tif", ".tiff")):
-                images_val.append(os.path.join(input_path, entry.name))
-
-    if percentage_brain_patch_skip > 0:
-        # load in percentage_brain_patch.json
-        with open(os.path.join(json_path, "percentage_brain_patch.json")) as f:
-            percentage_brain_patch = json.load(f)
-
-        # filter through images val based on percentage threshold
-        images_val_non_empty = [
-            os.path.join(input_path, image)
-            for image in images_val
-            if percentage_brain_patch[image] > percentage_brain_patch_skip
-        ]
-        images_val_non_empty.sort()
-
-        images_val_empty = [
-            os.path.join(input_path, image)
-            for image in images_val
-            if percentage_brain_patch[image] <= percentage_brain_patch_skip
-        ]
-        images_val_empty.sort()
-
-        images_val = images_val_non_empty
-
-    data_dicts = [{"image": image_name} for image_name in images_val]
-    print("Data dicts are ready!")
-    print(f"Some samples from data dicts: {data_dicts[:3]}")
-    print(
-        f"In total we have {len(data_dicts)} data dicts that the model will be deployed on"
+    data_dicts = create_datadicts(
+        input_file_path, metadata_path, percentage_brain_patch_skip
     )
-
     # -------------------------------------------------------
     # GPU selection and split the data
     # -------------------------------------------------------
@@ -500,7 +658,6 @@ def main(
     data_loaders = []
     core_ids = []
     if gpu_index != "all":
-
         # define the data loader
         d, ids = create_dataloader(cfg, data_dicts, gpu_index)
         core_ids.append(ids)
@@ -519,14 +676,12 @@ def main(
         )
 
     else:
-
         device_count = torch.cuda.device_count()
 
         # split the data
         # data_dicts = (torch.chunk(torch.tensor(data_dicts), device_count)).tolist()
         data_dicts = [data_dicts[i::device_count] for i in range(device_count)]
         for i in range(device_count):
-
             d, ids = create_dataloader(cfg, data_dicts[i], i)
             core_ids.append(ids)
             data_loaders.append(d)
@@ -542,7 +697,6 @@ def main(
     # Load the trained model
     # -------------------------------------------------------
     for i in range(len(models)):
-
         models[i].load_state_dict(torch.load(model_path))
 
     print("Trained model(s) loaded!")
@@ -550,7 +704,6 @@ def main(
     # Run inference on GPU(s)
     # -------------------------------------------------------
     if gpu_index != "all":
-
         start_time = time.time()
         run_inference_on_gpu(
             cfg,
@@ -570,9 +723,6 @@ def main(
         print(f"Execution time on GPU: {execution_time_minutes:.6f} minutes")
 
     else:
-
-        import time
-
         print("Starting parallel inference ...")
         start_time = time.time()
         # Use ThreadPoolExecutor for parallel execution
@@ -603,3 +753,9 @@ def main(
         ) / 60  # Convert seconds to minutes
         print(f"Execution time on GPU: {execution_time_minutes:.6f} minutes")
     print("Inference complete!")
+
+
+if __name__ == "__main__":
+    # Execute the parse_args() method
+    args = vars(my_parser.parse_args())
+    main(args)

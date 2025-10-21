@@ -1,0 +1,92 @@
+general:
+  model_name: 'ResidualUNet3D'
+  batch_size: 1
+  main_input_img_size: 256 # for unetr this is the size of input and network_patch_size won't be used
+  crop_number: 1
+  network_patch_size: 64
+  #data_dict_file: '/scratch/scratch01/mggrp/aattarpour/ahmadreza/attentiveunet/datasets/vessel_data/dataset2_minivess_data_dicts.pickle'
+  #data_dict_file: '/home/aattarpour/scratch/mggrp/ahmadreza/deeptrace/datasets/data_dicts_finetune_hpc.pickle'
+  #data_dict_file: '/data5/projects/Ahmadreza/deeptrace/DeepTrace/datasets/data_dicts_finetune_thr_1percent_maghz_filtered_val_raw.pickle'
+  data_dict_file: '/home/aattarpour/scratch/mggrp/ahmadreza/deeptrace/code/DeepTrace/datasets/data_dicts_finetune_thr_1percent_hpc_filtered_val.pickle'
+  # data_dict_file: '/home/aattarpour/scratch/mggrp/ahmadreza/deeptrace/experiments/exps_with_augmented_patches/2025-03-25-15-35-05/data_dicts.pickle'
+  dataloader_sampler: 'default' #default or weighted
+  checkpoint_period: 1
+  max_epochs: 700
+  warmup_epochs: 'default'
+  validation_interval: 1
+  early_stop_patience: 20
+  data_aug_prob: 0.5
+  cache_rate_train: 0.0
+  cache_rate_val: 0.0
+  GPU: 'single'
+  model_state: 'trained'
+  # model_trained_path: '/exa01/project/mggrp/aattarpour/ahmadreza/deeptrace/experiments/ssl_model/2024-12-03-12-53-19/checkpoint_trained_model_epoch_5_19000.pth'
+  model_trained_path: '/exa01/project/mggrp/aattarpour/ahmadreza/deeptrace/experiments/final/2025-01-17-21-01-36/best_metric_model.pth'
+
+unetr: # if the model is unetr
+  feature_size: 16
+  hidden_size: 768
+  mlp_dim: 3072
+  num_heads: 12
+  dropout: 0.2
+  res_block: True
+model: # if the model is ResidualUNet3D
+  in_channels: 1
+  out_channels: 2
+  final_sigmoid: None # will output probability
+  f_maps: 16 # number of channels
+  encoder_depth: 5
+  basic_module: 'ResNetBlock'
+  layer_order: 'cbdp' # default value / test r instead of p to test ReLu | try instance normalization
+  num_groups: 8 # default value; number of groups for the GroupNorm
+  is_segmentation: False # if True and the model is in eval mode, Sigmoid/Softmax normalization is applied after the final convolution; if False (regression problem) the normalization layer is skipped
+  conv_kernel_size: 3 # default to 3
+  pool_kernel_size: 2 # default to 2
+  conv_padding: 1 # default
+  is3d: True
+  dropout_prob: 0.1
+  drop_path: 0.1
+  attention_sum: True # if this is true --> voxel wise and patch wise must be applied in the same encoder depth
+  attention_weights: True # whether to apply separate weights to voxel-wise or patch-wise transformer; if this is true --> attention_sum must be true
+attention_patch_wise:
+  flag: True
+  down_flag: True # it downsamples the dimenstion of the patch wise attn
+  down_factor: 4 # this applies only if down_flag is True
+  adaptive_thr: True # this applies a globally aware patch wise adaptive bias to the foreground channel of output
+  patch_wise_PE_3D: False
+  encoder_depth_patch: 5 # at which depth of encdoder, patch-wise transformer will be apploed should be below encoder_depth 
+  num_heads: 8 # embedding dimension (check model_train.py) should be devidable by this number 
+  mlp_ratio: 4.
+  qkv_bias: True
+  qk_scale: None
+  drop: 0.05 # MLP
+  atten_drop: 0.05
+  atten_depth: 8
+  drop_path: 0.1
+attention_voxel_wise:
+  flag: True
+  encoder_depth_voxel: 5 # at which depth of encdoder, voxel-wise transformer will be apploed / should be smaller encoder_depth 
+  #adaptive_thr: False # this applies a globally aware patch wise adaptive bias to the foreground channel of output
+  num_heads: 8 # embedding dimension (check model_train.py) should be devidable by this number 
+  mlp_ratio: 4.
+  qkv_bias: True
+  qk_scale: None
+  drop: 0.05 # MLP
+  atten_drop: 0.05
+  atten_depth: 8
+  drop_path: 0.1
+loss:
+  name: 'tversky'
+  tversky_alpha: 0.3
+  tversky_beta: 0.7
+  deep_supervision_level: 3 # should be [0, encoder_depth] / for unetr must be zero
+  MIP_loss_weight: 0.3 # if false doesn't apply MIP loss / between 0-1
+  dicece_weights: 1
+  weight_on_edge: 0.7 # if false doesn't apply more weight on edges / between 0-1
+optimizer:
+  name: "AdamW"
+  learning_rate: 0.0001
+  weight_decay: 0.005
+  gradient_clip: 1
+  scheduler: "cosine"
+  scheduler_last_epoch: 339 # default is -1
