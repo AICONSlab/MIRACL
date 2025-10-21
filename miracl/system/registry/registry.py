@@ -170,7 +170,12 @@ class MiraclRegistry:
         # Run with merged mapping
         return entry["runner"](entry["script"], final_mapping)
 
-    def get_override_flag(self, registry_key: str, obj_name: str) -> Optional[str]:
+    def get_override_flag(
+        self,
+        registry_key: str,
+        obj_name: str,
+        manual_module_type: Optional[ModuleType] = None,
+    ) -> Optional[str]:
         """
         Get the CLI flag associated with a specific object in a registered module.
 
@@ -186,12 +191,15 @@ class MiraclRegistry:
 
         entry = self._registry[registry_key]
         cls = self.get_class(registry_key)
-        module_type = entry["module_type"]
+        if manual_module_type is None:
+            module_type = entry["module_type"]
+        else:
+            module_type = manual_module_type
 
         attr_instance = getattr(cls, obj_name)
 
         if module_type == ModuleType.MODULE:
-            return f"--{attr_instance.get('cli_l_flag')}"
+            return f"--{attr_instance.cli_l_flag}"
         else:
             return f"--{attr_instance.flow.get(module_type, {}).get('cli_l_flag')}"
 
@@ -211,4 +219,11 @@ class MiraclRegistry:
             Any: The 'content' value of the object.
         """
         cls = self.get_class(registry_key)
-        return getattr(cls, obj_name).content
+        attr_instance = getattr(cls, obj_name)
+
+        # return getattr(cls, obj_name).content
+        return (
+            attr_instance.content
+            if attr_instance.content is not None
+            else attr_instance.obj_default
+        )
