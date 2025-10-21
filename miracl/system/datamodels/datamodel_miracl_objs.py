@@ -25,7 +25,7 @@ from miracl.system.enums.enums_base_modules import (
 from argparse import ArgumentTypeError
 from pathlib import Path
 import re
-from uuid import UUID
+from uuid import UUID, uuid4
 
 ############
 # UTIL FNS #
@@ -96,7 +96,8 @@ class LineEditConfig(BaseModel):
 class MiraclObj(BaseModel):
     # REQUIRED FIELDS
     id: UUID = Field(
-        ...,
+        # ...,
+        default_factory=uuid4,
         description="Unique id for object",
         example="67b62f10-a6b6-4d61-9e2c-19819373265d",
         frozen=True,
