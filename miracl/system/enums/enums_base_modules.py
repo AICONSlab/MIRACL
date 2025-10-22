@@ -34,6 +34,10 @@ class CliGroup(Enum):
         "skeletonization",
         "Args for skeletonization",
     )
+    MAPL3_VOXELIZATION = (
+        "voxelization",
+        "Args for voxelization",
+    )
     REQUIRED = (
         "required",
         "required arguments",
