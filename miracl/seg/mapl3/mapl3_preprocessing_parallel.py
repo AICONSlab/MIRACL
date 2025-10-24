@@ -43,7 +43,7 @@ from tqdm import tqdm
 from joblib import Parallel, delayed, parallel_config
 import multiprocessing
 import json
-from miracl.system.utilfns.utilfns_cli_parser import str2bool
+from miracl_utilfns import str2bool
 
 # # -------------------------------------------------------
 # # custom action to handle metadata file

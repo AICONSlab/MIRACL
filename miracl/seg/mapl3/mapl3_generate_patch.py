@@ -43,7 +43,7 @@ from pathlib import Path
 from scipy.ndimage import binary_fill_holes, binary_erosion, binary_dilation
 from skimage.transform import resize
 from skimage.feature import canny
-from miracl.system.utilfns.utilfns_cli_parser import str2bool
+from miracl_utilfns import str2bool
 
 
 # -------------------------------------------------------
