@@ -13,6 +13,8 @@ from miracl.system.registry.raw_data_normalization_runner import (
 )
 from miracl.system.registry.skeletonization_runner import skeletonization_runner
 from miracl.system.registry.voxelization_runner import voxelization_runner
+from miracl.system.registry.warping_runner import warping_runner
+from miracl.system.registry.feat_extract_runner import feat_extract_runner
 
 
 __all__ = [
@@ -26,4 +28,6 @@ __all__ = [
     "raw_data_normalization_runner",
     "skeletonization_runner",
     "voxelization_runner",
+    "warping_runner",
+    "feat_extract_runner",
 ]

@@ -24,6 +24,8 @@ from miracl.system.registry.mapl3_skeletonization_template import (
 from miracl.system.registry.mapl3_voxelization_template import (
     mapl3_voxelization_dict,
 )
+from miracl.system.registry.mapl3_warping_template import warp_clar_allen_dict
+from miracl.system.registry.mapl3_feat_extract_template import mapl3_feat_extract_dict
 
 __all__ = [
     "mapl3_workflow_connectors_dict",
@@ -36,4 +38,6 @@ __all__ = [
     "mapl3_raw_data_normalization_dict",
     "mapl3_skeletonization_dict",
     "mapl3_voxelization_dict",
+    "warp_clar_allen_dict",
+    "mapl3_feat_extract_dict",
 ]
