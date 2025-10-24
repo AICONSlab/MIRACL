@@ -47,21 +47,43 @@ class MAPL3_connectors:
     #     version_added="2.4.0",
     # )
 
-    mapl3_workflow_raw_tiff_folder: MiraclObj = MiraclObj(
-        name="mapl3_workflow_raw_tiff_folder",
+    mapl3_workflow_raw_autoflor_tiff_folder: MiraclObj = MiraclObj(
+        name="mapl3_workflow_raw_autoflor_tiff_folder",
         tags=["mapl3", "flow", "mapl3_flow"],
-        cli_s_flag="mwfc_rtf",
-        cli_l_flag="mwfc_raw_tiff_folder",
+        cli_s_flag="mwfc_ratf",
+        cli_l_flag="mwfc_raw_autoflor_tiff_folder",
         flow={
             "mapl3": {
-                "cli_s_flag": "mwfc_rtf",
-                "cli_l_flag": "mwfc_raw_tiff_folder",
+                "cli_s_flag": "mwfc_ratf",
+                "cli_l_flag": "mwfc_raw_autoflor_tiff_folder",
                 "required": True,
                 "cli_group": CliGroup.REQUIRED,
             }
         },
         cli_obj_type=ArgumentType.STRING,
-        cli_help="RAW Tiff folder object i.e. path to the folder with Tiffs in it",
+        cli_help="RAW Tiff folder object i.e. path to the folder with autoflor Tiffs in it",
+        obj_default=None,
+        cli_required=True,
+        module="mapl3",
+        module_group="flow",
+        version_added="2.4.0",
+    )
+
+    mapl3_workflow_raw_signal_tiff_folder: MiraclObj = MiraclObj(
+        name="mapl3_workflow_raw_signal_tiff_folder",
+        tags=["mapl3", "flow", "mapl3_flow"],
+        cli_s_flag="mwfc_rstf",
+        cli_l_flag="mwfc_raw_signal_tiff_folder",
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mwfc_rstf",
+                "cli_l_flag": "mwfc_raw_signal_tiff_folder",
+                "required": True,
+                "cli_group": CliGroup.REQUIRED,
+            }
+        },
+        cli_obj_type=ArgumentType.STRING,
+        cli_help="RAW Tiff folder object i.e. path to the folder with signal Tiffs in it",
         obj_default=None,
         cli_required=True,
         module="mapl3",
