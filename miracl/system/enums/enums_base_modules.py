@@ -42,6 +42,10 @@ class CliGroup(Enum):
         "warping",
         "Args for CLARITY Allen warping",
     )
+    MAPL3_FEAT_EXTRACT = (
+        "feature extraction",
+        "Args for feature extraction",
+    )
     REQUIRED = (
         "required",
         "required arguments",
