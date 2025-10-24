@@ -193,6 +193,10 @@ if [[ "$#" -gt 1 ]]; then
   printf "v: Voxel resolution: ${voxres}\n"
   printf "l: input Allen labels: ${lbls}\n"
 
+  exit 1
+   
+
+
 else
 
 	# call gui

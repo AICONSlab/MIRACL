@@ -204,7 +204,6 @@ def parse_inputs(parser, args):
         args, unknown = parser.parse_known_args()
 
     if sys.argv[-2] == "conv" and sys.argv[-1] == "tiff_nii":
-
         print("Running in GUI mode")
 
         title = "Tiff to Nii conversion"
@@ -234,9 +233,9 @@ def parse_inputs(parser, args):
 
         indirstr = labels[dirs[0]].text()
         indir = str(indirstr.split(":")[1]).lstrip()
-        assert os.path.exists(indir), (
-            "%s does not exist ... please check path and rerun script" % indir
-        )
+        # assert os.path.exists(indir), (
+        #     "%s does not exist ... please check path and rerun script" % indir
+        # )
 
         # Initialize default params
 
@@ -276,16 +275,15 @@ def parse_inputs(parser, args):
         )
 
     else:
-
         print("\n running in script mode")
 
         # check if pars given
         assert isinstance(args.folder, str)
         indir = args.folder
 
-        assert os.path.exists(indir), (
-            "%s does not exist ... please check path and rerun script" % indir
-        )
+        # assert os.path.exists(indir), (
+        #     "%s does not exist ... please check path and rerun script" % indir
+        # )
 
         work_dir = args.work_dir
 
@@ -319,7 +317,9 @@ def parse_inputs(parser, args):
         chanp = (
             args.chanprefix
             if args.chanprefix != "None"
-            else None if args.chanprefix is not None else None
+            else None
+            if args.chanprefix is not None
+            else None
         )
 
         if args.channame is None:
