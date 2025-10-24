@@ -185,6 +185,14 @@ if [[ "$#" -gt 1 ]]; then
 	printf "\n Allen labels to warp: ${allenref} \n"
   fi
 
+  printf "Warping will be run with the following settings:\n"
+  printf "r: Input clarity registration dir: ${regdir}\n"
+  printf "i: Input downsampled CLARITY nii to warp: ${inimg}\n"
+  printf "o: File with orientation to standard code: ${ortfile}\n"
+  printf "s: Segmentation channel: ${channel}\n"
+  printf "v: Voxel resolution: ${voxres}\n"
+  printf "l: input Allen labels: ${lbls}\n"
+
 else
 
 	# call gui
