@@ -38,6 +38,10 @@ class CliGroup(Enum):
         "voxelization",
         "Args for voxelization",
     )
+    MAPL3_WARP_CLAR_ALLEN = (
+        "warping",
+        "Args for CLARITY Allen warping",
+    )
     REQUIRED = (
         "required",
         "required arguments",
