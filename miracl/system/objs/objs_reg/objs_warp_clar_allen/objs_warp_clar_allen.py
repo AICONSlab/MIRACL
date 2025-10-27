@@ -1,7 +1,6 @@
 from miracl.system.datamodels.datamodel_miracl_objs import (
     MiraclObj,
     ArgumentType,
-    WidgetType,
 )
 from pathlib import Path
 from miracl.system.enums.enums_base_modules import (
