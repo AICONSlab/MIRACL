@@ -143,7 +143,6 @@ class PatchStacking:
                 "cli_s_flag": "mps_d",
                 "cli_l_flag": "mps_dtype",
                 "cli_group": CliGroup.MAPL3_PATCH_STACKING,
-                "disabled": True,
             }
         },
         cli_obj_type=ArgumentType.STRING,
