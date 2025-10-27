@@ -1,3 +1,7 @@
+from __future__ import annotations
+from argparse import ArgumentTypeError
+
+
 def str2bool(v: object) -> bool:
     """
     Convert a value to a boolean.
@@ -28,10 +32,10 @@ def str2bool(v: object) -> bool:
     elif v == "False":
         return False
     else:
-        raise argparse.ArgumentTypeError("Boolean value expected.")
+        raise ArgumentTypeError("Boolean value expected.")
 
 
-def none_or_float(value):
+def none_or_float(value: str) -> float | None:
     """
     Convert a string to a float or None.
 
@@ -59,4 +63,4 @@ def none_or_float(value):
     try:
         return float(value)
     except ValueError:
-        raise argparse.ArgumentTypeError(f"{value} must be a float or 'None'")
+        raise ArgumentTypeError(f"{value} must be a float or 'None'")
