@@ -5,6 +5,7 @@ import subprocess
 def patch_stacking_runner(script: str, mapping: Dict[str, Optional[str]]):
     flag_map = {
         "--mps_cpu_load": "--cpu_load",
+        "--mps_dtype": "--dtype",
     }
     parts = [script]
     for flag, value in mapping.items():
