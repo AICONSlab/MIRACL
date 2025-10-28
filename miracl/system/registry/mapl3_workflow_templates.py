@@ -1,6 +1,7 @@
 from miracl.system.registry.mapl3_connectors_template import (
     mapl3_workflow_connectors_dict,
 )
+from miracl.system.registry.workflow_skips_template import workflow_skips_dict
 from miracl.system.registry.conv_template import conv_tiff_nii_dict
 from miracl.system.registry.reg_template import reg_clar_allen_dict
 from miracl.system.registry.mapl3_preprocessing_parallel_template import (
@@ -40,4 +41,5 @@ __all__ = [
     "mapl3_voxelization_dict",
     "warp_clar_allen_dict",
     "mapl3_feat_extract_dict",
+    "workflow_skips_dict",
 ]
