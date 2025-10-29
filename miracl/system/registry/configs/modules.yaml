@@ -1,0 +1,153 @@
+# workflow_connectors:
+#   script: ""
+#   obj_class: "miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_connectors.MAPL3_connectors"
+#   module_type: "FLOW_MAPL3"
+#   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+#   flag_map: {}
+#   execute: false
+
+conversion:
+  script: "python /code/miracl/conv/miracl_conv_convertTIFFtoNII.py"
+  obj_class: "miracl.system.objs.objs_conv.objs_tiff_to_nii.objs_tiff_to_nii.ConvTiffNiiObjs"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mctn_down": "--down"
+    "--mctn_channum": "--channum"
+    "--mctn_chanprefix": "--chanprefix"
+    "--mctn_channame": "--channame"
+    "--mctn_outnii": "--outnii"
+    "--mctn_resx": "--resx"
+    "--mctn_resz": "--resz"
+    "--mctn_center": "--center"
+    "--mctn_downzdim": "--downzdim"
+    "--mctn_prevdown": "--prevdown"
+    "--mctn_percentile_thr": "--percentile_thr"
+  execute: false
+
+registration:
+  script: "/code/miracl/reg/miracl_reg_clar-allen.sh"
+  obj_class: "miracl.system.objs.objs_reg.objs_clar_allen.objs_clar_allen_reg.ClarAllen"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mrca_orient_code": "-o"
+    "--mrca_voxel_size": "-v"
+    "--mrca_hemi": "-m"
+    "--mrca_allen_label": "-l"
+    "--mrca_allen_atlas": "-a"
+    "--mrca_side": "-s"
+    "--mrca_no_mosaic_fig": "-f"
+    "--mrca_olfactory_bulb": "-b"
+    "--mrca_skip_cor": "-p"
+    "--mrca_warp": "-w"
+  execute: false
+
+generate_patch:
+  script: "python /code/miracl/seg/mapl3/mapl3_generate_patch.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch.GeneratePatch"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mgp_cpu_load": "--cpu_load"
+    "--mgp_patch_size": "--patch_size"
+    "--mgp_brain_mask_erosion_flag": "--brain_mask_erosion_flag"
+  execute: false
+
+preprocessing_parallel:
+  script: "python /code/miracl/seg/mapl3/mapl3_preprocessing_parallel.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel.PreprocessingParallel"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mpp_cpu_load": "--cpu_load"
+    "--mpp_cl_percentage": "--cl_percentage"
+    "--mpp_cl_lsm_footprint": "--cl_lsm_footprint"
+    "--mpp_cl_back_footprint": "--cl_back_footprint"
+    "--mpp_lsm_vs_back_weight": "--lsm_vs_back_weight"
+    "--mpp_deconv_bin_thr": "--deconv_bin_thr"
+    "--mpp_deconv_sigma": "--deconv_sigma"
+    "--mpp_save_intermediate_results_flag": "--save_intermediate_results_flag"
+  execute: false
+
+inference:
+  script: "python /code/miracl/seg/mapl3/mapl3_inference.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_inference.Inference"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mi_binarization_threshold": "--binarization_threshold"
+    "--mi_tissue_percentage_threshold": "--tissue_percentage_threshold"
+  execute: false
+
+patch_stacking:
+  script: "python /code/miracl/seg/mapl3/mapl3_patch_stacking.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking.PatchStacking"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mps_cpu_load": "--cpu_load"
+    "--mps_dtype": "--dtype"
+  execute: false
+
+raw_data_normalization:
+  script: "python /code/miracl/seg/mapl3/mapl3_raw_data_normalization.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_raw_data_normalization.RawDataNormalization"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mrdn_num_erosion": "--num_erosion"
+    "--mrdn_alpha": "--alpha"
+    "--mrdn_thr": "--thr"
+    "--mrdn_cpu_load": "--cpu_load"
+  execute: false
+
+skeletonization:
+  script: "/home/josmann/.conda/envs/mapl3-env/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_skeletonization.Skeletonization"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--ms_threshold": "--threshold"
+    "--ms_num_erosion": "--num_erosion"
+    "--ms_remove_small_obj_thr": "--remove_small_obj_thr"
+    "--ms_remove_large_obj_thr": "--remove_large_obj_thr"
+    "--ms_elongation_thr": "--elongation_thr"
+    "--ms_euler_number_thr": "--euler_number_thr"
+    "--ms_cpu_load": "--cpu_load"
+    "--ms_dilate_distance_transform_flag": "--dilate_distance_transform_flag"
+    "--ms_alpha": "--alpha"
+  execute: false
+
+voxelization:
+  script: "python /code/miracl/seg/mapl3/mapl3_voxelization.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_voxelization.Voxelization"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mv_cpu_load": "--cpu_load"
+    "--mv_downsample_yx_axis": "--downsample_yx_axis"
+    "--mv_downsample_z_axis": "--downsample_z_axis"
+    "--mv_method": "--method"
+    "--mv_out_name": "--out_name"
+    "--mv_res_xy": "--res_xy"
+    "--mv_res_z": "--res_z"
+  execute: false
+
+warping:
+  script: "/code/miracl/reg/miracl_reg_warp_clar_data_to_allen.sh"
+  obj_class: "miracl.system.objs.objs_reg.objs_warp_clar_allen.objs_warp_clar_allen.WarpClarAllen"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mrwca_vox_res": "-v"
+  execute: false
+
+feat_extract:
+  script: "python /code/miracl/seg/mapl3/mapl3_feat_extract.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_feat_extract.FeatExtract"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mfe_mask": "--mask"
+  execute: false

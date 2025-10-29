@@ -117,6 +117,81 @@ class MiraclRegistry:
             raise ValueError(f"Module '{name}' not found in registry")
         return self._registry[name]["obj_class"]
 
+    def list_modules(self, verbose: bool = True) -> Dict[str, Dict[str, str]]:
+        """
+        List all modules currently registered in the MiraclRegistry.
+
+        This method provides both a human-readable summary (if `verbose=True`) and a structured
+        dictionary of all registered modules, including their script path, runner function,
+        associated object class, and module type.
+
+        Args:
+            verbose (bool, optional): If True, prints a formatted summary to stdout.
+                                      If False, only returns the structured dictionary.
+                                      Defaults to True.
+
+        Returns:
+            Dict[str, Dict[str, str]]: A dictionary mapping module names to their details:
+                {
+                    "module_name": {
+                        "script": "path/to/script.py",
+                        "runner": "runner_function_name",
+                        "class": "ClassName",
+                        "module_type": "ModuleTypeName",
+                    },
+                    ...
+                }
+
+        Examples:
+            # Print a summary of all registered modules
+            reg.list_modules()
+
+            # Retrieve structured module info without printing
+            info = reg.list_modules(verbose=False)
+            print(info["conversion"]["script"])
+        """
+        if not self._registry:
+            if verbose:
+                print("No modules registered.")
+            return {}
+
+        summary: Dict[str, Dict[str, str]] = {}
+        for name, entry in self._registry.items():
+            script = entry.get("script", "N/A")
+            runner = entry.get("runner")
+            obj_class = entry.get("obj_class")
+            module_type = entry.get("module_type")
+
+            # runner_name = getattr(runner, "__name__", str(runner))
+            runner_name = getattr(
+                entry["runner"], "_original_runner", entry["runner"]
+            ).__name__
+            class_name = getattr(obj_class, "__name__", str(obj_class))
+            module_type_name = (
+                module_type.name if hasattr(module_type, "name") else str(module_type)
+            )
+
+            summary[name] = {
+                "script": script,
+                "runner": runner_name,
+                "class": class_name,
+                "module_type": module_type_name,
+            }
+
+        if verbose:
+            print("\nRegistered Modules:")
+            print("=" * 60)
+            for name, info in summary.items():
+                print(
+                    f"• {name}\n"
+                    f"    script       : {info['script']}\n"
+                    f"    class        : {info['class']}\n"
+                    f"    module_type  : {info['module_type']}\n"
+                    f"    runner       : {info['runner']}\n"
+                )
+
+        return summary
+
     # def get_class(
     #     self,
     #     name: str,
