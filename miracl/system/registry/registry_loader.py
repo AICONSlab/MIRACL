@@ -2,6 +2,9 @@ import yaml
 import importlib  # For dynamically importing modules by name
 from miracl.system.registry.registry import MiraclRegistry, RegistryTemplate
 from miracl.system.datamodels.miraclobj_enums import ModuleType
+from miracl.system.datamodels.miraclobj_serializer import (
+    build_workflow_to_module_flag_map,
+)
 
 
 # Return attribute of dotted file path dynamically
@@ -79,8 +82,23 @@ def load_modules_from_yaml(path: str) -> MiraclRegistry:
         runner_func = import_from_string(cfg["runner"])
         # module_type = getattr(ModuleType, cfg["module_type"])
         module_type = parse_module_type(cfg["module_type"], module_name=name)
-        flag_map = cfg.get("flag_map", {})
         execute = cfg.get("execute", False)
+
+        yaml_flag_map = cfg.get("flag_map", {})
+
+        # Flag map decision logic
+        if module_type == ModuleType.MODULE:
+            flag_map = {}  # Module flags will already be used
+        elif yaml_flag_map is None:
+            raise ValueError(
+                f"Workflow '{name}' (type {module_type.name}) must define a flag_map in YAML. flag_map can be empty, but not omitted."
+            )
+        elif yaml_flag_map == {}:
+            # Empty -> dynamically generate
+            flag_map = build_workflow_to_module_flag_map(obj_class, module_type)
+        else:
+            # Non-empty -> YAML takes precedence
+            flag_map = yaml_flag_map
 
         def wrapped_runner(
             script, mapping, _runner=runner_func, _flag_map=flag_map, _execute=execute
