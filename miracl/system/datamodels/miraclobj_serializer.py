@@ -122,7 +122,9 @@ def build_flag_map_from_class(
     return mapping
 
 
-def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
+def get_cli_flags_for_obj(
+    obj: MiraclObj, module_type: ModuleType, include_disabled: bool = False
+) -> List[str]:
     """
     Return the CLI flags (short and long) for the given MiraclObj, respecting
     the provided module_type context.
@@ -140,7 +142,7 @@ def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
     if module_type == ModuleType.MODULE:  # If it's a module, not a workflow
         try:
             flags.append(f"-{obj.cli_s_flag}")
-            flags.append(f"-{obj.cli_l_flag}")
+            flags.append(f"--{obj.cli_l_flag}")
         except KeyError as e:
             raise KeyError(
                 f"Missing required CLI flag in flow config for '{obj.name}': {e}"
@@ -165,7 +167,8 @@ def get_cli_flags_for_obj(obj: MiraclObj, module_type: ModuleType) -> List[str]:
 
     # If the object should not be included in the workflow, return empty flag dict
     flow_cfg = obj.flow[module_type.value]
-    if flow_cfg.get("disabled", False):
+    # if flow_cfg.get("disabled", False):
+    if not include_disabled and flow_cfg.get("disabled", False):
         return []
 
     try:
@@ -243,6 +246,7 @@ def miraclobj_to_argparse(
     kwargs: Dict[str, MiraclObjToArgparseKwargValue] = {
         "help": obj.cli_help,
         "dest": str(obj.id),
+        # "dest": str(obj.cli_l_flag) if ModuleType.MODULE else str(obj.id),
         "metavar": obj.cli_metavar
         if obj.cli_metavar not in (None, "")
         else obj.name.upper(),
@@ -285,3 +289,60 @@ def miraclobj_to_argparse(
         kwargs["const"] = obj.cli_const
 
     return flags, kwargs
+
+
+def build_workflow_to_module_flag_map(
+    obj_class: Type,
+    module_type: ModuleType,
+) -> Dict[str, str]:
+    """
+     Build a mapping from workflow long flags to module long flags for a given class.
+
+    This function iterates over all `MiraclObj` attributes in `obj_class` and generates
+    a dictionary mapping workflow-specific CLI flags (e.g., '--mgp_input') to the
+    corresponding module flags (e.g., '--input').
+
+    Only attributes that have exactly one long flag in both workflow and module contexts
+    are valid. Attributes without a workflow long flag (disabled or not included) are skipped.
+    If an attribute has multiple long flags in either context, an error is raised.
+
+    Args:
+        obj_class (type): Class containing `MiraclObj` attributes.
+        module_type (ModuleType): Module/workflow context enum for which to extract workflow flags.
+
+    Returns:
+        dict[str, str]: Mapping of workflow long flags to module long flags.
+                        Example: {'--mgp_input': '--input'}
+
+    Raises:
+        ValueError: If an attribute has multiple long flags in either the workflow
+                    or module context.
+    """
+    flow_module_flag_map: Dict[str, str] = {}
+    for attr_value in vars(obj_class).values():
+        if isinstance(attr_value, MiraclObj):
+            flow_flags = get_cli_flags_for_obj(attr_value, module_type)
+            long_flow_flag = [f for f in flow_flags if f.startswith("--")]
+            module_flags = get_cli_flags_for_obj(attr_value, ModuleType.MODULE)
+            long_module_flag = [f for f in module_flags if f.startswith("--")]
+
+            # Skip attributes not included in workflow
+            if not long_flow_flag:
+                continue
+
+            # Enforce strict one-to-one mapping
+            if len(long_flow_flag) != 1:
+                raise ValueError(
+                    f"Expected exactly one long workflow flag for '{attr_value.name}', "
+                    f"found {len(long_flow_flag)}: {long_flow_flag}"
+                )
+
+            if len(long_module_flag) != 1:
+                raise ValueError(
+                    f"Expected exactly one long module flag for '{attr_value.name}', "
+                    f"found {len(long_module_flag)}: {long_module_flag}"
+                )
+
+            flow_module_flag_map[long_flow_flag[0]] = long_module_flag[0]
+
+    return flow_module_flag_map
