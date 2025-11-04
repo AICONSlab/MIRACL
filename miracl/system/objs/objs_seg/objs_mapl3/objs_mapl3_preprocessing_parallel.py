@@ -285,7 +285,7 @@ class PreprocessingParallel:
                 "cli_s_flag": "mpp_tpt",
                 "cli_l_flag": "mpp_tissue_percentage_threshold",
                 "cli_group": CliGroup.MAPL3_PREPROCESSING_PARALLEL,
-                "disabled": True,
+                "disabled": False,
             }
         },
         cli_obj_type=ArgumentType.FLOAT,
@@ -309,7 +309,7 @@ class PreprocessingParallel:
                 "cli_s_flag": "mpp_it",
                 "cli_l_flag": "mpp_intensity_threshold",
                 "cli_group": CliGroup.MAPL3_PREPROCESSING_PARALLEL,
-                "disabled": True,
+                "disabled": False,
             }
         },
         cli_obj_type=ArgumentType.FLOAT,

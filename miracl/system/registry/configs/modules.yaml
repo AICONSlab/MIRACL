@@ -1,10 +1,18 @@
-# workflow_connectors:
-#   script: ""
-#   obj_class: "miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_connectors.MAPL3_connectors"
-#   module_type: "FLOW_MAPL3"
-#   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
-#   flag_map: {}
-#   execute: false
+workflow_connectors:
+  script: ""
+  obj_class: "miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_connectors.MAPL3_connectors"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: false
+
+workflow_skips:
+  script: ""
+  obj_class: "miracl.system.objs.objs_flow.objs_workflow_skips.objs_workflow_skips.WorkflowSkips"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: false
 
 conversion:
   script: "python /code/miracl/conv/miracl_conv_convertTIFFtoNII.py"
@@ -68,7 +76,9 @@ preprocessing_parallel:
     "--mpp_deconv_bin_thr": "--deconv_bin_thr"
     "--mpp_deconv_sigma": "--deconv_sigma"
     "--mpp_save_intermediate_results_flag": "--save_intermediate_results_flag"
-  execute: false
+    "--mpp_intensity_threshold": "--intensity_threshold"
+    "--mpp_tissue_percentage_threshold": "--tissue_percentage_threshold"
+  execute: true
 
 inference:
   script: "python /code/miracl/seg/mapl3/mapl3_inference.py"
