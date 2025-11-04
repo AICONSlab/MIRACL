@@ -43,7 +43,7 @@ from pathlib import Path
 from scipy.ndimage import binary_fill_holes, binary_erosion, binary_dilation
 from skimage.transform import resize
 from skimage.feature import canny
-from miracl_utilfns import str2bool
+from miracl.system.miracl_utilfns import str2bool
 
 
 # -------------------------------------------------------
@@ -262,8 +262,6 @@ def main(args):
     print(f"  CPU load:                  {cpu_load}")
     print(f"  Path to brain mask TIFF's: {brain_mask_path}")
     print(f"  Brain mask erosion:        {brain_mask_erosion}")
-
-    sys.exit()
 
     # Create output directory if it doesn't exist
     # os.makedirs(output_dir, exist_ok=True)
