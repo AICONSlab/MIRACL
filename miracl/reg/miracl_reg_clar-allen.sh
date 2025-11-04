@@ -52,6 +52,9 @@ function usage() {
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
         p.  if utilfn intensity correction already run, skip correction inside registration (default: 0)
         w.  warp high-res clarity to Allen space (default: 0)
+        n.  chan # for extracting single channel from multiple channel data (default: none)
+        x.  chan prefix (string before channel number in file name). ex: C00 (default: none)
+
 
 	----------
 	Main Outputs
@@ -126,7 +129,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:m:v:l:f:p:a:w:b:s:" opt; do
+  while getopts ":i:c:r:o:m:v:l:f:p:a:w:b:s:n:x:" opt; do
 
     case "${opt}" in
 
@@ -182,6 +185,14 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
       side="${OPTARG}"
       ;;
 
+    n)
+      cn="${OPTARG}"
+      ;;
+
+    x)
+      cp="${OPTARG}"
+      ;;
+
     *)
       usage
       ;;
@@ -215,7 +226,7 @@ else
   #choose_file_gui "Down-sampled auto-fluorescence (or Thy1) channel" "*.nii *.nii.gz" inclar
 
   # options gui
-  opts=$(${MIRACL_HOME}/conv/miracl_conv_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel" \
+  opts=$("${MIRACL_HOME}"/conv/miracl_conv_gui_options.py -t "Reg options" -v "Down-sampled auto-fluorescence (or Thy1) channel" \
     -f "Input clarity tiff folder (no default)" \
     "Output directory (def = working dir)" "Orient code (def = ASL)" "Labels Hemi [combined (def)/split]" \
     "Labels resolution [vox] (def = 10 'um')" "olfactory bulb incl. (def = 0)" "side (def = None)" \
@@ -229,7 +240,7 @@ else
 
   inclar=$(echo "${arr[0]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Input file path: ${inclar} \n"
+  printf "\n Input file path: %s \n" "${inclar}"
 
   # check required input arguments
 
@@ -247,35 +258,35 @@ else
 
   orgclar=$(echo "${arr[1]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen clarity tiff directory: $orgclar \n"
+  printf "\n Chosen clarity tiff directory: %s \n" "${orgclar}"
 
   work_dir=$(echo "${arr[2]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen output directory: $work_dir \n"
+  printf "\n Chosen output directory: %s \n" "${work_dir}"
 
   ort=$(echo "${arr[3]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen orient code: $ort \n"
+  printf "\n Chosen orient code: %s \n" "${ort}"
 
   hemi=$(echo "${arr[4]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen labels hemi option: $hemi \n"
+  printf "\n Chosen labels hemi option: %s \n" "${hemi}"
 
   vox=$(echo "${arr[5]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen vox (um): $vox \n"
+  printf "\n Chosen vox (um): %s \n" "${vox}"
 
   bulb=$(echo "${arr[6]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen olfactory bulb option: $bulb \n"
+  printf "\n Chosen olfactory bulb option: %s \n" "${bulb}"
 
   side=$(echo "${arr[7]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen side option: $side \n"
+  printf "\n Chosen side option: %s \n" "${side}"
 
   prebias=$(echo "${arr[8]}" | cut -d ':' -f 2 | sed -e 's/^ "//' -e 's/"$//')
 
-  printf "\n Chosen extra intensity correct: $prebias \n"
+  printf "\n Chosen extra intensity correct: %s \n" "${prebias}"
 
 fi
 
@@ -295,13 +306,13 @@ fi
 if [[ ! -d ${regdir} ]]; then
 
   printf "\n Creating registration folder\n"
-  mkdir -p ${regdirfinal} ${regdir}
+  mkdir -p "${regdirfinal}" "${regdir}"
 
 fi
 
 # output log file of script
 
-exec > >(tee -i ${regdir}/clar_allen_script.log)
+exec > >(tee -i "${regdir}"/clar_allen_script.log)
 exec 2>&1
 
 #---------------------------
@@ -369,20 +380,21 @@ else
   exit 1
 fi
 
-base=$(basename ${lbls})
+base=$(basename "${lbls}")
 lblsname=${base%%.*}
 
 # olfactory bulb
-if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]]; then
+if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]] || [[ "${bulb}" == "0" ]]; then
   bulb=0
 
   # remove olfactory bulb from labels
   custom_lbls=${regdir}/${lblsname}.nii.gz
-  c3d ${lbls} -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o ${custom_lbls}
+  printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
+  c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
 
   if [[ "${hemi}" == "split" ]]; then
 
-    c3d ${custom_lbls} -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o ${custom_lbls}
+    c3d "${custom_lbls}" -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o "${custom_lbls}"
 
   fi
 
@@ -417,19 +429,21 @@ fi
 # Print final args to screen for user
 printf "\n######################################################\n\n"
 printf "The following arguments will be used for registration:\n\n"
-printf "i: Down-sampled nii file: %s\n" "$inclar"
-printf "c: Clarity tiff folder: %s\n" "$orgclar"
-printf "r: Output directory: %s\n" "$work_dir"
-printf "o: Orientation code: %s\n" "$ort"
-printf "m: Hemisphere: %s\n" "$hemi"
-printf "v: Labels voxel: size%s\n" "$vox"
-printf "b: Olfactory bulb included: %s\n" "$bulb"
-printf "s: Side: %s\n" "$side"
-printf "a: Custom Allen atlas: %s\n" "$atlas"
-printf "l: Allen labels to warp: %s\n" "$lbls"
-printf "p: Prebias: %s\n" "$prebias"
-printf "f: Save Mosaic figure: %s\n" "$savefig"
-printf "w: Warp high-res clarity to Allen space: %s\n" "$warphres"
+printf "i: Down-sampled nii file: %s\n" "${inclar}"
+printf "c: Clarity tiff folder: %s\n" "${orgclar}"
+printf "r: Output directory: %s\n" "${work_dir}"
+printf "o: Orientation code: %s\n" "${ort}"
+printf "m: Hemisphere: %s\n" "${hemi}"
+printf "v: Labels voxel: size%s\n" "${vox}"
+printf "b: Olfactory bulb included: %s\n" "${bulb}"
+printf "s: Side: %s\n" "${side}"
+printf "a: Custom Allen atlas: %s\n" "${atlas}"
+printf "l: Allen labels to warp: %s\n" "${lbls}"
+printf "p: Prebias: %s\n" "${prebias}"
+printf "f: Save Mosaic figure: %s\n" "${savefig}"
+printf "w: Warp high-res clarity to Allen space: %s\n" "${warphres}"
+printf "n: Channel #: %s\n" "${cn}"
+printf "x: Channel prefix: %s\n" "${cp}"
 printf "\n######################################################\n"
 
 # get time
@@ -451,13 +465,13 @@ function ifdsntexistrun() {
 
   if [[ ! -f ${outfile} ]]; then
 
-    printf "\n $outstr \n"
+    printf "\n %s \n" "${outstr}"
     echo "$fun"
     eval "${fun}"
 
   else
 
-    printf "\n $outfile already exists ... skipping \n"
+    printf "\n %s already exists ... skipping \n" "${outfile}"
 
   fi
 
@@ -473,8 +487,8 @@ function resampleclar() {
   local interp=$4
   local resclar=$5
 
-  ifdsntexistrun ${resclar} "Resampling CLARITY input" \
-    ResampleImage 3 ${inclar} ${resclar} ${vox}x${vox}x${vox} ${ifspacing} ${interp}
+  ifdsntexistrun "${resclar}" "Resampling CLARITY input" \
+    ResampleImage 3 "${inclar}" "${resclar}" "${vox}"x"${vox}"x"${vox}" "${ifspacing}" "${interp}"
 
   # c3d ${resclar} -type ushort -o ${resclar}
 
@@ -495,26 +509,26 @@ function getbrainmask() {
   local otsu=${10}
 
   # sharpen
-  ifdsntexistrun ${sharp} "Sharpening image" ImageMath 3 ${sharp} Sharpen ${resclar}
+  ifdsntexistrun "${sharp}" "Sharpening image" ImageMath 3 "${sharp}" Sharpen "${resclar}"
 
   # smooth
-  ifdsntexistrun ${median} "Median Filtering" SmoothImage 3 ${sharp} 2 ${median} 1 1
+  ifdsntexistrun "${median}" "Median Filtering" SmoothImage 3 "${sharp}" 2 "${median}" 1 1
 
   # bias correct in
-  ifdsntexistrun ${biasin} "Bias correcting input" N3BiasFieldCorrection 3 ${median} ${biasin} 2
+  ifdsntexistrun "${biasin}" "Bias correcting input" N3BiasFieldCorrection 3 "${median}" "${biasin}" 2
   #    ifdsntexistrun ${biasin} "Bias correcting input" N4BiasFieldCorrection -i ${median} -o ${biasin} -s 2
 
   # Otsu threshold
-  ifdsntexistrun ${otsumaskthr} "Otsu thresholding" ThresholdImage 3 ${biasin} ${otsumaskthr} Otsu 6
+  ifdsntexistrun "${otsumaskthr}" "Otsu thresholding" ThresholdImage 3 "${biasin}" "${otsumaskthr}" Otsu 6
 
   # create mask
   #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
   # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
-  ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 1 6
+  ifdsntexistrun "${otsumask}" "Thresholding mask" ThresholdImage 3 "${otsumaskthr}" "${otsumask}" 1 6
 
   # get masked
   #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
-  ifdsntexistrun ${otsu} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsu} 1
+  ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
 
 }
 # N4 bias correct
@@ -526,10 +540,10 @@ function biasfieldcorr() {
   local mask=$3
 
   # make sure same clar & mask occupy same space
-  c3d ${resclar} ${mask} -copy-transform -o ${mask}
+  c3d "${resclar}" "${mask}" -copy-transform -o "${mask}"
 
-  ifdsntexistrun ${biasclar} "Bias-correcting CLARITY image with N4" \
-    N4BiasFieldCorrection -d 3 -i ${resclar} -s 2 -t [0.15,0.01,200] -x ${mask} -o ${biasclar}
+  ifdsntexistrun "${biasclar}" "Bias-correcting CLARITY image with N4" \
+    N4BiasFieldCorrection -d 3 -i "${resclar}" -s 2 -t [0.15,0.01,200] -x "${mask}" -o "${biasclar}"
 
 }
 
@@ -541,7 +555,7 @@ function extrabiasfieldcorr() {
   local mask=$2
 
   printf"\n Performing extra bias correction step\n"
-  c3d ${biasclar} -as B -thresh 65% 75% 1 0 ${mask} -times -push B -times -scale 5 -push B -add -o ${biasclar}
+  c3d "${biasclar}" -as B -thresh 65% 75% 1 0 "${mask}" -times -push B -times -scale 5 -push B -add -o "${biasclar}"
 
 }
 
@@ -552,7 +566,7 @@ function padimage() {
   local biasclar=$1
   local padclar=$2
 
-  ifdsntexistrun ${padclar} "Padding image with 15% of voxels" c3d ${biasclar} -pad 15% 15% 0 -o ${padclar}
+  ifdsntexistrun "${padclar}" "Padding image with 15% of voxels" c3d "${biasclar}" -pad 15% 15% 0 -o "${padclar}"
 
 }
 
@@ -569,8 +583,8 @@ function thresh() {
   local t2=$5
   local thrclar=$6
 
-  ifdsntexistrun ${thrclar} "Thresholding CLARITY image" \
-    c3d ${biasclar} -threshold ${p1}% ${p2}% ${t1} ${t2} -o ${thrclar}
+  ifdsntexistrun "${thrclar}" "Thresholding CLARITY image" \
+    c3d "${biasclar}" -threshold ${p1}% ${p2}% "${t1}" "${t2}" -o "${thrclar}"
 
 }
 
@@ -582,7 +596,7 @@ function erode() {
   local erorad=$2
   local eromask=$3
 
-  ifdsntexistrun ${eromask} "Eroding CLARITY mask" ImageMath 3 ${eromask} ME ${thrclar} ${erorad}
+  ifdsntexistrun "${eromask}" "Eroding CLARITY mask" ImageMath 3 "${eromask}" ME "${thrclar}" "${erorad}"
 
 }
 
@@ -594,7 +608,7 @@ function dilate() {
   local dilrad=$2
   local dilmask=$3
 
-  ifdsntexistrun ${dilmask} "Dilating CLARITY mask" ImageMath 3 ${dilmask} MD ${eromask} ${dilrad}
+  ifdsntexistrun "${dilmask}" "Dilating CLARITY mask" ImageMath 3 "${dilmask}" MD "${eromask}" "${dilrad}"
 
 }
 
@@ -606,8 +620,8 @@ function maskimage() {
   local dilmask=$2
   local betclar=$3
 
-  ifdsntexistrun ${betclar} "Removing CLARITY image outline artifacts" \
-    MultiplyImages 3 ${biasclar} ${dilmask} ${betclar}
+  ifdsntexistrun "${betclar}" "Removing CLARITY image outline artifacts" \
+    MultiplyImages 3 "${biasclar}" "${dilmask}" "${betclar}"
 
 }
 
@@ -621,8 +635,8 @@ function orientimg() {
   local orttype=$4
   local ortclar=$5
 
-  ifdsntexistrun ${ortclar} "Orienting CLARITY to standard orientation" \
-    c3d ${betclar} -orient ${orttag} -interpolation ${ortint} -type ${orttype} -o ${ortclar}
+  ifdsntexistrun "${ortclar}" "Orienting CLARITY to standard orientation" \
+    c3d "${betclar}" -orient "${orttag}" -interpolation "${ortint}" -type "${orttype}" -o "${ortclar}"
 
 }
 
@@ -635,7 +649,7 @@ function smoothimg() {
   local smclar=$3
 
   #	ifdsntexistrun ${smclar} "Smoothing CLARITY image" SmoothImage 3 ${ortclar} ${sigma} ${smclar} 1 1
-  ifdsntexistrun ${smclar} "Smoothing CLARITY image" c3d ${ortclar} -smooth ${sigma}vox -o ${smclar}
+  ifdsntexistrun "${smclar}" "Smoothing CLARITY image" c3d "${ortclar}" -smooth "${sigma}vox" -o "${smclar}"
 
 }
 
@@ -647,8 +661,8 @@ function croptosmall() {
   local trim=$2
   local clarroi=$3
 
-  ifdsntexistrun ${clarroi} "Cropping CLARITY image to smallest ROI" \
-    c3d ${smclar} -trim ${trim}vox -o ${clarroi}
+  ifdsntexistrun "${clarroi}" "Cropping CLARITY image to smallest ROI" \
+    c3d "${smclar}" -trim "${trim}"vox -o "${clarroi}"
   # c3d ${smclar} -trim ${trim}vox -type ushort -o ${clarroi}
 
 }
@@ -676,8 +690,8 @@ function initclarallenreg() {
   initallen=$8
 
   # Init reg
-  ifdsntexistrun ${initform} "Initializing registration ..." \
-    antsAffineInitializer 3 ${clarroi} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} 2>/dev/null &
+  ifdsntexistrun "${initform}" "Initializing registration ..." \
+    antsAffineInitializer 3 "${clarroi}" "${allenref}" "${initform}" "${deg}" "${radfrac}" "${useprincax}" "${localiter}" 2>/dev/null &
 
   # kill after 3 min (gcc issue)
   if [[ ! -f "${initallen}" ]]; then
@@ -687,8 +701,8 @@ function initclarallenreg() {
   fi
 
   # Warp Allen
-  ifdsntexistrun ${initallen} "initializing Allen template" \
-    antsApplyTransforms -i ${allenref} -r ${clarroi} -t ${initform} -o ${initallen}
+  ifdsntexistrun "${initallen}" "initializing Allen template" \
+    antsApplyTransforms -i "${allenref}" -r "${clarroi}" -t "${initform}" -o "${initallen}"
 
 }
 
@@ -713,13 +727,13 @@ function regclarallen() {
   local antsallen=$8
 
   # convert init allen into int
-  c3d ${initallen} -type int -o ${initallen}
+  c3d "${initallen}" -type int -o "${initallen}"
 
   # Perform ANTs registration between CLARITY and Allen atlas
 
-  ifdsntexistrun ${antsallen} "Registering CLARITY data to allen atlas ... this will take a while" \
-    ants_miracl_clar -d 3 -f ${clarroi} -m ${initallen} -o ${regdir}/allen_clar_ants -t ${trans} -p ${prec} \
-    -n ${thrds} -s ${spldist} -r ${rad} | tee ${regdir}/ants_reg.log
+  ifdsntexistrun "${antsallen}" "Registering CLARITY data to allen atlas ... this will take a while" \
+    ants_miracl_clar -d 3 -f "${clarroi}" -m "${initallen}" -o "${regdir}/allen_clar_ants" -t "${trans}" -p "${prec}" \
+    -n "${thrds}" -s "${spldist}" -r "${rad}" | tee "${regdir}"/ants_reg.log
 
 }
 
@@ -779,29 +793,29 @@ function warpallenlbls() {
   vres=$(python -c "print (${vox}/1000.0)")
 
   # res clar in
-  ifdsntexistrun ${smclarres} "Upsampling reference image" \
-    ResampleImage 3 ${smclar} ${smclarres} ${vres}x${vres}x${vres} 0 3
+  ifdsntexistrun "${smclarres}" "Upsampling reference image" \
+    ResampleImage 3 "${smclar}" "${smclarres}" "${vres}"x"${vres}"x"${vres}" 0 3
 
   # convert to ushort
   # ConvertImagePixelType ${smclarres} ${smclarres} 3
   # c3d ${smclarres} -type ushort -o ${smclarres}
 
   # warp to registered clarity
-  ifdsntexistrun ${wrplbls} "Applying ants deformation to Allen labels" \
-    antsApplyTransforms -d 3 -r ${smclarres} -i ${lbls} -n MultiLabel -t ${antswarp} ${antsaff} ${initform} \
-    -o ${wrplbls} --float
+  ifdsntexistrun "${wrplbls}" "Applying ants deformation to Allen labels" \
+    antsApplyTransforms -d 3 -r "${smclarres}" -i "${lbls}" -n MultiLabel -t "${antswarp}" "${antsaff}" "${initform}" \
+    -o "${wrplbls}" --float
 
   # get org tag
-  ortmatrix=$(PrintHeader ${inclar} 4 | tr 'x' ' ')
+  ortmatrix=$(PrintHeader "${inclar}" 4 | tr 'x' ' ')
 
-  ifdsntexistrun ${ortlbls} "Orienting Allen labels" SetDirectionByMatrix ${wrplbls} ${ortlbls} ${ortmatrix}
+  ifdsntexistrun "${ortlbls}" "Orienting Allen labels" SetDirectionByMatrix "${wrplbls}" "${ortlbls}" "${ortmatrix}"
 
   # swap dim (x=>y / y=>x)
   # ifdsntexistrun ${swplbls} "Swapping label dimensions" \
   # PermuteFlipImageOrientationAxes 3 ${ortlbls} ${swplbls}  1 0 2  0 0 0
 
-  ifdsntexistrun ${unpadtif} "Swapping label dimensions & converting to tif" \
-    PermuteFlipImageOrientationAxes 3 ${ortlbls} ${unpadtif} 1 0 2 0 0 0
+  ifdsntexistrun "${unpadtif}" "Swapping label dimensions & converting to tif" \
+    PermuteFlipImageOrientationAxes 3 "${ortlbls}" "${unpadtif}" 1 0 2 0 0 0
 
   # ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -15% -15% -o ${tiflbls}
 
@@ -811,9 +825,9 @@ function warpallenlbls() {
     padvox=12
   fi
 
-  printf "\n pad vox: ${padvox} \n"
+  printf "\n pad vox: "${padvox}" \n"
 
-  ifdsntexistrun ${tiflbls} "Un-padding high res tif" c3d ${unpadtif} -pad -${padvox}% -${padvox}% -o ${tiflbls}
+  ifdsntexistrun "${tiflbls}" "Un-padding high res tif" c3d "${unpadtif}" -pad -"${padvox}"% -"${padvox}"% -o "${tiflbls}"
 
   # create hres tif lbls
 
@@ -823,12 +837,18 @@ function warpallenlbls() {
   # Print calculated downsampling factor
   # printf "\nUsing downsampling factor $df.\n"
 
-  # # get img dim
-  alldim=$(PrintHeader ${inclar} 2)
-  x=${alldim%%x*}
-  yz=${alldim#*x}
-  y=${yz%x*}
-  z=${alldim##*x}
+  # get img dim
+  alldim=$(PrintHeader "${inclar}" 2)
+  IFS='x' read -ra dimensions <<<"$alldim"
+  x="${dimensions[0]}"
+  y="${dimensions[1]}"
+  z="${dimensions[2]}"
+  yz="${dimensions[1]}x${dimensions[2]}"
+  printf "\n alldim: %s\n" "${alldim}"
+  printf "  x: %s\n" "${x}"
+  printf "  y: %s\n" "${y}"
+  printf "  z: %s\n" "${z}"
+  printf "  yz: %s\n" "${yz}"
 
   # # Print header dimensions
   # printf "\nHeader dimensions:\nx = $x\ny = $y\nyz = $yz\nz = $z\n"
@@ -844,68 +864,93 @@ function warpallenlbls() {
   # c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
 
   # get tiflbls dim
-  tiflblsdim=$(PrintHeader ${tiflbls} 2)
-  tiflblsx=${tiflblsdim%%x*}
-  tiflblsyz=${tiflblsdim#*x}
-  tiflblsy=${tiflblsyz%x*}
-  # z=${tiflblsdim##*x} ;
+  tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_"${vox}"um_clar_vox.tif 2)
+  IFS='x' read -ra dimensions <<<"$tiflblsdim"
+  tiflblsx="${dimensions[0]}"
+  tiflblsy="${dimensions[1]}"
+  tiflblsz="${dimensions[2]}"
+  tiflblsyz="${dimensions[1]}x${dimensions[2]}"
+  printf "  tiflblsdim: %s\n" "${tiflblsdim}"
+  printf "  tiflblsx: %s\n" "${tiflblsx}"
+  printf "  tiflblsy: %s\n" "${tiflblsy}"
+  printf "  tiflblsz: %s\n" "${tiflblsz}"
+  printf "  tiflblsyz: %s\n" "${tiflblsyz}"
 
   # get num slices (z dim)
-  orgclar=$(realpath ${orgclar})
-  orgclarz=$(ls ${orgclar}/*.tif* | wc -l)
-  firstslice=${orgclar}/$(ls ${orgclar} | head -n1)
+  orgclar=$(realpath "${orgclar}")
 
-  # get first_slice dim
-  firstslicedim=$(PrintHeader ${firstslice} 2)
-  firstslicex=${firstslicedim%%x*}
-  firstslicey=${firstslicedim##*x}
+  if [[ "${cn}" == "-999999" && "${cp}" == "-999999" ]]; then
+    orgclarz=$(ls "${orgclar}"/*.tif* | wc -l)
+    firstslice="${orgclar}/$(ls "${orgclar}" | head -n1)"
+  else
+    find_channel_files() {
+      local channel_pattern="${cp}${cn}"
+      find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
+    }
 
-  printf "\n orgclar: ${orgclar} \n"
-  printf "\n orgclar z: ${orgclarz} \n"
-
-  ifdsntexistrun ${tiflblszstack} "Resampling high res tif" ResampleImage 3 ${tiflbls} ${tiflblszstack} ${tiflblsx}x${tiflblsy}x${orgclarz} 1 1 3
-  # 1- Spacing , 1- NN, 3- ushort
-
-  if [[ ! -d ${tifdirreg} ]]; then
-    mkdir -p ${tifdirreg} ${tifdirregfinal}
+    orgclarz=$(find_channel_files | wc -l)
+    firstslice=$(find_channel_files -print | head -n 1)
   fi
 
-  firstlbl=${tifdirreg}/lbls_slice_000000.tif
+  # get first_slice dim
+  firstslicedim=$(PrintHeader "${firstslice}" 2)
+  IFS='x' read -ra dimensions <<<"${firstslicedim}"
+  firstslicex="${dimensions[0]}"
+  firstslicey="${dimensions[1]}"
+  printf "  orgclarz: %s\n" "${orgclarz}"
+  printf "  firstslice: %s\n" "${firstslice}"
+  printf "  firstslicedim: %s\n" "${firstslicedim}"
+  printf "  firstslicex: %s\n" "${firstslicex}"
+  printf "  firstslicey: %s\n" "${firstslicey}"
 
-  ifdsntexistrun ${firstlbl} "Extracting tiff slices" c3d ${tiflblszstack} -slice z 0:-1 -type ushort -oo ${tifdirreg}/lbls_slice_%06d.tif
+  printf "\n orgclar: %s \n" "${orgclar}"
+  printf "\n orgclar z: %s \n" "${orgclarz}"
 
+  ifdsntexistrun "${tiflblszstack}" "Resampling high res tif" ResampleImage 3 "${tiflbls}" "${tiflblszstack}" "${tiflblsx}"x"${tiflblsy}"x"${orgclarz}" 1 1 3
+  # 1- Spacing , 1- NN, 3- ushort
+
+  if [[ ! -d "${tifdirreg}" ]]; then
+    mkdir -p "${tifdirreg}" "${tifdirregfinal}"
+  fi
+
+  firstlbl="${tifdirreg}"/lbls_slice_000000.tif
+
+  # Create a series of 2D TIFF files, one for each slice in the original 3D stack
+  python /code/miracl/reg/miracl_reg_clar-allen_utility.py "${tiflblszstack}" "${tifdirreg}" "lbls_slice_%06d.tif"
+
+  # Start loop from zero index
   loop_z=$(python -c "print(${orgclarz}-1)")
 
   firstlblclar=${tifdirregfinal}/lbls_clar_slice_000000.tif
 
-  printf "\n firstslice: ${firstslice} \n"
-  printf "\n firstslice x: ${firstslicex} \n"
-  printf "\n firstslice y: ${firstslicey} \n"
+  printf "\n firstslice: %s \n" "${firstslice}"
+  printf "\n firstslice x: %s \n" "${firstslicex}"
+  printf "\n firstslice y: %s \n" "${firstslicey}"
 
   # printf "\n loop z: ${loop_z} \n"
 
-  if [[ ! -f ${firstlblclar} ]]; then
+  if [[ ! -f "${firstlblclar}" ]]; then
 
     printf "\n Resampling tiff slices to original space \n"
 
-    for i in $(seq 0 ${loop_z}); do
-      i=$(printf %06d $i)
-      ResampleImage 2 ${tifdirreg}/lbls_slice_${i}.tif ${tifdirregfinal}/lbls_clar_slice_${i}.tif ${firstslicex}x${firstslicey} 1 1 3
+    for i in $(seq 0 "${loop_z}"); do
+      i=$(printf %06d "$i")
+      ResampleImage 2 "${tifdirreg}"/lbls_slice_"${i}".tif "${tifdirregfinal}"/lbls_clar_slice_"${i}".tif "${firstslicex}"x"${firstslicey}" 1 1 3
     done
 
   fi
 
   # warp nifti to org space
-  orgspacing=$(PrintHeader ${inclar} 1)
+  orgspacing=$(PrintHeader "${inclar}" 1)
 
-  ifdsntexistrun ${wrplblsorg} "Resampling labels to original space" \
-    ResampleImage 3 ${wrplbls} ${wrplblsorg} ${orgspacing} 0 1
+  ifdsntexistrun "${wrplblsorg}" "Resampling labels to original space" \
+    ResampleImage 3 "${wrplbls}" "${wrplblsorg}" "${orgspacing}" 0 1
 
-  ifdsntexistrun ${orgortlbls} "Orienting Allen labels to original space" \
-    SetDirectionByMatrix ${wrplblsorg} ${orgortlbls} ${ortmatrix}
+  ifdsntexistrun "${orgortlbls}" "Orienting Allen labels to original space" \
+    SetDirectionByMatrix "${wrplblsorg}" "${orgortlbls}" "${ortmatrix}"
 
   # extract region
-  lblsdim=$(PrintHeader ${orgortlbls} 2)
+  lblsdim=$(PrintHeader "${orgortlbls}" 2)
   lx=${lblsdim%%x*}
   lyz=${lblsdim#*x}
   ly=${lyz%x*}
@@ -951,12 +996,12 @@ function warpinclarallen() {
   regorgclar=${10}
 
   # Orient channel to std
-  orientimg ${inclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
+  orientimg "${inclar}" "${ortclartag}" "${ortclarint}" "${ortclartype}" "${orthresclar}"
 
   # Apply warps
-  ifdsntexistrun ${regorgclar} "Applying ants deformation to input CLARITY" \
-    antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline \
-    -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
+  ifdsntexistrun "${regorgclar}" "Applying ants deformation to input CLARITY" \
+    antsApplyTransforms -r "${allenhres}" -i "${orthresclar}" -n Bspline \
+    -t [ "${initform}," 1 ] [ "${antsaff}," 1 ] "${antsinvwarp}" -o "${regorgclar}" --float
 
 }
 
@@ -982,12 +1027,12 @@ function warphresclarallen() {
   regorgclar=${10}
 
   # Orient channel to std
-  orientimg ${hresclar} ${ortclartag} ${ortclarint} ${ortclartype} ${orthresclar}
+  orientimg "${hresclar}" "${ortclartag}" "${ortclarint}" "${ortclartype}" "${orthresclar}"
 
   # Apply warps
-  ifdsntexistrun ${regorgclar} "Applying ants deformation to high-res CLARITY" \
-    antsApplyTransforms -r ${allenhres} -i ${orthresclar} -n Bspline \
-    -t [ ${initform}, 1 ] [ ${antsaff}, 1 ] ${antsinvwarp} -o ${regorgclar} --float
+  ifdsntexistrun "${regorgclar}" "Applying ants deformation to high-res CLARITY" \
+    antsApplyTransforms -r "${allenhres}" -i "${orthresclar}" -n Bspline \
+    -t [ "${initform}", 1 ] [ "${antsaff}," 1 ] "${antsinvwarp}" -o "${regorgclar}" --float
 
 }
 
@@ -1006,18 +1051,18 @@ function createtiledimg() {
   local reghemi=$8
 
   # clip clar intensities
-  ifdsntexistrun ${clipped} "Clipping CLARITY intensities" \
-    c3d ${smclarres} -stretch 2% 98% 0 255 -clip 0 255 -o ${clipped}
+  ifdsntexistrun "${clipped}" "Clipping CLARITY intensities" \
+    c3d "${smclarres}" -stretch 2% 98% 0 255 -clip 0 255 -o "${clipped}"
 
-  ifdsntexistrun ${lbl_mask} "Making labels mask" \
-    ThresholdImage 3 ${wrplbls} ${lbl_mask} 1 inf 1 0
+  ifdsntexistrun "${lbl_mask}" "Making labels mask" \
+    ThresholdImage 3 "${wrplbls}" "${lbl_mask}" 1 inf 1 0
 
   # create rgb labels
-  ifdsntexistrun ${rgb_lbls} "Creating RGB labels" \
-    ConvertScalarImageToRGB 3 ${wrplbls} ${rgb_lbls} ${lbl_mask} custom ${custom_lut}
+  ifdsntexistrun "${rgb_lbls}" "Creating RGB labels" \
+    ConvertScalarImageToRGB 3 "${wrplbls}" "${rgb_lbls}" "${lbl_mask}" custom "${custom_lut}"
 
   # create image
-  if [[ ${reghemi} == "combined" ]]; then
+  if [[ "${reghemi}" == "combined" ]]; then
     png_dir=2
     flip='0x1'
   else
@@ -1025,9 +1070,9 @@ function createtiledimg() {
     flip='0x0'
   fi
 
-  ifdsntexistrun ${mosaic} "Creating tiled mosaic image"
+  ifdsntexistrun "${mosaic}" "Creating tiled mosaic image"
   #    CreateTiledMosaic -i ${clipped} -r ${rgb_lbls} -a 0.3 -o ${mosaic} -t -1x7 -f '0x1' -s [10,350,1000] -x ${lbl_mask}
-  CreateTiledMosaic -i ${clipped} -r ${rgb_lbls} -a 0.3 -o ${mosaic} -f ${flip} -x ${lbl_mask} -d ${png_dir}
+  CreateTiledMosaic -i "${clipped}" -r "${rgb_lbls}" -a 0.3 -o "${mosaic}" -f "${flip}" -x "${lbl_mask}" -d "${png_dir}"
 
 }
 
@@ -1041,8 +1086,8 @@ function main() {
   # 1) Process clarity
 
   # resample to 0.05mm voxel
-  resclar=${regdir}/clar_res0.05.nii.gz
-  resampleclar ${inclar} 0.05 0 4 ${resclar}
+  resclar="${regdir}"/clar_res0.05.nii.gz
+  resampleclar "${inclar}" 0.05 0 4 "${resclar}"
 
   # get brain mask (thresh & largest comp)
   mask=${regdir}/brain_mask.nii.gz
@@ -1056,12 +1101,12 @@ function main() {
   otsu=${regdir}/clar_res0.05_median_bias_otsu.nii.gz
 
   if [[ ! -f "${otsu}" ]]; then
-    getbrainmask ${resclar} ${sharp} ${median} ${brain} ${mask} ${biasin} ${otsumaskthr} ${otsumask} ${otsucp} ${otsu}
+    getbrainmask "${resclar}" "${sharp}" "${median}" "${brain}" "${mask}" "${biasin}" "${otsumaskthr}" "${otsumask}" "${otsucp}" "${otsu}"
   fi
 
   # Mask
   masclar=${regdir}/clar_res0.05_masked.nii.gz
-  maskimage ${resclar} ${otsumask} ${masclar}
+  maskimage "${resclar}" "${otsumask}" "${masclar}"
   #	maskimage ${resclar} ${mask} ${masclar}
 
   if [[ "${prebias}" == 1 ]]; then
@@ -1069,26 +1114,26 @@ function main() {
   else
     # N4 bias correct
     biasclar=${regdir}/clar_res0.05_bias.nii.gz
-    biasfieldcorr ${masclar} ${biasclar} ${otsumask}
+    biasfieldcorr "${masclar}" "${biasclar}" "${otsumask}"
 
   fi
 
   # pad image
   padclar=${regdir}/clar_res0.05_pad.nii.gz
-  padimage ${biasclar} ${padclar}
+  padimage "${biasclar}" "${padclar}"
 
   # Orient
   ortclar=${regdir}/clar_res0.05_ort.nii.gz
-  orientimg ${padclar} "${ort}" Cubic float ${ortclar}
+  orientimg "${padclar}" "${ort}" Cubic float "${ortclar}"
 
   # Smooth, convert datatype to ushort
   smclar=${regdir}/clar_res0.05_sm.nii.gz
-  smoothimg ${ortclar} 0.25 ${smclar}
+  smoothimg "${ortclar}" 0.25 "${smclar}"
   # c3d ${smclar} -type ushort -o ${smclar}
 
   # make clarity copy, convert datatype to ushort
   clarlnk=${regdir}/clar.nii.gz
-  if [[ ! -f "${clarlnk}" ]]; then cp ${smclar} ${clarlnk}; fi
+  if [[ ! -f "${clarlnk}" ]]; then cp "${smclar}" "${clarlnk}"; fi
 
   #---------------------------
 
@@ -1108,7 +1153,7 @@ function main() {
     allenref=${atlas}
 
     custom_lbls=${regdir}/${lblsname}.nii.gz
-    c3d ${allenref} ${lbls} -reslice-identity -o ${custom_lbls}
+    c3d "${allenref}" "${lbls}" -reslice-identity -o "${custom_lbls}"
     lbls=${custom_lbls}
 
   fi
@@ -1125,7 +1170,7 @@ function main() {
   # Out Allen
   initallen=${regdir}/init_allen.nii.gz
 
-  initclarallenreg ${clarlnk} ${allenref} ${initform} ${deg} ${radfrac} ${useprincax} ${localiter} ${initallen}
+  initclarallenreg "${clarlnk}" "${allenref}" "${initform}" "${deg}" "${radfrac}" "${useprincax}" "${localiter}" "${initallen}"
 
   #---------------------------
 
@@ -1147,7 +1192,7 @@ function main() {
   # Out Allen
   antsallen=${regdir}/allen_clar_antsWarped.nii.gz
 
-  regclarallen ${clarroi} ${initallen} ${trans} ${spldist} ${rad} ${prec} ${thrds} ${antsallen}
+  regclarallen "${clarroi}" "${initallen}" "${trans}" "${spldist}" "${rad}" "${prec}" "${thrds}" "${antsallen}"
 
   #---------------------------
 
@@ -1178,44 +1223,44 @@ function main() {
 
   # orgclar, tiflbls_zstack , tifdir_reg, tifdir_regfinal
 
-  warpallenlbls ${smclar} ${lbls} ${antswarp} ${antsaff} ${initform} ${wrplbls} \
-    ${ortlbls} ${swplbls} ${tiflbls} ${inclar} ${reslbls} ${restif} ${vox} \
-    ${smclarres} ${inclar} ${orgortlbls} ${lblsorgnii} ${wrplblsorg} ${unpadtif} \
-    ${orgclar} ${tiflblszstack} ${tifdirreg} ${tifdirregfinal}
+  warpallenlbls "${smclar}" "${lbls}" "${antswarp}" "${antsaff}" "${initform}" "${wrplbls}" \
+    "${ortlbls}" "${swplbls}" "${tiflbls}" "${inclar}" "${reslbls}" "${restif}" "${vox}" \
+    "${smclarres}" "${inclar}" "${orgortlbls}" "${lblsorgnii}" "${wrplblsorg}" "${unpadtif}" \
+    "${orgclar}" "${tiflblszstack}" "${tifdirreg}" "${tifdirregfinal}"
 
   #---------------------------
 
   # 4) Warp input CLARITY to Allen
 
   # ort hres clar
-  ortinclar=${regdir}/clar_ort.nii.gz
+  ortinclar="${regdir}"/clar_ort.nii.gz
 
   # hres Allen
-  allenhres=${atlasdir}/ara/template/average_template_10um.nii.gz
+  allenhres="${atlasdir}"/ara/template/average_template_10um.nii.gz
 
   # ants inv warp
-  antsinvwarp=${regdir}/allen_clar_ants1InverseWarp.nii.gz
+  antsinvwarp="${regdir}"/allen_clar_ants1InverseWarp.nii.gz
 
   # out warp hres clar
-  regorgclar=${regdirfinal}/clar_allen_space.nii.gz
+  regorgclar="${regdirfinal}"/clar_allen_space.nii.gz
 
   if [[ "${warphres}" == 1 ]]; then
-    warpinclarallen ${inclar} ${ort} Cubic uint ${ortinclar} ${allenhres} \
-      ${initform} ${antsaff} ${antsinvwarp} ${regorgclar}
+    warpinclarallen "${inclar}" "${ort}" Cubic uint "${ortinclar}" "${allenhres}" \
+      "${initform}" "${antsaff}" "${antsinvwarp}" "${regorgclar}"
   fi
 
   #---------------------------
 
   # 5) Create Tiled Mosaic
 
-  clipped=${regdir}/clar_downsample_res${vox}um_int_clipped.nii.gz
-  custom_lut=${atlasdir}/ara/ara_ants_lut.txt
-  rgb_lbls=${regdir}/${lblsname}_clar_downsample_rgb.nii.gz
-  lbl_mask=${regdir}/${lblsname}_clar_downsample_mask.nii.gz
-  mosaic=${regdirfinal}/allen_labels_to_clar_mosaic.png
+  clipped="${regdir}"/clar_downsample_res${vox}um_int_clipped.nii.gz
+  custom_lut="${atlasdir}"/ara/ara_ants_lut.txt
+  rgb_lbls="${regdir}"/"${lblsname}"_clar_downsample_rgb.nii.gz
+  lbl_mask="${regdir}"/"${lblsname}"_clar_downsample_mask.nii.gz
+  mosaic="${regdirfinal}"/allen_labels_to_clar_mosaic.png
 
   if [[ "${savefig}" == 1 ]]; then
-    createtiledimg ${smclarres} ${clipped} ${wrplbls} ${rgb_lbls} ${lbl_mask} ${custom_lut} ${mosaic} ${hemi}
+    createtiledimg "${smclarres}" "${clipped}" "${wrplbls}" "${rgb_lbls}" "${lbl_mask}" "${custom_lut}" "${mosaic}" "${hemi}"
   fi
 
 }
@@ -1237,4 +1282,4 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 
 # create output file for successful completion
 command="${vox}\n${ort}"
-echo -e $command >"$work_dir/reg_final/reg_command.log"
+echo -e "${command}" >"${work_dir}/reg_final/reg_command.log"
