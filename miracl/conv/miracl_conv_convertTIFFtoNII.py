@@ -543,8 +543,6 @@ def main(args):
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpuload * cpus)
 
-    sys.exit()
-
     # Get file list
 
     # sort files
