@@ -15,6 +15,8 @@ def generic_runner(
     parts = [script]
     for flag, value in mapping.items():
         new_flag = flag_map.get(flag, flag)
+        if isinstance(value, list):
+            value = " ".join(map(str, value))
         parts.append(f"{new_flag} {value}")
     cmd_str = " ".join(map(str, parts))
     print(f"Running: {cmd_str}")
