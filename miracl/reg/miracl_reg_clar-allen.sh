@@ -417,22 +417,20 @@ fi
 # Print final args to screen for user
 printf "\n######################################################\n\n"
 printf "The following arguments will be used for registration:\n\n"
-printf "i: Down-sampled nii file: ${inclar}\n"
-printf "c: Clarity tiff folder: ${orgclar}\n"
-printf "r: Output directory: ${work_dir}\n"
-printf "o: Orientation code: ${ort}\n"
-printf "m: Hemisphere: ${hemi}\n"
-printf "v: Labels voxel: size${vox}\n"
-printf "b: Olfactory bulb included: ${bulb}\n"
-printf "s: Side: ${side}\n"
-printf "a: Custom Allen atlas: ${atlas}\n"
-printf "l: Allen labels to warp: ${lbls}\n"
-printf "p: Prebias: ${prebias}\n"
-printf "f: Save Mosaic figure: ${savefig}\n"
-printf "w: Warp high-res clarity to Allen space: ${warphres}\n"
+printf "i: Down-sampled nii file: %s\n" "$inclar"
+printf "c: Clarity tiff folder: %s\n" "$orgclar"
+printf "r: Output directory: %s\n" "$work_dir"
+printf "o: Orientation code: %s\n" "$ort"
+printf "m: Hemisphere: %s\n" "$hemi"
+printf "v: Labels voxel: size%s\n" "$vox"
+printf "b: Olfactory bulb included: %s\n" "$bulb"
+printf "s: Side: %s\n" "$side"
+printf "a: Custom Allen atlas: %s\n" "$atlas"
+printf "l: Allen labels to warp: %s\n" "$lbls"
+printf "p: Prebias: %s\n" "$prebias"
+printf "f: Save Mosaic figure: %s\n" "$savefig"
+printf "w: Warp high-res clarity to Allen space: %s\n" "$warphres"
 printf "\n######################################################\n"
-
-exit 1
 
 # get time
 
@@ -1240,4 +1238,3 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 # create output file for successful completion
 command="${vox}\n${ort}"
 echo -e $command >"$work_dir/reg_final/reg_command.log"
-
