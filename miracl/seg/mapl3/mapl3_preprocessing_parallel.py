@@ -43,7 +43,7 @@ from tqdm import tqdm
 from joblib import Parallel, delayed, parallel_config
 import multiprocessing
 import json
-from miracl_utilfns import str2bool
+from miracl.system.miracl_utilfns import str2bool
 
 # # -------------------------------------------------------
 # # custom action to handle metadata file
@@ -429,21 +429,20 @@ def main(args):
 
     print(
         f"\nthe following parameters will be used: \n",
-        f" 1. light sheet correction: ",
-        f"perc = {correct_lightsheet_perc} ",
-        f"lsm_foot = {correct_lightsheet_lsm_footprint} ",
-        f"back_foot = {correct_lightsheet_back_footprint} ",
-        f"back_downsample = {correct_lightsheet_back_downsample} "
-        f"lsm_vs_back = {correct_lightsheet_lsm_vs_back} \n",
-        f" 2. psuedo deconv.: ",
-        f"binarization thr = {deconvolve_bin_thr} ",
-        f"bluring sigma = {deconvolve_sigma} \n",
-        f"metadata json file = {metadata_path} ",
-        f"tissue_percentage_threshold = {percentage_brain_patch_skip} ",
-        f"intensity_threshold_skip = {intensity_threshold_skip} ",
+        f" 1. light sheet correction:\n",
+        f"     perc = {correct_lightsheet_perc}\n",
+        f"     lsm_foot = {correct_lightsheet_lsm_footprint}\n",
+        f"     back_foot = {correct_lightsheet_back_footprint}\n",
+        f"     back_downsample = {correct_lightsheet_back_downsample}\n"
+        f"      lsm_vs_back = {correct_lightsheet_lsm_vs_back}\n",
+        f" 2. pseudo deconv.:\n",
+        f"     binarization thr = {deconvolve_bin_thr}\n",
+        f"     bluring sigma = {deconvolve_sigma} \n",
+        f"     metadata json file = {metadata_path}\n",
+        f"     tissue_percentage_threshold = {percentage_brain_patch_skip}\n",
+        f"     intensity_threshold_skip = {intensity_threshold_skip}\n\n",
+        f" intermediate results will {'' if save_intermediate_results_flag else 'not '}be saved",
     )
-
-    sys.exit()
 
     # create out dir
     isExist = os.path.exists(out_dir)
