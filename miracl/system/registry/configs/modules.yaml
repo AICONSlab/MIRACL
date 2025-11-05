@@ -78,7 +78,7 @@ preprocessing_parallel:
     "--mpp_save_intermediate_results_flag": "--save_intermediate_results_flag"
     "--mpp_intensity_threshold": "--intensity_threshold"
     "--mpp_tissue_percentage_threshold": "--tissue_percentage_threshold"
-  execute: true
+  execute: false
 
 inference:
   script: "python /code/miracl/seg/mapl3/mapl3_inference.py"
@@ -88,6 +88,9 @@ inference:
   flag_map:
     "--mi_binarization_threshold": "--binarization_threshold"
     "--mi_tissue_percentage_threshold": "--tissue_percentage_threshold"
+    "--mi_gpu_index": "--gpu_index"
+    "--mi_save_prob_map_flag": "--save_prob_map_flag"
+    "--mi_metadata": "--metadata"
   execute: false
 
 patch_stacking:
@@ -113,7 +116,8 @@ raw_data_normalization:
   execute: false
 
 skeletonization:
-  script: "/home/josmann/.conda/envs/mapl3-env/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
+  # script: "/home/josmann/.conda/envs/mapl3-env/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
+  script: "python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_skeletonization.Skeletonization"
   module_type: "FLOW_MAPL3"
   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
@@ -127,7 +131,7 @@ skeletonization:
     "--ms_cpu_load": "--cpu_load"
     "--ms_dilate_distance_transform_flag": "--dilate_distance_transform_flag"
     "--ms_alpha": "--alpha"
-  execute: false
+  execute: true
 
 voxelization:
   script: "python /code/miracl/seg/mapl3/mapl3_voxelization.py"
