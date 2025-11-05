@@ -49,7 +49,7 @@ import multiprocessing
 import concurrent
 import time
 from monai.networks.nets import UNETR
-from miracl_utilfns import str2bool, none_or_float
+from miracl.system.miracl_utilfns import str2bool, none_or_float, none_or_str
 
 # Create the parser
 my_parser = argparse.ArgumentParser(description="Working directory")
@@ -110,6 +110,7 @@ my_parser.add_argument(
     help="path to metadata JSON file (optional,)",
     required=False,
     default=None,
+    type=none_or_str,
 )
 my_parser.add_argument(
     "-p",
@@ -629,8 +630,6 @@ def main(args):
     print(f"  Metadata path:          {metadata_path}")
     print(f"  Config path:            {config_path}")
     print(f"  Output dir:             {output_dir}")
-
-    sys.exit()
 
     isExist = os.path.exists(output_dir)
     if not isExist:

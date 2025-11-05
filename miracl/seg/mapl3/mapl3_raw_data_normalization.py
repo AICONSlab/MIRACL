@@ -188,8 +188,6 @@ def main():
     print(f"  Binarization thr:      {thr}")
     print(f"  Alpha:                 {alpha}")
 
-    sys.exit()
-
     # create out dir
     isExist = os.path.exists(out_dir)
     if not isExist:

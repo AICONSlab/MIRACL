@@ -64,3 +64,25 @@ def none_or_float(value: str) -> float | None:
         return float(value)
     except ValueError:
         raise ArgumentTypeError(f"{value} must be a float or 'None'")
+
+
+def none_or_str(value: str) -> str | None:
+    """
+    Convert a string to itself or None.
+
+    This function allows users to specify "None" (case-insensitive) to represent
+    a `None` value. Otherwise, it returns the string as-is.
+
+    Parameters
+    ----------
+    value : str
+        The input string, e.g., a file path, or "None".
+
+    Returns
+    -------
+    str or None
+        The input string itself, or `None` if the input is "None".
+    """
+    if value.lower() == "none":
+        return None
+    return value

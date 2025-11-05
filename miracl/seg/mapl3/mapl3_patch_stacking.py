@@ -197,8 +197,6 @@ def main(args):
     print(f"  Metadata path:     {metadata_path}")
     print(f"  dtype:             {dtype}")
 
-    sys.exit()
-
     # Get the number of cpus
     cpus = multiprocessing.cpu_count()
     ncpus = int(cpu_load * cpus)
@@ -279,4 +277,3 @@ def main(args):
 if __name__ == "__main__":
     args = vars(my_parser.parse_args())
     main(args)
-
