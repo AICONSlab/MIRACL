@@ -117,7 +117,7 @@ class Inference:
                 "cli_s_flag": "mi_g",
                 "cli_l_flag": "mi_gpu_index",
                 "cli_group": CliGroup.MAPL3_INFERENCE,
-                "disabled": True,
+                "disabled": False,
             }
         },
         cli_obj_type=ArgumentType.STRING,
@@ -166,7 +166,7 @@ class Inference:
                 "cli_s_flag": "mi_s",
                 "cli_l_flag": "mi_save_prob_map_flag",
                 "cli_group": CliGroup.MAPL3_INFERENCE,
-                "disabled": True,
+                "disabled": False,
             }
         },
         cli_obj_type=ArgumentType.CUSTOM_BOOL,
@@ -191,12 +191,13 @@ class Inference:
                 "cli_s_flag": "mi_j",
                 "cli_l_flag": "mi_metadata",
                 "cli_group": CliGroup.MAPL3_INFERENCE,
-                "disabled": True,
+                "disabled": False,
             }
         },
         cli_obj_type=ArgumentType.STRING,
         cli_help="path to metadata JSON file (default: None)",
         cli_required=False,
+        obj_default=None,
         gui_label=["Path to metadata JSON"],
         gui_group={"mapl3": "main"},
         gui_order=[1],
