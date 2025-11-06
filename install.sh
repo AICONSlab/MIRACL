@@ -356,24 +356,20 @@ services:
   $service_name:
     image: $image_name:$miracl_version
     tty: true
-    environment:
-      - DISPLAY
     stdin_open: true
     network_mode: host
     container_name: $container_name
     shm_size: ${shm_mem}
+    environment:
+      - DISPLAY
 EOF
 
   if [[ $gpu ]]; then
 
     cat >>docker-compose.yml <<EOF
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    gpus: all
 EOF
 
   fi
