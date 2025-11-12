@@ -313,7 +313,7 @@ class PreprocessingParallel:
             }
         },
         cli_obj_type=ArgumentType.FLOAT,
-        cli_help="threshold between 0-100 (percent of int16: around 65K,) to filter the patches that their 95 percentile of intensity fall below this (default: None)",
+        cli_help="threshold between 0-100 (percent of int16: around 65K) to filter the patches whos 95 percentile of intensity falls below this (default: None)",
         cli_required=False,
         gui_label=["Threshold between 0-100"],
         gui_group={"mapl3": "main"},

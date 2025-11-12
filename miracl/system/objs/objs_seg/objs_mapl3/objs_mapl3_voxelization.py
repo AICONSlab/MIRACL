@@ -109,7 +109,7 @@ class Voxelization:
     )
 
     downsample_z_axis: MiraclObj = MiraclObj(
-        name="mv_downsample_yx_axis",
+        name="mv_downsample_z_axis",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli_s_flag="dz",
         cli_l_flag="downsample_z_axis",

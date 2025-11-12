@@ -436,8 +436,6 @@ def main():
     print(f"  input_file_path_raw:            {input_file_path_raw}")
     print(f"  alpha:                          {alpha}")
 
-    sys.exit()
-
     # create out dir
     isExist = os.path.exists(out_dir)
     if not isExist:

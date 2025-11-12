@@ -203,8 +203,6 @@ def main():
     print(f"res_z:              {vz}")
     print(f"out_name:           {out_name}")
 
-    sys.exit()
-
     # create out dir
     isExist = os.path.exists(out_dir)
     if not isExist:
@@ -257,7 +255,7 @@ def main():
 
     img = nib.Nifti1Image(downsampled_zyx.astype("uint8"), mat)
     nib.save(img, os.path.join(out_dir, out_name + ".nii.gz"))
-    print(f"results saved in output dir")
+    print(f"results saved in '{out_dir}'")
 
 
 if __name__ == "__main__":
