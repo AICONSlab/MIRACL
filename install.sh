@@ -594,15 +594,11 @@ function build_docker() {
 
       if [[ "${gpu_check_results}" == "false" ]]; then
         printf "\n##############################################################"
-        printf "\n\nNote: You requested GPU forwarding but no Nvidia GPU's were detected during the initial system check.\n\nIf you think the checks were incorrect, please add the following to your 'docker-compose.yml':\n\n"
+        printf "\n\nNote: You requested GPU forwarding but no Nvidia GPU's were detected during the initial system check.\n\nIf you think the checks were incorrect, please add the following to your 'docker-compose.yml' under the 'environment' directive:\n\n"
         cat <<EOF
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    gpus: all
 EOF
 
         printf "\n\nAdd this under the 'shm_size' entry with 'deploy' being at the same indentation level."
