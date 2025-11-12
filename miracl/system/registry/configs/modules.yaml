@@ -31,7 +31,7 @@ conversion:
     "--mctn_downzdim": "--downzdim"
     "--mctn_prevdown": "--prevdown"
     "--mctn_percentile_thr": "--percentile_thr"
-  execute: false
+  execute: true
 
 registration:
   script: "/code/miracl/reg/miracl_reg_clar-allen.sh"
@@ -49,7 +49,9 @@ registration:
     "--mrca_olfactory_bulb": "-b"
     "--mrca_skip_cor": "-p"
     "--mrca_warp": "-w"
-  execute: false
+    "--mrca_chan_num": "-n"
+    "--mrca_chan_prefix": "-x"
+  execute: true
 
 generate_patch:
   script: "python /code/miracl/seg/mapl3/mapl3_generate_patch.py"
@@ -60,7 +62,7 @@ generate_patch:
     "--mgp_cpu_load": "--cpu_load"
     "--mgp_patch_size": "--patch_size"
     "--mgp_brain_mask_erosion_flag": "--brain_mask_erosion_flag"
-  execute: false
+  execute: true
 
 preprocessing_parallel:
   script: "python /code/miracl/seg/mapl3/mapl3_preprocessing_parallel.py"
@@ -78,7 +80,7 @@ preprocessing_parallel:
     "--mpp_save_intermediate_results_flag": "--save_intermediate_results_flag"
     "--mpp_intensity_threshold": "--intensity_threshold"
     "--mpp_tissue_percentage_threshold": "--tissue_percentage_threshold"
-  execute: false
+  execute: true
 
 inference:
   script: "python /code/miracl/seg/mapl3/mapl3_inference.py"
@@ -91,7 +93,7 @@ inference:
     "--mi_gpu_index": "--gpu_index"
     "--mi_save_prob_map_flag": "--save_prob_map_flag"
     "--mi_metadata": "--metadata"
-  execute: false
+  execute: true
 
 patch_stacking:
   script: "python /code/miracl/seg/mapl3/mapl3_patch_stacking.py"
@@ -101,7 +103,7 @@ patch_stacking:
   flag_map:
     "--mps_cpu_load": "--cpu_load"
     "--mps_dtype": "--dtype"
-  execute: false
+  execute: true
 
 raw_data_normalization:
   script: "python /code/miracl/seg/mapl3/mapl3_raw_data_normalization.py"
@@ -113,11 +115,11 @@ raw_data_normalization:
     "--mrdn_alpha": "--alpha"
     "--mrdn_thr": "--thr"
     "--mrdn_cpu_load": "--cpu_load"
-  execute: false
+  execute: true
 
 skeletonization:
   # script: "/home/josmann/.conda/envs/mapl3-env/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
-  script: "python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
+  script: "/code/miracl/system/venvs/skel_test/.venv/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_skeletonization.Skeletonization"
   module_type: "FLOW_MAPL3"
   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
@@ -146,7 +148,7 @@ voxelization:
     "--mv_out_name": "--out_name"
     "--mv_res_xy": "--res_xy"
     "--mv_res_z": "--res_z"
-  execute: false
+  execute: true
 
 warping:
   script: "/code/miracl/reg/miracl_reg_warp_clar_data_to_allen.sh"
@@ -155,7 +157,7 @@ warping:
   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
   flag_map:
     "--mrwca_vox_res": "-v"
-  execute: false
+  execute: true
 
 feat_extract:
   script: "python /code/miracl/seg/mapl3/mapl3_feat_extract.py"
@@ -164,4 +166,4 @@ feat_extract:
   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
   flag_map:
     "--mfe_mask": "--mask"
-  execute: false
+  execute: True

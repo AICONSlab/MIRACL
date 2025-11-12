@@ -398,3 +398,58 @@ class ClarAllen:
         },
         version_added="2.4.0",
     )
+
+    chan_num: MiraclObj = MiraclObj(
+        name="rca_chan_num",
+        tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
+        cli_s_flag="n",
+        cli_l_flag="chan_num",
+        flow={
+            "ace": {
+                "cli_s_flag": "arca_i",
+                "cli_l_flag": "arca_input",
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
+                "required": True,
+            },
+            "mapl3": {
+                "cli_s_flag": "mrca_n",
+                "cli_l_flag": "mrca_chan_num",
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
+            },
+        },
+        cli_obj_type=ArgumentType.STRING,
+        cli_help="chan # for extracting single channel from multiple channel data (default: -999999)",
+        obj_default="-999999",
+        gui_label=["Channel #"],
+        gui_group={"ace_flow": "main", "mapl3:": "main"},
+        module="clar_allen",
+        module_group="reg",
+        version_added="2.4.0",
+    )
+
+    chan_prefix: MiraclObj = MiraclObj(
+        name="rca_chan_prefix",
+        tags=["clar_allen", "reg", "ace_flow", "mapl3_flow"],
+        cli_s_flag="x",
+        cli_l_flag="chan_prefix",
+        flow={
+            "ace": {
+                "cli_s_flag": "arca_i",
+                "cli_l_flag": "arca_input",
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
+            },
+            "mapl3": {
+                "cli_s_flag": "mrca_x",
+                "cli_l_flag": "mrca_chan_prefix",
+                "cli_group": CliGroup.REG_CLAR_ALLEN,
+            },
+        },
+        cli_obj_type=ArgumentType.STRING,
+        cli_help="chan prefix (string before channel number in file name). ex: C00 (default: -999999)",
+        obj_default="-999999",
+        gui_label=["Channel prefix"],
+        gui_group={"ace_flow": "main", "mapl3:": "main"},
+        module="clar_allen",
+        module_group="reg",
+        version_added="2.4.0",
+    )
