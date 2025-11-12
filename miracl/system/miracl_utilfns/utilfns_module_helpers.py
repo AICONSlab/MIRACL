@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import re
+import shutil
 
 
 def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
@@ -49,3 +50,75 @@ def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
         )
     except OSError as e:
         raise OSError(f"Failed to write file {ort2std_file}: {e.strerror}") from e
+
+
+def move_warping_reg_final_contents(output_dir: str) -> None:
+    """
+    Move the contents of the 'reg_final' folder in the current working directory
+    to a user-specified output directory and delete 'reg_final'.
+
+    Parameters:
+    - output_dir: str, path to move the contents of 'reg_final' to
+
+    Raises:
+    - FileNotFoundError: if 'reg_final' folder does not exist in the current working directory
+    """
+    output_dir_path: Path = Path(output_dir)
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+
+    reg_final: Path = Path.cwd() / "reg_final"
+
+    try:
+        if not reg_final.is_dir():
+            raise FileNotFoundError(f"'reg_final' folder not found in {Path.cwd()}")
+
+        for item in reg_final.iterdir():
+            _ = shutil.move(str(item), output_dir_path)
+
+        reg_final.rmdir()
+        print(
+            f"Contents of reg_final moved to {output_dir_path} and reg_final deleted."
+        )
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError("'ref_final' from warping is missing.") from e
+
+
+def move_to_new_folder_and_rename(
+    output_dir: str,
+    input_file: str,
+    identifier: str,
+) -> None:
+    """
+    Move the specified file to a user-specified output directory and rename it.
+    Optionally, delete the 'reg_final' folder after the move operation.
+
+    Parameters:
+    - output_dir (str): Path to the output directory to move the file to.
+    - input_file (str): Path to the file to move.
+    - identifier (str): Identifier used to rename the file.
+
+    Raises:
+    - FileNotFoundError: If the input file doesn't exist.
+    - PermissionError: If there are permission issues.
+    - RuntimeError: For any unexpected errors during the file move.
+    """
+    input_file_path = Path(input_file)
+    output_dir_path = Path(output_dir)
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+
+    if not input_file_path.is_file():
+        raise FileNotFoundError(f"{input_file_path} does not exist.")
+
+    new_file_name = f"seg_feat_{identifier}_ara_lbls_split.csv"
+
+    try:
+        _ = shutil.move(input_file_path, output_dir_path / new_file_name)
+        print(f"{input_file_path.name} moved to {output_dir_path}/{new_file_name}.")
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Error with file: {e}")
+    except PermissionError as e:
+        raise PermissionError(f"Permission error: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to move the file: {e}")
