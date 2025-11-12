@@ -18,6 +18,7 @@ from joblib import Parallel, delayed
 from scipy import ndimage
 from skimage.measure import regionprops, label
 import nibabel as nib
+from miracl.system.miracl_utilfns import none_or_str
 
 
 # ---------
@@ -78,7 +79,7 @@ def parsefn():
     parser.add_argument(
         "-m",
         "--mask",
-        type=str,
+        type=none_or_str,
         help="ROI mask",
     )
 
@@ -319,8 +320,6 @@ def main(args):
     tmp_args, tmp_unknown = parser.parse_known_args()
     print(f"Mask:             {tmp_args.mask}")
 
-    sys.exit()
-
     # open seg
     ## AA CHANGE
     # print("Reading segmentation")
@@ -349,7 +348,7 @@ def main(args):
         lbls = lbls.astype(np.int16)
 
     # check mask
-    if args.mask is None:
+    if tmp_args.mask is None:
         # get all lbls
         alllbls = getlblvals(lbls)
 
@@ -357,7 +356,7 @@ def main(args):
         reslbls = upsampleswplbls(seg, lbls)
 
     else:
-        inmas = args.mask
+        inmas = tmp_args.mask
         maslbls = np.copy(lbls)
 
         maslbls[inmas == 0] = 0
