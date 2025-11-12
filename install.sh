@@ -446,6 +446,10 @@ EOF
 
   if [[ "${gpu}" == true ]]; then
 
+    if ! check_gpu; then
+      printf "Warning: GPU support requested but no GPU's found or accessible. Continuing without GPU support.\n"
+      gpu_check_results=false
+    else
     cat >>docker-compose.yml <<EOF
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
@@ -594,14 +598,14 @@ function build_docker() {
 
       if [[ "${gpu_check_results}" == "false" ]]; then
         printf "\n##############################################################"
-        printf "\n\nNote: You requested GPU forwarding but no Nvidia GPU's were detected during the initial system check.\n\nIf you think the checks were incorrect, please add the following to your 'docker-compose.yml' under the 'environment' directive:\n\n"
+        printf "\n\nNote: You requested GPU forwarding but no Nvidia GPU's were detected during the initial system check.\n\nIf you think the checks were incorrect, please add the following to your 'docker-compose.yml':\n\n"
         cat <<EOF
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     gpus: all
 EOF
 
-        printf "\n\nAdd this under the 'shm_size' entry with 'deploy' being at the same indentation level."
+        printf "\n\nAdd this under the 'environment' directive with '- DISPLAY' being at the same indentation level as '- NVIDIA_VISIBLE_DEVICES=all'."
         printf "\n\n##############################################################\n\n"
       fi
 
