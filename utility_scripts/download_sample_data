@@ -13,7 +13,7 @@ This script downloads sample data required to run MIRACL's tutorials.
 Things to note:
 
 1) Please make sure that you are in the correct folder where you want to download the data to.
-2) Ideally this folder has been mounted into the Docker/Singularity container from the host system
+2) Ideally this folder has been mounted into the Docker/Apptainer container from the host system
 to ensure that the data won't be deleted when the container is shut down.
 
 Usage: $0 [-h]

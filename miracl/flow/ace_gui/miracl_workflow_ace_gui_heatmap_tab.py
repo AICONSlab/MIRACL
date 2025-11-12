@@ -7,7 +7,7 @@ Description:
     View for heatmap.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann
@@ -184,7 +184,7 @@ class HeatmapTab(QWidget):
             "Output filenames:",
             help_dict["sh_outfile"],
             ["group_1", "group_2", "group_difference"],
-            ["strcon", "strcon", "strcon"]
+            ["strcon", "strcon", "strcon"],
         )
 
         self.heatmap_extension_input = wu.create_text_field(

@@ -13,5 +13,5 @@ our `offical GitHub page <https://github.com/AICONSlab/MIRACL>`_.
    :caption: Table of contents:
 
    troubleshooting_docker
-   troubleshooting_singularity
+   troubleshooting_apptainer
    troubleshooting_local

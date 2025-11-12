@@ -107,6 +107,8 @@ in the GUI version:
    -a, input custom Allen atlas: for example for registering sections
    -f, save mosaic figure (.png) of Allen labels registered to CLARITY (default: 1).
    -w, warp high-res clarity to Allen space (default: 0).
+   -n, chan number for extracting single channel from multiple channel data (default: none)
+   -x, chan prefix (string before channel number in file name). ex: C00 (default: none)
 
 .. attention::
    Note that the above listed ``-i`` parameter (``input down-sampled CLARITY 

@@ -58,6 +58,7 @@ RUN mkdir -p /code/atlases/ara && \
 
 # RUN conda install -y --no-update-deps pyqt=5
 
+# Add atlas ENV vars
 ENV aradir "/code/atlases/ara"
 
 # Templates (atlas images)
@@ -88,6 +89,21 @@ ENV ANTSPATH "${ANTSPATH}:/code/depends/ants"
 
 ENV IN_DOCKER_CONTAINER Yes
 
+###############################################################################
+#--- ACE models ---
+
+# Change permissions of models folder
+RUN chmod -R 777 /code/miracl/seg/models
+# Download UNet
+RUN wget -O /code/miracl/seg/models/unet/best_metric_model.pth https://huggingface.co/AICONSlab/ACE/resolve/main/models/unet/best_metric_model.pth?download=true && \
+    ls -l /code/miracl/seg/models/unet
+#Download UNETR
+RUN wget -O /code/miracl/seg/models/unetr/best_metric_model.pth https://huggingface.co/AICONSlab/ACE/resolve/main/models/unetr/best_metric_model.pth?download=true && \
+    ls -l /code/miracl/seg/models/unetr
+
+###############################################################################
+#--- Docker X11 forwarding directives ---
+
 #STARTUNCOMMENT#
 #STOPUNCOMMENT#
 
@@ -95,4 +111,3 @@ ENV IN_DOCKER_CONTAINER Yes
 
 # Temporarily uncommented to allow interactive shell access to Docker container
 #ENTRYPOINT ["/opt/miniconda/bin/miracl"]
-

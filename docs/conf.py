@@ -7,11 +7,24 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "MIRACL"
-copyright = "2023, Maged Goubran @ AICONS Lab"
+copyright = "2025, Maged Goubran @ AICONS Lab"
 author = "Maged Goubran"
 # Version and release set to the same since no separation is needed
-version = "2.2.6"
-release = "2.2.6"
+# version = "2.5.2"
+# release = "2.5.2"
+# Revised: Get version/release automatically from miracl/version.txt
+
+from pathlib import Path
+
+version_file = Path(__file__).resolve().parent.parent / "miracl" / "version.txt"
+
+if not version_file.exists():
+    raise FileNotFoundError(f"Required version file not found: {version_file}")
+
+with version_file.open("r") as f:
+    version = f.read().strip()
+
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -91,7 +104,8 @@ html_context = {
     "display_github": True,
     "github_user": "AICONSlab",
     "github_repo": "MIRACL",
-    "github_version": "master/",
+    "github_version": "master",
+    "conf_py_path": "/docs/",
 }
 
 # Output file base name for HTML help builder.

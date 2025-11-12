@@ -7,7 +7,7 @@ Description:
     View for cluster-wise statistics.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann
@@ -72,7 +72,7 @@ class ClusterwiseTab(QWidget):
             1.00,
             "float",
             0.01,
-            2
+            2,
         )
 
         self.clusterwise_tfce_h_input = wu.create_digit_text_field(
@@ -80,7 +80,11 @@ class ClusterwiseTab(QWidget):
         )
 
         self.clusterwise_tfce_e_input = wu.create_digit_text_field(
-            clusterwise_layout, "tfce E power:", help_dict["sctp_tfce_e"], "0.5", "float"
+            clusterwise_layout,
+            "tfce E power:",
+            help_dict["sctp_tfce_e"],
+            "0.5",
+            "float",
         )
 
         self.clusterwise_step_down_input = wu.create_digit_spinbox(
@@ -92,7 +96,7 @@ class ClusterwiseTab(QWidget):
             1.0000,
             "float",
             0.01,
-            4
+            4,
         )
 
         self.clusterwise_mask_thr_input = wu.create_digit_spinbox(

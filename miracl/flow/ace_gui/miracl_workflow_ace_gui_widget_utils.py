@@ -7,7 +7,7 @@ Description:
     A collection of utility functions for creating and managing widgets in PyQt5.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann
@@ -846,9 +846,9 @@ class WidgetUtils:
                 format_dict = {
                     "default": action.default,
                     "type": action.type.__name__ if action.type else None,
-                    "choices": ", ".join(map(str, action.choices))
-                    if action.choices
-                    else None,
+                    "choices": (
+                        ", ".join(map(str, action.choices)) if action.choices else None
+                    ),
                     "required": action.required,
                 }
 

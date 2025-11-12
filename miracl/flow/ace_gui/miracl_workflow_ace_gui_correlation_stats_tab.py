@@ -7,7 +7,7 @@ Description:
     View for correlation and statistics.
 
 Copyright:
-    (c) 2024 AICONs Lab. All rights reserved.
+    (c) 2025 AICONs Lab. All rights reserved.
 
 Author:
     Jonas Osmann

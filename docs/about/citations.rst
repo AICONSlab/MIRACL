@@ -3,6 +3,12 @@ MIRACL in research
 
 A selection of publications that used or referenced :program:`MIRACL`:
 
+Attarpour, A., Osmann, J., Rinaldi, A., Qi, T., Lal, N., Patel, S., ... 
+Stefanovic, B., & Goubran, M. (2025). `A deep learning pipeline for 
+three-dimensional brain-wide mapping of local neuronal ensembles in teravoxel 
+light-sheet microscopy <https://www.nature.com/articles/s41592-024-02583-1>`_. 
+Nature Methods, 1-12.
+
 Hsueh, B., Chen, R., Jo, Y., Tang, D., Raffiee, M., Kim, Y. S., ... Goubran, 
 M., & Deisseroth, K. (2023). `Cardiogenic control of affective behavioural 
 state <https://www.nature.com/articles/s41586-023-05748-8>`_. Nature, 1-8.
