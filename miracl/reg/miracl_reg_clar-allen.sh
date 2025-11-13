@@ -864,7 +864,8 @@ function warpallenlbls() {
   # c3d ${tiflbls} -resample ${ox}x${oy}x${oz}mm -o ${restif}
 
   # get tiflbls dim
-  tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_"${vox}"um_clar_vox.tif 2)
+  # tiflblsdim=$(PrintHeader reg_final/annotation_hemi_combined_"${vox}"um_clar_vox.tif 2)
+  tiflblsdim=$(PrintHeader "${regdirfinal}"/annotation_hemi_"${hemi}"_"${vox}"um_clar_vox.tif 2)
   IFS='x' read -ra dimensions <<<"$tiflblsdim"
   tiflblsx="${dimensions[0]}"
   tiflblsy="${dimensions[1]}"
@@ -1282,4 +1283,4 @@ miracl utils end_state -f "Registration and Allen labels warping" -t "$DIFF minu
 
 # create output file for successful completion
 command="${vox}\n${ort}"
-echo -e "${command}" >"${work_dir}/reg_final/reg_command.log"
+echo -e "${command}" >"${regdirfinal}"/reg_command.log"
