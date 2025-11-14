@@ -17,6 +17,18 @@ ___
 
 ___
 
+\*\***NEW WORKFLOW/FEATURE ANNOUNCEMENT**\*\*
+
+We will soon release our **M**apping **A**xonal **P**rojections in **L**ight-sheet Fluorescence Microscopy in **3**D (**MAPL3**) workflow as part of the **MIRACL** platform. **MAPL3** is an end-to-end deep learning pipeline for generalizable, brain-wide mapping of structural connectivity at the single-axon level using tera-voxel light sheet fluorescence microscopy (LSFM) dataset. It's built for scalability, precision, and biological insight and bridges the gap between raw LSFM data and interpretable brain-wide connectivity maps.
+
+- **SPECTRE (Spatial Patch Encoding with Convolutional TransfoRmEr) Network**: A novel deep learning design that fuses convolutional precision with transformer-level context awareness, capturing both fine axonal details and global anatomical structure.
+- **Self-Supervised Generative Pretraining**: Pretrained on ~22,000 3D sub-volumes using advanced self-supervised learning and unique patch-based augmentation strategies. Enhances model robustness across diverse imaging conditions and experimental setups.
+- **State-of-the-Art Performance**: Extensively benchmarked against leading DL pipelines, **MAPL3** consistently outperforms them in both in- and out-of-distribution datasets, from patch-level inference to full-brain reconstructions.
+- **Neuroscientific Discovery at Scale**: **MAPL3** reveals cell-type-specific axonal connectivity patterns previously unresolved by existing methods, enabling new insights into mesoscale and quantitative brain circuitry analysis.
+
+
+---
+
 \*\***NEW WORKFLOW/FEATURE RELEASE**\*\*
 
 We have released our AI-based Cartography of Ensembles (ACE) workflow, an end-to-end, automated pipeline that integrates cutting-edge deep learning segmentation models and advanced statistical methods to enable unbiased and generalizable brain-wide mapping of 3D alterations in neuronal activity, morphology, or connectivity at the sub-regional and laminar levels beyond atlas-defined regions.

@@ -32,6 +32,7 @@ Or structure tensor analysis:
    :caption: Table of contents:
 
    ACE **new feature** <ace_flow/ace_flow>
+   MAPL3 **new feature** <mapl3_flow/mapl3_flow>
    CLARITY-Allen registration <clarity_registration/clar_reg>
    STA <sta/sta>
    CLARITY segmentation <clarity_segmentation/clar_seg>
