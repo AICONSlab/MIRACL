@@ -10,4 +10,5 @@ This module consists of multiple sub-modules to apply statistical and correlatio
    :caption: Table of contents:
     
    ACE Cluster only **new** <ace_cluster/ace_cluster>
+   Label statistics <lbls_stats/lbls_stats>
 

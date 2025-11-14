@@ -10,8 +10,21 @@ project = "MIRACL"
 copyright = "2025, Maged Goubran @ AICONS Lab"
 author = "Maged Goubran"
 # Version and release set to the same since no separation is needed
-version = "2.5.1"
-release = "2.5.1"
+# version = "2.5.2"
+# release = "2.5.2"
+# Revised: Get version/release automatically from miracl/version.txt
+
+from pathlib import Path
+
+version_file = Path(__file__).resolve().parent.parent / "miracl" / "version.txt"
+
+if not version_file.exists():
+    raise FileNotFoundError(f"Required version file not found: {version_file}")
+
+with version_file.open("r") as f:
+    version = f.read().strip()
+
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
