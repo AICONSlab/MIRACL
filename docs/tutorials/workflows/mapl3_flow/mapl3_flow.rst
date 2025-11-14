@@ -4,7 +4,7 @@ MAPL3 Workflow
 Summary and key highlights
 ==========================
 
-**M**\ apping **A**\ xonal **P**\ rojections in **L**\ ight-sheet Fluorescence Microscopy in **3**\ D (:program:`MAPL3`) is an end-to-end deep learning pipeline for generalizable, brain-wide mapping of structural connectivity at the single-axon level using tera-voxel light sheet fluorescence microscopy (LSFM) dataset. It's uilt for scalability, precision, and biological insight, :program:`MAPL3` bridges the gap between raw LSFM data and interpretable brain-wide connectivity maps.
+**M**\ apping **A**\ xonal **P**\ rojections in **L**\ ight-sheet Fluorescence Microscopy in **3**\ D (:program:`MAPL3`) is an end-to-end deep learning pipeline for generalizable, brain-wide mapping of structural connectivity at the single-axon level using tera-voxel light sheet fluorescence microscopy (LSFM) dataset. It's built for scalability, precision, and biological insight and bridges the gap between raw LSFM data and interpretable brain-wide connectivity maps.
 
 - **Hybrid CNN–Transformer Architecture**: A novel deep learning design that fuses convolutional precision with transformer-level context awareness, capturing both fine axonal details and global anatomical structure.
 - **Self-Supervised Generative Pretraining**: Pretrained on 22,000+ 3D sub-volumes using advanced self-supervised learning (SSL) and unique patch-based augmentation strategies. Enhances model robustness across diverse imaging conditions and experimental setups.
