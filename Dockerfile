@@ -102,12 +102,64 @@ RUN wget -O /code/miracl/seg/models/unetr/best_metric_model.pth https://huggingf
     ls -l /code/miracl/seg/models/unetr
 
 ###############################################################################
+
+# Install UV and make available system wide
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv $HOME/.local/bin/uv* /usr/local/bin/
+
+###############################################################################
 #--- Docker X11 forwarding directives ---
 
 #STARTUNCOMMENT#
 #STOPUNCOMMENT#
 
 ################################################################################
+
+# Create UV venv for Skeletonization
+# Install Python 3.11 in a Conda venv
+
+USER root
+RUN mkdir -p /venvs && chown -R $USER:$USER /venvs
+USER $USER
+
+# Install Python 3.11 in a Conda venv and create Skeletonization venv 
+RUN rm -rf /venvs/mapl3-skeletonization || true && \
+    rm -rf /venvs/python311 || true && \
+    cd /venvs && \
+    pwd && \
+    conda create -y -p /venvs/python311 python=3.11 && \
+    # export PATH="/venvs/python311/bin:$PATH" && \
+    uv init mapl3-skeletonization --python /venvs/python311/bin/python3.11 && \
+    cd mapl3-skeletonization && \
+    pwd && \
+    ls -l && \
+    uv add "cucim-cu12==25.4.0" \
+    "cupy-cuda12x==13.4.1" \
+    "cuvs-cu12==25.4.0" \
+    "pylibraft-cu12==25.4.0" \
+    "imagecodecs==2023.9.18" \
+    "joblib==1.4.2" \
+    "networkx==3.2.1" \
+    "numpy==1.26.3" \
+    "pandas==2.2.3" \
+    "scikit-image==0.22.0" \
+    "scipy==1.11.4" \
+    "tifffile==2023.12.9"
+
+USER root
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    apt-get update && \
+    apt-get install -y cuda-cudart-12-4 \
+    cuda-nvrtc-12-4 \
+    libcublas-12-4 \
+    libcusolver-12-4 \
+    libcusparse-12-4 \
+    libcurand-12-4 && \
+    apt-get install -y cuda-nvcc-12-4
+
+USER $USER
+WORKDIR /home/$USER
 
 # Temporarily uncommented to allow interactive shell access to Docker container
 #ENTRYPOINT ["/opt/miniconda/bin/miracl"]
