@@ -119,7 +119,8 @@ raw_data_normalization:
 
 skeletonization:
   # script: "/home/josmann/.conda/envs/mapl3-env/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
-  script: "/code/miracl/system/venvs/skel_test/.venv/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
+  # script: "/code/miracl/system/venvs/skel_test/.venv/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
+  script: "/venvs/mapl3-skeletonization/.venv/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_skeletonization.Skeletonization"
   module_type: "FLOW_MAPL3"
   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
