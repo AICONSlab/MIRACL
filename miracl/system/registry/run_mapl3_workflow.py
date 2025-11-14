@@ -370,33 +370,33 @@ def main():
 
     # FIX: Must be added as a module!!!
 
-    # heatmaps_path = (
-    #     Path(
-    #         f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}"
-    #     )
-    #     / "heatmaps"
-    # )
-    # heatmaps_path.mkdir(parents=True, exist_ok=True)
-    # for step in [
-    #     "mapl3_skel",
-    #     "mapl3_norm",
-    # ]:
-    #     command = [
-    #         "python",
-    #         "/code/miracl/seg/mapl3/mapl3_plot_warped_data.py",
-    #         "-p",
-    #         f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
-    #         "-v",
-    #         str(25),
-    #         "-gs",
-    #         "2",
-    #         "-d",
-    #         heatmaps_path,
-    #         "-o",
-    #         f"heatmap_{step}",
-    #     ]
-    #     _ = subprocess.run(command)
-    #     print_delimiter()
+    heatmaps_path = (
+        Path(
+            f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}"
+        )
+        / "heatmaps"
+    )
+    heatmaps_path.mkdir(parents=True, exist_ok=True)
+    for step in [
+        "mapl3_skel",
+        "mapl3_norm",
+    ]:
+        command = [
+            "python",
+            "/code/miracl/seg/mapl3/mapl3_plot_warped_data.py",
+            "-p",
+            f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
+            "-v",
+            str(25),
+            "-gs",
+            "2",
+            "-d",
+            heatmaps_path,
+            "-o",
+            f"heatmap_{step}",
+        ]
+        _ = subprocess.run(command)
+        print_delimiter()
 
     for step_name, vals in {
         "feat_extract_skeletonization": {
