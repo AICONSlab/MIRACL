@@ -115,9 +115,6 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 
 ################################################################################
 
-# Create UV venv for Skeletonization
-# Install Python 3.11 in a Conda venv
-
 USER root
 RUN mkdir -p /venvs && chown -R $USER:$USER /venvs
 USER $USER
@@ -150,13 +147,23 @@ USER root
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb && \
     dpkg -i cuda-keyring_1.1-1_all.deb && \
     apt-get update && \
-    apt-get install -y cuda-cudart-12-4 \
-    cuda-nvrtc-12-4 \
-    libcublas-12-4 \
-    libcusolver-12-4 \
-    libcusparse-12-4 \
-    libcurand-12-4 && \
-    apt-get install -y cuda-nvcc-12-4
+    # apt-get install -y cuda-cudart-12-4 \
+    # cuda-nvrtc-12-4 \
+    # libcublas-12-4 \
+    # libcusolver-12-4 \
+    # libcusparse-12-4 \
+    # libcurand-12-4 && \
+    # apt-get install -y cuda-nvcc-12-4
+    apt-get install -y cuda-cudart-12-4=12.4.127-1 \
+    cuda-cudart-dev-12-4=12.4.127-1 \
+    cuda-nvrtc-12-4=12.4.127-1 \
+    libcublas-12-4=12.4.5.8-1 \
+    libcurand-12-4=10.3.5.147-1 \
+    libcusolver-12-4=11.6.1.9-1 \
+    libcusparse-12-4=12.3.1.170-1 && \
+    apt-get install -y cuda-nvcc-12-4=12.4.131-1
+
+
 
 USER $USER
 WORKDIR /home/$USER
