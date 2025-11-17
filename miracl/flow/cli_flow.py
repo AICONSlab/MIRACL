@@ -6,8 +6,15 @@ import sys
 from miracl.flow import miracl_workflow_ace_interface
 from miracl.flow.miracl_workflow_ace_parser import ACEWorkflowParser
 from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
-# from miracl.flow.mapl3 import mapl3_workflow_main
-# from miracl.flow.mapl3 import mapl3_workflow_cli_parser
+
+# MAPL3
+from miracl.system.registry.registry_loader import load_modules_from_yaml
+from miracl.system.datamodels.to_argparse_class_test import MiraclCLIBuilder
+from miracl.system.datamodels.miraclobj_enums import ModuleType
+from miracl.system.registry import run_mapl3_workflow
+from miracl.system.registry.mapl3_cli_parser_description import (
+    MAPL3_CLI_PARSER_DESCRIPTION,
+)
 
 
 def run_reg_clar(parser, args):
@@ -157,9 +164,9 @@ def run_ace(parser, args):
         miracl_workflow_ace_interface.main(args)
 
 
-# def run_mapl3_workflow(parser, args):
-#     sys.argv = sys.argv[2:]
-#     mapl3_workflow_main.main()
+def run_mapl3_workflow_cli(parser, args):
+    sys.argv = sys.argv[2:]
+    run_mapl3_workflow.main()
 
 
 def get_parser():
@@ -293,19 +300,27 @@ def get_parser():
     )
     parser_ace.set_defaults(func=run_ace)
 
-    # # MAPL3
-    # mapl3_workflow_parser_class = mapl3_workflow_cli_parser.Mapl3WorkflowParser()
-    # mapl3_workflow_parsefn = mapl3_workflow_parser_class.parsefn()
-    # parser_mapl3_workflow = subparsers.add_parser(
-    #     "mapl3",
-    #     parents=[mapl3_workflow_parsefn],
-    #     add_help=False,
-    #     usage=mapl3_workflow_parsefn.usage,
-    #     help="mapping axonal projection in light sheet microscopy in 3d",
-    # )
-    #
-    # parser_mapl3_workflow.set_defaults(func=run_mapl3_workflow)
-    #
+    # MAPL3
+    mapl3_registry = load_modules_from_yaml(
+        "/code/miracl/system/registry/configs/modules.yaml"
+    )
+    mapl3_builder = MiraclCLIBuilder(
+        registry=mapl3_registry,
+    )
+    mapl3_parser = mapl3_builder.build_parser()
+
+    parser_mapl3_workflow = subparsers.add_parser(
+        "mapl3",
+        parents=[mapl3_parser],
+        add_help=False,
+        usage=mapl3_parser.usage,
+        description=MAPL3_CLI_PARSER_DESCRIPTION,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        help="mapping axonal projection in light sheet microscopy in 3d",
+    )
+
+    parser_mapl3_workflow.set_defaults(func=run_mapl3_workflow_cli)
+
     return parser
 
 

@@ -1,6 +1,9 @@
 from miracl.system.miracl_utilfns.utilfns_module_helpers import (
     move_to_new_folder_and_rename,
 )
+from miracl.system.registry.mapl3_cli_parser_description import (
+    MAPL3_CLI_PARSER_DESCRIPTION,
+)
 from miracl.system.registry.registry_loader import load_modules_from_yaml
 from miracl.system.datamodels.to_argparse_class_test import MiraclCLIBuilder
 from miracl.system.datamodels.miraclobj_enums import ModuleType
@@ -19,7 +22,10 @@ from pathlib import Path
 def main():
     reg = load_modules_from_yaml("/code/miracl/system/registry/configs/modules.yaml")
 
-    cli_builder = MiraclCLIBuilder(reg)
+    cli_builder = MiraclCLIBuilder(
+        registry=reg,
+        description=MAPL3_CLI_PARSER_DESCRIPTION,
+    )
     parser = cli_builder.build_parser()
     args, parsed_objs = cli_builder.parse()
 
