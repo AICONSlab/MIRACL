@@ -26,7 +26,7 @@ class MiraclCLIBuilder:
         groups_cache: Cache for argparse argument groups to avoid duplicates.
     """
 
-    def __init__(self, registry):
+    def __init__(self, registry, description: Optional[str] = None):
         """
         Initialize the CLI builder with a registry containing MiraclObj
         class definitions and module type metadata.
@@ -35,7 +35,11 @@ class MiraclCLIBuilder:
             registry: Object providing access to registered MiraclObj info.
         """
         self.registry = registry
-        self.parser = argparse.ArgumentParser(description="My CLI")
+        default_desc = "MIRACL CLI"
+        self.parser = argparse.ArgumentParser(
+            description=description or default_desc,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
         self.groups_cache = {}
 
     def build_parser(self, parser: Optional[argparse.ArgumentParser] = None):
