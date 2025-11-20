@@ -266,6 +266,26 @@ class WorkflowSkips:
         version_added="2.4.0",
     )
 
+    workflow_plot_warped_data_skip: MiraclObj = MiraclObj(
+        name="workflow_plot_warped_data_skip",
+        tags=["mapl3", "flow", "mapl3_flow"],
+        cli_s_flag="spwd",
+        cli_l_flag="skip_plot_warped_data",
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mws_spwd",
+                "cli_l_flag": "skip_plot_warped_data",
+                "cli_group": CliGroup.MAPL3_SKIPS,
+            }
+        },
+        cli_obj_type=ArgumentType.CUSTOM_BOOL,
+        cli_help="skip heatmap plot module",
+        obj_default=False,
+        module="mapl3",
+        module_group="flow",
+        version_added="2.4.0",
+    )
+
     workflow_feat_extract_normalization_skip: MiraclObj = MiraclObj(
         name="workflow_feat_extract_normalization_skip",
         tags=["mapl3", "flow", "mapl3_flow"],

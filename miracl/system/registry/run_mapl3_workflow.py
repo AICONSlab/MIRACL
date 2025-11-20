@@ -387,21 +387,52 @@ def main():
         "mapl3_skel",
         "mapl3_norm",
     ]:
-        command = [
-            "python",
-            "/code/miracl/seg/mapl3/mapl3_plot_warped_data.py",
-            "-p",
-            f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
-            "-v",
-            str(25),
-            "-gs",
-            "2",
-            "-d",
-            heatmaps_path,
-            "-o",
-            f"heatmap_{step}",
-        ]
-        _ = subprocess.run(command)
+        # command = [
+        #     "python",
+        #     "/code/miracl/seg/mapl3/mapl3_plot_warped_data.py",
+        #     "-p",
+        #     f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
+        #     "-v",
+        #     str(25),
+        #     "-gs",
+        #     "2",
+        #     "-d",
+        #     heatmaps_path,
+        #     "-o",
+        #     f"heatmap_{step}",
+        # ]
+        # _ = subprocess.run(command)
+        # print_delimiter()
+        reg.run(
+            "plot_warped_data",
+            overrides={
+                reg.get_override_flag(
+                    "plot_warped_data",
+                    "pvalue",
+                    manual_module_type=ModuleType.MODULE,
+                ): f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
+                reg.get_override_flag(
+                    "plot_warped_data",
+                    "vox",
+                    manual_module_type=ModuleType.MODULE,
+                ): str(25),
+                reg.get_override_flag(
+                    "plot_warped_data",
+                    "sigma",
+                    manual_module_type=ModuleType.MODULE,
+                ): 2,
+                reg.get_override_flag(
+                    "plot_warped_data",
+                    "dir_outfile",
+                    manual_module_type=ModuleType.MODULE,
+                ): heatmaps_path,
+                reg.get_override_flag(
+                    "plot_warped_data",
+                    "outfile",
+                    manual_module_type=ModuleType.MODULE,
+                ): f"heatmap_{step}",
+            },
+        )
         print_delimiter()
 
     for step_name, vals in {

@@ -85,10 +85,18 @@ def parsefn() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "-p", "--pvalue", type=str, help="path to p value nii file", default=None
+        "-p",
+        "--pvalue",
+        type=str,
+        help="path to p value nii file",
+        default=None,
     )
     parser.add_argument(
-        "-atl", "--atlas_dir", type=str, help="path to atlas dir", default=None
+        "-atl",
+        "--atlas_dir",
+        type=str,
+        help="path to atlas dir",
+        default=None,
     )
     parser.add_argument(
         "-v",
@@ -99,7 +107,11 @@ def parsefn() -> argparse.ArgumentParser:
         default=None,
     )
     parser.add_argument(
-        "-gs", "--sigma", type=int, help="Gaussian smoothing sigma", default=4
+        "-gs",
+        "--sigma",
+        type=int,
+        help="Gaussian smoothing sigma",
+        default=4,
     )
     parser.add_argument(
         "-cp",
@@ -119,25 +131,25 @@ def parsefn() -> argparse.ArgumentParser:
         "-s",
         "--sagittal",
         nargs=5,
-        type=int,
+        type=float,
         help="slicing across sagittal axis. \n 5 Arguments: start_slice slice_interval number_of_slices number_of_rows number_of_columns",
-        default=[nan],
+        default=[float("nan")],
     )
     parser.add_argument(
         "-c",
         "--coronal",
         nargs=5,
-        type=int,
+        type=float,
         help="slicing across coronal axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns",
-        default=[nan],
+        default=[float("nan")],
     )
     parser.add_argument(
         "-a",
         "--axial",
         nargs=5,
-        type=int,
+        type=float,
         help="slicing across axial axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns",
-        default=[nan],
+        default=[float("nan")],
     )
     parser.add_argument(
         "-f",
@@ -163,9 +175,18 @@ def parsefn() -> argparse.ArgumentParser:
         default="cluster_wise_pvalue",
     )
     parser.add_argument(
-        "-e", "--extension", type=str, help="heatmap figure extension", default="tiff"
+        "-e",
+        "--extension",
+        type=str,
+        help="heatmap figure extension",
+        default="tiff",
     )
-    parser.add_argument("--dpi", type=int, help="dots per inch", default=500)
+    parser.add_argument(
+        "--dpi",
+        type=int,
+        help="dots per inch",
+        default=500,
+    )
     parser.add_argument(
         "-m",
         "--hemi",

@@ -46,6 +46,10 @@ class CliGroup(Enum):
         "feature extraction",
         "Args for feature extraction",
     )
+    MAPL3_PLOT_WARPED_DATA = (
+        "plot warped data",
+        "Args for heatmap plot",
+    )
     MAPL3_SKIPS = (
         "workflow skips",
         "set to True to skip a particular workflow - all relevant args still need to be provided!",

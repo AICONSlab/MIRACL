@@ -160,6 +160,25 @@ warping:
     "--mrwca_vox_res": "-v"
   execute: true
 
+plot_warped_data:
+  script: "python /code/miracl/seg/mapl3/mapl3_plot_warped_data.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_plot_warped_data.PlotWarpedData"
+  module_type: "FLOW_MAPL3"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map:
+    "--mpwd_atlas_dir": "--atlas_dir"
+    "--mpwd_colourmap_pos": "--colourmap_pos"
+    "--mpwd_colourmap_neg": "--colourmap_neg"
+    "--mpwd_sagittal": "--sagittal"
+    "--mpwd_coronal": "--coronal"
+    "--mpwd_axial": "--axial"
+    "--mpwd_figure_dim": "--figure_dim"
+    "--mpwd_extension": "--extension"
+    "--mpwd_dpi": "--dpi"
+    "--mpwd_hemi": "--hemi"
+    "--mpwd_side": "--side"
+  execute: false
+
 feat_extract:
   script: "python /code/miracl/seg/mapl3/mapl3_feat_extract.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_feat_extract.FeatExtract"
