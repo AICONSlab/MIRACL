@@ -1,5 +1,11 @@
 import yaml
 import importlib  # For dynamically importing modules by name
+
+# from .miracl.api.ext import (
+#     MiraclRegistry,
+#     RegistryTemplate,
+# )
+#
 from miracl.system.registry.registry import MiraclRegistry, RegistryTemplate
 from miracl.system.datamodels.miraclobj_enums import ModuleType
 from miracl.system.datamodels.miraclobj_serializer import (
