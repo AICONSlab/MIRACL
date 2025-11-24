@@ -120,7 +120,9 @@ class MiraclObj(BaseModel):
                 )
             MiraclObj._instances[key] = self
 
+    # ---------------------------------------------------------------------------------
     # REQUIRED FIELDS
+    # ---------------------------------------------------------------------------------
     id: UUID = Field(
         # ...,
         default_factory=uuid4,
@@ -141,7 +143,9 @@ class MiraclObj(BaseModel):
         example="--help",
     )
 
+    # ---------------------------------------------------------------------------------
     # GENERAL
+    # ---------------------------------------------------------------------------------
     content: Optional[Any] = Field(
         None, description="Content associated with flag variable input"
     )
@@ -217,7 +221,9 @@ class MiraclObj(BaseModel):
         example=["4ca6271e-c351-4230-bd20-b0f606101c42"],
     )
 
+    # ---------------------------------------------------------------------------------
     # CLI
+    # ---------------------------------------------------------------------------------
     cli_s_flag: Optional[str] = Field(
         None,
         description="Short flag for cli arg",
@@ -275,7 +281,9 @@ class MiraclObj(BaseModel):
         example=CliGroup.CONV_TIFF_NII,
     )
 
+    # ---------------------------------------------------------------------------------
     # GUI
+    # ---------------------------------------------------------------------------------
     gui_choice_override: Optional[GuiChoiceOverrideConfig] = Field(
         None,
         description="Strings to override the choice labels in the GUI with",
@@ -334,7 +342,9 @@ class MiraclObj(BaseModel):
         },
     )
 
+    # ---------------------------------------------------------------------------------
     # MIRACL
+    # ---------------------------------------------------------------------------------
     module: str = Field(
         ...,
         description="Module or component this argument belongs to",
