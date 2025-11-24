@@ -29,8 +29,6 @@ from .registry import (
     registry,
     generic_runner,
     load_modules_from_yaml,
-    import_from_string,
-    parse_module_type,
 )
 
 from .parser_descriptions import (
@@ -67,8 +65,6 @@ __all__ = [
     "registry",
     "generic_runner",
     "load_modules_from_yaml",
-    "import_from_string",
-    "parse_module_type",
     # parser_descriptions
     "MAPL3_CLI_PARSER_DESCRIPTION",
 ]

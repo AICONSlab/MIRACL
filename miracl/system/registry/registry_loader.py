@@ -14,13 +14,13 @@ from miracl.system.datamodels.miraclobj_serializer import (
 
 
 # Return attribute of dotted file path dynamically
-def import_from_string(path: str):
+def _import_from_string(path: str):
     module_path, attr = path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     return getattr(module, attr)
 
 
-def parse_module_type(module_type_str: str, module_name: str) -> ModuleType:
+def _parse_module_type(module_type_str: str, module_name: str) -> ModuleType:
     """
     Convert a YAML string to a ModuleType enum, validating the input.
 
@@ -84,10 +84,10 @@ def load_modules_from_yaml(path: str) -> MiraclRegistry:
     reg = MiraclRegistry()
 
     for name, cfg in config.items():
-        obj_class = import_from_string(cfg["obj_class"])
-        runner_func = import_from_string(cfg["runner"])
+        obj_class = _import_from_string(cfg["obj_class"])
+        runner_func = _import_from_string(cfg["runner"])
         # module_type = getattr(ModuleType, cfg["module_type"])
-        module_type = parse_module_type(cfg["module_type"], module_name=name)
+        module_type = _parse_module_type(cfg["module_type"], module_name=name)
         execute = cfg.get("execute", False)
 
         yaml_flag_map = cfg.get("flag_map", {})
