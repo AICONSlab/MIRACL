@@ -19,18 +19,12 @@ from pathlib import Path
 # FIX: None of the overrides should be declared imperatively
 def main():
     reg = load_modules_from_yaml("/code/miracl/system/registry/configs/modules.yaml")
-
-    cli_builder = MiraclCLIBuilder(
+    MiraclCLIBuilder(
         registry=reg,
         description=MAPL3_CLI_PARSER_DESCRIPTION,
-    )
-    parser = cli_builder.build_parser()
-    args, parsed_objs = cli_builder.parse()
+    ).parse_from_registry()
 
-    reg.list_modules()
-
-    # info = reg.list_modules(verbose=False)
-    # print(info["preprocessing_parallel"]["script"])
+    _ = reg.list_modules()
 
     def print_delimiter():
         print("\n######################################################\n")
@@ -137,16 +131,6 @@ def main():
                     "metadata_file",
                     manual_module_type=ModuleType.MODULE,
                 ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches/metadata.json",
-                # reg.get_override_flag(
-                #     "preprocessing_parallel",
-                #     "tissue_percentage_threshold",
-                #     manual_module_type=ModuleType.MODULE,
-                # ): 20,
-                # reg.get_override_flag(
-                #     "preprocessing_parallel",
-                #     "intensity_threshold",
-                #     manual_module_type=ModuleType.MODULE,
-                # ): 1,
             },
         )
     print_delimiter()
@@ -179,11 +163,6 @@ def main():
                     "model_path",
                     manual_module_type=ModuleType.MODULE,
                 ): "/code/miracl/seg/mapl3/models/best_metric_model.pth",
-                # reg.get_override_flag(
-                #     "inference",
-                #     "metadata_file",
-                #     manual_module_type=ModuleType.MODULE,
-                # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches/metadata.json",
             },
         )
     print_delimiter()
@@ -363,7 +342,6 @@ def main():
                     "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/voxelized_results.nii.gz",
                     "-o": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/ort2std.txt",
                     "-s": vals["channel"],
-                    # "-l": f"average_template_{reg.get_override_value('warping', 'vox_res')}um.nii.gz",
                     "-l": "None",
                 },
             )
@@ -371,8 +349,6 @@ def main():
                 f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/warped_results"
             )
         print_delimiter()
-
-    # FIX: Must be added as a module!!!
 
     heatmaps_path = (
         Path(

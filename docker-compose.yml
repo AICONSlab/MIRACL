@@ -1,12 +1,17 @@
-version: "3.3"
 services:
   miracl:
-    image: mgoubran/miracl
+    image: miracl_mapl3_merge_img:latest
     tty: true
-    environment:
-      - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: miracl
+    container_name: miracl_mapl3_merge
+    shm_size: 219007mb
+    environment:
+      - DISPLAY
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    gpus: all
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+      - /home/josmann/git/MIRACL/MIRACL_MAPL3_merge/miracl:/code/miracl
+      - /data:/data

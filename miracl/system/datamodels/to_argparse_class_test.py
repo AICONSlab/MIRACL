@@ -103,8 +103,11 @@ class MiraclCLIBuilder:
 
         return self.parser
 
+    # def parse(
+    #     self, argv=None, skip_deserialize: bool = False
+    # ) -> Tuple[argparse.Namespace, Optional[List[MiraclObj]]]:
     def parse(
-        self, argv=None, skip_deserialize: bool = False
+        self, argv: Optional[List[str]] = None, skip_deserialize: bool = False
     ) -> Tuple[argparse.Namespace, Optional[List[MiraclObj]]]:
         """
         Parse CLI arguments from argv and optionally deserialize parsed values
@@ -148,3 +151,29 @@ class MiraclCLIBuilder:
             args, included_objs_list
         )
         return args, parsed_miracl_objs
+
+    def parse_from_registry(
+        self, argv: Optional[List[str]] = None, skip_deserialize: bool = False
+    ) -> None:
+        """
+        Build the parser from the registry and parse arguments in one call.
+
+        Args:
+            argv (Optional[list]): List of CLI arguments to parse. Defaults to None (sys.argv).
+            skip_deserialize (bool): Skip deserializing into MiraclObj instances.
+
+        Returns:
+            None: Use build_parser() and parse() manually if args or parsed_obj are required.
+
+        Example:
+            cli_builder = MiraclCLIBuilder(
+                registry=reg,
+                description=CUSTOM_DESCRIPTION,
+            )
+            parser = cli_builder.build_parser()
+            args, parsed_objs = cli_builder.parse()
+        """
+        _ = self.build_parser()
+        _ = self.parse(argv=argv, skip_deserialize=skip_deserialize)
+
+        return None
