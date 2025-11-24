@@ -1,5 +1,4 @@
 from miracl.api.core import (
-    ModuleType,
     create_ort2std_file,
     move_warping_reg_final_contents,
     move_to_new_folder_and_rename,
@@ -9,10 +8,11 @@ from miracl.api.ext import (
     load_modules_from_yaml,
     MAPL3_CLI_PARSER_DESCRIPTION,
 )
+from miracl.api.enums import (
+    ModuleType,
+)
 
-# from miracl.system.registry.mapl3_cli_parser_description import (
-#     MAPL3_CLI_PARSER_DESCRIPTION,
-# )
+# from miracl.system.datamodels.miraclobj_enums import ModuleType
 from pathlib import Path
 
 

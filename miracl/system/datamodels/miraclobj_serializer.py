@@ -2,6 +2,8 @@ from typing import List, Tuple, Union, Dict, Type, Callable, Sequence
 from argparse import Namespace
 from miracl.api.core import (
     MiraclObj,
+)
+from miracl.api.enums import (
     ModuleType,
 )
 
