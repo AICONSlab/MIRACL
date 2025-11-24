@@ -5,6 +5,7 @@ from .utilities import (
     str2bool,
     none_or_float,
     none_or_str,
+    parser_true_or_false,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "str2bool",
     "none_or_float",
     "none_or_str",
+    "parser_true_or_false",
 ]
