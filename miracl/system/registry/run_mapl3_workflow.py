@@ -1,20 +1,18 @@
-from miracl.system.miracl_utilfns.utilfns_module_helpers import (
-    move_to_new_folder_and_rename,
-)
-from miracl.system.registry.mapl3_cli_parser_description import (
-    MAPL3_CLI_PARSER_DESCRIPTION,
-)
-from miracl.system.registry.registry_loader import load_modules_from_yaml
-from miracl.system.datamodels.to_argparse_class_test import MiraclCLIBuilder
-from miracl.system.datamodels.miraclobj_enums import ModuleType
-
-# FIX: These should not have to be imported. This should be handled declaratively.
-from miracl.system.miracl_utilfns import (
+from miracl.api.core import (
+    ModuleType,
     create_ort2std_file,
     move_warping_reg_final_contents,
     move_to_new_folder_and_rename,
 )
-import subprocess
+from miracl.api.ext import (
+    MiraclCLIBuilder,
+    load_modules_from_yaml,
+    MAPL3_CLI_PARSER_DESCRIPTION,
+)
+
+# from miracl.system.registry.mapl3_cli_parser_description import (
+#     MAPL3_CLI_PARSER_DESCRIPTION,
+# )
 from pathlib import Path
 
 
@@ -387,22 +385,6 @@ def main():
         "mapl3_skel",
         "mapl3_norm",
     ]:
-        # command = [
-        #     "python",
-        #     "/code/miracl/seg/mapl3/mapl3_plot_warped_data.py",
-        #     "-p",
-        #     f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
-        #     "-v",
-        #     str(25),
-        #     "-gs",
-        #     "2",
-        #     "-d",
-        #     heatmaps_path,
-        #     "-o",
-        #     f"heatmap_{step}",
-        # ]
-        # _ = subprocess.run(command)
-        # print_delimiter()
         reg.run(
             "plot_warped_data",
             overrides={
