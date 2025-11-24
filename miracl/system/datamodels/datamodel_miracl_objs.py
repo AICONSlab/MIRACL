@@ -94,6 +94,46 @@ class LineEditConfig(BaseModel):
 
 
 class MiraclObj(BaseModel):
+    # ----------------------------------------------------------------
+    # Singleton registry for all MiraclObj instances
+    #
+    # _instances:
+    #   - Key: (module_name, object_name)
+    #   - Value: the MiraclObj instance
+    #   - Ensures that there is only one instance per module/name pair.
+    #   - ClassVar ensures Pydantic ignores this field for validation.
+    #   - Optionally can be WeakValueDictionary if GC is desired.
+    #
+    # _lock:
+    #   - A threading.Lock used to synchronize access to _instances.
+    #   - Prevents race conditions when multiple threads create objects
+    #     at the same time.
+    # ----------------------------------------------------------------
+    _instances: ClassVar[Dict[Tuple[str, str], "MiraclObj"]] = {}
+    _lock: ClassVar[threading.Lock] = threading.Lock()
+
+    def model_post_init(
+        self, __context
+    ):  # __context is required by Pydantic v2 but not used in this method
+        """
+        Called by Pydantic after object initialization.
+        Registers the instance in the singleton registry.
+
+        Steps:
+        1. Construct key = (module, name)
+        2. Acquire lock to ensure thread-safety
+        3. Check if key already exists:
+            - If yes: raise RuntimeError (duplicate object)
+            - If no: register instance in _instances
+        """
+        key = (self.module, self.name)
+        with MiraclObj._lock:  # Acquire lock
+            if key in MiraclObj._instances:
+                raise RuntimeError(
+                    f"Duplicate MiraclObj for module='{self.module}', name='{self.name}'"
+                )
+            MiraclObj._instances[key] = self
+
     # REQUIRED FIELDS
     id: UUID = Field(
         # ...,
