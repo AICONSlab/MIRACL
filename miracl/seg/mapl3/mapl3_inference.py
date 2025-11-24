@@ -49,7 +49,11 @@ import multiprocessing
 import concurrent
 import time
 from monai.networks.nets import UNETR
-from miracl.system.miracl_utilfns import str2bool, none_or_float, none_or_str
+from miracl.api.utils import (
+    str2bool,
+    none_or_float,
+    none_or_str,
+)
 
 # Create the parser
 my_parser = argparse.ArgumentParser(description="Working directory")
