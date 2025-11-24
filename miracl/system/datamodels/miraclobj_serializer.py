@@ -1,9 +1,10 @@
 from typing import List, Tuple, Union, Dict, Type, Callable, Sequence
 from argparse import Namespace
+from miracl.api.core import (
+    MiraclObj,
+    ModuleType,
+)
 
-# FIX: Import ModuleType from centralized ENUMS file
-from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
-from miracl.system.datamodels.miraclobj_enums import ModuleType
 
 """
 Serializer utilities for Miracl CLI argument handling.
@@ -90,7 +91,7 @@ def deserialize_parsed_args_to_objects(
 
 
 def build_flag_map_from_class(
-    obj_class: Type,
+    obj_class: Type[MiraclObj],
     module_type: ModuleType,
 ) -> Dict[str, object]:
     """
@@ -292,7 +293,7 @@ def miraclobj_to_argparse(
 
 
 def build_workflow_to_module_flag_map(
-    obj_class: Type,
+    obj_class: Type[MiraclObj],
     module_type: ModuleType,
 ) -> Dict[str, str]:
     """
@@ -333,14 +334,12 @@ def build_workflow_to_module_flag_map(
             # Enforce strict one-to-one mapping
             if len(long_flow_flag) != 1:
                 raise ValueError(
-                    f"Expected exactly one long workflow flag for '{attr_value.name}', "
-                    f"found {len(long_flow_flag)}: {long_flow_flag}"
+                    f"Expected exactly one long workflow flag for '{attr_value.name}', found {len(long_flow_flag)}: {long_flow_flag}"
                 )
 
             if len(long_module_flag) != 1:
                 raise ValueError(
-                    f"Expected exactly one long module flag for '{attr_value.name}', "
-                    f"found {len(long_module_flag)}: {long_module_flag}"
+                    f"Expected exactly one long module flag for '{attr_value.name}', found {len(long_module_flag)}: {long_module_flag}"
                 )
 
             flow_module_flag_map[long_flow_flag[0]] = long_module_flag[0]
