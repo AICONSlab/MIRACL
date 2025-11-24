@@ -107,7 +107,11 @@ def load_modules_from_yaml(path: str) -> MiraclRegistry:
             flag_map = yaml_flag_map
 
         def wrapped_runner(
-            script, mapping, _runner=runner_func, _flag_map=flag_map, _execute=execute
+            script,
+            mapping,
+            _runner=runner_func,
+            _flag_map=flag_map,
+            _execute=execute,
         ):
             return _runner(script, mapping, flag_map=_flag_map, execute=_execute)
 

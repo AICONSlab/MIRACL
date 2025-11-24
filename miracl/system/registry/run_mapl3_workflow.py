@@ -338,7 +338,6 @@ def main():
                 "warping",
                 overrides={
                     "-r": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/clar_allen_reg",
-                    # "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/conv_final",
                     "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/voxelized_results.nii.gz",
                     "-o": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/ort2std.txt",
                     "-s": vals["channel"],
