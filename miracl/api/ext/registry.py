@@ -1,5 +1,6 @@
-from miracl.system.registry import (
-    registry,
+from miracl.system.registry.registry import (
+    MiraclRegistry,
+    RegistryTemplate,
 )
 from miracl.system.registry.runners.generic_runner import (
     generic_runner,
@@ -9,7 +10,8 @@ from miracl.system.registry.registry_loader import (
 )
 
 __all__ = [
-    "registry",
+    "MiraclRegistry",
+    "RegistryTemplate",
     "generic_runner",
     "load_modules_from_yaml",
 ]

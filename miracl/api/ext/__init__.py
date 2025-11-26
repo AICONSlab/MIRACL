@@ -26,7 +26,8 @@ from .objs import (
     Voxelization,
 )
 from .registry import (
-    registry,
+    MiraclRegistry,
+    RegistryTemplate,
     generic_runner,
     load_modules_from_yaml,
 )
@@ -62,7 +63,8 @@ __all__ = [
     "Skeletonization",
     "Voxelization",
     # registry
-    "registry",
+    "MiraclRegistry",
+    "RegistryTemplate",
     "generic_runner",
     "load_modules_from_yaml",
     # parser_descriptions
