@@ -5,9 +5,10 @@ from miracl.api.utils import (
 )
 from miracl.api.ext import (
     MiraclCLIBuilder,
-    load_modules_from_yaml,
+    # load_modules_from_yaml,
     MAPL3_CLI_PARSER_DESCRIPTION,
 )
+from miracl.system.registry.yaml_loader import load_modules_from_yaml
 from miracl.api.enums import (
     ModuleType,
 )
@@ -367,7 +368,7 @@ def main():
                     "plot_warped_data",
                     "pvalue",
                     manual_module_type=ModuleType.MODULE,
-                ): f"/data3/projects/josmann/mapl3/preprocessed/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
+                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/warped_results/voxelized_results_{step}_channel_allen_space.nii.gz",
                 reg.get_override_flag(
                     "plot_warped_data",
                     "vox",
