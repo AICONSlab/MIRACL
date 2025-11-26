@@ -512,6 +512,6 @@ class MiraclObj(BaseModel):
     ################
 
     class Config:
-        extra = "forbid"  # Prevent additional attributes from being added
+        extra = "forbid"  # Prevents additional attributes from being added and catches spelling mistakes
         validate_assignment = True
         validate_default = True
