@@ -110,7 +110,8 @@ fi
 
 # Init atlas dir
 
-atlasdir=$(dirname "${MIRACL_HOME}")/atlases
+atlasdir="/home/slollino/git/MIRACL_clarity_rat_registration/miracl/atlases"
+printf "\n Using atlas directory: %s \n" "${atlasdir}"
 
 # GUI for CLARITY input imgs
 
@@ -376,8 +377,17 @@ if [ "${atlas}" == "allen" ]; then
 
 elif [ "${atlas}" == "waxholm" ]; then
   vox=39
-  lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
 
+  if [[ -z "${side}" || "${side}" == "None" ]]; then
+    lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
+  elif [[ "${side}" == "lh" ]]; then
+    lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
+  elif [[ "${side}" == "rh" ]]; then
+    lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi.nii.gz
+  else
+    printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
+    exit 1
+  fi
 else
   printf "ERROR: < -a => (atlas) > Only accepted atlases (inputs) are: 'allen' or 'waxholm'"
   exit 1
@@ -542,17 +552,19 @@ function getbrainmask() {
   #    ifdsntexistrun ${biasin} "Bias correcting input" N4BiasFieldCorrection -i ${median} -o ${biasin} -s 2
 
   # Otsu threshold
-  ifdsntexistrun "${otsumaskthr}" "Otsu thresholding" ThresholdImage 3 "${biasin}" "${otsumaskthr}" Otsu 6
+  # ifdsntexistrun "${otsumaskthr}" "Otsu thresholding" ThresholdImage 3 "${biasin}" "${otsumaskthr}" Otsu 2
 
-  # create mask
-  #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
-  # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
-  ifdsntexistrun "${otsumask}" "Thresholding mask" ThresholdImage 3 "${otsumaskthr}" "${otsumask}" 1 6
+  # # create mask
+  # #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
+  # # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
+  # ifdsntexistrun "${otsumask}" "Thresholding mask" ThresholdImage 3 "${otsumaskthr}" "${otsumask}" 1 2
+  
 
-  # get masked
-  #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
-  ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
+  # # get masked
+  # #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
+  # ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
 
+  ifdsntexistrun "${otsumask}" "Binary Otsu mask (Python)" python3 "${MIRACL_HOME}/reg/make_rat_brain_otsu_mask.py" "${biasin}" "${otsumask}" "${otsu}"
 }
 # N4 bias correct
 
@@ -589,7 +601,7 @@ function padimage() {
   local biasclar=$1
   local padclar=$2
 
-  ifdsntexistrun "${padclar}" "Padding image with 15% of voxels" c3d "${biasclar}" -pad 15% 15% 0 -o "${padclar}"
+  ifdsntexistrun "${padclar}" "Padding image with 30% of voxels" c3d "${biasclar}" -pad 30% 30% 0 -o "${padclar}"
 
 }
 
@@ -1174,7 +1186,17 @@ function main() {
         atlasref=${atlasdir}/ara/template/average_template_25um${side}.nii.gz
       fi
     elif [[ "${atlas}" == "waxholm" ]]; then
-      atlasref=${atlasdir}/waxholm/template/WHS_SD_rat_T2star_v1.01.nii.gz
+      if [[ -z "${side}" || "${side}" == "None" ]]; then
+        atlasref=${atlasdir}/waxholm/template/WHS_SD_rat_T2star_v1.01.nii.gz
+      elif [[ "${side}" == "_left" ]]; then
+        atlasref=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_T2star_v1_01/WHS_SD_rat_T2star_v1_01_left_hemi.nii.gz
+      elif [[ "${side}" == "_right" ]]; then
+        atlasref=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_T2star_v1_01/WHS_SD_rat_T2star_v1_01_right_hemi.nii.gz
+      else
+        printf "side: %s\n" "${side}"
+        printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
+        exit 1
+      fi
     fi
   else
     # custom input Allen atlas
