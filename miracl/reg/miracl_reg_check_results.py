@@ -135,7 +135,7 @@ def main(args):
     parser = parsefn()
     indir, viz, space, hemi = parse_inputs(parser, args)
 
-    snaplut = os.path.join(ATLAS_DIR, "ara/ara_snaplabels_lut.txt")
+    snaplut = "/home/slollino/git/MIRACL_clarity_rat_registration/miracl/atlases/waxholm/annotation/WHS_SD_rat_atlas_v4.label"
 
     if viz == "itk":
         # check for itk
@@ -150,8 +150,8 @@ def main(args):
             print("\n Viewing downsampled CLARITY volume with registered Allen labels using itkSNAP ...\n")
 
             subprocess.check_call(
-                'itksnap -g %s/clar_downsample_res??um.nii.gz -s %s/annotation_hemi_%s_??um_clar_downsample.nii.gz -l %s' % (
-                    indir, indir, hemi, snaplut), shell=True,
+                'itksnap -g %s/clar_downsample_res39um.nii.gz -s %s/WHS_SD_rat_atlas_v4_left_hemi_clar_downsample.nii.gz -l %s' % (
+                    indir, indir, snaplut), shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
 
