@@ -205,7 +205,7 @@ def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order):
 
     hres_tiff = scipy.ndimage.interpolation.zoom(nii, upsample_ratio, order=spline_order)
 
-    tiff.imsave(out_tiff, hrestiff)
+    tiff.imsave(out_tiff, hres_tiff)
 
 
 # ---------
