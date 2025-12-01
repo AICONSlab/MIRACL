@@ -558,13 +558,18 @@ function getbrainmask() {
   # #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
   # # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
   # ifdsntexistrun "${otsumask}" "Thresholding mask" ThresholdImage 3 "${otsumaskthr}" "${otsumask}" 1 2
-  
 
   # # get masked
   # #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
   # ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
 
-  ifdsntexistrun "${otsumask}" "Binary Otsu mask (Python)" python3 "${MIRACL_HOME}/reg/make_rat_brain_otsu_mask.py" "${biasin}" "${otsumask}" "${otsu}"
+  ifdsntexistrun "${otsumask}" "Binary Otsu mask (Python)" python3 "${MIRACL_HOME}/reg/miracl_reg_clar-otsu_utility.py" \
+    --input "${biasin}" \
+    --mask "${otsumask}" \
+    --masked "${otsu}" \
+    --inside 1 \
+    --outside 0 \
+    --bins 200
 }
 # N4 bias correct
 
