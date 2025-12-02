@@ -62,11 +62,11 @@ function usage() {
 
     Waxholm atlas related arguments (the default values of 1 and 0 will create a
         binary mask using the Otsu method):
-        I.  The pixel value assigned to voxels inside the selected region - that is, 
+        I.  the pixel value assigned to voxels inside the selected region - that is, 
             the class below the Otsu threshold unless reversed (default: 1)
-        O.  The pixel value assigned to voxels outside the selected region - above the 
+        O.  the pixel value assigned to voxels outside the selected region - above the 
             Otsu threshold unless reversed (default: 0)
-        B.  Number of bins used when computing the intensity histogram on which Otsu’s 
+        B.  number of bins used when computing the intensity histogram on which Otsu’s 
             threshold is computed.
 
 	----------
@@ -118,7 +118,8 @@ fi
 
 # Init atlas dir
 
-atlasdir="/home/slollino/git/MIRACL_clarity_rat_registration/miracl/atlases"
+atlasdir=$(dirname "${MIRACL_HOME}")/atlases
+# atlasdir="/home/slollino/git/MIRACL_clarity_rat_registration/miracl/atlases"
 printf "\n Using atlas directory: %s \n" "${atlasdir}"
 
 # GUI for CLARITY input imgs
@@ -683,7 +684,11 @@ function padimage() {
   local biasclar=$1
   local padclar=$2
 
-  ifdsntexistrun "${padclar}" "Padding image with 30% of voxels" c3d "${biasclar}" -pad 30% 30% 0 -o "${padclar}"
+  if [[ "${atlas}" == "allen" ]]; then
+    ifdsntexistrun "${padclar}" "Padding image with 15% of voxels" c3d "${biasclar}" -pad 15% 15% 0 -o "${padclar}"
+  elif [[ "${atlas}" == "waxholm" ]]; then
+    ifdsntexistrun "${padclar}" "Padding image with 30% of voxels" c3d "${biasclar}" -pad 30% 30% 0 -o "${padclar}"
+  fi
 
 }
 
