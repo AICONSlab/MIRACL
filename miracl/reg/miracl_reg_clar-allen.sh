@@ -49,17 +49,25 @@ function usage() {
         w.  warp high-res clarity to atlas space (default: 0)
         n.  chan # for extracting single channel from multiple channel data (default: none)
         x.  chan prefix (string before channel number in file name). ex: C00 (default: none)
-
-    Allen atlas related arguments:
         m.  hemisphere mirror (default: combined)
             warp Allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels / Mirrored)
             accepted inputs are: <split> or <combined>
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
+
+    Allen atlas related arguments:
         v.  labels voxel size/Resolution in um (default: 10)
             accepted inputs are: 10, 25 or 50
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
 
+    Waxholm atlas related arguments (the default values of 1 and 0 will create a
+        binary mask using the Otsu method):
+        I.  The pixel value assigned to voxels inside the selected region - that is, 
+            the class below the Otsu threshold unless reversed (default: 1)
+        O.  The pixel value assigned to voxels outside the selected region - above the 
+            Otsu threshold unless reversed (default: 0)
+        B.  Number of bins used when computing the intensity histogram on which Otsu’s 
+            threshold is computed.
 
 	----------
 	Main Outputs
@@ -134,7 +142,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:" opt; do
+  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:" opt; do
 
     case "${opt}" in
 
@@ -200,6 +208,18 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
     x)
       cp="${OPTARG}"
+      ;;
+
+    I)
+      otsu_inside="${OPTARG}"
+      ;;
+
+    O)
+      otsu_outside="${OPTARG}"
+      ;;
+
+    B)
+      otsu_bins="${OPTARG}"
       ;;
 
     *)
@@ -467,8 +487,10 @@ printf "r: Output directory: %s\n" "${work_dir}"
 printf "o: Orientation code: %s\n" "${ort}"
 printf "a: Atlas: %s\n" "${atlas}"
 printf "m: Hemisphere: %s\n" "${hemi}"
-printf "v: Labels voxel size: %s\n" "${vox}"
-printf "b: Olfactory bulb included: %s\n" "${bulb}"
+if [[ "$atlas" == "allen" ]]; then
+  printf "v: Labels voxel size: %s\n" "${vox}"
+  printf "b: Olfactory bulb included: %s\n" "${bulb}"
+fi
 printf "s: Side: %s\n" "${side}"
 printf "t: Custom atlas: %s\n" "${cust_atlas}"
 printf "l: Atlas labels to warp: %s\n" "${lbls}"
@@ -477,6 +499,11 @@ printf "f: Save Mosaic figure: %s\n" "${savefig}"
 printf "w: Warp high-res clarity to atlas space: %s\n" "${warphres}"
 printf "n: Channel #: %s\n" "${cn}"
 printf "x: Channel prefix: %s\n" "${cp}"
+if [[ "$atlas" == "waxholm" ]]; then
+  printf "I: Otsu inside: %s\n" "${otsu_inside:-1}"
+  printf "O: Otsu outside: %s\n" "${otsu_outside:-0}"
+  printf "B: Otsu bins: %s\n" "${otsu_bins:-200}"
+fi
 printf "\n######################################################\n"
 
 # get time

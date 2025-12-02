@@ -18,7 +18,7 @@ def run_clar_allen(parser, args):
             )
         else:
             bash_args = (
-                "-i %s -r %s -o %s -a %s -m %s -v %s -l %s -f %s -p %s -t %s -w %s -b %s -s %s -c %s -n %s -x %s"
+                "-i %s -r %s -o %s -a %s -m %s -v %s -l %s -f %s -p %s -t %s -w %s -b %s -s %s -c %s -n %s -x %s -I %s -O %s -B %s"
                 % (
                     args["in_nii"],  # -i
                     args["reg_out"],  # -r
@@ -36,6 +36,9 @@ def run_clar_allen(parser, args):
                     args["clar_dir"],  # -c
                     args["cn"],  # -n
                     args["cp"],  # -x
+                    args["otsu_inside"],  # -I
+                    args["otsu_outside"],  # -O
+                    args["otsu_bins"],  # -B
                 )
             )
 
@@ -290,6 +293,27 @@ def get_parser():
         metavar="",
         default="-999999",
         help="Chan prefix (string before channel number in file name). ex: C00",
+    )
+    parser_clar_allen.add_argument(
+        "-I",
+        "--otsu_inside",
+        metavar="",
+        default="1",
+        help="the pixel value assigned to voxels inside the selected region (default: %(default)s)",
+    )
+    parser_clar_allen.add_argument(
+        "-O",
+        "--otsu_outside",
+        metavar="",
+        default="0",
+        help="the pixel value assigned to voxels outside the selected region (default: %(default)s)",
+    )
+    parser_clar_allen.add_argument(
+        "-B",
+        "--otsu_bins",
+        metavar="",
+        default="200",
+        help="number of bins used when computing the intensity histogram on which Otsu’s threshold is computed. (default: %(default)s)",
     )
     parser_clar_allen.add_argument(
         "-h",
