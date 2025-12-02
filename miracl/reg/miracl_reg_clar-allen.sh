@@ -354,10 +354,42 @@ if [[ -z ${ort} ]] || [[ "${ort}" == "None" ]]; then
 fi
 ## if A-P flipped (PLS) & if R-L -> ALS
 
-if [[ -z "${atlas}" ]]; then
+################################
+# ATLAS SELECTION & VALIDATION 
+################################
+
+# DEV NOTES
+#
+# ALLEN ATLAS
+# +----------------+-----------+-------------------------------+-----------------------------------------------+
+# | hemi           | side      | lbls                          | atlasref                                      |
+# +----------------+-----------+-------------------------------+-----------------------------------------------+
+# | combined       | any       | annotation_hemi_combined_XXum | average_template_XXum[_OBmasked].nii.gz       |
+# | split          | lh        | annotation_hemi_split_XXum    | average_template_XXum_left[_OBmasked].nii.gz  |
+# | split          | rh        | annotation_hemi_split_XXum    | average_template_XXum_right[_OBmasked].nii.gz |
+# | split          | None      | annotation_hemi_split_XXum    | ERROR or default? (must pick lh/rh)           |
+# +----------------+-----------+-------------------------------+-----------------------------------------------+
+#
+# WAXHOLM ATLAS
+# +----------------+-----------+-----------------------------------------------+-------------------------------------------+
+# | hemi           | side      | lbls                                          | atlasref                                  |
+# +----------------+-----------+-----------------------------------------------+-------------------------------------------+
+# | combined       | any       | WHS_SD_rat_atlas_v4.nii.gz                    | WHS_SD_rat_T2star_v1.01.nii.gz            |
+# | split          | lh        | WHS_SD_rat_atlas_v4_left_hemi.nii.gz          | WHS_SD_rat_T2star_v1_01_left_hemi.nii.gz  |
+# | split          | rh        | WHS_SD_rat_atlas_v4_right_hemi.nii.gz         | WHS_SD_rat_T2star_v1_01_right_hemi.nii.gz |
+# | split          | None      | ERROR: must pick lh or rh                     | ERROR                                     |
+# +----------------+-----------+-----------------------------------------------+-------------------------------------------+
+
+################################
+# DEFAULT ATLAS 
+################################
+if [[ -z "${atlas}" || "${atlas}" == "None" ]]; then
   atlas="allen"
 fi
 
+################################
+# ALLEN ATLAS
+################################
 if [ "${atlas}" == "allen" ]; then
 
   # If want to warp multi-res / hemi lbls
@@ -395,31 +427,36 @@ if [ "${atlas}" == "allen" ]; then
 
   fi
 
+################################
+# WAXHOLM ATLAS
+################################
 elif [ "${atlas}" == "waxholm" ]; then
+  if [[ -n "$vox" && "$vox" != "None" ]]; then
+    echo "ERROR: -v (voxel size) is not allowed for Waxholm atlas -> will default to 39um)."
+  fi
   vox=39
 
-  if [[ -z "${side}" || "${side}" == "None" ]]; then
-    lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
-  elif [[ "${side}" == "lh" ]]; then
-    lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
-  elif [[ "${side}" == "rh" ]]; then
-    lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi.nii.gz
-  else
-    printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
+  if [[ "$hemi" != "combined" && "$hemi" != "split" ]]; then
+    echo "ERROR: -m (hemi) must be 'combined' or 'split' for Waxholm atlas."
     exit 1
   fi
-else
-  printf "ERROR: < -a => (atlas) > Only accepted atlases (inputs) are: 'allen' or 'waxholm'"
-  exit 1
-fi
 
-# lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
-# printf "hemi: ${hemi}\n"
-# printf "vox: ${vox}\n"
-# printf "lbls: ${lbls}\n"
-# printf "atlas dir: ${atlasdir}\n"
-# printf "Exiting for debugging\n"
-# exit 1
+  if [[ -z "${hemi}" || "${hemi}" == "None" || "${hemi}" == "combined" ]]; then
+    hemi="combined"
+    lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
+  elif [[ "$hemi" == "split" ]]; then
+    if [[ $"{side}" == "lh" ]]; then
+      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
+    elif [[ "${side}" == "rh" ]]; then
+      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi.nii.gz
+    else 
+      printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
+      exit 1
+    fi 
+else
+   printf "ERROR: < -a => (atlas) > Only accepted atlases (inputs) are: 'allen' or 'waxholm'"
+   exit 1
+fi
 
 # set side for hemisphere registration
 if [[ -z ${side} ]] || [[ "${side}" == "None" ]]; then
@@ -476,6 +513,16 @@ fi
 # warp high-res clar
 if [[ -z ${warphres} ]] || [[ "${warphres}" == "None" ]]; then
   warphres=0
+fi
+
+if [[ "$atlas" == "allen" ]]; then
+# If user supplied Python Otsu flags → reject
+    if [[ -n "$otsu_inside" || -n "$otsu_outside" || -n "$otsu_bins" ]]; then
+        echo "ERROR: Otsu flags (-I, -O, -B) are only valid for -a waxholm atlas."
+        exit 1
+    fi
+
+    echo "Atlas = Allen -> Using ANTs Otsu pipeline"
 fi
 
 # Print final args to screen for user
@@ -578,26 +625,29 @@ function getbrainmask() {
   ifdsntexistrun "${biasin}" "Bias correcting input" N3BiasFieldCorrection 3 "${median}" "${biasin}" 2
   #    ifdsntexistrun ${biasin} "Bias correcting input" N4BiasFieldCorrection -i ${median} -o ${biasin} -s 2
 
-  # Otsu threshold
-  # ifdsntexistrun "${otsumaskthr}" "Otsu thresholding" ThresholdImage 3 "${biasin}" "${otsumaskthr}" Otsu 2
+  if [[ "$atlas" == "allen" ]]; then
+    # Otsu threshold
+    ifdsntexistrun "${otsumaskthr}" "Otsu thresholding" ThresholdImage 3 "${biasin}" "${otsumaskthr}" Otsu 6
 
-  # # create mask
-  # #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
-  # # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
-  # ifdsntexistrun "${otsumask}" "Thresholding mask" ThresholdImage 3 "${otsumaskthr}" "${otsumask}" 1 2
+    # # create mask
+    # #    ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 3 6
+    # # ifdsntexistrun ${otsumask} "Thresholding mask" ThresholdImage 3 ${otsumaskthr} ${otsumask} 2 6
+    ifdsntexistrun "${otsumask}" "Thresholding mask" ThresholdImage 3 "${otsumaskthr}" "${otsumask}" 1 6
 
-  # # get masked
-  # #    ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
-  # ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
+    # # get masked
+    # ifdsntexistrun ${otsucp} "Create masked image" MultiplyImages 3 ${biasin} ${otsumask} ${otsucp} 1
+    ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
 
-  ifdsntexistrun "${otsumask}" "Binary Otsu mask (Python)" python3 "${MIRACL_HOME}/reg/miracl_reg_clar-otsu_utility.py" \
-    --input "${biasin}" \
-    --mask "${otsumask}" \
-    --masked "${otsu}" \
-    --inside 1 \
-    --outside 0 \
-    --bins 200
-}
+  elif [[ "$atlas" == "waxholm" ]]; then
+    ifdsntexistrun "${otsumask}" "Binary Otsu mask (Python)" python3 "${MIRACL_HOME}/reg/miracl_reg_clar-otsu_utility.py" \
+      --input "${biasin}" \
+      --mask "${otsumask}" \
+      --masked "${otsu}" \
+      --inside "${otsu_inside:-1}" \
+      --outside "${otsu_outside:-0}" \
+      --bins "${ostu_bins:-200}"
+  fi
+
 # N4 bias correct
 
 function biasfieldcorr() {
