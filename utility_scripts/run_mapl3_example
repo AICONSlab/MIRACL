@@ -19,7 +19,7 @@ miracl flow mapl3 \
   --mv_res_z 3 \
   --mv_downsample_yx_axis 3 \
   --mv_downsample_z_axis 3 \
-  -mctn_d 15 \
+  -mctn_d 20 \
   --mpp_intensity_threshold 1 \
   --mpp_tissue_percentage_threshold 20 \
   --mi_gpu_index all \
