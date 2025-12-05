@@ -5,6 +5,7 @@ set -euo pipefail
 # Constants
 readonly ACE_MODE_2_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip"
 readonly ACE_STATS_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip"
+readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
 
 display_help() {
   cat <<EOF
@@ -32,6 +33,7 @@ Please make sure that you are in the correct folder where you want to download t
 
 1) ACE sample dataset Mode 2 (25.1GB zipped)
 2) ACE sample dataset stats (3.34GB zipped)
+3) MAPL3 sample dataset (400GB zipped)
 q) Exit this program
 
 EOF
@@ -101,6 +103,9 @@ handle_choice() {
     ;;
   2)
     download_file "$ACE_STATS_URL" "ACE_sample_dataset_stats.zip"
+    ;;
+  3)
+    download_file "$MAPL3_SAMPLE_URL" "mapl3_sample_dataset.zip"
     ;;
   q)
     echo ""
