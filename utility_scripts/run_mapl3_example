@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-# readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
-readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip"
+readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
 readonly MAPL3_DATASET_FILENAME="mapl3_sample_dataset.zip"
 MAPL3_CMD=$(cat <<'EOF'
 miracl flow mapl3 \
