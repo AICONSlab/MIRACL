@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
+readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip"
+readonly MAPL3_DATASET_FILENAME="mapl3_sample_dataset.zip"
+MAPL3_CMD=$(cat <<'EOF'
+miracl flow mapl3 \
+  --mwfc_raw_autoflor_tiff_folder Ex_647_Em_680_stitched \
+  --mwfc_raw_signal_tiff_folder Ex_488_Em_525_stitched \
+  --mwfc_results_folder mapl3/example_workflow \
+  -mctn_ch signal \
+  -mctn_vx 1.8 \
+  -mctn_vz 3 \
+  --mgp_brain_mask_erosion_flag True \
+  --mps_dtype float32 \
+  --mrca_orient_code PLI \
+  --mv_res_xy 1.8 \
+  --mv_res_z 3 \
+  --mv_downsample_yx_axis 3 \
+  --mv_downsample_z_axis 3 \
+  -mctn_d 15 \
+  --mpp_intensity_threshold 1 \
+  --mpp_tissue_percentage_threshold 20 \
+  --mi_gpu_index all \
+  --mi_save_prob_map True \
+  --skip_conversion False \
+  --skip_registration False \
+  --skip_generate_patch False \
+  --skip_preprocessing_parallel False \
+  --skip_inference False \
+  --skip_patch_stacking False \
+  --skip_data_normalization False \
+  --skip_skeletonization False \
+  --skip_voxelized_skeletonization False \
+  --skip_voxelized_normalization False \
+  --skip_warped_voxelized_normalization True \
+  --skip_warped_voxelized_skeletonization True \
+  --skip_feat_extract_skeletonization True \
+  --skip_feat_extract_normalization True \
+  --skip_plot_warped_data False
+EOF
+)
+
+display_help() {
+  cat <<EOF
+
+-----------------------------------------------------------------
+
+This script runs the complete MAPL3 workflow on a sample dataset.
+
+The sample dataset will be downloaded automatically.
+
+Things to note:
+
+1) Please make sure that you are in the correct folder where you want to download the data 
+   to and that the folder has the correct write permissions set for the container user.
+2) Ideally this folder has been mounted into the Docker/Apptainer container from the host system
+   to ensure that the data won't be deleted when the container is shut down.
+3) You should at least have 1TB available for the dataset and the analysis results.
+4) If the workflow fails for some reason or you decide to run it manually, run this
+   script with the '-c' flag to print the full command that will be passed to MIRACL by 
+   this script to stdout. You can then copy and use this command to run the worklfow on 
+   the sample dataset manually.
+
+-----------------------------------------------------------------
+
+Usage: $0 [-h] [-c]
+
+Options:
+  -h    Display this help menu
+  -c    Print the full MIRACL command for running the MAPL3 workflow on the sample dataset
+
+-----------------------------------------------------------------
+
+Run the script without any options to download the sample dataset and run the MAPL3 workflow.
+
+-----------------------------------------------------------------
+
+EOF
+}
+
+prompt_yes_no() {
+  local prompt_message="$1"
+  local default_choice="${2:-Y}"
+  local user_input
+
+  read -rp "$prompt_message ($default_choice): " user_input
+  user_input=${user_input:-$default_choice}
+
+  if [[ ${user_input,,} == "y" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+download_file() {
+  local url="$1"
+  local filename="$2"
+  echo ""
+  echo "Downloading $filename..."
+  echo ""
+  if wget -q --show-progress -O "$filename" "$url"; then
+    echo ""
+    echo "Download complete."
+    echo ""
+    handle_zip_file "$filename"
+  else
+    echo ""
+    echo "Download failed. Please make sure that you are connected to the internet and that you have write permissions for this folder."
+    echo ""
+    return 1
+  fi
+}
+
+handle_zip_file() {
+  local filename="$1"
+  echo "Extracting dataset zip...."
+  echo ""
+  if unzip "$filename"; then
+      echo ""
+      echo "File extracted successfully."
+      echo ""
+    else
+      echo ""
+      echo "Extraction failed. Please check that the zip file is not corrupted or disk is full and try again."
+      echo ""
+      return 1
+    fi
+}
+
+run_mapl3_workflow() {
+  modified_cmd=$(
+    printf "%s" "$MAPL3_CMD" \
+    | { 
+        read -r _
+        printf "python /code/miracl/system/registry/run_mapl3_workflow.py \\ \n"
+        cat
+      }
+  )
+
+  echo ""
+  echo "-----------------------------------------------------------------"
+  echo ""
+  echo "Running MAPL3 workflow on sample data using:"
+  echo ""
+  echo "$MAPL3_CMD"
+  echo ""
+
+  if ! command -v miracl >/dev/null 2>&1; then
+      echo "-----------------------------------------------------------------"
+      echo ""
+      echo "ERROR: The 'miracl' command was not found."
+      echo ""
+      echo "-----------------------------------------------------------------"
+      echo ""
+      echo "Make sure you are running this script inside the Docker container that contains MIRACL."
+      echo "This command will not work outside of the Docker container."
+      echo ""
+      echo "-----------------------------------------------------------------"
+      echo ""
+      return 1
+  fi
+
+  echo "Creating results folder..."
+  mkdir -p mapl3/example_workflow
+  echo "" 
+  eval "$modified_cmd"
+  local status=$?
+  if [[ $status -ne 0 ]]; then
+      echo "ERROR: MAPL3 workflow failed with exit code $status."
+      return $status
+  fi
+}
+
+print_command() {
+  echo ""
+  echo "-----------------------------------------------------------------"
+  echo ""
+  echo "This is the full command that is used by the script to run the MAPL3 workflow on the sample dataset."
+  echo ""
+  echo "-----------------------------------------------------------------"
+  echo ""
+  echo "$MAPL3_CMD"
+  echo ""
+  echo "-----------------------------------------------------------------"
+  echo ""
+  echo "Copy the command and use it to run the workflow manually. Change the parameters as"
+  echo "required and make sure that the path to the RAW input data is correct."
+  echo ""
+  echo "-----------------------------------------------------------------"
+  echo ""
+}
+
+parse_options() {
+    while getopts ":hc" opt; do
+        case "$opt" in
+            h) show_help; exit 0 ;;
+            c) print_command; exit 0 ;;
+            \?) echo "Unknown option: -$OPTARG" >&2; exit 1 ;;
+        esac
+    done
+
+    shift $((OPTIND-1))
+}
+
+main() {
+  download_file "$MAPL3_SAMPLE_URL" "$MAPL3_DATASET_FILENAME"
+  run_mapl3_workflow
+}
+
+if [[ $# -eq 1 && "$1" == "-h" ]]; then
+  display_help
+  exit 0
+elif [[ $# -eq 1 && "$1" == "-c" ]]; then
+  print_command
+  exit 0
+fi
+
+if [[ $# -eq 0 ]]; then
+  main
+else
+  echo "Invalid option. Use -h for help or run without flags to invoke the interactive download menu."
+  exit 1
+fi
