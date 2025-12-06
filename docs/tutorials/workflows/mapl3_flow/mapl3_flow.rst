@@ -11,10 +11,33 @@ Summary and key highlights
 - **State-of-the-Art Performance**: Extensively benchmarked against leading DL pipelines, :program:`MAPL3` consistently outperforms them in both in- and out-of-distribution datasets, from patch-level inference to full-brain reconstructions.
 - **Neuroscientific Discovery at Scale**: :program:`MAPL3` reveals cell-type-specific axonal connectivity patterns previously unresolved by existing methods, enabling new insights into mesoscale and quantitative brain circuitry analysis.
 
+Running the MAPL3 example workflow
+==================================
+
+We created a :program:`MAPL3` example workflow that is very straightforward to run in 
+case you want to first test MAPL3 to get a better understanding of how it works and 
+the results it produces before running it on your own dataset.
+
+1. Install :program:`MIRACL`, referring to the :doc:`Installation guide <../../../installation/installation>`. Make sure that you put the pre-trained :program:`MAPL3` DL model in its respective folder (see instructions below) after requesting it from `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
+2. Once installed, start the container and log into it.
+3. Once inside the container, navigate to the folder you want to run the workflow in. This will be where the example dataset will be downloaded to and where the results folder will be created.
+4. Type ``run_mapl3_example`` to run the example workflow. The script will automatically download the dataset, uncompress it and run the :program:`MAPL3` workflow on it.
+5. Once the workflow is done, all results will be available in the folder you ran the script from.
+
+.. note::
+
+   You also have the option to manually download the dataset and to then run the same 
+   command that the example script runs. If you prefer that do the following:
+  
+   1. Install :program:`MIRACL`, place the pre-trained :program:`MAPL3` DL model into its respective folder, log into the container, navigate to the folder you want to download the sample dataset to.
+   2. Type ``download_sample_data`` and choose option ``3``.
+   3. Once the dataset has been downloaded and uncompressed, run the example script with the ``-c`` flag: ``run_mapl3_example -c``. This will print the exact command to stdout that you will need to run :program:`MAPL3` on the downloaded sample dataset.
+   4. Copy the command and paste it in your terminal. Once you made sure that the args to the input and output folder flags are correct, run the workflow!
+
 Installation
 ============
 
-To install the :program:`MAPL3` workflow, refer to the MIRACL installation guide:
+To install the :program:`MAPL3` workflow, refer to the :program:`MIRACL` installation guide:
 
 - :doc:`Installation guide <../../../installation/installation>`
 
@@ -116,7 +139,7 @@ defaults by the user:
    Preprocessing     \-mpp_tpt, \-\-mpp_tissue_percentage_threshold  ``float``    ``None``    Threshold between 0-100 to filter empty patches (required if metadata is provided)
    Preprocessing     \-mpp_it, \-\-mpp_intensity_threshold           ``float``    ``None``    Threshold between 0-100 (percent of int16: around 65K) to filter the patches whose 95 percentile of intensity falls below this
    Inference         \-mi_g, \-\-mi_gpu_index                        ``int/str``  ``0``       GPU index to be used; if you wanna use all the available gpus, pass 'all' as the flag argument
-   Inference         \-mi_s, \-\-mi_save_prob_map_flag               ``bool``     ``False``   Set to save prob map
+   Inference         \-mi_s, \-\-mi_save_prob_map_flag               ``bool``     ``False``   Set to save probability map
    Patch stacking    \-mps_d, \-\-mps_dtype                          ``str``      ``uint16``  Output data type (e.g., uint16, bool)
    Voxelization      \-mv_vx, \-\-mv_res_xy                          ``float``    ``1.0``     Resolution of the input in x and y in um
    Voxelization      \-mv_vz, --mv_res_z                             ``float``    ``1.0``     Resolution of the input in z in um
