@@ -15,8 +15,8 @@ Running the MAPL3 example workflow
 ==================================
 
 We created a :program:`MAPL3` example workflow that is very straightforward to run in 
-case you want to first test MAPL3 to get a better understanding of how it works and 
-the results it produces before running it on your own dataset.
+case you want to first test :program:`MAPL3` to get a better understanding of how it 
+works and the results it produces before running it on your own dataset.
 
 1. Install :program:`MIRACL`, referring to the :doc:`Installation guide <../../../installation/installation>`. Make sure that you put the pre-trained :program:`MAPL3` DL model in its respective folder (see instructions below) after requesting it from `a.attarpour@mail.utoronto.ca <mailto:a.attarpour@mail.utoronto.ca>`_.
 2. Once installed, start the container and log into it.
