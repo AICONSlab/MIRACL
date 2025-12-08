@@ -1,3 +1,4 @@
+from curses import meta
 import os
 import sys
 import argparse
@@ -18,7 +19,7 @@ def run_clar_allen(parser, args):
             )
         else:
             bash_args = (
-                "-i %s -r %s -o %s -a %s -m %s -v %s -l %s -f %s -p %s -t %s -w %s -b %s -s %s -c %s -n %s -x %s -I %s -O %s -B %s"
+                "-i %s -r %s -o %s -a %s -m %s -v %s -l %s -f %s -p %s -t %s -w %s -b %s -s %s -c %s -n %s -x %s -I %s -O %s -B %s -P %s"
                 % (
                     args["in_nii"],  # -i
                     args["reg_out"],  # -r
@@ -39,6 +40,7 @@ def run_clar_allen(parser, args):
                     args["otsu_inside"],  # -I
                     args["otsu_outside"],  # -O
                     args["otsu_bins"],  # -B
+                    args["percentile_thr"],  # -P
                 )
             )
 
@@ -314,6 +316,13 @@ def get_parser():
         metavar="",
         default="200",
         help="number of bins used when computing the intensity histogram on which Otsu’s threshold is computed. (default: %(default)s)",
+    )
+    parser_clar_allen.add_argument(
+        "-P",
+        "--percentile_thr",
+        metavar="",
+        default="0",
+        help="percentile value for thresholding extreme values (default: %(default)s)",
     )
     parser_clar_allen.add_argument(
         "-h",

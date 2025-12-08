@@ -54,6 +54,7 @@ function usage() {
             accepted inputs are: <split> or <combined>
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
+        P.  percentile value for thresholding extreme values (default: 0)
 
     Allen atlas related arguments:
         v.  labels voxel size/Resolution in um (default: 10)
@@ -67,7 +68,7 @@ function usage() {
         O.  the pixel value assigned to voxels outside the selected region - above the 
             Otsu threshold unless reversed (default: 0)
         B.  number of bins used when computing the intensity histogram on which Otsu’s 
-            threshold is computed.
+            threshold is computed (default: 200)
 
 	----------
 	Main Outputs
@@ -143,7 +144,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:" opt; do
+  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:" opt; do
 
     case "${opt}" in
 
@@ -221,6 +222,10 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
     B)
       otsu_bins="${OPTARG}"
+      ;;
+
+    P)
+      percentile_thr="${OPTARG}"
       ;;
 
     *)
@@ -356,7 +361,7 @@ fi
 ## if A-P flipped (PLS) & if R-L -> ALS
 
 ################################
-# ATLAS SELECTION & VALIDATION 
+# ATLAS SELECTION & VALIDATION
 ################################
 
 # DEV NOTES
@@ -382,7 +387,7 @@ fi
 # +----------------+-----------+-----------------------------------------------+-------------------------------------------+
 
 ################################
-# DEFAULT ATLAS 
+# DEFAULT ATLAS
 ################################
 if [[ -z "${atlas}" || "${atlas}" == "None" ]]; then
   atlas="allen"
@@ -433,7 +438,7 @@ if [ "${atlas}" == "allen" ]; then
 ################################
 elif [ "${atlas}" == "waxholm" ]; then
   if [[ -n "$vox" && "$vox" != "None" ]]; then
-    echo "ERROR: -v (voxel size) is not allowed for Waxholm atlas -> will default to 39um)."
+    echo "WARNING: -v (voxel size) is not allowed for Waxholm atlas -> will default to 39um."
   fi
   vox=39
 
@@ -450,13 +455,15 @@ elif [ "${atlas}" == "waxholm" ]; then
       lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
     elif [[ "${side}" == "rh" ]]; then
       lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi.nii.gz
-    else 
+    else
       printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
       exit 1
-    fi 
-else
-   printf "ERROR: < -a => (atlas) > Only accepted atlases (inputs) are: 'allen' or 'waxholm'"
-   exit 1
+    fi
+  else
+    printf "ERROR: < -a => (atlas) > Only accepted atlases (inputs) are: 'allen' or 'waxholm'"
+    exit 1
+  fi
+
 fi
 
 # set side for hemisphere registration
@@ -516,14 +523,27 @@ if [[ -z ${warphres} ]] || [[ "${warphres}" == "None" ]]; then
   warphres=0
 fi
 
-if [[ "$atlas" == "allen" ]]; then
-# If user supplied Python Otsu flags → reject
-    if [[ -n "$otsu_inside" || -n "$otsu_outside" || -n "$otsu_bins" ]]; then
-        echo "ERROR: Otsu flags (-I, -O, -B) are only valid for -a waxholm atlas."
-        exit 1
-    fi
+# Check and validate percentile_thr input
+if [[ -z "${percentile_thr}" ]] || [[ "${percentile_thr}" == "None" ]]; then
+  percentile_thr=0
+fi
+if ! [[ "$percentile_thr" =~ ^[0-9]*\.?[0-9]+$ ]]; then
+  echo "ERROR: Percentile threshold must be an int or float."
+  exit 1
+fi
+if (($(echo "$percentile_thr < 0" | bc -l))) || (($(echo "$percentile_thr > 100" | bc -l))); then
+  echo "ERROR: Percentile threshold must be between 0 and 100."
+  exit 1
+fi
 
-    echo "Atlas = Allen -> Using ANTs Otsu pipeline"
+if [[ "$atlas" == "allen" ]]; then
+  # If user supplied Python Otsu flags -> reject
+  if [[ -n "$otsu_inside" || -n "$otsu_outside" || -n "$otsu_bins" ]]; then
+    echo ""
+    echo "WARNING: Otsu flags (-I, -O, -B) for SimpleITK method are ignored for Allen atlas."
+    unset otsu_inside otsu_outside otsu_bins
+    echo "Atlas = Allen -> Using ANTs Otsu pipeline instead"
+  fi
 fi
 
 # Print final args to screen for user
@@ -535,6 +555,7 @@ printf "r: Output directory: %s\n" "${work_dir}"
 printf "o: Orientation code: %s\n" "${ort}"
 printf "a: Atlas: %s\n" "${atlas}"
 printf "m: Hemisphere: %s\n" "${hemi}"
+printf "P: Percentile threshold: %s\n" "${percentile_thr}"
 if [[ "$atlas" == "allen" ]]; then
   printf "v: Labels voxel size: %s\n" "${vox}"
   printf "b: Olfactory bulb included: %s\n" "${bulb}"
@@ -553,6 +574,8 @@ if [[ "$atlas" == "waxholm" ]]; then
   printf "B: Otsu bins: %s\n" "${otsu_bins:-200}"
 fi
 printf "\n######################################################\n"
+
+exit 1
 
 # get time
 
@@ -648,6 +671,8 @@ function getbrainmask() {
       --outside "${otsu_outside:-0}" \
       --bins "${ostu_bins:-200}"
   fi
+
+}
 
 # N4 bias correct
 
@@ -1208,6 +1233,16 @@ function createtiledimg() {
 function main() {
 
   # 1) Process clarity
+
+  # Apply percentile threshold if provided as arg > 0
+  if (($(echo "$percentile_thr > 0" | bc -l))); then
+    python3 /code/miracl/reg/miracl_reg_clar-per_thr_utillity.py "$inclar" "$percentile_thr" "$regdir"
+
+    thr_file="${regir}/$(basename "$inclar")"
+
+    # Point inclar to the new thresholded file
+    inclar="$thr_file"
+  fi
 
   # resample to 0.05mm voxel
   resclar="${regdir}"/clar_res0.05.nii.gz
