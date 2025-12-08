@@ -17,8 +17,8 @@ miracl flow mapl3 \
   --mrca_orient_code PLI \
   --mv_res_xy 1.8 \
   --mv_res_z 3 \
-  --mv_downsample_yx_axis 3 \
-  --mv_downsample_z_axis 3 \
+  --mv_downsample_yx_axis 10 \
+  --mv_downsample_z_axis 6 \
   -mctn_d 20 \
   --mpp_intensity_threshold 1 \
   --mpp_tissue_percentage_threshold 20 \
@@ -34,10 +34,10 @@ miracl flow mapl3 \
   --skip_skeletonization False \
   --skip_voxelized_skeletonization False \
   --skip_voxelized_normalization False \
-  --skip_warped_voxelized_normalization True \
-  --skip_warped_voxelized_skeletonization True \
-  --skip_feat_extract_skeletonization True \
-  --skip_feat_extract_normalization True \
+  --skip_warped_voxelized_normalization False \
+  --skip_warped_voxelized_skeletonization False \
+  --skip_feat_extract_skeletonization False \
+  --skip_feat_extract_normalization False \
   --skip_plot_warped_data False
 EOF
 )
