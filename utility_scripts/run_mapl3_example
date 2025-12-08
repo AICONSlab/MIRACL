@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
-readonly MAPL3_DATASET_FILENAME="mapl3_sample_dataset.zip"
+readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3"
+readonly MAPL3_DATASET_FILENAME="mapl3_sample_dataset"
 MAPL3_CMD=$(cat <<'EOF'
 miracl flow mapl3 \
   --mwfc_raw_autoflor_tiff_folder Ex_647_Em_680_stitched \
@@ -80,56 +80,71 @@ Run the script without any options to download the sample dataset and run the MA
 EOF
 }
 
-prompt_yes_no() {
-  local prompt_message="$1"
-  local default_choice="${2:-Y}"
-  local user_input
+assemble_and_unzip() {
+    local base_name="$1"
+    local assembled_zip="${base_name}.zip"
 
-  read -rp "$prompt_message ($default_choice): " user_input
-  user_input=${user_input:-$default_choice}
+    echo "Preparing dataset..."
+    if cat "${base_name}_part_"* > "$assembled_zip"; then
+        echo "  Preparation complete."
+    else
+        echo "  Failed to prepare dataset."
+        return 1
+    fi
 
-  if [[ ${user_input,,} == "y" ]]; then
-    return 0
-  else
-    return 1
-  fi
+    echo "Removing temporary dataset files..."
+    rm -f "${base_name}_part_"??
+    echo "Temporary files removed."
+
+    echo ""
+    echo "Extracting ${assembled_zip}..."
+    if unzip "$assembled_zip"; then
+        echo ""
+        echo "File extracted successfully."
+        echo ""
+    else
+        echo ""
+        echo "Extraction failed — combined zip may be corrupted."
+        echo ""
+        return 1
+    fi
+
+    echo "Cleaning up dataset..."
+    rm -f "${assembled_zip}"
+    echo "Dataset zip deleted."
 }
 
 download_file() {
-  local url="$1"
-  local filename="$2"
+  local base_url="$1"
+  local base_name="$2"
+
+  local parts=(aa ab ac ad ae af ag ah)
+
   echo ""
-  echo "Downloading $filename..."
+  echo "Downloading MAPl3 sample dataset..."
   echo ""
-  if wget -q --show-progress -O "$filename" "$url"; then
+
+  for part in "${parts[@]}"; do
+        local filename="${base_name}_part_${part}"
+        local url="${base_url}/${filename}"
+
+        echo "Downloading ${filename}..."
+        if wget -q --show-progress -O "$filename" "$url"; then
+            echo "  Downloaded ${filename}"
+        else
+            echo "  Failed to download ${filename}"
+            return 1
+        fi
+        echo ""
+    done
+
+    echo "All parts downloaded successfully."
     echo ""
-    echo "Download complete."
-    echo ""
-    handle_zip_file "$filename"
-  else
-    echo ""
-    echo "Download failed. Please make sure that you are connected to the internet and that you have write permissions for this folder."
-    echo ""
-    return 1
-  fi
+
+    assemble_and_unzip "$base_name"
 }
 
-handle_zip_file() {
-  local filename="$1"
-  echo "Extracting dataset zip...."
-  echo ""
-  if unzip "$filename"; then
-      echo ""
-      echo "File extracted successfully."
-      echo ""
-    else
-      echo ""
-      echo "Extraction failed. Please check that the zip file is not corrupted or disk is full and try again."
-      echo ""
-      return 1
-    fi
-}
-
+# Substitute 'miracl flow mapl3' cmd with directly calling Python workflow script
 run_mapl3_workflow() {
   modified_cmd=$(
     printf "%s" "$MAPL3_CMD" \
@@ -148,6 +163,8 @@ run_mapl3_workflow() {
   echo "$MAPL3_CMD"
   echo ""
 
+  # Leaving this in despite calling the Python workflow script directly
+  # This essentially checks if the user is executing the script from within the container
   if ! command -v miracl >/dev/null 2>&1; then
       echo "-----------------------------------------------------------------"
       echo ""
@@ -189,6 +206,8 @@ print_command() {
   echo "Copy the command and use it to run the workflow manually. Change the parameters as"
   echo "required and make sure that the path to the RAW input data is correct."
   echo ""
+  echo "The sample data can be downloaded with the download_sample_data command."
+  echo ""
   echo "-----------------------------------------------------------------"
   echo ""
 }
@@ -196,9 +215,9 @@ print_command() {
 parse_options() {
     while getopts ":hc" opt; do
         case "$opt" in
-            h) show_help; exit 0 ;;
+            h) display_help; exit 0 ;;
             c) print_command; exit 0 ;;
-            \?) echo "Unknown option: -$OPTARG" >&2; exit 1 ;;
+            \?) echo "Unknown option: -$OPTARG. Use -h for an overview of all valid flag options." >&2; exit 1 ;;
         esac
     done
 
@@ -210,17 +229,5 @@ main() {
   run_mapl3_workflow
 }
 
-if [[ $# -eq 1 && "$1" == "-h" ]]; then
-  display_help
-  exit 0
-elif [[ $# -eq 1 && "$1" == "-c" ]]; then
-  print_command
-  exit 0
-fi
-
-if [[ $# -eq 0 ]]; then
-  main
-else
-  echo "Invalid option. Use -h for help or run without flags to invoke the interactive download menu."
-  exit 1
-fi
+parse_options "$@"
+main
