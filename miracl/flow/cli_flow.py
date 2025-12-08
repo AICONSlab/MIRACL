@@ -88,7 +88,7 @@ def run_sta(parser, args):
             )
         else:
             bash_args = (
-                "-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -d %s -c %s --out_dir %s -b %s -u %s -s %s -n %s -p %s -x %s -z %s --downz %s --dilationfx %s --dilationfy %s --dilationfz %s --rk %s"
+                "-f %s -o %s -l %s -r %s -m %s -g %s -k %s -a %s -w %s -d %s -c %s --out_dir %s -b %s -u %s -s %s -n %s -p %s -x %s -z %s --downz %s --dilationfx %s --dilationfy %s --dilationfz %s --rk %s"
                 % (
                     args["folder"],
                     args["out_nii"],
@@ -98,6 +98,7 @@ def run_sta(parser, args):
                     args["dog"],
                     args["sigma"],
                     args["angle"],
+                    args["workdir"],
                     args["down"],
                     args["chan"],
                     args["out_dir"],
@@ -204,6 +205,7 @@ def get_parser():
     parser_sta.add_argument(
         "-a", "--angle", metavar="", help="Tracking angle threshold"
     )
+    parser_sta.add_argument("-w", "--workdir", metavar="", help="Working directory")
     parser_sta.add_argument("-d", "--down", metavar="", help="Downsample ratio")
     parser_sta.add_argument("-c", "--chan", metavar="", help="Output channel name")
     parser_sta.add_argument("--out_dir", metavar="", help="Output directory")
