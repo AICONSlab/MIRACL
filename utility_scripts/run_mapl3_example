@@ -144,6 +144,25 @@ download_file() {
     assemble_and_unzip "$base_name"
 }
 
+check_miracl_cmd() {
+  # This essentially checks if the user is executing the script from within the container
+  if ! command -v miracl >/dev/null 2>&1; then
+      echo ""
+      echo "-----------------------------------------------------------------"
+      echo ""
+      echo "ERROR: The 'miracl' command was not found."
+      echo ""
+      echo "-----------------------------------------------------------------"
+      echo ""
+      echo "Make sure you are running this script inside the Docker container that contains MIRACL."
+      echo "This command will not work outside of the Docker container."
+      echo ""
+      echo "-----------------------------------------------------------------"
+      echo ""
+      return 1
+  fi
+}
+
 # Substitute 'miracl flow mapl3' cmd with directly calling Python workflow script
 run_mapl3_workflow() {
   modified_cmd=$(
@@ -162,23 +181,6 @@ run_mapl3_workflow() {
   echo ""
   echo "$MAPL3_CMD"
   echo ""
-
-  # Leaving this in despite calling the Python workflow script directly
-  # This essentially checks if the user is executing the script from within the container
-  if ! command -v miracl >/dev/null 2>&1; then
-      echo "-----------------------------------------------------------------"
-      echo ""
-      echo "ERROR: The 'miracl' command was not found."
-      echo ""
-      echo "-----------------------------------------------------------------"
-      echo ""
-      echo "Make sure you are running this script inside the Docker container that contains MIRACL."
-      echo "This command will not work outside of the Docker container."
-      echo ""
-      echo "-----------------------------------------------------------------"
-      echo ""
-      return 1
-  fi
 
   echo "Creating results folder..."
   mkdir -p mapl3/example_workflow
