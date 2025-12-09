@@ -93,8 +93,11 @@ assemble_and_unzip() {
     fi
 
     echo "Removing temporary dataset files..."
-    rm -f "${base_name}_part_"??
-    echo "Temporary files removed."
+    if rm -f "${base_name}_part_"??; then
+      echo "Temporary files removed."
+    else
+      echo "Temporary files couldn't be removed."
+    fi
 
     echo ""
     echo "Extracting ${assembled_zip}..."
@@ -110,8 +113,10 @@ assemble_and_unzip() {
     fi
 
     echo "Cleaning up dataset..."
+    echo ""
     rm -f "${assembled_zip}"
-    echo "Dataset zip deleted."
+    echo "Dataset zip file deleted."
+    echo ""
 }
 
 download_file() {
@@ -130,15 +135,15 @@ download_file() {
 
         echo "Downloading ${filename}..."
         if wget -q --show-progress -O "$filename" "$url"; then
-            echo "  Downloaded ${filename}"
+            echo "  Downloaded ${filename}."
         else
-            echo "  Failed to download ${filename}"
+            echo "  Failed to download ${filename}."
             return 1
         fi
         echo ""
     done
 
-    echo "All parts downloaded successfully."
+    echo "Dataset downloaded successfully."
     echo ""
 
     assemble_and_unzip "$base_name"
