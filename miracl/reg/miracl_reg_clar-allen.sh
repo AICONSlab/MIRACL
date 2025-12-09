@@ -525,7 +525,7 @@ fi
 
 # Check and validate percentile_thr input
 if [[ -z "${percentile_thr}" ]] || [[ "${percentile_thr}" == "None" ]]; then
-  percentile_thr=0
+  percentile_thr=5
 fi
 if ! [[ "$percentile_thr" =~ ^[0-9]*\.?[0-9]+$ ]]; then
   echo "ERROR: Percentile threshold must be an int or float."

@@ -321,7 +321,7 @@ def get_parser():
         "-P",
         "--percentile_thr",
         metavar="",
-        default="0",
+        default="5",
         help="percentile value for thresholding extreme values (default: %(default)s)",
     )
     parser_clar_allen.add_argument(
