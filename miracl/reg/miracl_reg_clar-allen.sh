@@ -575,8 +575,6 @@ if [[ "$atlas" == "waxholm" ]]; then
 fi
 printf "\n######################################################\n"
 
-exit 1
-
 # get time
 
 START=$(date +%s)
