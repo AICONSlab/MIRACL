@@ -65,11 +65,13 @@ Things to note:
 
 -----------------------------------------------------------------
 
-Usage: $0 [-h] [-c]
+Usage: $0 [-h] [-c] [-k] [-p]
 
 Options:
   -h    Display this help menu
   -c    Print the full MIRACL command for running the MAPL3 workflow on the sample dataset
+  -k    Keep zip file instead of deleting it
+  -p    Keep partial downloads instead of deleting them
 
 -----------------------------------------------------------------
 
@@ -80,43 +82,98 @@ Run the script without any options to download the sample dataset and run the MA
 EOF
 }
 
+KEEP_ZIP=false
+KEEP_PARTS=false
+
+# assemble_and_unzip() {
+#     local base_name="$1"
+#     local assembled_zip="${base_name}.zip"
+#
+#     echo "Preparing dataset..."
+#     if cat "${base_name}_part_"* > "$assembled_zip"; then
+#         echo "  Preparation complete."
+#     else
+#         echo "  Failed to prepare dataset."
+#         return 1
+#     fi
+#
+#     echo "Removing temporary dataset files..."
+#     if rm -f "${base_name}_part_"??; then
+#       echo "Temporary files removed."
+#     else
+#       echo "Temporary files couldn't be removed."
+#     fi
+#
+#     echo ""
+#     echo "Extracting ${assembled_zip}..."
+#     if unzip "$assembled_zip"; then
+#         echo ""
+#         echo "File extracted successfully."
+#         echo ""
+#     else
+#         echo ""
+#         echo "Extraction failed — combined zip may be corrupted."
+#         echo ""
+#         return 1
+#     fi
+#
+#     echo "Cleaning up dataset..."
+#     echo ""
+#     rm -f "${assembled_zip}"
+#     echo "Dataset zip file deleted."
+#     echo ""
+# }
+
 assemble_and_unzip() {
     local base_name="$1"
     local assembled_zip="${base_name}.zip"
 
     echo "Preparing dataset..."
-    if cat "${base_name}_part_"* > "$assembled_zip"; then
-        echo "  Preparation complete."
-    else
-        echo "  Failed to prepare dataset."
-        return 1
-    fi
 
-    echo "Removing temporary dataset files..."
-    if rm -f "${base_name}_part_"??; then
-      echo "Temporary files removed."
+    # Calculate total size in bytes for all arts
+    total_bytes=0
+    for part in "${base_name}_part_"*; do
+        total_bytes=$((total_bytes + $(stat -c%s "$part")))
+    done
+
+    echo "  Combining parts into ${assembled_zip}..."
+
+    # Combine all parts into one zip with a pv progress bar
+    cat "${base_name}_part_"* | pv -s "$total_bytes" > "$assembled_zip"
+
+    echo ""
+    echo "  Parts combined successfully."
+
+    # Optionally remove parts if -p is not set
+    if ! [[ "$KEEP_PARTS" == true ]]; then
+        echo "  Removing temporary part files..."
+        rm -f "${base_name}_part_"??
+        echo "  Part files removed."
     else
-      echo "Temporary files couldn't be removed."
+        echo "  Keeping part files (-p flag set)."
     fi
 
     echo ""
     echo "Extracting ${assembled_zip}..."
-    if unzip "$assembled_zip"; then
-        echo ""
-        echo "File extracted successfully."
-        echo ""
+
+    # Reliable unzip
+    mkdir -p "$base_name"
+    unzip -o "$assembled_zip" -d "$base_name"
+    
+    echo ""
+    echo "  Extraction complete."
+
+    # Optionally remove assembled zip if -k is not set
+    if ! [[ "$KEEP_ZIP" == true ]]; then
+        echo "  Removing combined zip file..."
+        rm -f "$assembled_zip"
+        echo "  Combined zip file deleted."
     else
-        echo ""
-        echo "Extraction failed — combined zip may be corrupted."
-        echo ""
-        return 1
+        echo "  Keeping combined zip file (-k flag set)."
     fi
 
-    echo "Cleaning up dataset..."
     echo ""
-    rm -f "${assembled_zip}"
-    echo "Dataset zip file deleted."
-    echo ""
+    echo "Dataset is ready."
 }
 
 download_file() {
@@ -124,20 +181,26 @@ download_file() {
   local base_name="$2"
 
   local parts=(aa ab ac ad ae af ag ah)
+  local total=${#parts[@]}
+  local part_idx=1
 
   echo ""
   echo "Downloading MAPl3 sample dataset..."
+  echo "INFO: Depending on your internet connection, this could take a while (353GB)."
+  echo "INFO: The dataset is split into ${total} parts and will be combined locally."
   echo ""
 
   for part in "${parts[@]}"; do
         local filename="${base_name}_part_${part}"
         local url="${base_url}/${filename}"
 
-        echo "Downloading ${filename}..."
-        if wget -q --show-progress -O "$filename" "$url"; then
-            echo "  Downloaded ${filename}."
+        echo "Downloading part ${part_idx}/${total} (${part})..."
+        if wget -c -q --show-progress -O "$filename" "$url"; then
+            echo "  Downloaded part ${part_idx}/${total}: ${filename}."
+            ((++part_idx))
         else
-            echo "  Failed to download ${filename}."
+            echo "  Failed to download part ${part_idx}: ${filename}."
+            echo "  Do you have write permissions in the location?"
             return 1
         fi
         echo ""
@@ -219,11 +282,25 @@ print_command() {
   echo ""
 }
 
+# parse_options() {
+#     while getopts ":hc" opt; do
+#         case "$opt" in
+#             h) display_help; exit 0 ;;
+#             c) print_command; exit 0 ;;
+#             \?) echo "Unknown option: -$OPTARG. Use -h for an overview of all valid flag options." >&2; exit 1 ;;
+#         esac
+#     done
+#
+#     shift $((OPTIND-1))
+# }
+
 parse_options() {
-    while getopts ":hc" opt; do
+    while getopts ":hckp" opt; do
         case "$opt" in
             h) display_help; exit 0 ;;
             c) print_command; exit 0 ;;
+            k) KEEP_ZIP=true ;;
+            p) KEEP_PARTS=true ;;
             \?) echo "Unknown option: -$OPTARG. Use -h for an overview of all valid flag options." >&2; exit 1 ;;
         esac
     done
@@ -232,8 +309,9 @@ parse_options() {
 }
 
 main() {
+  # check_miracl_cmd
   download_file "$MAPL3_SAMPLE_URL" "$MAPL3_DATASET_FILENAME"
-  run_mapl3_workflow
+  # run_mapl3_workflow
 }
 
 parse_options "$@"
