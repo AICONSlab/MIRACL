@@ -85,45 +85,6 @@ EOF
 KEEP_ZIP=false
 KEEP_PARTS=false
 
-# assemble_and_unzip() {
-#     local base_name="$1"
-#     local assembled_zip="${base_name}.zip"
-#
-#     echo "Preparing dataset..."
-#     if cat "${base_name}_part_"* > "$assembled_zip"; then
-#         echo "  Preparation complete."
-#     else
-#         echo "  Failed to prepare dataset."
-#         return 1
-#     fi
-#
-#     echo "Removing temporary dataset files..."
-#     if rm -f "${base_name}_part_"??; then
-#       echo "Temporary files removed."
-#     else
-#       echo "Temporary files couldn't be removed."
-#     fi
-#
-#     echo ""
-#     echo "Extracting ${assembled_zip}..."
-#     if unzip "$assembled_zip"; then
-#         echo ""
-#         echo "File extracted successfully."
-#         echo ""
-#     else
-#         echo ""
-#         echo "Extraction failed — combined zip may be corrupted."
-#         echo ""
-#         return 1
-#     fi
-#
-#     echo "Cleaning up dataset..."
-#     echo ""
-#     rm -f "${assembled_zip}"
-#     echo "Dataset zip file deleted."
-#     echo ""
-# }
-
 assemble_and_unzip() {
     local base_name="$1"
     local assembled_zip="${base_name}.zip"
@@ -282,18 +243,6 @@ print_command() {
   echo ""
 }
 
-# parse_options() {
-#     while getopts ":hc" opt; do
-#         case "$opt" in
-#             h) display_help; exit 0 ;;
-#             c) print_command; exit 0 ;;
-#             \?) echo "Unknown option: -$OPTARG. Use -h for an overview of all valid flag options." >&2; exit 1 ;;
-#         esac
-#     done
-#
-#     shift $((OPTIND-1))
-# }
-
 parse_options() {
     while getopts ":hckp" opt; do
         case "$opt" in
@@ -309,9 +258,9 @@ parse_options() {
 }
 
 main() {
-  # check_miracl_cmd
+  check_miracl_cmd
   download_file "$MAPL3_SAMPLE_URL" "$MAPL3_DATASET_FILENAME"
-  # run_mapl3_workflow
+  run_mapl3_workflow
 }
 
 parse_options "$@"
