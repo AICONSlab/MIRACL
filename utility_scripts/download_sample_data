@@ -5,7 +5,11 @@ set -euo pipefail
 # Constants
 readonly ACE_MODE_2_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip"
 readonly ACE_STATS_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip"
-readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
+# readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
+readonly MAPL3_SAMPLE_FILENAME="mapl3_sample_dataset.zip"
+readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3"
+
+
 
 display_help() {
   cat <<EOF
@@ -55,21 +59,58 @@ prompt_yes_no() {
 }
 
 download_file() {
-  local url="$1"
+  local base_url="$1"
   local filename="$2"
-  echo ""
-  echo "Downloading $filename..."
-  echo ""
-  if wget -q --show-progress -O "$filename" "$url"; then
+
+  if [[ "$filename" == "$MAPL3_SAMPLE_FILENAME"]]; then
+    basename="${filename%.zip}"
+    local parts=(aa ab ac ad ae af ag ah)
+    local total=${#parts[@]}
+    local part_idx=1
+
     echo ""
-    echo "Download complete."
+    echo "Downloading MAPl3 sample dataset..."
+    echo "INFO: Depending on your internet connection, this could take a while (353GB)."
+    echo "INFO: The dataset is split into ${total} parts and will be combined locally."
     echo ""
-    handle_zip_file "$filename"
+
+    for part in "${parts[@]}"; do
+          local part_filename="${basename}_part_${part}"
+          local url="${base_url}/${part_filename}"
+
+          echo "Downloading part ${part_idx}/${total} (${part})..."
+          if wget -c -q --show-progress -O "$part_filename" "$url"; then
+              echo "  Downloaded part ${part_idx}/${total}: ${part_filename}."
+              ((++part_idx))
+          else
+              echo "  Failed to download part ${part_idx}: ${part_filename}."
+              echo "  Do you have write permissions in the location?"
+              return 1
+          fi
+          echo ""
+      done
+
+      echo "Dataset downloaded successfully."
+      echo ""
+
+      handle_zip_file "$filename"
+      # assemble_and_unzip "$base_name"
+
   else
     echo ""
-    echo "Download failed. Please make sure that you are connected to the internet and that you have write permissions for this folder."
+    echo "Downloading $filename..."
     echo ""
-    return 1
+    if wget -c -q --show-progress -O "$filename" "$url"; then
+      echo ""
+      echo "Download complete."
+      echo ""
+      handle_zip_file "$filename"
+    else
+      echo ""
+      echo "Download failed. Please make sure that you are connected to the internet and that you have write permissions for this folder."
+      echo ""
+      return 1
+    fi
   fi
 }
 
@@ -105,7 +146,7 @@ handle_choice() {
     download_file "$ACE_STATS_URL" "ACE_sample_dataset_stats.zip"
     ;;
   3)
-    download_file "$MAPL3_SAMPLE_URL" "mapl3_sample_dataset.zip"
+    download_file "$MAPL3_SAMPLE_URL" "$MAPL3_SAMPLE_FILENAME"
     ;;
   q)
     echo ""
