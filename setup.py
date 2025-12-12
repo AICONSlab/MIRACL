@@ -69,6 +69,7 @@ setup(
         "svgwrite==1.4.3",
         "loguru==0.6.0",
         "mne==1.3.1",
+        "pv==1.6.6",
         "imagecodecs==2021.11.20",
     ],
     entry_points={
