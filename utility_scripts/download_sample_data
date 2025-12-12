@@ -2,14 +2,12 @@
 
 set -euo pipefail
 
-# Constants
-readonly ACE_MODE_2_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip"
-readonly ACE_STATS_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip"
-# readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3/mapl3_sample_dataset.zip"
+readonly ACE_MODE_2_FILENAME="ace_sample_data_mode_2.zip"
+readonly ACE_MODE_2_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/$ACE_MODE_2_FILENAME"
+readonly ACE_STATS_FILENAME="ace_sample_data_stats.zip"
+readonly ACE_STATS_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/$ACE_STATS_FILENAME"
 readonly MAPL3_SAMPLE_FILENAME="mapl3_sample_dataset.zip"
 readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3"
-
-
 
 display_help() {
   cat <<EOF
@@ -59,17 +57,18 @@ prompt_yes_no() {
 }
 
 download_file() {
-  local base_url="$1"
+  local url="$1"
   local filename="$2"
 
-  if [[ "$filename" == "$MAPL3_SAMPLE_FILENAME"]]; then
-    basename="${filename%.zip}"
+  if [[ "$filename" == "$MAPL3_SAMPLE_FILENAME" ]]; then
+    local base_url="$url"
+    local basename="${filename%.zip}"
     local parts=(aa ab ac ad ae af ag ah)
     local total=${#parts[@]}
     local part_idx=1
 
     echo ""
-    echo "Downloading MAPl3 sample dataset..."
+    echo "Downloading $MAPL3_SAMPLE_FILENAME..."
     echo "INFO: Depending on your internet connection, this could take a while (353GB)."
     echo "INFO: The dataset is split into ${total} parts and will be combined locally."
     echo ""
@@ -93,8 +92,8 @@ download_file() {
       echo "Dataset downloaded successfully."
       echo ""
 
+      assemble_zip_file_from_parts "$filename"
       handle_zip_file "$filename"
-      # assemble_and_unzip "$base_name"
 
   else
     echo ""
@@ -112,6 +111,42 @@ download_file() {
       return 1
     fi
   fi
+}
+
+assemble_zip_file_from_parts() {
+    local filename="$1"
+    local basename="${filename%.zip}"
+
+    echo "Preparing dataset..."
+
+    shopt -s nullglob
+
+    local total_bytes=0
+    local part
+    for part in "${basename}_part_"*; do
+        total_bytes=$((total_bytes + $(stat -c%s "$part")))
+    done
+
+    echo "  Combining parts into ${filename}..."
+
+    cat "${basename}_part_"* | pv -s "$total_bytes" > "$filename"
+
+    echo ""
+    echo "  Parts combined successfully."
+
+    shopt -u nullglob
+
+    if prompt_yes_no "Do you want to keep the partial files?" "y/N"; then
+      echo ""
+      echo "Parts preserved."
+      echo ""
+    else
+      if rm -f "${basename}_part_"*; then
+        echo ""
+        echo "Parts succesfully deleted."
+        echo""
+      fi
+    fi
 }
 
 handle_zip_file() {
@@ -140,10 +175,10 @@ handle_zip_file() {
 handle_choice() {
   case ${1,,} in
   1)
-    download_file "$ACE_MODE_2_URL" "ACE_sample_dataset_mode_2.zip"
+    download_file "$ACE_MODE_2_URL" "$ACE_MODE_2_FILENAME"
     ;;
   2)
-    download_file "$ACE_STATS_URL" "ACE_sample_dataset_stats.zip"
+    download_file "$ACE_STATS_URL" "$ACE_STATS_FILENAME"
     ;;
   3)
     download_file "$MAPL3_SAMPLE_URL" "$MAPL3_SAMPLE_FILENAME"
