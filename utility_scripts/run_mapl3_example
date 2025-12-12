@@ -4,43 +4,60 @@ set -euo pipefail
 
 readonly MAPL3_SAMPLE_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/mapl3"
 readonly MAPL3_DATASET_FILENAME="mapl3_sample_dataset"
-MAPL3_CMD=$(cat <<'EOF'
-miracl flow mapl3 \
-  --mwfc_raw_autoflor_tiff_folder Ex_647_Em_680_stitched \
-  --mwfc_raw_signal_tiff_folder Ex_488_Em_525_stitched \
-  --mwfc_results_folder mapl3/example_workflow \
-  -mctn_ch signal \
-  -mctn_vx 1.8 \
-  -mctn_vz 3 \
-  --mgp_brain_mask_erosion_flag True \
-  --mps_dtype float32 \
-  --mrca_orient_code PLI \
-  --mv_res_xy 1.8 \
-  --mv_res_z 3 \
-  --mv_downsample_yx_axis 10 \
-  --mv_downsample_z_axis 6 \
-  -mctn_d 20 \
-  --mpp_intensity_threshold 1 \
-  --mpp_tissue_percentage_threshold 20 \
-  --mi_gpu_index all \
-  --mi_save_prob_map True \
-  --skip_conversion False \
-  --skip_registration False \
-  --skip_generate_patch False \
-  --skip_preprocessing_parallel False \
-  --skip_inference False \
-  --skip_patch_stacking False \
-  --skip_data_normalization False \
-  --skip_skeletonization False \
-  --skip_voxelized_skeletonization False \
-  --skip_voxelized_normalization False \
-  --skip_warped_voxelized_normalization False \
-  --skip_warped_voxelized_skeletonization False \
-  --skip_feat_extract_skeletonization False \
-  --skip_feat_extract_normalization False \
-  --skip_plot_warped_data False
-EOF
+MAPL3_CMD=(
+"miracl"
+"flow"
+"mapl3"
+"--mwfc_raw_autoflor_tiff_folder" "mapl3_sample_dataset/Ex_647_Em_680_stitched"
+"--mwfc_raw_signal_tiff_folder" "mapl3_sample_dataset/Ex_488_Em_525_stitched"
+"--mwfc_results_folder" "mapl3/example_workflow"
+"-mctn_ch" "signal"
+"-mctn_vx" "1.8"
+"-mctn_vz" "3"
+"--mgp_brain_mask_erosion_flag" "True"
+"--mps_dtype" "float32"
+"--mrca_orient_code" "PLI"
+"--mv_res_xy" "1.8"
+"--mv_res_z" "3"
+"--mv_downsample_yx_axis" "10"
+"--mv_downsample_z_axis" "6"
+"-mctn_d" "20"
+"--mpp_intensity_threshold" "1"
+"--mpp_tissue_percentage_threshold" "20"
+"--mi_gpu_index" "all"
+"--mi_save_prob_map" "True"
+"--skip_conversion" "False"
+"--skip_registration" "False"
+"--skip_generate_patch" "False"
+"--skip_preprocessing_parallel" "False"
+"--skip_inference" "False"
+"--skip_patch_stacking" "False"
+"--skip_data_normalization" "False"
+"--skip_skeletonization" "False"
+"--skip_voxelized_skeletonization" "False"
+"--skip_voxelized_normalization" "False"
+"--skip_warped_voxelized_normalization" "False"
+"--skip_warped_voxelized_skeletonization" "False"
+"--skip_feat_extract_skeletonization" "False"
+"--skip_feat_extract_normalization" "False"
+"--skip_plot_warped_data" "False"
 )
+
+print_mapl3_cmd() {
+    local cmd=("$@")
+
+    printf "$ %s " "${cmd[0]} ${cmd[1]} ${cmd[2]}"
+    echo " \\"
+
+    for ((i=3; i<${#cmd[@]}; i+=2)); do
+        printf "  %q %q" "${cmd[i]}" "${cmd[i+1]:-}"
+        if (( i+2 < ${#cmd[@]} )); then
+            echo " \\"
+        else
+            echo ""
+        fi
+    done
+}
 
 display_help() {
   cat <<EOF
@@ -91,7 +108,6 @@ assemble_and_unzip() {
 
     echo "Preparing dataset..."
 
-    # Calculate total size in bytes for all arts
     total_bytes=0
     for part in "${base_name}_part_"*; do
         total_bytes=$((total_bytes + $(stat -c%s "$part")))
@@ -99,13 +115,11 @@ assemble_and_unzip() {
 
     echo "  Combining parts into ${assembled_zip}..."
 
-    # Combine all parts into one zip with a pv progress bar
     cat "${base_name}_part_"* | pv -s "$total_bytes" > "$assembled_zip"
 
     echo ""
     echo "  Parts combined successfully."
 
-    # Optionally remove parts if -p is not set
     if ! [[ "$KEEP_PARTS" == true ]]; then
         echo "  Removing temporary part files..."
         rm -f "${base_name}_part_"??
@@ -117,14 +131,12 @@ assemble_and_unzip() {
     echo ""
     echo "Extracting ${assembled_zip}..."
 
-    # Reliable unzip
     mkdir -p "$base_name"
     unzip -o "$assembled_zip" -d "$base_name"
     
     echo ""
     echo "  Extraction complete."
 
-    # Optionally remove assembled zip if -k is not set
     if ! [[ "$KEEP_ZIP" == true ]]; then
         echo "  Removing combined zip file..."
         rm -f "$assembled_zip"
@@ -192,45 +204,41 @@ check_miracl_cmd() {
   fi
 }
 
-# Substitute 'miracl flow mapl3' cmd with directly calling Python workflow script
 run_mapl3_workflow() {
-  modified_cmd=$(
-    printf "%s" "$MAPL3_CMD" \
-    | { 
-        read -r _
-        printf "python /code/miracl/system/registry/run_mapl3_workflow.py \\ \n"
-        cat
-      }
-  )
+    # Make a copy of MAPL3_CMD
+    # local cmd=("${MAPL3_CMD[@]}")
+    local exec_cmd=(python /code/miracl/system/registry/run_mapl3_workflow.py "${MAPL3_CMD[@]:3}")
 
-  echo ""
-  echo "-----------------------------------------------------------------"
-  echo ""
-  echo "Running MAPL3 workflow on sample data using:"
-  echo ""
-  echo "$MAPL3_CMD"
-  echo ""
+    echo ""
+    echo "-----------------------------------------------------------------"
+    echo ""
+    echo "Running MAPL3 workflow on sample data using:"
+    echo ""
 
-  echo "Creating results folder..."
-  mkdir -p mapl3/example_workflow
-  echo "" 
-  eval "$modified_cmd"
-  local status=$?
-  if [[ $status -ne 0 ]]; then
-      echo "ERROR: MAPL3 workflow failed with exit code $status."
-      return $status
-  fi
+    print_mapl3_cmd "${MAPL3_CMD[@]}"
+
+    echo ""
+    echo "Creating results folder..."
+    mkdir -p mapl3/example_workflow
+
+    # Run the command
+    "${exec_cmd[@]}"
+    local status=$?
+    if [[ $status -ne 0 ]]; then
+        echo "ERROR: MAPL3 workflow failed with exit code $status."
+        return $status
+    fi
 }
 
 print_command() {
   echo ""
   echo "-----------------------------------------------------------------"
   echo ""
-  echo "This is the full command that is used by the script to run the MAPL3 workflow on the sample dataset."
+  echo "This is the full command that is used by the script to run the MAPL3 workflow on the sample dataset:"
   echo ""
   echo "-----------------------------------------------------------------"
   echo ""
-  echo "$MAPL3_CMD"
+  print_mapl3_cmd "${MAPL3_CMD[@]}"
   echo ""
   echo "-----------------------------------------------------------------"
   echo ""
