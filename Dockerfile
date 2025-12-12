@@ -109,6 +109,13 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     mv $HOME/.local/bin/uv* /usr/local/bin/
 
 ###############################################################################
+
+# Install CLI utils if required
+RUN apt-get update && \
+    apt-get install -y pv && \
+    rm -rf /var/lib/apt/lists/*
+
+###############################################################################
 #--- Docker X11 forwarding directives ---
 
 #STARTUNCOMMENT#
