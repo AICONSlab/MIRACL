@@ -92,7 +92,13 @@ def load_modules_from_yaml(path: str) -> MiraclRegistry:
         else:
             flag_map = yaml_flag_map
 
-        def wrapped_runner(script: str, mapping: Dict[str, object]) -> object:
+        def wrapped_runner(
+            script: str,
+            mapping: Dict[str, object],
+            *,
+            _flag_map=flag_map,
+            _execute=execute,
+        ) -> object:
             """
             Wrapped runner that injects the resolved flag map and execute setting.
 
@@ -103,7 +109,7 @@ def load_modules_from_yaml(path: str) -> MiraclRegistry:
             Returns:
                 object: Result of the underlying runner
             """
-            return runner_func(script, mapping, flag_map=flag_map, execute=execute)
+            return runner_func(script, mapping, flag_map=_flag_map, execute=_execute)
 
         setattr(wrapped_runner, "_original_runner", runner_func)
 
