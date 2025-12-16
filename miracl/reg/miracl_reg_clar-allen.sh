@@ -54,7 +54,7 @@ function usage() {
             accepted inputs are: <split> or <combined>
         s.  side, if only registering a hemisphere instead of whole brain
             accepted inputs are: rh (right hemisphere) or lh (left)
-        P.  percentile value for thresholding extreme values (default: 0)
+        P.  percentile value for thresholding extreme values (default: 5)
 
     Allen atlas related arguments:
         v.  labels voxel size/Resolution in um (default: 10)
