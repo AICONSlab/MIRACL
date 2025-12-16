@@ -11,8 +11,10 @@ import os
 import sys
 import time
 import typing as th
+from typing import List, Union, Optional
 from math import ceil, nan
 from pathlib import Path
+
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -199,11 +201,46 @@ def parsefn() -> argparse.ArgumentParser:
         "-si",
         "--side",
         type=str,
-        choices=["rh", "lh"],
+        choices=["rh", "lh", "None"],
         default=None,
         help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
     )
     return parser
+
+
+# def normalize_slicing_args(axis: List[float]) -> Union[float, List[float]]:
+#     """
+#     Normalize slicing arguments for sagittal/coronal/axial:
+#     - If all elements are nan, return float('nan') (default slicing)
+#     - Otherwise, return the list as-is (custom slicing)
+#     """
+#     if all(np.isnan(x) for x in axis):
+#         return float("nan")
+#     return axis
+
+
+def normalize_figure_dim(
+    figure_dim: Optional[List[float]],
+) -> Optional[List[float]]:
+    """
+    Normalize figure_dim:
+    - None → None
+    - [nan, nan] → None
+    - [w, h] → unchanged
+    """
+    if figure_dim is None:
+        return None
+
+    if len(figure_dim) == 2 and all(np.isnan(x) for x in figure_dim):
+        return None
+
+    return figure_dim
+
+
+def normalize_side(side):
+    if side in (None, "None"):
+        return None
+    return {"rh": "right", "lh": "left"}[side]
 
 
 def parse_inputs(parser: argparse.ArgumentParser, args: list) -> th.Tuple:
@@ -216,17 +253,21 @@ def parse_inputs(parser: argparse.ArgumentParser, args: list) -> th.Tuple:
     sigma = args.sigma
     cp = args.colourmap_pos
     cn = args.colourmap_neg
+    # sagittal = normalize_slicing_args(args.sagittal)
+    # coronal = normalize_slicing_args(args.coronal)
+    # axial = normalize_slicing_args(args.axial)
     sagittal = args.sagittal
     coronal = args.coronal
     axial = args.axial
-    figure_dim = args.figure_dim
+    figure_dim = normalize_figure_dim(args.figure_dim)
     outdir = args.dir_outfile
     outfile = args.outfile
     extension = args.extension
     dpi = args.dpi
     hemi = args.hemi
-    side = args.side
-    side = {"rh": "right", "lh": "left"}.get(side, None)
+    # side = args.side
+    # side = {"rh": "right", "lh": "left"}.get(side, None)
+    side = normalize_side(args.side)
 
     # create out dir
     Path(outdir).mkdir(parents=True, exist_ok=True)
