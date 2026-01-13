@@ -431,7 +431,6 @@ function download_models() {
 function populate_docker_compose() {
   # Generate docker-compose.yml file
   cat >docker-compose.yml <<EOF
-version: "3.3"
 services:
   $service_name:
     image: $image_name:$miracl_version
@@ -451,9 +450,13 @@ EOF
       gpu_check_results=false
     else
     cat >>docker-compose.yml <<EOF
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 EOF
     fi
   fi
