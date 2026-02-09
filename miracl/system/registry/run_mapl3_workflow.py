@@ -15,17 +15,21 @@ from miracl.api.enums import (
 
 # from miracl.system.datamodels.miraclobj_enums import ModuleType
 from pathlib import Path
+import sys
 
 
-# FIX: None of the overrides should be declared imperatively
-def main():
-    reg = load_modules_from_yaml("/code/miracl/system/registry/configs/modules.yaml")
-    MiraclCLIBuilder(
-        registry=reg,
-        description=MAPL3_CLI_PARSER_DESCRIPTION,
-    ).parse_from_registry()
+def run_single_workflow(reg, individial_brain_results_folder, which_brain=None):
+    results_folder_path = Path(individial_brain_results_folder)
 
-    _ = reg.list_modules()
+    print(f"Checking if folder exist: {results_folder_path}")
+    if not results_folder_path.exists():
+        print(f"Folder does not exist. Creating: {results_folder_path}")
+        results_folder_path.mkdir(parents=True)
+    else:
+        print(f"Folder already exists: {results_folder_path}")
+
+    if which_brain:
+        print(f"Running analysis on {which_brain}")
 
     def print_delimiter():
         print("\n######################################################\n")
@@ -49,10 +53,7 @@ def main():
                     "conversion",
                     "output_folder",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                ): individial_brain_results_folder,
             },
         )
     print_delimiter()
@@ -69,11 +70,13 @@ def main():
                     "workflow_connectors",
                     "mapl3_workflow_raw_autoflor_tiff_folder",
                 ),
-                "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/conv_final/{reg.get_override_value('conversion', 'outnii')}_{dx}x_down_{reg.get_override_value('conversion', 'channame')}_chan.nii.gz",
-                "-r": reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                # "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/conv_final/{reg.get_override_value('conversion', 'outnii')}_{dx}x_down_{reg.get_override_value('conversion', 'channame')}_chan.nii.gz",
+                "-i": f"{individial_brain_results_folder}/conv_final/{reg.get_override_value('conversion', 'outnii')}_{dx}x_down_{reg.get_override_value('conversion', 'channame')}_chan.nii.gz",
+                # "-r": reg.get_override_value(
+                #     "workflow_connectors",
+                #     "mapl3_workflow_results_folder",
+                # ),
+                "-r": individial_brain_results_folder,
             },
         )
         # print("")
@@ -96,15 +99,17 @@ def main():
                     "generate_patch",
                     "brain_mask",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
+                ): f"{individial_brain_results_folder}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
                 reg.get_override_flag(
                     "generate_patch",
                     "out_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                    # ): reg.get_override_value(
+                    #     "workflow_connectors",
+                    #     "mapl3_workflow_results_folder",
+                    # ),
+                ): individial_brain_results_folder,
             },
         )
     print_delimiter()
@@ -118,20 +123,23 @@ def main():
                     "preprocessing_parallel",
                     "input",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches",
+                ): f"{individial_brain_results_folder}/generated_patches",
                 reg.get_override_flag(
                     "preprocessing_parallel",
                     "out_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                    # ): reg.get_override_value(
+                    #     "workflow_connectors",
+                    #     "mapl3_workflow_results_folder",
+                    # ),
+                ): individial_brain_results_folder,
                 reg.get_override_flag(
                     "preprocessing_parallel",
                     "metadata_file",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches/metadata.json",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches/metadata.json",
+                ): f"{individial_brain_results_folder}/generated_patches/metadata.json",
             },
         )
     print_delimiter()
@@ -150,15 +158,17 @@ def main():
                     "inference",
                     "input_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/preprocessing_parallel",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/preprocessing_parallel",
+                ): f"{individial_brain_results_folder}/preprocessing_parallel",
                 reg.get_override_flag(
                     "inference",
                     "out_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                    # ): reg.get_override_value(
+                    #     "workflow_connectors",
+                    #     "mapl3_workflow_results_folder",
+                    # ),
+                ): individial_brain_results_folder,
                 reg.get_override_flag(
                     "inference",
                     "model_path",
@@ -177,15 +187,17 @@ def main():
                     "patch_stacking",
                     "input_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/inference/out_prob",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/inference/out_prob",
+                ): f"{individial_brain_results_folder}/inference/out_prob",
                 reg.get_override_flag(
                     "patch_stacking",
                     "out_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                    # ): reg.get_override_value(
+                    #     "workflow_connectors",
+                    #     "mapl3_workflow_results_folder",
+                    # ),
+                ): individial_brain_results_folder,
                 reg.get_override_flag(
                     "patch_stacking",
                     "tiff_folder",
@@ -198,7 +210,8 @@ def main():
                     "patch_stacking",
                     "metadata_file",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches/metadata.json",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/generated_patches/metadata.json",
+                ): f"{individial_brain_results_folder}/generated_patches/metadata.json",
             },
         )
     print_delimiter()
@@ -212,7 +225,8 @@ def main():
                     "raw_data_normalization",
                     "input_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/stacked_patches",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/stacked_patches",
+                ): f"{individial_brain_results_folder}/stacked_patches",
                 reg.get_override_flag(
                     "raw_data_normalization",
                     "tiff_folder",
@@ -225,15 +239,17 @@ def main():
                     "raw_data_normalization",
                     "out_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                    # ): reg.get_override_value(
+                    #     "workflow_connectors",
+                    #     "mapl3_workflow_results_folder",
+                    # ),
+                ): individial_brain_results_folder,
                 reg.get_override_flag(
                     "raw_data_normalization",
                     "brain_mask",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
+                ): f"{individial_brain_results_folder}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
             },
         )
     print_delimiter()
@@ -247,12 +263,14 @@ def main():
                     "raw_data_normalization",
                     "input_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/stacked_patches",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/stacked_patches",
+                ): f"{individial_brain_results_folder}/stacked_patches",
                 reg.get_override_flag(
                     "raw_data_normalization",
                     "brain_mask",
                     manual_module_type=ModuleType.MODULE,
-                ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
+                    # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
+                ): f"{individial_brain_results_folder}/reg_final/annotation_hemi_{reg.get_override_value('registration', 'hemi')}_{reg.get_override_value('registration', 'voxel_size')}um_tiff_clar",
                 reg.get_override_flag(
                     "raw_data_normalization",
                     "tiff_folder",
@@ -265,10 +283,11 @@ def main():
                     "skeletonization",
                     "out_dir",
                     manual_module_type=ModuleType.MODULE,
-                ): reg.get_override_value(
-                    "workflow_connectors",
-                    "mapl3_workflow_results_folder",
-                ),
+                    # ): reg.get_override_value(
+                    #     "workflow_connectors",
+                    #     "mapl3_workflow_results_folder",
+                    # ),
+                ): individial_brain_results_folder,
             },
         )
     print_delimiter()
@@ -298,12 +317,14 @@ def main():
                         "voxelization",
                         "input_dir",
                         manual_module_type=ModuleType.MODULE,
-                    ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['input']}",
+                        # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['input']}",
+                    ): f"{individial_brain_results_folder}/{vals['input']}",
                     reg.get_override_flag(
                         "voxelization",
                         "out_dir",
                         manual_module_type=ModuleType.MODULE,
-                    ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}",
+                        # ): f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}",
+                    ): f"{individial_brain_results_folder}/{vals['output']}",
                 },
             )
         print_delimiter()
@@ -326,33 +347,40 @@ def main():
         if vals["skip"]:
             print(f"Skipping warped_{vals['output']}...")
         else:
-            create_ort2std_file(
-                reg.get_override_value(
-                    "workflow_connectors", "mapl3_workflow_raw_signal_tiff_folder"
-                ),
-                reg.get_override_value("registration", "orient_code"),
-                f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}",
-            )
+            # FIX: UNCOMMENT AFTER TESTING
+            # create_ort2std_file(
+            #     reg.get_override_value(
+            #         "workflow_connectors", "mapl3_workflow_raw_signal_tiff_folder"
+            #     ),
+            #     reg.get_override_value("registration", "orient_code"),
+            #     # f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}",
+            #     f"{individial_brain_results_folder}/{vals['output']}",
+            # )
             dx = int(str(reg.get_override_value("conversion", "down")))
             dx = f"0{dx}" if 0 <= dx <= 9 else str(dx)
             reg.run(
                 "warping",
                 overrides={
-                    "-r": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/clar_allen_reg",
-                    "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/voxelized_results.nii.gz",
-                    "-o": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/ort2std.txt",
+                    # "-r": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/clar_allen_reg",
+                    "-r": f"{individial_brain_results_folder}/clar_allen_reg",
+                    # "-i": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/voxelized_results.nii.gz",
+                    "-i": f"{individial_brain_results_folder}/{vals['output']}/voxelized_results.nii.gz",
+                    # "-o": f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{vals['output']}/ort2std.txt",
+                    "-o": f"{individial_brain_results_folder}/{vals['output']}/ort2std.txt",
                     "-s": vals["channel"],
                     "-l": "None",
                 },
             )
-            move_warping_reg_final_contents(
-                f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/warped_results"
-            )
+            # FIX: UNCOMMENT AFTER TESTING
+            # move_warping_reg_final_contents(
+            #     f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/warped_results"
+            # )
         print_delimiter()
 
     heatmaps_path = (
         Path(
-            f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}"
+            # f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}"
+            f"{individial_brain_results_folder}"
         )
         / "heatmaps"
     )
@@ -428,12 +456,48 @@ def main():
                 },
             )
             # FIX: Should be declared somehow instead of being called here imperatively
-            move_to_new_folder_and_rename(
-                f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/extracted_features",
-                f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/warped_results/clarity_segmentation_features_ara_labels_split.csv",
-                str(vals["identifier"]),
-            )
+            # FIX: UNCOMMENT AFTER TESTING
+            # move_to_new_folder_and_rename(
+            #     f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/extracted_features",
+            #     f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/warped_results/clarity_segmentation_features_ara_labels_split.csv",
+            #     str(vals["identifier"]),
+            # )
         print_delimiter()
+
+
+# FIX: None of the overrides should be declared imperatively
+def main():
+    reg = load_modules_from_yaml("/code/miracl/system/registry/configs/modules.yaml")
+    MiraclCLIBuilder(
+        registry=reg,
+        description=MAPL3_CLI_PARSER_DESCRIPTION,
+    ).parse_from_registry()
+
+    _ = reg.list_modules()
+
+    if reg.get_override_value(
+        "workflow_connectors", "mapl3_workflow_clusterwise_analysis"
+    ):
+        for brain in [
+            "ctrl_brain_1",
+            "ctrl_brain_2",
+            "exp_brain_1",
+            "exp_brain_2",
+        ]:
+            run_single_workflow(
+                reg,
+                f"{reg.get_override_value('workflow_connectors', 'mapl3_workflow_results_folder')}/{brain}",
+                brain,
+            )
+
+        sys.exit()
+    else:
+        run_single_workflow(
+            reg,
+            reg.get_override_value(
+                "workflow_connectors", "mapl3_workflow_results_folder"
+            ),
+        )
 
 
 if __name__ == "__main__":

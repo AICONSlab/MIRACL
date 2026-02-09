@@ -112,3 +112,23 @@ class MAPL3_connectors:
         module_group="flow",
         version_added="2.4.0",
     )
+
+    mapl3_workflow_clusterwise_analysis: MiraclObj = MiraclObj(
+        name="mapl3_workflow_clusterwise_analysis",
+        tags=["mapl3", "flow", "mapl3_flow"],
+        cli_s_flag="mwfc_cwa",
+        cli_l_flag="mwfc_clusterwise_analysis",
+        flow={
+            "mapl3": {
+                "cli_s_flag": "mwfc_cwa",
+                "cli_l_flag": "mwfc_clusterwise_analysis",
+                "required": False,
+            }
+        },
+        cli_obj_type=ArgumentType.CUSTOM_BOOL,
+        cli_help="Run clusterwise analysis",
+        obj_default=False,
+        module="mapl3",
+        module_group="flow",
+        version_added="2.4.0",
+    )
