@@ -54,9 +54,13 @@ def run_stacking(
     PATCH_SIZE = 512
 
     def image_stacking(image_mode, image_type):
-        height = floor(subj_height / PATCH_SIZE) + 1
-        width = floor(subj_width / PATCH_SIZE) + 1
-        depth = floor(subj_depth / PATCH_SIZE) + 1
+        # height = floor(subj_height / PATCH_SIZE) + 1
+        # width = floor(subj_width / PATCH_SIZE) + 1
+        # depth = floor(subj_depth / PATCH_SIZE) + 1
+
+        height = subj_height // PATCH_SIZE + 1 * (subj_height % PATCH_SIZE > 0)
+        width = subj_width // PATCH_SIZE + 1 * (subj_width % PATCH_SIZE > 0)
+        depth = subj_depth // PATCH_SIZE + 1 * (subj_depth % PATCH_SIZE > 0)
 
         cnt_depth = 1
         # for each subject we have 4 depth (0-3); each depth has multiple 512^3 image patches

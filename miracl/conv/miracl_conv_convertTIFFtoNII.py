@@ -59,6 +59,7 @@ def helpmsg(name=None):
                             Nii center (default: 0,0,0 ) corresponding to Allen atlas nii template
       -dz , --downzdim      Down-sample in z dimension, binary argument, (default: 1) => yes
       -pd , --prevdown      Previous down-sample ratio, if already downs-sampled
+      -pct, --percentile_thr Percentile value for thresholding extreme values (default: 0)
       -h, --help            Show this help message and exit
 
     '''
@@ -116,6 +117,7 @@ def parsefn():
                               help="Down-sample in z dimension, binary argument, (default: 1) => yes")
         optional.add_argument('-pd', '--prevdown', type=int, metavar='',
                               help="Previous down-sample ratio, if already downs-sampled")
+        optional.add_argument('-pct', '--percentile_thr', type=float, metavar="", help="Percentile value for thresholding extreme values (default: None)")
 
         # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -150,30 +152,32 @@ def parse_inputs(parser, args):
 
         # Initialize default params
 
-        work_dir = os.path.abspath(os.getcwd()) if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
+        work_dir = str(linedits[fields[0]].text()) if linedits[fields[0]].text() else Path.cwd().resolve()
 
-        outnii = 'clarity' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
+        outnii = str(linedits[fields[1]].text()) if linedits[fields[1]].text() else 'clarity'
         # assert isinstance(outnii, str), '-outnii not a string'
 
-        d = 5 if not linedits[fields[2]].text() else int(linedits[fields[2]].text())
+        d = int(linedits[fields[2]].text()) if linedits[fields[2]].text() else 5
         # assert isinstance(d, int), '-d not a integer'
 
-        chann = 0 if not linedits[fields[3]].text() else int(linedits[fields[3]].text())
+        chann = int(linedits[fields[3]].text()) if linedits[fields[3]].text() else 0
         # assert isinstance(chann, int), '-chann not a integer'
 
-        chanp = None if not linedits[fields[4]].text() else str(linedits[fields[4]].text())
+        chanp = str(linedits[fields[4]].text()) if linedits[fields[4]].text() else None
 
-        chan = 'eyfp' if not linedits[fields[5]].text() else str(linedits[fields[5]].text())
+        chan = str(linedits[fields[5]].text()) if linedits[fields[5]].text() else 'eyfp'
 
-        vx = 5 if not linedits[fields[6]].text() else float(linedits[fields[6]].text())
+        vx = float(linedits[fields[6]].text()) if linedits[fields[6]].text() else 5.
 
-        vz = 5 if not linedits[fields[7]].text() else float(linedits[fields[7]].text())
+        vz = float(linedits[fields[7]].text()) if linedits[fields[7]].text() else 5.
 
-        cent = [0, 0, 0] if not linedits[fields[8]].text() else linedits[fields[8]].text()
+        cent = linedits[fields[8]].text() if linedits[fields[8]].text() else [0, 0, 0]
 
-        downz = 1 if not linedits[fields[9]].text() else int(linedits[fields[9]].text())
+        downz = int(linedits[fields[9]].text()) if linedits[fields[9]].text() else 1
 
-        pd = 1 if not linedits[fields[10]].text() else int(linedits[fields[10]].text())
+        pd = int(linedits[fields[10]].text()) if linedits[fields[10]].text() else 1
+
+        pct_thr = float(linedits[fields[11]].text()) if linedits[fields[11]].text() else 0.0
 
     else:
 
@@ -246,11 +250,13 @@ def parse_inputs(parser, args):
         else:
             pd = args.prevdown
 
+        pct_thr = 0 if args.percentile_thr is None else args.percentile_thr
+
     # make res in um
     vx /= float(1000)  # in um
     vz /= float(1000)
 
-    return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd
+    return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr
 
 
 # ---------
@@ -322,6 +328,19 @@ def converttiff2nii(d, i, x, newdata, tifx):
     # data.append(mres)
 
 
+def percentile_threshold(data, percentile_thr):
+    """
+    Thresholding extreme values using percentile
+    """
+
+    percentile_001 = np.percentile(data, percentile_thr)
+    percentile_9999 = np.percentile(data, 100 - percentile_thr)
+
+    # Threshold the image array
+    thresholded_img = np.clip(data, percentile_001, percentile_9999)
+
+    return thresholded_img
+
 def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
     # array type
     # data_array = np.array(mres, dtype='int16')
@@ -376,7 +395,7 @@ def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
-    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd = parse_inputs(parser, args)
+    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr = parse_inputs(parser, args)
 
     print("\n Converting with the following settings:")
     print(f"  indir:      {indir}")
@@ -391,6 +410,7 @@ def main(args):
     print(f"  cent:       {cent}")
     print(f"  downz:      {downz}")
     print(f"  pd:         {pd}")
+    print(f"  pct_thr:    {pct_thr}")
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
@@ -444,7 +464,8 @@ def main(args):
 
     nvx = vx * pd
     nvz = vz * pd
-
+    
+    newdata = percentile_threshold(newdata, pct_thr) if pct_thr > 0 else newdata
     savenii(newdata, d, stackname, downz, nvx, nvz, cent)
 
     # clear tmp memmap

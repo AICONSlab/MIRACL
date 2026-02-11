@@ -18,69 +18,104 @@ import nibabel as nib
 
 from miracl import ATLAS_DIR
 
-def helpmsg():
-    return '''Usage: miracl_lbls_stats.py 
 
-    Computes Allen label stats of input volume 
+# Dependencies:
 
-    A GUI will open to choose your:
+#     ImageMaths (ANTs)
+#     Python 2.7
 
-        - < input volume > 
 
-        - < registered Allen labels >
-
-    ----------
-
-    For command-line / scripting
-
-    Usage: miracl_lbls_stats.py -i [input volume] -l [reg Allen labels] -o [ out csv ]
-
-    Example: miracl_lbls_stats.py -i clarity_downsample_05x_virus_chan.nii.gz -l registered_labels.nii.gz -o label_stats.csv
-        -s Count
-
-    Arguments (required):
-
-        -i Input volume
-
-        -l Registered Allen labels
-
-    Optional arguments:
-
-        -o Output file name
-
-        -s Sort values by, options are:
-
-            Mean or StdD or Max or Min or Count or Vol(mm^3)
-
-            Mean -> mean intensity values
-            Count -> number of voxels
-
-        -m  Labels hemi (combined or split, default=combined)
-
-        -d  Labels depth (default no depth chosen, all labels)
-
-        '''
-
-    # Dependencies:
-
-    #     ImageMaths (ANTs)
-    #     Python 2.7
+PROG_NAME = "lbls_stats"
 
 
 def parsefn():
-    if len(sys.argv) >= 3 and sys.argv[-2] == 'lbl' and sys.argv[-1] == 'stats':
-        parser = argparse.ArgumentParser(description='', usage=helpmsg())
+    if len(sys.argv) >= 3 and sys.argv[-2] == "lbl" and sys.argv[-1] == "stats":
+        parser = argparse.ArgumentParser(description="", usage=helpmsg())
     else:
-        parser = argparse.ArgumentParser(description='', usage=helpmsg())
+        parser = argparse.ArgumentParser(
+            description="""miracl lbls_stats -i INVOL -l LBLS [-s SORT] [-m HEMI] [-d DEPTH]
+                         [-r RATIO] [-o OUTFILE] [-h]
 
-        parser.add_argument('-i', '--invol', type=str, help="In volume")
-        parser.add_argument('-l', '--lbls', type=str, help="Reg lbls")
-        parser.add_argument('-s', '--sort', type=str, help="Sort by", default='Mean')
-        parser.add_argument('-m', '--hemi', type=str, help="Labels hemi")
-        parser.add_argument('-d', '--depth', type=int, help="Labels depth")
-        parser.add_argument('-r', '--ratio', type=str, help="Tractography (.trk) file used to generate tract ratio")
-        parser.add_argument('-o', '--outfile', type=str, help="Output file",
-                            default='clarity_label_statistics.csv')
+Modes:
+    GUI Mode (default):
+        Runs an interactive GUI to select:
+            - Input volume file
+            - Registered Allen labels file
+        Then allows setting output options via the GUI.
+
+    Command-line / Scripting Mode:
+        Use the following arguments to run without GUI.
+
+Examples:
+    # Run with GUI
+    miracl_lbls_stats.py lbls stats
+
+    # Run with command-line arguments
+    miracl_lbls_stats.py -i input_volume.nii.gz -l registered_labels.nii.gz -o output_stats.csv -s Count
+
+Notes:
+    - Input volumes must be registered to the Allen atlas space.
+    - Output CSV contains label statistics merged with Allen ontology info.
+            """,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            add_help=False,
+        )
+
+        required = parser.add_argument_group("required arguments")
+        required.add_argument(
+            "-i",
+            "--invol",
+            required=True,
+            type=str,
+            help="Input volume",
+        )
+        required.add_argument(
+            "-l",
+            "--lbls",
+            required=True,
+            type=str,
+            help="Registerd Allen labels",
+        )
+
+        optional = parser.add_argument_group("additional arguments")
+        optional.add_argument(
+            "-s",
+            "--sort",
+            type=str,
+            help="Sort by Mean, StdD, Max, Min, Count or Vol(mm^3) (default: 'Mean')",
+            default="Mean",
+        )
+        optional.add_argument(
+            "-m",
+            "--hemi",
+            type=str,
+            help="Labels hemi, 'combined' or 'split' (default: 'combined')",
+        )
+        optional.add_argument(
+            "-d",
+            "--depth",
+            type=int,
+            help="Labels depth (default: None)",
+        )
+        optional.add_argument(
+            "-r",
+            "--ratio",
+            type=str,
+            help="Tractography (.trk) file used to generate tract ratio (default: None)",
+        )
+        optional.add_argument(
+            "-o",
+            "--outfile",
+            type=str,
+            help="Output CSV filename (default: %(default)s)",
+            default="clarity_label_statistics.csv",
+        )
+        optional.add_argument(
+            "-h",
+            "--help",
+            action="help",
+            help="show this help message and exit",
+        )
 
         return parser
 
@@ -89,15 +124,17 @@ def parse_inputs(parser, args):
     if isinstance(args, list):
         args, unknown = parser.parse_known_args()
 
-    if sys.argv[-2] == 'lbls' and sys.argv[-1] == 'stats':
+    if sys.argv[-2] == "lbls" and sys.argv[-1] == "stats":
         print("Running in GUI mode")
 
-        title = 'Label Statistics'
-        vols = ['Input Volume', 'Registered Labels']
-        fields = ['Output file name', 'Sort (def = Mean)', 'Hemi', 'Label depth']
+        title = "Label Statistics"
+        vols = ["Input Volume", "Registered Labels"]
+        fields = ["Output file name", "Sort (def = Mean)", "Hemi", "Label depth"]
 
         app = QApplication(sys.argv)
-        menu, linedits, labels = gui_opts.OptsMenu(title=title, vols=vols, fields=fields, helpfun=helpmsg())
+        menu, linedits, labels = gui_opts.OptsMenu(
+            title=title, vols=vols, fields=fields, helpfun=helpmsg()
+        )
         menu.show()
         app.exec_()
         app.processEvents()
@@ -108,10 +145,24 @@ def parse_inputs(parser, args):
         lblsstr = labels[vols[1]].text()
         lbls = str(lblsstr.split(":")[1]).lstrip()
 
-        outfile = 'clarity_label_statistics.csv' if not linedits[fields[0]].text() else str(linedits[fields[0]].text())
-        sort = 'Mean' if not linedits[fields[1]].text() else str(linedits[fields[1]].text())
-        hemi = 'Combined' if not linedits[fields[2]].text() else str(linedits[fields[2]].text())
-        label_depth = '' if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+        outfile = (
+            "clarity_label_statistics.csv"
+            if not linedits[fields[0]].text()
+            else str(linedits[fields[0]].text())
+        )
+        sort = (
+            "Mean"
+            if not linedits[fields[1]].text()
+            else str(linedits[fields[1]].text())
+        )
+        hemi = (
+            "combined"
+            if not linedits[fields[2]].text()
+            else str(linedits[fields[2]].text())
+        )
+        label_depth = (
+            "" if not linedits[fields[3]].text() else str(linedits[fields[3]].text())
+        )
 
     else:
         print("\n running in script mode \n")
@@ -127,9 +178,13 @@ def parse_inputs(parser, args):
         # check if pars given
 
         assert isinstance(invol, str)
-        assert os.path.exists(invol), '%s does not exist ... please check path and rerun script' % invol
+        assert os.path.exists(invol), (
+            "%s does not exist ... please check path and rerun script" % invol
+        )
         assert isinstance(lbls, str)
-        assert os.path.exists(lbls), '%s does not exist ... please check path and rerun script' % lbls
+        assert os.path.exists(lbls), (
+            "%s does not exist ... please check path and rerun script" % lbls
+        )
         assert isinstance(outfile, str)
         assert isinstance(sort, str)
 
@@ -137,6 +192,7 @@ def parse_inputs(parser, args):
 
 
 # ---------
+
 
 def upsampleswplbls(seg, lbls):
     segx = seg.shape[1]
@@ -148,21 +204,16 @@ def upsampleswplbls(seg, lbls):
     lblsz = lbls.shape[0]
 
     if segx != lblsx:
-
         if segx == lblsy:
-
-            print('Swapping x-y')
+            print("Swapping x-y")
             reslbls = np.swapaxes(lbls, 1, 2)
 
         else:
-
             if segx > lblsx:
-
-                print('Upsampling labels to clarity resolution')
+                print("Upsampling labels to clarity resolution")
 
             else:
-
-                print('Downsampling labels to voxelized clarity resolution')
+                print("Downsampling labels to voxelized clarity resolution")
 
             rx = float(segx) / lblsx
             ry = float(segy) / lblsy
@@ -170,27 +221,23 @@ def upsampleswplbls(seg, lbls):
 
             reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
 
-            print('Segmentation shape:', seg.shape)
+            print("Segmentation shape:", seg.shape)
 
-            print('Resampled labels shape:', reslbls.shape)
+            print("Resampled labels shape:", reslbls.shape)
 
             resx = reslbls.shape[1]
 
             if segx != resx:
-                print('Swapping x-y')
+                print("Swapping x-y")
                 reslbls = np.swapaxes(reslbls, 1, 2)
 
     else:
-
         if segz != lblsz:
-
             if segx > lblsx:
-
-                print('Upsampling labels to clarity resolution')
+                print("Upsampling labels to clarity resolution")
 
             else:
-
-                print('Downsampling labels to voxelized clarity resolution')
+                print("Downsampling labels to voxelized clarity resolution")
 
             rx = float(segx) / lblsx
             ry = float(segy) / lblsy
@@ -199,25 +246,24 @@ def upsampleswplbls(seg, lbls):
             reslbls = sp.ndimage.zoom(lbls, (rz, rx, ry), order=0)
 
         else:
-
             reslbls = lbls
 
     return reslbls
 
 
 def get_count_stats(invol, lbls):
-    ''' Given an input volume and a label mask, generate a table of statistics for each label in the label mask.
+    """Given an input volume and a label mask, generate a table of statistics for each label in the label mask.
     Unlike c3d's "lstat", this method extracts the following statistics:
 
     "intensity count": within a label, the number of voxels in the input with an intensity greater than 0
 
     invol (str): path to a medical image
     lbls (str): path to a label image
-    '''
+    """
     # load images
     invol_img = nib.load(invol)
     invol_arr = invol_img.get_data()
-    
+
     lbls_img = nib.load(lbls)
     lbls_arr = lbls_img.get_data()
 
@@ -233,17 +279,18 @@ def get_count_stats(invol, lbls):
         intensity_count = intensity_count.sum()
 
         # create dict that stores {intensity_value, count, total}
-        res.append({'LabelID': int(label_id), "intensity_count": intensity_count})
+        res.append({"LabelID": int(label_id), "intensity_count": intensity_count})
 
     # convert list to pandas dataframe, return
     return pd.DataFrame(res)
 
+
 def get_tract_count(tract_file):
-    """ Given a tractography file, return the number of tracts
-    
+    """Given a tractography file, return the number of tracts
+
     Args: tract_file - trk file
     """
-    print('reading sta streamlines')
+    print("reading sta streamlines")
     streamlines_file = nib.streamlines.load(tract_file)
     streams, hdr = streamlines_file.streamlines, streamlines_file.header
 
@@ -251,6 +298,7 @@ def get_tract_count(tract_file):
 
 
 # ---------
+
 
 def main(args):
     # parse in args
@@ -265,21 +313,32 @@ def main(args):
     #                       stderr=subprocess.PIPE)
 
     try:
-        subprocess.check_call("c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s" % (invol, lbls, outfile), shell=True)
+        subprocess.check_call(
+            "c3d %s %s -lstat | sed -e 's/^[ ]*//' | tr -s '[:blank:]' ',' | sed -r '2,$s/(.*),(.*),/\\1 \\2 /'> %s"
+            % (invol, lbls, outfile),
+            shell=True,
+        )
     except subprocess.CalledProcessError as err:
-        print("Error occurred during the function call. It is possible that %s and %s had different spacings" % (invol, lbls))
+        print(
+            "Error occurred during the function call. It is possible that %s and %s had different spacings"
+            % (invol, lbls)
+        )
         sys.exit(1)
     except OSError:
         sys.exit(1)
 
     # read fwf
-    out_stats = pd.read_csv('%s' % outfile)
+    out_stats = pd.read_csv("%s" % outfile)
 
     # read Allen ontology -- combined or split labels
     if hemi == "combined":
-        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_combined.csv' % ATLAS_DIR)
+        annot_csv = pd.read_csv(
+            "%s/ara/ara_mouse_structure_graph_hemi_combined.csv" % ATLAS_DIR
+        )
     else:
-        annot_csv = pd.read_csv('%s/ara/ara_mouse_structure_graph_hemi_split.csv' % ATLAS_DIR)
+        annot_csv = pd.read_csv(
+            "%s/ara/ara_mouse_structure_graph_hemi_split.csv" % ATLAS_DIR
+        )
 
     # extract labels at certain depth only
     if label_depth is not None:
@@ -298,24 +357,24 @@ def main(args):
     # Add label Name, Abrv, PathID
 
     # make dic
-    name_dict = annot_csv.set_index('id')['name'].to_dict()
-    acronym_dict = annot_csv.set_index('id')['acronym'].to_dict()
-    pathid_dict = annot_csv.set_index('id')['structure_id_path'].to_dict()
-    parent_dict = annot_csv.set_index('id')['parent_structure_id'].to_dict()
+    name_dict = annot_csv.set_index("id")["name"].to_dict()
+    acronym_dict = annot_csv.set_index("id")["acronym"].to_dict()
+    pathid_dict = annot_csv.set_index("id")["structure_id_path"].to_dict()
+    parent_dict = annot_csv.set_index("id")["parent_structure_id"].to_dict()
 
     # replace label info
-    out_stats['name'] = out_stats.LabelID.replace(name_dict)
-    out_stats['acronym'] = out_stats.LabelID.replace(acronym_dict)
-    out_stats['parent'] = out_stats.LabelID.replace(parent_dict)
-    out_stats['pathid'] = out_stats.LabelID.replace(pathid_dict)
+    out_stats["name"] = out_stats.LabelID.replace(name_dict)
+    out_stats["acronym"] = out_stats.LabelID.replace(acronym_dict)
+    out_stats["parent"] = out_stats.LabelID.replace(parent_dict)
+    out_stats["pathid"] = out_stats.LabelID.replace(pathid_dict)
 
     # sort data-frame
     out_stats = out_stats.sort_values([sort], ascending=False)
     # remove background
-    out_stats = out_stats[out_stats['LabelID'] != 0]
+    out_stats = out_stats[out_stats["LabelID"] != 0]
 
     # re-oder columns with info then sorted column of choice
-    cols = ['LabelID', 'acronym', 'name', 'parent', sort]
+    cols = ["LabelID", "acronym", "name", "parent", sort]
     df_cols = out_stats.columns.values
     all_cols = np.hstack([cols, df_cols])
     _, idx = np.unique(all_cols, return_index=True)
@@ -327,7 +386,7 @@ def main(args):
     out_stats = out_stats[~out_stats.name.apply(lambda x: np.isreal(x))]
 
     # save to csv
-    out_stats.to_csv('%s' % outfile, index=False)
+    out_stats.to_csv("%s" % outfile, index=False)
 
 
 if __name__ == "__main__":

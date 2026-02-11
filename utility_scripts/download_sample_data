@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Constants
+readonly ACE_MODE_2_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_mode_2.zip"
+readonly ACE_STATS_URL="https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/sample_data/ace/ace_sample_data_stats.zip"
+
+display_help() {
+  cat <<EOF
+This script downloads sample data required to run MIRACL's tutorials.
+
+Things to note:
+
+1) Please make sure that you are in the correct folder where you want to download the data to.
+2) Ideally this folder has been mounted into the Docker/Apptainer container from the host system
+to ensure that the data won't be deleted when the container is shut down.
+
+Usage: $0 [-h]
+
+Options:
+  -h    Display this help menu
+
+Run the script without any options to start the interactive download menu.
+EOF
+}
+
+display_menu() {
+  cat <<EOF
+
+Please make sure that you are in the correct folder where you want to download the data to and choose from the following options:
+
+1) ACE sample dataset Mode 2 (25.1GB zipped)
+2) ACE sample dataset stats (3.34GB zipped)
+q) Exit this program
+
+EOF
+}
+
+prompt_yes_no() {
+  local prompt_message="$1"
+  local default_choice="${2:-Y}"
+  local user_input
+
+  read -rp "$prompt_message ($default_choice): " user_input
+  user_input=${user_input:-$default_choice}
+
+  if [[ ${user_input,,} == "y" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+download_file() {
+  local url="$1"
+  local filename="$2"
+  echo ""
+  echo "Downloading $filename..."
+  echo ""
+  if wget -q --show-progress -O "$filename" "$url"; then
+    echo ""
+    echo "Download complete."
+    echo ""
+    handle_zip_file "$filename"
+  else
+    echo ""
+    echo "Download failed. Please make sure that you are connected to the internet and that you have write permissions for this folder."
+    echo ""
+    return 1
+  fi
+}
+
+handle_zip_file() {
+  local filename="$1"
+  if prompt_yes_no "Do you want to extract the downloaded data?" "Y/n"; then
+    if unzip "$filename"; then
+      echo ""
+      echo "File extracted successfully."
+      echo ""
+      if prompt_yes_no "Do you want to delete the original zip file?" "Y/n"; then
+        rm "$filename"
+        echo ""
+        echo "Original zip file deleted."
+        echo ""
+      fi
+    else
+      echo "Extraction failed. Please check that the zip file is not corrupted and try again."
+    fi
+  else
+    echo ""
+    echo "Zip file not extracted but retained in folder."
+    echo ""
+  fi
+}
+
+handle_choice() {
+  case ${1,,} in
+  1)
+    download_file "$ACE_MODE_2_URL" "ACE_sample_dataset_mode_2.zip"
+    ;;
+  2)
+    download_file "$ACE_STATS_URL" "ACE_sample_dataset_stats.zip"
+    ;;
+  q)
+    echo ""
+    echo "Exiting. Have a great day!"
+    exit 0
+    ;;
+  *)
+    echo "Please choose a dataset to download or quit ('q' or 'Q'): "
+    return 1
+    ;;
+  esac
+}
+
+main() {
+  while true; do
+    display_menu
+    read -rp "Select option: " choice
+    if handle_choice "$choice"; then
+      if ! prompt_yes_no "Do you want to download another dataset?" "Y/n"; then
+        echo ""
+        echo "Exiting. Have a great day!"
+        exit 0
+      fi
+    fi
+  done
+}
+
+if [[ $# -eq 1 && "$1" == "-h" ]]; then
+  display_help
+  exit 0
+fi
+
+if [[ $# -eq 0 ]]; then
+  main
+else
+  echo "Invalid option. Use -h for help or run without flags to invoke the interactive download menu."
+  exit 1
+fi

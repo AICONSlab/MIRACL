@@ -9,5 +9,6 @@ This module consists of multiple sub-modules to apply statistical and correlatio
    :maxdepth: 2
    :caption: Table of contents:
     
-   ACE CLuster only **new** <ace_cluster/ace_cluster>
+   ACE Cluster only **new** <ace_cluster/ace_cluster>
+   Label statistics <lbls_stats/lbls_stats>
 

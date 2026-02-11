@@ -1,13 +1,17 @@
-import sys
 import argparse
+import sys
+
+from miracl.lbls import miracl_lbls_stats
 from miracl.stats import (
-    miracl_stats_paired_ttest_ipsi_contra,
-    miracl_stats_voxel_wise,
-    miracl_stats_paired_ttest_group,
     miracl_plot_single_subj,
-    miracl_stats_heatmap_group,
+    miracl_stats_ace_cluster_neuron_count,
     miracl_stats_ace_interface,
     miracl_stats_ace_parser,
+    miracl_stats_ace_validate_clusters,
+    miracl_stats_heatmap_group,
+    miracl_stats_paired_ttest_group,
+    miracl_stats_paired_ttest_ipsi_contra,
+    miracl_stats_voxel_wise,
 )
 
 
@@ -33,6 +37,18 @@ def heatmap_group(parser, args):
 
 def ace(parser, args):
     miracl_stats_ace_interface.main(args)
+
+
+def ace_neuron_count(parser, args):
+    miracl_stats_ace_cluster_neuron_count.main(args)
+
+
+def ace_validate_clusters(parser, args):
+    miracl_stats_ace_validate_clusters.main(args)
+
+
+def lbls_stats(parser, args):
+    miracl_lbls_stats.main(args)
 
 
 def get_parser():
@@ -109,6 +125,37 @@ def get_parser():
         help="run ACE stats",
     )
     parser_ace.set_defaults(func=ace)
+
+    ace_neuron_parser = miracl_stats_ace_cluster_neuron_count.parsefn()
+    parser_ace_neuron = subparsers.add_parser(
+        miracl_stats_ace_cluster_neuron_count.PROG_NAME,
+        parents=[ace_neuron_parser],
+        add_help=False,
+        usage=ace_neuron_parser.usage,
+        help="run ACE neuron count stats",
+    )
+    parser_ace_neuron.set_defaults(func=ace_neuron_count)
+
+    ace_validate_parser = miracl_stats_ace_validate_clusters.parsefn()
+    parser_ace_validate = subparsers.add_parser(
+        miracl_stats_ace_validate_clusters.PROG_NAME,
+        parents=[ace_validate_parser],
+        add_help=False,
+        usage=ace_validate_parser.usage,
+        help="run ACE validate clusters stats",
+    )
+    parser_ace_validate.set_defaults(func=ace_validate_clusters)
+
+    lbls_stats_parser = miracl_lbls_stats.parsefn()
+    parser_lbls_stats = subparsers.add_parser(
+        miracl_lbls_stats.PROG_NAME,
+        parents=[lbls_stats_parser],
+        add_help=False,
+        usage=lbls_stats_parser.description,
+        # epilog=lbls_stats_parser.epilog,
+        help="compute lbl stats for Allen Atlas volumes",
+    )
+    parser_lbls_stats.set_defaults(func=lbls_stats)
 
     return parser
 

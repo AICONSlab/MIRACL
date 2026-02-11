@@ -175,7 +175,7 @@ def parcomputevox(seg, radius, ncpus, down, outvox):
 
     # read data
     segtif = tiff.imread("%s" % seg)
-    segflt = segtif.astype('float32')
+    segflt = segtif
 
     # ---------
     # Setup kernel

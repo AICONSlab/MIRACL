@@ -41,45 +41,45 @@ jobs:
             docker run -it mgoubran/miracl echo "Docker run test"
       - store_test_results:
           path: /tmp/tests
-  singularity-publish:
-    docker:
-      - image: quay.io/singularity/singularity:v3.10.3
-    working_directory: /root/project/MIRACL
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Compile and push Singularity image
-          no_output_timeout: 2h
-          command: |
-            # Log in to cloud.sylabs.io
-            echo $SYLABS_TOKEN_MAR_08_2024 > tokenfile && \
-            singularity remote login -u aiconslab --tokenfile tokenfile && \
-            # Create Singularity container remotely and push to cloud
-            singularity build miracl.sif docker://mgoubran/miracl:latest
-            # Setting trap in case image cannot be deleted
-            set -e
-            trap "echo 'Image doesn't exist - catching error!'; if [ $? == 255 ]; then echo 'Error 255'; fi" ERR
-            # Remove current Singularity container
-            singularity delete --force library://aiconslab/miracl/miracl:latest && \
-            # Unset trap
-            trap - ERR
-            singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
-  singularity-build:
-    docker:
-      - image: quay.io/singularity/singularity:v3.10.3
-    working_directory: /root/project/MIRACL
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Compile and push Singularity image
-          no_output_timeout: 2h
-          command: |
-            # Create Singularity container remotely and push to cloud
-            singularity build miracl.sif docker://mgoubran/miracl:dev-latest
+  # singularity-publish:
+  #   docker:
+  #     - image: quay.io/singularity/singularity:v3.10.3
+  #   working_directory: /root/project/MIRACL
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         docker_layer_caching: true
+  #     - run:
+  #         name: Compile and push Singularity image
+  #         no_output_timeout: 2h
+  #         command: |
+  #           # Log in to cloud.sylabs.io
+  #           echo $SYLABS_TOKEN_JAN_21_2025 > tokenfile && \
+  #           singularity remote login -u aiconslab --tokenfile tokenfile && \
+  #           # Create Singularity container remotely and push to cloud
+  #           singularity build miracl.sif docker://mgoubran/miracl:latest
+  #           # Setting trap in case image cannot be deleted
+  #           set -e
+  #           trap "echo 'Image doesn't exist - catching error!'; if [ $? == 255 ]; then echo 'Error 255'; fi" ERR
+  #           # Remove current Singularity container
+  #           singularity delete --force library://aiconslab/miracl/miracl:latest && \
+  #           # Unset trap
+  #           trap - ERR
+  #           singularity push -U miracl.sif library://aiconslab/miracl/miracl:latest
+  # singularity-build:
+  #   docker:
+  #     - image: quay.io/singularity/singularity:v3.10.3
+  #   working_directory: /root/project/MIRACL
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         docker_layer_caching: true
+  #     - run:
+  #         name: Compile and push Singularity image
+  #         no_output_timeout: 2h
+  #         command: |
+  #           # Create Singularity container remotely and push to cloud
+  #           singularity build miracl.sif docker://mgoubran/miracl:dev-latest
 
 workflows:
   build_and_test:
@@ -127,14 +127,14 @@ workflows:
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:latest mgoubran/miracl:${DOCKER_TAG}
-      - singularity-publish:
-          context:
-            - miracl_singularity
-          requires:
-            - docker-publish/publish
-          filters:
-            branches:
-              only: master
+      # - singularity-publish:
+      #     context:
+      #       - miracl_singularity
+      #     requires:
+      #       - docker-publish/publish
+      #     filters:
+      #       branches:
+      #         only: master
   
   docker_with_lifecycle_dev:
     jobs:
@@ -151,11 +151,11 @@ workflows:
                    DOCKER_TAG=$(docker run --entrypoint /bin/cat mgoubran/miracl:dev-latest /code/miracl/version.txt)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
                    docker tag mgoubran/miracl:dev-latest mgoubran/miracl:dev-${DOCKER_TAG}
-      - singularity-build:
-          context:
-            - miracl_singularity
-          requires:
-            - docker-publish/publish
-          filters:
-            branches:
-              only: dev
+      # - singularity-build:
+      #     context:
+      #       - miracl_singularity
+      #     requires:
+      #       - docker-publish/publish
+      #     filters:
+      #       branches:
+      #         only: dev

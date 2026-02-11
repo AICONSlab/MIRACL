@@ -30,7 +30,7 @@ from miracl.stats import reg_svg, stats_gui_heatmap_group
 
 # Log errors to file in current working directory
 # FIX: Add output directory to path if provided as argument
-logger.add(os.getcwd() + "/miracl_stats_heatmap_group_error.log", level='ERROR', mode="w")
+logger.add(Path.cwd() / "miracl_stats_heatmap_group_error.log", level='ERROR', mode="w")
 
 
 # ----- Input Arguments ------
@@ -104,14 +104,14 @@ def parsefn():
                         help="path to group 1 directory",
                         default=None,
                         nargs='+',
-                        required=True)
+                        required=False)
     parser.add_argument('-g2',
                         '--group2',
                         type=str,
                         help="path to group 2 directory",
                         default=None,
                         nargs='+',
-                        required=True)
+                        required=False)
     parser.add_argument('-v',
                         '--vox',
                         type=int,
@@ -167,7 +167,7 @@ def parsefn():
                         '--dir_outfile',
                         type=str,
                         help="Output file directory",
-                        default=os.getcwd())
+                        default=Path.cwd())
     parser.add_argument('-o',
                         '--outfile',
                         nargs='+',
@@ -183,6 +183,23 @@ def parsefn():
                         type=int,
                         help="dots per inch",
                         default=500)
+    parser.add_argument('-m',
+                        '--hemi',
+                        type=str,
+                        choices=["combined", "split"],
+                        default="combined",
+                        help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
+                        )
+    parser.add_argument("-si",
+                        "--side",
+                        type=str,
+                        choices=["rh", "lh", "None"],
+                        default=None,
+                        help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",)
+    parser.add_argument("--mask",
+                        action="store_true",
+                        default=False,
+                        help="mask out non-brain regions in heatmap (default: %(default)s)",)
     return parser
 
 
@@ -214,9 +231,12 @@ def parse_inputs(parser, args):
     outfile = args.outfile
     extension = args.extension
     dpi = args.dpi
+    hemi = args.hemi
+    side = args.side
+    mask_flag = args.mask
 
-    # sys.exit()
-
+    if g1 is None:
+        parser.error("Group 1 directory path (-g1 / --group1) is required")
     # validation functions
 
     def path_check(*paths):
@@ -233,11 +253,13 @@ def parse_inputs(parser, args):
 
     # Validate paths
     path_check(*g1)
-    path_check(*g2)
+    if g2 != None:
+        path_check(*g2)
     path_check(outdir)
 
     # assert g1 and g2 are the same length
-    assert len(g1) == len(g2), "g1 and g2 must contain the same number of arguments"
+    if g2 != None:
+        assert len(g1) == len(g2), "g1 and g2 must contain the same number of arguments"
     assert len(g1) in [1, 2], "g1 and g2 must contain 1 or 2 arguments"
 
     # assert g1, g2, outdir directories are all different
@@ -307,9 +329,14 @@ def parse_inputs(parser, args):
     find_value(3, [len(outfile)], False,
                 "-o Must enter three arguments. Detected {} Arguments: {} \n Names must use underscore instead of space. \n Ex. ACCEPTABLE -o control_group treated_group difference_group \n UNACCEPTABLE -o control group treated group difference group".format(
                     len(outfile), outfile))
-    multi = True
+    
+    if g2 != None:
+        multi = True
 
-    return g1, g2, vox, sigma, percentile, cp, cn, sagittal, coronal, axial, x, y, z, figure_dim, outdir, outfile, extension, dpi, multi
+    # change side to "left" or "right"
+    side = {"rh": "right", "lh": "left"}.get(side, None)
+
+    return g1, g2, vox, sigma, percentile, cp, cn, sagittal, coronal, axial, x, y, z, figure_dim, outdir, outfile, extension, dpi, multi, hemi, side, mask_flag
 
 def grp_mean(input_path, brain_template, outdir, x, y, z, percentile):
     '''read input image files, return mean and shape. Calls reg_svg script to generate registration-to-input data check svg animation'''
@@ -633,14 +660,19 @@ def plot(mean_img, mask, group, vox, cut_coords, cut_len, sagittal, coronal, axi
 def main(args):
     # read input arguments
     parser = parsefn()
-    g1, g2, vox, sigma, percentile, cp, cn, sagittal, coronal, axial, x, y, z, figure_dim, outdir, outfile, extension, dpi, multi = parse_inputs(
+    g1, g2, vox, sigma, percentile, cp, cn, sagittal, coronal, axial, x, y, z, figure_dim, outdir, outfile, extension, dpi, multi, hemi, side, mask_flag = parse_inputs(
         parser, args)
 
     print("Step 1/{} : Completed Input Argument Validation".format(4 + int(multi * 3)))
     start_time=time.time()
     # retrieve Atlas paths
-    mask = os.path.join(ATLAS_DIR, 'ara/annotation/annotation_hemi_combined_%dum.nii.gz' % (vox))
-    brain_template = os.path.join(ATLAS_DIR, 'ara/template/average_template_%dum.nii.gz' % (vox))
+    if hemi == "combined":
+        mask = os.path.join(ATLAS_DIR, f'ara/annotation/annotation_hemi_combined_{vox}um.nii.gz')
+        brain_template = os.path.join(ATLAS_DIR, f'ara/template/average_template_{vox}um.nii.gz')
+    elif hemi == "split":
+        mask = os.path.join(ATLAS_DIR, f'ara/annotation/annotation_hemi_{side}_{vox}um.nii.gz')
+        brain_template = os.path.join(ATLAS_DIR, f'ara/template/average_template_{vox}um_{side}.nii.gz')
+    
     cut_len, cut_coords = slice_display(mask, sagittal, coronal, axial, x, y, z)
     # extract Atlas slices for background and outline
     mask_slices = slice_extract(mask, cut_coords, x, y, z, mask.split("/")[-1])
@@ -650,6 +682,20 @@ def main(args):
     # calculate input slices with user specified axis.
     # Note:  Image array is formatted as img[P, I, L]. Order in accordance with LPI convention. x-position-> img[:,:,x], y-position-> img[y,:,:], z-position> img[:,z,:]
     img1, img_shape = grp_mean(g1, brain_template, outdir, x, y, z, percentile)
+    # multiply the brain mask by the img1 to remove values outside the brain
+    if mask_flag:
+        # if vox == 10:
+        mask_loaded = nib.load(brain_template)
+        mask_array = mask_loaded.get_fdata()
+        brain_mask = np.ones_like(mask_array)
+        brain_mask[mask_array == 0] = 0
+        nib.save(nib.Nifti1Image(brain_mask, mask_loaded.affine), os.path.join(outdir, 'brain_mask.nii.gz'))
+        # else:
+        #     if 
+        #     brain_mask = nib.load(os.path.join(ATLAS_DIR, f'ara/template/average_template_{vox}um_OBmasked.nii.gz')).get_fdata()
+
+        img1 = np.multiply(img1, brain_mask)
+        
     print("Step 3/{} : Completed Group 1 Mean and QC Reg Check SVG File".format(4 + int(multi) * 3))
 
     # plot first heatmap
@@ -661,6 +707,10 @@ def main(args):
     # check if argument g2 was specified then plots heatmaps if True
     if multi == True:
         img2, img_shape = grp_mean(g2, brain_template, outdir, x, y, z, percentile)
+        # multiply the brain mask by the img1 to remove values outside the brain
+        if mask_flag:
+            img2 = np.multiply(img2, brain_mask)
+        
         print("Step 5/7 : Completed Group 2 Mean and QC Reg Check SVG File".format(outfile[1]))
         plot(img2, mask, 1, vox, cut_coords, cut_len, sagittal, coronal, axial, figure_dim, outdir, outfile[1], sigma,
              cn, cp, mask_slices,
