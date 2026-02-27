@@ -1,0 +1,52 @@
+mapl3_workflow_connectors:
+  script: ""
+  obj_class: "miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_connectors.Mapl3WorkflowConnectors"
+  module_type: "MODULE"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: false
+
+# conversion:
+#   script: "python /code/miracl/conv/miracl_conv_convertTIFFtoNII.py"
+#   obj_class: "miracl.system.objs.objs_conv.objs_tiff_to_nii.objs_tiff_to_nii.ConvTiffNiiObjs"
+#   module_type: "FLOW_MAPL3"
+#   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+#   flag_map:
+#     "--mctn_folder": "--folder"
+#     "--mctn_work_dir": "--work_dir"
+#     "--mctn_down": "--down"
+#     "--mctn_channum": "--channum"
+#     "--mctn_chanprefix": "--chanprefix"
+#     "--mctn_channame": "--channame"
+#     "--mctn_outnii": "--outnii"
+#     "--mctn_resx": "--resx"
+#     "--mctn_resz": "--resz"
+#     "--mctn_center": "--center"
+#     "--mctn_downzdim": "--downzdim"
+#     "--mctn_prevdown": "--prevdown"
+#     "--mctn_percentile_thr": "--percentile_thr"
+#   execute: false
+#
+# registration:
+#   script: "/code/miracl/reg/miracl_reg_clar-allen.sh"
+#   obj_class: "miracl.system.objs.objs_reg.objs_clar_allen.objs_clar_allen_reg.ClarAllen"
+#   module_type: "FLOW_MAPL3"
+#   runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+#   flag_map:
+#     "--mrca_input": "-i"
+#     "--mrca_tiff_input": "-c"
+#     "--mrca_output": "-r"
+#     "--mrca_orient_code": "-o"
+#     "--mrca_voxel_size": "-v"
+#     "--mrca_hemi": "-m"
+#     "--mrca_allen_label": "-l"
+#     "--mrca_allen_atlas": "-a"
+#     "--mrca_side": "-s"
+#     "--mrca_no_mosaic_fig": "-f"
+#     "--mrca_olfactory_bulb": "-b"
+#     "--mrca_skip_cor": "-p"
+#     "--mrca_warp": "-w"
+#     "--mrca_chan_num": "-n"
+#     "--mrca_chan_prefix": "-x"
+#   execute: false
+#

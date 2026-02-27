@@ -2,6 +2,10 @@ from enum import Enum
 
 
 class CliGroup(Enum):
+    STATS_TFCE = (
+        "TFCE",
+        "Args for TFCE stats method",
+    )
     REG_CLAR_ALLEN = (
         "registration",
         "Args for CLARITY Allen image registration",

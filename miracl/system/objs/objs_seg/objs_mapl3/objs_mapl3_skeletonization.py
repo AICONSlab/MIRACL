@@ -141,7 +141,7 @@ class Skeletonization:
         cli_l_flag="remove_small_obj_thr",
         flow={
             "mapl3": {
-                "cli_s_flag": "ms_r",
+                "cli_s_flag": "ms_ts",
                 "cli_l_flag": "ms_remove_small_obj_thr",
                 "cli_group": CliGroup.MAPL3_SKELETONIZATION,
             }
@@ -284,8 +284,8 @@ class Skeletonization:
         cli_l_flag="raw_data",
         flow={
             "mapl3": {
-                "cli_s_flag": "mrdn_r",
-                "cli_l_flag": "mrdn_raw_data",
+                "cli_s_flag": "ms_r",
+                "cli_l_flag": "ms_raw_data",
                 "cli_group": CliGroup.REQUIRED,
                 "disabled": True,
             },

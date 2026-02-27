@@ -16,7 +16,7 @@ class WarpClarAllen:
         cli_l_flag="regdir",
         flow={
             "mapl3": {
-                "cli_s_flag": "mrwca_i",
+                "cli_s_flag": "mrwca_r",
                 "cli_l_flag": "mrwca_regdir",
                 "cli_group": CliGroup.REQUIRED,
                 "disabled": True,

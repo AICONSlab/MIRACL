@@ -1,0 +1,539 @@
+"""
+logger_config.py
+================
+Central logging configuration for the MIRACL pipeline.
+
+This module is the single source of truth for how logging is set up across
+the entire application. It should never be imported directly by pipeline
+modules — those should use `get_logger()` from `__init__.py` instead.
+
+Design decisions
+----------------
+- Configuration is done once via `dictConfig`, which is declarative and
+  easier to reason about than imperative handler/formatter construction.
+- The idempotency guard (`_logging_initialized`) ensures that importing
+  this module from many places never causes duplicate log output.
+- Log level, file logging, and per-module overrides are driven by
+  environment variables so that operators can change verbosity without
+  modifying source code. This is especially useful in containerised
+  (Docker/Singularity) runs.
+- Third-party libraries are silenced at the named-logger level rather than
+  by filtering on the root, so MIRACL's own DEBUG output is unaffected.
+- File logging is enabled by default and writes to a central log directory.
+  Each run produces a uniquely named file (<script>_<timestamp>.log) so
+  logs from different runs never overwrite each other.
+
+Environment variables
+---------------------
+MIRACL_LOG_LEVEL
+    Global log level for the entire application.
+    Accepted values: DEBUG, INFO, WARNING, ERROR, CRITICAL (case-insensitive).
+    Default: INFO
+
+MIRACL_LOG_LEVEL_<MODULE>
+    Per-module override. The suffix is translated into a dotted Python module
+    path by lower-casing and replacing underscores with dots, then prepending
+    "miracl.".
+
+    Examples:
+        MIRACL_LOG_LEVEL_FLOW_ACE=DEBUG
+            → sets "miracl.flow.ace" to DEBUG
+
+        MIRACL_LOG_LEVEL_SEG=WARNING
+            → sets "miracl.seg" to WARNING
+
+MIRACL_LOG_FORMAT
+    Console output format. Valid values: "text" (default), "json".
+    Set to "json" for structured output in containers / log aggregators.
+
+MIRACL_LOG_TO_FILE
+    Set to "false" to disable file logging entirely.
+    Useful in unit tests or environments where the runtime captures stdout.
+    Default: "true" (file logging is on).
+
+MIRACL_LOG_DIR
+    Directory where log files are written.
+    Default: ~/.miracl/logs
+"""
+
+import logging
+import logging.config
+import logging.handlers
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Dict
+
+# ---------------------------------------------------------------------------
+# Custom log level: SUCCESS
+# ---------------------------------------------------------------------------
+# Python's standard levels are DEBUG(10) INFO(20) WARNING(30) ERROR(40) CRITICAL(50).
+# SUCCESS sits at 25 — above INFO so it isn't drowned out, but below WARNING
+# so it doesn't imply anything went wrong. It's used to mark the clean
+# completion of a major pipeline stage (e.g. registration, segmentation).
+
+SUCCESS: int = 25
+logging.addLevelName(SUCCESS, "SUCCESS")
+
+
+def _success(self: logging.Logger, message: str, *args, **kwargs) -> None:
+    """Emit a log record at the custom SUCCESS level.
+
+    Bound to `logging.Logger` instances so callers can write:
+        logger.success("Registration complete")
+
+    The `isEnabledFor` check is the standard pattern used by all built-in
+    level methods (debug, info, etc.). It short-circuits before doing any
+    string formatting if the level is filtered out, which matters in hot loops.
+    """
+    if self.isEnabledFor(SUCCESS):
+        # `_log` is the internal Logger method that creates the LogRecord.
+        # Passing `args` (not `*args`) matches the convention used by the
+        # stdlib — the record's `getMessage()` applies %-formatting lazily.
+        self._log(SUCCESS, message, args, **kwargs)
+
+
+# Monkey-patch the method onto every Logger instance in this process.
+# This must happen before any logger is retrieved, which is guaranteed
+# because this module is imported before `get_logger()` is ever called.
+logging.Logger.success = _success  # type: ignore[attr-defined]
+
+
+# ---------------------------------------------------------------------------
+# Process-wide initialisation guard
+# ---------------------------------------------------------------------------
+# Python's import system caches modules after the first import, so this
+# boolean persists for the lifetime of the process. Every call to
+# `setup_logging()` checks it first. Without this guard, importing
+# `get_logger` from N modules would call `dictConfig` N times, which
+# adds duplicate handlers and produces N copies of every log line.
+
+_logging_initialized: bool = False
+
+
+# ---------------------------------------------------------------------------
+# Global log level
+# ---------------------------------------------------------------------------
+# Read once at import time and stored as a module-level constant.
+# `.upper()` normalises the value so "debug", "DEBUG", and "Debug" all work.
+# If the variable isn't set, fall back to "INFO" — a sensible default that
+# shows meaningful progress without flooding the terminal.
+
+LOG_LEVEL: str = os.getenv("MIRACL_LOG_LEVEL", "INFO").upper()
+
+
+# ---------------------------------------------------------------------------
+# Console formatter selection
+# ---------------------------------------------------------------------------
+# Maps the MIRACL_LOG_FORMAT env var value to a formatter name defined in
+# the "formatters" dict inside setup_logging().
+#
+# To add a new formatter:
+#   1. Define it in the `formatters` dict inside ref:vars.base_dirsetup_logging().
+#   2. Add its env var key → formatter name mapping here.
+#   Nothing else needs to change — the selection logic below is untouched.
+
+FORMATTER_MAP: Dict[str, str] = {
+    "text": "standard",
+    "json": "json",
+    # "colored": "colored",   # example: add new formatters here
+}
+
+
+# ---------------------------------------------------------------------------
+# File logging configuration
+# ---------------------------------------------------------------------------
+
+# Master switch for file logging.
+# Set MIRACL_LOG_TO_FILE=false to disable (e.g. in unit tests or containers
+# where the runtime captures stdout and file logs are unwanted noise).
+FILE_LOGGING_ENABLED: bool = os.getenv("MIRACL_LOG_TO_FILE", "true").lower() != "false"
+
+# Central directory where all MIRACL log files are written.
+# Defaults to ~/.miracl/logs so logs persist across working directories
+# and are easy to find regardless of where scripts are invoked from.
+# Override via MIRACL_LOG_DIR if you need logs in a specific location
+# (e.g. a shared network drive or a per-project directory).
+LOG_DIR: Path = Path(os.getenv("MIRACL_LOG_DIR", "/code/miracl/logs")).expanduser()
+
+
+def _build_log_path() -> Path:
+    """Derive a timestamped log file path from the invoking script's name.
+
+    The filename format is:  <script_stem>_<YYYYMMDD_HHMMSS>.log
+    For example:             ace_flow_20250301_142201.log
+
+    Each invocation produces a unique filename so logs from different runs
+    never overwrite each other and can be compared or archived freely.
+
+    Falls back to "miracl_<timestamp>.log" in environments where
+    __main__.__file__ is unavailable (interactive shell, pytest, etc.).
+
+    Returns
+    -------
+    Path
+        Absolute path to the log file for this run. The parent directory
+        is guaranteed to exist by the time this path is used because
+        setup_logging() calls LOG_DIR.mkdir() before calling this function.
+    """
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    try:
+        # sys.modules["__main__"] is the script Python was invoked with.
+        # This works correctly whether the script is run directly
+        # (python script.py) or as a module (python -m package.script).
+        # Path(...).stem strips the directory and extension, e.g.:
+        #   /home/user/miracl/flow/ace/ace_flow.py  →  "ace_flow"
+        main_module = sys.modules.get("__main__")
+        script_stem = Path(main_module.__file__).stem
+    except (AttributeError, TypeError):
+        # AttributeError: __main__ has no __file__ (interactive shell).
+        # TypeError:       __file__ is None (some test runners set it to None).
+        # In both cases, fall back to a generic prefix.
+        script_stem = "miracl"
+
+    return LOG_DIR / f"{script_stem}_{timestamp}.log"
+
+
+# ---------------------------------------------------------------------------
+# Per-module override builder
+# ---------------------------------------------------------------------------
+
+
+def _module_overrides() -> dict:
+    """Scan environment variables and build per-module logger config entries.
+
+    Iterates over every environment variable in the current process. Any
+    variable whose name starts with ``MIRACL_LOG_LEVEL_`` is treated as a
+    per-module override. The suffix after the prefix is translated into a
+    dotted Python module path and used as a named logger key in the
+    ``dictConfig`` schema.
+
+    Translation rules
+    -----------------
+    1. Strip the ``MIRACL_LOG_LEVEL_`` prefix.
+    2. Lower-case the remainder.
+    3. Replace ``_`` with ``.`` (env var names cannot contain dots).
+    4. Prepend ``miracl.`` to anchor the path within the package.
+
+    The resulting dict is unpacked directly into the ``"loggers"`` section
+    of the ``dictConfig`` call, so each entry must conform to that schema:
+    a dict with at least ``"level"`` and ``"propagate"`` keys.
+
+    ``propagate: True`` is essential — without it the override logger would
+    swallow records silently instead of forwarding them to the root handler.
+
+    Returns
+    -------
+    dict
+        Mapping of dotted logger names to their config dicts.
+        Empty dict if no matching environment variables are set.
+
+    Examples
+    --------
+    With ``MIRACL_LOG_LEVEL_FLOW_ACE=DEBUG`` set::
+
+        {
+            "miracl.flow.ace": {
+                "level": "DEBUG",
+                "propagate": True,
+            }
+        }
+    """
+    overrides: dict = {}
+    prefix: str = "MIRACL_LOG_LEVEL_"
+
+    for key, val in os.environ.items():
+        if not key.startswith(prefix):
+            continue
+
+        # Strip prefix → e.g. "FLOW_ACE"
+        # Lower-case  → e.g. "flow_ace"
+        # Replace _   → e.g. "flow.ace"
+        # Prepend pkg → e.g. "miracl.flow.ace"
+        module_path = "miracl." + key[len(prefix) :].lower().replace("_", ".")
+
+        overrides[module_path] = {
+            "level": val.upper(),
+            # Keep propagation ON so records still reach the root handler.
+            # Turning this off would mean the override logger becomes a dead
+            # end and nothing gets printed, which is almost never what you want.
+            "propagate": True,
+        }
+
+    return overrides
+
+
+# ---------------------------------------------------------------------------
+# JSON formatter (optional, enabled via MIRACL_LOG_FORMAT=json)
+# ---------------------------------------------------------------------------
+
+
+class _JsonFormatter(logging.Formatter):
+    """Emit each log record as a single-line JSON object.
+
+    Useful when MIRACL runs inside a container and logs are shipped to an
+    aggregator (Loki, CloudWatch, Datadog, etc.) that can parse structured
+    fields. Enable by setting ``MIRACL_LOG_FORMAT=json`` in the environment.
+
+    Fields emitted
+    --------------
+    timestamp : str
+        ISO 8601 datetime, e.g. "2025-03-01T14:22:01".
+    level : str
+        Log level name, e.g. "INFO", "SUCCESS", "ERROR".
+    logger : str
+        Dotted logger name, e.g. "miracl.flow.ace.ace_flow".
+    module : str
+        Python module filename without extension.
+    message : str
+        The final formatted message string.
+    exception : list[str], optional
+        Only present when the record carries exception info. Contains the
+        formatted traceback lines.
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        import json
+        import traceback
+
+        payload: dict = {
+            "timestamp": self.formatTime(record, datefmt="%Y-%m-%dT%H:%M:%S"),
+            "level": record.levelname,
+            "logger": record.name,
+            "module": record.module,
+            "message": record.getMessage(),
+        }
+
+        # Only include the exception key when there is actually an exception.
+        # `record.exc_info` is a 3-tuple (type, value, traceback) or None.
+        if record.exc_info:
+            payload["exception"] = traceback.format_exception(*record.exc_info)
+
+        return json.dumps(payload)
+
+
+# ---------------------------------------------------------------------------
+# Main setup function
+# ---------------------------------------------------------------------------
+
+
+def setup_logging() -> None:
+    """Configure the root logger and all handlers for the MIRACL application.
+
+    This function is idempotent — it is safe to call from multiple modules
+    and will only apply configuration on the very first call. Subsequent
+    calls return immediately without modifying the logging state.
+
+    File logging is enabled by default and requires no arguments. The log
+    file path is derived automatically from the invoking script's name and
+    the current timestamp, and is written to LOG_DIR (~/.miracl/logs by
+    default). To disable file logging, set MIRACL_LOG_TO_FILE=false.
+
+    Environment variables read
+    --------------------------
+    MIRACL_LOG_LEVEL
+        Global log level. Read at module import time; changing it after
+        import has no effect.
+    MIRACL_LOG_LEVEL_<MODULE>
+        Per-module overrides. See ``_module_overrides()`` for details.
+    MIRACL_LOG_FORMAT
+        Console formatter. See ``FORMATTER_MAP`` for valid values.
+    MIRACL_LOG_TO_FILE
+        Set to "false" to skip file handler creation entirely.
+    MIRACL_LOG_DIR
+        Override the central log directory.
+
+    Notes
+    -----
+    The ``disable_existing_loggers: False`` setting in ``dictConfig`` is
+    critical. The default (``True``) silently disables any logger that was
+    created before this function runs — a common trap with third-party
+    libraries that instantiate loggers at import time.
+    """
+    global _logging_initialized
+
+    # Guard: if we've already run, do nothing.
+    # This is the mechanism that makes every call after the first a no-op.
+    if _logging_initialized:
+        return
+
+    # ------------------------------------------------------------------
+    # Determine active console formatter
+    # ------------------------------------------------------------------
+    # Read the requested format from the environment and look it up in
+    # FORMATTER_MAP. If the value isn't recognised, fall back to "standard"
+    # and warn — failing silently here would be confusing to diagnose.
+
+    log_format: str = os.getenv("MIRACL_LOG_FORMAT", "text").lower()
+    active_formatter: str = FORMATTER_MAP.get(log_format, "standard")
+
+    if log_format not in FORMATTER_MAP:
+        # We can't use the logger here yet (it isn't configured), so we
+        # print directly. This message appears exactly once at startup.
+        print(
+            f"[MIRACL] WARNING: Unrecognised MIRACL_LOG_FORMAT={log_format!r}. "
+            f"Falling back to 'text'. Valid options: {list(FORMATTER_MAP.keys())}"
+        )
+
+    # ------------------------------------------------------------------
+    # Formatters
+    # ------------------------------------------------------------------
+    # All formatters are defined here even if only one is active.
+    # dictConfig only instantiates a formatter if a handler references it,
+    # so unused entries have zero runtime cost.
+    #
+    # Format field breakdown for "standard":
+    #   %(asctime)s     — timestamp, formatted by datefmt below
+    #   %(levelname)-8s — level name, left-aligned in 8 chars so INFO,
+    #                     WARNING, SUCCESS, CRITICAL all column-align
+    #   %(name)s        — dotted logger name (the __name__ of the caller)
+    #   %(message)s     — the final formatted message string
+
+    formatters: dict = {
+        "standard": {
+            "format": "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+            # ISO 8601: sortable, locale-independent, compatible with most
+            # log aggregation tools (Loki, CloudWatch, Splunk, etc.)
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+        },
+        "json": {
+            # `()` is dictConfig's syntax for calling an arbitrary factory.
+            # Instead of a "class" string that dictConfig imports, it calls
+            # this callable directly and uses the result as the formatter.
+            "()": _JsonFormatter,
+        },
+        # To add a new formatter: define it here, then add it to FORMATTER_MAP.
+        # Example:
+        # "colored": {
+        #     "()": _ColoredFormatter,
+        # },
+    }
+
+    # ------------------------------------------------------------------
+    # Handlers
+    # ------------------------------------------------------------------
+    # We build the handlers dict as a plain Python dict first so the file
+    # handler can be added conditionally before passing everything to
+    # dictConfig. dictConfig requires that every handler name referenced
+    # by a logger or the root actually exists in this section.
+
+    handlers: dict = {
+        "console": {
+            # StreamHandler writes to a stream (stdout, stderr, or any
+            # file-like object). We use stdout explicitly rather than the
+            # default stderr so that piping (`miracl ... | grep INFO`) works
+            # as expected and the output doesn't mix with Python tracebacks.
+            "class": "logging.StreamHandler",
+            "formatter": active_formatter,
+            "level": LOG_LEVEL,
+            # `ext://` is dictConfig's escape hatch for Python object references.
+            # Without it, dictConfig would try to open a *file* named "sys.stdout".
+            "stream": "ext://sys.stdout",
+        }
+    }
+
+    if FILE_LOGGING_ENABLED:
+        # Ensure the central log directory exists before we try to write to it.
+        # `parents=True` creates intermediate directories (e.g. ~/.miracl/)
+        # if they don't exist. `exist_ok=True` means no error if it's already there.
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+        log_path: Path = _build_log_path()
+
+        handlers["file"] = {
+            # RotatingFileHandler writes to a file and rolls it over when it
+            # reaches `maxBytes`. Old files are renamed .log.1, .log.2, etc.
+            # and only `backupCount` copies are kept before the oldest is deleted.
+            "class": "logging.handlers.RotatingFileHandler",
+            # Always use the text formatter for files — JSON in a log file is
+            # harder to read with `tail -f` and tools like `less`.
+            "formatter": "standard",
+            # The file handler is pinned to DEBUG regardless of LOG_LEVEL.
+            # This gives you a full trace on disk for post-mortem analysis
+            # even when the console is configured to show only WARNING.
+            "level": "DEBUG",
+            "filename": str(log_path),
+            # 10 MB per file. Chosen as a balance between keeping enough
+            # context for debugging and not filling disks during long runs.
+            # Adjust upward for workflows that process very large datasets.
+            "maxBytes": 10_485_760,  # 10 × 1024 × 1024 bytes
+            # Keep the 3 most recent rotated files. Combined with maxBytes,
+            # this means at most ~40 MB of log history is retained on disk.
+            "backupCount": 3,
+        }
+
+        # We can't use logger.info() here yet because dictConfig hasn't run —
+        # the logging system isn't live. print() is intentional and will only
+        # ever appear once at startup, so it isn't noise in normal operation.
+        print(f"[MIRACL] Logging to file: {log_path}")
+
+    # ------------------------------------------------------------------
+    # Apply configuration via dictConfig
+    # ------------------------------------------------------------------
+
+    logging.config.dictConfig(
+        {
+            # Schema version. Currently 1 is the only valid value. Required field.
+            # It exists so future Python versions can introduce new schemas without
+            # breaking existing config dicts.
+            "version": 1,
+            # CRITICAL: must be False.
+            # If True (the dictConfig default), any logger created *before* this
+            # call — including those inside third-party libraries imported at the
+            # top of any file — will be silently disabled. Setting False preserves
+            # all pre-existing loggers and only applies our new configuration on top.
+            "disable_existing_loggers": False,
+            "formatters": formatters,
+            "handlers": handlers,
+            # The root logger is the top of the logger hierarchy. Every logger
+            # in the process eventually propagates records up to the root, so
+            # configuring it here acts as the universal fallback.
+            "root": {
+                # Reference the handler names defined above. Using list() ensures
+                # this is always a plain list, whether one or two handlers exist.
+                "handlers": list(handlers.keys()),
+                # The root level is the absolute gate for the entire application.
+                # No record below this threshold will be processed by any handler,
+                # regardless of what individual named loggers are set to.
+                "level": LOG_LEVEL,
+            },
+            # Named logger overrides.
+            # Each key is a dotted logger name. Records from that logger (and all
+            # child loggers below it in the hierarchy) must pass this level before
+            # propagating up to the root. This is the mechanism for both silencing
+            # third-party libraries and enabling per-module DEBUG overrides.
+            "loggers": {
+                # ── Third-party library silencing ────────────────────────────
+                # These libraries emit extensive DEBUG/INFO output during normal
+                # operation. We gate them at WARNING so their internal chatter
+                # never reaches our handlers, but genuine warnings and errors still do.
+                #
+                # How the hierarchy works:
+                #   matplotlib.font_manager → parent: matplotlib → parent: root
+                # By placing a WARNING gate on "matplotlib", all child loggers
+                # are filtered before they ever reach the root handler. MIRACL's
+                # own loggers under "miracl.*" are on a completely separate branch
+                # and are unaffected.
+                "matplotlib": {"level": "WARNING", "propagate": True},
+                "PIL": {"level": "WARNING", "propagate": True},
+                "torch": {"level": "WARNING", "propagate": True},
+                "nibabel": {"level": "WARNING", "propagate": True},
+                "itk": {"level": "WARNING", "propagate": True},
+                # ── Per-module overrides from environment variables ───────────
+                # _module_overrides() returns a dict that is unpacked here.
+                # If no MIRACL_LOG_LEVEL_* env vars are set, this expands to
+                # nothing and has no effect. If they are set, their entries are
+                # merged in as additional named logger configs.
+                # See _module_overrides() docstring for the translation rules.
+                **_module_overrides(),
+            },
+        }
+    )
+
+    # Flip the guard only after dictConfig has returned successfully.
+    # If dictConfig raised an exception, _logging_initialized stays False
+    # and the next call to setup_logging() can retry rather than assuming
+    # everything is fine.
+    _logging_initialized = True

@@ -1,0 +1,30 @@
+name: "Conversion -> Registration workflow"
+description: "Running conversion and registration to test workflow"
+version: "1.0"
+
+vars:
+  base_dir: "ref:conns.results_folder"
+  tiff_folder: "ref:conns.tiff_folder"
+  conv_nii: "pattern:{ref:vars.base_dir}/conv_final/{ref:conv.outnii}_{fn:dx_pad_zero('ref:conv.down')}x_down_{ref:conv.channame}_chan.nii.gz"
+
+modules:
+  mapl3_workflow_connectors@conns: {}
+  conversion@conv: {}
+  registration@reg: {}
+
+execution_order:
+  - conns
+  - conv
+  - reg
+
+data_flow:
+  conns: {}
+
+  conv: 
+    tiff_folder: "ref:vars.tiff_folder"
+    output_folder: "ref:vars.base_dir"
+
+  reg:
+    nii_folder: "ref:vars.conv_nii"
+    tiff_folder: "ref:vars.tiff_folder"
+    output_path: "ref:vars.base_dir"

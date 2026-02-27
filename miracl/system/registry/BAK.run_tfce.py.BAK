@@ -1,0 +1,21 @@
+from miracl.api.ext import (
+    MiraclCLIBuilder,
+    load_modules_from_yaml,
+    MAPL3_CLI_PARSER_DESCRIPTION,
+)
+
+
+def main():
+    reg = load_modules_from_yaml(
+        "/code/miracl/system/registry/configs/tfce_module.yaml"
+    )
+    MiraclCLIBuilder(
+        registry=reg,
+        # description=MAPL3_CLI_PARSER_DESCRIPTION,
+    ).parse_from_registry()
+
+    _ = reg.list_modules()
+
+
+if __name__ == "__main__":
+    main()

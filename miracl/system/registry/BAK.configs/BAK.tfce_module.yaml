@@ -1,0 +1,7 @@
+tfce:
+  script: "python /code/miracl/stats/miracl_stats_tfce.py"
+  obj_class: "miracl.system.objs.objs_stats.objs_tfce.objs_tfce.TFCE"
+  module_type: "MODULE"
+  runner: "miracl.system.registry.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: false

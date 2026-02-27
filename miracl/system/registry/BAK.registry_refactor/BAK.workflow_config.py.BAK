@@ -1,0 +1,48 @@
+from typing_extensions import override
+from pydantic import BaseModel, Field
+from typing import Dict, List, Optional
+
+
+class ModuleInstanceConfig(BaseModel):
+    """
+    Single module instance in a workflow.
+    """
+
+    type: str
+    params: Dict[str, object] = Field(default_factory=dict)
+
+
+class WorkFlowConfig(BaseModel):
+    """
+    Workflow configuration data model.
+
+    Simple representation of a workflow YAML with no validation logic.
+    Just defines the structure.
+
+    Attributes:
+        name: Workflow name
+        description: Optional workflow description
+        version: Workflow version
+        execution_order: List of module keys to execute in order
+        data_flow: Connections between modules
+            Format: {
+                'target_module': {
+                    'target_input': 'source_module.source_output'
+                }
+            }
+    """
+
+    name: str
+    description: Optional[str] = None
+    version: str = "1.0"
+    modules: Dict[str, ModuleInstanceConfig]
+    execution_order: List[str]
+    data_flow: Dict[str, Dict[str, str]] = Field(default_factory=dict)
+
+    class Config:
+        extra = "forbid"
+
+    @override
+    def __repr__(self) -> str:
+        """String representation"""
+        return f"WorkflowConfig(name='{self.name}', modules={len(self.execution_order)}, connections={sum(len(v) for v in self.data_flow.values())}, dataflow='{self.data_flow}')"

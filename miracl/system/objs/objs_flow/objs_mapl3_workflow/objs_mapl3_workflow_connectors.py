@@ -1,114 +1,61 @@
-from miracl.system.datamodels.datamodel_miracl_objs import (
-    MiraclObj,
-    ArgumentType,
-)
+from miracl.system.datamodels.miraclobj_enums import WidgetType
 from miracl.system.enums.enums_base_modules import CliGroup
 
+# from miracl.system.datamodels.datamodel_miracl_objs_refactored import (
+from miracl.system.datamodels.miraclobj_datamodel import (
+    MiraclObj,
+    CLISpec,
+    GuiNamespace,
+    GuiBase,
+    ArgumentType,
+    CliGroup,
+    WidgetType,
+)
 
-# class WorkflowInterfaceSubfolders:
-class MAPL3_connectors:
-    # mapl3_workflow_reg_folder: MiraclObj = MiraclObj(
-    #     id="e9d4d091-b3fb-4307-abab-02737f900003",
-    #     name="mapl3_workflow_reg_folder",
-    #     tags=["mapl3", "flow", "mapl3_flow"],
-    #     cli_s_flag="mw_ro",
-    #     cli_l_flag="mw_reg_output",
-    #     flow={
-    #         "mapl3": {
-    #             "cli_s_flag": "mw_ro",
-    #             "cli_l_flag": "mw_reg_output",
-    #             "disabled": True,
-    #         }
-    #     },
-    #     cli_obj_type=ArgumentType.STRING,
-    #     cli_help="Folder object for workflow interface reg output subfolder",
-    #     module="mapl3",
-    #     module_group="flow",
-    #     version_added="2.4.0",
-    # )
-    #
-    # mapl3_workflow_conv_folder: MiraclObj = MiraclObj(
-    #     id="119fa9cd-f61a-4220-a945-2cea704cb9d0",
-    #     name="mapl3_workflow_conv_folder",
-    #     tags=["mapl3", "flow", "mapl3_flow"],
-    #     cli_s_flag="mw_co",
-    #     cli_l_flag="mw_conv_output",
-    #     flow={
-    #         "mapl3": {
-    #             "cli_s_flag": "mw_co",
-    #             "cli_l_flag": "mw_conv_output",
-    #             "disabled": True,
-    #         }
-    #     },
-    #     cli_obj_type=ArgumentType.STRING,
-    #     cli_help="Folder object for workflow interface conv output subfolder",
-    #     module="mapl3",
-    #     module_group="flow",
-    #     version_added="2.4.0",
-    # )
 
-    mapl3_workflow_raw_autoflor_tiff_folder: MiraclObj = MiraclObj(
-        name="mapl3_workflow_raw_autoflor_tiff_folder",
-        tags=["mapl3", "flow", "mapl3_flow"],
-        cli_s_flag="mwfc_ratf",
-        cli_l_flag="mwfc_raw_autoflor_tiff_folder",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mwfc_ratf",
-                "cli_l_flag": "mwfc_raw_autoflor_tiff_folder",
-                "required": True,
-                "cli_group": CliGroup.REQUIRED,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="RAW Tiff folder object i.e. path to the folder with autoflor Tiffs in it",
-        obj_default=None,
-        cli_required=True,
+class Mapl3WorkflowConnectors:
+    results_folder = MiraclObj(
+        name="workflow_results_folder",
         module="mapl3",
-        module_group="flow",
+        module_group="workflow_connectors",
         version_added="2.4.0",
+        tags=["mapl3_flow", "workflow_connectors"],
+        cli=CLISpec(
+            s_flag="r",
+            l_flag="results_folder",
+            obj_type=ArgumentType.STRING,
+            help="Results folder for the workflow",
+            required=True,
+            group=CliGroup.REQUIRED,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Workflow results folder"],
+                widget_type=WidgetType.PATH_INPUT,
+                group=CliGroup.REQUIRED,
+            )
+        ),
     )
 
-    mapl3_workflow_raw_signal_tiff_folder: MiraclObj = MiraclObj(
-        name="mapl3_workflow_raw_signal_tiff_folder",
-        tags=["mapl3", "flow", "mapl3_flow"],
-        cli_s_flag="mwfc_rstf",
-        cli_l_flag="mwfc_raw_signal_tiff_folder",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mwfc_rstf",
-                "cli_l_flag": "mwfc_raw_signal_tiff_folder",
-                "required": True,
-                "cli_group": CliGroup.REQUIRED,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="RAW Tiff folder object i.e. path to the folder with signal Tiffs in it",
-        obj_default=None,
-        cli_required=True,
+    tiff_folder = MiraclObj(
+        name="workflow_tiff_folder",
         module="mapl3",
-        module_group="flow",
+        module_group="workflow_connectors",
         version_added="2.4.0",
-    )
-
-    mapl3_workflow_results_folder: MiraclObj = MiraclObj(
-        name="mapl3_workflow_results_folder",
-        tags=["mapl3", "flow", "mapl3_flow"],
-        cli_s_flag="mwfc_crf",
-        cli_l_flag="mwfc_conv_results_folder",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mwfc_cof",
-                "cli_l_flag": "mwfc_results_folder",
-                "required": True,
-                "cli_group": CliGroup.REQUIRED,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="Path to MAPL3 workflow results folder",
-        obj_default=None,
-        cli_required=True,
-        module="mapl3",
-        module_group="flow",
-        version_added="2.4.0",
+        tags=["mapl3_flow", "workflow_connectors"],
+        cli=CLISpec(
+            s_flag="t",
+            l_flag="tiff_folder",
+            obj_type=ArgumentType.STRING,
+            help="Raw tiff folder for the workflow",
+            required=True,
+            group=CliGroup.REQUIRED,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Workflow raw tiff folder"],
+                widget_type=WidgetType.PATH_INPUT,
+                group=CliGroup.REQUIRED,
+            )
+        ),
     )

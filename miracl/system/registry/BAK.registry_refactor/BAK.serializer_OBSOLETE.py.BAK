@@ -1,0 +1,401 @@
+"""
+MiraclObj Serializer
+
+This module provides serialization utilities to convert MiraclObj instances
+to/from various formats.
+
+The serializer is responsible for:
+1. Resolving MiraclObj instances with appropriate context (ModuleType)
+2. Converting resolved data to argparse-compatible format
+3. Deserializing parsed CLI arguments back to MiraclObj instances
+4. Building flag mappings for module execution
+
+The serializer does NOT:
+- Know about the registry structure
+- Know about argparse internals beyond add_argument() format
+- Execute any modules
+- Perform class introspection (delegates to MiraclObjIntrospector)
+"""
+
+from typing import Type, List, Dict, Tuple, Any, Union
+from argparse import Namespace
+
+from miracl.system.datamodels.datamodel_miracl_objs import MiraclObj
+from miracl.system.datamodels.miraclobj_enums import ModuleType
+from miracl.system.utils.introspection import MiraclObjIntrospector
+
+
+class MiraclObjSerializer:
+    """
+    Serializer for converting MiraclObj instances to/from CLI format.
+
+    This class bridges the gap between Pydantic MiraclObj data models and
+    the data structures needed for CLI construction and module execution.
+    """
+
+    @staticmethod
+    def resolve_objects(
+        miracl_objs: List[MiraclObj], module_type: ModuleType
+    ) -> List[Dict[str, Any]]:
+        """
+        Resolve a list of MiraclObj instances with the given module context.
+
+        Calls MiraclObj.resolve() on each object with the specified module_type.
+        Objects that return None (disabled in this context) are filtered out.
+
+        Args:
+            miracl_objs: List of MiraclObj instances to resolve
+            module_type: Context for resolution (MODULE, FLOW_MAPL3, etc.)
+
+        Returns:
+            List of resolved dictionaries (excludes disabled objects)
+
+        Examples:
+            >>> objs = MiraclObjIntrospector.extract_miracl_objs(TFCE)
+            >>> resolved = MiraclObjSerializer.resolve_objects(objs, ModuleType.MODULE)
+            >>> len(resolved)
+            12
+        """
+        resolved_objs: List[Dict[str, Any]] = []
+
+        for obj in miracl_objs:
+            resolved = obj.resolve(module_type)
+            if resolved is not None:
+                resolved_objs.append(resolved)
+
+        return resolved_objs
+
+    @staticmethod
+    def resolve_class_objects(
+        obj_class: Type, module_type: ModuleType
+    ) -> List[Dict[str, Any]]:
+        """
+        Extract and resolve all MiraclObj instances from a class.
+
+        Convenience method that combines introspection and resolution.
+
+        Args:
+            obj_class: Class containing MiraclObj attributes
+            module_type: Context for resolution
+
+        Returns:
+            List of resolved dictionaries ready for CLI construction
+
+        Examples:
+            >>> resolved = MiraclObjSerializer.resolve_class_objects(
+            ...     TFCE,
+            ...     ModuleType.MODULE
+            ... )
+        """
+        miracl_objs = MiraclObjIntrospector.extract_miracl_objs(obj_class)
+        resolved_objs = MiraclObjSerializer.resolve_objects(miracl_objs, module_type)
+        return resolved_objs
+
+    @staticmethod
+    def to_argparse_format(
+        resolved: Dict[str, Any],
+    ) -> Tuple[List[str], Dict[str, Any]]:
+        """
+        Convert a resolved MiraclObj dictionary to argparse format.
+
+        Takes the resolved dictionary and converts it into the (flags, kwargs)
+        format that argparse.add_argument() expects.
+
+        Args:
+            resolved: Resolved dictionary from MiraclObj.resolve()
+
+        Returns:
+            Tuple of (flags, kwargs) for argparse.add_argument()
+
+        Raises:
+            ValueError: If required fields are missing
+
+        Examples:
+            >>> resolved = {...}
+            >>> flags, kwargs = MiraclObjSerializer.to_argparse_format(resolved)
+            >>> flags
+            ['-i', '--input']
+            >>> kwargs['dest']
+            '67b62f10-a6b6-4d61-9e2c-19819373265d'
+        """
+        flags: List[str] = []
+
+        if resolved.get("cli_s_flag"):
+            flags.append(f"-{resolved['cli_s_flag']}")
+
+        if not resolved.get("cli_l_flag"):
+            raise ValueError(
+                f"Missing required 'cli_l_flag' in resolved object: {resolved.get('name', 'unknown')}"
+            )
+        flags.append(f"--{resolved['cli_l_flag']}")
+
+        if not resolved.get("cli_help"):
+            raise ValueError(
+                f"Missing required 'cli_help' for object: {resolved.get('name', 'unknown')}"
+            )
+
+        kwargs: Dict[str, Any] = {
+            "help": resolved["cli_help"],
+            "dest": str(resolved.get("id", resolved.get("name"))),
+        }
+
+        metavar = resolved.get("cli_metavar")
+        if metavar:
+            kwargs["metavar"] = metavar
+        else:
+            name = resolved.get("name", "ARG")
+            kwargs["metavar"] = name.upper()
+
+        if resolved.get("cli_obj_type"):
+            kwargs["type"] = resolved["cli_obj_type"].python_type
+
+        kwargs["required"] = resolved.get("cli_required", False)
+
+        if resolved.get("obj_default") is not None:
+            kwargs["default"] = resolved.get("obj_default")
+
+        if resolved.get("cli_nargs") is not None:
+            kwargs["nargs"] = resolved["cli_nargs"]
+
+        if resolved.get("cli_choices") is not None:
+            kwargs["choices"] = resolved["cli_choices"]
+
+        if resolved.get("cli_action"):
+            kwargs["action"] = resolved["cli_action"].value
+
+        if resolved.get("cli_const") is not None:
+            kwargs["const"] = resolved["cli_const"]
+
+        return flags, kwargs
+
+    @staticmethod
+    def resolved_to_argparse_list(
+        resolved_objs: List[Dict[str, Any]],
+    ) -> List[Tuple[List[str], Dict[str, Any]]]:
+        """
+        Convert a list of resolved objects to argparse format.
+
+        This is the method that provides direct input to the builder.
+
+        Args:
+            resolved_objs: List of resolved dictionaries
+
+        Returns:
+            List of (flags, kwargs) tuples ready for builder
+
+        Examples:
+            >>> resolved = MiraclObjSerializer.resolve_class_objects(TFCE, ModuleType.MODULE)
+            >>> argparse_data = MiraclObjSerializer.resolved_to_argparse_list(resolved)
+            >>> # Pass directly to builder
+            >>> builder.add_arguments(parser, argparse_data)
+        """
+        argparse_data = []
+        for resolved in resolved_objs:
+            flags, kwargs = MiraclObjSerializer.to_argparse_format(resolved)
+            argparse_data.append((flags, kwargs))
+        return argparse_data
+
+    @staticmethod
+    def deserialize_parsed_args(
+        parsed_args: Union[Namespace, Dict[str, Any]],
+        miracl_objs: List[MiraclObj],
+    ) -> List[MiraclObj]:
+        """
+        Deserialize parsed CLI arguments back to MiraclObj instances.
+
+        Maps parsed argument values back to their corresponding MiraclObj
+        instances by matching the argparse 'dest' (UUID) to object IDs.
+
+        Args:
+            parsed_args: Parsed arguments from argparse
+            miracl_objs: List of MiraclObj instances to update
+
+        Returns:
+            Updated list of MiraclObj instances with 'content' fields populated
+
+        Examples:
+            >>> args = parser.parse_args()
+            >>> objs = MiraclObjIntrospector.extract_miracl_objs(TFCE)
+            >>> updated = MiraclObjSerializer.deserialize_parsed_args(args, objs)
+        """
+        if isinstance(parsed_args, Namespace):
+            parsed_args = vars(parsed_args)
+
+        id_to_obj = MiraclObjIntrospector.build_id_to_obj_map(miracl_objs)
+
+        for dest, value in parsed_args.items():
+            obj = id_to_obj.get(dest)
+            if obj:
+                obj.content = value
+
+        return miracl_objs
+
+    @staticmethod
+    def build_flag_mapping(
+        miracl_objs: List[MiraclObj], module_type: ModuleType
+    ) -> Dict[str, Any]:
+        """
+        Build a flag mapping from MiraclObj instances for module execution.
+
+        This creates a dictionary mapping CLI flags to their values, which
+        is used by the executor to run modules.
+
+        Args:
+            miracl_objs: List of MiraclObj instances (usually deserialized)
+            module_type: Context for resolution
+
+        Returns:
+            Dictionary mapping flags to values (e.g., {'--input': '/path', '--threshold': 0.05})
+
+        Examples:
+            >>> # After parsing and deserializing
+            >>> objs = [...] # deserialized objects
+            >>> flag_mapping = MiraclObjSerializer.build_flag_mapping(objs, ModuleType.MODULE)
+            >>> flag_mapping
+            {'--input': '/data/brain.nii', '--output': '/results', '--threshold': 0.05}
+            >>>
+            >>> # Pass to executor
+            >>> executor.execute(entry, flag_mapping)
+        """
+        flag_mapping = {}
+
+        for obj in miracl_objs:
+            resolved = obj.resolve(module_type)
+            if resolved:
+                flag = f"--{resolved['cli_l_flag']}"
+                # Use content if available, otherwise default
+                value = obj.content if obj.content is not None else obj.obj_default
+                flag_mapping[flag] = value
+
+        return flag_mapping
+
+    @staticmethod
+    def get_cli_flag(resolved: Dict[str, Any]) -> str:
+        """
+        Extract the long CLI flag from a resolved object.
+
+        Args:
+            resolved: Resolved dictionary
+
+        Returns:
+            Long flag string (e.g., '--input')
+        """
+        cli_l_flag = resolved.get("cli_l_flag")
+        if not cli_l_flag:
+            raise ValueError(
+                f"Missing 'cli_l_flag' in resolved object: {resolved.get('name', 'unknown')}"
+            )
+        return f"--{cli_l_flag}"
+
+    @staticmethod
+    def get_value(resolved: Dict[str, Any]) -> Any:
+        """
+        Extract the value from a resolved object.
+
+        Returns content if available, otherwise obj_default.
+
+        Args:
+            resolved: Resolved dictionary
+
+        Returns:
+            The value (content or default)
+        """
+        content = resolved.get("content")
+        if content is not None:
+            return content
+        return resolved.get("obj_default")
+
+    @staticmethod
+    def prepare_from_registry(
+        registry,
+    ) -> Tuple[List[Tuple[List[str], Dict[str, Any]]], List[MiraclObj]]:
+        """
+        Prepare argparse data and objects from registry.
+
+        This method handles the registry introspection so that builder
+        doesn't need to know about registry at all.
+
+        Args:
+            registry: MiraclRegistry instance
+
+        Returns:
+            Tuple of (argparse_data, all_objs)
+            - argparse_data: Ready for builder.build_parser()
+            - all_objs: Ready for deserialize_parsed_args()
+
+        Examples:
+            >>> registry = load_registry_from_yaml("modules.yaml")
+            >>> serializer = MiraclObjSerializer()
+            >>> argparse_data, all_objs = serializer.prepare_from_registry(registry)
+            >>>
+            >>> # Pass to builder (no registry knowledge needed)
+            >>> builder = MiraclCLIBuilder()
+            >>> parser = builder.build_parser(argparse_data)
+        """
+        all_objs = []
+        all_argparse_data = []
+
+        # Loop through all modules
+        for entry in registry.list_modules().values():
+            # Extract objects via introspector
+            objs = MiraclObjIntrospector.extract_miracl_objs(entry["obj_class"])
+            all_objs.extend(objs)
+
+            # Resolve objects
+            resolved = MiraclObjSerializer.resolve_objects(objs, entry["module_type"])
+
+            # Convert to argparse format
+            argparse_data = MiraclObjSerializer.resolved_to_argparse_list(resolved)
+            all_argparse_data.extend(argparse_data)
+
+        return all_argparse_data, all_objs
+
+    @staticmethod
+    def prepare_for_executor(
+        registry, module_name: str, deserialized_objs: List[MiraclObj]
+    ) -> Dict[str, Any]:
+        """
+        Prepare execution data for executor.
+
+        This method handles registry lookups and flag mapping so that
+        executor doesn't need to know about registry internals.
+
+        Args:
+            registry: MiraclRegistry instance
+            module_name: Name of module to execute
+            deserialized_objs: List of deserialized MiraclObj instances
+
+        Returns:
+            Dictionary with all data executor needs:
+            {
+                'runner': <function>,
+                'script': <path>,
+                'flag_map': <dict>,
+                'execute': <bool>,
+                'flag_mapping': <dict>
+            }
+
+        Examples:
+            >>> # After parsing and deserializing
+            >>> exec_data = serializer.prepare_for_executor(registry, "conversion", objs)
+            >>>
+            >>> # Pass to executor (no registry knowledge needed)
+            >>> executor = ModuleExecutor()
+            >>> result = executor.run(exec_data)
+        """
+        # Get registry entry
+        entry = registry.get(module_name)
+
+        # Build flag mapping
+        flag_mapping = MiraclObjSerializer.build_flag_mapping(
+            deserialized_objs, entry["module_type"]
+        )
+
+        # Return everything executor needs
+        return {
+            "runner": entry["runner"],
+            "script": entry["script"],
+            "flag_map": entry.get("flag_map", {}),
+            "execute": entry.get("execute", False),
+            "flag_mapping": flag_mapping,
+        }

@@ -1,0 +1,12 @@
+name: "TFCE Workflow"
+description: "Voxel-wise, slice-wise TFCE-based permutation testing between control and treated groups on warped, voxelized segmentation maps"
+version: "1.0"
+
+modules:
+  tfce@module: {}
+
+execution_order:
+  - module
+
+data_flow:
+  module: {}

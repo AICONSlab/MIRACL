@@ -1,0 +1,146 @@
+from __future__ import annotations
+
+from typing import Any, Dict, Optional
+
+from miracl.system.registry.registry_refactor.workflow.dsl import (
+    Expression,
+    parse_expression,
+)
+
+
+class WorkflowResolver:
+    """
+    Resolves workflow variable values by merging three layers in order:
+
+        1. Module defaults  — extracted from parsed module objects
+        2. External overrides — injected by the caller (e.g. CLI args)
+        3. Data flow expressions — computed cross-module dependencies
+
+    Both methods are @classmethods rather than @staticmethods so that
+    subclasses can override individual steps. For example, a
+    CachingWorkflowResolver could override _build_flat_context() and
+    resolve() would automatically call the overridden version via cls.
+
+    The resolver is stateless by design — it holds no instance data.
+    If caching of resolved results across multiple calls is needed,
+    convert to an instance-based class and add a self._cache attribute.
+    """
+
+    @classmethod
+    def _build_flat_context(
+        cls,
+        parsed_module_objects: Dict[str, Any],
+        parsed_registry_metadata: Dict[str, Any],
+        workflow_config: Any,
+    ) -> Dict[str, Any]:
+        """
+        Builds the initial flat context from module object defaults.
+
+        Keys follow dot-notation: "<instance_name>.<variable_name>"
+        e.g. "conv_instance.tiff_folder"
+
+        Note: Variable names must not contain dots, as dots are used
+        as the separator between instance and variable names.
+
+        Args:
+            parsed_module_objects:   Dict of class_name -> {var_name -> obj_dict}.
+            parsed_registry_metadata: Dict of module_type -> registry metadata.
+            workflow_config:          Workflow config with .modules and .execution_order.
+
+        Returns:
+            Flat dict of dot-notation keys to their default content values.
+        """
+        flat_context: Dict[str, Any] = {}
+
+        for instance_name, module_config in workflow_config.modules.items():
+            module_type = module_config.type
+            class_name = parsed_registry_metadata[module_type]["obj_class"].__name__
+
+            if class_name in parsed_module_objects:
+                for variable_name, obj_dict in parsed_module_objects[
+                    class_name
+                ].items():
+                    flat_key = f"{instance_name}.{variable_name}"
+                    flat_context[flat_key] = obj_dict["content"]
+
+        return flat_context
+
+    @classmethod
+    def resolve(
+        cls,
+        parsed_module_objects: Dict[str, Any],
+        parsed_registry_metadata: Dict[str, Any],
+        workflow_config: Any,
+        external_context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Resolves all variable values for every module instance in the workflow.
+
+        Resolution order (later layers overwrite earlier ones):
+            1. Module defaults (from parsed_module_objects)
+            2. External overrides (from external_context)
+            3. Data flow expressions (from workflow_config.data_flow)
+
+        No warning is emitted if an external override key does not match
+        any known variable — callers are responsible for key correctness.
+
+        Args:
+            parsed_module_objects:    Dict of class_name -> {var_name -> obj_dict}.
+            parsed_registry_metadata: Dict of module_type -> registry metadata.
+            workflow_config:          Workflow config with .modules, .execution_order,
+                                      and optional .data_flow.
+            external_context:         Optional flat dict of overrides using the same
+                                      dot-notation as the internal context.
+
+        Returns:
+            Dict of instance_name -> {var_name -> resolved_value} for every
+            instance in workflow_config.execution_order.
+        """
+        cache: Dict[str, Any] = {}
+
+        # Step 1: Build defaults
+        flat_context = cls._build_flat_context(
+            parsed_module_objects, parsed_registry_metadata, workflow_config
+        )
+
+        # Step 2: Inject external overrides — always win over defaults
+        if external_context:
+            for key, val in external_context.items():
+                flat_context[key] = val
+
+        # Step 3: Resolve data flow expressions in execution order
+        # Execution order matters — later modules may reference values
+        # computed by earlier modules in the same flow.
+        if workflow_config.data_flow:
+            for module_instance in workflow_config.execution_order:
+                data_flow_config = workflow_config.data_flow.get(module_instance)
+                if not data_flow_config:
+                    continue
+
+                for variable_name_target, expression in data_flow_config.items():
+                    node = (
+                        expression
+                        if isinstance(expression, Expression)
+                        else parse_expression(expression)
+                    )
+                    resolved_value = node.evaluate(flat_context, cache)
+                    target_key = f"{module_instance}.{variable_name_target}"
+                    flat_context[target_key] = resolved_value
+
+        # Step 4: Restructure into per-instance dicts for the builders
+        # Falls back to the module's default content if a key was never touched.
+        resolved_instances: Dict[str, Dict[str, Any]] = {}
+
+        for instance_name in workflow_config.execution_order:
+            module_type = workflow_config.modules[instance_name].type
+            class_name = parsed_registry_metadata[module_type]["obj_class"].__name__
+
+            instance_data: Dict[str, Any] = {}
+            if class_name in parsed_module_objects:
+                for var_name, ctn in parsed_module_objects[class_name].items():
+                    key = f"{instance_name}.{var_name}"
+                    instance_data[var_name] = flat_context.get(key, ctn["content"])
+
+            resolved_instances[instance_name] = instance_data
+
+        return resolved_instances

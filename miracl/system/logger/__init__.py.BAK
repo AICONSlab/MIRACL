@@ -1,0 +1,93 @@
+"""
+miracl/system/logger/__init__.py
+=================================
+Public API for MIRACL's logging system.
+
+This is the only module that pipeline code should ever import from.
+The implementation details in ``logger_config.py`` are intentionally
+kept separate so they can evolve without touching every call site.
+
+Typical usage
+-------------
+At the top of any MIRACL module::
+
+    from miracl.system.logger import get_logger
+
+    logger = get_logger(__name__)
+
+    logger.debug("Entering function | param=%s", value)
+    logger.info("Stage complete | elapsed=%.2fs", elapsed)
+    logger.success("Pipeline finished successfully")
+    logger.warning("Unexpected input — proceeding with defaults")
+    logger.error("Operation failed | reason=%s", err)
+    logger.critical("Unrecoverable error", exc_info=True)
+
+At the application entry point (CLI or main script), call
+``setup_logging`` *before* the first ``get_logger`` if you want
+file logging or non-default settings::
+
+    from miracl.system.logger import setup_logging
+
+    setup_logging(log_file="miracl_run.log")
+
+Environment variables
+---------------------
+See ``logger_config.py`` for the full list of environment variables
+that control log level, per-module overrides, and output format.
+"""
+
+import logging
+
+from miracl.system.logger.logger_config import SUCCESS, setup_logging  # noqa: F401
+# SUCCESS and setup_logging are re-exported here so callers can import
+# them from this module without knowing about logger_config internally:
+#
+#   from miracl.system.logger import setup_logging, SUCCESS
+
+
+def get_logger(name: str) -> logging.Logger:
+    """Return a logger configured for use within the MIRACL package.
+
+    This is the single call site every MIRACL module should use to
+    obtain a logger. It guarantees that logging is initialised before
+    the first record is emitted, regardless of whether the caller
+    remembered to call ``setup_logging()`` explicitly at startup.
+
+    Parameters
+    ----------
+    name : str
+        The logger's name. Always pass ``__name__`` so the dotted
+        module path is used (e.g. ``"miracl.flow.ace.ace_flow"``).
+        This places the logger correctly in the hierarchy and makes
+        log output immediately tell you which module produced it.
+        It also means per-module env var overrides like
+        ``MIRACL_LOG_LEVEL_FLOW_ACE=DEBUG`` will match correctly.
+
+    Returns
+    -------
+    logging.Logger
+        A standard Python ``Logger`` instance with one additional method:
+        ``logger.success(msg)`` — emits at the custom SUCCESS level (25).
+
+        ``logging.getLogger()`` is idempotent: calling it twice with the
+        same name always returns the *same* object, so there is no risk
+        of creating duplicate loggers.
+
+    Examples
+    --------
+    >>> from miracl.system.logger import get_logger
+    >>> logger = get_logger(__name__)
+    >>> logger.info("Data loaded | shape=%s", data.shape)
+    >>> logger.success("Registration complete | elapsed=%.2fs", elapsed)
+    """
+    # Ensure logging is configured before the first record is emitted.
+    # setup_logging() is idempotent — if it has already been called
+    # (e.g. explicitly at the entry point with a log_file argument),
+    # this call returns immediately without changing anything.
+    setup_logging()
+
+    # logging.getLogger() is the standard library function that returns
+    # the Logger for the given name, creating it if it doesn't exist yet.
+    # The returned logger is fully configured via the root logger that
+    # setup_logging() established — no further configuration is needed here.
+    return logging.getLogger(name)

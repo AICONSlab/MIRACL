@@ -1,304 +1,237 @@
-from typing import Optional, Dict, Type, Callable
-from typing_extensions import TypedDict
+from typing import Dict, Type, Callable, Optional
 
-from miracl.system.datamodels.miraclobj_serializer import build_flag_map_from_class
+# from miracl.system.registry.registry_refactor.registry_datamodels import RegistryEntry
+from miracl.system.registry.registry_datamodel import RegistryEntry
 from miracl.system.datamodels.miraclobj_enums import ModuleType
+from miracl.system.logger import get_logger
 
-
-# FlagMap = flag_map: Dict[str, object]
-
-
-class RegistryTemplate(TypedDict):
-    script: str
-    obj_class: Type
-    module_type: ModuleType
-
-
-class RegistryEntry(TypedDict):
-    script: str
-    runner: Callable[[str, Dict[str, object]], object]
-    obj_class: Type
-    module_type: ModuleType
+logger = get_logger(__name__)  # >>> ADDED: Logger for deserialization
 
 
 class MiraclRegistry:
+    """
+    Pure catalog/index of available MIRACL modules.
+
+    The registry serves as a lightweight lookup table that answers:
+    - "What modules are available?"
+    - "Where can I find module X?"
+    - "What metadata is associated with module X?"
+
+    The registry does NOT:
+    - Build flag maps (that's the serializer's job)
+    - Resolve MiraclObj instances (that's the serializer's job)
+    - Execute modules (that's the executor's job)
+    - Introspect object classes (that's the serializer's job)
+
+    This separation of concerns keeps the registry fast, simple, and focused.
+    """
+
     def __init__(self):
-        """
-        Initialize an empty MiraclRegistry.
-        """
+        """Initialize an empty registry catalog."""
         self._registry: Dict[str, RegistryEntry] = {}
+        logger.info("Initialized empty MiraclRegistry")
 
     def register(
         self,
         name: str,
         script: str,
-        # mapping: dict,
-        runner: Callable[[str, Dict[str, object]], object],
         obj_class: Type,
         module_type: ModuleType,
+        runner: Callable[[str, Dict[str, object], Dict[str, str], bool], object],
+        flag_map: Optional[Dict[str, str]] = None,
+        execute: bool = False,
     ) -> None:
         """
-        Register a module with the registry.
+        Register a module in the catalog.
 
         Args:
-            name (str): Unique name for the module.
-            script (str): Path or identifier of the script to run.
-            runner (Callable): Function that executes the script with flags.
-            obj_class (Type): Class containing miracl object definitions.
-            module_type (ModuleType): The module type (e.g., FLOW_MAPL3, etc.).
-        """
-        self._registry[name] = {
-            "script": script,
-            # "mapping": mapping,
-            "runner": runner,
-            "obj_class": obj_class,
-            "module_type": module_type,
-        }
+            name: Unique identifier for the module (e.g., 'tfce', 'plot_warped_data')
+            script: Path or command to execute the module
+            obj_class: Class containing MiraclObj definitions for this module
+            module_type: Context in which the module runs (MODULE, FLOW_MAPL3, etc.)
+            runner: Function that executes the script with flags
+            flag_map: Optional workflow-to-module flag mapping (e.g., {"--mpwd_atlas_dir": "--atlas_dir"})
+            execute: Whether to actually execute the script or just prepare it
 
-    def register_from_template(
-        self,
-        name: str,
-        template: RegistryTemplate,
-        runner: Callable[[str, Dict[str, object]], object],
-    ) -> None:
-        """
-        Register a module using a RegistryTemplate.
+        Raises:
+            ValueError: If a module with this name is already registered
 
-        Args:
-            name (str): Unique name for the module.
-            template (RegistryTemplate): Dict with 'script', 'obj_class', 'module_type'.
-            runner (Callable): Function that executes the script with flags.
+        Examples:
+            >>> registry.register(
+            ...     name="tfce",
+            ...     script="",
+            ...     obj_class=TFCE,
+            ...     module_type=ModuleType.MODULE,
+            ...     runner=generic_runner,
+            ...     flag_map={},
+            ...     execute=False
+            ... )
         """
-        flag_map = build_flag_map_from_class(
-            template["obj_class"],
-            template["module_type"],
+        if name in self._registry:
+            logger.error("Failed to register module '%s': already exists", name)
+            raise ValueError(
+                f"Module '{name}' is already registered. Use a different name or unregister the existing module first."
+            )
+
+        self._registry[name] = RegistryEntry(
+            script=script,
+            obj_class=obj_class,
+            module_type=module_type,
+            runner=runner,
+            flag_map=flag_map or {},
+            execute=execute,
         )
-        self.register(
+        logger.info(
+            "Registered module '%s' | type=%s | execute=%s",
             name,
-            template["script"],
-            # flag_map,
-            runner,
-            template["obj_class"],
-            template["module_type"],
+            module_type.name,
+            execute,
         )
 
     def get(self, name: str) -> RegistryEntry:
         """
-        Get the full registry entry for a given module.
+        Retrieve the full registry entry for a module.
 
         Args:
-            name (str): Name of the registered module.
+            name: Name of the registered module
 
         Returns:
-            Dict[str, Any]: The full registry entry.
-        """
-        return self._registry[name]
+            RegistryEntry: Complete metadata for the module
 
-    def get_info(self) -> Dict[str, RegistryEntry]:
-        """
-        Return the entire registry.
-
-        Returns:
-            Dict[str, Dict[str, Any]]: All registered modules.
-        """
-        return self._registry
-
-    def get_class(self, name: str) -> Type:
-        """
-        Return the obj_class for a given module name.
-
-        Args:
-            name (str): The module name.
-
-        Returns:
-            Type: The registered class associated with the module.
-        """
-        if name not in self._registry:
-            raise ValueError(f"Module '{name}' not found in registry")
-        return self._registry[name]["obj_class"]
-
-    def list_modules(self, verbose: bool = True) -> Dict[str, Dict[str, str]]:
-        """
-        List all modules currently registered in the MiraclRegistry.
-
-        This method provides both a human-readable summary (if `verbose=True`) and a structured
-        dictionary of all registered modules, including their script path, runner function,
-        associated object class, and module type.
-
-        Args:
-            verbose (bool, optional): If True, prints a formatted summary to stdout.
-                                      If False, only returns the structured dictionary.
-                                      Defaults to True.
-
-        Returns:
-            Dict[str, Dict[str, str]]: A dictionary mapping module names to their details:
-                {
-                    "module_name": {
-                        "script": "path/to/script.py",
-                        "runner": "runner_function_name",
-                        "class": "ClassName",
-                        "module_type": "ModuleTypeName",
-                    },
-                    ...
-                }
+        Raises:
+            KeyError: If no module with this name is registered
 
         Examples:
-            # Print a summary of all registered modules
-            reg.list_modules()
-
-            # Retrieve structured module info without printing
-            info = reg.list_modules(verbose=False)
-            print(info["conversion"]["script"])
-        """
-        if not self._registry:
-            if verbose:
-                print("No modules registered.")
-            return {}
-
-        summary: Dict[str, Dict[str, str]] = {}
-        for name, entry in self._registry.items():
-            script = entry.get("script", "N/A")
-            runner = entry.get("runner")
-            obj_class = entry.get("obj_class")
-            module_type = entry.get("module_type")
-
-            # runner_name = getattr(runner, "__name__", str(runner))
-            runner_name = getattr(
-                entry["runner"], "_original_runner", entry["runner"]
-            ).__name__
-            class_name = getattr(obj_class, "__name__", str(obj_class))
-            module_type_name = (
-                module_type.name if hasattr(module_type, "name") else str(module_type)
-            )
-
-            summary[name] = {
-                "script": script,
-                "runner": runner_name,
-                "class": class_name,
-                "module_type": module_type_name,
-            }
-
-        if verbose:
-            print("\nRegistered Modules:")
-            print("=" * 60)
-            for name, info in summary.items():
-                print(
-                    f"• {name}\n"
-                    f"    script       : {info['script']}\n"
-                    f"    class        : {info['class']}\n"
-                    f"    module_type  : {info['module_type']}\n"
-                    f"    runner       : {info['runner']}\n"
-                )
-
-        return summary
-
-    # def get_class(
-    #     self,
-    #     name: str,
-    #     include_all: bool = True,
-    # ) -> Dict[str, object]:
-    #     if name not in self._registry:
-    #         raise ValueError(f"Module '{name}' not found in registry")
-    #
-    #     entry = self._registry[name]
-    #     obj_class = entry["obj_class"]
-    #     module_type = entry["module_type"]
-    #
-    #     # Return the flattened flag map, optionally including disabled flags
-    #     return build_flag_map_from_class(
-    #         obj_class, module_type, include_all=include_all
-    #     )
-
-    # UPDATED: now supports overrides
-    def run(
-        self,
-        name: str,
-        overrides: Optional[Dict[str, object]] = None,
-    ) -> None:
-        """
-        Execute the registered runner function for a module, with optional overrides.
-
-        Args:
-            name (str): The module name.
-            overrides (Optional[Dict[str, Any]]): Optional flag overrides.
-
-        Returns:
-            Any: The result of the runner execution.
+            >>> entry = registry.get("tfce")
+            >>> print(entry["script"])
+            ""
+            >>> print(entry["module_type"])
+            ModuleType.MODULE
         """
         if name not in self._registry:
-            raise ValueError(f"Module '{name}' not found in registry")
+            logger.error("Cannot unregister module '%s': not found", name)
+            raise KeyError(
+                f"Module '{name}' not found in registry. Available modules: {', '.join(self.list_modules().keys())}"
+            )
+        logger.debug("Retrieved module '%s' from registry", name)
+        return self._registry[name]
 
-        entry = self._registry[name]
-
-        obj_class = entry["obj_class"]
-        module_type = entry["module_type"]
-
-        flag_map = build_flag_map_from_class(obj_class, module_type)
-        # Copy mapping so we don't modify stored defaults
-        # final_mapping = entry["mapping"].copy()
-        final_mapping = flag_map.copy()
-
-        # Apply overrides if provided
-        if overrides:
-            final_mapping.update(overrides)
-
-        # Run with merged mapping
-        return entry["runner"](entry["script"], final_mapping)
-
-    def get_override_flag(
-        self,
-        registry_key: str,
-        obj_name: str,
-        manual_module_type: Optional[ModuleType] = None,
-    ) -> Optional[str]:
+    def list_modules(self, verbose: bool = False) -> Dict[str, RegistryEntry]:
         """
-        Get the CLI flag associated with a specific object in a registered module.
+        List all registered modules.
 
         Args:
-            registry_key (str): The name of the registered module.
-            obj_name (str): The attribute name of the object.
+            verbose: If True, prints a formatted summary to stdout
 
         Returns:
-            Optional[str]: The CLI flag (e.g., '--tiff-folder'), or None if not found.
+            Dict mapping module names to their full registry entries
+
+        Examples:
+            >>> modules = registry.list_modules()
+            >>> print(modules.keys())
+            dict_keys(['tfce', 'plot_warped_data', 'conversion'])
+
+            >>> registry.list_modules(verbose=True)
+            Registered Modules (3 total):
+            ============================================================
+            - tfce
+                Type    : MODULE
+                Script  :
+                Runner  : generic_runner
+                Class   : TFCE
+                Execute : False
+            ...
         """
-        if registry_key not in self._registry:
-            raise ValueError(f"Module '{registry_key}' not found in registry")
+        if verbose:
+            self._print_module_summary()
 
-        entry = self._registry[registry_key]
-        cls = self.get_class(registry_key)
-        if manual_module_type is None:
-            module_type = entry["module_type"]
-        else:
-            module_type = manual_module_type
+        return dict(self._registry)
 
-        attr_instance = getattr(cls, obj_name)
-
-        if module_type == ModuleType.MODULE:
-            return f"--{attr_instance.cli_l_flag}"
-        else:
-            return f"--{attr_instance.flow.get(module_type, {}).get('cli_l_flag')}"
-
-    def get_override_value(
-        self,
-        registry_key: str,
-        obj_name: str,
-    ) -> object:
+    def has(self, name: str) -> bool:
         """
-        Get the content value associated with a specific object in a registered module.
+        Check if a module is registered.
 
         Args:
-            registry_key (str): The name of the registered module.
-            obj_name (str): The attribute name of the object.
+            name: Name of the module to check
 
         Returns:
-            Any: The 'content' value of the object.
-        """
-        cls = self.get_class(registry_key)
-        attr_instance = getattr(cls, obj_name)
+            True if the module exists in the registry, False otherwise
 
-        # return getattr(cls, obj_name).content
-        return (
-            attr_instance.content
-            if attr_instance.content is not None
-            else attr_instance.obj_default
-        )
+        Examples:
+            >>> registry.has("tfce")
+            True
+            >>> registry.has("nonexistent_module")
+            False
+        """
+        return name in self._registry
+
+    def unregister(self, name: str) -> None:
+        """
+        Remove a module from the registry.
+
+        Args:
+            name: Name of the module to unregister
+
+        Raises:
+            KeyError: If no module with this name is registered
+
+        Examples:
+            >>> registry.unregister("tfce")
+            >>> registry.has("tfce")
+            False
+        """
+        if name not in self._registry:
+            raise KeyError(f"Cannot unregister '{name}': module not found in registry")
+        del self._registry[name]
+        logger.info("Unregistered module '%s'", name)
+
+    def _print_module_summary(self) -> None:
+        """Print a formatted summary of all registered modules."""
+        if not self._registry:
+            print("No modules registered.")
+            return
+
+        print(f"\nRegistered Modules ({len(self._registry)} total):")
+        print("=" * 60)
+
+        for name, entry in self._registry.items():
+            runner_name = self._get_runner_name(entry["runner"])
+            class_name = entry["obj_class"].__name__
+            module_type_name = entry["module_type"].name
+
+            print(f"* {name}")
+            print(f"    Type    : {module_type_name}")
+            print(f"    Script  : {entry['script'] or '(empty)'}")
+            print(f"    Runner  : {runner_name}")
+            print(f"    Class   : {class_name}")
+            print(f"    Execute : {entry['execute']}")
+
+            if entry["flag_map"]:
+                print(f"    Flags   : {len(entry['flag_map'])} workflow mappings")
+            print()
+
+    @staticmethod
+    def _get_runner_name(runner: Callable) -> str:
+        """Extract a readable name from a runner function."""
+        # Check if it's a wrapped runner with original stored
+        if hasattr(runner, "_original_runner"):
+            return runner._original_runner.__name__
+        return runner.__name__
+
+    def __len__(self) -> int:
+        """Return the number of registered modules."""
+        return len(self._registry)
+
+    def __contains__(self, name: str) -> bool:
+        """Support 'in' operator for checking module existence."""
+        return self.has(name)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the registry."""
+        module_names = list(self._registry.keys())
+        if len(module_names) > 5:
+            shown = ", ".join(module_names[:5])
+            return f"MiraclRegistry({len(self)} modules: {shown}, ...)"
+        else:
+            shown = ", ".join(module_names)
+            return f"MiraclRegistry({len(self)} modules: {shown})"

@@ -1,0 +1,220 @@
+from __future__ import annotations
+
+import ast
+import re
+import sys
+from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, List, Union
+
+
+# =============================================================================
+# WHITELISTED FUNCTIONS
+# =============================================================================
+
+ALLOWED_FUNCTIONS: Dict[str, Callable] = {
+    "nifti_output_filename": lambda name, voxel: f"{name}_{voxel}um.nii.gz",
+    "format_name": lambda name, voxel: f"MyOutput_{voxel}",
+    "join_strings": lambda items: "_".join(str(i) for i in items),
+}
+
+
+# =============================================================================
+# AST NODE BASE CLASS
+# =============================================================================
+
+
+class Expression(ABC):
+    """
+    Abstract base class for all DSL expression nodes.
+
+    Every subclass MUST implement evaluate(). Using ABC with @abstractmethod
+    ensures this is enforced at class instantiation time, not at runtime when
+    evaluate() is first called.
+    """
+
+    @abstractmethod
+    def evaluate(self, context: Dict[str, Any], cache: Dict[str, Any]) -> Any:
+        """
+        Evaluate this expression node against a flat context dict.
+
+        Args:
+            context: Flat key-value store of resolved variable values.
+            cache:   Memoization cache to avoid redundant lookups.
+
+        Returns:
+            The evaluated result of this expression.
+        """
+        ...
+
+
+# =============================================================================
+# CONCRETE EXPRESSION NODES
+# =============================================================================
+
+
+class ConstantNode(Expression):
+    """
+    A leaf node holding a static value that evaluates to itself.
+
+    Named ConstantNode (not Literal) to avoid shadowing typing.Literal
+    if both modules are ever used in the same namespace.
+    """
+
+    def __init__(self, value: Any) -> None:
+        self.value = value
+
+    def evaluate(self, context: Dict[str, Any], cache: Dict[str, Any]) -> Any:
+        return self.value
+
+
+class Reference(Expression):
+    """
+    A leaf node that resolves a dot-notation key from the context.
+
+    Example key: "conv_instance.tiff_folder"
+
+    Raises a descriptive KeyError if the key is not found, including
+    the full list of available keys to aid debugging.
+    """
+
+    def __init__(self, key: str) -> None:
+        self.key = key
+
+    def evaluate(self, context: Dict[str, Any], cache: Dict[str, Any]) -> Any:
+        if self.key in cache:
+            return cache[self.key]
+
+        if self.key not in context:
+            raise KeyError(
+                f"Reference key '{self.key}' could not be resolved. "
+                f"Available keys: {sorted(context.keys())}"
+            )
+
+        value = context[self.key]
+        cache[self.key] = value
+        return value
+
+
+class FunctionCall(Expression):
+    """
+    A node that calls a whitelisted function with evaluated arguments.
+
+    Only functions present in ALLOWED_FUNCTIONS may be called.
+    This is the primary security gate for the DSL.
+    """
+
+    def __init__(self, func_name: str, args: List[Expression]) -> None:
+        self.func_name = func_name
+        self.args = args
+
+    def evaluate(self, context: Dict[str, Any], cache: Dict[str, Any]) -> Any:
+        if self.func_name not in ALLOWED_FUNCTIONS:
+            raise ValueError(
+                f"Function '{self.func_name}' is not whitelisted. "
+                f"Allowed functions: {sorted(ALLOWED_FUNCTIONS.keys())}"
+            )
+        func = ALLOWED_FUNCTIONS[self.func_name]
+        evaluated_args = [arg.evaluate(context, cache) for arg in self.args]
+        return func(*evaluated_args)
+
+
+class Pattern(Expression):
+    """
+    A template string node that interpolates embedded expressions.
+
+    Template syntax: "prefix_{ref:instance.var}_suffix"
+    Expressions inside {} are parsed recursively via parse_expression().
+
+    Template parts are parsed eagerly at construction time so malformed
+    templates fail immediately rather than at evaluation time.
+    """
+
+    def __init__(self, template: str) -> None:
+        self.parts: List[Union[str, Expression]] = []
+        last_index = 0
+
+        for match in re.finditer(r"\{([^{}]+)\}", template):
+            if match.start() > last_index:
+                self.parts.append(template[last_index : match.start()])
+            self.parts.append(parse_expression(match.group(1).strip()))
+            last_index = match.end()
+
+        if last_index < len(template):
+            self.parts.append(template[last_index:])
+
+    def evaluate(self, context: Dict[str, Any], cache: Dict[str, Any]) -> str:
+        evaluated_parts = [
+            part.evaluate(context, cache) if isinstance(part, Expression) else part
+            for part in self.parts
+        ]
+        return "".join(str(p) for p in evaluated_parts)
+
+
+# =============================================================================
+# EXPRESSION FACTORY
+# =============================================================================
+
+
+def parse_expression(raw: str) -> Expression:
+    """
+    Factory function that parses a raw DSL string into an Expression node.
+
+    Supported prefixes:
+        ref:      -> Reference node       e.g. "ref:conv_instance.tiff_folder"
+        pattern:  -> Pattern node         e.g. "pattern:{ref:inst.name}_{ref:inst.vox}um"
+        fn:       -> FunctionCall node    e.g. "fn:nifti_output_filename('ref:inst.name', 'ref:inst.vox')"
+        literal:  -> ConstantNode         e.g. "literal:some_fixed_string"
+
+    Raises:
+        ValueError: If the prefix is unknown or the fn: expression cannot be parsed.
+    """
+    raw = raw.strip()
+
+    if raw.startswith("ref:"):
+        return Reference(raw[len("ref:") :])
+
+    elif raw.startswith("pattern:"):
+        return Pattern(raw[len("pattern:") :])
+
+    elif raw.startswith("fn:"):
+        expr_text = raw[len("fn:") :]
+        tree = ast.parse(expr_text, mode="eval")
+
+        if isinstance(tree.body, ast.Call) and isinstance(tree.body.func, ast.Name):
+            func_name = tree.body.func.id
+            args: List[Expression] = []
+
+            for a in tree.body.args:
+                val = None
+                # Compatilibilty shim until MIRACL's Python version is upgraded
+                if sys.version_info >= (3, 8) and isinstance(a, ast.Constant):
+                    val = a.value
+                elif isinstance(a, ast.Str):
+                    val = a.s
+                elif isinstance(a, ast.Num):
+                    val = a.n
+                else:
+                    raise ValueError(f"Unsupported AST arg type: {ast.dump(a)}")
+
+                if isinstance(val, str) and (
+                    val.startswith("ref:") or val.startswith("pattern:")
+                ):
+                    args.append(parse_expression(val))
+                else:
+                    args.append(ConstantNode(val))
+
+            return FunctionCall(func_name, args)
+
+        else:
+            raise ValueError(
+                f"Cannot parse fn expression — expected a plain function call: '{raw}'"
+            )
+
+    elif raw.startswith("literal:"):
+        return ConstantNode(raw[len("literal:") :])
+
+    else:
+        raise ValueError(
+            f"Unknown expression prefix in: '{raw}'. "
+            f"Expected one of: ref:, pattern:, fn:, literal:"
+        )

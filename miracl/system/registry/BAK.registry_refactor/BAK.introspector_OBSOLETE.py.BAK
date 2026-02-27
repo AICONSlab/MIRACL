@@ -1,0 +1,306 @@
+from typing import Dict, List, Any, Optional
+from miracl.system.registry.registry_refactor.registry_clean import MiraclRegistry
+from miracl.system.datamodels.miraclobj_enums import ModuleType
+from miracl.system.datamodels.datamodel_miracl_objs_refactored import MiraclObj
+import inspect
+
+
+class RegistryIntrospector:
+    """
+    Introspects registered modules and resolves their MiraclObj instances.
+
+    The introspector extracts all MiraclObj class attributes from registered
+    obj_class definitions and resolves them according to their module_type context.
+
+    This provides a complete view of what arguments/objects are available for
+    each module in its resolved form, ready for serialization or further processing.
+    """
+
+    def __init__(self, registry: MiraclRegistry):
+        """
+        Initialize the introspector with a registry.
+
+        Args:
+            registry: The MiraclRegistry instance to introspect
+        """
+        self.registry = registry
+
+    def introspect_module(self, module_name: str) -> Dict[str, Dict[str, Any]]:
+        """
+        Introspect a single module and resolve all its MiraclObj instances.
+
+        Args:
+            module_name: Name of the registered module to introspect
+
+        Returns:
+            Dict mapping MiraclObj names to their resolved attributes.
+            Returns empty dict if module has no MiraclObj instances.
+
+        Raises:
+            KeyError: If module_name is not registered
+
+        Examples:
+            >>> introspector = RegistryIntrospector(registry)
+            >>> resolved = introspector.introspect_module("tfce")
+            >>> print(resolved.keys())
+            dict_keys(['tfce_control_input_dir', 'tfce_treated_input_dir', ...])
+            >>> print(resolved['tfce_control_input_dir']['cli_l_flag'])
+            '--ctrl_input_dir'
+        """
+        # Get registry entry
+        entry = self.registry.get(module_name)
+
+        # Extract obj_class and module_type
+        obj_class = entry["obj_class"]
+        module_type = entry["module_type"]
+
+        # Find all MiraclObj class attributes
+        miracl_objs = self._extract_miracl_objs(obj_class)
+
+        # Resolve each object in the appropriate context
+        resolved_objs = {}
+        for obj_name, miracl_obj in miracl_objs.items():
+            resolved = miracl_obj.resolve(context=module_type)
+
+            # Only include objects that aren't disabled
+            if resolved is not None:
+                resolved_objs[obj_name] = resolved
+
+        return resolved_objs
+
+    def introspect_all_modules(self) -> Dict[str, Dict[str, Dict[str, Any]]]:
+        """
+        Introspect all registered modules and resolve their MiraclObj instances.
+
+        Returns:
+            Nested dict structure:
+            {
+                "module_name": {
+                    "obj_name": {resolved_attributes},
+                    ...
+                },
+                ...
+            }
+
+        Examples:
+            >>> introspector = RegistryIntrospector(registry)
+            >>> all_resolved = introspector.introspect_all_modules()
+            >>> print(all_resolved.keys())
+            dict_keys(['tfce', 'conversion', 'registration', ...])
+            >>> print(all_resolved['tfce']['tfce_control_input_dir']['cli_required'])
+            True
+        """
+        all_modules = self.registry.list_modules()
+
+        result = {}
+        for module_name in all_modules.keys():
+            result[module_name] = self.introspect_module(module_name)
+
+        return result
+
+    def introspect_module_with_metadata(self, module_name: str) -> Dict[str, Any]:
+        """
+        Introspect a module with additional registry metadata.
+
+        Includes both the resolved objects and registry-level information
+        like script path, runner, execute flag, etc.
+
+        Args:
+            module_name: Name of the registered module
+
+        Returns:
+            Dict containing:
+                - 'metadata': Registry entry info (script, module_type, etc.)
+                - 'objects': Resolved MiraclObj instances
+
+        Examples:
+            >>> result = introspector.introspect_module_with_metadata("conversion")
+            >>> print(result['metadata']['script'])
+            'python /code/miracl/conv/miracl_conv_convertTIFFtoNII.py'
+            >>> print(result['metadata']['module_type'])
+            'FLOW_MAPL3'
+            >>> print(result['objects'].keys())
+            dict_keys(['conv_down', 'conv_channum', ...])
+        """
+        entry = self.registry.get(module_name)
+
+        # Extract metadata (exclude obj_class and runner as they're not serializable)
+        metadata = {
+            "script": entry["script"],
+            "module_type": entry["module_type"].value,  # Convert enum to string
+            "flag_map": entry["flag_map"],
+            "execute": entry["execute"],
+            "obj_class_name": entry["obj_class"].__name__,
+            "runner_name": self._get_runner_name(entry["runner"]),
+        }
+
+        # Get resolved objects
+        objects = self.introspect_module(module_name)
+
+        return {
+            "metadata": metadata,
+            "objects": objects,
+        }
+
+    def introspect_all_modules_with_metadata(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Introspect all modules with their metadata.
+
+        Returns:
+            Nested dict structure:
+            {
+                "module_name": {
+                    "metadata": {...},
+                    "objects": {resolved_obj_dict}
+                },
+                ...
+            }
+
+        Examples:
+            >>> full_introspection = introspector.introspect_all_modules_with_metadata()
+            >>> print(full_introspection['registration']['metadata']['script'])
+            '/code/miracl/reg/miracl_reg_clar-allen.sh'
+            >>> print(len(full_introspection['registration']['objects']))
+            12
+        """
+        all_modules = self.registry.list_modules()
+
+        result = {}
+        for module_name in all_modules.keys():
+            result[module_name] = self.introspect_module_with_metadata(module_name)
+
+        return result
+
+    def get_object_by_id(
+        self, obj_id: str, module_name: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Find a resolved object by its UUID across all modules.
+
+        Args:
+            obj_id: UUID of the MiraclObj to find
+            module_name: Optional module name to limit search scope
+
+        Returns:
+            Dict containing the resolved object data and its module context,
+            or None if not found.
+
+        Examples:
+            >>> obj = introspector.get_object_by_id("67b62f10-a6b6-4d61-9e2c-19819373265d")
+            >>> print(obj['module'])
+            'tfce'
+            >>> print(obj['resolved']['cli_l_flag'])
+            '--ctrl_input_dir'
+        """
+        modules_to_search = (
+            {module_name: self.registry.get(module_name)}
+            if module_name
+            else self.registry.list_modules()
+        )
+
+        for mod_name, entry in modules_to_search.items():
+            obj_class = entry["obj_class"]
+            module_type = entry["module_type"]
+
+            miracl_objs = self._extract_miracl_objs(obj_class)
+
+            for obj_name, miracl_obj in miracl_objs.items():
+                if str(miracl_obj.id) == str(obj_id):
+                    resolved = miracl_obj.resolve(context=module_type)
+                    if resolved:
+                        return {
+                            "module": mod_name,
+                            "object_name": obj_name,
+                            "resolved": resolved,
+                        }
+
+        return None
+
+    @staticmethod
+    def _extract_miracl_objs(obj_class: type) -> Dict[str, MiraclObj]:
+        """
+        Extract all MiraclObj class attributes from an obj_class.
+
+        Args:
+            obj_class: The class to inspect for MiraclObj attributes
+
+        Returns:
+            Dict mapping attribute names to MiraclObj instances
+        """
+        miracl_objs = {}
+
+        for attr_name in dir(obj_class):
+            # Skip private/magic attributes
+            if attr_name.startswith("_"):
+                continue
+
+            attr = getattr(obj_class, attr_name)
+
+            # Check if it's a MiraclObj instance
+            if isinstance(attr, MiraclObj):
+                miracl_objs[attr_name] = attr
+
+        return miracl_objs
+
+    @staticmethod
+    def _get_runner_name(runner) -> str:
+        """Extract a readable name from a runner function."""
+        if hasattr(runner, "_original_runner"):
+            return runner._original_runner.__name__
+        return runner.__name__
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """
+        Get statistics about the registry.
+
+        Returns:
+            Dict containing:
+                - total_modules: Number of registered modules
+                - total_objects: Total MiraclObj instances across all modules
+                - objects_per_module: Dict of module_name -> object count
+                - module_types: Distribution of module types
+
+        Examples:
+            >>> stats = introspector.get_statistics()
+            >>> print(stats['total_modules'])
+            15
+            >>> print(stats['total_objects'])
+            127
+            >>> print(stats['module_types'])
+            {'MODULE': 2, 'FLOW_MAPL3': 13}
+        """
+        all_modules = self.registry.list_modules()
+
+        total_objects = 0
+        objects_per_module = {}
+        module_type_counts = {}
+
+        for module_name, entry in all_modules.items():
+            obj_class = entry["obj_class"]
+            module_type = entry["module_type"]
+
+            miracl_objs = self._extract_miracl_objs(obj_class)
+            obj_count = len(miracl_objs)
+
+            objects_per_module[module_name] = obj_count
+            total_objects += obj_count
+
+            # Count module types
+            type_name = module_type.value
+            module_type_counts[type_name] = module_type_counts.get(type_name, 0) + 1
+
+        return {
+            "total_modules": len(all_modules),
+            "total_objects": total_objects,
+            "objects_per_module": objects_per_module,
+            "module_types": module_type_counts,
+        }
+
+    def __repr__(self) -> str:
+        """String representation of the introspector."""
+        stats = self.get_statistics()
+        return (
+            f"RegistryIntrospector("
+            f"modules={stats['total_modules']}, "
+            f"objects={stats['total_objects']})"
+        )

@@ -1,0 +1,142 @@
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional
+from abc import ABC, abstractmethod
+from miracl.api.core import MiraclObj
+from miracl.api.enums import ModuleType
+
+
+class ArgumentManifest(BaseModel):
+    """Data for a single argparse.add_argument call."""
+
+    flags: List[str]
+    kwargs: Dict[str, Any]
+    obj_id: str  # Kept for mapping parsed results back to objects
+
+
+class GroupManifest(BaseModel):
+    """Data for an argparse.add_argument_group call."""
+
+    label: str
+    description: Optional[str] = None
+    arguments: List[ArgumentManifest] = Field(default_factory=list)
+
+
+class CLIManifest(BaseModel):
+    """The complete 'Instruction Manual' for the CLI Builder."""
+
+    description: str
+    groups: List[GroupManifest] = Field(default_factory=list)
+    ungrouped_arguments: List[ArgumentManifest] = Field(default_factory=list)
+
+
+class BaseMiraclSerializer(ABC):
+    """
+    Handles finding and filtering MiraclObjs.
+    Subclasses define how to transform them into specific UI formats.
+    """
+
+    def _get_active_objs(
+        self, obj_class: type, module_type: ModuleType
+    ) -> List[MiraclObj]:
+        """Collects all MiraclObj instances that are not disabled in this context."""
+        active = []
+        # Inspect the class for MiraclObj attributes
+        for attr_name in dir(obj_class):
+            val = getattr(obj_class, attr_name)
+            if isinstance(val, MiraclObj):
+                if self._should_include(val, module_type):
+                    active.append(val)
+        return active
+
+    def _should_include(self, obj: MiraclObj, module_type: ModuleType) -> bool:
+        """Central logic to check 'disabled' status based on context."""
+        if module_type == ModuleType.MODULE:
+            return True
+        if not obj.flow:
+            return False
+        flow_cfg = obj.flow.get(module_type.value, {})
+        return not flow_cfg.get("disabled", False)
+
+    @abstractmethod
+    def serialize_registry(self, registry_info: Dict[str, Any]) -> Any:
+        pass
+
+
+from miracl.api.enums import CliGroup, ArgumentType
+
+
+class CLISerializer(BaseMiraclSerializer):
+    def serialize_registry(
+        self, registry_info: Dict, description: str = "MIRACL CLI"
+    ) -> CLIManifest:
+        manifest = CLIManifest(description=description)
+        group_map: Dict[str, GroupManifest] = {}
+
+        for entry in registry_info.values():
+            module_type = entry["module_type"]
+            objs = self._get_active_objs(entry["obj_class"], module_type)
+
+            for obj in objs:
+                arg_manifest = self._create_arg_manifest(obj, module_type)
+
+                # Handle Grouping
+                group_enum = self._get_group_enum(obj, module_type)
+                if group_enum:
+                    if group_enum.label not in group_map:
+                        group_map[group_enum.label] = GroupManifest(
+                            label=group_enum.label, description=group_enum.description
+                        )
+                    group_map[group_enum.label].arguments.append(arg_manifest)
+                else:
+                    manifest.ungrouped_arguments.append(arg_manifest)
+
+        manifest.groups = list(group_map.values())
+        return manifest
+
+    def _create_arg_manifest(
+        self, obj: MiraclObj, context: ModuleType
+    ) -> ArgumentManifest:
+        flags = self._get_flags(obj, context)
+
+        # Build Argparse Kwargs
+        kwargs = {
+            "help": obj.cli_help or "No description provided",
+            "dest": str(obj.id),
+            "metavar": obj.cli_metavar if obj.cli_metavar else obj.name.upper(),
+            "required": self._is_required(obj, context),
+        }
+
+        # Map optional attributes
+        if obj.cli_obj_type:
+            kwargs["type"] = obj.cli_obj_type.python_type
+        if obj.cli_nargs:
+            kwargs["nargs"] = obj.cli_nargs
+        if obj.cli_choices:
+            kwargs["choices"] = obj.cli_choices
+        if obj.obj_default is not None:
+            kwargs["default"] = obj.obj_default
+        if obj.cli_action:
+            kwargs["action"] = obj.cli_action.value
+        if obj.cli_const is not None:
+            kwargs["const"] = obj.cli_const
+
+        return ArgumentManifest(flags=flags, kwargs=kwargs, obj_id=str(obj.id))
+
+    def _get_flags(self, obj: MiraclObj, context: ModuleType) -> List[str]:
+        if context == ModuleType.MODULE:
+            return [f"-{obj.cli_s_flag}", f"--{obj.cli_l_flag}"]
+
+        flow_cfg = obj.flow[context.value]
+        return [f"-{flow_cfg['cli_s_flag']}", f"--{flow_cfg['cli_l_flag']}"]
+
+    def _is_required(self, obj: MiraclObj, context: ModuleType) -> bool:
+        if context == ModuleType.MODULE:
+            return obj.cli_required or False
+        return obj.flow.get(context.value, {}).get("required", False)
+
+    def _get_group_enum(
+        self, obj: MiraclObj, context: ModuleType
+    ) -> Optional[CliGroup]:
+        if context == ModuleType.MODULE or not obj.flow:
+            return None
+        return obj.flow.get(context.value, {}).get("cli_group")
