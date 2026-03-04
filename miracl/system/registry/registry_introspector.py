@@ -1,10 +1,7 @@
-from collections import defaultdict
 from typing_extensions import override
 from typing import Dict
-
 from miracl.system.registry.registry import MiraclRegistry, RegistryEntry
-
-# from miracl.system.datamodels.datamodel_miracl_objs_refactored import (
+from miracl.system.registry.schema_validators.config_schema import MetaConfig
 from miracl.system.datamodels.miraclobj_datamodel import (
     MiraclObj,
     ResolvedMiraclObj,
@@ -29,9 +26,18 @@ class RegistryIntrospector:
             len(self.registry.list_modules()),
         )
 
-    # ==========================================================================
-    # >>> UPDATED: Now returns structured objects instead of Dict[str, Any]
-    # ==========================================================================
+    def get_meta(self) -> MetaConfig:
+        """
+        Return MetaConfig. Same as get_registry_metadata_as_dict() i.e. no processing
+        done here. It's just a passthrough to the serializer.
+
+        MetaCOnfig is guaranteed to be present as _load_registry_from_yaml() validates
+        the _meta block and calls register_meta() before the registry is even introspected.
+
+        The only way an error is raised here is if the loader was skipped and the
+        registry was created manually, which should never be the case!
+        """
+        return self.registry.get_meta()
 
     def get_modules_as_dict(self) -> Dict[str, Dict[str, ResolvedMiraclObj]]:
         """
@@ -119,10 +125,6 @@ class RegistryIntrospector:
 
         return resolved_objects
 
-    # ==========================================================================
-    # Metadata unchanged
-    # ==========================================================================
-
     def get_registry_metadata_as_dict(self) -> Dict[str, RegistryEntry]:
         """
         List all registered modules.
@@ -131,10 +133,6 @@ class RegistryIntrospector:
             Dict mapping module names to their full registry entries
         """
         return self.registry.list_modules(verbose=False)
-
-    # ==========================================================================
-    # Representation unchanged
-    # ==========================================================================
 
     @override
     def __repr__(self) -> str:

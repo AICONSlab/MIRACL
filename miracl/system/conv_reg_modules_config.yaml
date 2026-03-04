@@ -1,3 +1,27 @@
+_meta:
+  module: flow
+  command: conv_reg
+  help: "conversion -> registration pipeline"
+  extended_help: |
+    Converts tiff stack into nifti file.
+    Registers nifti to atlas
+  docs_url: "https://miracl.readthedocs.io/en/latest/tutorials/workflows/clarity_registration/clar_reg.html"
+  examples:
+    - cmd: "miracl flow conv_reg -i tiff_folder -o results_folder"
+      help: "Basic conversion and registration"
+  experimental: false
+  deprecated: false
+  deprecation_message: ""
+  version: "2.0.0"
+  requires_gpu: false
+  min_memory_gb: "128GB"
+  estimated_runtime: "2-4h"
+  tags:
+    - "registration"
+    - "clarity"
+    - "allen"
+  test_data: "tests/data/flow/conv_reg"
+
 mapl3_workflow_connectors:
   script: ""
   obj_class: "miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_connectors.Mapl3WorkflowConnectors"

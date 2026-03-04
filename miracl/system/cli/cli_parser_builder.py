@@ -2,6 +2,7 @@ import argparse
 from typing import List, Tuple, Dict, Any, Optional
 from miracl.system.enums.enums_base_modules import CliGroup
 from miracl.system.logger import get_logger
+from miracl.system.cli.cli_parser_contracts import SerializedCLI
 
 logger = get_logger(__name__)
 
@@ -14,32 +15,34 @@ class MiraclCLIBuilder:
         List[Tuple[flags, kwargs, optional CliGroup]]
     """
 
-    def __init__(self, description: Optional[str] = None):
-        logger.info(
-            "Initializing CLI builder | description=%s",
-            description or "MIRACL CLI",
-        )
+    def __init__(self):
+        logger.info("Initializing CLI builder")
 
-        self.parser = argparse.ArgumentParser(
-            description=description or "MIRACL CLI",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-        )
+        self.parser: argparse.ArgumentParser
         self.groups_cache: Dict[str, argparse._ArgumentGroup] = {}
 
         logger.debug("CLI builder initialized | groups_cache_empty=True")
 
     def build_parser(
-        self, serialized_cli: List[Tuple[List[str], Dict[str, Any], Optional[CliGroup]]]
+        self,
+        serialized: SerializedCLI,
     ) -> argparse.ArgumentParser:
         logger.info(
             "Building argparse parser | total_entries=%d",
-            len(serialized_cli),
+            len(serialized.args),
         )
+
+        self.parser = argparse.ArgumentParser(
+            description=self._build_description(serialized.meta),
+            epilog=self._build_epilog(serialized.meta),
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+        self.groups_cache = {}
 
         group_creation_count = 0
         argument_count = 0
 
-        for flags, kwargs, cli_group in serialized_cli:
+        for flags, kwargs, cli_group in serialized.args:
             logger.debug(
                 "Attaching CLI argument | flags=%s | group=%s",
                 flags,
@@ -74,8 +77,57 @@ class MiraclCLIBuilder:
 
         return self.parser
 
-    # def parse(self, argv: Optional[List[str]] = None) -> argparse.Namespace:
-    #     return self.parser.parse_args(argv)
+    @staticmethod
+    def _build_description(meta: Any) -> str:
+        """
+        Build argparse description string from _meta block params provided in YAML config.
+        """
+        parts = []
+
+        if meta.experimental:
+            parts.append("[EXPERIMENTAL]")
+
+        if meta.deprecated:
+            parts.append(f"[DEPRECATED: {meta.deprecation_message}]")
+
+        parts.append(meta.help)
+
+        return " ".join(parts)
+
+    @staticmethod
+    def _build_epilog(meta: Any) -> Optional[str]:
+        """
+        Build argparse epilog string from _meta block content.
+        """
+        parts = []
+
+        if meta.extended_help:
+            parts.append(meta.extended_help)
+
+        if meta.examples:
+            parts.append("Examples:")
+            for ex in meta.examples:
+                parts.append(f"    {ex.cmd}")
+                if ex.help:
+                    parts.append(f"    {ex.help}")
+
+        runtime_parts = []
+        if meta.estimated_runtime:
+            runtime_parts.append(f"Runtime : {meta.estimated_runtime}")
+        if meta.min_memory_gb:
+            runtime_parts.append(f"Memory  : {meta.min_memory_gb}")
+        if meta.requires_gpu:
+            runtime_parts.append("GPU     : required")
+        if meta.version:
+            runtime_parts.append(f"Version : {meta.version}")
+        if runtime_parts:
+            parts.append("\n" + "\n".join(runtime_parts))
+
+        if meta.docs_url:
+            parts.append(f"\nFor more details, see: {meta.docs_url}")
+
+        return "\n".join(parts) if parts else None
+
     def parse(self, argv: Optional[List[str]] = None) -> argparse.Namespace:
         logger.info("Parsing CLI arguments")
         logger.debug("Raw argv input | argv=%s", argv)

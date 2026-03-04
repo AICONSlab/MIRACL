@@ -1,9 +1,8 @@
 from typing import Dict, Any, List, Tuple, Optional, Union
 from miracl.system.enums.enums_base_modules import CliGroup
-
-# from miracl.system.datamodels.datamodel_miracl_objs_refactored import ResolvedMiraclObj
 from miracl.system.datamodels.miraclobj_datamodel import ResolvedMiraclObj
 from miracl.system.logger import get_logger
+from miracl.system.cli.cli_parser_contracts import SerializedCLI
 
 logger = get_logger(__name__)
 
@@ -99,8 +98,9 @@ class MiraclObjSerializer:
     def serialize_for_cli(
         cls,
         resolved_objects: Dict[str, Dict[str, ResolvedMiraclObj]],  # >>> UPDATED
+        meta: Any,
         module_parser: bool = False,
-    ) -> List[Tuple[List[str], Dict[str, Any], Optional[CliGroup]]]:
+    ) -> SerializedCLI:
         """
         Flatten the nested introspector dict into a list of CLI-ready entries.
 
@@ -134,6 +134,7 @@ class MiraclObjSerializer:
 
                 # The returned tuple matches argparse needs exactly
                 serialized.append(cls._to_argparse_format(resolved, module_parser))
+                total_arguments += 1
 
         logger.success(
             "CLI serialization complete | modules=%d | total_arguments=%d",
@@ -141,4 +142,4 @@ class MiraclObjSerializer:
             total_arguments,
         )
 
-        return serialized
+        return SerializedCLI(args=serialized, meta=meta)

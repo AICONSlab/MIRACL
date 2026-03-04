@@ -2,9 +2,63 @@
 Schema definitions for validating module entries loaded from YAML for registry.
 """
 
-from pydantic import BaseModel, Field, RootModel, field_validator
-from typing import Dict
+from __future__ import annotations
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing import Dict, List, Optional, Any
 from miracl.api.enums import ModuleType
+
+
+class UsageExample(BaseModel):
+    """A single usage example declared in the YAML _meta block"""
+
+    cmd: str
+    help: Optional[str] = None
+
+    class Config:
+        extra = "forbid"
+
+
+class MetaConfig(BaseModel):
+    """
+    Metadata in '_meta' key in each module YAML for each command.
+    This will replace the sperate Python description file for the
+    argparser desciption.
+    """
+
+    # Routing
+    # These are required to correctly match the module
+    module: str  # Ex.: "reg" - shown in `miracl -h` output
+    command: str  # Ex.: "clar_allen" - used in usage line
+    help: str  # Short module description - shown in `miracl reg -h`
+
+    # Extended help
+    extended_help: Optional[str] = None
+    examples: Optional[List[UsageExample]] = None  # Usage example in help epilog
+    docs_url: Optional[str] = None
+
+    # Status badges rendered by MiraclCLIBuilder._build_description()
+    deprecated: bool = False
+    deprecation_message: Optional[str]
+    experimental: bool = False
+
+    # Runtime info
+    version: Optional[str] = None
+    requires_gpu: bool = False
+    min_memory_gb: Optional[str] = None
+    estimated_runtime: Optional[str] = None
+
+    # Testing/CI/CD
+    tags: Optional[List[str]] = None
+    test_data: Optional[str] = None
+
+    @model_validator(mode="after")
+    def deprecation_message_required_if_deprecated(self) -> MetaConfig:
+        if self.deprecated and not self.deprecation_message:
+            raise ValueError("deprecation_message is required when deprecated is True.")
+        return self
+
+    class Config:
+        extra = "forbid"
 
 
 class ModuleEntry(BaseModel):
@@ -65,12 +119,49 @@ class ModuleEntry(BaseModel):
         return v
 
 
-class ModuleConfig(RootModel[Dict[str, ModuleEntry]]):
+class ModuleConfig(BaseModel):
     """
-    Pydantic root model representing the full modules dictionary
-    loaded from YAML.
+    Validated container for a module config YAML file.
 
-    Each key is a module name, and each value is a ModuleEntry object.
+    Accepts the raw YAML dict. The mode="before" validator splits _meta from module
+    entries before Pydantic validates each field.
+
+    This gives us a clean model with .meta and .modules as direct typed attr for use
+    in introspector!
     """
 
-    pass
+    meta: MetaConfig
+    modules: Dict[str, ModuleEntry]
+
+    @model_validator(mode="before")
+    @classmethod
+    def split_meta_and_modules(cls, raw: dict) -> dict[str, Any]:
+        """
+        Serializes the raw YAML dict into the format expected by Pydantic.
+
+        Runs before field validation and returns a plain dict with two keys:
+          "meta": the _meta block, validated by MetaConfig
+          "modules": all other keys i.e. modules, each validated by ModuleEntry
+
+        Once created, Pydantic then validates the returned dict against the model's
+        field definitions.
+        """
+
+        # NOTE: This might actually be dead code. Technically a non-empty config is
+        # already guaranteed here. This check would only ever happen if ModuleConfig()
+        # got called directly but load_registry_from_yaml() should be the only construction
+        # path. I leave it in here for now after more testing has been done.
+        if not isinstance(raw, dict):
+            raise ValueError(
+                f"YAML config must be a key-value structure (got {type(raw).__name__}). Check that your YAML file is not empty or incorrectly formatted."
+            )
+
+        if "_meta" not in raw:
+            raise ValueError(
+                "YAML config is missing required _meta block! Every module config must declare _meta with at least: module, command and help!"
+            )
+
+        return {
+            "meta": raw["_meta"],
+            "modules": {name: entry for name, entry in raw.items() if name != "_meta"},
+        }

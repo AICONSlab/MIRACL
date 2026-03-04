@@ -1,35 +1,49 @@
 from typing import Dict, Type, Callable, Optional
-
-# from miracl.system.registry.registry_refactor.registry_datamodels import RegistryEntry
 from miracl.system.registry.registry_datamodel import RegistryEntry
 from miracl.system.datamodels.miraclobj_enums import ModuleType
 from miracl.system.logger import get_logger
+from miracl.system.registry.schema_validators.config_schema import MetaConfig
 
-logger = get_logger(__name__)  # >>> ADDED: Logger for deserialization
+logger = get_logger(__name__)
 
 
 class MiraclRegistry:
     """
-    Pure catalog/index of available MIRACL modules.
-
-    The registry serves as a lightweight lookup table that answers:
-    - "What modules are available?"
-    - "Where can I find module X?"
-    - "What metadata is associated with module X?"
-
-    The registry does NOT:
-    - Build flag maps (that's the serializer's job)
-    - Resolve MiraclObj instances (that's the serializer's job)
-    - Execute modules (that's the executor's job)
-    - Introspect object classes (that's the serializer's job)
-
-    This separation of concerns keeps the registry fast, simple, and focused.
+    Pure catalog/index of available MIRACL modules. All modules, either standalone or
+    as part of a workflow will be registered into the registry and accessed only by
+    the registry introspector
     """
 
     def __init__(self):
-        """Initialize an empty registry catalog."""
+        """Initialize an empty registry catalog and meta config"""
         self._registry: Dict[str, RegistryEntry] = {}
+        self._meta: MetaConfig
+
         logger.info("Initialized empty MiraclRegistry")
+
+    def register_meta(self, meta: MetaConfig) -> None:
+        """
+        Store the validated _meta block from YAML config file. Called by load_registry_from_yaml().
+        """
+        self._meta = meta
+        logger.debug(
+            "Registered meta | module=%s | command=%s",
+            meta.module,
+            meta.command,
+        )
+
+    def get_meta(self) -> MetaConfig:
+        """
+        Return the MetaConfig for the registry's command.
+        """
+        # NOTE: This could only ever happen if a user or dev constructed a MiraclRegistry
+        # manually instead of using the loader. This should never happen so that's why
+        # I leave it in here.
+        if not hasattr(self, "_meta"):
+            raise RuntimeError(
+                "Registry meta has not been registered. Ensure load_registry_from_yaml() was called before accessing meta."
+            )
+        return self._meta
 
     def register(
         self,
@@ -109,7 +123,7 @@ class MiraclRegistry:
             ModuleType.MODULE
         """
         if name not in self._registry:
-            logger.error("Cannot unregister module '%s': not found", name)
+            logger.error("Module not found in registry | name=%s", name)
             raise KeyError(
                 f"Module '{name}' not found in registry. Available modules: {', '.join(self.list_modules().keys())}"
             )
