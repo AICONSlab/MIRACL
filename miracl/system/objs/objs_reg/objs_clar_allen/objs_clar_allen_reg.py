@@ -52,7 +52,7 @@ class ClarAllen:
                     required=True,
                 ),
                 gui=GuiDelta(
-                    base=GuiBase(group="main"),
+                    base=GuiBase(),
                 ),
             ),
             "mapl3": FlowOverride(
@@ -61,7 +61,7 @@ class ClarAllen:
                     s_flag="mrca_i", l_flag="mrca_input", group=CliGroup.REQUIRED
                 ),
                 gui=GuiDelta(
-                    base=GuiBase(group="main"),
+                    base=GuiBase(),
                 ),
             ),
         },
@@ -89,7 +89,7 @@ class ClarAllen:
                     l_flag="arca_tiff_input",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 source=ArgumentSource.INTERNAL,
@@ -98,7 +98,7 @@ class ClarAllen:
                     l_flag="mrca_tiff_input",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -122,14 +122,14 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="arca_r", l_flag="arca_output", group=CliGroup.REG_CLAR_ALLEN
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 source=ArgumentSource.INTERNAL,
                 cli=CLIDelta(
                     s_flag="mrca_r", l_flag="mrca_output", group=CliGroup.REG_CLAR_ALLEN
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -151,6 +151,7 @@ class ClarAllen:
             base=GuiBase(
                 label=["Orientation code"],
                 order=9.0,
+                widget_type=WidgetType.LINE_EDIT,
             )
         ),
         flow={
@@ -160,7 +161,7 @@ class ClarAllen:
                     l_flag="arca_orient_code",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -200,7 +201,7 @@ class ClarAllen:
                     l_flag="arca_voxel_size",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -226,17 +227,26 @@ class ClarAllen:
             choices=["combined", "split"],
             default="combined",
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Labels hemisphere"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Labels hemisphere"],
+                widget_type=WidgetType.DROPDOWN,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="arca_m", l_flag="arca_hemi", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="arca_m",
+                    l_flag="arca_hemi",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mrca_m", l_flag="mrca_hemi", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="mrca_m",
+                    l_flag="mrca_hemi",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
         },
@@ -255,7 +265,12 @@ class ClarAllen:
             help="input Allen labels to warp. Input labels could be at a different depth than default labels, If l. is specified (m & v cannot be specified) (default: %(default)s)",
             default=None,
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Allen labels to warp"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Allen labels to warp"],
+                widget_type=WidgetType.LINE_EDIT,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
@@ -263,7 +278,7 @@ class ClarAllen:
                     l_flag="arca_allen_label",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -288,7 +303,12 @@ class ClarAllen:
             help="custom Allen atlas (default: %(default)s)",
             default="None",
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Custom Allen atlas"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Custom Allen atlas"],
+                widget_type=WidgetType.LINE_EDIT,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
@@ -296,7 +316,7 @@ class ClarAllen:
                     l_flag="arca_allen_atlas",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -325,6 +345,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Side"],
+                widget_type=WidgetType.DROPDOWN,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["right hemisphere", "left hemisphere"],
@@ -338,7 +359,7 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="arca_s", l_flag="arca_side", group=CliGroup.REG_CLAR_ALLEN
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -366,6 +387,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Create mosaic figure"],
+                widget_type=WidgetType.DROPDOWN,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["yes", "no"], default_val="yes"
@@ -380,7 +402,7 @@ class ClarAllen:
                     l_flag="arca_no_mosaic_fig",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -409,6 +431,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Olfactory bulb incl."],
+                widget_type=WidgetType.DROPDOWN,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["not included", "included"], default_val="not included"
@@ -423,7 +446,7 @@ class ClarAllen:
                     l_flag="arca_olfactory_bulb",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -452,6 +475,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Utilfn intensity correction"],
+                widget_type=WidgetType.DROPDOWN,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["run", "skip"], default_val="run"
@@ -466,7 +490,7 @@ class ClarAllen:
                     l_flag="arca_skip_cor",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -495,9 +519,11 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Warp CLARITY to Allen"],
+                widget_type=WidgetType.DROPDOWN,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
-                        vals=["yes", "no"], default_val="no"
+                        vals=["yes", "no"],
+                        default_val="no",
                     )
                 ),
             )
@@ -507,7 +533,7 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="arca_w", l_flag="arca_warp", group=CliGroup.REG_CLAR_ALLEN
                 ),
-                gui=GuiDelta(base=GuiBase(group="registration")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -530,7 +556,12 @@ class ClarAllen:
             help="chan # for extracting single channel from multiple channel data (default: -999999)",
             default="-999999",
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Channel #"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Channel #"],
+                widget_type=WidgetType.LINE_EDIT,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
@@ -539,7 +570,7 @@ class ClarAllen:
                     group=CliGroup.REG_CLAR_ALLEN,
                     required=True,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -547,7 +578,7 @@ class ClarAllen:
                     l_flag="mrca_chan_num",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -565,13 +596,18 @@ class ClarAllen:
             help="chan prefix (string before channel number in file name). ex: C00 (default: -999999)",
             default="-999999",
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Channel prefix"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Channel prefix"],
+                widget_type=WidgetType.LINE_EDIT,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
                     s_flag="arca_i", l_flag="arca_input", group=CliGroup.REG_CLAR_ALLEN
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -579,7 +615,7 @@ class ClarAllen:
                     l_flag="mrca_chan_prefix",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )

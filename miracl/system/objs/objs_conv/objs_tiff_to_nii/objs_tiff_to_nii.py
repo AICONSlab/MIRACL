@@ -1,4 +1,5 @@
 from pathlib import Path
+from tkinter import Widget
 from miracl.system.enums.enums_base_modules import CliGroup
 
 # from miracl.system.datamodels.datamodel_miracl_objs_refactored import (
@@ -51,7 +52,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_folder",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 source=ArgumentSource.INTERNAL,
@@ -60,7 +61,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_folder",
                     group=CliGroup.REQUIRED,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -86,7 +87,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_work_dir",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 source=ArgumentSource.INTERNAL,
@@ -95,7 +96,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_work_dir",
                     group=CliGroup.REQUIRED,
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -125,13 +126,13 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_d", l_flag="actn_down", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
                     s_flag="mctn_d", l_flag="mctn_down", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -165,7 +166,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_channum",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -173,7 +174,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_channum",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -207,7 +208,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_chanprefix",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -215,7 +216,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_chanprefix",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -249,7 +250,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_channame",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -257,7 +258,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_channame",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -291,13 +292,13 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_o", l_flag="actn_outnii", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
                     s_flag="mctn_o", l_flag="mctn_outnii", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -326,13 +327,13 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_vx", l_flag="actn_resx", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
                     s_flag="mctn_vx", l_flag="mctn_resx", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -361,13 +362,13 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_vz", l_flag="actn_resz", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
                     s_flag="mctn_vz", l_flag="mctn_resz", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="main")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -400,13 +401,13 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_c", l_flag="actn_center", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
                     s_flag="mctn_c", l_flag="mctn_center", group=CliGroup.CONV_TIFF_NII
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -425,7 +426,12 @@ class ConvTiffNiiObjs:
             default=1,
             choices=[0, 1],
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Z-axis dx"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Z-axis dx"],
+                widget_type=WidgetType.DROPDOWN,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
@@ -433,7 +439,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_downzdim",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -441,7 +447,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_downzdim",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -472,7 +478,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_prevdown",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -480,7 +486,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_prevdown",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
@@ -516,7 +522,7 @@ class ConvTiffNiiObjs:
                     l_flag="actn_percentile_thr",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
@@ -524,7 +530,7 @@ class ConvTiffNiiObjs:
                     l_flag="mctn_percentile_thr",
                     group=CliGroup.CONV_TIFF_NII,
                 ),
-                gui=GuiDelta(base=GuiBase(group="conversion")),
+                gui=GuiDelta(base=GuiBase()),
             ),
         },
     )
