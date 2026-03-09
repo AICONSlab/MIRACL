@@ -80,11 +80,11 @@ class WidgetType(str, Enum):
     Each widget maps to a specific Qt widget in the interface.
     """
 
-    LINE_EDIT = "line_edit"  # Text input (QLineEdit)
-    SPINBOX = "spinbox"  # Integer input (QSpinBox)
-    DOUBLE_SPINBOX = "double_spinbox"  # Float input (QDoubleSpinBox)
-    DROPDOWN = "dropdown"  # Multiple choice (QComboBox)
-    PATH_INPUT = "path_input"  # Custom path input
+    LINE_EDIT = "LINE_EDIT"  # Text input (QLineEdit)
+    SPINBOX = "SPINBOX"  # Integer input (QSpinBox)
+    DOUBLE_SPINBOX = "DOUBLE_SPINBOX"  # Float input (QDoubleSpinBox)
+    DROPDOWN = "DROPDOWN"  # Multiple choice (QComboBox)
+    PATH_INPUT = "PATH_INPUT"  # Custom path input
 
 
 class InputRestrictionType(str, Enum):
