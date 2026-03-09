@@ -1,16 +1,5 @@
 """
-FULL ARCHITECTURAL REFACTOR - COMPLETE VERSION (PYDANTIC V2)
-=============================================================
-
-Includes ALL features from original datamodel + Fixes:
-- Structured CLI/GUI/Metadata
-- [RESTORED] Contextual flag validation errors (id, module)
-- [RESTORED] Field constraints for tags (min_length, max_length)
-- [RESTORED] GuiWidgetSpecifics (props) namespace
-- [RESTORED] Strict Union for obj_default
-- [V2 SYNTAX] Complete Pydantic V2 syntax migration (ConfigDict, field_validator)
-
-EVERYTHING ANNOTATED WITH >>> MARKERS
+MiraclObj Basemodel defintions and resolver (Pydantic v2)
 """
 
 from typing import (
@@ -50,76 +39,102 @@ import threading
 import re
 
 
-# ============================================================
+# =====
 # ENUMS
-# ============================================================
+# =====
 
 
 class ArgumentSource(str, Enum):
     """Source/visibility of an argument"""
 
     USER = "user"  # Visible in CLI and GUI
-    INTERNAL = "internal"  # Hidden from help/UI but available for module piping
-    DISABLED = "disabled"  # Removed from context entirely
+    INTERNAL = "internal"  # Hidden from help/UI but available for module piping -> this is probably the default for most cases
+    DISABLED = "disabled"  # Removed from context entirely i.e. not being passed on procedurally
 
 
-# ============================================================
+# =============
 # GUI STRUCTURE
-# ============================================================
+# =============
 
 
 class RangeFormConfig(BaseModel):
-    min_val: Optional[Union[int, float]] = Field(None, description="Min value")
-    max_val: Optional[Union[int, float]] = Field(None, description="Max value")
-    increment_val: Optional[Union[int, float]] = Field(
-        None, description="Increment value"
+    min_val: Optional[Union[int, float]] = Field(
+        None,
+        description="Min value",
     )
-    nr_decimals: Optional[int] = Field(None, description="Nr decimals")
+    max_val: Optional[Union[int, float]] = Field(
+        None,
+        description="Max value",
+    )
+    increment_val: Optional[Union[int, float]] = Field(
+        None,
+        description="Increment value",
+    )
+    nr_decimals: Optional[int] = Field(
+        None,
+        description="Nr decimals",
+    )
 
 
 class GuiChoiceOverrideConfig(BaseModel):
     vals: Optional[List[str]] = Field(
-        None, description="Values to use instead of cli choices"
+        None,
+        description="Values to use instead of cli choices",
     )
-    default_val: Optional[str] = Field(None, description="Default value")
+    default_val: Optional[str] = Field(
+        None,
+        description="Default value",
+    )
 
 
 class LineEditConfig(BaseModel):
     input_restrictions: Optional[InputRestrictionType] = Field(
-        None, description="Type of input restrictions"
+        None,
+        description="Type of input restrictions",
     )
 
 
-# >>> [RESTORED] Widget specifics namespace
 class GuiWidgetSpecifics(BaseModel):
     """Container for generic widget configuration options"""
 
     range: Optional[RangeFormConfig] = Field(
-        None, description="Range/formatting configuration for numeric widgets"
+        None,
+        description="Range/formatting configuration for numeric widgets",
     )
     text: Optional[LineEditConfig] = Field(
-        None, description="Settings for line edit widgets"
+        None,
+        description="Settings for line edit widgets",
     )
     choices: Optional[GuiChoiceOverrideConfig] = Field(
-        None, description="Override for choice labels in GUI"
+        None,
+        description="Override for choice labels in GUI",
     )
 
 
 class GuiBase(BaseModel):
     """Frontend-agnostic GUI properties."""
 
-    label: Optional[List[str]] = Field(None, description="Main label(s) used in GUI")
+    label: List[str] = Field(
+        None,
+        description="Main label(s) used in GUI",
+    )
     widget_type: Optional[WidgetType] = Field(
-        None, description="Type of widget to use in GUI"
+        None,
+        description="Type of widget to use in GUI",
     )
     additional_labels: Optional[List[str]] = Field(
-        None, description="Additional label(s) used in GUI"
+        None,
+        description="Additional label(s) used in GUI",
     )
-    # group: Optional[CliGroup] = Field(
-    group: str = Field(None, description="Group name for organizing in GUI")
-    order: Optional[float] = Field(None, description="Order of appearance in GUI")
+    group: CliGroup = Field(
+        None,
+        description="Group name for organizing in GUI",
+    )
+    order: Optional[float] = Field(
+        None,
+        description="Order of appearance in GUI",
+    )
 
-    # >>> [RESTORED] Props property instead of flattened attributes
     props: GuiWidgetSpecifics = Field(
         default_factory=GuiWidgetSpecifics,
         description="Widget-specific configuration",
@@ -143,35 +158,55 @@ class GuiDelta(BaseModel):
     extensions: Optional[Dict[str, Dict[str, Any]]] = None
 
 
-# ============================================================
+# =============
 # CLI STRUCTURE
-# ============================================================
+# =============
 
 
 class CLISpec(BaseModel):
     """Complete CLI specification."""
 
-    s_flag: Optional[str] = Field(None, description="Short flag for cli arg")
-    l_flag: str = Field(..., description="Long flag for cli arg")
-    help: str = Field(..., description="Help text for cli arg")
-    required: Optional[bool] = Field(None, description="Whether cli arg is required")
-    obj_type: Optional[ArgumentType] = Field(None, description="Data type of cli arg")
+    s_flag: Optional[str] = Field(
+        None,
+        description="Short flag for cli arg",
+    )
+    l_flag: str = Field(
+        ...,
+        description="Long flag for cli arg",
+    )
+    help: str = Field(
+        ...,
+        description="Help text for cli arg",
+    )
+    required: Optional[bool] = Field(
+        None,
+        description="Whether cli arg is required",
+    )
+    obj_type: Optional[ArgumentType] = Field(
+        None,
+        description="Data type of cli arg",
+    )
 
-    # >>> [RESTORED] Strict Union typing for default value
     default: Optional[Union[Path, int, float, List[Any], str, Dict[str, Any], bool]] = (
         Field(None, description="Default obj value for arg, if any")
     )
 
     nargs: Optional[Union[int, str]] = Field(
-        None, description="Number of expected cli args"
+        None,
+        description="Number of expected cli args",
     )
     choices: Optional[List[Any]] = Field(
-        None, description="List of allowed choices/values for the cli arg"
+        None,
+        description="List of allowed choices/values for the cli arg",
     )
     action: Optional[ArgumentAction] = Field(
-        None, description="Action to be taken when cli arg is encountered"
+        None,
+        description="Action to be taken when cli arg is encountered",
     )
-    const: Optional[Any] = Field(None, description="Argparse const option")
+    const: Optional[Any] = Field(
+        None,
+        description="Argparse const option",
+    )
     metavar: Optional[Union[str, Tuple[str, ...]]] = Field(
         None, description="Name for cli arg in cli usage messages"
     )
@@ -179,7 +214,6 @@ class CLISpec(BaseModel):
         None, description="Argparse group the object belongs to"
     )
 
-    # >>> [V2 SYNTAX] Replaced @validator with @field_validator
     @field_validator("nargs", mode="before")
     @classmethod
     def validate_nargs(cls, value):
@@ -198,7 +232,6 @@ class CLISpec(BaseModel):
             f"Invalid type for nargs: {value}. Must be an int or one of {valid_nargs}."
         )
 
-    # >>> [V2 SYNTAX] Replaced @validator with @field_validator
     @field_validator("obj_type", mode="before")
     @classmethod
     def validate_type(cls, v):
@@ -206,7 +239,6 @@ class CLISpec(BaseModel):
             return parser_true_or_false(str(v))
         return v
 
-    # >>> [V2 SYNTAX] Replaced @validator with @field_validator
     @field_validator("default", mode="before")
     @classmethod
     def validate_default(cls, value):
@@ -239,15 +271,14 @@ class CLIDelta(BaseModel):
     group: Optional[CliGroup] = None
 
 
-# ============================================================
+# =======================
 # RESOLVED RUNTIME OBJECT
-# ============================================================
+# =======================
 
 
 class ResolvedMiraclObj(BaseModel):
     """Immutable runtime object used by builders/serializers."""
 
-    # >>> [V2 SYNTAX] Using model_config for immutability
     model_config = ConfigDict(frozen=True)
 
     id: UUID
@@ -259,9 +290,13 @@ class ResolvedMiraclObj(BaseModel):
     cli: CLISpec
     gui: Optional[GuiNamespace]
 
-    content: Optional[Any] = Field(None, description="Runtime value for this argument")
+    content: Optional[Any] = Field(
+        None,
+        description="Runtime value for this argument",
+    )
     gui_hidden: bool = Field(
-        default=False, description="Whether this argument should be hidden in GUI"
+        default=False,
+        description="Whether this argument should be hidden in GUI",
     )
     gui_extensions: Optional[Dict[str, Dict[str, Any]]] = Field(
         None, description="Copy of gui.extensions"
@@ -274,10 +309,8 @@ class ResolvedMiraclObj(BaseModel):
     version_added: str
     examples: List[str]
 
-    # >>> [RESTORED] Tags constraints using V2 syntax
     tags: Optional[List[str]] = Field(None, min_length=1, max_length=10)
 
-    # >>> [V2 SYNTAX] Updated to ValidationInfo
     @field_validator("content", mode="before")
     @classmethod
     def validate_content(cls, v, info: ValidationInfo):
@@ -304,9 +337,9 @@ class ResolvedMiraclObj(BaseModel):
             raise ValueError(f"Cannot convert {v} to {python_type}")
 
 
-# ============================================================
+# =============
 # FLOW OVERRIDE
-# ============================================================
+# =============
 
 
 class FlowOverride(BaseModel):
@@ -315,15 +348,14 @@ class FlowOverride(BaseModel):
     source: Optional[ArgumentSource] = None
 
 
-# ============================================================
+# ===========
 # MAIN OBJECT
-# ============================================================
+# ===========
 
 
 class MiraclObj(BaseModel):
     """Definition-time object."""
 
-    # >>> [V2 SYNTAX] ConfigDict for config
     model_config = ConfigDict(
         extra="forbid",
         validate_assignment=True,
@@ -401,10 +433,8 @@ class MiraclObj(BaseModel):
     version_added: str = Field(...)
     examples: List[str] = Field(default_factory=list)
 
-    # >>> [RESTORED] Tags constraints using V2 syntax
     tags: Optional[List[str]] = Field(None, min_length=1, max_length=10)
 
-    # >>> [V2 SYNTAX] Replaced @validator with @field_validator
     @field_validator("dirpath_field", mode="before")
     @classmethod
     def create_directory_if_not_exists(cls, value):
@@ -414,9 +444,9 @@ class MiraclObj(BaseModel):
             return path
         return value
 
-    # ============================================================
-    # >>> [RESTORED] CONTEXTUAL FLAG VALIDATION
-    # ============================================================
+    # ==========================
+    # CONTEXTUAL FLAG VALIDATION
+    # ==========================
 
     @model_validator(mode="after")
     def validate_flags_with_context(self) -> "MiraclObj":
@@ -426,8 +456,14 @@ class MiraclObj(BaseModel):
         if a flag contains invalid characters or is empty.
         """
         # Validate base CLI
-        self._check_flag_format(self.cli.s_flag, "cli.s_flag")
-        self._check_flag_format(self.cli.l_flag, "cli.l_flag")
+        self._check_flag_format(
+            self.cli.s_flag,
+            "cli.s_flag",
+        )
+        self._check_flag_format(
+            self.cli.l_flag,
+            "cli.l_flag",
+        )
 
         # Validate overrides
         if self.flow:
@@ -458,9 +494,9 @@ class MiraclObj(BaseModel):
                 f"for object '{self.id}' in module '{self.module}'"
             )
 
-    # ============================================================
+    # ==============
     # RESOLVE METHOD
-    # ============================================================
+    # ==============
 
     def resolve(self, context: ModuleType) -> Optional[ResolvedMiraclObj]:
         final_cli = self.cli.model_copy()
