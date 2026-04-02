@@ -1,0 +1,8 @@
+{
+  "module_name": "new_miracl_module",
+  "description": "Short description of this module",
+  "authors": ["Jonas Osmann"],
+  "maintainers": ["Jonas Osmann"],
+  "contributors": ["Jonas Osmann"],
+  "version": "0.1.0"
+}
