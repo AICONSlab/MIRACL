@@ -1,30 +1,89 @@
-from __future__ import annotations
+"""
+This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca)
 
+Workflow DSL parser and evaluator.
+
+Provides a domain-specific language (DSL) for workflow configuration, supporting:
+    - ref:     Reference to workflow variables
+    - pattern: String templating with embedded expressions
+    - fn:      Whitelisted function calls
+    - literal: Static values i.e. actual string is parsed
+
+Example:
+    >>> expr = parse_expression("pattern:{ref:vars.base}/output/{ref:conv.name}.nii.gz")
+    >>> result = expr.evaluate(context, {})
+"""
+
+# =====================================================================================
+# IMPORTS
+# =====================================================================================
+
+from __future__ import annotations
 import ast
 import re
-import sys
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Dict, List, Union
+
+# =====================================================================================
+# FUNCTION REGISTRY
+# =====================================================================================
 
 
-# =============================================================================
+class LazyFunctionRegistry(dict):
+    """
+    A registry that supports both direct callables and lazy-loaded string paths.
+    This is supposed to prevent import coupling of functions to the DSL system.
+    Instead of importing the functions, they will be resolved as string paths and
+    only imported when called in a worklfow config file.
+
+    Example:
+        "my_func": "path.to.module:function_name"
+    """
+
+    def __getitem__(self, key):
+        value = super().__getitem__(key)
+        if isinstance(value, str) and ":" in value:
+            import importlib
+
+            try:
+                module_path, func_name = value.split(":")
+                module = importlib.import_module(module_path)
+                value = getattr(module, func_name)
+                self[key] = value  # Neat little cache for resolved function
+            except (ImportError, AttributeError) as e:
+                raise ImportError(
+                    f"MIRACLang could not lazy-load function '{key}' from '{value}': {e}"
+                )
+        return value
+
+    def __contains__(self, key):
+        return super().__contains__(key)
+
+
+# -------------------------------------------------------------------------------------
 # WHITELISTED FUNCTIONS
-# =============================================================================
+# -------------------------------------------------------------------------------------
+# Only functions registered here can be called in the workflow configuration!
+# This prevents malicious function injections.
+# -------------------------------------------------------------------------------------
 
-ALLOWED_FUNCTIONS: Dict[str, Callable] = {
-    "nifti_output_filename": lambda name, voxel: f"{name}_{voxel}um.nii.gz",
-    "format_name": lambda name, voxel: f"MyOutput_{voxel}",
-    "join_strings": lambda items: "_".join(str(i) for i in items),
-    "dx_pad_zero": lambda x: f"0{x}" if 0 <= x <= 9 else str(x),
-}
+ALLOWED_FUNCTIONS = LazyFunctionRegistry(
+    {
+        "nifti_output_filename": lambda name, voxel: f"{name}_{voxel}um.nii.gz",
+        "format_name": lambda name, voxel: f"MyOutput_{voxel}",
+        "join_strings": lambda items: "_".join(str(i) for i in items),
+        "dx_pad_zero": lambda x: f"0{x}" if 0 <= x <= 9 else str(x),
+        "create_ort2std_file": "miracl.system.miracl_utilfns.utilfns_module_helpers:create_ort2std_file",
+    }
+)
 
 
-# =============================================================================
+# =====================================================================================
 # NAMESPACED CONTEXT
-# =============================================================================
+# =====================================================================================
 # Replaces the flat Dict[str, Any] that was previously threaded through
 # evaluate() calls. Instead of a single dict with "instance.var" string keys,
-# we now have explicit namespaces — one per module instance, plus "vars" for
+# we now have explicit namespaces: one per module instance, plus "vars" for
 # workflow-level variables.
 #
 # This eliminates the key collision risk that existed when two instances of the
@@ -33,7 +92,7 @@ ALLOWED_FUNCTIONS: Dict[str, Callable] = {
 #
 # RESERVED_NAMESPACES: names that cannot be used as module instance names.
 # "vars" is reserved for the workflow-level variables block.
-# =============================================================================
+# =====================================================================================
 
 RESERVED_NAMESPACES = {"vars"}
 
@@ -44,7 +103,7 @@ class Context:
 
     Each namespace is a separate dict. Module instances, workflow vars, and
     any future groupings each get their own namespace, making collisions
-    structurally impossible rather than just unlikely.
+    structurally impossible!
 
     Key format in DSL expressions:  namespace.variable
         e.g.  ref:conv.tiff_folder
@@ -131,9 +190,9 @@ class Context:
         return [f"{ns}.{k}" for ns, d in self._namespaces.items() for k in d]
 
 
-# =============================================================================
+# =====================================================================================
 # AST NODE BASE CLASS
-# =============================================================================
+# =====================================================================================
 
 
 class Expression(ABC):
@@ -144,15 +203,27 @@ class Expression(ABC):
     ensures this is enforced at class instantiation time, not at runtime when
     evaluate() is first called.
 
-    [CHANGED] evaluate() now accepts a Context instead of Dict[str, Any].
-    The cache parameter is unchanged — it remains a flat dict keyed by
-    "namespace.variable" strings for fast memoization across repeated lookups.
+    evaluate() accepts a Context instead of Dict[str, Any]. The cache parameter is a
+    flat dict keyed by "namespace.variable" strings for caching.
     """
 
     @abstractmethod
     def evaluate(self, context: Context, cache: Dict[str, Any]) -> Any:
         """
         Evaluate this expression node against the namespaced context.
+
+        Additional info regarding the Strategy Pattern that I'm using here:
+
+            Expression (ABC)
+                |-> ConstantNode.evaluate() -> returns self.value
+                |-> Reference.evaluate()    -> looks up context.get()
+                |-> FunctionCall.evaluate() -> calls whitelisted function
+                |-> Pattern.evaluate()      -> interpolates template strings
+
+            The point here is that each subclass has different evaluation logic but
+            shares the same interface. The abstract method ensures all expression types
+            can be called uniformly i.e. using a polymorphic call that works for any
+            Expression type.
 
         Args:
             context: Namespaced store of resolved variable values.
@@ -175,8 +246,6 @@ class ConstantNode(Expression):
 
     Named ConstantNode (not Literal) to avoid shadowing typing.Literal
     if both modules are ever used in the same namespace.
-
-    [UNCHANGED]
     """
 
     def __init__(self, value: Any) -> None:
@@ -190,38 +259,33 @@ class Reference(Expression):
     """
     A leaf node that resolves a namespace.key pair from the Context.
 
-    [CHANGED] Previously accepted a flat "instance.var" key and did a single
-    dict lookup. Now splits on the first dot to extract (namespace, variable)
-    and delegates to Context.get(), which enforces namespace boundaries.
+    Splits on the first dot to extract (namespace, variable) and delegates to
+    Context.get(), which enforces namespace boundaries.
 
-    Example key: "conv.tiff_folder"  →  namespace="conv", variable="tiff_folder"
-    Example key: "vars.base_dir"     →  namespace="vars", variable="base_dir"
+    Example key: "conv.tiff_folder"  ->  namespace="conv", variable="tiff_folder"
+    Example key: "vars.base_dir"     ->  namespace="vars", variable="base_dir"
 
-    The cache key remains the full "namespace.variable" string so memoization
-    behaviour is identical to before.
+    The cache key remains the full "namespace.variable".
 
     Raises:
         ValueError: If the key does not contain a dot separator.
-        KeyError:   If the namespace or variable is not found in context,
-                    with the full list of available keys included.
+        KeyError:   If the namespace or variable is not found in context, with the
+                    full list of available keys included.
     """
 
     def __init__(self, key: str) -> None:
-        # [CHANGED] Validate dot-notation at construction time
+        # Validate dot-notation at construction time
         if "." not in key:
             raise ValueError(
                 f"Reference key '{key}' must use 'namespace.variable' dot-notation. Example: 'ref:conv.tiff_folder' or 'ref:vars.base_dir'"
             )
         self.key = key
-        # [NEW] Split eagerly so evaluate() does no string work at runtime
         self.namespace, self.variable = key.split(".", 1)
 
     def evaluate(self, context: Context, cache: Dict[str, Any]) -> Any:
-        # Cache key is the full "namespace.variable" string — unchanged behaviour
         if self.key in cache:
             return cache[self.key]
 
-        # [CHANGED] Delegate to Context.get() instead of flat dict lookup
         try:
             value = context.get(self.namespace, self.variable)
         except KeyError:
@@ -239,9 +303,6 @@ class FunctionCall(Expression):
 
     Only functions present in ALLOWED_FUNCTIONS may be called.
     This is the primary security gate for the DSL.
-
-    [CHANGED] evaluate() signature updated to accept Context instead of
-    Dict[str, Any]. Internal logic is otherwise unchanged.
     """
 
     def __init__(self, func_name: str, args: List[Expression]) -> None:
@@ -262,14 +323,11 @@ class Pattern(Expression):
     """
     A template string node that interpolates embedded expressions.
 
-    Template syntax: "prefix_{ref:instance.var}_suffix"
-    Expressions inside {} are parsed recursively via parse_expression().
+    Template syntax: "prefix_{ref:instance.var}_suffix". Expressions inside {} are
+    parsed recursively via parse_expression().
 
-    Template parts are parsed eagerly at construction time so malformed
-    templates fail immediately rather than at evaluation time.
-
-    [CHANGED] evaluate() signature updated to accept Context instead of
-    Dict[str, Any]. Internal logic is otherwise unchanged.
+    Template parts are parsed eagerly at construction time so faulty templates fail
+    immediately rather than at evaluation time.
     """
 
     def __init__(self, template: str) -> None:
@@ -293,24 +351,9 @@ class Pattern(Expression):
         return "".join(str(p) for p in evaluated_parts)
 
 
-# =============================================================================
+# =====================================================================================
 # EXPRESSION FACTORY HELPER
-# =============================================================================
-# Extracted from the inline argument-parsing loop that previously lived inside
-# parse_expression(). Two reasons for the extraction:
-#
-#   1. [NEW] Nested fn: support — by handling ast.Call recursively, fn:
-#      arguments can themselves be fn: calls to arbitrary depth, without
-#      requiring ast.unparse (Python 3.9+ only). Recursion operates directly
-#      on AST nodes, making this safe on Python 3.7.3+.
-#
-#   2. [CHANGED] Fixed ast.Constant ordering — the original code guarded
-#      ast.Constant with `sys.version_info >= (3, 8)`, which caused a linter
-#      unreachable-code warning on 3.8+ because ast.Str/ast.Num are never
-#      emitted on that version. The fix is to check the older node types first
-#      (they are simply never matched on 3.8+) and let ast.Constant be the
-#      fallthrough, which the linter can see is always reachable.
-# =============================================================================
+# =====================================================================================
 
 
 def _parse_ast_arg(node: ast.expr) -> Expression:
@@ -326,16 +369,14 @@ def _parse_ast_arg(node: ast.expr) -> Expression:
         node: An AST expression node from a parsed fn: argument list.
 
     Returns:
-        An Expression node — FunctionCall for nested calls, ConstantNode for
-        plain values, or a parsed Reference/Pattern if the constant value is
-        a DSL string starting with ref: or pattern:.
+        An Expression node: FunctionCall for nested calls, ConstantNode for plain
+        values, or a parsed Reference/Pattern if the constant value is a DSL string
+        starting with ref: or pattern:.
 
     Raises:
-        ValueError: If the node type is not supported or a nested call uses
-                    a non-plain-name function (e.g. attribute access).
+        ValueError: If the node type is not supported or a nested call uses a
+                    non-plain-name function (e.g. attribute access).
     """
-    # [NEW] Nested fn: call — recurse directly on the AST node.
-    # This enables arbitrary nesting depth without ast.unparse.
     if isinstance(node, ast.Call):
         if not isinstance(node.func, ast.Name):
             raise ValueError(
@@ -345,17 +386,12 @@ def _parse_ast_arg(node: ast.expr) -> Expression:
         nested_args = [_parse_ast_arg(a) for a in node.args]
         return FunctionCall(nested_func_name, nested_args)
 
-    # Older node types checked first to avoid unreachable-code
-    # linter warning. On Python 3.8+, ast.Str and ast.Num are never emitted
-    # by the parser so these branches are simply never entered. On Python
-    # 3.7.3, ast.Constant may or may not be present depending on the value,
-    # so it is the correct fallthrough case.
     val = None
-    if isinstance(node, ast.Str):  # Python < 3.8 string literals
+    if isinstance(node, ast.Str):
         val = node.s
-    elif isinstance(node, ast.Num):  # Python < 3.8 numeric literals
+    elif isinstance(node, ast.Num):
         val = node.n
-    elif isinstance(node, ast.Constant):  # Python 3.8+ all constants
+    elif isinstance(node, ast.Constant):
         val = node.value
     else:
         raise ValueError(f"Unsupported AST arg type: {ast.dump(node)}")
@@ -367,9 +403,9 @@ def _parse_ast_arg(node: ast.expr) -> Expression:
     return ConstantNode(val)
 
 
-# =============================================================================
+# =====================================================================================
 # EXPRESSION FACTORY
-# =============================================================================
+# =====================================================================================
 
 
 def parse_expression(raw: str) -> Expression:
@@ -382,12 +418,9 @@ def parse_expression(raw: str) -> Expression:
         fn:       -> FunctionCall node    e.g. "fn:nifti_output_filename('ref:conv.channame', 'ref:conv.channum')"
         literal:  -> ConstantNode         e.g. "literal:some_fixed_string"
 
-    [UNCHANGED] This function is not aware of Context — it only builds the
-    Expression tree. Context is only needed at evaluate() time.
-
-    [CHANGED] The fn: branch now delegates argument parsing to _parse_ast_arg()
-    instead of handling it inline. This enables nested fn: calls and fixes
-    the ast.Constant linter warning. See _parse_ast_arg() for details.
+    Note:
+        This function is not aware of Context! It only builds the Expression tree.
+        Context is only needed at evaluate() time.
 
     Raises:
         ValueError: If the prefix is unknown or the fn: expression cannot be parsed.
@@ -406,9 +439,6 @@ def parse_expression(raw: str) -> Expression:
 
         if isinstance(tree.body, ast.Call) and isinstance(tree.body.func, ast.Name):
             func_name = tree.body.func.id
-            # Delegate to _parse_ast_arg() instead of inline loop.
-            # Enables nested fn: calls and resolves the ast.Constant ordering
-            # issue that caused the linter unreachable-code warning.
             args = [_parse_ast_arg(a) for a in tree.body.args]
             return FunctionCall(func_name, args)
 
