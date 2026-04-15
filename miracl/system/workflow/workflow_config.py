@@ -16,53 +16,39 @@ class WorkFlowConfig(BaseModel):
     """
     Workflow configuration data model.
 
-    Simple representation of a workflow YAML with no validation logic.
-    Just defines the structure.
-
-    Attributes:
-        name:            Workflow name
-        description:     Optional workflow description
-        version:         Workflow version
-        modules:         Dict of instance_name -> ModuleInstanceConfig
-        execution_order: List of instance names to execute in order
-        data_flow:       Connections between modules
-                         Format: {
-                             'target_instance': {
-                                 'target_variable': 'DSL expression string'
-                             }
-                         }
-        vars:            Workflow-level variables available to all
-                         data_flow expressions via ref:vars.<name>.
-                         Type widened from Dict[str, str] to Dict[str, Any] so
-                         that values can be DSL expressions
-                         (e.g. "ref:conv.base_dir") rather than only plain
-                         strings. Vars are evaluated after module defaults are
-                         populated but before data_flow, so they can reference
-                         CLI-provided module values. See ordering note in
-                         WorkflowResolver.resolve().
-                         Example YAML:
-                             vars:
-                               base_dir: "ref:conv.base_dir"
-                               out_path: "pattern:{ref:conv.base_dir}/output"
-                         Example reference in data_flow:
-                             output_folder: "ref:vars.out_path"
+    Simple representation of a workflow YAML with no validation logic. Just defines
+    the structure.
     """
 
-    name: str
-    description: Optional[str] = None
-    version: str = "1.0"
-    modules: Dict[str, ModuleInstanceConfig]
-    execution_order: List[str]
-    data_flow: Dict[str, Dict[str, str]] = Field(default_factory=dict)
-
-    # Optional workflow-level variables block.
-    # Widened from Dict[str, str] to Dict[str, Any] to support DSL
-    # expressions as values. Previously restricted to plain string constants.
-    # Values are now parsed and evaluated by WorkflowResolver.resolve() in a
-    # dedicated vars resolution step that runs after module defaults
-    # are populated but before data_flow, so vars can safely reference
-    # CLI-provided values from any module namespace.
-    vars: Dict[str, Any] = Field(default_factory=dict)
+    name: str = Field(
+        description="Workflow name",
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="Optional workflow description",
+    )
+    version: str = Field(
+        default="1.0",
+        description="Version of this workflow",
+    )
+    modules: Dict[str, ModuleInstanceConfig] = Field(
+        description="Dict of instance_name -> ModuleInstanceConfig: Mapping of module instance names to their configurations. Keys are instance aliases used in execution_order (e.g., 'conv', 'reg'). Values contain module type and optional parameters/hooks.",
+    )
+    execution_order: List[str] = Field(
+        description="The order in which the modules are executed in the workflow",
+    )
+    data_flow: Dict[str, Dict[str, str]] = Field(
+        default_factory=dict,
+        description="Connections between modules. Format: {'target_instance': {'target_variable': 'DSL expression string'}}. Important: the reference here is to the object name, NOT the name attribute of the object!",
+    )
+    # Dedicated namespace for variable construction in workflow configs
+    vars: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Workflow-level variables available to all data_flow expressions via ref:vars.<name>. Vars are evaluated after module defaults are populated but before data_flow, so they can reference CLI-provided module values. See ordering note in WorkflowResolver.resolve().",
+        examples=[
+            "vars: {base_dir: 'ref:conv.base_dir', out_path: 'pattern:{ref:conv.base_dir}/output'}",
+        ],
+    )
 
     class Config:
         extra = "forbid"
