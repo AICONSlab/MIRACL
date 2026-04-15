@@ -1,6 +1,23 @@
+"""
+This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+
+Workflow configuration data models.
+
+Defines the structure for workflow YAML configs used by WorkflowResolver
+to orchestrate module execution.
+"""
+
+# =====================================================================================
+# IMPORTS
+# =====================================================================================
+
 from typing_extensions import override
 from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Optional
+
+# =====================================================================================
+# CONFIGS
+# =====================================================================================
 
 
 class ModuleInstanceConfig(BaseModel):
