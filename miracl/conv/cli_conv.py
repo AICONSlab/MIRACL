@@ -2,7 +2,12 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.conv import miracl_conv_convertTIFFtoNII, miracl_conv_gui_options, miracl_conv_convertNIItoTIFF, miracl_conv_convertTRK
+from miracl.conv import (
+    miracl_conv_convertTIFFtoNII, 
+    # miracl_conv_gui_options, 
+    miracl_conv_convertNIItoTIFF, 
+    miracl_conv_convertTRK,
+)
 
 
 def run_tiff_nii(parser, args):
@@ -22,8 +27,8 @@ def run_set_orient(parser, args=None):
                           stderr=subprocess.STDOUT)
 
 
-def run_gui_opts(parser, args):
-    miracl_conv_gui_options.main(args)
+# def run_gui_opts(parser, args):
+#     miracl_conv_gui_options.main(args)
 
 
 def get_parser():
@@ -57,10 +62,10 @@ def get_parser():
     parser_set_orient.set_defaults(func=run_set_orient)
 
     # gui_opts
-    gui_opts_parser = miracl_conv_gui_options.parsefn()
-    parser_gui_opts = subparsers.add_parser('gui_opts', parents=[gui_opts_parser], add_help=False,
-                                            help="GUI options")
-    parser_gui_opts.set_defaults(func=run_gui_opts)
+    # gui_opts_parser = miracl_conv_gui_options.parsefn()
+    # parser_gui_opts = subparsers.add_parser('gui_opts', parents=[gui_opts_parser], add_help=False,
+    #                                         help="GUI options")
+    # parser_gui_opts.set_defaults(func=run_gui_opts)
 
     return parser
 

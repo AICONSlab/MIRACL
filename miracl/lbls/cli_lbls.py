@@ -2,8 +2,12 @@ import os
 import sys
 import argparse
 import subprocess
-from miracl.lbls import miracl_lbls_stats, miracl_lbls_get_graph_info, miracl_lbls_generate_parents_at_depth, \
-    miracl_lbls_get_gp_volumes
+from miracl.lbls import (
+    miracl_lbls_stats, 
+    miracl_lbls_get_graph_info, 
+    miracl_lbls_generate_parents_at_depth,
+    miracl_lbls_get_gp_volumes,
+)
 
 
 def run_lbl_stats(parser, args):

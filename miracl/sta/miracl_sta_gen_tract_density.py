@@ -8,7 +8,7 @@ import sys
 import nibabel as nib
 from dipy.tracking import utils
 
-from miracl.sta import sta_gui
+# from miracl.sta import sta_gui
 
 def helpmsg():
     return '''
@@ -52,6 +52,7 @@ def parse_inputs(parser, args):
     if sys.argv[-2] == 'sta' and sys.argv[-1] == 'tract_density':
 
         print("Running in GUI mode")
+        from miracl.sta import sta_gui
 
         # pass the results of the gui here
         args = sta_gui.tractDensityMain()

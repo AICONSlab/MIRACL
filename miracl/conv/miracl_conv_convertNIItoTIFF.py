@@ -4,7 +4,7 @@
 # coding: utf-8
 
 import argparse
-from PyQt5.QtWidgets import *
+# from PyQt5.QtWidgets import *
 import logging
 import os
 import sys
@@ -15,9 +15,9 @@ from datetime import datetime
 import nibabel as nib
 import scipy.ndimage
 import tifffile as tiff
-from PyQt5.QtGui import *
-
-from miracl.conv import miracl_conv_gui_options as gui_opts
+# from PyQt5.QtGui import *
+# from PyQt5.QtWidgets import *
+# from miracl.conv import miracl_conv_gui_options as gui_opts
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -106,6 +106,10 @@ def parse_inputs(parser, args):
     if sys.argv[-2] == 'conv' and sys.argv[-1] == 'nii_tiff':
 
         print("Running in GUI mode")
+
+        # from PyQt5.QtGui import *
+        from PyQt5.QtWidgets import QApplication
+        from miracl.conv import miracl_conv_gui_options as gui_opts
 
         title = 'Nii to Tiff conversion'
         dirs = ['Input Nii file']

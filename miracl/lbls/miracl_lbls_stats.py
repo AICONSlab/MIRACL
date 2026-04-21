@@ -10,8 +10,8 @@ import sys
 import scipy as sp
 import numpy as np
 import pandas as pd
-from PyQt5.QtWidgets import QApplication
-from miracl.conv import miracl_conv_gui_options as gui_opts
+# from PyQt5.QtWidgets import QApplication
+# from miracl.conv import miracl_conv_gui_options as gui_opts
 from miracl.utilfn.depends_manager import add_paths
 
 import nibabel as nib
@@ -126,6 +126,8 @@ def parse_inputs(parser, args):
 
     if sys.argv[-2] == "lbls" and sys.argv[-1] == "stats":
         print("Running in GUI mode")
+        from PyQt5.QtWidgets import QApplication
+        from miracl.conv import miracl_conv_gui_options as gui_opts
 
         title = "Label Statistics"
         vols = ["Input Volume", "Registered Labels"]

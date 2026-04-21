@@ -5,8 +5,8 @@ import os
 import sys
 import subprocess
 
-from miracl.conv import miracl_conv_gui_options as gui_opts
-from miracl.sta import sta_gui
+# from miracl.conv import miracl_conv_gui_options as gui_opts
+# from miracl.sta import sta_gui
 from miracl.utilfn.misc import get_orient
 
 
@@ -63,24 +63,24 @@ def parsefn():
     parser = argparse.ArgumentParser(description='', usage=helpmsg())
 
     if len(sys.argv) > 3:
-    	parser.add_argument('-i', '--input_clar', type=str, help="Input down-sampled clarity nifti (.nii/.nii.gz)", required=True)
-    	parser.add_argument('-b', '--brainmask', type=str, help="Brain mask (.nii/.nii.gz)", required=True)
-    	parser.add_argument('-s', '--seedmask', type=str, help="Seed mask (.nii/.nii.gz)", required=True)
-    	parser.add_argument('-a', '--angles', nargs='*', help="Tracking angle threshold", default=[45, 60])
-    	parser.add_argument('-g', '--dogs', nargs='*', help="derivative of gaussian (dog) sigma", default=[3,5])
-    	parser.add_argument('-k', '--gausses', nargs='*', help="Gaussian smoothing sigma", default=[3,5])
-    	parser.add_argument('-sl', '--step_length', nargs='*', help="Step length, in the unit of minimum voxel size", default=[0.1])
-    	parser.add_argument('-rk', '--rk2', action='store_true',
+        parser.add_argument('-i', '--input_clar', type=str, help="Input down-sampled clarity nifti (.nii/.nii.gz)", required=True)
+        parser.add_argument('-b', '--brainmask', type=str, help="Brain mask (.nii/.nii.gz)", required=True)
+        parser.add_argument('-s', '--seedmask', type=str, help="Seed mask (.nii/.nii.gz)", required=True)
+        parser.add_argument('-a', '--angles', nargs='*', help="Tracking angle threshold", default=[45, 60])
+        parser.add_argument('-g', '--dogs', nargs='*', help="derivative of gaussian (dog) sigma", default=[3,5])
+        parser.add_argument('-k', '--gausses', nargs='*', help="Gaussian smoothing sigma", default=[3,5])
+        parser.add_argument('-sl', '--step_length', nargs='*', help="Step length, in the unit of minimum voxel size", default=[0.1])
+        parser.add_argument('-rk', '--rk2', action='store_true',
                             help="use 2nd order runge-kutta method for tracking")
-    	parser.add_argument('-o', '--outdir', type=str, help="Output directory", default='clarity_sta')
-
+        parser.add_argument('-o', '--outdir', type=str, help="Output directory", default='clarity_sta')
+    
     return parser
-
 
 def parse_inputs(parser, args):
     if sys.argv[-2] == 'sta' and sys.argv[-1] == 'track_tensor':
 
         print("Running in GUI mode")
+        from miracl.sta import sta_gui
 
         # pass the results of the gui here
         args = sta_gui.main()

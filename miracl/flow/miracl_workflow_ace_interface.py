@@ -248,7 +248,7 @@ class ACEWarping(Warping):
         :param orientation_file: path to the orientation file ('warp_final/ort2std.txt')
         :type orientation_file: pathlib.Path
         """
-        print("  warping stacked tif...")
+        print(" warping stacked tif...")
         warp_cmd = f"miracl reg warp_clar \
                 -r {ace_flow_reg_output_folder.as_posix()} \
                 -i {voxelized_segmented_tif} \
@@ -262,6 +262,7 @@ class ACEWarping(Warping):
             str(warp_file),
             str(voxelized_segmented_tif.parent.parent / "warp_final" / warp_file.name),
         )
+
         logger.debug("Calling warping here")
         logger.debug(f"orientation_file: {orientation_file}")
 
@@ -484,6 +485,8 @@ class ACEWorkflows:
                 converted_nii_file=converted_nii_file,
             )
             self.registration.register(args, reg_cmd)
+        
+        print("STACKING ")
 
         # Stack tiff files for use in voxelization method
         fiji_file = ace_flow_vox_output_folder / "stack_seg_tifs.ijm"
@@ -492,6 +495,9 @@ class ACEWorkflows:
         StackTiffs.stacking(
             fiji_file, stacked_tif, ace_flow_seg_output_folder, args.sa_monte_carlo > 0
         )
+
+        print("VOXELIZE")
+
         self.voxelization.voxelize(args, stacked_tif)
 
         (
@@ -506,6 +512,8 @@ class ACEWorkflows:
             ace_flow_warp_output_folder,
             args.rca_orient_code,
         )
+
+        print("WARPING ")
         self.warping.warp(
             args,
             ace_flow_reg_output_folder.parent / "clar_allen_reg",

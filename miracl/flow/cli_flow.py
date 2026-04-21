@@ -5,7 +5,6 @@ import sys
 
 from miracl.flow import miracl_workflow_ace_interface
 from miracl.flow.miracl_workflow_ace_parser import ACEWorkflowParser
-from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
 
 
 def run_reg_clar(parser, args):
@@ -150,6 +149,7 @@ def run_mul(parser, args):
 
 def run_ace(parser, args):
     if sys.argv[-2] == "flow" and sys.argv[-1] == "ace":
+        from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
         miracl_workflow_ace_gui_controller.main()
     else:
         miracl_workflow_ace_interface.main(args)

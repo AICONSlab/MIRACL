@@ -12,7 +12,6 @@ import pandas as pd
 import scipy as sp
 import tifffile as tiff
 from skimage.measure import regionprops
-from miracl.conv import  miracl_conv_gui_options as gui_opts
 
 
 # import commands
