@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# get version
+get version
 function getversion()
 {
 	ver=`cat ${MIRACL_HOME}/version.txt`
@@ -23,11 +23,10 @@ function usage()
 
     Usage: `basename $0` -d <DTI data> -m <binary mask> -r <bvecs> -b <bvals> -s <seed> -v <vox> -t <output tract name> -f <DTI dir> -e <exclusion seed> -p tckgen (tracking) options 
 
-    Example: `basename $0` -d dti.nii.gz -m dti_mask.nii.gz -r dti.bvecs -b dti.bvals -s seed.nii.gz -v 1 -t CST -f dti_folder -e dti_exlcude_seed.nii.gz -p "-cutoff 0.2 -number 2000"
+    Example: `basename $0` -d dti.nii.gz -m dti_mask.nii.gz -r dti.bvecs -b dti.bvals -s seed.nii.gz -v 1 -t CST -f dti_folder -e dti_exlcude_seed.nii.gz -p "-cutoff 0.2 -number 2000" -z "tournier"
 
 
-Required arguments:
-
+Required arguments 
     d. DTI data
 
     m. DTI mask
@@ -50,7 +49,7 @@ Optional arguments:
 
 	p. Tckgen (tractography) options 
 
-	
+	z. Specify response function used (options: tournier, dollhander)
     ----------
 
 	Dependencies:
@@ -80,7 +79,7 @@ fi
 
 # get arguments
 
-while getopts ":d:m:r:b:s:v:t:f:e:p:" opt; do
+while getopts ":d:m:r:b:s:v:t:f:e:z:p:" opt; do
     
     case "${opt}" in
        
@@ -110,6 +109,9 @@ while getopts ":d:m:r:b:s:v:t:f:e:p:" opt; do
             ;;
         e)
             excludeseed=${OPTARG}
+            ;;
+        z)
+            shellnum=${OPTARG}
             ;;
         p)
         	set -f
@@ -221,14 +223,29 @@ pushd $workdir
 # 1. Compute response function
 
 response=response.txt
+wm_response=wm_response.txt
+gm_response=gm_response.txt
+csf_response=csf_response.txt
 
 if [[ ! -f $response ]]; then
+	if [[ "$shellnum" == "tournier" ]]; then
+		printf "\n Computing tournier response function\n"
+		# will produce wm_response.txt
+		echo dwi2response tournier $dti $wm_response -mask $mask -fslgrad $bvec $bval
+		dwi2response tournier $dti $wm_response -mask $mask -fslgrad $bvec $bval > >(tee response.err) 2> >(tee response.out >&2)
+		echo < $response
+	elif [[ "$shellnum" == "dhollander" ]]; then
+		printf "\n Computing dhollander response function\n"
 
-	printf "\n Computing response function\n"
-	
-	echo dwi2response tournier $dti $response -mask $mask -fslgrad $bvec $bval 
-	dwi2response tournier $dti $response -mask $mask -fslgrad $bvec $bval > >(tee response.err) 2> >(tee response.out >&2)
-	
+		# will produce wm_response.txt gm_response.txt csf_response.txt into tee response.out
+		# useful for global tractography or msmt_csd
+		echo dwi2response dhollander $dti $wm_response $gm_response $csf_response -mask $mask -fslgrad $bvec $bval
+		#dwi2response dhollander $dti wm_response gm_response csf_response -mask $mask -fslgrad $bvec $bval
+		dwi2response dhollander $dti $wm_response $gm_response $csf_response -mask $mask -fslgrad $bvec $bval  > >(tee response.err) 2> >(tee response.out >&2)
+        # > >(tee wm_response.err gm_response.err sf_response.err) 2> >(tee wm_response.outgm_response.out sf_response.out >&2)
+	else
+		printf "\n Please specify a response function\n"
+	fi
 else
 
 	printf "\n Response function already computed .. skipping\n"
@@ -242,11 +259,18 @@ fi
 fod=dti_fod.nii.gz
 
 if [[ ! -f $fod ]]; then
-	
-	printf "\n Computing ODF from response function\n"
-
-	echo dwi2fod $dti $response $fod -mask $mask -fslgrad $bvec $bval 
-	dwi2fod $dti $response $fod -mask $mask -fslgrad $bvec $bval > >(tee fod.err) 2> >(tee fod.out >&2)
+	if [[ "$shellnum" == "tournier" ]]; then
+		printf "\n Computing csd ODF from tournier response function\n"
+		# specify algorithm used, here it is csd
+		echo dwi2fod csd $dti $response $fod -mask $mask -fslgrad $bvec $bval 
+		dwi2fod csd $dti $wm_response $fod -mask $mask -fslgrad $bvec $bval > >(tee fod.err) 2> >(tee fod.out >&2)
+	elif [[ "$shellnum" == "dhollander" ]]; then
+		printf "\n Computing msmt_csd ODF from dhollander response function\n"
+		# need to specify wm_response, gm_response and csf_response
+		# need to extract the three in response.txt depending on how it is written to it 
+		echo dwi2fod msmt_csd $dti $response $fod -mask $mask -fslgrad $bvec $bval 
+		dwi2fod msmt_csd $dti $wm_response $gm_response $csf_response $fod -mask $mask -fslgrad $bvec $bval > >(tee fod.err) 2> >(tee fod.out >&2)
+	fi
 
 else
 
