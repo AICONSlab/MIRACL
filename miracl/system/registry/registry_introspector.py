@@ -58,16 +58,16 @@ class RegistryIntrospector:
 
         resolved_objects: Dict[str, Dict[str, ResolvedMiraclObj]] = {}
 
-        module_keys = self.registry.list_modules().keys()
+        all_modules = self.registry.list_modules()
         logger.debug(
             "Beginning module introspection | total_modules=%d",
-            len(module_keys),
+            len(all_modules),
         )
 
         # Track number of resolved args
         total_resolved_args = 0
 
-        for key in self.registry.list_modules().keys():
+        for key in all_modules.keys():
             entry = self.registry.get(key)
             module_type = entry["module_type"]
             obj_class = entry["obj_class"]
