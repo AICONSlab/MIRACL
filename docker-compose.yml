@@ -1,12 +1,22 @@
 version: "3.3"
 services:
   miracl:
-    image: mgoubran/miracl
+    image: miracl_doc:latest
     tty: true
     environment:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: miracl
+    container_name: miracl_con
+    shm_size: 109249mb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     volumes:
       - /home/josmann/.Xauthority:/home/josmann/.Xauthority
+      - /home/kinkini/Research/OpenSourceTools/miracl/MIRACL/miracl:/code/miracl
+      - /home/kinkini/Research/OpenSourceTools/miracl:/data
