@@ -1,427 +1,591 @@
-from miracl.system.datamodels.datamodel_miracl_objs import (
+from pathlib import Path
+from miracl.system.enums.enums_base_modules import CliGroup
+from miracl.system.datamodels.miraclobj_datamodel import (
     MiraclObj,
+    CLISpec,
+    CLIDelta,
+    GuiNamespace,
+    GuiBase,
+    GuiWidgetSpecifics,
+    RangeFormConfig,
+    GuiDelta,
+    FlowOverride,
+    ArgumentSource,
     ArgumentType,
     WidgetType,
 )
-from pathlib import Path
-from miracl.system.enums.enums_base_modules import (
-    CliGroup,
-)
-from pathlib import Path
 
 
 class PlotWarpedData:
+    _MPWD_GROUP = CliGroup.MAPL3_PLOT_WARPED_DATA
+
     pvalue: MiraclObj = MiraclObj(
         name="mpwd_pvalue",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="p",
-        cli_l_flag="pvalue",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_p",
-                "cli_l_flag": "mpwd_pvalue",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path to p-value nii file (default: None)",
-        gui_label=["P-Value nii file"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="p",
+            l_flag="pvalue",
+            obj_type=ArgumentType.STRING,
+            help="path to p-value nii file (default: None)",
+            required=False,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["P-Value nii file"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mpwd_p",
+                    l_flag="mpwd_pvalue",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     atlas_dir: MiraclObj = MiraclObj(
         name="mpwd_atlas_dir",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="atl",
-        cli_l_flag="atlas_dir",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_atl",
-                "cli_l_flag": "mpwd_atlas_dir",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path to atlas dir (default: None)",
-        gui_label=["Atlas dir"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="atl",
+            l_flag="atlas_dir",
+            obj_type=ArgumentType.STRING,
+            help="path to atlas dir (default: None)",
+            required=False,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Atlas dir"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_atl",
+                    l_flag="mpwd_atlas_dir",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     vox: MiraclObj = MiraclObj(
         name="mpwd_vox",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="v",
-        cli_l_flag="vox",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_v",
-                "cli_l_flag": "mpwd_vox",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.INTEGER,
-        cli_help="voxel size/resolution in um (default: None)",
-        cli_choices=[10, 25, 50],
-        gui_label=["Voxel res"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="v",
+            l_flag="vox",
+            obj_type=ArgumentType.INTEGER,
+            help="voxel size/resolution in um (default: None)",
+            required=False,
+            default=None,
+            choices=[10, 25, 50],
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Voxel res"],
+                widget_type=WidgetType.COMBO_BOX,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mpwd_v",
+                    l_flag="mpwd_vox",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     sigma: MiraclObj = MiraclObj(
         name="mpwd_sigma",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="gs",
-        cli_l_flag="sigma",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_gs",
-                "cli_l_flag": "mpwd_sigma",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.INTEGER,
-        cli_help="Gaussian smoothing sigma (default: %(default)s)",
-        obj_default=4,
-        gui_label=["Sigma"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="gs",
+            l_flag="sigma",
+            obj_type=ArgumentType.INTEGER,
+            help="Gaussian smoothing sigma (default: %(default)s)",
+            required=False,
+            default=4,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Sigma"],
+                widget_type=WidgetType.SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=1,
+                        max_val=10_000,
+                    )
+                ),
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mpwd_gs",
+                    l_flag="mpwd_sigma",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     colourmap_pos: MiraclObj = MiraclObj(
         name="mpwd_colourmap_pos",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="pos",
-        cli_l_flag="colourmap_pos",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_pos",
-                "cli_l_flag": "mpwd_colourmap_pos",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="Matplotlib colourmap for p-values (default: %(default)s)",
-        obj_default="Reds",
-        gui_label=["Colourmap p-values"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="pos",
+            l_flag="colourmap_pos",
+            obj_type=ArgumentType.STRING,
+            help="Matplotlib colourmap for p-values (default: %(default)s)",
+            required=False,
+            default="Reds",
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Colourmap p-values"],
+                widget_type=WidgetType.LINE_EDIT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_pos",
+                    l_flag="mpwd_colourmap_pos",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     colourmap_neg: MiraclObj = MiraclObj(
         name="mpwd_colourmap_neg",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="cn",
-        cli_l_flag="colourmap_neg",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_cn",
-                "cli_l_flag": "mpwd_colourmap_neg",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="Matplotlib colourmap for negative values (default: %(default)s)",
-        obj_default="Blues",
-        gui_label=["Colourmap neg values"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="cn",
+            l_flag="colourmap_neg",
+            obj_type=ArgumentType.STRING,
+            help="Matplotlib colourmap for negative values (default: %(default)s)",
+            required=False,
+            default="Blues",
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Colourmap neg values"],
+                widget_type=WidgetType.LINE_EDIT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_cn",
+                    l_flag="mpwd_colourmap_neg",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     sagittal: MiraclObj = MiraclObj(
         name="mpwd_sagittal",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="s",
-        cli_l_flag="sagittal",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_s",
-                "cli_l_flag": "mpwd_sagittal",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.LIST,
-        cli_help="slicing across coronal axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns (default: %(default)s)",
-        obj_default=[
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
-        ],
-        cli_nargs=5,
-        gui_label=["Sagittal axis"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="s",
+            l_flag="sagittal",
+            obj_type=ArgumentType.LIST,
+            help="slicing across coronal axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns (default: %(default)s)",
+            required=False,
+            default=[
+                float("nan"),
+                float("nan"),
+                float("nan"),
+                float("nan"),
+                float("nan"),
+            ],
+            nargs=5,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Sagittal axis"],
+                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_s",
+                    l_flag="mpwd_sagittal",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     coronal: MiraclObj = MiraclObj(
         name="mpwd_coronal",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="c",
-        cli_l_flag="coronal",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_c",
-                "cli_l_flag": "mpwd_coronal",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.LIST,
-        cli_help="slicing across coronal axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns (default: %(default)s)",
-        obj_default=[
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
-        ],
-        cli_nargs=5,
-        gui_label=["Coronal axis"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="c",
+            l_flag="coronal",
+            obj_type=ArgumentType.LIST,
+            help="slicing across coronal axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns (default: %(default)s)",
+            required=False,
+            default=[
+                float("nan"),
+                float("nan"),
+                float("nan"),
+                float("nan"),
+                float("nan"),
+            ],
+            nargs=5,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Coronal axis"],
+                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_c",
+                    l_flag="mpwd_coronal",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     axial: MiraclObj = MiraclObj(
         name="mpwd_axial",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="a",
-        cli_l_flag="axial",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_a",
-                "cli_l_flag": "mpwd_axial",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.LIST,
-        cli_help="slicing across axial axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns (default: %(default)s)",
-        obj_default=[
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
-        ],
-        cli_nargs=5,
-        gui_label=["axial axis"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="a",
+            l_flag="axial",
+            obj_type=ArgumentType.LIST,
+            help="slicing across axial axis. \n 5 Arguments: start_slice interval number_of_slices number_of_rows number_of_columns (default: %(default)s)",
+            required=False,
+            default=[
+                float("nan"),
+                float("nan"),
+                float("nan"),
+                float("nan"),
+                float("nan"),
+            ],
+            nargs=5,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["axial axis"],
+                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_a",
+                    l_flag="mpwd_axial",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     figure_dim: MiraclObj = MiraclObj(
         name="mpwd_figure_dim",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="f",
-        cli_l_flag="figure_dim",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_f",
-                "cli_l_flag": "mpwd_figure_dim",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.LIST,
-        obj_default=[
-            float("nan"),
-            float("nan"),
-        ],
-        cli_help="figure width and height (default: None)",
-        cli_nargs=2,
-        gui_label=["Figure w and h"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="f",
+            l_flag="figure_dim",
+            obj_type=ArgumentType.LIST,
+            help="figure width and height (default: None)",
+            required=False,
+            default=[float("nan"), float("nan")],
+            nargs=2,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Figure w and h"],
+                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_f",
+                    l_flag="mpwd_figure_dim",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     dir_outfile: MiraclObj = MiraclObj(
         name="mpwd_dir_outfile",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="d",
-        cli_l_flag="dir_outfile",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_d",
-                "cli_l_flag": "mpwd_dir_outfile",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        obj_default=Path.cwd(),
-        cli_help="Output file directory (default: %(default)s)",
-        gui_label=["Output dir"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="d",
+            l_flag="dir_outfile",
+            obj_type=ArgumentType.STRING,
+            help="Output file directory (default: %(default)s)",
+            required=False,
+            default=Path.cwd(),
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Output dir"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mpwd_d",
+                    l_flag="mpwd_dir_outfile",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     outfile: MiraclObj = MiraclObj(
         name="mpwd_outfile",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="o",
-        cli_l_flag="outfile",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_o",
-                "cli_l_flag": "mpwd_outfile",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="output filenames (default: %(default)s)",
-        obj_default="heatmap_figure_extension",
-        cli_nargs="+",
-        gui_label=["Output filenames"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="o",
+            l_flag="outfile",
+            obj_type=ArgumentType.STRING,
+            help="output filenames (default: %(default)s)",
+            required=False,
+            default="heatmap_figure_extension",
+            nargs="+",
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Output filenames"],
+                widget_type=WidgetType.LINE_EDIT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mpwd_o",
+                    l_flag="mpwd_outfile",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     extension: MiraclObj = MiraclObj(
         name="mpwd_extension",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="e",
-        cli_l_flag="extension",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_e",
-                "cli_l_flag": "mpwd_extension",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="heatmap figure extension (default: %(default)s)",
-        obj_default="tiff",
-        gui_label=["Figure extension"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="e",
+            l_flag="extension",
+            obj_type=ArgumentType.STRING,
+            help="heatmap figure extension (default: %(default)s)",
+            required=False,
+            default="tiff",
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Figure extension"],
+                widget_type=WidgetType.LINE_EDIT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_e",
+                    l_flag="mpwd_extension",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     dpi: MiraclObj = MiraclObj(
         name="mpwd_dpi",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="dpi",
-        cli_l_flag="dpi",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_dpi",
-                "cli_l_flag": "mpwd_dpi",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.INTEGER,
-        cli_help="dots per inch (default: %(default)s)",
-        obj_default=500,
-        gui_label=["DPI"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="dpi",
+            l_flag="dpi",
+            obj_type=ArgumentType.INTEGER,
+            help="dots per inch (default: %(default)s)",
+            required=False,
+            default=500,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["DPI"],
+                widget_type=WidgetType.SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=1,
+                        max_val=100_000,
+                    )
+                ),
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_dpi",
+                    l_flag="mpwd_dpi",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     hemi: MiraclObj = MiraclObj(
         name="mpwd_hemi",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="m",
-        cli_l_flag="hemi",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_m",
-                "cli_l_flag": "mpwd_hemi",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
-        obj_default="combined",
-        cli_choices=["combined", "split"],
-        gui_label=["Hemisphere"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="m",
+            l_flag="hemi",
+            obj_type=ArgumentType.STRING,
+            help="warp allen labels with hemisphere split (Left different than Right labels) or combined (L & R same labels/Mirrored) (default: %(default)s)",
+            required=False,
+            default="combined",
+            choices=["combined", "split"],
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Hemisphere"],
+                widget_type=WidgetType.COMBO_BOX,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_m",
+                    l_flag="mpwd_hemi",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     side: MiraclObj = MiraclObj(
         name="mpwd_side",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="si",
-        cli_l_flag="side",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mpwd_si",
-                "cli_l_flag": "mpwd_side",
-                "cli_group": CliGroup.MAPL3_PLOT_WARPED_DATA,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
-        obj_default=None,
-        cli_choices=["rh", "lh", "None"],
-        gui_label=["Hemi side"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="si",
+            l_flag="side",
+            obj_type=ArgumentType.STRING,
+            help="side, if only registering a hemisphere instead of whole brain (default: %(default)s)",
+            required=False,
+            default=None,
+            choices=["rh", "lh", "None"],
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Hemi side"],
+                widget_type=WidgetType.COMBO_BOX,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mpwd_si",
+                    l_flag="mpwd_side",
+                    group=_MPWD_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )

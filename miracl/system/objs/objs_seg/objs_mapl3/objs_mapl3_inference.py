@@ -1,232 +1,339 @@
-from miracl.system.datamodels.datamodel_miracl_objs import (
+from miracl.system.enums.enums_base_modules import CliGroup
+from miracl.system.datamodels.miraclobj_datamodel import (
     MiraclObj,
+    CLISpec,
+    CLIDelta,
+    GuiNamespace,
+    GuiBase,
+    GuiWidgetSpecifics,
+    RangeFormConfig,
+    GuiDelta,
+    FlowOverride,
+    ArgumentSource,
+    GuiChoiceOverrideConfig,
     ArgumentType,
     WidgetType,
-)
-from miracl.system.enums.enums_base_modules import (
-    CliGroup,
 )
 
 
 class Inference:
-    config = MiraclObj(
+    _MI_GROUP = CliGroup.MAPL3_INFERENCE
+
+    config: MiraclObj = MiraclObj(
         name="mi_config",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="c",
-        cli_l_flag="config",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_c",
-                "cli_l_flag": "mi_config",
-                "cli_group": CliGroup.REQUIRED,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path of config file used during training to define the model",
-        cli_required=True,
-        gui_label=["Config file"],
-        gui_group={"mapl3": "main"},
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="c",
+            l_flag="config",
+            obj_type=ArgumentType.STRING,
+            help="path of config file used during training to define the model",
+            required=True,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Config file"],
+                widget_type=WidgetType.PATH_INPUT,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mi_c",
+                    l_flag="mi_config",
+                    group=CliGroup.REQUIRED,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     out_dir: MiraclObj = MiraclObj(
         name="mi_out_dir",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="o",
-        cli_l_flag="output_path",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_o",
-                "cli_l_flag": "mi_out_dir",
-                "cli_group": CliGroup.REQUIRED,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path of output directory (default: None)",
-        cli_required=True,
-        gui_label=["Output directory"],
-        gui_group={"mapl3": "main"},
-        gui_order=[2],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="o",
+            l_flag="output_path",
+            obj_type=ArgumentType.STRING,
+            help="path of output directory (default: None)",
+            required=True,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Output directory"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=2.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mi_o",
+                    l_flag="mi_out_dir",
+                    group=CliGroup.REQUIRED,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
-    model_path = MiraclObj(
+    model_path: MiraclObj = MiraclObj(
         name="mi_model_path",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="m",
-        cli_l_flag="model_path",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_m",
-                "cli_l_flag": "mi_model_path",
-                "cli_group": CliGroup.REQUIRED,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path to trained model",
-        cli_required=True,
-        gui_label=["Path to trained model"],
-        gui_group={"mapl3": "main"},
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="m",
+            l_flag="model_path",
+            obj_type=ArgumentType.STRING,
+            help="path to trained model",
+            required=True,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Path to trained model"],
+                widget_type=WidgetType.PATH_INPUT,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mi_m",
+                    l_flag="mi_model_path",
+                    group=CliGroup.REQUIRED,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     input_dir: MiraclObj = MiraclObj(
         name="mi_input_dir",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="i",
-        cli_l_flag="input_dir",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_i",
-                "cli_l_flag": "mi_input_dir",
-                "cli_group": CliGroup.REQUIRED,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path to input directory containing patches (default: None)",
-        cli_required=True,
-        gui_label=["Input directory"],
-        gui_group={"mapl3": "main"},
-        gui_order=[2],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="i",
+            l_flag="input_dir",
+            obj_type=ArgumentType.STRING,
+            help="path to input directory containing patches (default: $(default)s)",
+            required=True,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Input directory"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=2.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mi_i",
+                    l_flag="mi_input_dir",
+                    group=CliGroup.REQUIRED,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
-    gpu_index = MiraclObj(
+    gpu_index: MiraclObj = MiraclObj(
         name="mi_gpu_index",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="g",
-        cli_l_flag="gpu_index",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_g",
-                "cli_l_flag": "mi_gpu_index",
-                "cli_group": CliGroup.MAPL3_INFERENCE,
-                "disabled": False,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="gpu index to be used; if you wanna use all the available gpus, pass 'all' as the flag argument (default: %(default)s)",
-        cli_required=False,
-        obj_default=0,
-        gui_label=["GPU index"],
-        gui_group={"mapl3": "main"},
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.SPINBOX,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="g",
+            l_flag="gpu_index",
+            obj_type=ArgumentType.STRING,
+            help="gpu index to be used; if you wanna use all the available gpus, pass 'all' as the flag argument (default: %(default)s)",
+            required=False,
+            default="0",
+            choices=[str(i) for i in range(11)] + ["all"],
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["GPU index"],
+                widget_type=WidgetType.COMBO_BOX,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mi_g",
+                    l_flag="mi_gpu_index",
+                    group=_MI_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
-    binarization_threshold = MiraclObj(
+    binarization_threshold: MiraclObj = MiraclObj(
         name="mi_binarization_threshold",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="b",
-        cli_l_flag="binarization_threshold",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_b",
-                "cli_l_flag": "mi_binarization_threshold",
-                "cli_group": CliGroup.MAPL3_INFERENCE,
-            }
-        },
-        cli_obj_type=ArgumentType.FLOAT,
-        cli_help="threshold (between 0-1) to binarize the model probabilty map (default: %(default)s)",
-        cli_required=False,
-        obj_default=0.5,
-        gui_label=["Tissue % threshold"],
-        gui_group={"mapl3": "main"},
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.DOUBLE_SPINBOX,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="b",
+            l_flag="binarization_threshold",
+            obj_type=ArgumentType.FLOAT,
+            help="threshold (between 0-1) to binarize the model probabilty map (default: %(default)s)",
+            required=False,
+            default=0.5,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Tissue % threshold"],
+                widget_type=WidgetType.DOUBLE_SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=0.0,
+                        max_val=1.0,
+                        increment_val=0.01,
+                        nr_decimals=2,
+                    )
+                ),
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mi_b",
+                    l_flag="mi_binarization_threshold",
+                    group=_MI_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
-    save_prob_map = MiraclObj(
+    save_prob_map: MiraclObj = MiraclObj(
         name="mi_save_prob_map_flag",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="s",
-        cli_l_flag="save_prob_map_flag",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_s",
-                "cli_l_flag": "mi_save_prob_map_flag",
-                "cli_group": CliGroup.MAPL3_INFERENCE,
-                "disabled": False,
-            }
-        },
-        cli_obj_type=ArgumentType.CUSTOM_BOOL,
-        cli_help="set to save prob map (default: %(default)s)",
-        cli_required=False,
-        obj_default=False,
-        gui_label=["Save prob map"],
-        gui_group={"mapl3": "main"},
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="s",
+            l_flag="save_prob_map_flag",
+            obj_type=ArgumentType.CUSTOM_BOOL,
+            help="set to save prob map (default: %(default)s)",
+            required=False,
+            default=False,
+            choices=[True, False],
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Save prob map"],
+                widget_type=WidgetType.COMBO_BOX,
+                props=GuiWidgetSpecifics(
+                    choices=GuiChoiceOverrideConfig(
+                        vals=["Yes", "No"],
+                        default_val="No",
+                    )
+                ),
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mi_s",
+                    l_flag="mi_save_prob_map_flag",
+                    group=_MI_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     metadata_file: MiraclObj = MiraclObj(
         name="mi_metadata",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="j",
-        cli_l_flag="metadata",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_j",
-                "cli_l_flag": "mi_metadata",
-                "cli_group": CliGroup.MAPL3_INFERENCE,
-                "disabled": False,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="path to metadata JSON file (default: None)",
-        cli_required=False,
-        obj_default=None,
-        gui_label=["Path to metadata JSON"],
-        gui_group={"mapl3": "main"},
-        gui_order=[1],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="j",
+            l_flag="metadata",
+            obj_type=ArgumentType.STRING,
+            help="path to metadata JSON file (default: %(default)s)",
+            required=False,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Path to metadata JSON"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=1.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mi_j",
+                    l_flag="mi_metadata",
+                    group=_MI_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
-    tissue_percentage_threshold = MiraclObj(
+    tissue_percentage_threshold: MiraclObj = MiraclObj(
         name="mi_tissue_percentage_threshold",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="p",
-        cli_l_flag="tissue_percentage_threshold",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mi_p",
-                "cli_l_flag": "mi_tissue_percentage_threshold",
-                "cli_group": CliGroup.MAPL3_INFERENCE,
-            }
-        },
-        cli_obj_type=ArgumentType.FLOAT,
-        cli_help="threshold between 0-100 to filter empty patches (default: None)",
-        cli_required=False,
-        obj_default=None,
-        gui_label=["Tissue % threshold"],
-        gui_group={"mapl3": "main"},
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.DOUBLE_SPINBOX,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="p",
+            l_flag="tissue_percentage_threshold",
+            obj_type=ArgumentType.FLOAT,
+            help="threshold between 0-100 to filter empty patches (default: %(default)s)",
+            required=False,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Tissue % threshold"],
+                widget_type=WidgetType.NULLABLE_DOUBLE_SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=0.0,
+                        max_val=100.0,
+                        increment_val=0.1,
+                        nr_decimals=1,
+                    )
+                ),
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mi_p",
+                    l_flag="mi_tissue_percentage_threshold",
+                    group=_MI_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )

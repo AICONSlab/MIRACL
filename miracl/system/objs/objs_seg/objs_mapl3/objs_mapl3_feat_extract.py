@@ -1,84 +1,119 @@
-from miracl.system.datamodels.datamodel_miracl_objs import (
+from miracl.system.enums.enums_base_modules import CliGroup
+from miracl.system.datamodels.miraclobj_datamodel import (
     MiraclObj,
+    CLISpec,
+    CLIDelta,
+    GuiNamespace,
+    GuiBase,
+    GuiDelta,
+    FlowOverride,
+    ArgumentSource,
     ArgumentType,
     WidgetType,
-)
-from miracl.system.enums.enums_base_modules import (
-    CliGroup,
 )
 
 
 class FeatExtract:
-    vox_file: MiraclObj = MiraclObj(
+    _MFE_GROUP = CliGroup.MAPL3_FEAT_EXTRACT
+
+    seg: MiraclObj = MiraclObj(
         name="mfe_seg",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="s",
-        cli_l_flag="seg",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mfe_s",
-                "cli_l_flag": "mfe_seg",
-                "cli_group": CliGroup.REQUIRED,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="segmentation tif (default: None)",
-        cli_required=True,
-        gui_label=["Segmentation tif"],
-        gui_group={"mapl3": "main"},
-        gui_order=[2],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="s",
+            l_flag="seg",
+            obj_type=ArgumentType.STRING,
+            help="segmentation tif (default: %(default)s)",
+            required=True,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Segmentation tif"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=2.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mfe_s",
+                    l_flag="mfe_seg",
+                    group=CliGroup.REQUIRED,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     lbl: MiraclObj = MiraclObj(
         name="mfe_lbl",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="l",
-        cli_l_flag="lbl",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mfe_l",
-                "cli_l_flag": "mfe_lbl",
-                "cli_group": CliGroup.REQUIRED,
-                "disabled": True,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="label annotation (default: None)",
-        cli_required=True,
-        gui_label=["Label annotation"],
-        gui_group={"mapl3": "main"},
-        gui_order=[2],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="l",
+            l_flag="lbl",
+            obj_type=ArgumentType.STRING,
+            help="label annotation (default: %(default)s)",
+            required=True,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Label annotation"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=2.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="mfe_l",
+                    l_flag="mfe_lbl",
+                    group=CliGroup.REQUIRED,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
 
     mask: MiraclObj = MiraclObj(
         name="mfe_mask",
-        tags=["mapl3", "seg", "mapl3_flow"],
-        cli_s_flag="m",
-        cli_l_flag="mask",
-        flow={
-            "mapl3": {
-                "cli_s_flag": "mfe_m",
-                "cli_l_flag": "mfe_mask",
-                "cli_group": CliGroup.MAPL3_FEAT_EXTRACT,
-            }
-        },
-        cli_obj_type=ArgumentType.STRING,
-        cli_help="ROI mask (default: None)",
-        cli_required=False,
-        gui_label=["ROI mask"],
-        gui_group={"mapl3": "main"},
-        gui_order=[2],
         module="mapl3",
         module_group="seg",
         version_added="2.4.0",
-        gui_widget_type=WidgetType.PATH_INPUT,
+        tags=["mapl3", "seg", "mapl3_flow"],
+        cli=CLISpec(
+            s_flag="m",
+            l_flag="mask",
+            obj_type=ArgumentType.STRING,
+            help="ROI mask (default: %(default)s)",
+            required=False,
+            default=None,
+        ),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["ROI mask"],
+                widget_type=WidgetType.PATH_INPUT,
+                order=2.0,
+            )
+        ),
+        flow={
+            "mapl3": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="mfe_m",
+                    l_flag="mfe_mask",
+                    group=_MFE_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+        },
     )
+
