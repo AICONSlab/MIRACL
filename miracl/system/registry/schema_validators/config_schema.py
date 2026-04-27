@@ -27,6 +27,7 @@ class MetaConfig(BaseModel):
 
     # Routing
     # These are required to correctly match the module
+    title: str
     module: str  # Ex.: "reg" - shown in `miracl -h` output
     command: str  # Ex.: "clar_allen" - used in usage line
     help: str  # Short module description - shown in `miracl reg -h`
@@ -38,7 +39,7 @@ class MetaConfig(BaseModel):
 
     # Status badges rendered by MiraclCLIBuilder._build_description()
     deprecated: bool = False
-    deprecation_message: Optional[str]
+    deprecation_message: Optional[str] = None
     experimental: bool = False
 
     # Runtime info
