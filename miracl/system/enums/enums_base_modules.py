@@ -1,3 +1,17 @@
+"""
+Code created and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+
+
+This is where modules are registered. Add a module here to reference it in the config
+files.
+
+Note:
+  This needs some refactoring. I want to add a third item to the tuple that can be used
+  as the parser group header. Currently, the first argument is used for that but it's
+  also used to match the module in the workflow config. Horrible design! These should
+  be independant of each other so they can be changed independantly from each other.
+"""
+
 from enum import Enum
 
 
@@ -70,7 +84,3 @@ class CliGroup(Enum):
     @property
     def label(self):
         return self.value[0]
-
-
-# group_name = obj.cli_group  # instance of CliGroup
-# parser.add_argument_group(title=group_name.label, description=group_name.description)
