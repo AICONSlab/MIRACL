@@ -48,6 +48,7 @@ from cucim.skimage.morphology import medial_axis, dilation
 from cucim.skimage.feature import peak_local_max
 import time
 from skimage import measure
+from miracl.api.utils import str2bool
 
 # -------------------------------------------------------
 # create parser
@@ -135,7 +136,7 @@ my_parser.add_argument(
     help="whether to dilate distance transform",
     required=False,
     default=True,
-    type=bool,
+    type=str2bool,
 )
 my_parser.add_argument(
     "-r",
