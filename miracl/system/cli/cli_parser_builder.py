@@ -107,9 +107,9 @@ class MiraclCLIBuilder:
         if meta.examples:
             parts.append("Examples:")
             for ex in meta.examples:
-                parts.append(f"  {ex.cmd}")
+                parts.append(f"  $ {ex.cmd}")
                 if ex.help:
-                    parts.append(f"  +--> {ex.help}")
+                    parts.append(f"    +--> {ex.help}")
 
         runtime_parts = []
         if meta.estimated_runtime:
