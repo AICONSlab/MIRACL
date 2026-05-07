@@ -1,14 +1,38 @@
+"""
+This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+
+Enums required by modules and workflows.
+"""
+
+#######################################################################################
+# IMPORTS
+#######################################################################################
 from enum import Enum
 from miracl.api.utils import parser_true_or_false
 
+#######################################################################################
+# CLI
+#######################################################################################
 
-# NOTE: This should eventually be the only place where flows will have to be added/defined
+
+# TODO: This should eventually be the only place where flows will have to be
+# added/defined. I should map out the current way to add/define flows in a dev guide.
+# FIX: Or should it? Is this actually the best place for the flow and module enums?
+# This is very important since they add/define the workflows. Consider moving them to
+# their own file.
 class ModuleType(str, Enum):
     """
-    Enum representing the type of module the argument belongs to.
+    Module execution context within the MIRACL system.
 
-    Used to distinguish between standalone modules and modules that are part
-    of a workflow (e.g., ACE, MAPL3).
+    Distinguishes between standalone CLI/GUI execution and workflow-based execution.
+
+    Attributes:
+        MODULE: Standalone module execution via CLI or GUI.
+        FLOW_ACE: Module executed as part of the ACE workflow.
+        FLOW_MAPL3: Module executed as part of the MAPL3 workflow.
+
+    Note:
+        All new modules or workflows must be registered here before use.
     """
 
     MODULE = "module"
@@ -16,18 +40,46 @@ class ModuleType(str, Enum):
     FLOW_MAPL3 = "mapl3"
 
 
+class FlagMapMode(str, Enum):
+    """
+    Used in the module config to automatically build flag maps between workflow and
+    the parser of the actual script that is being called. This can only be used if
+    the module flags in the objects match the flags of the parser from the script. It
+    creates a mapping between the object's module flags and the respective workflow
+    flags.
+    """
+
+    AUTOGENERATE = "autogenerate"
+
+
 class ArgumentType(str, Enum):
     """
-    Enum representing supported data types for command-line arguments.
+    Data types supported by MIRACL command-line and GUI arguments.
 
-    These types are used for parsing input from CLI and GUI interfaces.
-    The `python_type` property returns the Python type or callable corresponding
-    to the enum value.
+    Used by the MIRACLang (workflow DSL) and validation layer to determine how to
+    parse and validate user input. Each type has two associated conversion strategies:
+
+    - :attr:`python_type`: The resulting Python type after parsing.
+    - :attr:`cli_parser`: The function used to convert CLI string input.
+
+    Example:
+        >>> arg_type = ArgumentType.INTEGER
+        >>> arg_type.python_type
+        <class 'int'>
+        >>> arg_type.cli_parser("42")
+        42
+
+        >>> arg_type = ArgumentType.BOOLEAN
+        >>> arg_type.python_type
+        <class 'bool'>
+        >>> arg_type.cli_parser("false")
+        False
     """
 
     STRING = "str"
     INTEGER = "int"
     FLOAT = "float"
+    # FIX: BOOLEAN enum should be fully replaced by CUSTOM_BOOL.
     BOOLEAN = "bool"
     LIST = "list"
     CUSTOM_BOOL = "custom_bool"
@@ -35,28 +87,57 @@ class ArgumentType(str, Enum):
     @property
     def python_type(self):
         """
-        Return the Python type or conversion function associated with the argument type.
+        The Python type resulting from parsing an argument of this type.
 
-        For CUSTOM_BOOL, a custom parser is imported at runtime.
+        Used by Pydantic to validate values and generate schemas.
         """
-
-        if self == ArgumentType.CUSTOM_BOOL:
-            return parser_true_or_false
 
         return {
             ArgumentType.STRING: str,
             ArgumentType.INTEGER: int,
             ArgumentType.FLOAT: float,
             ArgumentType.BOOLEAN: bool,
+            ArgumentType.CUSTOM_BOOL: bool,
             ArgumentType.LIST: list,
         }[self]
+
+    @property
+    def cli_parser(self):
+        """
+        The function used to parse string input from the CLI.
+
+        For boolean types, this uses :func:`~miracl.api.utils.parser_true_or_false`
+        to handle string values like ``"true"`` and ``"false"`` correctly.
+        """
+
+        parser_map = {
+            ArgumentType.STRING: str,
+            ArgumentType.INTEGER: int,
+            ArgumentType.FLOAT: float,
+            ArgumentType.BOOLEAN: parser_true_or_false,
+            ArgumentType.CUSTOM_BOOL: parser_true_or_false,
+            ArgumentType.LIST: list,
+        }
+        return parser_map[self]
 
 
 class ArgumentAction(str, Enum):
     """
-    Enum representing the available actions for argparse when parsing CLI arguments.
+    Argparse action types available for CLI argument parsing.
 
-    Mirrors the choices accepted by argparse’s `action` parameter.
+    Maps directly to argparse's built-in actions. See :mod:`argparse`
+    documentation for detailed behavior of each action.
+
+    Attributes:
+        STORE: Store the associated value (default).
+        STORE_CONST: Store a constant value.
+        STORE_TRUE: Store ``True`` when the flag is present.
+        STORE_FALSE: Store ``False`` when the flag is present.
+        APPEND: Append this value to a list.
+        APPEND_CONST: Append a constant to a list.
+        COUNT: Count occurrences of this flag.
+        HELP: Show the help message and exit.
+        VERSION: Show the version and exit.
     """
 
     STORE = "store"
@@ -70,31 +151,52 @@ class ArgumentAction(str, Enum):
     VERSION = "version"
 
 
+#######################################################################################
 # GUI
+#######################################################################################
 
 
 class WidgetType(str, Enum):
     """
-    Enum specifying GUI widget types for argument input.
+    GUI widget types for argument input to the PyQt frontend.
 
-    Each widget maps to a specific Qt widget in the interface.
+    Each enum value maps to a specific Qt widget for rendering the argument.
+
+    Attributes:
+        LINE_EDIT: Single-line text input (:class:`PyQt5.QtWidgets.QLineEdit`).
+        SPINBOX: Integer input with up/down controls (:class:`PyQt5.QtWidgets.QSpinBox`).
+        DOUBLE_SPINBOX: Floating-point input (:class:`PyQt5.QtWidgets.QDoubleSpinBox`).
+        NULLABLE_DOUBLE_SPINBOX: Optional float with checkbox (:class:`PyQt5.QtWidgets.QDoubleSpinBox`).
+            Returns 'None' if unchecked, int value when checked.
+        COMBO_BOX: Dropdown selection (:class:`PyQt5.QtWidgets.QComboBox`).
+        PATH_INPUT: File or directory path picker (custom widget).
     """
 
-    LINE_EDIT = "LINE_EDIT"  # Text input (QLineEdit)
-    SPINBOX = "SPINBOX"  # Integer input (QSpinBox)
-    DOUBLE_SPINBOX = "DOUBLE_SPINBOX"  # Float input (QDoubleSpinBox)
-    DROPDOWN = "DROPDOWN"  # Multiple choice (QComboBox)
-    PATH_INPUT = "PATH_INPUT"  # Custom path input
+    LINE_EDIT = "LINE_EDIT"
+    SPINBOX = "SPINBOX"
+    DOUBLE_SPINBOX = "DOUBLE_SPINBOX"
+    NULLABLE_DOUBLE_SPINBOX = "NULLABLE_DOUBLE_SPINBOX"
+    COMBO_BOX = "COMBO_BOX"
+    PATH_INPUT = "PATH_INPUT"
 
 
 class InputRestrictionType(str, Enum):
-    """
-    Enum for restricting text input in GUI text fields (e.g., QLineEdit).
+    """Input restrictions for GUI text fields.
 
-    Defines allowed character classes or formats
+    Defines the character classes or formats allowed in text-based GUI widgets.
+    These restrictions are enforced by the frontend to provide immediate
+    user feedback before submission.
+
+    Attributes:
+        STR: No restrictions.
+        STRCON: Constrained string with custom validation.
+        ALPHANUMERIC: Letters and digits only.
+        INTEGERS_ONLY: Whole numbers only.
+        FLOATS_ONLY: Numeric values including decimals.
     """
 
     STR = "str"
     STRCON = "strcon"
     ALPHANUMERIC = "alphanumeric"
-    INT = "numeric"
+    INTEGERS_ONLY = "INTEGERS_ONLY"
+    FLOATS_ONLY = "FLOATS_ONLY"
