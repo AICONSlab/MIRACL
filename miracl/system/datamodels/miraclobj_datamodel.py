@@ -3,25 +3,29 @@ This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca)
 
 MiraclObj Basemodel defintions and resolver using Pydantic v2.
 
-This is the blueprint for all MIRACL object singletons!
+This is the blueprint for all MIRACL object singletons!! Super important!!
 
-NOTE: Some recommended settings for conf.py:
+Note:
+  Some recommended settings for conf.py:
 
-     extensions = [
-         'sphinx.ext.napoleon',
-         'sphinx_contrib.autodoc_pydantic',
-     ]
+    extensions = [
+        'sphinx.ext.napoleon',
+        'sphinx_contrib.autodoc_pydantic',
+    ]
 
-     # autodoc_pydantic settings
-     autodoc_pydantic_model_show_json = False
-     autodoc_pydantic_model_show_config_summary = False
-     autodoc_pydantic_field_list_validators = False
-     autodoc_pydantic_model_member_order = "bysource"
+    # autodoc_pydantic settings
+    autodoc_pydantic_model_show_json = False
+    autodoc_pydantic_model_show_config_summary = False
+    autodoc_pydantic_field_list_validators = False
+    autodoc_pydantic_model_member_order = "bysource"
 
-     # Napoleon settings
-     napoleon_google_docstring = True
-     napoleon_use_ivar = True
+    # Napoleon settings
+    napoleon_google_docstring = True
+    napoleon_use_ivar = True
 
+Note:
+  This script has been formatted according to the internal dev style guide. However,
+  it's still a WIP. Formatting might not be final.
 """
 
 # =====================================================================================
@@ -56,13 +60,17 @@ from miracl.api.enums import (
     ModuleType,
 )
 from argparse import ArgumentTypeError
-import argparse
 from enum import Enum
 from pathlib import Path
 from uuid import UUID, uuid4
 import threading
 import re
 
+# =====================================================================================
+# CONSTANTS
+# =====================================================================================
+
+MIRACL_HIDE_HELP = "MIRACL_HIDDEN_ARG"
 
 # =====================================================================================
 # ENUMS
@@ -71,13 +79,16 @@ import re
 
 class ArgumentSource(str, Enum):
     """
-    Source/visibility of an argument within the system.
+    Source/visibility of an argument within the system. This is important for workflows
+    where the user doesn't/shouldn't have access to the args/flags that get passed on
+    between modules.
 
     Attributes:
         USER: Visible in both CLI and GUI.
         INTERNAL: Hidden from help/UI; used for module piping. In 99% of the cases,
             a MIRACL dev will want to use this as the default for required args in
-            workflows.
+            workflows. The resolver will force required=False to ensure that
+            procedural execution doesn't hang on missing hidden args in workflows.
         DISABLED: Completely removed from context i.e. not passed procedurally.
     """
 
@@ -92,7 +103,9 @@ class ArgumentSource(str, Enum):
 
 
 class RangeFormConfig(BaseModel):
-    """Definitions for range-based widgets like SPINBOX or SLIDER."""
+    """
+    Definitions for range-based widgets like SPINBOX or SLIDER.
+    """
 
     min_val: Optional[Union[int, float]] = Field(
         None,
@@ -116,8 +129,8 @@ class GuiChoiceOverrideConfig(BaseModel):
     """
     Overrides default choices for dropdown widgets with custom labels.
 
-    Useful for mapping internally used values to more user-friendly labels
-    without changing the underlying :class:`~.ArgumentSource` logic.
+    Useful for mapping internally used values to more user-friendly labels without
+    changing the underlying :class:`~.ArgumentSource` logic.
     """
 
     vals: Optional[List[str]] = Field(
@@ -145,7 +158,9 @@ class LineEditConfig(BaseModel):
 
 
 class GuiWidgetSpecifics(BaseModel):
-    """Generic widget configuration options."""
+    """
+    Generic widget configuration options.
+    """
 
     range: Optional[RangeFormConfig] = Field(
         None,
@@ -167,7 +182,7 @@ class GuiBase(BaseModel):
     GUI frontends e.g. PyQt, webbased etc.
     """
 
-    label: List[str] = Field(
+    label: Optional[List[str]] = Field(
         None,
         description="Main label(s) used in GUI, can be more than one for custom widgets",
     )
@@ -179,7 +194,7 @@ class GuiBase(BaseModel):
         None,
         description="Additional label(s) used in GUI, also used for custom widgets",
     )
-    group: CliGroup = Field(
+    group: Optional[CliGroup] = Field(
         None,
         description="Group name for organizing in GUI",
     )
@@ -214,7 +229,7 @@ class GuiDelta(BaseModel):
     """
     Delta object for overriding GUI properties in a FlowOverride. This is a delta i.e.
     a partial config. It holds only the overrides that will be applied on top of the
-    base config hence why all of these fields are optional.
+    base config hence why all of these fields are optional. Pretty cool design...
 
     Attributes:
         base: Optional overrides for core GUI properties.
@@ -233,7 +248,7 @@ class GuiDelta(BaseModel):
 class CLISpec(BaseModel):
     """
     Complete CLI specification for an argument. This is the core definition for a
-    singleton!
+    singleton i.e. this is important!
     """
 
     s_flag: Optional[str] = Field(
@@ -394,12 +409,14 @@ class ResolvedMiraclObj(BaseModel):
         source: Resolved visibility/source of the argument.
         cli: Resolved CLI specification.
         gui: Resolved GUI specification.
-        content: The actual runtime value for this argument. This will get assigned once.
+        content:
+            The actual runtime value for this argument. This will get assigned once.
             In the DAG, the content value will actually belong to a dictionary copy, not
             to the original singleton registered to the registry.
         gui_hidden: Whether the argument is hidden in the GUI.
         gui_extensions: Frontend-specific GUI extensions.
-        depends_on: List of other objects this object depends on. This is useful, for
+        depends_on:
+            List of other objects this object depends on. This is useful, for
             example in the GUI when a widget can only be used based on whether another
             widget is or isn't used.
         conflicts_with: List of other objects this object conflicts with.
@@ -541,19 +558,30 @@ class MiraclObj(BaseModel):
         tags: Search tags.
     """
 
-    # I defined these to make the model defensive for development. This should catch
-    # invalid data at construction, re-assignment and also prevent accidental extra
-    # fields and typos. It's relatively strict since this is a critical data model.
+    # NOTE: I defined these to make the model defensive for development. This should
+    # catch invalid data at construction, re-assignment and also prevent accidental
+    # extra fields and typos. It's relatively strict since this is a critical data model.
     model_config = ConfigDict(
-        extra="forbid",  # Don't allow fields not defined in the object class. Enforces schemas and catches typos.
-        validate_assignment=True,  # Validate fields every time they are reassigned, not only at initialization.
-        validate_default=True,  # Validate default values when model is first created.
+        extra="forbid",  # NOTE: Don't allow fields not defined in the object class. Enforces schemas and catches typos.
+        validate_assignment=True,  # NOTE: Validate fields every time they are reassigned, not only at initialization.
+        validate_default=True,  # NOTE: Validate default values when model is first created.
     )
 
     instances: ClassVar[Dict[Tuple[str, str], "MiraclObj"]] = {}
     _lock: ClassVar[threading.Lock] = threading.Lock()
 
-    def model_post_init(self, __context):
+    @classmethod
+    def clear_registry(cls):
+        """
+        Reset the global singleton Registry. This is a future-proofing feature.
+        Eventually we will hopefully have time to write a comprehensive test suite
+        for MIRACL and we need a reset button to wipe the registry clean before each
+        test.
+        """
+        with cls._lock:
+            cls.instances.clear()
+
+    def model_post_init(self, __context):  # FIX: Figure out if __context can be removed
         """
         Registers the object instance in the global registry.
 
@@ -587,6 +615,9 @@ class MiraclObj(BaseModel):
 
     flow: Optional[Dict[str, FlowOverride]] = None
 
+    # NOTE: Always set via the property, never via input_dirpath_field directly.
+    # The _field suffix is an implementation detail of the alias pattern and
+    # does not have setter protection! Maybe this NOTE should be changed to a FIX?
     input_dirpath_field: Optional[DirectoryPath] = Field(
         default=None, alias="input_dirpath"
     )
@@ -607,7 +638,9 @@ class MiraclObj(BaseModel):
 
     @property
     def dirpath(self) -> Optional[DirectoryPath]:
-        """Property for accessing the directory path."""
+        """
+        Property for accessing the directory path.
+        """
         return self.dirpath_field
 
     @dirpath.setter
@@ -621,7 +654,9 @@ class MiraclObj(BaseModel):
 
     @property
     def filepath(self) -> Optional[FilePath]:
-        """Property for accessing the file path."""
+        """
+        Property for accessing the file path.
+        """
         return self.filepath_field
 
     @filepath.setter
@@ -691,7 +726,7 @@ class MiraclObj(BaseModel):
             "cli.l_flag",
         )
 
-        # Validate overrides
+        # NOTE: Validate overrides
         if self.flow:
             for flow_name, override in self.flow.items():
                 if override.cli:
@@ -716,7 +751,7 @@ class MiraclObj(BaseModel):
             ValueError: If the flag is empty or contains invalid characters.
         """
 
-        # Skip validation for unset flags. Flags can be None for example when a method
+        # NOTE: Skip validation for unset flags. Flags can be None for example when a method
         # only has a short flag but no long flag.
         if flag_value is None:
             return
@@ -754,8 +789,8 @@ class MiraclObj(BaseModel):
         Raises:
             ValueError: If a required workflow entry is missing or configuration is invalid.
         """
-        final_cli = self.cli.model_copy()
-        final_gui = self.gui.model_copy() if self.gui else None
+        final_cli = self.cli.model_copy(deep=True)
+        final_gui = self.gui.model_copy(deep=True) if self.gui else None
         final_source = self.source
 
         if context != ModuleType.MODULE:
@@ -799,7 +834,7 @@ class MiraclObj(BaseModel):
         if final_source == ArgumentSource.INTERNAL:
             final_cli = final_cli.model_copy(
                 update={
-                    "help": argparse.SUPPRESS,
+                    "help": MIRACL_HIDE_HELP,
                     "required": False,
                 }
             )
@@ -809,6 +844,7 @@ class MiraclObj(BaseModel):
         if final_gui and final_gui.extensions:
             gui_extensions = final_gui.extensions.copy()
 
+        # Resolved object - beautiful!
         return ResolvedMiraclObj(
             id=self.id,
             name=self.name,
