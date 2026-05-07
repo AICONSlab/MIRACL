@@ -7,23 +7,23 @@ class CliGroup(Enum):
         "Args for TFCE stats method",
     )
     REG_CLAR_ALLEN = (
-        "registration",
+        "reg_clar_allen",
         "Args for CLARITY Allen image registration",
     )
     CONV_TIFF_NII = (
-        "conversion",
+        "conv_tiff_nii",
         "Args for image conversion from tiff to nifti",
     )
     MAPL3_GENERATE_PATCH = (
-        "generate patch",
+        "mapl3_gen_patch",
         "Args for generating patches from Z-stack .tif files",
     )
     MAPL3_PREPROCESSING_PARALLEL = (
-        "preprocessing parallel",
+        "mapl3_preproc_para",
         "Args for preprocessing RAW LSFM data in parallel",
     )
     MAPL3_INFERENCE = (
-        "inference",
+        "mapl3_inference",
         "Args for inference",
     )
     MAPL3_PATCH_STACKING = (
