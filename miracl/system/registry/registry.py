@@ -11,11 +11,13 @@ class MiraclRegistry:
     """
     Pure catalog/index of available MIRACL modules. All modules, either standalone or
     as part of a workflow will be registered into the registry and accessed only by
-    the registry introspector
+    the registry introspector.
     """
 
     def __init__(self):
-        """Initialize an empty registry catalog and meta config"""
+        """
+        Initialize an empty registry catalog and meta config
+        """
         self._registry: Dict[str, RegistryEntry] = {}
         self._meta: MetaConfig
 
