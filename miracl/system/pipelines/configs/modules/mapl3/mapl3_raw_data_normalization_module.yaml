@@ -1,0 +1,7 @@
+mapl3_raw_data_normalization:
+  script: "python /code/miracl/seg/mapl3/mapl3_raw_data_normalization.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_raw_data_normalization.RawDataNormalization"
+  module_type: "MODULE"
+  runner: "miracl.system.workflow.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: true

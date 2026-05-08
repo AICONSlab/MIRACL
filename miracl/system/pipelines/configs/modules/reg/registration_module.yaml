@@ -1,0 +1,7 @@
+reg_clar_allen:
+  script: "/code/miracl/reg/miracl_reg_clar-allen.sh"
+  obj_class: "miracl.system.objs.objs_reg.objs_clar_allen.objs_clar_allen_reg.ClarAllen"
+  module_type: "MODULE"
+  runner: "miracl.system.workflow.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: true

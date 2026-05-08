@@ -1,0 +1,7 @@
+mapl3_preproc_para:
+  script: "python /code/miracl/seg/mapl3/mapl3_preprocessing_parallel.py"
+  obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel.PreprocessingParallel"
+  module_type: "MODULE"
+  runner: "miracl.system.workflow.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: true

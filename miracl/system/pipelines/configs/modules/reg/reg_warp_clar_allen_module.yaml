@@ -1,0 +1,7 @@
+reg_warp_clar_allen:
+  script: "/code/miracl/reg/miracl_reg_warp_clar_data_to_allen.sh"
+  obj_class: "miracl.system.objs.objs_reg.objs_warp_clar_allen.objs_warp_clar_allen.WarpClarAllen"
+  module_type: "MODULE"
+  runner: "miracl.system.workflow.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: true
