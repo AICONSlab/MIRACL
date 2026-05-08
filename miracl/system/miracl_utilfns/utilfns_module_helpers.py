@@ -1,10 +1,20 @@
+"""
+Code created and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+
+Utility fns for MIRACL to facilitate workflow specific tasks.
+"""
+
 from pathlib import Path
-import os
 import re
 import shutil
+from miracl.system.logger import get_logger
+
+logger = get_logger(__name__)
 
 
-def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
+def create_ort2std_file(
+    tifdir: str, ortcode: str, target_dir: str, dev_mode: bool = False
+) -> Path:
     """
     Creates a configuration file named 'ort2std.txt' in the specified target directory.
 
@@ -23,6 +33,15 @@ def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
         PermissionError: If the program lacks permission to write to the `target_dir`.
         OSError: If writing the file fails due to other OS-related errors.
     """
+    if dev_mode:
+        logger.info(
+            "dev_mode=True: skipping ort2std file creation | tifdir=%s | ortcode=%s | target_dir=%s",
+            tifdir,
+            ortcode,
+            target_dir,
+        )
+        return Path(target_dir) / "ort2std.txt"
+
     ortcode_upper = ortcode.upper()
     pattern = r"^[A-Z]{3}$"
 
@@ -35,8 +54,9 @@ def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
     if not tifdir_path.is_dir():
         raise NotADirectoryError(f"Tiff folder path does not exist: {tifdir}")
 
-    if not os.access(tifdir_path, os.W_OK):
-        raise PermissionError(f"No write permission for directory: {tifdir}")
+    target_dir_path = Path(target_dir)
+    if not target_dir_path.is_dir():
+        raise NotADirectoryError(f"Target directory does not exist: {target_dir}")
 
     ort2std_file = Path(target_dir) / "ort2std.txt"
 
@@ -53,17 +73,33 @@ def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
 
     return ort2std_file
 
-def move_warping_reg_final_contents(output_dir: str) -> None:
+
+def move_warping_reg_final_contents(output_dir: str, dev_mode: bool = False) -> Path:
     """
     Move the contents of the 'reg_final' folder in the current working directory
     to a user-specified output directory and delete 'reg_final'.
 
+    This is currently required since the function doesn't have an output directory flag.
+
+    Note:
+        This should be changed to accept folder names instead of hardcoding 'reg_final'
+        i.e. make it a more reusable function not tied to only the warping script.
+
     Parameters:
-    - output_dir: str, path to move the contents of 'reg_final' to
+        output_dir: str, path to move the contents of 'reg_final' to.
+        dev_mode:   If True, skips all filesystem operations. Useful for testing
+                    when reg_final does not yet exist.
 
     Raises:
-    - FileNotFoundError: if 'reg_final' folder does not exist in the current working directory
+        FileNotFoundError: if 'reg_final' folder does not exist (non-dev mode only).
     """
+    if dev_mode:
+        logger.info(
+            "dev_mode=True: skipping reg_final move | output_dir=%s",
+            output_dir,
+        )
+        return Path(output_dir)
+
     output_dir_path: Path = Path(output_dir)
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
@@ -82,10 +118,12 @@ def move_warping_reg_final_contents(output_dir: str) -> None:
         )
 
     except FileNotFoundError as e:
-        raise FileNotFoundError("'ref_final' from warping is missing.") from e
+        raise FileNotFoundError("'reg_final' from warping is missing.") from e
+
     return output_dir_path
 
 
+# WARNING: This function is currently not imported anywhere. Dead code?
 def move_to_new_folder_and_rename(
     output_dir: str,
     input_file: str,
@@ -93,7 +131,6 @@ def move_to_new_folder_and_rename(
 ) -> None:
     """
     Move the specified file to a user-specified output directory and rename it.
-    Optionally, delete the 'reg_final' folder after the move operation.
 
     Parameters:
     - output_dir (str): Path to the output directory to move the file to.
