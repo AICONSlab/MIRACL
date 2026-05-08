@@ -1,143 +1,269 @@
 """
-Code written by Jonas Osmann. Contact at j.osmann@alumni.utoronto.ca or via
-https://github.com/AICONSlab/MIRACL/issues
+Code written and maintained by Jonas Osmann. Contact at j.osmann@alumni.utoronto.ca or
+via https://github.com/AICONSlab/MIRACL/issues
 
-loader_clean.py
-===============
+Declarative loader that registers modules listed in YAML config into registry.
+This is the base loader for the new MIRACL module system.
 
-Declarative YAML-to-registry loader for the new MIRACL module system.
-
-This module is the entry point for bootstrapping the MIRACL registry.
-It bridges the gap between human-readable YAML configuration files and the
-in-memory :class:`~miracl.system.registry.registry_refactor.registry_clean.MiraclRegistry`
+This module is super important (!!!) as it is the entry point for bootstrapping the
+MIRACL registry. It bridges the gap between human-readable YAML configuration
+files and the in-memory :class:`~miracl.system.registry.registry.MiraclRegistry`
 object that the rest of the system depends on at runtime.
 
-What this module does
----------------------
-This module has one job: it reads the YAML file that the dev declared and produces a
-populated :class:`~miracl.system.registry.registry_refactor.registry_clean.MiraclRegistry`
-(registry). The registry itself is a pure catalog. It only records what modules exist,
-where their classes live, which runner is associated with each, and what their
-flag maps declare. It does not execute anything or interpret the entries beyond storing
-them.
+This module deliberately only has one job: it reads the YAML file that the dev
+declared and produces a populated
+:class:`~miracl.system.registry.registry.MiraclRegistry` i.e. a registry. The
+registry itself is just a catalog and only a catalog. It only records what
+modules exist, where their classes live, which runner is associated with each,
+and what their flag maps declare. It does not execute anything or interpret the
+entries beyond storing them.
 
-Side note: Flag maps are mappings between the flags defined in the objects and
-their corresponding flags in the script that is being called. This is unfortunately
-necessary until all scripts have been ported into the new MIRACL architecture i.e.
-have all of their flags defined as Pydantic objects.
+Flag maps are mappings between the workflow-level flags defined in the
+:class:`~miracl.system.datamodels.miraclobj_datamodel.MiraclObj` flow overrides
+and the corresponding flags in the underlying script. Three declaration modes
+are supported in the YAML:
 
-Typical data flow
------------------
-::
+- ``flag_map: "autogenerate"`` derives the mapping automatically from
+  :attr:`~miracl.system.datamodels.miraclobj_datamodel.MiraclObj.flow`
+  overrides at load time. Use this for any module whose ``MiraclObj``
+  definitions are already fully ported to the new architecture.
+- ``flag_map: {}`` explicitly declares that this step requires no flag
+  translation (no mappings).
+- ``flag_map: {"--flow_flag": "--module_flag", ...}`` explicit manual
+  mapping. Use this as an escape hatch for scripts whose flags do not yet
+  match their ``MiraclObj`` definitions.
 
-    modules.yaml
-        |
-        V
-    load_registry_from_yaml()
-        |  validates the file path
-        |  parses YAML (safe_load — no arbitrary Python execution)
-        |  validates schema (Pydantic ModuleConfig)
-        |  dynamically imports obj_class + runner for each entry
-        |  enforces workflow-specific constraints (flag_map presence)
-        |  calls registry.register() for each entry
-        V
-    MiraclRegistry (in-memory catalog)
-        |
-        +--> consumed by downstream components (introspector, executor, etc.)
+Omitting ``flag_map`` entirely defaults to ``{}`` (no mappings) via Pydantic.
+This is intentionally NOT treated as ``"autogenerate"`` omission and
+auto-generation are different intents and should be stated explicitly.
 
-Module-level responsibilities
-------------------------------
-- Path validation (raises :exc:`FileNotFoundError` -> early rather than cryptically later)
-- YAML parsing (delegates to PyYAML's ``safe_load`` -> no arbitrary Python execution)
-- Schema validation (delegates to Pydantic's ``ModuleConfig``)
-- Dynamic import of ``obj_class`` and ``runner`` dotted paths
-- Enum coercion of ``module_type`` strings
-- Workflow-specific guard: ``FLOW_*`` modules **must** declare a ``flag_map``
-- Populating the registry via ``registry.register()``
+Note:
+    The flag map mechanism is transitional. Once all scripts are ported to
+    the new MIRACL architecture, workflow-level and module-level flags will
+    be identical and the flag map will be obsolete. At that point,
+    ``FlagMapMode``, ``_resolve_flag_map``, ``_auto_generate_flag_map``, and
+    the ``flag_map`` field on ``ModuleEntry``/``RegistryEntry`` can all be
+    removed.
 
-Adding a new module
--------------------
-To register a new module you only need to add an entry to the YAML configuration file
-e.g. ``modules.yaml``. No Python changes are required unless you are introducing a
-custom new module class or runner. The YAML schema is validated by
+A typical data flow looks as follows:
+    1) modules.yaml is defined by dev
+    2) load_registry_from_yaml()
+        - validates the file path
+        - parses YAML (safe_load, no arbitrary Python execution)
+        - validates schema (Pydantic ModuleConfig)
+        - dynamically imports obj_class + runner for each entry
+        - resolves flag_map via _resolve_flag_map()
+        - calls registry.register() for each entry i.e. registers the module
+    3) Created MiraclRegistry which is an in-memory catalog i.e. exists only
+       during program lifetime and is consumed by downstream components
+       (introspector, executor, etc.)
+
+To register a new module, a dev only needs to add an entry to the YAML
+configuration file e.g. ``modules.yaml``. No Python changes are required unless
+a custom new module class or runner is introduced. In that case, this needs to
+be done beforehand. The YAML schema is validated by
 :class:`~miracl.system.registry.schema_validators.config_schema.ModuleConfig`.
 """
 
+#######################################################################################
+# IMPORTS
+#######################################################################################
 import yaml
 import importlib
-from typing import Callable, Type
+from typing import Callable, Type, Tuple, Dict, Union
 from pathlib import Path
 
+from miracl.system.datamodels.miraclobj_datamodel import MiraclObj
+from miracl.system.datamodels.miraclobj_enums import ModuleType, FlagMapMode
 from miracl.system.registry.registry import MiraclRegistry
 from miracl.system.registry.schema_validators.config_schema import ModuleConfig
-from miracl.system.datamodels.miraclobj_enums import ModuleType
 from miracl.system.logger import get_logger
 
 logger = get_logger(__name__)
 
+#######################################################################################
+# YAML LOADER
+#######################################################################################
 
-# Private helpers
+
+class RegistryLoader(yaml.SafeLoader):
+    """
+    Custom YAML loader scoped to this module.
+
+    Subclassing SafeLoader rather than modifying it directly ensures that any
+    constructors registered here (e.g. for ``!include``) do not leak into the
+    global PyYAML registry and affect unrelated YAML parses elsewhere in the
+    process.
+
+    The ``!include`` constructor is registered per-call inside
+    :func:`load_registry_from_yaml` because it must be relative to the
+    directory of the YAML file being loaded, which is not known at import time.
+    """
+
+    pass
+
+
+#######################################################################################
+# PRIVATE HELPERS
+#######################################################################################
+
+
+def _auto_generate_flag_map(obj_class: Type, module_type: ModuleType) -> Dict[str, str]:
+    """
+    Derive an explicit ``flag_map`` from :class:`~miracl.system.datamodels.miraclobj_datamodel.MiraclObj`
+    flow overrides declared on ``obj_class``.
+
+    Inspects every :class:`~miracl.system.datamodels.miraclobj_datamodel.MiraclObj`
+    attribute of ``obj_class`` for a flow entry matching the given
+    ``module_type``. For each matching object, maps the workflow-level flag
+    (from the flow override) to the module-level flag (from the base CLI spec).
+
+    Pairings are mapped explicitly even when the workflow flag and the module
+    flag are identical, so the resulting dict is always the authoritative
+    source of truth for the runner regardless of whether a translation is
+    actually needed.
+
+    Note:
+        Uses :func:`vars` rather than :func:`dir` to iterate attributes.
+        ``vars()`` returns only attributes declared directly on ``obj_class``,
+        avoiding inherited dunder methods and parent class attributes that
+        would otherwise be included by ``dir()``.
+
+    :param obj_class: The class containing ``MiraclObj`` attribute definitions
+        for this module.
+    :type obj_class: Type
+
+    :param module_type: The workflow context to generate mappings for.
+        Only ``MiraclObj`` instances that declare a flow entry for this type
+        are included.
+    :type module_type: ModuleType
+
+    :returns: A ``dict`` mapping workflow-level flags (e.g. ``"--mi_config"``)
+        to module-level flags (e.g. ``"--config"``).
+    :rtype: Dict[str, str]
+    """
+    flag_map = {}
+    flow_key = module_type.value  # e.g. "mapl3"
+
+    for attr in vars(obj_class).values():
+        if not isinstance(attr, MiraclObj):
+            continue
+
+        if attr.cli.l_flag:
+            module_flag = "--" + attr.cli.l_flag
+        elif attr.cli.s_flag:
+            module_flag = "-" + attr.cli.s_flag
+        else:
+            continue
+
+        if not attr.flow or flow_key not in attr.flow:
+            continue
+
+        flow_override = attr.flow[flow_key]
+
+        workflow_flag = module_flag
+        if flow_override.cli:
+            if flow_override.cli.l_flag:
+                workflow_flag = "--" + flow_override.cli.l_flag
+            elif flow_override.cli.s_flag:
+                workflow_flag = "-" + flow_override.cli.s_flag
+
+        flag_map[workflow_flag] = module_flag
+
+    logger.debug(
+        "Auto-generated explicit flag_map | class=%s | mappings=%d",
+        obj_class.__name__,
+        len(flag_map),
+    )
+    return flag_map
+
+
+def _resolve_flag_map(
+    flag_map: Union[Dict[str, str], FlagMapMode],
+    obj_class: Type,
+    module_type: ModuleType,
+    module_name: str,
+) -> Dict[str, str]:
+    """
+    Resolve the final ``flag_map`` dict for a module given its declared mode.
+
+    Three modes are supported:
+
+    - :attr:`~miracl.system.datamodels.miraclobj_enums.FlagMapMode.AUTOGENERATE`
+      — derives the mapping automatically from
+      :class:`~miracl.system.datamodels.miraclobj_datamodel.MiraclObj` flow
+      overrides via :func:`_auto_generate_flag_map`.
+    - ``{}`` (empty dict) — no flag translation needed. Returned as-is.
+    - ``{"--flow_flag": "--module_flag", ...}`` — explicit manual mapping.
+      Returned as-is.
+
+    :param flag_map: The ``flag_map`` value from the validated
+        :class:`~miracl.system.registry.schema_validators.config_schema.ModuleEntry`.
+    :type flag_map: Union[Dict[str, str], FlagMapMode]
+
+    :param obj_class: The class containing ``MiraclObj`` definitions.
+        Only used when ``flag_map`` is ``FlagMapMode.AUTOGENERATE``.
+    :type obj_class: Type
+
+    :param module_type: The workflow context. Only used when ``flag_map`` is
+        ``FlagMapMode.AUTOGENERATE``.
+    :type module_type: ModuleType
+
+    :param module_name: The registry name of the module. Used only in log
+        messages.
+    :type module_name: str
+
+    :returns: The resolved ``flag_map`` dict, ready for storage in the
+        registry entry.
+    :rtype: Dict[str, str]
+    """
+    if flag_map is FlagMapMode.AUTOGENERATE:
+        logger.debug("Resolving flag_map via auto-generation | module=%s", module_name)
+        return _auto_generate_flag_map(obj_class, module_type)
+
+    return flag_map
+
+
 def _import_from_string(dotted_path: str) -> object:
     """
-    Dynamically import and return an attribute from a module using its dotted path.
+    Dynamically import and return an attribute from a module using its dotted
+    path. Chosen for this because it allows YAML config files to reference
+    Python classes and functions by name, as strings, without requiring
+    hardcoded imports at the top of this file. Intentionally kept generic so
+    that both ``obj_class`` and ``runner`` entries can be resolved through the
+    same code path.
 
-    This is the mechanism that allows YAML config files to reference Python
-    classes and functions by name (as strings) without requiring hard-coded
-    imports at the top of this file.  It is intentionally kept generic so that
-    both ``obj_class`` *and* ``runner`` entries can be resolved through the same
-    code path.
+    Example: Given ``"a.b.c.MyClass"``:
 
-    .. note::
-        I might have to rethink this design at some point in terms of separation of
-        concerns but for now I like the generic nature of it.
+    1. Split on the last dot: ``module_path = "a.b.c"``, ``attr_name = "MyClass"``.
+    2. ``importlib.import_module("a.b.c")`` — honours normal Python import rules.
+    3. ``getattr(module, "MyClass")`` — retrieves the class from the module.
 
-    How it works
-    ~~~~~~~~~~~~
-    Given a dotted path such as ``"a.b.c.MyClass"``:
+    Note:
+        Cannot traverse nested classes. This is by design since MIRACL's
+        ``obj_class`` entries are top-level classes by convention.
 
-    1. The string is split on the **last** dot separator, yielding
-       ``module_path = "a.b.c"`` and ``attr_name = "MyClass"``.
-    2. ``importlib.import_module("a.b.c")`` is called - this honours the normal
-       Python import method including ``sys.path``, ``__init__.py`` files,
-       namespace packages etc.
-    3. ``getattr(module, "MyClass")`` retrieves the class/function/constant from
-       the now-imported module object.
-
-    .. note::
-        The parser can currently not traverse nested classes. However, this is by
-        design since MIRACL's ``obj_classes`` entries are top level classes by convention.
-        Nested class traversal needs to be added to ``_import_from_string`` if that ever
-        becomes an issue.
-
-    Why ``rsplit(".", 1)`` and not ``split(".", 1)``?
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ``rsplit`` splits from the **right**, which correctly handles deeply nested
-    paths like ``"a.b.c.d.MyClass"`` - the module is everything up to the last
-    dot, and the attribute is what follows it. Using left-split would incorrectly give
-    ``module_path = "a"`` and ``attr_name = "b.c.d.MyClass"``.
-
-    .. note::
-        The right split method for the dotted notation also works because Python
-        classes can't have '.' in their names.
+    Note:
+        ``rsplit(".", 1)`` is used rather than ``split(".", 1)`` to correctly
+        handle deeply nested paths like ``"a.b.c.d.MyClass"``. Left-split would
+        incorrectly give ``module_path = "a"`` and
+        ``attr_name = "b.c.d.MyClass"``.
 
     :param dotted_path: A fully-qualified dotted Python path such as
-        ``'miracl.system.objs.objs_stats.objs_tfce.objs_tfce.TFCE'`` or
+        ``'miracl.system.objs.objs_stats.objs_tfce.TFCE'`` or
         ``'miracl.system.registry.runners.generic_runner.generic_runner'``.
     :type dotted_path: str
 
-    :returns: The imported class, function, or other module-level attribute
-        identified by ``dotted_path``.
+    :returns: The imported class, function, or other module-level attribute.
     :rtype: object
 
-    :raises ImportError: If the module portion of the path cannot be imported
-        (e.g. the package does not exist, or there is a syntax error inside it).
-    :raises AttributeError: If the module was imported successfully but does not
-        expose an attribute with the given name.
+    :raises ImportError: If the module portion of the path cannot be imported.
+    :raises AttributeError: If the module does not expose the named attribute.
 
     Examples::
 
         >>> TFCE = _import_from_string(
-        ...     "miracl.system.objs.objs_stats.objs_tfce.objs_tfce.TFCE"
+        ...     "miracl.system.objs.objs_stats.objs_tfce.TFCE"
         ... )
         >>> runner = _import_from_string(
         ...     "miracl.system.registry.runners.generic_runner.generic_runner"
@@ -155,246 +281,162 @@ def _import_from_string(dotted_path: str) -> object:
     return getattr(module, attr_name)
 
 
-def _parse_module_type(module_type_str: str, module_name: str) -> ModuleType:
+def _load_and_unwrap_shared_file(include_path: Path) -> Tuple[str, dict]:
     """
-    Convert a raw YAML string to the corresponding :class:`ModuleType` enum member.
+    Load a shared module YAML file, validate its structure, and return the declared
+    module name and its body dict.
 
-    YAML files store module types as plain strings (e.g. ``"MODULE"`` or
-    ``"FLOW_MAPL3"``).  This helper validates that the string matches a known
-    enum key and converts it, providing a clear error message when it doesn't.
+    A module YAML can be declared once and then imported (via ``!include`` or
+    ``$include``) into multiple workflow configs. This function is the single
+    authoritative validation point for both mechanisms, ensuring identical
+    structural checks regardless of which include syntax was used.
 
-    .. note::
-        As of the Pydantic-validated config path in :func:`load_registry_from_yaml`,
-        ``module_type`` is already coerced to a :class:`ModuleType` by the
-        ``ModuleEntry`` schema **before** this function is reached.  This helper
-        is therefore retained primarily for use in contexts where raw YAML dicts
-        are consumed directly (e.g. tests, CLI tooling, or future loaders that
-        bypass Pydantic).
+    :param include_path: Absolute path to the shared module YAML file.
+    :type include_path: Path
 
-    :param module_type_str: The raw string value read from YAML, expected to
-        match one of the :class:`ModuleType` enum member **names** (not values).
-        Example: ``"MODULE"``, ``"FLOW_MAPL3"``.
-    :type module_type_str: str
+    :returns: A tuple of ``(declared_name, body)`` where ``declared_name`` is
+        the single top-level key and ``body`` is the dict of module fields.
+    :rtype: Tuple[str, dict]
 
-    :param module_name: The name of the module being parsed.  Used only for
-        producing a human-friendly error message.
-    :type module_name: str
-
-    :returns: The :class:`ModuleType` enum member whose ``name`` matches
-        ``module_type_str``.
-    :rtype: ModuleType
-
-    :raises ValueError: If ``module_type_str`` does not correspond to any
-        :class:`ModuleType` member.  The exception message lists all valid
-        member names so the developer can fix the YAML without consulting the
-        source code.
-
-    Examples::
-
-        >>> _parse_module_type("MODULE", "tfce")
-        <ModuleType.MODULE: 'MODULE'>
-        >>> _parse_module_type("FLOW_MAPL3", "plot_warped_data")
-        <ModuleType.FLOW_MAPL3: 'FLOW_MAPL3'>
+    :raises FileNotFoundError: If the file does not exist.
+    :raises ValueError: If the file does not declare exactly one top-level key,
+        or if the body under that key is not a dict.
+    :raises yaml.YAMLError: If the file contains invalid YAML syntax.
     """
-    try:
-        return ModuleType[module_type_str]
-    except KeyError:
-        valid_types = ", ".join(e.name for e in ModuleType)
+    if not include_path.exists():
+        raise FileNotFoundError(f"Shared module file not found: {include_path}")
 
-        logger.error(
-            "Invalid module_type | module=%s | provided=%s | valid=%s",
-            module_name,
-            module_type_str,
-            valid_types,
-        )
+    logger.debug("Loading shared module file | path=%s", include_path)
 
+    with open(include_path, "r") as f:
+        content = yaml.load(f, Loader=RegistryLoader)
+
+    if not isinstance(content, dict) or len(content) != 1:
         raise ValueError(
-            f"Invalid module_type '{module_type_str}' for module '{module_name}'. Expected one of: {valid_types}"
+            f"Shared module file must declare exactly one top-level key (the module name). Got {len(content) if isinstance(content, dict) else type(content).__name__} top-level keys in: {include_path}"
         )
 
+    declared_name, body = next(iter(content.items()))
 
-def _validate_workflow_config(
-    module_name: str,
-    module_type: ModuleType,
-    flag_map: object,
-) -> None:
-    """
-    Assert that workflow modules declare a ``flag_map`` in their YAML config.
-
-    Background
-    ~~~~~~~~~~
-    ``MODULE`` type entries represent standalone tools that manage their own
-    argument parsing internally.  They do **not** need a ``flag_map`` because
-    the serializer does not need to translate workflow-level flags into
-    module-level flags for them.
-
-    ``FLOW_*`` type entries (e.g. ``FLOW_MAPL3``) are *steps inside a larger
-    workflow pipeline*.  The pipeline's argument parser exposes a unified CLI
-    surface, and the serializer uses ``flag_map`` to translate each pipeline-level
-    flag into the flag(s) that the underlying module actually understands.
-    Without ``flag_map`` being declared (even if empty), the serializer has no
-    mapping to work from, which would cause a silent no-op or a cryptic
-    ``KeyError`` deep inside the executor. As mentioned above, this is only true
-    while not all MIRACL modules have been ported to the new architecture. Once
-    that is done, the module parsers will be built on the same registrty as the
-    workflow parses hence automatically matching flags.
-
-    This validation runs after Pydantic has already confirmed the structural
-    schema, so it is purely a *semantic* guard.
-
-    :param module_name: Name of the module being validated (used in error messages).
-    :type module_name: str
-
-    :param module_type: The resolved :class:`ModuleType` enum value.
-    :type module_type: ModuleType
-
-    :param flag_map: The ``flag_map`` value extracted from the YAML entry.
-        For workflow modules this must not be ``None``. An empty dict ``{}``
-        is explicitly allowed (meaning "this step takes no flags from the
-        pipeline CLI").
-    :type flag_map: object
-
-    :raises ValueError: If ``module_type`` is not ``MODULE`` and ``flag_map``
-        is ``None`` (i.e. the key was entirely absent from the YAML and
-        Pydantic defaulted it to ``None``).
-
-    .. note::
-        ``flag_map`` is allowed to be an empty dict — the error is only raised
-        when the key is **completely absent** (``None``).  An empty dict is a
-        valid explicit declaration that the workflow step has no flag translations.
-    """
-    if module_type == ModuleType.MODULE:
-        return
-
-    if flag_map is None:
-        logger.error(
-            "Workflow module missing flag_map | module=%s | type=%s",
-            module_name,
-            module_type.name,
-        )
+    if not isinstance(body, dict):
         raise ValueError(
-            f"Workflow module '{module_name}' (type: {module_type.name}) must define a 'flag_map' in the YAML config. It can be empty (flag_map: {{}}) but cannot be omitted."
+            f"Module body under '{declared_name}' must be a key-value mapping "
+            f"in: {include_path}"
         )
 
+    return declared_name, body
 
-# Public API
+
+def _make_include_constructor(base_dir: Path) -> Callable:
+    """
+    Build a PyYAML constructor that resolves ``!include`` tags relative to
+    ``base_dir``.
+
+    Delegates all file loading and structural validation to
+    :func:`_load_and_unwrap_shared_file`. Injects ``_declared_name`` into the
+    returned body so :func:`load_registry_from_yaml` can validate it against
+    the key used in the parent YAML.
+
+    Use ``!include`` when importing a shared module with no field overrides.
+    Use ``$include`` (handled in :func:`load_registry_from_yaml`) when you
+    need to override specific fields for a given workflow.
+
+    :param base_dir: Absolute path to the directory containing the YAML file
+        being parsed. All ``!include`` paths are resolved relative to this.
+    :type base_dir: Path
+
+    :returns: A PyYAML constructor function compatible with
+        ``yaml.add_constructor``.
+    :rtype: Callable
+    """
+
+    def constructor(loader: yaml.SafeLoader, node: yaml.ScalarNode) -> dict:
+        include_path = base_dir / loader.construct_scalar(node)
+        declared_name, body = _load_and_unwrap_shared_file(include_path)
+        body["_declared_name"] = declared_name
+        return body
+
+    return constructor
+
+
+#######################################################################################
+# PUBLIC API
+#######################################################################################
 def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
     """
-    Parse a YAML configuration file and return a fully populated :class:`MiraclRegistry`.
+    Parse a YAML configuration file and return a fully populated
+    :class:`~miracl.system.registry.registry.MiraclRegistry`.
 
-    This is the primary public function of this module. Virtually all
-    production code that needs a registry (which eventually will be all production
-    code) should call this function (or a higher-level wrapper that calls it).
+    This is the primary public function of this module. All production code
+    that needs a registry should call this function or a higher-level wrapper
+    that calls it.
 
-    .. note::
-        The migration to the new architecture poses several challenges. MIRACL is
-        used in production so the refactoring can't break existing versions. The
-        refactoring is happening on a per module/workflow basis.
+    Note:
+        The migration to the new architecture is happening on a per-module /
+        per-workflow basis. MIRACL is used in production so the refactoring
+        cannot break existing versions.
 
-    What this function does step by step
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    1. **Path validation** - Converts ``yaml_path`` to a :class:`pathlib.Path`
-       and raises :exc:`FileNotFoundError` immediately if it does not exist.
-       This surfaces misconfiguration early rather than as an opaque I/O error
-       deep inside a pipeline run.
+    Performs the following steps in order:
 
-    2. **YAML parsing** - Reads the file with ``yaml.safe_load``. The
-       ``safe_load`` variant is used deliberately: it refuses to deserialise
-       arbitrary Python objects, preventing code execution from a config file
-       that hasn't been declared by MIRACL devs.
+    1. Path validation: raises :exc:`FileNotFoundError` immediately if
+       the file does not exist, surfacing misconfiguration before any
+       pipeline work begins.
 
-    3. **Schema validation** - Wraps the parsed dict in
+    2. YAML parsing: reads the file with :class:`RegistryLoader`, a
+       :class:`~yaml.SafeLoader` subclass. ``safe_load`` semantics prevent
+       arbitrary Python object deserialisation from config files. The
+       ``!include`` constructor is registered per-call so it is relative to
+       the directory of the file being loaded.
+
+    3. Pre-processing loop: resolves ``$include`` merges and validates
+       ``!include``-injected ``_declared_name`` metadata before Pydantic sees
+       the config dict.
+
+    4. Schema validation: wraps the pre-processed dict in
        :class:`~miracl.system.registry.schema_validators.config_schema.ModuleConfig`
-       (a Pydantic BaseModel). This step:
+       (Pydantic). Confirms required fields, coerces types, and enforces
+       semantic constraints (including the ``flag_map`` workflow requirement,
+       which is now a ``model_validator`` on ``ModuleEntry``).
 
-       * Confirms every required field (``script``, ``obj_class``,
-         ``module_type``, ``runner``) is present.
-       * Applies type coercions (e.g. ``module_type`` string -> ``ModuleType``
-         enum; ``execute`` absent -> ``False``; ``flag_map`` absent -> ``{}``).
-       * Raises a descriptive :exc:`ValueError` for any schema violation,
-         including the full Pydantic error detail.
+    5. Registration loop: for each module entry: dynamically imports
+       ``obj_class`` and ``runner``, resolves the ``flag_map`` via
+       :func:`_resolve_flag_map`, and calls
+       :meth:`~miracl.system.registry.registry.MiraclRegistry.register`.
 
-    4. **Dynamic import loop** - For each module entry:
-
-       a. Calls :func:`_import_from_string` twice. Once for ``obj_class``
-          (the class that holds ``MiraclObj`` field definitions) and once for
-          ``runner`` (the callable that executes the module).
-       b. Calls :func:`_validate_workflow_config` to enforce the ``flag_map``
-          requirement for workflow modules.
-       c. Calls :meth:`~MiraclRegistry.register` to add the entry to the
-          catalog.
-
-    5. **Logging** - Emits ``logger.success`` after all modules are registered,
-       reporting the total count. Individual modules streamed at ``INFO`` level but
-       to the console and log files to avoid flooding production logs meant for the
-       end user.
-
-    Design decisions
-    ~~~~~~~~~~~~~~~~
-    * **Pure catalog**: The registry built here stores *references* to classes
-      and functions.  It does not instantiate classes, invoke runners, or build
-      flag maps. Those are the introspector's, serializer's and executor's jobs,
-      respectively. This means the registry can be constructed at import time without
-      triggering any side effects.
-
-    * **Fail-fast**: All validation (path, schema, imports, workflow config)
-      happens in this function before any module is registered. A single
-      broken entry causes the entire load to fail with a clear error rather
-      than partially populating the registry and causing subtle runtime bugs.
-
-    * **Pydantic first**: Schema enforcement is delegated to Pydantic rather
-      than implemented with ad-hoc ``if key not in config`` guards. This means
-      automatic type coercions, default values, and rich error messages for free.
+    The registry is a pure catalog. It only stores references to classes and
+      functions. It does not instantiate classes, invoke runners, or build
+      flag maps. Those are the introspector's, serializer's, and executor's
+      jobs. All validation in the registry happens before any module is registered.
+      A single broken entry causes the entire load to fail and raises an error! Schema
+      enforcement is done with Pydantic.
 
     :param yaml_path: Absolute or relative path to the YAML file containing
-        module definitions. Example:
-        ``"/code/miracl/system/configs/modules.yaml"``.
+        module definitions.
     :type yaml_path: str
 
-    :returns: A :class:`MiraclRegistry` instance populated with one entry per
-        module defined in the YAML file. The registry is ready to be handed
-        to the registry introspector immediately.
+    :returns: A :class:`~miracl.system.registry.registry.MiraclRegistry`
+        instance populated with one entry per module defined in the YAML file.
     :rtype: MiraclRegistry
 
     :raises FileNotFoundError: If the file at ``yaml_path`` does not exist.
-    :raises yaml.YAMLError: If the file exists but contains invalid YAML syntax.
-    :raises ValueError: If:
-
-        * The YAML file is empty.
-        * The YAML structure fails Pydantic schema validation.
-        * A ``module_type`` string is not a valid :class:`ModuleType` name.
-        * A workflow module is missing its ``flag_map`` declaration.
-        * A module definition references an ``obj_class`` or ``runner`` that
-          cannot be imported (wrapped from :exc:`ImportError` /
-          :exc:`AttributeError`).
+    :raises yaml.YAMLError: If the file contains invalid YAML syntax.
+    :raises ValueError: If the YAML is empty, fails schema validation, or a
+        component (``obj_class``/``runner``) cannot be imported.
 
     Examples::
 
         >>> registry = load_registry_from_yaml(
         ...     "/code/miracl/system/configs/modules.yaml"
         ... )
-        >>> registry.list_modules(verbose=True)
-        Registered Modules (2 total):
-        ------------------------------------------------------------
-        * tfce
-            Type    : MODULE
-            ...
-        * plot_warped_data
-            Type    : FLOW_MAPL3
-            ...
-
-        >>> # Retrieve a registered entry for downstream use
-        >>> entry = registry.get("plot_warped_data")
+        >>> entry = registry.get("mapl3_inference")
         >>> entry["obj_class"]
-        <class 'miracl.system.objs.objs_flow.objs_mapl3.PlotWarpedData'>
+        <class 'miracl.system.objs.objs_flow.objs_mapl3.Inference'>
 
     .. seealso::
-        * :class:`~miracl.system.registry.registry_refactor.registry_clean.MiraclRegistry`
-          — the catalog object this function populates.
+        * :class:`~miracl.system.registry.registry.MiraclRegistry`
         * :class:`~miracl.system.registry.schema_validators.config_schema.ModuleConfig`
-          — the Pydantic model used for YAML schema validation.
         * :class:`~miracl.system.datamodels.miraclobj_enums.ModuleType`
-          — enum of valid module type identifiers.
+        * :class:`~miracl.system.datamodels.miraclobj_enums.FlagMapMode`
     """
     logger.info("Loading registry from YAML | path=%s", yaml_path)
 
@@ -405,10 +447,15 @@ def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
 
     logger.debug("Validated YAML path exists | path=%s", yaml_file)
 
-    with open(yaml_file, "r") as f:
-        config = yaml.safe_load(f)
+    RegistryLoader.add_constructor(
+        "!include",
+        _make_include_constructor(yaml_file.parent),
+    )
 
-    if not config:
+    with open(yaml_file, "r") as f:
+        config = yaml.load(f, Loader=RegistryLoader)
+
+    if not config or not isinstance(config, dict):
         logger.error("YAML file empty or invalid | path=%s", yaml_path)
         raise ValueError(f"YAML file is empty or invalid: {yaml_path}")
 
@@ -417,6 +464,44 @@ def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
         yaml_path,
         len(config),
     )
+
+    for module_name, module_entry in list(config.items()):
+        if module_name == "_meta" or not isinstance(module_entry, dict):
+            continue
+
+        if "flag_map" not in module_entry:
+            raise ValueError(
+                f"Module '{module_name}' is missing required 'flag_map'. Valid options: 'autogenerate', {{}} for no mappings, or an explicit mapping dict. Omission is not allowed."
+            )
+        if "$include" in module_entry:
+            rel_path = module_entry.pop("$include")
+            include_path = yaml_file.parent / rel_path
+
+            declared_name, base_body = _load_and_unwrap_shared_file(include_path)
+
+            if declared_name != module_name:
+                logger.error(
+                    "Module name mismatch | parent_key=%s | declared=%s",
+                    module_name,
+                    declared_name,
+                )
+                raise ValueError(
+                    f"Module name mismatch: parent YAML uses key '{module_name}' but shared file declares '{declared_name}'. Either rename the key in the parent YAML or update the shared file."
+                )
+
+            config[module_name] = {**base_body, **module_entry}
+            module_entry = config[module_name]
+
+        declared_name = module_entry.pop("_declared_name", None)
+        if declared_name is not None and declared_name != module_name:
+            logger.error(
+                "Module name mismatch | parent_key=%s | declared=%s",
+                module_name,
+                declared_name,
+            )
+            raise ValueError(
+                f"Module name mismatch: parent YAML uses key '{module_name}' but shared file declares '{declared_name}'. Either rename the key in the parent YAML or update the shared file."
+            )
 
     try:
         split = ModuleConfig.model_validate(config)
@@ -450,21 +535,28 @@ def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
         try:
             obj_class: Type = _import_from_string(module_config.obj_class)
             runner_func: Callable = _import_from_string(module_config.runner)
-            module_type: ModuleType = module_config.module_type
-            script: str = module_config.script
-            flag_map: dict = module_config.flag_map
-            execute: bool = module_config.execute
 
-            _validate_workflow_config(module_name, module_type, flag_map)
+            flag_map = _resolve_flag_map(
+                flag_map=module_config.flag_map,
+                obj_class=obj_class,
+                module_type=module_config.module_type,
+                module_name=module_name,
+            )
+
+            logger.debug(
+                "Resolved flag_map | module=%s | flag_map=%s",
+                module_name,
+                flag_map,
+            )
 
             registry.register(
                 name=module_name,
-                script=script,
+                script=module_config.script,
                 obj_class=obj_class,
-                module_type=module_type,
+                module_type=module_config.module_type,
                 runner=runner_func,
                 flag_map=flag_map,
-                execute=execute,
+                execute=module_config.execute,
             )
 
             registered_count += 1
@@ -472,19 +564,10 @@ def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
             logger.debug(
                 "Registered module | name=%s | type=%s | execute=%s",
                 module_name,
-                module_type.name,
-                execute,
+                module_config.module_type.name,
+                module_config.execute,
             )
 
-        except KeyError as e:
-            logger.error(
-                "Missing required field | module=%s | field=%s",
-                module_name,
-                str(e),
-            )
-            raise ValueError(
-                f"Module '{module_name}' is missing required field: {e}"
-            ) from e
         except (ImportError, AttributeError) as e:
             logger.error(
                 "Import failure | module=%s | error=%s",
@@ -502,69 +585,3 @@ def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
     )
 
     return registry
-
-
-# The function below would allow splitting module definitions across multiple
-# YAML files (e.g. stats.yaml, registration.yaml) and merging them into a
-# single registry. It is preserved here as a design reference for when
-# the module catalog grows large enough to warrant splitting.
-#
-# Key design points for when this is re-enabled:
-#   - It creates a fresh MiraclRegistry per YAML file via load_registry_from_yaml,
-#     leveraging all of the validation logic above.
-#   - It then checks for name collisions before merging, ensuring module names
-#     remain globally unique across all files.
-#   - The merge is a simple re-registration loop; no deep copying is needed
-#     because registry entries are immutable once registered.
-#
-# NOTE: This fn might need an update since I made a lot of changes to the above code
-#
-# def load_registry_from_multiple_yamls(yaml_paths: list[str]) -> MiraclRegistry:
-#     """
-#     Load a single registry from multiple YAML configuration files.
-#
-#     This is useful for organizing module definitions across multiple files
-#     (e.g., stats.yaml, registration.yaml, segmentation.yaml).
-#
-#     :param yaml_paths: List of paths to YAML configuration files.
-#     :type yaml_paths: list[str]
-#
-#     :returns: Single registry with modules from all files merged together.
-#     :rtype: MiraclRegistry
-#
-#     :raises ValueError: If module names conflict across files.
-#
-#     Examples::
-#
-#         >>> registry = load_registry_from_multiple_yamls([
-#         ...     "/code/miracl/configs/stats.yaml",
-#         ...     "/code/miracl/configs/registration.yaml",
-#         ... ])
-#     """
-#     combined_registry = MiraclRegistry()
-#
-#     for yaml_path in yaml_paths:
-#         temp_registry = load_registry_from_yaml(yaml_path)
-#
-#         # Check for conflicts before merging to avoid silently overwriting
-#         # an existing entry with a same-named one from a different file.
-#         for module_name in temp_registry.list_modules().keys():
-#             if combined_registry.has(module_name):
-#                 raise ValueError(
-#                     f"Module name conflict: '{module_name}' is defined in multiple "
-#                     f"YAML files. Each module must have a unique name."
-#                 )
-#
-#         # Merge by re-registering each entry from the temporary registry.
-#         for module_name, entry in temp_registry.list_modules().items():
-#             combined_registry.register(
-#                 name=module_name,
-#                 script=entry["script"],
-#                 obj_class=entry["obj_class"],
-#                 module_type=entry["module_type"],
-#                 runner=entry["runner"],
-#                 flag_map=entry["flag_map"],
-#                 execute=entry["execute"],
-#             )
-#
-#     return combined_registry
