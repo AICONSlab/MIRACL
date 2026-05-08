@@ -1,0 +1,148 @@
+name: "MAPL3"
+description: "Mapping Axonal Projections in Light-sheet Fluorescence Microscopy in 3D (MAPL3)"
+version: "1.0"
+
+vars:
+  base_res_dir: "ref:conns.mapl3_workflow_results_folder"
+  raw_autoflor_dir: "ref:conns.mapl3_workflow_raw_autoflor_tiff_folder"
+  raw_signal_dir: "ref:conns.mapl3_workflow_raw_signal_tiff_folder"
+  converted_nii: "pattern:{ref:vars.base_res_dir}/conv_final/{ref:conv.outnii}_{fn:dx_pad_zero('ref:conv.down')}x_down_{ref:conv.channame}_chan.nii.gz"
+  brain_mask_folder: "pattern:{ref:vars.base_res_dir}/reg_final/annotation_hemi_{ref:reg.hemi}_{ref:reg.voxel_size}um_tiff_clar"
+  clar_allen_reg_folder: "pattern:{ref:vars.base_res_dir}/clar_allen_reg"
+  generated_patches: "pattern:{ref:vars.base_res_dir}/generated_patches"
+  preprocessed: "pattern:{ref:vars.base_res_dir}/preprocessing_parallel"
+  inference_out_prob: "pattern:{ref:vars.base_res_dir}/inference/out_prob"
+  normalized_data: "pattern:{ref:vars.base_res_dir}/normalized_raw_data"
+  skeletonized_data: "pattern:{ref:vars.base_res_dir}/skeletonized"
+  patch_stacking_metadata_file: "pattern:{ref:vars.generated_patches}/metadata.json"
+  stacked_patches: "pattern:{ref:vars.base_res_dir}/stacked_patches"
+  voxelized_normalization: "pattern:{ref:vars.base_res_dir}/voxelized_normalization"
+  voxelized_skeletonization: "pattern:{ref:vars.base_res_dir}/voxelized_skeletonization"
+  norm_ort2std_file: "pattern:{ref:vars.voxelized_normalization}/ort2std.txt"
+  skel_ort2std_file: "pattern:{ref:vars.voxelized_skeletonization}/ort2std.txt"
+  heatmaps_dir: "pattern:{ref:conns.mapl3_workflow_results_folder}/heatmaps"
+  warped_results_dir: "pattern:{ref:conns.mapl3_workflow_results_folder}/warped_results"
+  vox_res_skel_file: "pattern:{ref:vars.warped_results_dir}/voxelized_results_mapl3_skel_channel_allen_space.nii.gz"
+  vox_res_norm_file: "pattern:{ref:vars.warped_results_dir}/voxelized_results_mapl3_norm_channel_allen_space.nii.gz"
+  annotation_hemi_split_lbl_10um: "pattern:/code/atlases/ara/annotation/annotation_hemi_{ref:reg.hemi}_{ref:reg.voxel_size}um.nii.gz"
+
+modules:
+  mapl3_workflow_connectors@conns: {}
+  conv_tiff_nii@conv: {}
+  reg_clar_allen@reg: {}
+  mapl3_gen_patch@gen_patch: {}
+  mapl3_preproc_para@preproc_para: {}
+  mapl3_inference@inference: {}
+  mapl3_patch_stacking@patch_stacking: {}
+  mapl3_raw_data_normalization@normalization: {}
+  mapl3_skeletonization@skeletonization: {}
+  mapl3_voxelization@norm_vox: {}
+  mapl3_voxelization@norm_skel: {}
+  reg_warp_clar_allen@warp_vox:
+    hooks:
+      pre_run:
+        - "fn:create_ort2std_file('ref:vars.raw_signal_dir', 'ref:reg.orient_code', 'ref:vars.voxelized_normalization', 'True')"
+      post_run:
+        - "fn:move_warping_reg_final_contents('pattern:{ref:vars.base_res_dir}/warped_results', 'True')"
+  reg_warp_clar_allen@warp_skel:
+    hooks:
+      pre_run:
+        - "fn:create_ort2std_file('ref:vars.raw_signal_dir', 'ref:reg.orient_code', 'ref:vars.voxelized_skeletonization', 'True')"
+      post_run:
+        - "fn:move_warping_reg_final_contents('pattern:{ref:vars.base_res_dir}/warped_results', 'True')"
+  mapl3_plot_warped_data@plot_warped_skel:
+    hooks:
+      pre_run:
+        - "fn:ensure_folder_exists('ref:vars.heatmaps_dir', 'True')"
+  mapl3_plot_warped_data@plot_warped_norm: {}
+  mapl3_feat_extract@feat_extract_skel: {}
+  mapl3_feat_extract@feat_extract_norm: {}
+
+execution_order:
+  - conns
+  - conv
+  - reg
+  - gen_patch
+  - preproc_para
+  - inference
+  - patch_stacking
+  - normalization
+  - skeletonization
+  - norm_vox
+  - norm_skel
+  - warp_vox
+  - warp_skel
+  - plot_warped_skel
+  - plot_warped_norm
+  - feat_extract_skel
+  - feat_extract_norm
+
+data_flow:
+  conns: {}
+  conv:
+    tiff_folder: "ref:vars.raw_autoflor_dir"
+    output_folder: "ref:vars.base_res_dir"
+  reg:
+    nii_folder: "ref:vars.converted_nii"
+    tiff_folder: "ref:vars.raw_autoflor_dir"
+    output_path: "ref:vars.base_res_dir"
+  gen_patch: 
+    input: "ref:vars.raw_signal_dir"
+    brain_mask: "ref:vars.brain_mask_folder"
+    out_dir: "ref:vars.base_res_dir"
+  preproc_para:
+    input: "ref:vars.generated_patches"
+    out_dir: "ref:vars.base_res_dir"
+  inference:
+    config: "literal:/code/miracl/seg/mapl3/config_finetune.yml"
+    input_dir: "ref:vars.preprocessed"
+    model_path: "literal:/code/miracl/seg/mapl3/models/best_metric_model.pth"
+    out_dir: "ref:vars.base_res_dir"
+  patch_stacking:
+    input_dir: "ref:vars.inference_out_prob" 
+    out_dir: "ref:vars.base_res_dir"
+    tiff_folder: "ref:vars.raw_signal_dir"
+    metadata_file: "ref:vars.patch_stacking_metadata_file"
+  normalization:
+    input_dir: "ref:vars.stacked_patches"
+    tiff_folder: "ref:vars.raw_signal_dir"
+    out_dir: "ref:vars.base_res_dir"
+    brain_mask: "ref:vars.brain_mask_folder"
+  skeletonization:
+    input_dir: "ref:vars.stacked_patches"
+    brain_mask: "ref:vars.brain_mask_folder"
+    out_dir: "ref:vars.base_res_dir"
+  norm_vox:
+    input_dir: "ref:vars.normalized_data"
+    out_dir: "ref:vars.voxelized_normalization"
+  norm_skel:
+    input_dir: "ref:vars.skeletonized_data"
+    out_dir: "ref:vars.voxelized_skeletonization"
+  warp_vox:
+    reg_dir: "ref:vars.clar_allen_reg_folder"
+    nii_folder: "pattern:{ref:vars.voxelized_normalization}/{ref:norm_vox.out_name}.nii.gz"
+    ort2std_file: "ref:vars.norm_ort2std_file"
+    seg_channel: "literal:mapl3_norm"
+  warp_skel:
+    reg_dir: "ref:vars.clar_allen_reg_folder"
+    nii_folder: "pattern:{ref:vars.voxelized_skeletonization}/{ref:norm_vox.out_name}.nii.gz"
+    ort2std_file: "ref:vars.skel_ort2std_file"
+    seg_channel: "literal:mapl3_skel"
+  plot_warped_skel:
+    pvalue: "ref:vars.vox_res_skel_file"
+    vox: "literal:25"
+    sigma: "literal:2"
+    dir_outfile: "ref:vars.heatmaps_dir"
+    outfile: "literal:heatmap_mapl3_skel"
+  plot_warped_norm:
+    pvalue: "ref:vars.vox_res_norm_file"
+    vox: "literal:25"
+    sigma: "literal:2"
+    dir_outfile: "ref:vars.heatmaps_dir"
+    outfile: "literal:heatmap_mapl3_norm"
+  feat_extract_skel:
+    seg: "ref:vars.vox_res_skel_file"
+    lbl: "ref:vars.annotation_hemi_split_lbl_10um"
+  feat_extract_norm:
+    seg: "ref:vars.vox_res_norm_file"
+    lbl: "ref:vars.annotation_hemi_split_lbl_10um"
