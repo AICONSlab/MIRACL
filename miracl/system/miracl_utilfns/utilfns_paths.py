@@ -1,38 +1,46 @@
+"""
+Code created and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+
+Utility fns for path validation stuff. Will probably grow beyond just validation.
+"""
+
 from pathlib import Path
-from miracl import miracl_logger
+from miracl.system.logger import get_logger
 
-
-logger = miracl_logger.logger
+logger = get_logger(__name__)
 
 
 class UtilfnsPaths:
     @staticmethod
-    def ensure_folder_exists(folder_path: Path) -> None:
+    def ensure_folder_exists(folder_path: Path, dev_mode: bool = False) -> None:
         """
         Check if a folder exists and create it if it doesn't.
 
-        This method checks for the existence of a folder at the specified path.
-        If the folder doesn't exist, it creates it along with any necessary
-        parent directories.
+        Args:
+            folder_path: A Path object representing the folder path.
+            dev_mode: If True, simulates the operation without creating the folder on
+                      disk. Useful for dry-run testing. Shows up in debug log msg.
 
-        :param folder_path: A Path object representing the folder path
-        :type folder_path: Path
-        :return: None
-        :rtype: None
-
-        :raises OSError: If the folder cannot be created due to permissions or other OS-level issues
-
-        :example:
-        >>> from pathlib import Path
-        >>> UtilfnsPaths.ensure_folder_exists(Path("/path/to/new/folder"))
-        Folder created: /path/to/new/folder
+        Raises:
+            PermissionError: If the folder cannot be created due to insufficient
+                permissions.
+            OSError: If the folder cannot be created for any other OS-level reason.
         """
+        if dev_mode:
+            logger.info(f"dev_mode=True | Skipping folder creation: {folder_path}")
+            return
+
         try:
             if not folder_path.exists():
                 folder_path.mkdir(parents=True, exist_ok=True)
                 logger.debug(f"Folder created: {folder_path}")
             else:
                 logger.debug(f"Folder already exists: {folder_path}")
+        except PermissionError as e:
+            logger.error(
+                f"Permission denied creating folder: {folder_path}. Error: {e}"
+            )
+            raise
         except OSError as e:
             logger.error(f"Failed to create folder: {folder_path}. Error: {e}")
             raise
@@ -41,14 +49,6 @@ class UtilfnsPaths:
     def ensure_file_exists(file_path: Path) -> None:
         """
         Check if a file exists at a file path.
-
-        This method checks for the existence of a file at the specified path.
-        If the file doesn't exist or can't be accessed, it throws an error.
-
-        :param file_path: A Path object representing the path to the file
-        :type file_path: Path
-        :return: None
-        :rtype: None
 
         :raises FileNotFoundError: If the file does not exist
         :raises OSError: If there's an issue accessing the file
