@@ -51,6 +51,7 @@ def create_ort2std_file(tifdir: str, ortcode: str, target_dir: str) -> None:
     except OSError as e:
         raise OSError(f"Failed to write file {ort2std_file}: {e.strerror}") from e
 
+    return ort2std_file
 
 def move_warping_reg_final_contents(output_dir: str) -> None:
     """
@@ -82,6 +83,7 @@ def move_warping_reg_final_contents(output_dir: str) -> None:
 
     except FileNotFoundError as e:
         raise FileNotFoundError("'ref_final' from warping is missing.") from e
+    return output_dir_path
 
 
 def move_to_new_folder_and_rename(
