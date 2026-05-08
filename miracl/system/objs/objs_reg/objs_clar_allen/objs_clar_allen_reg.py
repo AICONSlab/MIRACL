@@ -190,7 +190,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Labels voxel size (um)"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
                 order=10.0,
             )
         ),
@@ -230,7 +230,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Labels hemisphere"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
             )
         ),
         flow={
@@ -268,7 +268,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Allen labels to warp"],
-                widget_type=WidgetType.LINE_EDIT,
+                widget_type=WidgetType.PATH_INPUT,
             )
         ),
         flow={
@@ -301,12 +301,12 @@ class ClarAllen:
             l_flag="allen_atlas",
             obj_type=ArgumentType.STRING,
             help="custom Allen atlas (default: %(default)s)",
-            default="None",
+            default=None,
         ),
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Custom Allen atlas"],
-                widget_type=WidgetType.LINE_EDIT,
+                widget_type=WidgetType.PATH_INPUT,
             )
         ),
         flow={
@@ -345,7 +345,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Side"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["right hemisphere", "left hemisphere"],
@@ -387,7 +387,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Create mosaic figure"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["yes", "no"], default_val="yes"
@@ -424,14 +424,14 @@ class ClarAllen:
             s_flag="b",
             l_flag="olfactory_bulb",
             obj_type=ArgumentType.INTEGER,
-            help="include olfactory bulb in brain. '0' means no (default: %(default)s)",
+            help="include olfactory bulb in brain. '0' means 'not included' (default: %(default)s)",
             choices=[0, 1],
             default=0,
         ),
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Olfactory bulb incl."],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["not included", "included"], default_val="not included"
@@ -475,7 +475,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Utilfn intensity correction"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["run", "skip"], default_val="run"
@@ -519,7 +519,7 @@ class ClarAllen:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Warp CLARITY to Allen"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
                 props=GuiWidgetSpecifics(
                     choices=GuiChoiceOverrideConfig(
                         vals=["yes", "no"],
@@ -553,7 +553,7 @@ class ClarAllen:
             s_flag="n",
             l_flag="chan_num",
             obj_type=ArgumentType.STRING,
-            help="chan # for extracting single channel from multiple channel data (default: -999999)",
+            help="chan # for extracting single channel from multiple channel data (default: %(default)s)",
             default="-999999",
         ),
         gui=GuiNamespace(
@@ -593,7 +593,7 @@ class ClarAllen:
             s_flag="x",
             l_flag="chan_prefix",
             obj_type=ArgumentType.STRING,
-            help="chan prefix (string before channel number in file name). ex: C00 (default: -999999)",
+            help="chan prefix (string before channel number in file name). ex: C00 (default: %(default)s)",
             default="-999999",
         ),
         gui=GuiNamespace(
