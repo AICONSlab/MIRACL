@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from miracl import miracl_logger
+# import miracl_logger
 from miracl.flow import miracl_workflow_ace_parser
 from miracl.seg import ace_interface, miracl_instance_segmentation_interface
 from miracl.stats import miracl_stats_ace_interface, miracl_stats_ace_validate_clusters
@@ -1070,7 +1071,9 @@ class RegistrationChecker:
         -b {args.rca_olfactory_bulb} \
         -p {args.rca_skip_cor} \
         -w {args.rca_warp} \
-        -c {args.single}"
+        -c {args.single} \
+        -n {args.ctn_channum} \
+        -x {args.ctn_chanprefix}"
 
         return reg_cmd
 

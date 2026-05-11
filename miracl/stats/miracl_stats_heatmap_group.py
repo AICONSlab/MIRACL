@@ -26,7 +26,7 @@ from skimage import exposure, feature, filters, measure
 from sklearn.preprocessing import binarize
 
 from miracl import ATLAS_DIR
-from miracl.stats import reg_svg, stats_gui_heatmap_group
+from miracl.stats import reg_svg#, stats_gui_heatmap_group
 
 # Log errors to file in current working directory
 # FIX: Add output directory to path if provided as argument
@@ -207,6 +207,7 @@ def parse_inputs(parser, args):
     if sys.argv[-2] == 'stats' and sys.argv[-1] == 'heatmap_group':
         print("Running in GUI mode")
         # pass the results of the gui here
+        from miracl.stats import stats_gui_heatmap_group
         args = stats_gui_heatmap_group.main()
         if hasattr(args, "run") == False:
             print("Heatmap GUI Window was closed")

@@ -13,7 +13,6 @@ RUN rm -rf $(python -c "from distutils.sysconfig import get_python_lib; print(ge
 ENV MIRACL_HOME=/code/miracl
 ENV ATLASES_HOME=/code/atlases
 COPY ./utility_scripts /usr/bin
-RUN chmod o+x /usr/bin/download_sample_data
 
 # Point to g++-5 for NiftyReg compilation
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50 --slave /usr/bin/g++ g++ /usr/bin/g++-5
@@ -102,12 +101,86 @@ RUN wget -O /code/miracl/seg/models/unetr/best_metric_model.pth https://huggingf
     ls -l /code/miracl/seg/models/unetr
 
 ###############################################################################
+
+# Install UV and make available system wide
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv $HOME/.local/bin/uv* /usr/local/bin/
+
+###############################################################################
+
+# Install CLI utils if required
+RUN apt-get update && \
+    apt-get install -y pv && \
+    rm -rf /var/lib/apt/lists/*
+
+###############################################################################
 #--- Docker X11 forwarding directives ---
 
 #STARTUNCOMMENT#
 #STOPUNCOMMENT#
 
 ################################################################################
+
+USER root
+RUN mkdir -p /venvs && chown -R $USER:$USER /venvs
+USER $USER
+
+# Install Python 3.11 in a Conda venv and create Skeletonization venv
+RUN rm -rf /venvs/mapl3-skeletonization || true && \
+    rm -rf /venvs/python311 || true && \
+    cd /venvs && \
+    pwd && \
+    conda create -y -p /venvs/python311 python=3.11 && \
+    # export PATH="/venvs/python311/bin:$PATH" && \
+    uv init mapl3-skeletonization --python /venvs/python311/bin/python3.11 && \
+    cd mapl3-skeletonization && \
+    pwd && \
+    ls -l && \
+    uv add "cucim-cu12==25.4.0" \
+    "cupy-cuda12x==13.4.1" \
+    "cuvs-cu12==25.4.0" \
+    "pylibraft-cu12==25.4.0" \
+    "imagecodecs==2023.9.18" \
+    "joblib==1.4.2" \
+    "networkx==3.2.1" \
+    "numpy==1.26.3" \
+    "pandas==2.2.3" \
+    "scikit-image==0.22.0" \
+    "scipy==1.11.4" \
+    "tifffile==2023.12.9" \
+    "torch==2.4.0" \
+    "monai==1.2.0" \
+    "tqdm==4.67.3" \
+    "nibabel==5.4.2" \
+    "nilearn==0.13.1" \
+    "pyyaml==6.0.3" \
+    "mne==1.11.0" \
+    "seaborn==0.13.2"
+
+USER root
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    apt-get update && \
+    # apt-get install -y cuda-cudart-12-4 \
+    # cuda-nvrtc-12-4 \
+    # libcublas-12-4 \
+    # libcusolver-12-4 \
+    # libcusparse-12-4 \
+    # libcurand-12-4 && \
+    # apt-get install -y cuda-nvcc-12-4
+    apt-get install -y cuda-cudart-12-4=12.4.127-1 \
+    cuda-cudart-dev-12-4=12.4.127-1 \
+    cuda-nvrtc-12-4=12.4.127-1 \
+    libcublas-12-4=12.4.5.8-1 \
+    libcurand-12-4=10.3.5.147-1 \
+    libcusolver-12-4=11.6.1.9-1 \
+    libcusparse-12-4=12.3.1.170-1 && \
+    apt-get install -y cuda-nvcc-12-4=12.4.131-1
+
+
+
+USER $USER
+WORKDIR /home/$USER
 
 # Temporarily uncommented to allow interactive shell access to Docker container
 #ENTRYPOINT ["/opt/miniconda/bin/miracl"]

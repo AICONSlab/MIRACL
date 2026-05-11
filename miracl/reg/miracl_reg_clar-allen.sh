@@ -107,6 +107,8 @@ fi
 # Init atlas dir
 
 atlasdir=$(dirname ${MIRACL_HOME})/atlases
+cn = -999999
+cp = -999999
 
 # GUI for CLARITY input imgs
 

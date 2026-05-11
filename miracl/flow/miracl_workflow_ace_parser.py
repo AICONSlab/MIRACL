@@ -346,8 +346,8 @@ class ACEWorkflowParser:
         conv_args.add_argument(
             "-ctncn",
             "--ctn_channum",
-            type=int,
-            default=0,
+            type=str,
+            default="-999999",
             metavar="",
             help="Chan # for extracting single channel from multiple channel data (default: %(default)s)",
         )
@@ -356,7 +356,7 @@ class ACEWorkflowParser:
             "--ctn_chanprefix",
             type=str,
             metavar="",
-            default=None,
+            default="-999999",
             help="Chan prefix (string before channel number in file name). ex: C00",
         )
         conv_args.add_argument(

@@ -97,9 +97,9 @@ def parsefn():
         optional.add_argument('-w', '--work_dir', type=str, metavar='', default=os.path.abspath(os.getcwd()),
                               help="Output directory (default: working directory)")
         optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
-        optional.add_argument('-cn', '--channum', type=int, metavar='',
+        optional.add_argument('-cn', '--channum', type=str, metavar='', default="-999999",
                               help="Chan # for extracting single channel from multiple channel data (default: 0)")
-        optional.add_argument('-cp', '--chanprefix', type=str, metavar='',
+        optional.add_argument('-cp', '--chanprefix', type=str, metavar='', default="-999999",
                               help="Chan prefix (string before channel number in file name). ex: C00")
         optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")
         optional.add_argument('-o', '--outnii', type=str, metavar='',
@@ -205,18 +205,24 @@ def parse_inputs(parser, args):
             assert isinstance(args.down, int)
             d = args.down
 
-        if args.channum is None:
+        if args.channum is "-999999":
             chann = 0
             print("\n channel # not specified ... choosing default value of %d" % chann)
         else:
-            assert isinstance(args.channum, int)
-            chann = args.channum
+            if isinstance(args.channum, str):
+                chann = int(args.channum)
+            elif isinstance(args.channum, int):
+                chann = args.channum
+            else:
+                raise TypeError("Invalid type for channum. Must be int or string.")
+            # assert isinstance(args.channum, str)
+            # chann = args.channum
 
-            if args.chanprefix is None:
-                sys.exit('-cp (channel prefix) not specified ')
+            # if args.chanprefix is "-999999":
+            #     sys.exit('-cp (channel prefix) not specified ')
 
         # chanp = args.chanprefix if args.chanprefix is not None else None
-        chanp = args.chanprefix if args.chanprefix != "None" else None if args.chanprefix is not None else None
+        chanp = args.chanprefix if args.chanprefix != "-999999" else None
 
 
         if args.channame is None:
