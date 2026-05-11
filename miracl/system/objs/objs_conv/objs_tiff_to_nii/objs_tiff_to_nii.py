@@ -1,8 +1,6 @@
 from pathlib import Path
-from tkinter import Widget
 from miracl.system.enums.enums_base_modules import CliGroup
 
-# from miracl.system.datamodels.datamodel_miracl_objs_refactored import (
 from miracl.system.datamodels.miraclobj_datamodel import (
     MiraclObj,
     CLISpec,
@@ -13,7 +11,6 @@ from miracl.system.datamodels.miraclobj_datamodel import (
     GuiWidgetSpecifics,
     RangeFormConfig,
     LineEditConfig,
-    GuiChoiceOverrideConfig,
     FlowOverride,
     ArgumentType,
     WidgetType,
@@ -23,6 +20,8 @@ from miracl.system.datamodels.miraclobj_datamodel import (
 
 
 class ConvTiffNiiObjs:
+    _CONV_GROUP = CliGroup.CONV_TIFF_NII
+
     tiff_folder = MiraclObj(
         name="ctn_tiff_folder",
         module="tiff_nii",
@@ -41,7 +40,6 @@ class ConvTiffNiiObjs:
             base=GuiBase(
                 label=["TIFF input folder"],
                 widget_type=WidgetType.LINE_EDIT,
-                props=GuiWidgetSpecifics(range=RangeFormConfig(min_val=5.0)),
             ),
             extensions={"qt": {"placeholder_text": "Select folder"}},
         ),
@@ -79,7 +77,12 @@ class ConvTiffNiiObjs:
             help="Output directory (default: %(default)s)",
             default=Path.cwd(),
         ),
-        gui=GuiNamespace(base=GuiBase(label=["Results output folder"])),
+        gui=GuiNamespace(
+            base=GuiBase(
+                label=["Results output folder"],
+                widget_type=WidgetType.LINE_EDIT,
+            )
+        ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
@@ -119,18 +122,28 @@ class ConvTiffNiiObjs:
                 label=["Conversion dx"],
                 widget_type=WidgetType.SPINBOX,
                 order=8.0,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=1,
+                        max_val=100,
+                    )
+                ),
             )
         ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="actn_d", l_flag="actn_down", group=CliGroup.CONV_TIFF_NII
+                    s_flag="actn_d",
+                    l_flag="actn_down",
+                    group=CliGroup.CONV_TIFF_NII,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mctn_d", l_flag="mctn_down", group=CliGroup.CONV_TIFF_NII
+                    s_flag="mctn_d",
+                    l_flag="mctn_down",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -148,15 +161,20 @@ class ConvTiffNiiObjs:
             l_flag="channum",
             obj_type=ArgumentType.INTEGER,
             help="Chan # for extracting single channel from multiple channel data (default: %(default)s)",
-            default=0,
+            default=None,
         ),
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Channel #"],
-                widget_type=WidgetType.SPINBOX,
+                widget_type=WidgetType.LINE_EDIT,
                 props=GuiWidgetSpecifics(
-                    range=RangeFormConfig(min_val=0, max_val=10000, increment_val=1)
+                    text=LineEditConfig(
+                        input_restrictions=InputRestrictionType.INTEGERS_ONLY,
+                    )
                 ),
+                # props=GuiWidgetSpecifics(
+                #     range=RangeFormConfig(min_val=0, max_val=10000, increment_val=1)
+                # ),
             )
         ),
         flow={
@@ -172,7 +190,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_cn",
                     l_flag="mctn_channum",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -189,7 +207,7 @@ class ConvTiffNiiObjs:
             s_flag="cp",
             l_flag="chanprefix",
             obj_type=ArgumentType.STRING,
-            help="Chan prefix (string before channel number in file name). ex: C00",
+            help="Chan prefix (string before channel number in file name, not including channel #). ex: C00 (default: %(default)s)",
             default=None,
         ),
         gui=GuiNamespace(
@@ -214,7 +232,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_cp",
                     l_flag="mctn_chanprefix",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -256,7 +274,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_ch",
                     l_flag="mctn_channame",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -290,13 +308,17 @@ class ConvTiffNiiObjs:
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="actn_o", l_flag="actn_outnii", group=CliGroup.CONV_TIFF_NII
+                    s_flag="actn_o",
+                    l_flag="actn_outnii",
+                    group=CliGroup.CONV_TIFF_NII,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mctn_o", l_flag="mctn_outnii", group=CliGroup.CONV_TIFF_NII
+                    s_flag="mctn_o",
+                    l_flag="mctn_outnii",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -319,19 +341,31 @@ class ConvTiffNiiObjs:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Orig res in x-y plane (um)"],
-                widget_type=WidgetType.SPINBOX,
+                widget_type=WidgetType.DOUBLE_SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=0.000,
+                        max_val=1000.000,
+                        increment_val=0.1,
+                        nr_decimals=3,
+                    )
+                ),
             )
         ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="actn_vx", l_flag="actn_resx", group=CliGroup.CONV_TIFF_NII
+                    s_flag="actn_vx",
+                    l_flag="actn_resx",
+                    group=CliGroup.CONV_TIFF_NII,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mctn_vx", l_flag="mctn_resx", group=CliGroup.CONV_TIFF_NII
+                    s_flag="mctn_vx",
+                    l_flag="mctn_resx",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -354,19 +388,31 @@ class ConvTiffNiiObjs:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Orig thickness (um)"],
-                widget_type=WidgetType.SPINBOX,
+                widget_type=WidgetType.DOUBLE_SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=0.000,
+                        max_val=1000.000,
+                        increment_val=0.1,
+                        nr_decimals=3,
+                    )
+                ),
             )
         ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="actn_vz", l_flag="actn_resz", group=CliGroup.CONV_TIFF_NII
+                    s_flag="actn_vz",
+                    l_flag="actn_resz",
+                    group=CliGroup.CONV_TIFF_NII,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mctn_vz", l_flag="mctn_resz", group=CliGroup.CONV_TIFF_NII
+                    s_flag="mctn_vz",
+                    l_flag="mctn_resz",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -392,20 +438,26 @@ class ConvTiffNiiObjs:
                 label=["Nii center"],
                 widget_type=WidgetType.LINE_EDIT,
                 props=GuiWidgetSpecifics(
-                    text=LineEditConfig(input_restrictions=InputRestrictionType.INT)
+                    text=LineEditConfig(
+                        input_restrictions=InputRestrictionType.INTEGERS_ONLY,
+                    )
                 ),
             )
         ),
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="actn_c", l_flag="actn_center", group=CliGroup.CONV_TIFF_NII
+                    s_flag="actn_c",
+                    l_flag="actn_center",
+                    group=CliGroup.CONV_TIFF_NII,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mctn_c", l_flag="mctn_center", group=CliGroup.CONV_TIFF_NII
+                    s_flag="mctn_c",
+                    l_flag="mctn_center",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -429,7 +481,7 @@ class ConvTiffNiiObjs:
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Z-axis dx"],
-                widget_type=WidgetType.DROPDOWN,
+                widget_type=WidgetType.COMBO_BOX,
             )
         ),
         flow={
@@ -445,7 +497,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_dz",
                     l_flag="mctn_downzdim",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -469,6 +521,12 @@ class ConvTiffNiiObjs:
             base=GuiBase(
                 label=["Previous dx"],
                 widget_type=WidgetType.SPINBOX,
+                props=GuiWidgetSpecifics(
+                    range=RangeFormConfig(
+                        min_val=1,
+                        max_val=100,
+                    )
+                ),
             )
         ),
         flow={
@@ -484,7 +542,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_pd",
                     l_flag="mctn_prevdown",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -510,7 +568,10 @@ class ConvTiffNiiObjs:
                 widget_type=WidgetType.DOUBLE_SPINBOX,
                 props=GuiWidgetSpecifics(
                     range=RangeFormConfig(
-                        min_val=0.000, max_val=1.000, increment_val=0.01, nr_decimals=3
+                        min_val=0.000,
+                        max_val=1.000,
+                        increment_val=0.01,
+                        nr_decimals=3,
                     )
                 ),
             )
@@ -528,7 +589,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_pct",
                     l_flag="mctn_percentile_thr",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
