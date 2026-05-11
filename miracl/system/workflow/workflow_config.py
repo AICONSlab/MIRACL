@@ -20,6 +20,34 @@ from typing import Any, Dict, List, Optional
 # =====================================================================================
 
 
+class LifecycleHooks(BaseModel):
+    """
+    Container for lifecycle hook definitions.
+
+    Each hook type contains a list of DSL expression strings that will be evaluated
+    and executed at the corresponding point in the workflow lifecycle.
+
+    This feature is generally useful but is also needed as some MIRACL workflows can
+    be a bit hacky. Until we can refactor them all we need to be able to run actions
+    pre and post modules in the workflow.
+
+    The on_failure and on_success methods are also generally a good addition but can
+    also be used in the Graphviz/Dot visualization down the road.
+
+    Example YAML:
+        hooks:
+          pre_run:
+            - "fn:create_ort2std_file(...)"
+          post_run:
+            - "fn:move_results(...)"
+    """
+
+    pre_run: List[str] = Field(default_factory=list)
+    post_run: List[str] = Field(default_factory=list)
+    on_failure: List[str] = Field(default_factory=list)
+    on_success: List[str] = Field(default_factory=list)
+
+
 class ModuleInstanceConfig(BaseModel):
     """
     Single module instance in a workflow.
@@ -27,6 +55,7 @@ class ModuleInstanceConfig(BaseModel):
 
     type: str
     params: Dict[str, object] = Field(default_factory=dict)
+    hooks: LifecycleHooks = Field(default_factory=LifecycleHooks)
 
 
 class WorkFlowConfig(BaseModel):
@@ -58,7 +87,7 @@ class WorkFlowConfig(BaseModel):
         default_factory=dict,
         description="Connections between modules. Format: {'target_instance': {'target_variable': 'DSL expression string'}}. Important: the reference here is to the object name, NOT the name attribute of the object!",
     )
-    # Dedicated namespace for variable construction in workflow configs
+    # NOTE: Dedicated namespace for variable construction in workflow configs
     vars: Dict[str, Any] = Field(
         default_factory=dict,
         description="Workflow-level variables available to all data_flow expressions via ref:vars.<name>. Vars are evaluated after module defaults are populated but before data_flow, so they can reference CLI-provided module values. See ordering note in WorkflowResolver.resolve().",

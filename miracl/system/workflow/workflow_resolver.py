@@ -6,17 +6,11 @@ Workflow variable resolver for MIRACL pipelines.
 Takes a workflow configuration and registry metadata, then resolves all variable values
 for every module instance before execution.
 
-Resolution proceeds in four layers (later layers overwrite earlier ones):
-    1. Module defaults:       extracted from parsed module objects
-    2. Vars expressions:      evaluated against module defaults
-    3. External overrides:    injected by the caller (e.g. CLI args)
-    4. Data flow expressions: computed cross-module dependencies
+Each module instance gets its own namespace in a Context object, preventing accidental
+key collisions between instances.
 
-Each module instance gets its own namespace in a Context object, preventing
-accidental key collisions between instances.
-
-Used by WorkflowOrchestrator to prepare execution plans before module runners
-are invoked.
+Used by WorkflowOrchestrator to prepare execution plans before module runners are
+invoked.
 """
 
 # =====================================================================================
@@ -24,7 +18,7 @@ are invoked.
 # =====================================================================================
 
 from __future__ import annotations
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List, Tuple
 from miracl.system.workflow.workflow_dsl import (
     Context,
     Expression,
@@ -172,34 +166,92 @@ class WorkflowResolver:
         return set(parsed_module_objects[class_name].keys())
 
     @classmethod
-    def resolve(
+    def resolve_hooks(
+        cls,
+        hook_lists: Dict[str, List[str]],
+        context: Context,
+        cache: Dict[str, Any],
+    ) -> Dict[str, List[Any]]:
+        """
+        Evaluate lifecycle hook expressions against the namespaced context.
+
+        Hooks are evaluated immediately so that:
+        1. Errors in hooks are caught early (before module execution).
+        2. DSL expressions (ref:, pattern:, fn:) are resolved using the current
+           context.
+
+        Args:
+            hook_lists: Dict of hook_type -> list of DSL expression strings.
+                        e.g. {"pre_run": ["fn:create_file(...)"]}
+            context: The namespaced context with resolved variable values.
+            cache: Cache for DSL expression evaluation.
+
+        Returns:
+            Dict of hook_type -> list of evaluated results.
+            Note: For fn: calls, the return value is discarded but errors are raised.
+        """
+        VALID_HOOKS = {
+            "pre_run",
+            "post_run",
+            "on_failure",
+            "on_success",
+        }
+
+        resolved_hooks: Dict[str, List[Any]] = {k: [] for k in VALID_HOOKS}
+
+        for hook_type, hook_strings in hook_lists.items():
+            if hook_type not in VALID_HOOKS:
+                raise ValueError(
+                    f"Unknown hook type: '{hook_type}'. Valid hooks are: {sorted(VALID_HOOKS)}"
+                )
+
+            for hook_str in hook_strings:
+                node = parse_expression(hook_str)
+                node.evaluate(context, cache)
+
+        return resolved_hooks
+
+    @classmethod
+    def resolve_with_context(
         cls,
         parsed_module_objects: Dict[str, Dict[str, ResolvedMiraclObj]],
         parsed_registry_metadata: Dict[str, Any],
         workflow_config: Any,
         external_context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Dict[str, Any]]:
+    ) -> Tuple[Dict[str, Dict[str, Any]], Context]:
         """
-        Resolves all variable values for every module instance in the workflow.
+        Resolves all variable values for every module instance in the workflow, and
+        returns the fully populated Context alongside the flat resolved data.
 
-        The four resolution layers overwrite each other in order.
+        The Context is needed by callers that must evaluate DSL expressions after
+        resolution. Most importantly WorkflowOrchestrator._bake_hooks() which closes
+        over the Context to produce zero-arg hook callables while it is still alive.
+        Once plan generation is complete the Context is no longer needed and goes out
+        of scope.
+
+        Resolution proceeds in four layers (later layers overwrite earlier ones):
+            1. Module defaults:       extracted from parsed module objects.
+            2. Vars expressions:      evaluated against module defaults.
+            3. External overrides:    injected by the caller (e.g. CLI args).
+            4. Data flow expressions: computed cross-module dependencies.
 
         Args:
-            parsed_module_objects: Dict of class_name -> {var_name -> ResolvedMiraclObj}.
+            parsed_module_objects:    Dict of class_name -> {var_name -> ResolvedMiraclObj}.
             parsed_registry_metadata: Dict of module_type -> registry metadata.
-            workflow_config: WorkflowConfig with .modules, .execution_order, etc.
-            external_context: Optional overrides in "namespace.variable" dot-notation.
+            workflow_config:          WorkflowConfig with .modules, .execution_order, etc.
+            external_context:         Optional overrides in "namespace.variable" dot-notation.
 
         Returns:
-            Dict of instance_name -> {var_name -> resolved_value}.
+            Tuple of:
+                - Dict of instance_name -> {var_name -> resolved_value}
+                - Fully-populated Context, with one namespace per module instance
+                  plus an optional "vars" namespace.
 
         Raises:
             ValueError: On reserved namespace names or invalid overrides.
-
         """
         cache: Dict[str, Any] = {}
 
-        # Validate instance names
         cls._validate_instance_names(workflow_config)
 
         context = cls._build_context(
@@ -291,4 +343,44 @@ class WorkflowResolver:
 
             resolved_instances[instance_name] = instance_data
 
+        return resolved_instances, context
+
+    @classmethod
+    def resolve(
+        cls,
+        parsed_module_objects,
+        parsed_registry_metadata,
+        workflow_config,
+        external_context=None,
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Thin wrapper around resolve_with_context() for callers that only need
+        the flat resolved data and not the Context.
+
+        Preserves the original public API so existing callers are unaffected. Use
+        resolve_with_context() directly when the Context is needed after resolution,
+        such as for baking hook expressions into callables.
+
+        Note:
+            At some point I will go through all resolve() calls to change them to
+            resolve_with_context().
+
+        Args:
+            parsed_module_objects:    Dict of class_name -> {var_name -> ResolvedMiraclObj}.
+            parsed_registry_metadata: Dict of module_type -> registry metadata.
+            workflow_config:          WorkflowConfig with .modules, .execution_order, etc.
+            external_context:         Optional overrides in "namespace.variable" dot-notation.
+
+        Returns:
+            Dict of instance_name -> {var_name -> resolved_value}.
+
+        Raises:
+            ValueError: On reserved namespace names or invalid overrides.
+        """
+        resolved_instances, _ = cls.resolve_with_context(
+            parsed_module_objects,
+            parsed_registry_metadata,
+            workflow_config,
+            external_context,
+        )
         return resolved_instances

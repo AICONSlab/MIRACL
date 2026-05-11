@@ -46,9 +46,13 @@ class LazyFunctionRegistry(dict):
             import importlib
 
             try:
-                module_path, func_name = value.split(":")
+                # module_path, func_name = value.split(":")
+                module_path, attr_path = value.split(":")
                 module = importlib.import_module(module_path)
-                value = getattr(module, func_name)
+                # value = getattr(module, func_name)
+                value = module
+                for attr in attr_path.split("."):
+                    value = getattr(value, attr)
                 self[key] = value  # Neat little cache for resolved function
             except (ImportError, AttributeError) as e:
                 raise ImportError(
@@ -74,6 +78,8 @@ ALLOWED_FUNCTIONS = LazyFunctionRegistry(
         "join_strings": lambda items: "_".join(str(i) for i in items),
         "dx_pad_zero": lambda x: f"0{x}" if 0 <= x <= 9 else str(x),
         "create_ort2std_file": "miracl.system.miracl_utilfns.utilfns_module_helpers:create_ort2std_file",
+        "move_warping_reg_final_contents": "miracl.system.miracl_utilfns.utilfns_module_helpers:move_warping_reg_final_contents",
+        "ensure_folder_exists": "miracl.system.miracl_utilfns.utilfns_paths:UtilfnsPaths.ensure_folder_exists",
     }
 )
 

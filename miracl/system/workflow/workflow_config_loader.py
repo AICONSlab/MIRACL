@@ -30,11 +30,25 @@ class WorkFlowLoader:
         """
         Expand shorthand module definitions:
 
-        conversion@raw: {}
-        ->
-        raw:
-          type: conversion
-          params: {}
+            conversion@raw: {}
+            ->
+            raw:
+              type: conversion
+              params: {}
+
+            conversion@raw:           conversion@raw:
+              params:                   hooks:
+                down: 10         or       pre_run:
+            ->                              - "fn:create_ort2std_file(...)"
+            raw:                ->
+              type: conversion          raw:
+              params:                     type: conversion
+                down: 10                  hooks:
+                                            pre_run:
+                                              - "fn:create_ort2std_file(...)"
+
+        The value dict is unpacked as keyword arguments into ModuleInstanceConfig,
+        so any field defined on that model (params, hooks) is supported transparently.
         """
         logger.debug("Expanding workflow modules | raw_modules=%s", modules)
 
@@ -61,9 +75,13 @@ class WorkFlowLoader:
                 )
                 raise ValueError(f"Duplicate module instance name '{instance_name}'.")
 
+            # NOTE: When a module has no content ({}), value is None or {}. However,
+            # for a module with hooks, value is {"hooks": {"pre_run": [...], "post_run": [...]}}.
+            # The entire dict is being passed as params here, so that hooks is silently
+            # swallowed and ModuleInstanceConfig is constructed with empty hooks.
             expanded[instance_name] = ModuleInstanceConfig(
                 type=module_type,
-                params=value or {},
+                **(value or {}),
             )
             logger.debug(
                 "Created ModuleInstanceConfig | instance_name=%s | type=%s | params=%s | object=%s",

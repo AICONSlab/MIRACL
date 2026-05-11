@@ -13,7 +13,7 @@ Use PythonPlan for direct Python function calls.
 # =====================================================================================
 
 from __future__ import annotations
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Dict
 from pydantic import BaseModel, Field
 
 # =====================================================================================
@@ -47,6 +47,9 @@ class CommandPlan(BaseModel):
     execute: bool = Field(
         description="Whether to actually run the plan or just prepare it (dry-run)",
     )
+    hooks: Dict[str, List[Callable]] = Field(
+        default_factory=dict, description="Pre-baked zero-arg hook callables"
+    )
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -75,6 +78,9 @@ class PythonPlan(BaseModel):
     )
     execute: bool = Field(
         description="Whether to actually run the plan or just prepare it (dry-run)",
+    )
+    hooks: Dict[str, List[Callable]] = Field(
+        default_factory=dict, description="Pre-baked zero-arg hook callables"
     )
 
     model_config = {"arbitrary_types_allowed": True}
