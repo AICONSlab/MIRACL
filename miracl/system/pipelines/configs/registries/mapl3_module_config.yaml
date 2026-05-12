@@ -59,7 +59,7 @@ mapl3_workflow_connectors: !include ../modules/mapl3/mapl3_workflow_connectors_m
 conv_tiff_nii: 
   $include: ../modules/conv/conversion_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map: "autogenerate"
+  flag_map: "autogenerate_long"
     # "--mctn_folder": "--folder"
     # "--mctn_work_dir": "--work_dir"
     # "--mctn_down": "--down"
@@ -99,7 +99,7 @@ reg_clar_allen:
 mapl3_gen_patch:
   $include: ../modules/mapl3/mapl3_generate_patch_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map: "autogenerate"
+  flag_map: "autogenerate_long"
     # "--mpg_input": "--input"
     # "--mpg_brain_mask": "--brain_mask"
     # "--mpg_out_dir": "--out_dir"
