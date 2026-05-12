@@ -68,6 +68,7 @@ be done beforehand. The YAML schema is validated by
 #######################################################################################
 # IMPORTS
 #######################################################################################
+from multiprocessing.sharedctypes import Value
 import yaml
 import importlib
 from typing import Callable, Type, Tuple, Dict, Union
@@ -108,7 +109,31 @@ class RegistryLoader(yaml.SafeLoader):
 #######################################################################################
 
 
-def _auto_generate_flag_map(obj_class: Type, module_type: ModuleType) -> Dict[str, str]:
+def _pick_flag(cli, mode: FlagMapMode, context: str) -> str:
+    """
+    Extract the correct flag string from a CLI spec according to mode. Raises ValueError
+    if the requested flag type is not defined in object and therefore probably not
+    defined in the respective script.
+    """
+    if mode is FlagMapMode.AUTOGENERATE_SHORT:
+        if not cli.s_flag:
+            raise ValueError(
+                "autogenerate_short selected but the module-side `{context}' has no short flag attribute 's_flag'. You could either create short flags to the module or switch to 'autogenerate_long'."
+            )
+        return "-" + cli.s_flag
+    else:  # AUTOGENERATE_LONG
+        if not cli.l_flag:
+            raise ValueError(
+                "autogenerate_long selected but module-side `{context}' has no long flag attribute 'l_flag'. You could either create module long flags or switch to 'autogenerate_short'."
+            )
+        return "--" + cli.l_flag
+
+
+def _auto_generate_flag_map(
+    obj_class: Type,
+    module_type: ModuleType,
+    mode: FlagMapMode,
+) -> Dict[str, str]:
     """
     Derive an explicit ``flag_map`` from :class:`~miracl.system.datamodels.miraclobj_datamodel.MiraclObj`
     flow overrides declared on ``obj_class``.
@@ -145,28 +170,44 @@ def _auto_generate_flag_map(obj_class: Type, module_type: ModuleType) -> Dict[st
     flag_map = {}
     flow_key = module_type.value  # e.g. "mapl3"
 
-    for attr in vars(obj_class).values():
+    for attr_name, attr in vars(obj_class).items():
         if not isinstance(attr, MiraclObj):
             continue
 
-        if attr.cli.l_flag:
-            module_flag = "--" + attr.cli.l_flag
-        elif attr.cli.s_flag:
-            module_flag = "-" + attr.cli.s_flag
-        else:
-            continue
+        context = f"attribute '{attr_name}' on '{obj_class.__name__}'"
+        module_flag = _pick_flag(attr.cli, mode, context)
+
+        # for attr in vars(obj_class).values():
+        #     if not isinstance(attr, MiraclObj):
+        #         continue
+        #
+        #     if attr.cli.l_flag:
+        #         module_flag = "--" + attr.cli.l_flag
+        #     elif attr.cli.s_flag:
+        #         module_flag = "-" + attr.cli.s_flag
+        #     else:
+        #         continue
 
         if not attr.flow or flow_key not in attr.flow:
             continue
 
         flow_override = attr.flow[flow_key]
-
         workflow_flag = module_flag
+
         if flow_override.cli:
-            if flow_override.cli.l_flag:
-                workflow_flag = "--" + flow_override.cli.l_flag
-            elif flow_override.cli.s_flag:
-                workflow_flag = "-" + flow_override.cli.s_flag
+            flow_context = f"flow override for '{attr_name}' on {obj_class.__name__}'"
+            if not flow_override.cli.l_flag:
+                raise ValueError(
+                    "Missing required long flag (l_flag) for '{flow_context}'. Workflow side flag map keys must always be long flags."
+                )
+            workflow_flag = "--" + flow_override.cli.l_flag
+            # workflow_flag = _pick_flag(flow_override.cli, mode, flow_context)
+
+        # if flow_override.cli:
+        #     if flow_override.cli.l_flag:
+        #         workflow_flag = "--" + flow_override.cli.l_flag
+        #     elif flow_override.cli.s_flag:
+        #         workflow_flag = "-" + flow_override.cli.s_flag
 
         flag_map[workflow_flag] = module_flag
 
@@ -217,9 +258,13 @@ def _resolve_flag_map(
         registry entry.
     :rtype: Dict[str, str]
     """
-    if flag_map is FlagMapMode.AUTOGENERATE:
-        logger.debug("Resolving flag_map via auto-generation | module=%s", module_name)
-        return _auto_generate_flag_map(obj_class, module_type)
+    if isinstance(flag_map, FlagMapMode):
+        logger.debug(
+            "Resolving flag_map via auto-generation | module=%s | mode=%s",
+            module_name,
+            flag_map.value,
+        )
+        return _auto_generate_flag_map(obj_class, module_type, mode=flag_map)
 
     return flag_map
 

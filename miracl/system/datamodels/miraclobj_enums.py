@@ -30,6 +30,7 @@ class ModuleType(str, Enum):
         MODULE: Standalone module execution via CLI or GUI.
         FLOW_ACE: Module executed as part of the ACE workflow.
         FLOW_MAPL3: Module executed as part of the MAPL3 workflow.
+        FLOW_CONV_REG: Module executed as part othe Conversion/Registration workflow.
 
     Note:
         All new modules or workflows must be registered here before use.
@@ -38,6 +39,7 @@ class ModuleType(str, Enum):
     MODULE = "module"
     FLOW_ACE = "ace"
     FLOW_MAPL3 = "mapl3"
+    FLOW_CONV_REG = "conv_reg"
 
 
 class FlagMapMode(str, Enum):
@@ -49,7 +51,8 @@ class FlagMapMode(str, Enum):
     flags.
     """
 
-    AUTOGENERATE = "autogenerate"
+    AUTOGENERATE_LONG = "autogenerate_long"
+    AUTOGENERATE_SHORT = "autogenerate_short"
 
 
 class ArgumentType(str, Enum):
