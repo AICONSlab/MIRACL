@@ -250,8 +250,15 @@ class PlotWarpedData:
         ),
         gui=GuiNamespace(
             base=GuiBase(
-                label=["Sagittal axis"],
-                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                label=[
+                    "Sagittal axis",
+                    "Start",
+                    "Interval",
+                    "# slices",
+                    "# row",
+                    "# col",
+                ],
+                widget_type=WidgetType.MULTI_LINE_EDIT,
                 order=1.0,
             )
         ),
@@ -290,8 +297,15 @@ class PlotWarpedData:
         ),
         gui=GuiNamespace(
             base=GuiBase(
-                label=["Coronal axis"],
-                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                label=[
+                    "Coronal axis",
+                    "Start",
+                    "Interval",
+                    "# slices",
+                    "# row",
+                    "# col",
+                ],
+                widget_type=WidgetType.MULTI_LINE_EDIT,
                 order=1.0,
             )
         ),
@@ -330,8 +344,15 @@ class PlotWarpedData:
         ),
         gui=GuiNamespace(
             base=GuiBase(
-                label=["axial axis"],
-                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                label=[
+                    "Axial axis",
+                    "Start",
+                    "Interval",
+                    "# slices",
+                    "# row",
+                    "# col",
+                ],
+                widget_type=WidgetType.MULTI_LINE_EDIT,
                 order=1.0,
             )
         ),
@@ -357,15 +378,15 @@ class PlotWarpedData:
             s_flag="f",
             l_flag="figure_dim",
             obj_type=ArgumentType.LIST,
-            help="figure width and height (default: None)",
+            help="figure width and height (default: %(default)s)",
             required=False,
             default=[float("nan"), float("nan")],
             nargs=2,
         ),
         gui=GuiNamespace(
             base=GuiBase(
-                label=["Figure w and h"],
-                widget_type=WidgetType.LINE_EDIT,  # NOTE: inherited from original; likely should be MULTI_INPUT
+                label=["Figure dims", "Width", "Height"],
+                widget_type=WidgetType.MULTI_LINE_EDIT,
                 order=1.0,
             )
         ),
