@@ -147,26 +147,44 @@ def run_mul(parser, args):
         )
 
 
+# def run_ace(parser, args):
+#     # if sys.argv[-2] == "flow" and sys.argv[-1] == "ace":
+#     #     from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
+#     #     miracl_workflow_ace_gui_controller.main()
+#     # else:
+#     venv_python = "/venvs/mapl3-skeletonization/.venv/bin/python3.11"
+#     project_root = "/code"
+#     # Create the environment for the subprocess
+#     my_env = os.environ.copy()
+#     my_env["PYTHONPATH"] = project_root
+#     # Run the command
+#     _ = subprocess.run(
+#       # [venv_python, "-c", "from miracl.flow.miracl_workflow_ace_interface import main; main(args)"],
+#       # [venv_python, "-m", "miracl.flow.miracl_workflow_ace_interface"],
+#         [venv_python, "-m", "miracl.flow.miracl_workflow_ace_interface", "--single", "/test_data/Ex_561_Em_600_stitched/", "--sa_output_folder", "/output_dir", "--sa_model_type", "unet", "--rca_orient_code", "ARI", "--sa_resolution", "3.5", "3.5", "4.0", "--ctn_down", "10", "--rca_voxel_size", "25", "--ctn_channame", "Signal", "--sa_batch_size", "2"],
+# 
+#         #[venv_python, "--version"],
+#         env=my_env,
+#         capture_output=False,  # This captures stdout and stderr so they don't just print to terminal
+#         text=True             # This makes the output readable strings instead of bytes
+#     )
+#     # miracl_workflow_ace_interface.main(args)
+# 
+
 def run_ace(parser, args):
-    if sys.argv[-2] == "flow" and sys.argv[-1] == "ace":
-        from miracl.flow.ace_gui import miracl_workflow_ace_gui_controller
-        miracl_workflow_ace_gui_controller.main()
-    else:
-        venv_python = "/venvs/mapl3-skeletonization/.venv/bin/python3.11"
-        project_root = "/code"
-        # Create the environment for the subprocess
-        my_env = os.environ.copy()
-        my_env["PYTHONPATH"] = project_root
-        # Run the command
-        _ = subprocess.run(
-            [venv_python, "-c", "from miracl.flow.miracl_workflow_ace_interface import main; main(args)"],
-            env=my_env,
-            capture_output=True,  # This captures stdout and stderr so they don't just print to terminal
-            text=True             # This makes the output readable strings instead of bytes
-        )
-        # miracl_workflow_ace_interface.main(args)
+    venv_python = "/venvs/mapl3-skeletonization/.venv/bin/python3.11"
+    project_root = "/code"
 
+    my_env = os.environ.copy()
+    my_env["PYTHONPATH"] = project_root
 
+    # Reconstruct CLI args
+    cli_args = sys.argv[3:]  # skip "miracl flow ace"
+
+    subprocess.run(
+        [venv_python, "-m", "miracl.flow.miracl_workflow_ace_interface"] + cli_args,
+        env=my_env,
+    )
 
 def get_parser():
     parser = argparse.ArgumentParser()
