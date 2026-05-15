@@ -1,13 +1,13 @@
 version: "3.3"
 services:
   miracl:
-    image: miracl_cho_conv_img:latest
+    image: miracl_cho_force_lab_img:latest
     tty: true
     environment:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: miracl_cho_conv
+    container_name: miracl_cho_force_lab
     shm_size: 109216mb
     deploy:
       resources:

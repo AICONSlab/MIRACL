@@ -107,8 +107,8 @@ fi
 # Init atlas dir
 
 atlasdir=$(dirname ${MIRACL_HOME})/atlases
-cn = -999999
-cp = -999999
+channum="-999999"
+chanprefix="-999999"
 
 # GUI for CLARITY input imgs
 
@@ -188,11 +188,11 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
       ;;
 
     n)
-      cn="${OPTARG}"
+      channum="${OPTARG}"
       ;;
 
     x)
-      cp="${OPTARG}"
+      chanprefix="${OPTARG}"
       ;;
 
     *)
@@ -444,8 +444,8 @@ printf "l: Allen labels to warp: %s\n" "${lbls}"
 printf "p: Prebias: %s\n" "${prebias}"
 printf "f: Save Mosaic figure: %s\n" "${savefig}"
 printf "w: Warp high-res clarity to Allen space: %s\n" "${warphres}"
-printf "n: Channel #: %s\n" "${cn}"
-printf "x: Channel prefix: %s\n" "${cp}"
+printf "n: Channel #: %s\n" "${channum}"
+printf "x: Channel prefix: %s\n" "${chanprefix}"
 printf "\n######################################################\n"
 
 # get time
@@ -883,12 +883,12 @@ function warpallenlbls() {
   # get num slices (z dim)
   orgclar=$(realpath "${orgclar}")
 
-  if [[ "${cn}" == "-999999" && "${cp}" == "-999999" ]]; then
+  if [[ "${channum}" == "-999999" && "${chanprefix}" == "-999999" ]]; then
     orgclarz=$(ls "${orgclar}"/*.tif* | wc -l)
     firstslice="${orgclar}/$(ls "${orgclar}" | head -n1)"
   else
     find_channel_files() {
-      local channel_pattern="${cp}${cn}"
+      local channel_pattern="${chanprefix}${channum}"
       find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
     }
 
