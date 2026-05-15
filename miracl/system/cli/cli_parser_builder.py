@@ -85,7 +85,7 @@ class MiraclCLIBuilder:
         parts = []
 
         if meta.experimental:
-            parts.append("[EXPERIMENTAL]")
+            parts.append("[EXPERIMENTAL]\n\n")
 
         if meta.deprecated:
             parts.append(f"[DEPRECATED: {meta.deprecation_message}]")
@@ -113,18 +113,25 @@ class MiraclCLIBuilder:
 
         runtime_parts = []
         if meta.estimated_runtime:
-            runtime_parts.append(f"Runtime : {meta.estimated_runtime}")
+            runtime_parts.append(f"Runtime        : {meta.estimated_runtime}")
         if meta.min_memory_gb:
-            runtime_parts.append(f"Memory  : {meta.min_memory_gb}")
+            runtime_parts.append(f"Memory         : {meta.min_memory_gb}")
         if meta.requires_gpu:
-            runtime_parts.append("GPU     : required")
+            runtime_parts.append("GPU            : Required")
         if meta.version:
-            runtime_parts.append(f"Version : {meta.version}")
+            runtime_parts.append(f"Method version : {meta.version}")
+        if meta.miracl_version:
+            runtime_parts.append(f"MIRACL version : {meta.miracl_version}")
         if runtime_parts:
             parts.append("\n" + "\n".join(runtime_parts))
 
+        nl = "\n"
+        if meta.test_data:
+            parts.append(f"\nTest data             : {meta.test_data}")
         if meta.docs_url:
-            parts.append(f"\nFor more details, see: {meta.docs_url}")
+            parts.append(
+                f"{'' if meta.test_data else nl}For more details, see : {meta.docs_url}"
+            )
 
         return "\n".join(parts) if parts else None
 
