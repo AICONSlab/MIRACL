@@ -16,22 +16,10 @@ def create_ort2std_file(
     tifdir: str, ortcode: str, target_dir: str, dev_mode: bool = False
 ) -> Path:
     """
-    Creates a configuration file named 'ort2std.txt' in the specified target directory.
+    Creates a configuration file named ort2std.txt in the specified target directory.
 
-    The file contains two lines with the keys 'tifdir' and 'ortcode' set to the provided
+    The file contains two lines with the keys tifdir and ortcode set to the provided
     TIFF directory path and the uppercase orientation code, respectively.
-
-    Args:
-        tifdir (str): Path to the TIFF directory. Must exist and be a directory.
-        ortcode (str): Orientation code string. Must be exactly three alphabetic characters.
-        target_dir (str): Directory path where the 'ort2std.txt' file will be created.
-                          Must be writable.
-
-    Raises:
-        ValueError: If `ortcode` is not exactly three alphabetic characters.
-        NotADirectoryError: If `tifdir` does not exist or is not a directory.
-        PermissionError: If the program lacks permission to write to the `target_dir`.
-        OSError: If writing the file fails due to other OS-related errors.
     """
     if dev_mode:
         logger.info(
@@ -76,22 +64,10 @@ def create_ort2std_file(
 
 def move_warping_reg_final_contents(output_dir: str, dev_mode: bool = False) -> Path:
     """
-    Move the contents of the 'reg_final' folder in the current working directory
-    to a user-specified output directory and delete 'reg_final'.
+    Move the contents of the reg_final folder in the current working directory to a
+    user-specified output directory and delete reg_final.
 
     This is currently required since the function doesn't have an output directory flag.
-
-    Note:
-        This should be changed to accept folder names instead of hardcoding 'reg_final'
-        i.e. make it a more reusable function not tied to only the warping script.
-
-    Parameters:
-        output_dir: str, path to move the contents of 'reg_final' to.
-        dev_mode:   If True, skips all filesystem operations. Useful for testing
-                    when reg_final does not yet exist.
-
-    Raises:
-        FileNotFoundError: if 'reg_final' folder does not exist (non-dev mode only).
     """
     if dev_mode:
         logger.info(
@@ -131,16 +107,6 @@ def move_to_new_folder_and_rename(
 ) -> None:
     """
     Move the specified file to a user-specified output directory and rename it.
-
-    Parameters:
-    - output_dir (str): Path to the output directory to move the file to.
-    - input_file (str): Path to the file to move.
-    - identifier (str): Identifier used to rename the file.
-
-    Raises:
-    - FileNotFoundError: If the input file doesn't exist.
-    - PermissionError: If there are permission issues.
-    - RuntimeError: For any unexpected errors during the file move.
     """
     input_file_path = Path(input_file)
     output_dir_path = Path(output_dir)

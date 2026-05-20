@@ -78,6 +78,7 @@ from miracl.system.datamodels.miraclobj_datamodel import MiraclObj
 from miracl.system.datamodels.miraclobj_enums import ModuleType, FlagMapMode
 from miracl.system.registry.registry import MiraclRegistry
 from miracl.system.registry.schema_validators.config_schema import ModuleConfig
+from miracl.system.enums.enums_base_modules import CliGroup
 from miracl.system.logger import get_logger
 
 logger = get_logger(__name__)
@@ -118,13 +119,13 @@ def _pick_flag(cli, mode: FlagMapMode, context: str) -> str:
     if mode is FlagMapMode.AUTOGENERATE_SHORT:
         if not cli.s_flag:
             raise ValueError(
-                "autogenerate_short selected but the module-side `{context}' has no short flag attribute 's_flag'. You could either create short flags to the module or switch to 'autogenerate_long'."
+                f"autogenerate_short selected but the module-side `{context}' has no short flag attribute 's_flag'. You could either create short flags to the module or switch to 'autogenerate_long'."
             )
         return "-" + cli.s_flag
     else:  # AUTOGENERATE_LONG
         if not cli.l_flag:
             raise ValueError(
-                "autogenerate_long selected but module-side `{context}' has no long flag attribute 'l_flag'. You could either create module long flags or switch to 'autogenerate_short'."
+                f"autogenerate_long selected but module-side `{context}' has no long flag attribute 'l_flag'. You could either create module long flags or switch to 'autogenerate_short'."
             )
         return "--" + cli.l_flag
 
@@ -572,9 +573,22 @@ def load_registry_from_yaml(yaml_path: str) -> MiraclRegistry:
         split.meta.command,
     )
 
+    # Resolve CliGroup enum member names to registry module keys
+    resolved_modules = {}
+    for raw_name, module_config in split.modules.items():
+        try:
+            cli_group = getattr(CliGroup, raw_name)
+        except AttributeError:
+            valid = sorted(m.name for m in CliGroup)
+            raise ValueError(
+                f"Invalid module reference '{raw_name}' in registry YAML. Module keys must be CliGroup enum member names. Valid options: {', '.join(valid)}"
+            )
+        resolved_modules[cli_group.ref] = module_config
+
     registered_count = 0
 
-    for module_name, module_config in split.modules.items():
+    # for module_name, module_config in split.modules.items():
+    for module_name, module_config in resolved_modules.items():
         logger.debug("Processing module | name=%s", module_name)
 
         try:

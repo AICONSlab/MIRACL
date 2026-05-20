@@ -45,7 +45,7 @@ class RawDataNormalization:
                 cli=CLIDelta(
                     s_flag="mrdn",
                     l_flag="mrdn_input",
-                    group=CliGroup.REQUIRED,
+                    group=_MRDN_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -78,7 +78,7 @@ class RawDataNormalization:
                 cli=CLIDelta(
                     s_flag="mrdn_r",
                     l_flag="mrdn_raw_data",
-                    group=CliGroup.REQUIRED,
+                    group=_MRDN_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -112,7 +112,7 @@ class RawDataNormalization:
                 cli=CLIDelta(
                     s_flag="mrdn_m",
                     l_flag="mrdn_brain_mask",
-                    group=CliGroup.REQUIRED,
+                    group=_MRDN_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -267,7 +267,7 @@ class RawDataNormalization:
                 cli=CLIDelta(
                     s_flag="mrdn_o",
                     l_flag="mrdn_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MRDN_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),

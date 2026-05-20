@@ -7,6 +7,86 @@ from miracl.system.cli.cli_parser_contracts import SerializedCLI
 logger = get_logger(__name__)
 
 
+class _FilteredHelpAction(argparse.Action):
+    """
+    Custom argparse action for -h/--help.
+
+    Prints help but only shows args with Pydantic required CLI spec set to True.
+    Optional args are omitted. The footer will include an info message about the -hv
+    flag to get the full list of modules/args.
+    """
+
+    def __init__(
+        self,
+        option_strings,
+        dest=argparse.SUPPRESS,
+        default=argparse.SUPPRESS,
+        help=None,
+    ):
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help="show only required args and exit",
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        formatter = parser._get_formatter()
+
+        if parser.description:
+            formatter.add_text(parser.description)
+
+        for group in parser._action_groups:
+            required = [
+                a
+                for a in group._group_actions
+                if a.help != argparse.SUPPRESS and a.required
+            ]
+            if required:
+                formatter.start_section(group.title)
+                formatter.add_text(group.description)
+                formatter.add_arguments(required)
+                formatter.end_section()
+
+        formatter.add_text(
+            "*---------------------------------------------------------*\n| Use '-hv' or '--help_verbose' to see all available args |\n*---------------------------------------------------------*"
+        )
+
+        if parser.epilog:
+            formatter.add_text(parser.epilog)
+
+        parser._print_message(formatter.format_help())
+        parser.exit()
+
+
+class _VerboseHelpAction(argparse.Action):
+    """
+    Custom argparse action for -hv/--help_verbose.
+
+    Prints full help with all args.
+    """
+
+    def __init__(
+        self,
+        option_strings,
+        dest=argparse.SUPPRESS,
+        default=argparse.SUPPRESS,
+        help=None,
+    ) -> None:
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            default=default,
+            nargs=0,
+            help="show all args and exit",
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.print_help()
+        parser.exit()
+
+
 class MiraclCLIBuilder:
     """
     Build an argparse.ArgumentParser from serialized CLI entries.
@@ -36,6 +116,7 @@ class MiraclCLIBuilder:
             description=self._build_description(serialized.meta),
             epilog=self._build_epilog(serialized.meta),
             formatter_class=argparse.RawDescriptionHelpFormatter,
+            add_help=False,
         )
         self.groups_cache = {}
 
@@ -68,6 +149,19 @@ class MiraclCLIBuilder:
                 self.parser.add_argument(*flags, **kwargs)
 
             argument_count += 1
+
+        self.parser.add_argument(
+            "-h",
+            "--help",
+            action=_FilteredHelpAction,
+            help="show only required arguments and exit (use -hv for all)",
+        )
+        self.parser.add_argument(
+            "-hv",
+            "--help_verbose",
+            action=_VerboseHelpAction,
+            help="show all arguments and exit",
+        )
 
         logger.success(
             "Argparse parser built successfully | groups_created=%d | arguments_attached=%d",
@@ -109,7 +203,9 @@ class MiraclCLIBuilder:
             for ex in meta.examples:
                 parts.append(f"  $ {ex.cmd}")
                 if ex.help:
-                    parts.append(f"    +--> {ex.help}")
+                    parts.append(
+                        f"    \u2514\u2500\u2500> {ex.help}"
+                    )  # Unicode creates angled arrow
 
         runtime_parts = []
         if meta.estimated_runtime:
@@ -117,7 +213,7 @@ class MiraclCLIBuilder:
         if meta.min_memory_gb:
             runtime_parts.append(f"Memory         : {meta.min_memory_gb}")
         if meta.requires_gpu:
-            runtime_parts.append("GPU            : Required")
+            runtime_parts.append("GPU             : Required")
         if meta.version:
             runtime_parts.append(f"Method version : {meta.version}")
         if meta.miracl_version:

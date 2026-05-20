@@ -45,7 +45,7 @@ class Voxelization:
                 cli=CLIDelta(
                     s_flag="mv",
                     l_flag="mv_input",
-                    group=CliGroup.REQUIRED,
+                    group=_MV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -79,7 +79,7 @@ class Voxelization:
                 cli=CLIDelta(
                     s_flag="mv_o",
                     l_flag="mv_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),

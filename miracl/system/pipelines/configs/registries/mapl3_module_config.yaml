@@ -3,13 +3,17 @@ _meta:
   module: flow
   command: mapl3
   help: |
-    Mapping Axonal Projections in Light-sheet Fluorescence Microscopy in 3D (MAPL3) is an
-    end-to-end deep learning pipeline for generalizable, brain-wide mapping of structural
-    connectivity at the single-axon level using tera-voxel light sheet fluorescence
-    microscopy (LSFM) dataset. It’s built for scalability, precision, and biological
-    insight and bridges the gap between raw LSFM data and interpretable brain-wide
-    connectivity maps.
+    *---------------------------------------------------------------------------------*
+    | Mapping Axonal Projections in Light-sheet Fluorescence Microscopy in 3D (MAPL3) |
+    *---------------------------------------------------------------------------------*
     
+    MAPL3 is an end-to-end deep learning pipeline for generalizable, brain-wide mapping 
+    of structural connectivity at the single-axon level using tera-voxel light sheet 
+    fluorescence microscopy (LSFM) dataset. It’s built for scalability, precision, and 
+    biological insight and bridges the gap between raw LSFM data and interpretable 
+    brain-wide connectivity maps.
+
+    Features:
       - SPECTRE (Spatial Patch Encoding with Convolutional TransfoRmEr) Network: A novel
         deep learning design that fuses convolutional precision with transformer-level
         context awareness, capturing both fine axonal details and global anatomical structure.
@@ -25,16 +29,17 @@ _meta:
         insights into mesoscale and quantitative brain circuitry analysis.
   extended_help: |
     This interface runs the following modules:
-      - conversion
-      - registration
-      - patch generation
-      - preprocessing
-      - inference
-      - stacking
-      - normalization
-      - voxelization
-      - warping
-      - feature extraction
+      - Tiff to Nifti conversion
+      - CLARITY to Allen Atlas registration
+      - Patch generation
+      - Preprocessing
+      - Inference
+      - Patch stacking
+      - Normalization
+      - Voxelization
+      - CLARITY Allen warping
+      - Plotting
+      - Feature extraction
   docs_url: "https://miracl.readthedocs.io/en/latest/tutorials/workflows/mapl3_flow/mapl3_flow.html"
   examples:
     - cmd: "miracl flow mapl3 -mwfc_ratf /data/raw_autoflor_tiffs -mwfc_rstf /data/raw_signal_tiffs -mwfc_cof /results"
@@ -45,203 +50,86 @@ _meta:
   deprecated: false
   deprecation_message: ""
   version: "2.4.0"
-  requires_gpu: false
-  min_memory_gb: "128GB"
-  estimated_runtime: "1-12h"
+  miracl_version: "2.4.0"
+  requires_gpu: true
+  min_memory_gb: ""
+  estimated_runtime: ""
   tags:
     - "flow"
     - "mapl3"
     - "segmentation"
-  test_data: ""
+  test_data: "Use 'run_mapl3_example' on the CLI to download sample data and run a full workflow on it. For more info use with '-h'."
 
-mapl3_workflow_connectors: !include ../modules/mapl3/mapl3_workflow_connectors_module.yaml
+MAPL3_WORKFLOW_CONNECTORS: !include ../modules/mapl3/mapl3_workflow_connectors_module.yaml
 
-conv_tiff_nii: 
+CONV_TIFF_NII: 
   $include: ../modules/conv/conversion_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-    # "--mctn_folder": "--folder"
-    # "--mctn_work_dir": "--work_dir"
-    # "--mctn_down": "--down"
-    # "--mctn_channum": "--channum"
-    # "--mctn_chanprefix": "--chanprefix"
-    # "--mctn_channame": "--channame"
-    # "--mctn_outnii": "--outnii"
-    # "--mctn_resx": "--resx"
-    # "--mctn_resz": "--resz"
-    # "--mctn_center": "--center"
-    # "--mctn_downzdim": "--downzdim"
-    # "--mctn_prevdown": "--prevdown"
-    # "--mctn_percentile_thr": "--percentile_thr"
   execute: false
 
-reg_clar_allen:
+REG_CLAR_ALLEN:
   $include: ../modules/reg/registration_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map: 
-    "--mrca_input": "-i"
-    "--mrca_tiff_input": "-c"
-    "--mrca_output": "-r"
-    "--mrca_orient_code": "-o"
-    "--mrca_voxel_size": "-v"
-    "--mrca_hemi": "-m"
-    "--mrca_allen_label": "-l"
-    "--mrca_allen_atlas": "-a"
-    "--mrca_side": "-s"
-    "--mrca_no_mosaic_fig": "-f"
-    "--mrca_olfactory_bulb": "-b"
-    "--mrca_skip_cor": "-p"
-    "--mrca_warp": "-w"
-    "--mrca_chan_num": "-n"
-    "--mrca_chan_prefix": "-x"
+  flag_map: "autogenerate_short"
   execute: false
 
-mapl3_gen_patch:
+MAPL3_GENERATE_PATCH:
   $include: ../modules/mapl3/mapl3_generate_patch_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-    # "--mpg_input": "--input"
-    # "--mpg_brain_mask": "--brain_mask"
-    # "--mpg_out_dir": "--out_dir"
-    # "--mgp_cpu_load": "--cpu_load"
-    # "--mgp_patch_size": "--patch_size"
-    # "--mgp_brain_mask_erosion_flag": "--brain_mask_erosion_flag"
   execute: false
 
-mapl3_preproc_para: 
+MAPL3_PREPROCESSING_PARALLEL:
   $include: ../modules/mapl3/mapl3_preprocessing_parallel_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mpp_input": "--input"
-    "--mpp_out_dir": "--out_dir"
-    "--mpp_cpu_load": "--cpu_load"
-    "--mpp_cl_percentage": "--cl_percentage"
-    "--mpp_cl_lsm_footprint": "--cl_lsm_footprint"
-    "--mpp_cl_back_footprint": "--cl_back_footprint"
-    "--mpp_cl_back_downsample": "--cl_back_downsample"
-    "--mpp_lsm_vs_back_weight": "--lsm_vs_back_weight"
-    "--mpp_deconv_bin_thr": "--deconv_bin_thr"
-    "--mpp_deconv_sigma": "--deconv_sigma"
-    "--mpp_save_intermediate_results_flag": "--save_intermediate_results_flag"
-    "--mpp_metadata": "--metadata"
-    "--mpp_tissue_percentage_threshold": "--tissue_percentage_threshold"
-    "--mpp_intensity_threshold": "--intensity_threshold"
+  flag_map: "autogenerate_long"
   execute: false
 
-mapl3_inference:
+MAPL3_INFERENCE:
   $include: ../modules/mapl3/mapl3_inference_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mi_config": "--config"
-    "--mi_out_dir": "--output_path"
-    "--mi_model_path": "--model_path"
-    "--mi_input_dir": "--input_dir"
-    "--mi_gpu_index": "--gpu_index"
-    "--mi_binarization_threshold": "--binarization_threshold"
-    "--mi_save_prob_map_flag": "--save_prob_map_flag"
-    "--mi_metadata": "--metadata"
-    "--mi_tissue_percentage_threshold": "--tissue_percentage_threshold"
+  flag_map: "autogenerate_long"
   execute: false
 
-mapl3_patch_stacking:
+MAPL3_PATCH_STACKING:
   $include: ../modules/mapl3/mapl3_patch_stacking_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mps_input": "--input"
-    "--mps_out_dir": "--out_dir"
-    "--mps_raw_dir": "--raw_dir"
-    "--mps_cpu_load": "--raw_cpu_load"
-    "--mps_metadata": "--raw_metadata"
-    "--mps_dtype": "--raw_dtype"
+  flag_map: "autogenerate_long"
   execute: false
 
-mapl3_raw_data_normalization:
+MAPL3_RAW_DATA_NORMALIZATION:
   $include: ../modules/mapl3/mapl3_raw_data_normalization_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mrdn_input": "--input"
-    "--mrdn_raw_data": "--raw_data"
-    "--mrdn_brain_mask": "--brain_mask"
-    "--mrdn_num_erosion": "--num_erosion"
-    "--mrdn_alpha": "--alpha"
-    "--mrdn_thr": "--thr"
-    "--mrdn_out_dir": "--out_dir"
-    "--mrdn_cpu_load": "--cpu_load"
+  flag_map: "autogenerate_long"
   execute: false
 
-mapl3_skeletonization:
+MAPL3_SKELETONIZATION:
   $include: ../modules/mapl3/mapl3_skeletonization_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--ms_input": "--input"
-    "--ms_brain_mask": "--brain_mask"
-    "--ms_threshold": "--threshold"
-    "--ms_mpp_num_erosion": "--num_erosion"
-    "--ms_out_dir": "--out_dir"
-    "--ms_remove_small_obj_thr": "--remove_small_obj_thr"
-    "--ms_remove_large_obj_thr": "--remove_large_obj_thr"
-    "--ms_elongation_thr": "--elongation_thr"
-    "--ms_euler_number_thr": "--euler_number_thr"
-    "--ms_cpu_load": "--cpu_load"
-    "--ms_dilate_distance_transform_flag": "--dilate_distance_transform_flag"
-    "--ms_raw_data": "--raw_data"
-    "--ms_alpha": "--alpha"
+  flag_map: "autogenerate_long"
   execute: false
 
-mapl3_voxelization:
+MAPL3_VOXELIZATION:
   $include: ../modules/mapl3/mapl3_voxelization_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mv_input": "--input"
-    "--mv_out_dir": "--out_dir"
-    "--mv_cpu_load": "--cpu_load"
-    "--mv_downsample_yx_axis": "--downsample_yx_axis"
-    "--mv_downsample_z_axis": "--downsample_z_axis"
-    "--mv_method": "--method"
-    "--mv_out_name": "--out_name"
-    "--mv_res_xy": "--res_xy"
-    "--mv_res_z": "--res_z"
+  flag_map: "autogenerate_long"
   execute: false
 
-reg_warp_clar_allen:
+MAPL3_WARP_CLAR_ALLEN:
   $include: ../modules/reg/reg_warp_clar_allen_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mrwca_regdir": "-r"
-    "--mrwca_inimg": "-i"
-    "--mrwca_ort2std_file": "-o"
-    "--mrwca_seg_channel": "-s"
-    "--mrwca_vox_res": "-v"
-    "--mrwca_allen_lbls": "-l"
+  flag_map: "autogenerate_short"
   execute: false
 
-mapl3_plot_warped_data:
+MAPL3_PLOT_WARPED_DATA:
   $include: ../modules/mapl3/mapl3_plot_warped_data_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mpwd_pvalue": "--pvalue"
-    "--mpwd_atlas_dir": "--atlas_dir"
-    "--mpwd_vox": "--vox"
-    "--mpwd_sigma": "--sigma"
-    "--mpwd_colourmap_pos": "--colourmap_pos"
-    "--mpwd_colourmap_neg": "--colourmap_neg"
-    "--mpwd_sagittal": "--sagittal"
-    "--mpwd_coronal": "--coronal"
-    "--mpwd_axial": "--axial"
-    "--mpwd_figure_dim": "--figure_dim"
-    "--mpwd_dir_outfile": "--dir_outfile"
-    "--mpwd_outfile": "--outfile"
-    "--mpwd_extension": "--extension"
-    "--mpwd_dpi": "--dpi"
-    "--mpwd_hemi": "--hemi"
-    "--mpwd_side": "--side"
+  flag_map: "autogenerate_long"
   execute: false
 
-mapl3_feat_extract:
+MAPL3_FEAT_EXTRACT:
   $include: ../modules/mapl3/mapl3_feat_extract_module.yaml
   module_type: "FLOW_MAPL3"
-  flag_map:
-    "--mfe_seg": "--seg"
-    "--mfe_lbl": "--lbl"
-    "--mfe_mask": "--mask"
+  flag_map: "autogenerate_long"
   execute: false

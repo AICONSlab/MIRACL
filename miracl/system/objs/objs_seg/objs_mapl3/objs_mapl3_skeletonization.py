@@ -46,7 +46,7 @@ class Skeletonization:
                 cli=CLIDelta(
                     s_flag="ms",
                     l_flag="ms_input",
-                    group=CliGroup.REQUIRED,
+                    group=_MS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -80,7 +80,7 @@ class Skeletonization:
                 cli=CLIDelta(
                     s_flag="ms_m",
                     l_flag="ms_brain_mask",
-                    group=CliGroup.REQUIRED,
+                    group=_MS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -192,7 +192,7 @@ class Skeletonization:
                 cli=CLIDelta(
                     s_flag="ms_o",
                     l_flag="ms_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -456,7 +456,7 @@ class Skeletonization:
                 cli=CLIDelta(
                     s_flag="ms_r",
                     l_flag="ms_raw_data",
-                    group=CliGroup.REQUIRED,
+                    group=_MS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),

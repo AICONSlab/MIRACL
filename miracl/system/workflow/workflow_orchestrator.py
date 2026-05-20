@@ -12,9 +12,9 @@ The orchestrator itself is agnostic to runner types, plan structures, and builde
 implementations. All specifics live in runners/runner_plan_type_map.py.
 """
 
-# =====================================================================================
+#######################################################################################
 # IMPORTS
-# =====================================================================================
+#######################################################################################
 
 from __future__ import annotations
 from typing import Any, Callable, Dict, List, Optional
@@ -27,13 +27,14 @@ from miracl.system.workflow.runners.runner_plan_type_map import (
     RunnerConfig,
     UnregisteredRunnerError,
 )
+from miracl.system.workflow.workflow_graph import WorkflowGraph, NodeStatus
 from miracl.system.logger import get_logger
 
 logger = get_logger(__name__)
 
-# =====================================================================================
+#######################################################################################
 # ORCHESTRATION
-# =====================================================================================
+#######################################################################################
 
 
 class WorkflowOrchestrator:
@@ -190,22 +191,20 @@ class WorkflowOrchestrator:
         logger.success("All execution plans generated | total=%d", len(plans))
         return plans
 
-    def execute_plans(self, plans: List[ExecutionPlan]) -> List[Any]:
+    def execute_plans(
+        self,
+        plans: List[ExecutionPlan],
+        graph: Optional[WorkflowGraph] = None,
+    ) -> List[Any]:
         """
         Execute a list of previously generated execution plans.
 
-        For each plan, executes hooks in the following order:
-            1. pre_run hooks (before module runner)
-            2. Module runner
-            3a. on_success + post_run hooks (if runner succeeds)
-            3b. on_failure hooks (if runner fails)
-
-        Pre-resolved hooks (callables) are stored in the plan and executed directly.
-        This separation ensures the resolver handles evaluation and the orchestrator
-        handles execution only.
-
         Args:
             plans: Ordered list of ExecutionPlan objects from generate_plans().
+            graph: Optional WorkflowGraph for node status tracking. When provided,
+                   each node transitions PENDING → RUNNING → DONE on success, or
+                   FAILED (with cascade) on error. Pass None to skip tracking,
+                   e.g. in tests or standalone callers that have no graph.
 
         Returns:
             List of results in execution order. Each result is whatever the runner
@@ -231,22 +230,16 @@ class WorkflowOrchestrator:
                 context=f"instance '{plan.instance_name}'",
             )
 
-            # -------------------------------------------------------------------------
-            # 1. Execute pre_run hooks (pre-resolved)
-            # -------------------------------------------------------------------------
             self._execute_hooks(
                 plan.hooks.get("pre_run", []), "pre_run", plan.instance_name
             )
 
-            # -------------------------------------------------------------------------
-            # 2. Execute the module runner
-            # -------------------------------------------------------------------------
+            if graph is not None:
+                graph.set_status(plan.instance_name, NodeStatus.RUNNING)
+
             try:
                 result = plan.runner(*runner_config.get_payload(plan))
 
-                # ---------------------------------------------------------------------
-                # 3a. Success: Execute on_success and post_run hooks
-                # ---------------------------------------------------------------------
                 self._execute_hooks(
                     plan.hooks.get("on_success", []), "on_success", plan.instance_name
                 )
@@ -254,12 +247,12 @@ class WorkflowOrchestrator:
                     plan.hooks.get("post_run", []), "post_run", plan.instance_name
                 )
 
+                if graph is not None:
+                    graph.set_status(plan.instance_name, NodeStatus.DONE)
+
                 results.append(result)
 
             except Exception as e:
-                # ---------------------------------------------------------------------
-                # 3b. Failure: Execute on_failure hooks, then re-raise
-                # ---------------------------------------------------------------------
                 logger.error(
                     "Plan '%s' failed with error: %s",
                     plan.instance_name,
@@ -269,6 +262,9 @@ class WorkflowOrchestrator:
                 self._execute_hooks(
                     plan.hooks.get("on_failure", []), "on_failure", plan.instance_name
                 )
+
+                if graph is not None:
+                    graph.mark_failed(plan.instance_name, cascade=True)
 
                 raise  # Re-raise the original exception
 
@@ -282,11 +278,8 @@ class WorkflowOrchestrator:
         instance_name: str,
     ) -> Dict[str, List[Any]]:
         """
-        Parse hook DSL strings and bake each one into a zero-arg callable that
-        closes over the resolved context.
-
-        Baking happens during generate_plans() while the context is alive.
-        execute_plans() then just calls each closure without needing the context.
+        Parse hook DSL strings and bake each one into a zero-arg callable that closes
+        over the resolved context.
 
         Args:
             hook_lists: Raw hook strings from the workflow config, keyed by hook type.
@@ -298,7 +291,12 @@ class WorkflowOrchestrator:
         Raises:
             ValueError: On unknown hook type or unparseable DSL expression.
         """
-        VALID_HOOKS = {"pre_run", "post_run", "on_failure", "on_success"}
+        VALID_HOOKS = {
+            "pre_run",
+            "post_run",
+            "on_failure",
+            "on_success",
+        }
         baked: Dict[str, List[Any]] = {k: [] for k in VALID_HOOKS}
 
         def _make_hook(node: Any, ctx: Context) -> Any:
@@ -350,172 +348,6 @@ class WorkflowOrchestrator:
                 )
                 raise
 
-    # def _execute_hooks(
-    #     self,
-    #     hook_list: List[Any],
-    #     hook_type: str,
-    #     instance_name: str,
-    # ) -> None:
-    #     """Execute a list of pre-resolved hook results.
-    #
-    #     Hooks are pre-evaluated by the resolver. This method only executes
-    #     the stored callable results. Any exceptions from hooks propagate up.
-    #
-    #     Args:
-    #         hook_list: List of pre-resolved hook results (callables or values).
-    #         hook_type: Type of hooks being executed (e.g., 'pre_run', 'on_failure').
-    #         instance_name: Module instance name for logging context.
-    #
-    #     Raises:
-    #         Exception: Propagates any errors from hook execution.
-    #     """
-    #     for hook_result in hook_list:
-    #         try:
-    #             if callable(hook_result):
-    #                 hook_result()  # Execute the resolved function
-    #             # Non-callable results (e.g., reference values) are silently ignored
-    #             # as hooks are intended for side-effects only.
-    #         except Exception as e:
-    #             logger.error(
-    #                 "Hook '%s' failed for instance '%s': %s",
-    #                 hook_type,
-    #                 instance_name,
-    #                 str(e),
-    #             )
-    #             raise
-
-    # def execute_plans(self, plans: List[ExecutionPlan]) -> List[Any]:
-    #     """
-    #     Execute a list of previously generated execution plans.
-    #
-    #     Hooks are executed in the following order:
-    #         1. pre_run hooks (before module)
-    #         2. Module runner
-    #         3a. on_success + post_run hooks (if runner succeeds)
-    #         3b. on_failure hooks (if runner fails)
-    #
-    #     The payload extractor is resolved from the runner map so the orchestrator never
-    #     inspects plan fields or plan types directly.
-    #
-    #     Returns:
-    #         List of results in the same order as the input plans. Each result is
-    #         whatever the plan's runner returns: a CompletedProcess for CLI plans,
-    #         a Namespace for Python plans, or raw tokens/args for dry runs (execute=False).
-    #
-    #     Raises:
-    #         UnregisteredRunnerError: If a runner is not in the runner map.
-    #         subprocess.CalledProcessError: Propagated from generic_runner
-    #                                        on non-zero exit codes.
-    #     """
-    #     logger.info("Executing plans | total=%d", len(plans))
-    #     results = []
-    #
-    #     for plan in plans:
-    #         logger.info(
-    #             "Executing plan | instance=%s | module=%s | execute=%s",
-    #             plan.instance_name,
-    #             plan.module_name,
-    #             plan.execute,
-    #         )
-    #
-    #         runner_config = self._get_runner_config(
-    #             plan.runner,
-    #             context=f"instance '{plan.instance_name}'",
-    #         )
-    #
-    #         # -------------------------------------------------------------------------
-    #         # 1. Execute pre_run hooks
-    #         # -------------------------------------------------------------------------
-    #         if plan.hooks and plan.hooks.get("pre_run"):
-    #             for hook_str in plan.hooks["pre_run"]:
-    #                 self._execute_hook("pre_run", hook_str, plan.instance_name)
-    #
-    #         # ------------------------------------------------------------
-    #         # 2. Execute the module runner
-    #         # ------------------------------------------------------------
-    #         try:
-    #             logger.debug(
-    #                 "Dispatching plan | instance=%s | plan_type=%s",
-    #                 plan.instance_name,
-    #                 runner_config.plan_type.__name__,
-    #             )
-    #
-    #             result = plan.runner(*runner_config.get_payload(plan))
-    #
-    #             logger.debug(
-    #                 "Plan executed | instance=%s | result=%s",
-    #                 plan.instance_name,
-    #                 result,
-    #             )
-    #
-    #             # ---------------------------------------------------------------------
-    #             # 3a. Success: Execute on_success and post_run hooks
-    #             # ---------------------------------------------------------------------
-    #             if plan.hooks:
-    #                 for hook_str in plan.hooks.get("on_success", []):
-    #                     self._execute_hook("on_success", hook_str, plan.instance_name)
-    #                 for hook_str in plan.hooks.get("post_run", []):
-    #                     self._execute_hook("post_run", hook_str, plan.instance_name)
-    #
-    #             results.append(result)
-    #
-    #         except Exception as e:
-    #             # ------------------------------------------------------------
-    #             # 3b. Failure: Execute on_failure hooks, then re-raise
-    #             # ------------------------------------------------------------
-    #             logger.error(
-    #                 "Plan '%s' failed with error: %s",
-    #                 plan.instance_name,
-    #                 str(e),
-    #             )
-    #
-    #             if plan.hooks:
-    #                 for hook_str in plan.hooks.get("on_failure", []):
-    #                     self._execute_hook("on_failure", hook_str, plan.instance_name)
-    #
-    #             raise  # Re-raise the original exception
-    #
-    #     logger.success("All plans executed | total=%d", len(plans))
-    #     return results
-
-    # def _execute_hook(
-    #     self,
-    #     hook_type: str,
-    #     hook_str: str,
-    #     instance_name: str,
-    # ) -> None:
-    #     """
-    #     Parse and execute a single hook expression.
-    #
-    #     Args:
-    #         hook_type: Type of hook (pre_run, post_run, etc.) for logging.
-    #         hook_str: DSL expression string (e.g., "fn:create_file(...)").
-    #         instance_name: Module instance name for logging.
-    #
-    #     Raises:
-    #         Exception: Propagates any errors from hook execution.
-    #     """
-    #     from miracl.system.workflow.workflow_dsl import parse_expression
-    #
-    #     try:
-    #         node = parse_expression(hook_str)
-    #         # Execute the hook. Result is discarded for side-effect functions
-    #         node.evaluate(context, cache)
-    #         logger.debug(
-    #             "Hook executed | type=%s | instance=%s | hook=%s",
-    #             hook_type,
-    #             instance_name,
-    #             hook_str,
-    #         )
-    #     except Exception as e:
-    #         logger.error(
-    #             "Hook '%s' failed for instance '%s': %s",
-    #             hook_type,
-    #             instance_name,
-    #             str(e),
-    #         )
-    #         raise
-
     def run(
         self,
         parsed_module_objects: Dict[str, Dict[str, ResolvedMiraclObj]],
@@ -524,10 +356,12 @@ class WorkflowOrchestrator:
         external_context: Optional[Dict[str, Any]] = None,
     ) -> List[Any]:
         """
-        This is just a convenience method. It generates plans and execute them in one call.
+        This is just a convenience method. It generates plans and execute them in one
+        call.
 
-        generate_plans() plus execute_plans() is called separately in case a dev wants
-        to inspect or modify plans before execution. Otherwise this method is fine.
+        generate_plans() and execute_plans() are kept separate so callers can inspect
+        or modify plans before execution. Use this method when you don't need that
+        control.
 
         Equivalent to:
             plans = orchestrator.generate_plans(...)

@@ -1,4 +1,4 @@
-mapl3_patch_stacking:
+MAPL3_PATCH_STACKING:
   script: "python /code/miracl/seg/mapl3/mapl3_patch_stacking.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_patch_stacking.PatchStacking"
   module_type: "MODULE"

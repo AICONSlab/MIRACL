@@ -1,4 +1,4 @@
-mapl3_workflow_connectors:
+MAPL3_WORKFLOW_CONNECTORS:
   script: ""
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_generate_patch.GeneratePatch"
   obj_class: "miracl.system.objs.objs_flow.objs_mapl3_workflow.objs_mapl3_workflow_connectors.Mapl3WorkflowConnectors"

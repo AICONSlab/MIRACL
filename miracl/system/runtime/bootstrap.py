@@ -32,7 +32,10 @@ def configure_runtime():
     Returns:
         None: All effects are applied to process-global state.
     """
-    is_help = "-h" in sys.argv or "--help" in sys.argv
+    # is_help = "-h" in sys.argv or "--help" in sys.argv
+    is_help = any(
+        flag in sys.argv for flag in ("-h", "--help", "-hv", "--help_verbose")
+    )
 
     if is_help:
         logging.disable(

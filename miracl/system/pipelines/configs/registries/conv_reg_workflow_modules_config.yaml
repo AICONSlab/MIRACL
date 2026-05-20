@@ -1,0 +1,80 @@
+_meta:
+  title: "Conversion -> CLARITY-Allen Registration Pipeline"
+  module: flow
+  command: conv_reg
+  help: |
+    *---------------------------------------------------*
+    | Conversion -> CLARITY-Allen Registration Pipeline |
+    *---------------------------------------------------*
+  
+    Complete CLARITY-Allen registration pipeline that processes raw microscopy data to atlas-aligned brain volumes:
+      1) Converts TIFF image stacks to NIfTI format with intelligent downsampling  
+      2) Registers CLARITY data to Allen Reference mouse brain atlas  
+      3) Warps Allen annotations to original high-resolution CLARITY space  
+      4) Optionally warps full-resolution CLARITY data to Allen atlas space  
+        
+    This workflow eliminates the need to run separate conversion and registration tools,  
+    ensuring consistent processing and standardized outputs compatible with downstream  
+    analysis pipelines. Ideal for multi-sample studies requiring atlas-based quantitative  
+    analysis and cross-subject comparisons.
+  extended_help: |
+    Conversion Outputs:
+      - {name}{downsample}x_down{channel}.nii.gz - Located in conv_final/ - Primary conversion output representing the downsampled NIfTI file from TIFF conversion miracl_conv_convertTIFFtoNII.py
+
+    Registration Outputs:
+      - clar_allen_space.nii.gz - Located in reg_final/ - Critical file containing CLARITY data warped to Allen reference space for cross-subject comparison miracl_workflow_registration_clarity-allen.sh
+      - clar_downsample_res{vox}um.nii.gz - Located in reg_final/ - High importance file containing oriented downsampled CLARITY data for validation miracl_workflow_registration_clarity-allen.sh
+      - annotation_hemi_{hemi}_{vox}um_clar_downsample.nii.gz - Located in reg_final/ - Critical file containing Allen labels in native CLARITY space for region-based analysis miracl_workflow_registration_clarity-allen.sh
+    
+    Full-Resolution Analysis Files:
+      - annotation_hemi_{hemi}_{vox}um_clar.tif - Located in reg_final/ - High importance file containing Allen labels in original full-resolution CLARITY space miracl_reg_clar-allen.sh
+      - annotation_hemi_{hemi}_{vox}um_clar_vox.tif - Located in reg_final/ - Medium importance file containing Allen labels in oriented CLARITY space (voxel format) miracl_workflow_registration_clarity-allen.sh
+
+    Validation Files:
+      - allen_labels_to_clar_mosaic.png - Located in reg_final/ - High importance file providing registration quality validation mosaic miracl_reg_clar-allen.sh
+
+    Key Usage Notes:
+      - For registration validation: Overlay annotation_hemi_{hemi}_{vox}um_clar_downsample.nii.gz on clar_downsample_res{vox}um.nii.gz ace_flow.rst
+      - For cross-subject analysis: Use clar_allen_space.nii.gz in Allen atlas space
+      - For high-resolution analysis: Use the .tif label files in original CLARITY space
+
+    The workflow produces a complete pipeline from raw TIFF data to atlas-aligned volumes, with the most critical files being the converted NIfTI, the Allen-space registered data, and the warped annotation labels for quantitative analysis.
+
+    Notes:
+      - {vox} represents voxel resolution (10, 25, or 50 μm)
+      - {hemi} indicates hemisphere configuration (combined or split)
+      - {downsample} is the downsampling factor used during conversion
+      - Use miracl reg check to visualize registration results interactively
+  docs_url: "https://miracl.readthedocs.io/en/latest/tutorials/workflows/clarity_registration/clar_reg.html"
+  examples:
+    - cmd: "miracl flow conv_reg -i tiff_folder -o results_folder"
+      help: "Basic conversion and registration"
+  experimental: false
+  deprecated: false
+  deprecation_message: ""
+  version: "2.0.0"
+  miracl_version: "2.4.0"
+  requires_gpu: false
+  min_memory_gb: "Minimum 256GB, 1TB recommended"
+  estimated_runtime: "Depending on hardware, image size and downsample factor"
+  tags:
+    - "flow"
+    - "registration"
+    - "conversion"
+    - "clarity"
+    - "allen"
+  test_data: ""
+
+CONV_REG_WORKFLOW_CONNECTORS: !include ../modules/conv_reg/conv_reg_workflow_connectors_module.yaml
+
+CONV_TIFF_NII: 
+  $include: ../modules/conv/conversion_module.yaml
+  module_type: "FLOW_CONV_REG"
+  flag_map: "autogenerate_long"
+  execute: false
+
+REG_CLAR_ALLEN:
+  $include: ../modules/reg/registration_module.yaml
+  module_type: "FLOW_CONV_REG"
+  flag_map: "autogenerate_short"
+  execute: false

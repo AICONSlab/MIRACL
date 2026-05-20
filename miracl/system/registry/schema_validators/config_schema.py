@@ -83,6 +83,7 @@ class MetaConfig(BaseModel):
 
     # Runtime info
     version: Optional[str] = None
+    miracl_version: Optional[str] = None
     requires_gpu: bool = False
     min_memory_gb: Optional[str] = None
     estimated_runtime: Optional[str] = None

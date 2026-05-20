@@ -42,7 +42,7 @@ class WarpClarAllen:
                 cli=CLIDelta(
                     s_flag="mrwca_r",
                     l_flag="mrwca_regdir",
-                    group=CliGroup.REQUIRED,
+                    group=CliGroup.MAPL3_WARP_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -75,7 +75,7 @@ class WarpClarAllen:
                 cli=CLIDelta(
                     s_flag="mrwca_i",
                     l_flag="mrwca_inimg",
-                    group=CliGroup.REQUIRED,
+                    group=CliGroup.MAPL3_WARP_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -109,7 +109,7 @@ class WarpClarAllen:
                 cli=CLIDelta(
                     s_flag="mrwca_o",
                     l_flag="mrwca_ort2std_file",
-                    group=CliGroup.REQUIRED,
+                    group=CliGroup.MAPL3_WARP_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -143,7 +143,7 @@ class WarpClarAllen:
                 cli=CLIDelta(
                     s_flag="mrwca_s",
                     l_flag="mrwca_seg_channel",
-                    group=CliGroup.REQUIRED,
+                    group=CliGroup.MAPL3_WARP_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -211,7 +211,7 @@ class WarpClarAllen:
                 cli=CLIDelta(
                     s_flag="mrwca_l",
                     l_flag="mrwca_allen_lbls",
-                    group=CliGroup.REQUIRED,
+                    group=CliGroup.MAPL3_WARP_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),

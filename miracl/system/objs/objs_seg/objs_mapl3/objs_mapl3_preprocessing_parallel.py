@@ -48,7 +48,7 @@ class PreprocessingParallel:
                 cli=CLIDelta(
                     s_flag="mpp_i",
                     l_flag="mpp_input",
-                    group=CliGroup.REQUIRED,
+                    group=_MPP_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -82,7 +82,7 @@ class PreprocessingParallel:
                 cli=CLIDelta(
                     s_flag="mpp_o",
                     l_flag="mpp_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MPP_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -331,7 +331,7 @@ class PreprocessingParallel:
             s_flag="dbt",
             l_flag="deconv_bin_thr",
             obj_type=ArgumentType.INTEGER,
-            help="threshold uses to detect high intensity voxels for pseudo deconvolution between 0-100 (default: %(default)s)",
+            help="threshold used to detect high intensity voxels for pseudo deconvolution between 0-100 (default: %(default)s)",
             required=False,
             default=95,
         ),

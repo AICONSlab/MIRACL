@@ -1,4 +1,4 @@
-mapl3_preproc_para:
+MAPL3_PREPROCESSING_PARALLEL:
   script: "python /code/miracl/seg/mapl3/mapl3_preprocessing_parallel.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_preprocessing_parallel.PreprocessingParallel"
   module_type: "MODULE"

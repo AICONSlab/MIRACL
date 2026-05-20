@@ -45,7 +45,7 @@ class Inference:
                 cli=CLIDelta(
                     s_flag="mi_c",
                     l_flag="mi_config",
-                    group=CliGroup.REQUIRED,
+                    group=_MI_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -79,7 +79,7 @@ class Inference:
                 cli=CLIDelta(
                     s_flag="mi_o",
                     l_flag="mi_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MI_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -112,7 +112,7 @@ class Inference:
                 cli=CLIDelta(
                     s_flag="mi_m",
                     l_flag="mi_model_path",
-                    group=CliGroup.REQUIRED,
+                    group=_MI_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -146,7 +146,7 @@ class Inference:
                 cli=CLIDelta(
                     s_flag="mi_i",
                     l_flag="mi_input_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MI_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),

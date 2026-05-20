@@ -25,13 +25,13 @@ class Mapl3WorkflowConnectors:
             help="RAW Tiff folder object i.e. path to the folder with autoflor Tiffs in it",
             required=True,
             default=None,
-            group=CliGroup.REQUIRED,
+            group=CliGroup.MAPL3_WORKFLOW_CONNECTORS,
         ),
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Raw autoflor TIFF folder"],
                 widget_type=WidgetType.PATH_INPUT,
-                group=CliGroup.REQUIRED,
+                group=CliGroup.MAPL3_WORKFLOW_CONNECTORS,
             )
         ),
     )
@@ -49,13 +49,13 @@ class Mapl3WorkflowConnectors:
             help="RAW Tiff folder object i.e. path to the folder with signal Tiffs in it",
             required=True,
             default=None,
-            group=CliGroup.REQUIRED,
+            group=CliGroup.MAPL3_WORKFLOW_CONNECTORS,
         ),
         gui=GuiNamespace(
             base=GuiBase(
                 label=["Raw signal TIFF folder"],
                 widget_type=WidgetType.PATH_INPUT,
-                group=CliGroup.REQUIRED,
+                group=CliGroup.MAPL3_WORKFLOW_CONNECTORS,
             )
         ),
     )
@@ -73,13 +73,13 @@ class Mapl3WorkflowConnectors:
             help="Path to MAPL3 workflow results folder",
             required=True,
             default=None,
-            group=CliGroup.REQUIRED,
+            group=CliGroup.MAPL3_WORKFLOW_CONNECTORS,
         ),
         gui=GuiNamespace(
             base=GuiBase(
                 label=["MAPL3 results folder"],
                 widget_type=WidgetType.PATH_INPUT,
-                group=CliGroup.REQUIRED,
+                group=CliGroup.MAPL3_WORKFLOW_CONNECTORS,
             )
         ),
     )

@@ -43,7 +43,7 @@ class FeatExtract:
                 cli=CLIDelta(
                     s_flag="mfe_s",
                     l_flag="mfe_seg",
-                    group=CliGroup.REQUIRED,
+                    group=_MFE_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -77,7 +77,7 @@ class FeatExtract:
                 cli=CLIDelta(
                     s_flag="mfe_l",
                     l_flag="mfe_lbl",
-                    group=CliGroup.REQUIRED,
+                    group=_MFE_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -116,4 +116,3 @@ class FeatExtract:
             ),
         },
     )
-

@@ -1,4 +1,4 @@
-mapl3_voxelization:
+MAPL3_VOXELIZATION:
   script: "python /code/miracl/seg/mapl3/mapl3_voxelization.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_voxelization.Voxelization"
   module_type: "MODULE"

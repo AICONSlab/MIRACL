@@ -39,10 +39,29 @@ Note:
   this package is imported!!
 """
 
-from miracl.system.runtime.runtime import MiraclRuntime
-from miracl.system.runtime.runtime_parser import (
-    RuntimeArgs,
-)  # RuntimeArgs is the data contract between RuntimeArgParser and MiraclRuntime.
+
+# HACK: This is lazy loaded to suppress logging when the help flags are called. Maybe
+# this could be done more elegantly as lazy loading does add to the loading time of the
+# help text. I mean it's milliseconds so it's fine, the user is not going to notice a
+# difference, but I would like to optimize this properly at some point.
+def __getattr__(name):
+    if name == "MiraclRuntime":
+        from miracl.system.runtime.runtime import MiraclRuntime
+
+        return MiraclRuntime
+    if name == "RuntimeArgs":
+        from miracl.system.runtime.runtime_parser import RuntimeArgs
+
+        return RuntimeArgs
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+# NOTE: Leaving this here as a ref in case I can find a better solution for the above
+# hack.
+# from miracl.system.runtime.runtime import MiraclRuntime
+# from miracl.system.runtime.runtime_parser import (
+#     RuntimeArgs,
+# )  # RuntimeArgs is the data contract between RuntimeArgParser and MiraclRuntime.
 
 __all__ = [
     "MiraclRuntime",

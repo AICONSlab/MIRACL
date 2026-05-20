@@ -1,4 +1,4 @@
-mapl3_skeletonization:
+MAPL3_SKELETONIZATION:
   script: "python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_skeletonization.Skeletonization"
   module_type: "MODULE"

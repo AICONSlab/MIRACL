@@ -48,7 +48,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_f",
                     l_flag="actn_folder",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -57,7 +57,16 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_f",
                     l_flag="mctn_folder",
-                    group=CliGroup.REQUIRED,
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="cctn_f",
+                    l_flag="cctn_folder",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -88,7 +97,7 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="actn_w",
                     l_flag="actn_work_dir",
-                    group=CliGroup.CONV_TIFF_NII,
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -97,7 +106,16 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_w",
                     l_flag="mctn_work_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="cctn_w",
+                    l_flag="cctn_work_dir",
+                    group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -143,6 +161,14 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_d",
                     l_flag="mctn_down",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_d",
+                    l_flag="cctn_down",
                     group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
@@ -194,6 +220,14 @@ class ConvTiffNiiObjs:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_cn",
+                    l_flag="cctn_channum",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -232,6 +266,14 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_cp",
                     l_flag="mctn_chanprefix",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_cp",
+                    l_flag="cctn_chanprefix",
                     group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
@@ -278,6 +320,14 @@ class ConvTiffNiiObjs:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_ch",
+                    l_flag="cctn_channame",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -318,6 +368,14 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_o",
                     l_flag="mctn_outnii",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_o",
+                    l_flag="cctn_outnii",
                     group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
@@ -369,6 +427,14 @@ class ConvTiffNiiObjs:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_vx",
+                    l_flag="cctn_resx",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -416,6 +482,14 @@ class ConvTiffNiiObjs:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_vz",
+                    l_flag="cctn_resz",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -435,8 +509,8 @@ class ConvTiffNiiObjs:
         ),
         gui=GuiNamespace(
             base=GuiBase(
-                label=["Nii center"],
-                widget_type=WidgetType.LINE_EDIT,
+                label=["Nii center", "x", "y", "z"],
+                widget_type=WidgetType.MULTI_LINE_EDIT,
                 props=GuiWidgetSpecifics(
                     text=LineEditConfig(
                         input_restrictions=InputRestrictionType.INTEGERS_ONLY,
@@ -457,6 +531,14 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_c",
                     l_flag="mctn_center",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_c",
+                    l_flag="cctn_center",
                     group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
@@ -497,6 +579,14 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_dz",
                     l_flag="mctn_downzdim",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_dz",
+                    l_flag="cctn_downzdim",
                     group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
@@ -546,6 +636,14 @@ class ConvTiffNiiObjs:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_pd",
+                    l_flag="cctn_prevdown",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -589,6 +687,14 @@ class ConvTiffNiiObjs:
                 cli=CLIDelta(
                     s_flag="mctn_pct",
                     l_flag="mctn_percentile_thr",
+                    group=_CONV_GROUP,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="cctn_pct",
+                    l_flag="cctn_percentile_thr",
                     group=_CONV_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),

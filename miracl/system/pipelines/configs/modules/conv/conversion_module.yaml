@@ -1,4 +1,4 @@
-conv_tiff_nii:
+CONV_TIFF_NII:
   script: "python /code/miracl/conv/miracl_conv_convertTIFFtoNII.py"
   obj_class: "miracl.system.objs.objs_conv.objs_tiff_to_nii.objs_tiff_to_nii.ConvTiffNiiObjs"
   module_type: "MODULE"

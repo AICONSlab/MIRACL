@@ -1,5 +1,5 @@
 """
-This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+This code is written and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca).
 
 Execution plans for modules, currently for subprocess/CLI-based module calls as well
 as direct Python function calls.
@@ -8,17 +8,17 @@ Use CommandPlan for CLI scripts (via generic_runner).
 Use PythonPlan for direct Python function calls.
 """
 
-# =====================================================================================
+#######################################################################################
 # IMPORTS
-# =====================================================================================
+#######################################################################################
 
 from __future__ import annotations
 from typing import Any, Callable, List, Dict
 from pydantic import BaseModel, Field
 
-# =====================================================================================
+#######################################################################################
 # PLANS
-# =====================================================================================
+#######################################################################################
 
 
 class CommandPlan(BaseModel):

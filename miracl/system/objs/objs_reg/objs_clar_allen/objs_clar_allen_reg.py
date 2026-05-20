@@ -48,7 +48,7 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="arca_i",
                     l_flag="arca_input",
-                    group=CliGroup.REQUIRED,
+                    group=CliGroup.REG_CLAR_ALLEN,
                     required=True,
                 ),
                 gui=GuiDelta(
@@ -58,7 +58,20 @@ class ClarAllen:
             "mapl3": FlowOverride(
                 source=ArgumentSource.INTERNAL,
                 cli=CLIDelta(
-                    s_flag="mrca_i", l_flag="mrca_input", group=CliGroup.REQUIRED
+                    s_flag="mrca_i",
+                    l_flag="mrca_input",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+                gui=GuiDelta(
+                    base=GuiBase(),
+                ),
+            ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="rrca_i",
+                    l_flag="rrca_input",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(
                     base=GuiBase(),
@@ -100,6 +113,15 @@ class ClarAllen:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="rrca_ti",
+                    l_flag="rrca_tiff_input",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -120,14 +142,27 @@ class ClarAllen:
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="arca_r", l_flag="arca_output", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="arca_r",
+                    l_flag="arca_output",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 source=ArgumentSource.INTERNAL,
                 cli=CLIDelta(
-                    s_flag="mrca_r", l_flag="mrca_output", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="mrca_r",
+                    l_flag="mrca_output",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="rrca_r",
+                    l_flag="rrca_output",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -167,6 +202,13 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="mrca_o",
                     l_flag="mrca_orient_code",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_o",
+                    l_flag="rrca_orient_code",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
@@ -210,6 +252,13 @@ class ClarAllen:
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_v",
+                    l_flag="rrca_voxel_size",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
         },
     )
 
@@ -246,6 +295,13 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="mrca_m",
                     l_flag="mrca_hemi",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_m",
+                    l_flag="rrca_hemi",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
@@ -287,6 +343,13 @@ class ClarAllen:
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_l",
+                    l_flag="rrca_allen_label",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
         },
     )
 
@@ -325,6 +388,13 @@ class ClarAllen:
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_a",
+                    l_flag="rrca_allen_atlas",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
         },
     )
 
@@ -357,13 +427,24 @@ class ClarAllen:
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="arca_s", l_flag="arca_side", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="arca_s",
+                    l_flag="arca_side",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mrca_s", l_flag="mrca_side", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="mrca_s",
+                    l_flag="mrca_side",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_s",
+                    l_flag="rrca_side",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
         },
@@ -411,6 +492,13 @@ class ClarAllen:
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrcan_m",
+                    l_flag="rrca_no_mosaic_fig",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
         },
     )
 
@@ -452,6 +540,13 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="mrca_b",
                     l_flag="mrca_olfactory_bulb",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_b",
+                    l_flag="rrca_olfactory_bulb",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
@@ -499,6 +594,13 @@ class ClarAllen:
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_p",
+                    l_flag="rrca_skip_cor",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
         },
     )
 
@@ -531,13 +633,24 @@ class ClarAllen:
         flow={
             "ace": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="arca_w", l_flag="arca_warp", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="arca_w",
+                    l_flag="arca_warp",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
             "mapl3": FlowOverride(
                 cli=CLIDelta(
-                    s_flag="mrca_w", l_flag="mrca_warp", group=CliGroup.REG_CLAR_ALLEN
+                    s_flag="mrca_w",
+                    l_flag="mrca_warp",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+            ),
+            "conv_reg": FlowOverride(
+                cli=CLIDelta(
+                    s_flag="rrca_w",
+                    l_flag="rrca_warp",
+                    group=CliGroup.REG_CLAR_ALLEN,
                 ),
             ),
         },
@@ -580,6 +693,15 @@ class ClarAllen:
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="rrca_n",
+                    l_flag="rrca_chan_num",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
         },
     )
 
@@ -613,6 +735,15 @@ class ClarAllen:
                 cli=CLIDelta(
                     s_flag="mrca_x",
                     l_flag="mrca_chan_prefix",
+                    group=CliGroup.REG_CLAR_ALLEN,
+                ),
+                gui=GuiDelta(base=GuiBase()),
+            ),
+            "conv_reg": FlowOverride(
+                source=ArgumentSource.INTERNAL,
+                cli=CLIDelta(
+                    s_flag="rrca_x",
+                    l_flag="rrca_chan_prefix",
                     group=CliGroup.REG_CLAR_ALLEN,
                 ),
                 gui=GuiDelta(base=GuiBase()),

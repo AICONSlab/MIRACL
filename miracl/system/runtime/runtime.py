@@ -1,6 +1,4 @@
 """
-Code created and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca)
-
 Top-level orchestration class for the MIRACL runtime! Kind of a big deal!
 
 The MiraclRuntime is what pulls the workflow architecture together. It owns the startup
@@ -37,6 +35,12 @@ from miracl.api_v2.cli import deserialize_parsed_args_to_objects
 from miracl.system.runtime.runtime_parser import RuntimeArgParser, RuntimeArgs
 from miracl.system.runtime.frontend import FrontendDispatcher
 
+# ADDED: WorkflowGraph integration
+from miracl.system.workflow.workflow_graph import (
+    WorkflowGraph,
+    CircularDependencyError,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +48,7 @@ class MiraclRuntime:
     """
     Convenient orchestration wrapper for MIRACL pipelines.
 
-    Given paths to a registry config i.e. moules YAML and a workflow config YAML, this
+    Given paths to a registry config i.e. modules YAML and a workflow config YAML, this
     class drives the full pipeline from argument collection to plan generation in a
     single, sweet run call.
 
@@ -111,37 +115,38 @@ class MiraclRuntime:
         This is kind of important so the docstring will be very detailed.
 
         The pipeline runs in a fixed sequence:
-          1. Registry loading: Reads registry_config and builds the in-memory
-                               miracl.system.registry.registry.MiraclRegistry.
-          2. Workflow loading: Reads workflow_config and builds a
-                               miracl.system.workflow.workflow_config.WorkFlowConfig
-                               that describes module ordering and tab structure.
-          3. Introspection: Extracts the module objects, registry metadata, and meta
-                            block from the registry. These are the inputs that every
-                            frontend adapter and the deserializer expect.
-          4. Input gathering: Delegates to FrontendDispatcher, which selects the
-                              correct adapter (CLI or PyQt etc.) and returns the raw
-                              user inputs as a dict.
-          5. Deserialisation: Populates
-                              miracl.system.datamodels.miraclobj_datamodel.MiraclObj`
-                              instances from the raw inputs dict. This is where string
-                              values from argparse (or the GUI) are coerced into the
-                              correct Python types and validated against the module
-                              schemas.
-          6. Plan generation: The miracl.api_v2.workflow.WorkflowOrchestrator converts
-                              populated module objects into execution plans. Each plan
-                              describes the runner, the command, and the arguments for
-                              one module invocation.
-          7. Dry-run short-circuit: If --dry-run was set, the plans are logged and
-                                    returned without invoking any runners. This is
-                                    useful for debugging and for CI pipelines that need
-                                    to verify configuration without executing anything.
+          1.  Registry loading: Reads registry_config and builds the in-memory
+                                miracl.system.registry.registry.MiraclRegistry.
+          2.  Workflow loading: Reads workflow_config and builds a
+                                miracl.system.workflow.workflow_config.WorkFlowConfig
+                                that describes module ordering and tab structure.
+          2b. DAG construction: Builds and validates the WorkflowGraph from the
+                                workflow config. Fails fast on circular dependencies
+                                before any user input is gathered.
+          3.  Introspection: Extracts the module objects, registry metadata, and meta
+                             block from the registry. These are the inputs that every
+                             frontend adapter and the deserializer expect.
+          4.  Input gathering: Delegates to FrontendDispatcher, which selects the
+                               correct adapter (CLI or PyQt etc.) and returns the raw
+                               user inputs as a dict.
+          5.  Deserialisation: Populates
+                               miracl.system.datamodels.miraclobj_datamodel.MiraclObj
+                               instances from the raw inputs dict. This is where string
+                               values from argparse (or the GUI) are coerced into the
+                               correct Python types and validated against the module
+                               schemas.
+          6.  Plan generation: The miracl.api_v2.workflow.WorkflowOrchestrator converts
+                               populated module objects into execution plans. Each plan
+                               describes the runner, the command, and the arguments for
+                               one module invocation.
+          7.  Dry-run short-circuit: If --dry-run was set, the plans and DAG structure
+                                     are logged and returned without invoking any
+                                     runners.
+          8.  Execution: execute_plans() is called with the graph for status tracking.
 
         Returns:
-            list | None: In normal execution (runners are invoked by the orchestrator
-                         and results are handled downstream). Returns the list of
-                         miracl.api_v2.workflow.ExecutionPlan` instances when dry_run
-                         is True.
+            list | None: The list of ExecutionPlan instances when dry_run is True,
+                         otherwise the return value of execute_plans().
         """
         logger.info(
             "MiraclRuntime.run() starting | frontend=%s | dry_run=%s",
@@ -162,6 +167,29 @@ class MiraclRuntime:
         # The workflow config describes which modules participate in this pipeline,
         # their execution order, and (for GUI frontends) their tab order.
         workflow = WorkFlowLoader.load(self.workflow_config)
+
+        ###############################################################################
+        # STEP 2b: BUILD AND VALIDATE THE EXECUTION DAG
+        ###############################################################################
+        # Built here — before input gathering — because the graph depends only on the
+        # workflow config, not on user input. A circular dependency in the config should
+        # fail immediately with a clear error rather than deadlocking at runtime after
+        # the user has already filled in a form.
+        graph = WorkflowGraph(workflow)
+        try:
+            graph.validate()
+        except CircularDependencyError as exc:
+            logger.error(
+                "Workflow DAG validation failed — aborting before user input | error=%s",
+                exc,
+            )
+            raise
+
+        logger.debug(
+            "Workflow DAG validated | nodes=%d | edges=%d",
+            len(graph.nodes),
+            len(graph.edges),
+        )
 
         ###############################################################################
         # STEP 3: INTROSPECT THE REGISTRY
@@ -194,7 +222,7 @@ class MiraclRuntime:
         )
 
         ###############################################################################
-        # Step 5: Deserialise raw inputs into populated MiraclObj instances
+        # STEP 5: DESERIALISE RAW INPUTS INTO POPULATED MiraclObj INSTANCES
         ###############################################################################
         # The deserializer coerces and validates the raw string/value inputs from the
         # frontend into the typed MiraclObj fields that the orchestrator needs.
@@ -221,11 +249,21 @@ class MiraclRuntime:
         ###############################################################################
         # STEP 7: DRY-RUN SHORT-CIRCUIT
         ###############################################################################
-        # When --dry-run is set we log the plans and return them without executing.
-        # This lets callers (e.g. CI, tests) inspect what would have run without any
-        # side effects.
+        # When --dry-run is set we log the plans and DAG structure, then return without
+        # executing. This lets callers (e.g. CI, tests) inspect what would have run.
         if self.args.dry_run:
             logger.info("DRY RUN enabled — skipping execution | plans=%d", len(plans))
+
+            logger.info("--- Workflow DAG: Parallel Stages ---")
+            for i, stage in enumerate(graph.parallel_stages()):
+                logger.info("  Stage %d: %s", i, ", ".join(stage))
+
+            logger.info("--- Workflow DAG: Status Summary ---")
+            for instance, status in graph.status_summary().items():
+                logger.info("  %s: %s", instance, status)
+
+            graph.to_dot(path="dry_run_graph.dot", show_vars=False)
+
             for plan in plans:
                 logger.info(
                     "Plan | instance=%s | runner=%s | command=%s",
@@ -235,7 +273,11 @@ class MiraclRuntime:
                 )
             return plans
 
-        # Normal execution: the orchestrator (or a downstream executor) is responsible
-        # for invoking the runners. The runtime's job ends here. Returning None signals
-        # to callers that execution was handed off.
-        return None
+        ###############################################################################
+        # STEP 8: EXECUTE PLANS
+        ###############################################################################
+        # Passes the graph so execute_plans() can update node statuses as each module
+        # runs (PENDING → RUNNING → DONE, or FAILED with cascade on error).
+        # WorkflowOrchestrator.execute_plans() accepts graph=None for backward
+        # compatibility with callers that don't have a graph.
+        return orchestrator.execute_plans(plans, graph=graph)

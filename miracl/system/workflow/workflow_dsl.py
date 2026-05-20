@@ -1,9 +1,9 @@
 """
-This code is written by Jonas Osmann (j.osmann@alumni.utoronto.ca)
+This code is written and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca).
 
 Workflow DSL parser and evaluator.
 
-Provides a domain-specific language (DSL) for workflow configuration, supporting:
+Provides MIRACLang, a DSL for workflow YAML configs:
     - ref:     Reference to workflow variables
     - pattern: String templating with embedded expressions
     - fn:      Whitelisted function calls
@@ -14,9 +14,9 @@ Example:
     >>> result = expr.evaluate(context, {})
 """
 
-# =====================================================================================
+#######################################################################################
 # IMPORTS
-# =====================================================================================
+#######################################################################################
 
 from __future__ import annotations
 import ast
@@ -24,17 +24,17 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Union
 
-# =====================================================================================
+#######################################################################################
 # FUNCTION REGISTRY
-# =====================================================================================
+#######################################################################################
 
 
 class LazyFunctionRegistry(dict):
     """
-    A registry that supports both direct callables and lazy-loaded string paths.
-    This is supposed to prevent import coupling of functions to the DSL system.
-    Instead of importing the functions, they will be resolved as string paths and
-    only imported when called in a worklfow config file.
+    A registry that supports both direct callables and lazy-loaded string paths. This
+    is supposed to prevent import coupling of functions to the DSL system. Instead of
+    importing the functions, they will be resolved as string paths and only imported
+    when called in a worklfow config file.
 
     Example:
         "my_func": "path.to.module:function_name"
@@ -53,7 +53,9 @@ class LazyFunctionRegistry(dict):
                 value = module
                 for attr in attr_path.split("."):
                     value = getattr(value, attr)
-                self[key] = value  # Neat little cache for resolved function
+                self[key] = (
+                    value  # Clever little cache for resolved function if I may say so myself
+                )
             except (ImportError, AttributeError) as e:
                 raise ImportError(
                     f"MIRACLang could not lazy-load function '{key}' from '{value}': {e}"
@@ -64,12 +66,12 @@ class LazyFunctionRegistry(dict):
         return super().__contains__(key)
 
 
-# -------------------------------------------------------------------------------------
+#######################################################################################
 # WHITELISTED FUNCTIONS
-# -------------------------------------------------------------------------------------
-# Only functions registered here can be called in the workflow configuration!
-# This prevents malicious function injections.
-# -------------------------------------------------------------------------------------
+#######################################################################################
+# Only functions registered here can be called in the workflow configuration! This
+# prevents injections of unwanted functions.
+#######################################################################################
 
 ALLOWED_FUNCTIONS = LazyFunctionRegistry(
     {
@@ -84,21 +86,12 @@ ALLOWED_FUNCTIONS = LazyFunctionRegistry(
 )
 
 
-# =====================================================================================
+#######################################################################################
 # NAMESPACED CONTEXT
-# =====================================================================================
-# Replaces the flat Dict[str, Any] that was previously threaded through
-# evaluate() calls. Instead of a single dict with "instance.var" string keys,
-# we now have explicit namespaces: one per module instance, plus "vars" for
-# workflow-level variables.
-#
-# This eliminates the key collision risk that existed when two instances of the
-# same module type (e.g. conv and convtest) or a module named "vars" could
-# silently overwrite each other in the flat dict.
-#
-# RESERVED_NAMESPACES: names that cannot be used as module instance names.
-# "vars" is reserved for the workflow-level variables block.
-# =====================================================================================
+#######################################################################################
+# RESERVED_NAMESPACES: names that cannot be used as module instance names. "vars" is
+# reserved for the workflow-level variables block.
+#######################################################################################
 
 RESERVED_NAMESPACES = {"vars"}
 
@@ -107,9 +100,8 @@ class Context:
     """
     Namespaced key-value store for DSL expression evaluation.
 
-    Each namespace is a separate dict. Module instances, workflow vars, and
-    any future groupings each get their own namespace, making collisions
-    structurally impossible!
+    Each namespace is a separate dict. Module instances, workflow vars, and any future
+    groupings each get their own namespace, making collisions structurally impossible!
 
     Key format in DSL expressions:  namespace.variable
         e.g.  ref:conv.tiff_folder
@@ -196,21 +188,19 @@ class Context:
         return [f"{ns}.{k}" for ns, d in self._namespaces.items() for k in d]
 
 
-# =====================================================================================
+#######################################################################################
 # AST NODE BASE CLASS
-# =====================================================================================
+#######################################################################################
 
 
 class Expression(ABC):
     """
     Abstract base class for all DSL expression nodes.
 
-    Every subclass MUST implement evaluate(). Using ABC with @abstractmethod
-    ensures this is enforced at class instantiation time, not at runtime when
-    evaluate() is first called.
-
-    evaluate() accepts a Context instead of Dict[str, Any]. The cache parameter is a
-    flat dict keyed by "namespace.variable" strings for caching.
+    Every subclass MUST implement evaluate(). Using ABC with @abstractmethod ensures
+    this is enforced at class instantiation time, not at runtime when evaluate() is
+    first called. evaluate() accepts a Context instead of Dict[str, Any]. The cache
+    parameter is a flat dict keyed by namespace.variable strings for caching.
     """
 
     @abstractmethod
@@ -240,18 +230,50 @@ class Expression(ABC):
         """
         ...
 
+    @abstractmethod
+    def get_dependencies(self) -> List[str]:
+        """
+        Return module instance names this expression directly references.
 
-# =============================================================================
+        By 'directly' I mean that the expression itself contains a ref to a module
+        namespace i.e. not via indirection through the reserverd 'vars' namespace.
+        Expansion for vars is handled by WorkflowGraph._resolve_expr_deps().
+
+        So for exmaple, 'ref:convs.tiff_folder' woudl results in '["conv"]'.
+
+        Returns:
+            List of module instance name strings. Empty list if none.
+        """
+        ...
+
+    @abstractmethod
+    def get_var_refs(self) -> List[str]:
+        """
+        Return workflow-level var keys referenced by this expression.
+
+        This handles the reserverd 'vars' namespace i.e. only references to that
+        namespace qualify. Module instance references do not. These keys are later
+        expanded by WorkflowGraph._resolve_vars() into module instance dependencies.
+
+        So for example, 'ref:vars.base_dir' results in '["base_dir"]'.
+
+        Returns:
+            List of var key strings. Empty list if none.
+        """
+        ...
+
+
+#######################################################################################
 # CONCRETE EXPRESSION NODES
-# =============================================================================
+#######################################################################################
 
 
 class ConstantNode(Expression):
     """
     A leaf node holding a static value that evaluates to itself.
 
-    Named ConstantNode (not Literal) to avoid shadowing typing.Literal
-    if both modules are ever used in the same namespace.
+    Named ConstantNode (not Literal) to avoid shadowing typing.Literal if both modules
+    are ever used in the same namespace.
     """
 
     def __init__(self, value: Any) -> None:
@@ -259,6 +281,12 @@ class ConstantNode(Expression):
 
     def evaluate(self, context: Context, cache: Dict[str, Any]) -> Any:
         return self.value
+
+    def get_dependencies(self) -> List[str]:
+        return []
+
+    def get_var_refs(self) -> List[str]:
+        return []
 
 
 class Reference(Expression):
@@ -271,7 +299,7 @@ class Reference(Expression):
     Example key: "conv.tiff_folder"  ->  namespace="conv", variable="tiff_folder"
     Example key: "vars.base_dir"     ->  namespace="vars", variable="base_dir"
 
-    The cache key remains the full "namespace.variable".
+    The cache key remains the full namespace.variable.
 
     Raises:
         ValueError: If the key does not contain a dot separator.
@@ -302,13 +330,23 @@ class Reference(Expression):
         cache[self.key] = value
         return value
 
+    def get_dependencies(self) -> List[str]:
+        if self.namespace == "vars":
+            return []
+        return [self.namespace]
+
+    def get_var_refs(self) -> List[str]:
+        if self.namespace == "vars":
+            return [self.variable]
+        return []
+
 
 class FunctionCall(Expression):
     """
     A node that calls a whitelisted function with evaluated arguments.
 
-    Only functions present in ALLOWED_FUNCTIONS may be called.
-    This is the primary security gate for the DSL.
+    Only functions present in ALLOWED_FUNCTIONS may be called. This is the primary
+    security gate for the DSL.
     """
 
     def __init__(self, func_name: str, args: List[Expression]) -> None:
@@ -324,16 +362,29 @@ class FunctionCall(Expression):
         evaluated_args = [arg.evaluate(context, cache) for arg in self.args]
         return func(*evaluated_args)
 
+    def get_dependencies(self) -> List[str]:
+        seen: Dict[str, None] = {}
+        for arg in self.args:
+            for dep in arg.get_dependencies():
+                seen[dep] = None
+        return list(seen)
+
+    def get_var_refs(self) -> List[str]:
+        seen: Dict[str, None] = {}
+        for arg in self.args:
+            for var_key in arg.get_var_refs():
+                seen[var_key] = None
+        return list(seen)
+
 
 class Pattern(Expression):
     """
     A template string node that interpolates embedded expressions.
 
-    Template syntax: "prefix_{ref:instance.var}_suffix". Expressions inside {} are
-    parsed recursively via parse_expression().
-
-    Template parts are parsed eagerly at construction time so faulty templates fail
-    immediately rather than at evaluation time.
+    Template syntax: prefix_{ref:instance.var}_suffix. Expressions inside {} are
+    parsed recursively via parse_expression(). Template parts are parsed eagerly at
+    construction time so faulty templates fail immediately rather than at evaluation
+    time.
     """
 
     def __init__(self, template: str) -> None:
@@ -356,20 +407,31 @@ class Pattern(Expression):
         ]
         return "".join(str(p) for p in evaluated_parts)
 
+    def get_dependencies(self) -> List[str]:
+        seen: Dict[str, None] = {}
+        for part in self.parts:
+            if isinstance(part, Expression):
+                for dep in part.get_dependencies():
+                    seen[dep] = None
+        return list(seen)
 
-# =====================================================================================
+    def get_var_refs(self) -> List[str]:
+        seen: Dict[str, None] = {}
+        for part in self.parts:
+            if isinstance(part, Expression):
+                for var_key in part.get_var_refs():
+                    seen[var_key] = None
+        return list(seen)
+
+
+#######################################################################################
 # EXPRESSION FACTORY HELPER
-# =====================================================================================
+#######################################################################################
 
 
 def _parse_ast_arg(node: ast.expr) -> Expression:
     """
     Recursively parse a single AST argument node into an Expression.
-
-    Python version compatibility:
-        3.7.3+  — ast.Str, ast.Num (older constant nodes)
-        3.8+    — ast.Constant (unified constant node, replaces ast.Str/ast.Num)
-        No dependency on ast.unparse (added in 3.9).
 
     Args:
         node: An AST expression node from a parsed fn: argument list.
@@ -402,16 +464,16 @@ def _parse_ast_arg(node: ast.expr) -> Expression:
     else:
         raise ValueError(f"Unsupported AST arg type: {ast.dump(node)}")
 
-    # If the constant string is itself a DSL expression, parse it recursively
+    # NOTE: If the constant string is itself a DSL expression, parse it recursively
     if isinstance(val, str) and (val.startswith("ref:") or val.startswith("pattern:")):
         return parse_expression(val)
 
     return ConstantNode(val)
 
 
-# =====================================================================================
+#######################################################################################
 # EXPRESSION FACTORY
-# =====================================================================================
+#######################################################################################
 
 
 def parse_expression(raw: str) -> Expression:

@@ -181,6 +181,7 @@ class WidgetType(str, Enum):
     NULLABLE_DOUBLE_SPINBOX = "NULLABLE_DOUBLE_SPINBOX"
     COMBO_BOX = "COMBO_BOX"
     PATH_INPUT = "PATH_INPUT"
+    MULTI_LINE_EDIT = "MULTI_LINE_EDIT"
 
 
 class InputRestrictionType(str, Enum):

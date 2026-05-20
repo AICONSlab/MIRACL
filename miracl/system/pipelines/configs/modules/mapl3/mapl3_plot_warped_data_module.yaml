@@ -1,4 +1,4 @@
-mapl3_plot_warped_data:
+MAPL3_PLOT_WARPED_DATA:
   script: "python /code/miracl/seg/mapl3/mapl3_plot_warped_data.py"
   obj_class: "miracl.system.objs.objs_seg.objs_mapl3.objs_mapl3_plot_warped_data.PlotWarpedData"
   module_type: "MODULE"

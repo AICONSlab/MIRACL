@@ -52,11 +52,6 @@ class UtilfnsPaths:
 
         :raises FileNotFoundError: If the file does not exist
         :raises OSError: If there's an issue accessing the file
-
-        :example:
-        >>> from pathlib import Path
-        >>> UtilfnsPaths.ensure_file_exists(Path("/path/to/existing/file"))
-        The file exists
         """
         try:
             if file_path.is_file():

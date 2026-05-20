@@ -45,7 +45,7 @@ class PatchStacking:
                 cli=CLIDelta(
                     s_flag="mps_i",
                     l_flag="mps_input",
-                    group=CliGroup.REQUIRED,
+                    group=_MPS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -79,7 +79,7 @@ class PatchStacking:
                 cli=CLIDelta(
                     s_flag="mps_o",
                     l_flag="mps_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MPS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -112,7 +112,7 @@ class PatchStacking:
                 cli=CLIDelta(
                     s_flag="mps_r",
                     l_flag="mps_raw_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_MPS_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),

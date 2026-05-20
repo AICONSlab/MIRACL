@@ -1,3 +1,9 @@
+"""
+This code is written and maintained by Jonas Osmann (j.osmann@alumni.utoronto.ca).
+
+Loader that parses and loads workflow YAML configs and returns a workflow.
+"""
+
 import yaml
 from typing import Dict
 from pathlib import Path
@@ -6,14 +12,12 @@ from miracl.system.workflow.workflow_config import (
     WorkFlowConfig,
     ModuleInstanceConfig,
 )
+from miracl.system.enums.enums_base_modules import CliGroup
 from miracl.system.logger import get_logger
 
-# ---------------------------------------------------------------------------
-# Module-level logger
-# ---------------------------------------------------------------------------
-# This is MIRACL's structured logger. The ``__name__`` dunder ensures log records
-# are attributed to this module's fully-qualified dotted path, which makes it easy to
-# filter in production logs.
+#######################################################################################
+# LOGGER
+#######################################################################################
 logger = get_logger(__name__)
 
 
@@ -21,8 +25,8 @@ class WorkFlowLoader:
     """
     Loads workflow YAML files.
 
-    Simple loader that just parses YAML and creates a WorkflowConfig object.
-    No validation - just parsing.
+    Simple loader that just parses YAML and creates a WorkflowConfig object. No
+    validation, just parsing.
     """
 
     @staticmethod
@@ -74,6 +78,21 @@ class WorkFlowLoader:
                     "Duplicate module instance name detected: '%s'", instance_name
                 )
                 raise ValueError(f"Duplicate module instance name '{instance_name}'.")
+
+            try:
+                cli_group = getattr(CliGroup, module_type)
+
+            except AttributeError:
+                valid = sorted(m.name for m in CliGroup)
+                logger.error(
+                    "Invalid CliGroup reference: '%s' | valid options: %s",
+                    module_type,
+                    valid,
+                )
+                raise ValueError(
+                    f"Invalid module reference '{module_type}' in '{key}'. Left side of '@' must be a CliGroup enum member name. Valid options: {', '.join(valid)}"
+                )
+            module_type = cli_group.ref
 
             # NOTE: When a module has no content ({}), value is None or {}. However,
             # for a module with hooks, value is {"hooks": {"pre_run": [...], "post_run": [...]}}.

@@ -13,9 +13,9 @@ Used by WorkflowOrchestrator to prepare execution plans before module runners ar
 invoked.
 """
 
-# =====================================================================================
+#######################################################################################
 # IMPORTS
-# =====================================================================================
+#######################################################################################
 
 from __future__ import annotations
 from typing import Any, Dict, Optional, List, Tuple
@@ -28,10 +28,11 @@ from miracl.system.workflow.workflow_dsl import (
 from miracl.system.datamodels.miraclobj_datamodel import (
     ResolvedMiraclObj,
 )
+from miracl.system.workflow.workflow_config import ModuleDataFlow
 
-# =====================================================================================
+#######################################################################################
 # RESOLVERS
-# =====================================================================================
+#######################################################################################
 
 
 class WorkflowResolver:
@@ -45,7 +46,7 @@ class WorkflowResolver:
 
     Note:
         The resolver uses a namespaced Context. Each module instance and the optional
-        'vars' block each get their own namespace, basically making key collisions
+        vars block each get their own namespace, basically making key collisions
         impossible.
 
     The resolver is stateless by design, it holds no instance data!
@@ -89,16 +90,9 @@ class WorkflowResolver:
         """
         context = Context()
 
-        # Register vars as an empty namespace if the workflow defines a vars block.
-        # Previously this registered vars values as plain strings. Now we register
-        # empty so vars expressions can be evaluated in Step 2 of resolve() after
-        # module defaults are available.
         if getattr(workflow_config, "vars", None):
             context.register_namespace("vars", {})
 
-        # Register one namespace per module instance, pre-loaded with defaults.
-        # We iterate execution_order (not modules.items()) to respect ordering,
-        # though for default population the order doesn't affect correctness.
         for instance_name in workflow_config.execution_order:
             module_config = workflow_config.modules[instance_name]
             module_type = module_config.type
@@ -109,8 +103,6 @@ class WorkflowResolver:
                 for var_name, obj in parsed_module_objects[class_name].items():
                     instance_defaults[var_name] = obj.content
 
-            # register_namespace() raises if name is already taken. Catches duplicate
-            # instance names that somehow made it past the loader
             # TODO: I should actually double-check how the latter could possibly happen...
             context.register_namespace(instance_name, instance_defaults)
 
@@ -126,8 +118,8 @@ class WorkflowResolver:
     ) -> set[str]:
         """Get the set of valid variable names for a namespace.
 
-        Used to validate that data_flow expressions and external overrides
-        target only variables that actually exist.
+        Used to validate that data_flow expressions and external overrides target only
+        variables that actually exist.
 
         Args:
             namespace: The namespace to check (module instance name or "vars").
@@ -175,11 +167,6 @@ class WorkflowResolver:
         """
         Evaluate lifecycle hook expressions against the namespaced context.
 
-        Hooks are evaluated immediately so that:
-        1. Errors in hooks are caught early (before module execution).
-        2. DSL expressions (ref:, pattern:, fn:) are resolved using the current
-           context.
-
         Args:
             hook_lists: Dict of hook_type -> list of DSL expression strings.
                         e.g. {"pre_run": ["fn:create_file(...)"]}
@@ -222,18 +209,6 @@ class WorkflowResolver:
         """
         Resolves all variable values for every module instance in the workflow, and
         returns the fully populated Context alongside the flat resolved data.
-
-        The Context is needed by callers that must evaluate DSL expressions after
-        resolution. Most importantly WorkflowOrchestrator._bake_hooks() which closes
-        over the Context to produce zero-arg hook callables while it is still alive.
-        Once plan generation is complete the Context is no longer needed and goes out
-        of scope.
-
-        Resolution proceeds in four layers (later layers overwrite earlier ones):
-            1. Module defaults:       extracted from parsed module objects.
-            2. Vars expressions:      evaluated against module defaults.
-            3. External overrides:    injected by the caller (e.g. CLI args).
-            4. Data flow expressions: computed cross-module dependencies.
 
         Args:
             parsed_module_objects:    Dict of class_name -> {var_name -> ResolvedMiraclObj}.
@@ -300,7 +275,9 @@ class WorkflowResolver:
 
         if workflow_config.data_flow:
             for module_instance in workflow_config.execution_order:
-                data_flow_config = workflow_config.data_flow.get(module_instance)
+                data_flow_config = workflow_config.data_flow.get(
+                    module_instance, ModuleDataFlow()
+                )
                 if not data_flow_config:
                     continue
 
@@ -311,7 +288,7 @@ class WorkflowResolver:
                     parsed_module_objects,
                 )
 
-                for variable_name_target, expression in data_flow_config.items():
+                for variable_name_target, expression in data_flow_config.input.items():
                     if variable_name_target not in allowed_vars:
                         raise ValueError(
                             f"Variable '{variable_name_target}' is not a known variable of instance '{module_instance}'. Available variables: {sorted(allowed_vars)}. Variable incorrectly defined in YAML config?"
@@ -356,10 +333,6 @@ class WorkflowResolver:
         """
         Thin wrapper around resolve_with_context() for callers that only need
         the flat resolved data and not the Context.
-
-        Preserves the original public API so existing callers are unaffected. Use
-        resolve_with_context() directly when the Context is needed after resolution,
-        such as for baking hook expressions into callables.
 
         Note:
             At some point I will go through all resolve() calls to change them to

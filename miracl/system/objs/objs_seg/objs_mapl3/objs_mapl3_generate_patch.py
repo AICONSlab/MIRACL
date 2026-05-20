@@ -46,7 +46,7 @@ class GeneratePatch:
                 cli=CLIDelta(
                     s_flag="mgp_i",
                     l_flag="mgp_input",
-                    group=CliGroup.REQUIRED,
+                    group=_GP_GROUP,
                 ),
                 gui=GuiDelta(base=GuiBase()),
             ),
@@ -114,7 +114,7 @@ class GeneratePatch:
                 cli=CLIDelta(
                     s_flag="mgp_o",
                     l_flag="mgp_out_dir",
-                    group=CliGroup.REQUIRED,
+                    group=_GP_GROUP,
                     required=True,
                 ),
                 gui=GuiDelta(base=GuiBase()),

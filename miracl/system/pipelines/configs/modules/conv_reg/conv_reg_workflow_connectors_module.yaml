@@ -1,0 +1,7 @@
+CONV_REG_WORKFLOW_CONNECTORS:
+  script: ""
+  obj_class: "miracl.system.objs.objs_flow.objs_conv_reg_workflow.objs_conv_reg_workflow_connectors.ConvRegWorkflowConnectors"
+  module_type: "MODULE"
+  runner: "miracl.system.workflow.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: false
