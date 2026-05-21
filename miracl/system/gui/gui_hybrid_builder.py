@@ -339,7 +339,14 @@ class MiraclPyQtGuiBuilder(MiraclGUIBuilder):
         # Only show required tabs at GUI startup. Show optional tabs checkbox.
         if self._has_required_tab and self._optional_tab_indices:
             show_cb = self._QtWidgets.QCheckBox("Show optional arguments")
+            # NOTE: Initial state of the optional tabs visibility.
+            # False: Checkbox not checked -> optional tabs hidden when GUI starts
+            # True: Checkbox checked -> optional tabs shown when GUI starts
+            show_cb.setChecked(False)
             show_cb.stateChanged.connect(self._on_show_optional_tabs)
+            self._on_show_optional_tabs(
+                show_cb.checkState()
+            )  # Immediatly communicate checkbox state to show optional tabs method
             root_layout.addWidget(show_cb)
 
         root_layout.addWidget(self._build_footer(dialog))
@@ -501,9 +508,9 @@ class MiraclPyQtGuiBuilder(MiraclGUIBuilder):
                 self._optional_tab_indices.append(index)
 
         # If a required tab exists, hide optional tabs at startup
-        if self._has_required_tab:
-            for idx in self._optional_tab_indices:
-                tab_widget.setTabVisible(idx, False)
+        # if self._has_required_tab:
+        #     for idx in self._optional_tab_indices:
+        #         tab_widget.setTabVisible(idx, False)
 
         # Store widget ref for checkbox callback
         self._tab_widget = tab_widget
