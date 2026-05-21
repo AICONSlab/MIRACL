@@ -557,16 +557,31 @@ class WorkflowGraph:
 
         lines: list[str] = [
             "digraph workflow {",
-            f"    graph [{_attr(label=graph_label, labelloc='t', fontname='Helvetica', fontsize='14', rankdir='LR')}];",
+            f"    graph [{_attr(label=graph_label, labelloc='t', fontname='Helvetica', fontsize='14', rankdir='LR', newrank='true', splines='ortho', rankspec='0.9', nodesep='0.5')}];",
             f"    node  [{_attr(shape='box', fontname='Helvetica', fontsize='11')}];",
             f"    edge  [{_attr(fontname='Helvetica', fontsize='9')}];",
             "",
         ]
 
+        # if show_stages:
+        #     for i, stage in enumerate(self.parallel_stages()):
+        #         lines.append(f"    subgraph cluster_stage_{i} {{")
+        #         lines.append('        graph [style="invis"];')
+        #         lines.append("        rank=same;")
+        #         for node in stage:
+        #             lines.append(f'        "{node}";')
+        #         lines.append("    }\n")
+
         if show_stages:
             for i, stage in enumerate(self.parallel_stages()):
+                parallel_note = f"  ({len(stage)} parallel)" if len(stage) > 1 else ""
+                stage_label = f"Stage {i}{parallel_note}"
                 lines.append(f"    subgraph cluster_stage_{i} {{")
-                lines.append('        graph [style="invis"];')
+                lines.append(
+                    f'        graph [label="{stage_label}", labeljust="l", '
+                    f'style="rounded,dashed", color="steelblue", '
+                    f'fontsize="9", fontcolor="steelblue", bgcolor="azure"];'
+                )
                 lines.append("        rank=same;")
                 for node in stage:
                     lines.append(f'        "{node}";')
@@ -582,11 +597,56 @@ class WorkflowGraph:
 
         lines.append("")
 
+        # for src, dst, data in self._graph.edges(data=True):
+        #     edge_attrs: dict[str, str] = {}
+        #     types = data.get("edge_types", [])
+        #     if "hook" in types and "data_flow" not in types:
+        #         edge_attrs.update({"style": "dashed", "color": "gray"})
+        #     lines.append(f'    "{src}" -> "{dst}" [{_attr(**edge_attrs)}];')
+
         for src, dst, data in self._graph.edges(data=True):
             edge_attrs: dict[str, str] = {}
             types = data.get("edge_types", [])
-            if "hook" in types and "data_flow" not in types:
-                edge_attrs.update({"style": "dashed", "color": "gray"})
+            hook_only = "hook" in types and "data_flow" not in types
+
+            if hook_only:
+                hook_label = ",".join(sorted(data.get("hook_types", [])))
+                edge_attrs.update(
+                    {
+                        "style": "dashed",
+                        "color": "gray50",
+                        "constraint": "false",
+                        "arrowsize": "0.7",
+                    }
+                )
+                if hook_label:
+                    # headlabel anchors to the arrowhead end — never floats free
+                    edge_attrs.update(
+                        {
+                            "headlabel": hook_label,
+                            "fontsize": "7",
+                            "fontcolor": "gray40",
+                            "labeldistance": "2.2",
+                            "labelangle": "-25",
+                        }
+                    )
+            else:
+                params = sorted(data.get("params", []))
+                if params:
+                    # tooltip only: visible on hover in SVG, never clutters the layout
+                    edge_attrs["tooltip"] = ", ".join(params)
+                    # if there are multiple params, a small count badge is enough
+                    if len(params) > 1:
+                        edge_attrs.update(
+                            {
+                                "headlabel": str(len(params)),
+                                "fontsize": "7",
+                                "fontcolor": "steelblue",
+                                "labeldistance": "1.8",
+                                "labelangle": "-25",
+                            }
+                        )
+
             lines.append(f'    "{src}" -> "{dst}" [{_attr(**edge_attrs)}];')
 
         if show_vars and hasattr(self, "_var_module_deps") and self._var_module_deps:
@@ -606,16 +666,32 @@ class WorkflowGraph:
                         f'    "{dep}" -> "vars.{var_key}" [{_attr(style="dashed", color="gray")}];'
                     )
 
+        # if show_legend and show_status:
+        #     lines.append("\n    subgraph cluster_legend {")
+        #     lines.append(
+        #         '        graph [label="Legend", fontsize="10", color="gray70"];'
+        #     )
+        #     for status, attrs in _DOT_STATUS_ATTRS.items():
+        #         lines.append(
+        #             f'        "legend_{status.name}" [{_attr(label=status.name, **attrs)}];'
+        #         )
+        #     lines.append("    }")
         if show_legend and show_status:
+            legend_nodes = [f'"legend_{s.name}"' for s in _DOT_STATUS_ATTRS]
             lines.append("\n    subgraph cluster_legend {")
             lines.append(
-                '        graph [label="Legend", fontsize="10", color="gray70"];'
+                '        graph [label="Legend", fontsize="10", color="gray70", style="rounded"];'
             )
             for status, attrs in _DOT_STATUS_ATTRS.items():
                 lines.append(
-                    f'        "legend_{status.name}" [{_attr(label=status.name, **attrs)}];'
+                    f'        "legend_{status.name}" [{_attr(label=status.name, shape="box", **attrs)}];'
                 )
+            # Chain legend nodes invisibly to keep them in one row and pinned at sink
+            legend_chain = " -> ".join(legend_nodes)
+            lines.append(f"        {legend_chain} [style=invis];")
             lines.append("    }")
+            # Force legend to the rightmost rank so it never intrudes on the workflow
+            lines.append(f"    {{ rank=sink; {' '.join(legend_nodes)}; }}")
 
         lines.append("}")
         dot_src = "\n".join(lines)
