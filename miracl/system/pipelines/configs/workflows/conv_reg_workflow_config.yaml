@@ -21,12 +21,16 @@ data_flow:
   conns: {}
 
   conv: 
-    tiff_folder: "ref:vars.tiff_folder"
-    output_folder: "ref:vars.base_dir"
+    input:
+      tiff_folder: "ref:vars.tiff_folder"
+      output_folder: "ref:vars.base_dir"
+    output:
+      conv_nii: "ref:vars.conv_nii"
 
   reg:
-    nii_folder: "ref:vars.conv_nii"
-    tiff_folder: "ref:vars.tiff_folder"
-    output_path: "ref:vars.base_dir"
-    chan_num: "ref:conv.channum"
-    chan_prefix: "ref:conv.chanprefix"
+    input:
+      nii_folder: "ref:vars.conv_nii"
+      tiff_folder: "ref:vars.tiff_folder"
+      output_path: "ref:vars.base_dir"
+      chan_num: "ref:conv.channum"
+      chan_prefix: "ref:conv.chanprefix"
