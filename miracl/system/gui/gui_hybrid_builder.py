@@ -458,11 +458,82 @@ class MiraclPyQtGuiBuilder(MiraclGUIBuilder):
         if hints:
             lines.extend(["", " | ".join(hints)])
 
-        QtWidgets.QMessageBox.information(
-            None,
-            f"About {meta.command}",
-            "\n".join(lines),
+        text = "\n".join(lines)
+
+        dialog = QtWidgets.QDialog()
+        dialog.setWindowTitle(f"About {meta.command}")
+
+        # dialog.setMinimumSize(700, 500)
+        # dialog.adjustSize()
+        # dialog.resize(
+        #     min(dialog.width(), 1000),
+        #     min(dialog.height(), 800),
+        # )
+        # dialog.resize(900, 700)
+
+        screen = QtWidgets.QApplication.primaryScreen()
+        geometry = screen.availableGeometry()
+
+        max_width = int(geometry.width() * 0.7)
+        max_height = int(geometry.height() * 0.8)
+
+        dialog.resize(
+            min(dialog.width(), max_width),
+            min(dialog.height(), max_height),
         )
+
+        root_layout = QtWidgets.QVBoxLayout(dialog)
+        header_layout = QtWidgets.QHBoxLayout()
+
+        icon_label = QtWidgets.QLabel()
+
+        icon = dialog.style().standardIcon(QtWidgets.QStyle.SP_MessageBoxInformation)
+
+        icon_label.setPixmap(icon.pixmap(48, 48))
+
+        title_label = QtWidgets.QLabel(
+            f"<h2>Help for 'miracl {meta.module} {meta.command}'</h2>"
+        )
+
+        header_layout.addWidget(icon_label)
+        header_layout.addWidget(title_label)
+        header_layout.addStretch()
+
+        root_layout.addLayout(header_layout)
+
+        # layout = QtWidgets.QVBoxLayout(dialog)
+
+        text_box = QtWidgets.QPlainTextEdit()
+        text_box.setReadOnly(True)
+        text_box.setPlainText(text)
+
+        # font = text_box.font()
+        # font.setPointSize(10)
+        font = self._QtGui.QFontDatabase.systemFont(self._QtGui.QFontDatabase.FixedFont)
+        text_box.setFont(font)
+
+        root_layout.addWidget(text_box)
+
+        buttons = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok)
+        buttons.accepted.connect(dialog.accept)
+
+        root_layout.addWidget(buttons)
+
+        dialog.exec()
+
+        # msg_box = QtWidgets.QMessageBox()
+        # msg_box.setWindowTitle(f"About {meta.command}")
+        # msg_box.setText("\n".join(lines))
+        #
+        # msg_box.resize(800, 800)
+        #
+        # msg_box.exec_()
+
+        # QtWidgets.QMessageBox.information(
+        #     None,
+        #     f"About {meta.command}",
+        #     "\n".join(lines),
+        # )
 
     def _build_tabs(self, schema: GuiSchema) -> "QtWidgets.QTabWidget":
         """
