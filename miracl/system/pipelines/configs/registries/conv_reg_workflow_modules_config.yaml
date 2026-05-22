@@ -19,26 +19,28 @@ _meta:
     analysis and cross-subject comparisons.
   extended_help: |
     Conversion Outputs:
-      - {name}{downsample}x_down{channel}.nii.gz - Located in conv_final/ - Primary conversion output representing the downsampled NIfTI file from TIFF conversion miracl_conv_convertTIFFtoNII.py
+      - {name}{downsample}x_down{channel}.nii.gz, located in conv_final/:
+          Primary conversion output representing the downsampled NIfTI file from TIFF conversion miracl_conv_convertTIFFtoNII.py
 
     Registration Outputs:
-      - clar_allen_space.nii.gz - Located in reg_final/ - Critical file containing CLARITY data warped to Allen reference space for cross-subject comparison miracl_workflow_registration_clarity-allen.sh
-      - clar_downsample_res{vox}um.nii.gz - Located in reg_final/ - High importance file containing oriented downsampled CLARITY data for validation miracl_workflow_registration_clarity-allen.sh
-      - annotation_hemi_{hemi}_{vox}um_clar_downsample.nii.gz - Located in reg_final/ - Critical file containing Allen labels in native CLARITY space for region-based analysis miracl_workflow_registration_clarity-allen.sh
+      - clar_allen_space.nii.gz, located in reg_final/: Critical file containing CLARITY data warped to Allen reference space for cross-subject comparison miracl_workflow_registration_clarity-allen.sh
+      - clar_downsample_res{vox}um.nii.gz, located in reg_final/: High importance file containing oriented downsampled CLARITY data for validation miracl_workflow_registration_clarity-allen.sh
+      - annotation_hemi_{hemi}_{vox}um_clar_downsample.nii.gz, located in reg_final/: Critical file containing Allen labels in native CLARITY space for region-based analysis miracl_workflow_registration_clarity-allen.sh
     
     Full-Resolution Analysis Files:
-      - annotation_hemi_{hemi}_{vox}um_clar.tif - Located in reg_final/ - High importance file containing Allen labels in original full-resolution CLARITY space miracl_reg_clar-allen.sh
-      - annotation_hemi_{hemi}_{vox}um_clar_vox.tif - Located in reg_final/ - Medium importance file containing Allen labels in oriented CLARITY space (voxel format) miracl_workflow_registration_clarity-allen.sh
+      - annotation_hemi_{hemi}_{vox}um_clar.tif, located in reg_final/: High importance file containing Allen labels in original full-resolution CLARITY space miracl_reg_clar-allen.sh
+      - annotation_hemi_{hemi}_{vox}um_clar_vox.tif, located in reg_final/: Medium importance file containing Allen labels in oriented CLARITY space (voxel format) miracl_workflow_registration_clarity-allen.sh
 
     Validation Files:
-      - allen_labels_to_clar_mosaic.png - Located in reg_final/ - High importance file providing registration quality validation mosaic miracl_reg_clar-allen.sh
+      - allen_labels_to_clar_mosaic.png, located in reg_final/: High importance file providing registration quality validation mosaic miracl_reg_clar-allen.sh
 
     Key Usage Notes:
       - For registration validation: Overlay annotation_hemi_{hemi}_{vox}um_clar_downsample.nii.gz on clar_downsample_res{vox}um.nii.gz ace_flow.rst
       - For cross-subject analysis: Use clar_allen_space.nii.gz in Allen atlas space
       - For high-resolution analysis: Use the .tif label files in original CLARITY space
 
-    The workflow produces a complete pipeline from raw TIFF data to atlas-aligned volumes, with the most critical files being the converted NIfTI, the Allen-space registered data, and the warped annotation labels for quantitative analysis.
+    The workflow produces a complete pipeline from raw TIFF data to atlas-aligned volumes, with the most critical files being the converted NIfTI, 
+    the Allen-space registered data, and the warped annotation labels for quantitative analysis.
 
     Notes:
       - {vox} represents voxel resolution (10, 25, or 50 μm)
