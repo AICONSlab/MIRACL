@@ -325,6 +325,31 @@ if [[ -z ${ort} ]] || [[ "${ort}" == "None" ]]; then
 fi
 ## if A-P flipped (PLS) & if R-L -> ALS
 
+
+
+if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
+  if [[ -z ${hemi} ]] || [[ "${hemi}" == "None" ]] || [[ "${hemi}" == "combined" ]]; then
+    hemi=combined
+  else
+    if [[ "${hemi}" != "combined" ]] && [[ "${hemi}" != "split" ]]; then
+      printf "ERROR: < -m => (hemi) > only takes as inputs: combined or split"
+      exit 1
+    fi
+  fi
+  if [[ -z ${vox} ]] || [[ "${vox}" == "None" ]]; then
+    vox=10
+  else
+    if [[ "${vox}" != 10 ]] && [[ "${vox}" != 25 ]] && [[ "${vox}" != 50 ]]; then
+      printf "ERROR: < -v => (vox) > only takes as inputs: 10, 25 or 50"
+      exit 1
+    fi
+  fi
+
+  lbls=${atlasdir}/ara/annotation/annotation_hemi_${hemi}_${vox}um.nii.gz
+fi
+
+
+
 # If want to warp multi-res / hemi lbls
 if [[ -z ${lbls} ]] || [[ "${lbls}" == "None" ]]; then
 
@@ -369,15 +394,27 @@ fi
 # exit 1
 
 # set side for hemisphere registration
-if [[ -z ${side} ]] || [[ "${side}" == "None" ]]; then
-  side=""
-elif [[ "${side}" == "rh" ]]; then
-  side="_right"
-elif [[ "${side}" == "lh" ]]; then
-  side="_left"
-else
-  printf "ERROR: < -s => (side) > only takes as inputs: rh or lh"
-  exit 1
+# if [[ -z ${side} ]] || [[ "${side}" == "None" ]]; then
+#   side=""
+# elif [[ "${side}" == "rh" ]]; then
+#   side="_right"
+# elif [[ "${side}" == "lh" ]]; then
+#   side="_left"
+# else
+#   printf "ERROR: < -s => (side) > only takes as inputs: rh or lh"
+#   exit 1
+# fi
+
+side=""
+if [[ "${hemi}" == "split" ]]; then
+  if [[ "${side}" == "rh" ]]; then
+    side="_right"
+  elif [[ "${side}" == "lh" ]]; then
+    side="_left"
+  else
+    printf "ERROR: < -s => (side) > only takes as inputs: rh or lh"
+    exit 1
+  fi
 fi
 
 base=$(basename "${lbls}")

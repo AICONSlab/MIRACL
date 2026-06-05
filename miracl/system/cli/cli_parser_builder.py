@@ -213,7 +213,7 @@ class MiraclCLIBuilder:
         if meta.min_memory_gb:
             runtime_parts.append(f"Memory         : {meta.min_memory_gb}")
         if meta.requires_gpu:
-            runtime_parts.append("GPU             : Required")
+            runtime_parts.append("GPU            : Required")
         if meta.version:
             runtime_parts.append(f"Method version : {meta.version}")
         if meta.miracl_version:

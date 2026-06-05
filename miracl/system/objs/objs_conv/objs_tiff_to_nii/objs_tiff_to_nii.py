@@ -187,7 +187,7 @@ class ConvTiffNiiObjs:
             l_flag="channum",
             obj_type=ArgumentType.INTEGER,
             help="Chan # for extracting single channel from multiple channel data (default: %(default)s)",
-            default=None,
+            default=-999999,
         ),
         gui=GuiNamespace(
             base=GuiBase(
@@ -242,7 +242,7 @@ class ConvTiffNiiObjs:
             l_flag="chanprefix",
             obj_type=ArgumentType.STRING,
             help="Chan prefix (string before channel number in file name, not including channel #). ex: C00 (default: %(default)s)",
-            default=None,
+            default="-999999",
         ),
         gui=GuiNamespace(
             base=GuiBase(
@@ -505,7 +505,7 @@ class ConvTiffNiiObjs:
             obj_type=ArgumentType.LIST,
             nargs=3,
             help="Nii center (default: 0 0 3 ) corresponding to Allen atlas nii template",
-            default=[0, 0, 3],
+            default=[0, 0, 0],
         ),
         gui=GuiNamespace(
             base=GuiBase(
@@ -658,7 +658,7 @@ class ConvTiffNiiObjs:
             l_flag="percentile_thr",
             obj_type=ArgumentType.FLOAT,
             help="Percentile threshold for intensity correction (default: %(default)s)",
-            default=0.01,
+            default=0.00,
         ),
         gui=GuiNamespace(
             base=GuiBase(

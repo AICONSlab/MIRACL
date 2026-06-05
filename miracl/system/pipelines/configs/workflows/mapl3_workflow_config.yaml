@@ -10,6 +10,7 @@ vars:
   brain_mask_folder: "pattern:{ref:vars.base_res_dir}/reg_final/annotation_hemi_{ref:reg.hemi}_{ref:reg.voxel_size}um_tiff_clar"
   clar_allen_reg_folder: "pattern:{ref:vars.base_res_dir}/clar_allen_reg"
   generated_patches: "pattern:{ref:vars.base_res_dir}/generated_patches"
+  gen_patch_metadata_json: "pattern:{ref:vars.generated_patches}/metadata.json"
   preprocessed: "pattern:{ref:vars.base_res_dir}/preprocessing_parallel"
   inference_out_prob: "pattern:{ref:vars.base_res_dir}/inference/out_prob"
   normalized_data: "pattern:{ref:vars.base_res_dir}/normalized_raw_data"
@@ -94,6 +95,8 @@ data_flow:
       nii_folder:  "ref:vars.converted_nii"
       tiff_folder: "ref:vars.raw_autoflor_dir"
       output_path: "ref:vars.base_res_dir"
+      chan_num: "ref:conv.channum"
+      chan_prefix: "ref:conv.chanprefix"
     output:
       brain_mask_folder:    "ref:vars.brain_mask_folder"
       clar_allen_reg_folder: "ref:vars.clar_allen_reg_folder"
@@ -104,10 +107,12 @@ data_flow:
       out_dir:    "ref:vars.base_res_dir"
     output:
       generated_patches: "ref:vars.generated_patches"
+      gen_patch_metadata_json: "ref:vars.gen_patch_metadata_json"
   preproc_para:
     input:
       input:   "ref:vars.generated_patches"
       out_dir: "ref:vars.base_res_dir"
+      metadata_file: "ref:vars.gen_patch_metadata_json"
     output:
       preprocessed: "ref:vars.preprocessed"
   inference:

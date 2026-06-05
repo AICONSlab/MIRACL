@@ -96,8 +96,8 @@ class PreprocessingParallel:
         version_added="2.4.0",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
-            s_flag="mpp_c",
-            l_flag="mpp_cpu_load",
+            s_flag="cpu",
+            l_flag="cpu_load",
             obj_type=ArgumentType.FLOAT,
             help="fraction of cpus to be used for parallelization. Value needs to be between 0-1 (default: %(default)s)",
             required=False,
@@ -176,7 +176,7 @@ class PreprocessingParallel:
         version_added="2.4.0",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
-            s_flag="cl_lf",
+            s_flag="cllf",
             l_flag="cl_lsm_footprint",
             obj_type=ArgumentType.INTEGER,
             help="structure for estimating lsm stripes 1x1xVALUE (default: %(default)s)",
@@ -214,7 +214,7 @@ class PreprocessingParallel:
         version_added="2.4.0",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
-            s_flag="cl_bf",
+            s_flag="clbf",
             l_flag="cl_back_footprint",
             obj_type=ArgumentType.INTEGER,
             help="structure for estimating background: VALUExVALUExVALUE (default: %(default)s)",
@@ -252,7 +252,7 @@ class PreprocessingParallel:
         version_added="2.4.0",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
-            s_flag="cl_bd",
+            s_flag="clbd",
             l_flag="cl_back_downsample",
             obj_type=ArgumentType.INTEGER,
             help="downsample ratio applied for background stimation; patch size should be devidable by this value (default: %(default)s)",
@@ -404,7 +404,7 @@ class PreprocessingParallel:
         version_added="2.4.0",
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
-            s_flag="sir",
+            s_flag="sirf",
             l_flag="save_intermediate_results_flag",
             obj_type=ArgumentType.CUSTOM_BOOL,
             help="whether to save intermediate results for debugging (default: %(default)s)",

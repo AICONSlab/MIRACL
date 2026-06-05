@@ -303,24 +303,34 @@ def parse_inputs(parser, args):
             assert isinstance(args.down, int)
             d = args.down
 
-        if args.channum is None:
-            chann = 0
-            print("\n channel # not specified ... choosing default value of %d" % chann)
-        else:
-            assert isinstance(args.channum, int)
-            chann = args.channum
-
-            if args.chanprefix is None:
-                sys.exit("-cp (channel prefix) not specified ")
+        # if args.channum is "-999999":
+        #     chann = 0
+        #     print("\n channel # not specified ... choosing default value of %d" % chann)
+        # else:
+        #     assert isinstance(args.channum, int)
+        #     chann = args.channum
+        #
+        #     if args.chanprefix is None:
+        #         sys.exit("-cp (channel prefix) not specified ")
 
         # chanp = args.chanprefix if args.chanprefix is not None else None
-        chanp = (
-            args.chanprefix
-            if args.chanprefix != "None"
-            else None
-            if args.chanprefix is not None
-            else None
-        )
+        chanp = None if args.chanprefix in ("-999999", -999999) else args.chanprefix
+        # chanp = (
+        #     args.chanprefix
+        #     if args.chanprefix != "None"
+        #     else None
+        #     if args.chanprefix is not None
+        #     else None
+        # )
+
+        # 1. Resolve channel number (handles both string and integer -999999)
+        chann = 0 if args.channum in ("-999999", -999999) else int(args.channum)
+
+        if chann == 0:
+            print("\n channel # not specified ... choosing default value of %d" % chann)
+
+        if chann != 0 and chanp is None:
+            sys.exit("-cp (channel prefix) not specified ")
 
         if args.channame is None:
             chan = "eyfp"

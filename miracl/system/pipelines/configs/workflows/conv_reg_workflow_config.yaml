@@ -18,7 +18,10 @@ execution_order:
   - reg
 
 data_flow:
-  conns: {}
+  conns:
+    output:
+      tiff_folder: "ref:vars.tiff_folder"
+      output_folder: "ref:vars.base_dir"
 
   conv: 
     input:
