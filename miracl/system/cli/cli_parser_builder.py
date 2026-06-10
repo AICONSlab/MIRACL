@@ -1,4 +1,6 @@
 import argparse
+from curses import tigetflag
+import difflib
 from typing import List, Tuple, Dict, Any, Optional
 from miracl.system.enums.enums_base_modules import CliGroup
 from miracl.system.logger import get_logger
@@ -231,11 +233,47 @@ class MiraclCLIBuilder:
 
         return "\n".join(parts) if parts else None
 
+    # NOTE: Leaving this in here for now until I tested the new difflib method below
+    #
+    # def parse(self, argv: Optional[List[str]] = None) -> argparse.Namespace:
+    #     logger.info("Parsing CLI arguments")
+    #     logger.debug("Raw argv input | argv=%s", argv)
+    #
+    #     namespace = self.parser.parse_args(argv)
+    #
+    #     logger.success("CLI parsing complete")
+    #     logger.debug("Parsed namespace | values=%s", vars(namespace))
+    #
+    #     return namespace
+
     def parse(self, argv: Optional[List[str]] = None) -> argparse.Namespace:
         logger.info("Parsing CLI arguments")
         logger.debug("Raw argv input | argv=%s", argv)
 
-        namespace = self.parser.parse_args(argv)
+        namespace, unknown = self.parser.parse_known_args(argv)
+
+        if unknown:
+            valid_flags = [
+                s for action in self.parser._actions for s in action.option_strings
+            ]
+
+            suggested = {}
+            for tok in unknown:
+                if tok.startswith("-"):
+                    matches = difflib.get_close_matches(
+                        tok,
+                        valid_flags,
+                        n=1,
+                        cutoff=0.6,
+                    )
+                    if matches:
+                        suggested[tok] = matches[0]
+
+            msg = f"Unrecognized args: {' '.join(unknown)}"
+            for tok, suggestion in suggested.items():
+                msg += f"\n  '{tok}' - did you mean: '{suggestion}'?"
+
+            self.parser.error(msg)
 
         logger.success("CLI parsing complete")
         logger.debug("Parsed namespace | values=%s", vars(namespace))
