@@ -73,10 +73,10 @@ CONV_TIFF_NII:
   $include: ../modules/conv/conversion_module.yaml
   module_type: "FLOW_CONV_REG"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 REG_CLAR_ALLEN:
   $include: ../modules/reg/registration_module.yaml
   module_type: "FLOW_CONV_REG"
   flag_map: "autogenerate_short"
-  execute: false
+  execute: true
