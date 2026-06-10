@@ -73,6 +73,7 @@ my_parser.add_argument(
     default="uint16",
 )
 
+zero_filled_count = 0
 
 # -------------------------------------------------------
 # Stitch patches for a single Z-index
@@ -113,6 +114,7 @@ def stitch_z_index(
     z_index, patches_dir, original_height, original_width, patch_size, dtype, metadata
 ):
     """Stitch all patches for a given Z-index."""
+    global zero_filled_count
     # Initialize an empty array for the stitched volume
     height = original_height // patch_size + 1 * (original_height % patch_size > 0)
     width = original_width // patch_size + 1 * (original_width % patch_size > 0)
@@ -138,7 +140,10 @@ def stitch_z_index(
             print(f"Loading patch: {patch_path}")
             patch = tifffile.imread(patch_path)
         else:
-            print(f"Patch not found: {patch_path}. Using zero-filled patch.")
+            zero_filled_count += 1
+            print(
+                f"Empty patch skipped during inference: {patch_path}. Using zero-filled patch."
+            )
             patch = np.zeros((patch_size, patch_size, patch_size), dtype=dtype)
 
         # Place the patch in the stitched volume
@@ -271,6 +276,9 @@ def main(args):
 
         cnt_depth += patch_size
 
+    print(
+        f"{zero_filled_count} empty patches where filled with zeros i.e. not processed by inference."
+    )
     print(f"Stitched Z-stack saved to {output_dir}.")
 
 
