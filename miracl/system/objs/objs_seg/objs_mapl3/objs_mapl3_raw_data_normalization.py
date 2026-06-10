@@ -166,7 +166,7 @@ class RawDataNormalization:
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
             s_flag="a",
-            l_flag="num_alpha",
+            l_flag="alpha",
             obj_type=ArgumentType.FLOAT,
             help="alpha for linear mixation of probability map and raw image; 0 (only model) 1 (only raw image) (default: %(default)s)",
             required=False,
@@ -207,7 +207,7 @@ class RawDataNormalization:
         tags=["mapl3", "seg", "mapl3_flow"],
         cli=CLISpec(
             s_flag="t",
-            l_flag="num_thr",
+            l_flag="thr",
             obj_type=ArgumentType.FLOAT,
             help="threshold for binarization (default: %(default)s)",
             required=False,
