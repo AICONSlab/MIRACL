@@ -26,6 +26,7 @@ class UtilfnsPaths:
                 permissions.
             OSError: If the folder cannot be created for any other OS-level reason.
         """
+        folder_path = Path(folder_path)
         if dev_mode:
             logger.info(f"dev_mode=True | Skipping folder creation: {folder_path}")
             return
@@ -53,6 +54,7 @@ class UtilfnsPaths:
         :raises FileNotFoundError: If the file does not exist
         :raises OSError: If there's an issue accessing the file
         """
+        file_path = Path(file_path)
         try:
             if file_path.is_file():
                 logger.debug(f"The file exists: {file_path}")

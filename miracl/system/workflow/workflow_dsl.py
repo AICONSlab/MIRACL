@@ -455,11 +455,13 @@ def _parse_ast_arg(node: ast.expr) -> Expression:
         return FunctionCall(nested_func_name, nested_args)
 
     val = None
-    if isinstance(node, ast.Str):
+    if isinstance(node, ast.Constant):
+        val = node.value
+    elif isinstance(node, ast.Str):
         val = node.s
     elif isinstance(node, ast.Num):
         val = node.n
-    elif isinstance(node, ast.Constant):
+    elif isinstance(node, ast.NameConstant):
         val = node.value
     else:
         raise ValueError(f"Unsupported AST arg type: {ast.dump(node)}")

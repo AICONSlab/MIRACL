@@ -42,19 +42,19 @@ modules:
   MAPL3_WARP_CLAR_ALLEN@warp_vox:
     hooks:
       pre_run:
-        - "fn:create_ort2std_file('ref:vars.raw_signal_dir', 'ref:reg.orient_code', 'ref:vars.voxelized_normalization', 'True')"
+        - "fn:create_ort2std_file('ref:vars.raw_signal_dir', 'ref:reg.orient_code', 'ref:vars.voxelized_normalization', True)"
       post_run:
-        - "fn:move_warping_reg_final_contents('pattern:{ref:vars.base_res_dir}/warped_results', 'True')"
+        - "fn:move_warping_reg_final_contents('pattern:{ref:vars.base_res_dir}/warped_results', True)"
   MAPL3_WARP_CLAR_ALLEN@warp_skel:
     hooks:
       pre_run:
-        - "fn:create_ort2std_file('ref:vars.raw_signal_dir', 'ref:reg.orient_code', 'ref:vars.voxelized_skeletonization', 'True')"
+        - "fn:create_ort2std_file('ref:vars.raw_signal_dir', 'ref:reg.orient_code', 'ref:vars.voxelized_skeletonization', True)"
       post_run:
-        - "fn:move_warping_reg_final_contents('pattern:{ref:vars.base_res_dir}/warped_results', 'True')"
+        - "fn:move_warping_reg_final_contents('pattern:{ref:vars.base_res_dir}/warped_results', True)"
   MAPL3_PLOT_WARPED_DATA@plot_warped_skel:
     hooks:
       pre_run:
-        - "fn:ensure_folder_exists('ref:vars.heatmaps_dir', 'True')"
+        - "fn:ensure_folder_exists('ref:vars.heatmaps_dir', False)"
   MAPL3_PLOT_WARPED_DATA@plot_warped_norm: {}
   MAPL3_FEAT_EXTRACT@feat_extract_skel: {}
   MAPL3_FEAT_EXTRACT@feat_extract_norm: {}
@@ -95,7 +95,7 @@ data_flow:
       nii_folder:  "ref:vars.converted_nii"
       tiff_folder: "ref:vars.raw_autoflor_dir"
       output_path: "ref:vars.base_res_dir"
-      chan_num: "ref:conv.channum"
+      chan_num:    "ref:conv.channum"
       chan_prefix: "ref:conv.chanprefix"
     output:
       brain_mask_folder:    "ref:vars.brain_mask_folder"
@@ -133,17 +133,18 @@ data_flow:
       stacked_patches: "ref:vars.stacked_patches"
   normalization:
     input:
-      input_dir:  "ref:vars.stacked_patches"
+      input_dir:   "ref:vars.stacked_patches"
       tiff_folder: "ref:vars.raw_signal_dir"
-      out_dir:    "ref:vars.base_res_dir"
-      brain_mask: "ref:vars.brain_mask_folder"
+      out_dir:     "ref:vars.base_res_dir"
+      brain_mask:  "ref:vars.brain_mask_folder"
     output:
       normalized_data: "ref:vars.normalized_data"
   skeletonization:
     input:
-      input_dir:  "ref:vars.stacked_patches"
-      brain_mask: "ref:vars.brain_mask_folder"
-      out_dir:    "ref:vars.base_res_dir"
+      input_dir:   "ref:vars.stacked_patches"
+      brain_mask:  "ref:vars.brain_mask_folder"
+      out_dir:     "ref:vars.base_res_dir"
+      tiff_folder: "ref:vars.raw_signal_dir"
     output:
       skeletonized_data: "ref:vars.skeletonized_data"
   norm_vox:
