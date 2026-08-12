@@ -1,14 +1,14 @@
 version: "3.3"
 services:
   miracl:
-    image: miracl_cho_force_lab_img:latest
+    image: sgc_miracl_ye_lab_img:latest
     tty: true
     environment:
       - DISPLAY
     stdin_open: true
     network_mode: host
-    container_name: miracl_cho_force_lab
-    shm_size: 109216mb
+    container_name: sgc_miracl_ye_lab
+    shm_size: 866501mb
     deploy:
       resources:
         reservations:
@@ -18,4 +18,11 @@ services:
               capabilities: [gpu]
     volumes:
       - /home/sgablecook/.Xauthority:/home/sgablecook/.Xauthority
-      - /home/sgablecook/git/miracl/miracl:/code/miracl
+      - /home/sgablecook/git/MIRACL/miracl:/code/miracl
+      - /data1/projects/sgablecook/ye_lab:/ye_lab
+      - /data1/projects/sgablecook/mapl3:/mapl3
+      - /data1/projects/sgablecook/novas3d:/novas3d
+      - /data1/projects/sgablecook/LSFM-pipeline:/LSFM-pipeline 
+      - /data4/projects/ahmadreza/deeptrace:/deeptrace
+      - /data3/projects/ahmadreza/deeptrace/experiments:/experiments
+      - /data3/projects/ahmadreza/DeepTrace/postprocessing:/mapl3/postprocessing

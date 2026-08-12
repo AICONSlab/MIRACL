@@ -7,6 +7,8 @@
 /depends/
 /data/
 
+/.devcontainer/
+
 # Singularity #
 ###############
 miracl.img
