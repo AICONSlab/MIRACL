@@ -3,8 +3,9 @@ import sys
 import argparse
 import subprocess
 from miracl.lbls import (
-    miracl_lbls_stats, 
-    miracl_lbls_get_graph_info, 
+    miracl_lbls_stats,
+    miracl_lbls_stats_waxholm,
+    miracl_lbls_get_graph_info,
     miracl_lbls_generate_parents_at_depth,
     miracl_lbls_get_gp_volumes,
 )
@@ -12,6 +13,10 @@ from miracl.lbls import (
 
 def run_lbl_stats(parser, args):
     miracl_lbls_stats.main(args)
+
+
+def run_lbl_stats_waxholm(parser, args):
+    miracl_lbls_stats_waxholm.main(args)
 
 
 def run_graph_info(parser, args):
@@ -78,6 +83,13 @@ def get_parser():
                                              usage=lbl_stats_parser.usage,
                                              help="Get label stats")
     parser_lbl_stats.set_defaults(func=run_lbl_stats)
+
+    # lbl stats (waxholm)
+    lbl_stats_waxholm_parser = miracl_lbls_stats_waxholm.parsefn()
+    parser_lbl_stats_waxholm = subparsers.add_parser('stats_waxholm', parents=[lbl_stats_waxholm_parser], add_help=False,
+                                             usage=lbl_stats_waxholm_parser.usage,
+                                             help="Get label stats (Waxholm atlas)")
+    parser_lbl_stats_waxholm.set_defaults(func=run_lbl_stats_waxholm)
 
     # graph info
     graph_info_parser = miracl_lbls_get_graph_info.parsefn()

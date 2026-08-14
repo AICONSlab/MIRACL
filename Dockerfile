@@ -55,6 +55,7 @@ RUN mkdir -p /code/atlases/ara && \
     wget -P /code/atlases https://www.dropbox.com/sh/j31vurlp6h4lvod/AAAIKpYJQizkAte3Ju5DZYj8a --content-disposition && \
     unzip /code/atlases/ara.zip -x / -d /code/atlases/ara
 
+RUN mkdir -p /code/atlases/waxholm && wget -P /code/atlases/waxholm https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/atlases/waxholm/annotation/WHS_SD_rat_atlas_v4.label?download=true --content-disposition
 # RUN conda install -y --no-update-deps pyqt=5
 
 # Add atlas ENV vars
