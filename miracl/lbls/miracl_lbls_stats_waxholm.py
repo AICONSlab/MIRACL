@@ -33,7 +33,7 @@ def get_count_stats(invol, lbls):
     ids_arr = np.unique(lbls_arr)
     res_df = pd.DataFrame({
         "LabelID": ids_arr,
-        "intensity_count": counts[ids_arr].astype(np.int64),
+        "Intensity_Count": counts[ids_arr].astype(np.int64),
     })
 
     print("Done getting intensity counts.")
@@ -55,31 +55,42 @@ def get_lstat_df(invol, lbls):
     columns = ["LabelID", "Mean", "StdD", "Max", "Min", "Count", "Vol_mm3",
                "ExtentX", "ExtentY", "ExtentZ"]
     result_df = pd.read_csv(io.StringIO(result.stdout), sep=r"\s+", skiprows=1, names=columns)
+    print("Done getting label statistics.")
     return result_df
 
 
 
 def merge_stats_df(stats_df, count_stats):
     """Merge intensity counts and Waxholm atlas label names into stats_df, and reorder
-    columns so name and intensity_count sit right after LabelID.
+    columns so name and Intensity_Count sit right after LabelID.
 
     stats_df (pd.DataFrame): output of get_lstat_df
     count_stats (pd.DataFrame): output of get_count_stats
     """
+    print("Merging statistics...")
     # Merge intensity counts into stats_df
     stats_df = stats_df.merge(count_stats, on="LabelID", how="left")
-    # Read in tsv from atlas
-    annot_tsv = pd.read_csv("/code/atlases/waxholm/WHS_SD_rat_atlas_v4.label", sep="\t")
+    # Read in ITK-SNAP label description file from atlas
+    print("Reading Waxholm atlas label names...")
+    annot_labels = pd.read_csv(
+        "/code/atlases/waxholm/WHS_SD_rat_atlas_v4.label",
+        comment="#",
+        sep=r"\s+",
+        header=None,
+        names=["index", "R", "G", "B", "A", "VIS", "MSH", "name"],
+        quotechar='"',
+    )
     # Merge label names into stats_df
     stats_df = stats_df.merge(
-        annot_tsv[["index", "name"]], left_on="LabelID", right_on="index", how="left"
+        annot_labels[["index", "name"]], left_on="LabelID", right_on="index", how="left"
     ).drop(columns=["index"])
-    # Move name column to right after LabelID, and intensity_count right after name
+    # Move name column to right after LabelID, and Intensity_Count right after name
     cols = stats_df.columns.tolist()
     cols.remove("name")
     cols.insert(cols.index("LabelID") + 1, "name")
-    cols.remove("intensity_count")
-    cols.insert(cols.index("name") + 1, "intensity_count")
+    cols.remove("Intensity_Count")
+    cols.insert(cols.index("name") + 1, "Intensity_Count")
+    print("Done merging statistics.")
     return stats_df[cols]
 
 def parse_inputs(parser, args):
@@ -113,8 +124,10 @@ def main(args):
     args: parsed arguments from parsefn(), with invol, lbls, and outfile attributes
     """
     # parse in args
+    print("Parsing inputs...")
     parser = parsefn()
     invol, lbls, outfile, sort = parse_inputs(parser, args)
+    print(f"Inputs OK. invol={invol}, lbls={lbls}, outfile={outfile}, sort={sort}")
 
     # Get the dataframe from c3d -lstat
     stats_df = get_lstat_df(
@@ -124,10 +137,10 @@ def main(args):
 
     # Generate additional stats and merge into output file
     count_stats = get_count_stats(invol, lbls)
-    print("Done getting label statistics.")
     stats_df = merge_stats_df(stats_df, count_stats)
 
     # Sort dataframe
+    print(f"Sorting by {sort}...")
     stats_df = stats_df.sort_values([sort], ascending=False)
 
     # Save to csv
