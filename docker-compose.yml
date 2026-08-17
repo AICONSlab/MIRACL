@@ -19,3 +19,5 @@ services:
     volumes:
       - /home/sgablecook/.Xauthority:/home/sgablecook/.Xauthority
       - /home/sgablecook/git/MIRACL/miracl:/code/miracl
+      - /home/sgablecook/git/MIRACL/tests:/code/tests
+      - /data1/projects/sgablecook/dustin_data:/rat_data

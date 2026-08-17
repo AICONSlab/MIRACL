@@ -1,3 +1,5 @@
+# Produce statistics using the Waxholm atlas. Derived from miracl_lbls_stats.py. Testing testing 123
+
 import argparse
 import subprocess
 import io
@@ -58,18 +60,18 @@ def get_lstat_df(invol, lbls):
     print("Done getting label statistics.")
     return result_df
 
-
-
-def merge_stats_df(stats_df, count_stats):
+def merge_stats_df(stats_df, count_stats, sort):
     """Merge intensity counts and Waxholm atlas label names into stats_df, and reorder
     columns so name and Intensity_Count sit right after LabelID.
 
     stats_df (pd.DataFrame): output of get_lstat_df
     count_stats (pd.DataFrame): output of get_count_stats
+    sort (str): The column to sort the labels by
     """
     print("Merging statistics...")
     # Merge intensity counts into stats_df
     stats_df = stats_df.merge(count_stats, on="LabelID", how="left")
+
     # Read in ITK-SNAP label description file from atlas
     print("Reading Waxholm atlas label names...")
     annot_labels = pd.read_csv(
@@ -80,22 +82,27 @@ def merge_stats_df(stats_df, count_stats):
         names=["index", "R", "G", "B", "A", "VIS", "MSH", "name"],
         quotechar='"',
     )
+
     # Merge label names into stats_df
     stats_df = stats_df.merge(
         annot_labels[["index", "name"]], left_on="LabelID", right_on="index", how="left"
     ).drop(columns=["index"])
-    # Move name column to right after LabelID, and Intensity_Count right after name
-    cols = stats_df.columns.tolist()
-    cols.remove("name")
-    cols.insert(cols.index("LabelID") + 1, "name")
-    cols.remove("Intensity_Count")
-    cols.insert(cols.index("name") + 1, "Intensity_Count")
+
+    # Re-order columns with info then sorted column of choice
+    cols = ["LabelID", "name", sort]
+    df_cols = stats_df.columns.values
+    all_cols = np.hstack([cols, df_cols])
+    _, idx = np.unique(all_cols, return_index=True)
+    columns = all_cols[np.sort(idx)]
+    
+    stats_df = stats_df[columns]
+    
     print("Done merging statistics.")
-    return stats_df[cols]
+    return stats_df
 
 def parse_inputs(parser, args):
     if isinstance(args, list):
-        args, unknown = parser.parse_known_args()
+        args, unknown_args = parser.parse_known_args()
 
     invol = args.invol
     lbls = args.lbls
@@ -137,7 +144,7 @@ def main(args):
 
     # Generate additional stats and merge into output file
     count_stats = get_count_stats(invol, lbls)
-    stats_df = merge_stats_df(stats_df, count_stats)
+    stats_df = merge_stats_df(stats_df, count_stats, sort)
 
     # Sort dataframe
     print(f"Sorting by {sort}...")
@@ -182,7 +189,7 @@ Notes:
         "-s",
         "--sort",
         type=str,
-        help="Sort by Mean, StdD, Max, Min, Count or Vol(mm^3) (default: 'Mean')",
+        help="Sort by Mean, StdD, Max, Min, Count or Vol_mm3 (default: 'Mean')",
         default="Mean",
     )
     optional.add_argument(

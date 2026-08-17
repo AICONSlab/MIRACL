@@ -68,6 +68,7 @@ PyQt5-Qt5==5.15.2
 PyQt5-sip==12.9.0
 pyrsistent==0.18.0
 pytest==6.2.5
+pytest-cov==3.0.0
 python-dateutil==2.8.2
 pytz==2021.3
 PyWavelets==1.2.0
