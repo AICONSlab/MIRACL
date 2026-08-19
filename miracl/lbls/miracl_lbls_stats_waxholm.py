@@ -88,6 +88,9 @@ def merge_stats_df(stats_df, count_stats, sort):
         annot_labels[["index", "name"]], left_on="LabelID", right_on="index", how="left"
     ).drop(columns=["index"])
 
+    # Remove background (clear colour)
+    stats_df = stats_df[stats_df["LabelID"] != 0]
+
     # Re-order columns with info then sorted column of choice
     cols = ["LabelID", "name", sort]
     df_cols = stats_df.columns.values
