@@ -20,6 +20,7 @@ from monai.transforms import (
     AddChanneld,
     ScaleIntensityRangePercentilesd,
     Transform,
+    Lambdad
 )
 import torch
 from monai.networks.layers import Norm
@@ -124,8 +125,7 @@ def generate_model_transforms(chosen_model, cfg_path_var):
         [
             MyLoadImage(),
             AddChanneld(keys=["image"]),
-            # ScaleIntensityRangePercentilesd(keys=["image"], lower=0.001, upper=99.99, b_min=0, b_max=1, clip=True, relative=False),
-            EnsureTyped(keys=["image"], dtype=torch.float32),
+            Lambdad(keys=["image"], func=lambda x: x.astype(np.float32)),
             ScaleIntensityRangePercentilesd(
                 keys=["image"],
                 lower=0.05,
@@ -135,7 +135,7 @@ def generate_model_transforms(chosen_model, cfg_path_var):
                 clip=True,
                 relative=False,
             ),
-#            EnsureTyped(keys=["image"]),
+            EnsureTyped(keys=["image"], dtype=torch.float32),
         ]
     )
 

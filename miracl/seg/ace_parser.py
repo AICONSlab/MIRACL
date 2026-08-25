@@ -151,15 +151,15 @@ class aceParser:
         )
         return parser
 
-    # def parse_args(self) -> argparse.Namespace:
-    #     """
-    #     Parse the command-line arguments.
-    #
-    #     :returns: The parsed arguments.
-    #     """
-    #     args = self.parser.parse_args()
-    #     self._validate_args(args)
-    #     return args
+    def parse_args(self) -> argparse.Namespace:
+        """
+        Parse the command-line arguments.
+    
+        :returns: The parsed arguments.
+        """
+        args = self.parser.parse_args()
+        self._validate_args(args)
+        return args
 
     def _readable_file(self, folder_path):
         """

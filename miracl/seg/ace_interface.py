@@ -2,7 +2,7 @@
 # import os
 import torch
 from pathlib import Path
-from miracl.seg import ace_generate_patch, ace_deploy_model, ace_patch_stacking
+from miracl.seg import ace_generate_patch, ace_deploy_model, ace_patch_stacking, ace_parser
 import sys
 
 
@@ -54,7 +54,7 @@ def main(args):
             output_folder_arg.mkdir(parents=True)
 
         patches_folder = ace_generate_patch.generate_patch_main(
-            input_folder=input_folder_arg,
+            input_folder=input_folder_arg, 
             output_folder=output_folder_arg
         )
 
@@ -91,4 +91,5 @@ Please install MIRACL with GPU passthrough as explained in our docs.")
 
 
 if __name__ == "__main__":
-    main(args)
+    main(ace_parser.aceParser().parser.parse_args())
+

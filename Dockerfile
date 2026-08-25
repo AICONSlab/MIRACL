@@ -157,6 +157,38 @@ RUN rm -rf /venvs/mapl3-skeletonization || true && \
     "mne==1.11.0" \
     "seaborn==0.13.2"
 
+# Install Python 3.11 in a Conda venv and create ACE venv
+RUN rm -rf /venvs/ace-env || true && \
+    rm -rf /venvs/python311 || true && \
+    cd /venvs && \
+    pwd && \
+    conda create -y -p /venvs/python311 python=3.11 && \
+    # export PATH="/venvs/python311/bin:$PATH" && \
+    uv init ace-env --python /venvs/python311/bin/python3.11 && \
+    cd ace-env && \
+    pwd && \
+    ls -l && \
+    uv add "cucim-cu12==25.4.0" \
+    "cupy-cuda12x==13.4.1" \
+    "cuvs-cu12==25.4.0" \
+    "pylibraft-cu12==25.4.0" \
+    "imagecodecs==2023.9.18" \
+    "joblib==1.4.2" \
+    "networkx==3.2.1" \
+    "numpy==1.26.3" \
+    "pandas==2.2.3" \
+    "scikit-image==0.22.0" \
+    "scipy==1.11.4" \
+    "tifffile==2023.12.9" \
+    "torch==2.4.0" \
+    "monai==1.2.0" \
+    "tqdm==4.67.3" \
+    "nibabel==5.4.2" \
+    "nilearn==0.13.1" \
+    "pyyaml==6.0.3" \
+    "mne==1.11.0" \
+    "seaborn==0.13.2"
+
 USER root
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb && \
     dpkg -i cuda-keyring_1.1-1_all.deb && \
