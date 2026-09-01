@@ -12,6 +12,7 @@ import pandas as pd
 import tifffile as tiff
 
 ATLAS_DIR = Path(os.environ.get("aradir"))
+print(ATLAS_DIR)
 PROG_NAME = "count_neurons"
 FULL_PROG_NAME = f"miracl seg {PROG_NAME}"
 
@@ -544,7 +545,7 @@ def main(args):
     shared_arr_label, arr_label = load_image_parallel(
         files=label_files,
         shape=label_shape,
-        dtype=np.uint16,
+        dtype=np.uint8,
         ncpus=ncpus,
         pool_args={
             "init": _init_label,
@@ -580,4 +581,4 @@ def main(args):
 if __name__ == "__main__":
     parser = parsefn()
     args = parser.parse_args()
-    main(args)
+    # main(args)

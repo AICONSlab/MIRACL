@@ -168,6 +168,8 @@ def validate_args(args):
 def main(args):
     validate_args(args)
 
+    print("running the revised miracl segmentation!")
+
     input_folder = Path(args.input_folder)
     raw_input_folder = Path(args.raw_input_folder)
     output_folder = Path(args.output_folder)

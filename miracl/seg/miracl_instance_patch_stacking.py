@@ -306,6 +306,8 @@ def run_stacking(
     print(f"the main input has the size of {subj_h} x {subj_w} x {subj_depth}")
     patch_size = tiff.imread(list(patches_dir.glob("*.tiff"))[0]).shape[0]
 
+    print("saving with uint8")
+
     image_stacking(
         subj_w=subj_w,
         subj_h=subj_h,
@@ -315,6 +317,6 @@ def run_stacking(
         output_path=output_dir,
         img_list_name=img_list_name,
         neuron_info_by_file=neuron_info_by_file,
-        image_type="uint32",
+        image_type="uint8",
         ncpus=ncpus,
     )

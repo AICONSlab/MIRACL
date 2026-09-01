@@ -1,5 +1,6 @@
 """
 This code is written by Ahmadreza Attarpour, a.attarpour@mail.utoronto.ca
+Modified by Spencer Gable-Cook, spencer.gable-cook@sri.utoronto.ca, for the Waxholm atlas.
 
 This code zero pad images, and create normalized image batches with specific
 size (512x512x512). It saves batches in ZYX order with naming of
@@ -22,7 +23,6 @@ output:
 
 import skimage.io as io
 import os
-# import fnmatch
 import numpy as np
 from math import floor
 import tifffile
@@ -31,16 +31,31 @@ import logging
 from skimage.filters import threshold_otsu
 from scipy.ndimage import binary_fill_holes
 import json
-
-# def generate_patch_main(input_folder, output_folder):
-#     input_path = input_folder
-#     output_path = output_folder
-#     output_dir_subfolder = "generated_patches"
-#
-#     print("generate_patch_main called")
+import argparse
+import sys
+import pdb
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+def parsefn():
+    parser = argparse.ArgumentParser(description="ACE Finetune Model")
+    parser.add_argument(
+        "-i",
+        "--input_dir",
+        help="input directory",
+        type=str,
+        required=True
+    )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        help="output directory",
+        type=str,
+        required=True
+    )
+
+    return parser
 
 
 #######################################
@@ -51,16 +66,6 @@ def generate_patch_main(input_folder, output_folder):
     input_path = input_folder
     output_path = Path(output_folder)
     output_dir_subfolder = "generated_patches"
-
-    # return input_path, output_path
-
-    # def test_pass(input_folder, output_folder):
-    #     tmp_in = input_folder
-    #     tmp_out = output_folder
-    #     logging.debug(f"Input path: {tmp_in}")
-    #     logging.debug(f"Output path: {tmp_out}")
-    #
-    #     return tmp_in, tmp_out
 
     # input_path = args.input_folder
     # output_path = args.output_folder
@@ -90,10 +95,6 @@ def generate_patch_main(input_folder, output_folder):
 
     print(f"  \nSubject: {input_path} has been found!")
 
-    # read all the slices in the input directory
-    # img_list_name = fnmatch.filter(os.listdir(input_path), "*.tif*")
-    # img_list_name.sort()
-
     img_list_name = []
 
     with os.scandir(input_path) as entries:
@@ -109,29 +110,15 @@ def generate_patch_main(input_folder, output_folder):
         for x in range(0, len(img_list_name), batch_size)
     ]
 
-    # check last slice; if its length is less than 512; pick the last 512 as the final crop (overlapping)
-    # if len(stack_index_img[-1]) < batch_size:
-    #     last_slice = img_list_name[-batch_size:]
-    #     stack_index_img = stack_index_img[:-1]
-    #     stack_index_img.append(last_slice)
-
-    # def print_dim(idx):
-    #     return ["Z", "Y", "X"][idx]
-    percentage_brain_patch = {}
+    num_patches = 0
     for idx1, stack in enumerate(stack_index_img):
         img_list = []
-        img_list_binary = []
 
         print(f"  \nProcessing image slices for Z-dim...\n")
         for idx2, file in enumerate(stack):
             print("  Slice: ", file)
             fname_input_img = os.path.join(input_path, file)
             img = io.imread(fname_input_img)
-
-            # create a brain mask for the img
-            threshold = threshold_otsu(img)
-            img_binary = img > threshold
-            img_binary = binary_fill_holes(img_binary)
 
             # check if the img needs zero padding
             if (img.shape[0] % batch_size) != 0:
@@ -145,38 +132,30 @@ def generate_patch_main(input_folder, output_folder):
                 img_width = img.shape[1]
 
             img_padding = np.zeros((img_height, img_width), dtype=img.dtype)
-            img_padding_binary = np.zeros((img_height, img_width), dtype=np.bool_)
             img_padding[: img.shape[0], : img.shape[1]] = img
-            img_padding_binary[: img.shape[0], : img.shape[1]] = img_binary
 
             batch_arr_img = blockshaped(img_padding, batch_size, batch_size)
-            batch_arr_img_binary = blockshaped(img_padding_binary, batch_size, batch_size)
 
             img_list.append(batch_arr_img)
-            img_list_binary.append(batch_arr_img_binary)
 
         img_batch = np.stack(img_list, axis=1)
-        img_batch_binary = np.stack(img_list_binary, axis=1)
 
         # save each data with size of 512 * 512 * 512
         print(
             f" \nSaving patches for Z-dim to '{output_path}/{output_dir_subfolder}/'..."
         )
+
+        # Create output directory if it does not exist
+        output_dir_img = Path(output_path) / output_dir_subfolder
+        if not output_dir_img.is_dir():
+            output_dir_img.mkdir(parents=True)
+            print(f"output_dir: {output_dir_img}")
         
         for i in range(img_batch.shape[0]):
             img_batch_single = img_batch[i, :, :, :]
-            img_batch_single_binary = img_batch_binary[i, :, :, :]
 
-            # img_batch_single_normalized = (img_batch_single - img_batch_single.min()) / (img_batch_single.max() - img_batch_single.min())
             file_img = "patch_" + str(idx1) + "_" + str(i) + ".tiff"
 
-            # output_dir_img = os.path.join(output_path, output_dir_subfolder)
-            output_dir_img = Path(output_path) / output_dir_subfolder
-            # isExist = os.path.exists(output_dir_img)
-            if not output_dir_img.is_dir():
-                # os.mkdir(output_dir_img)
-                output_dir_img.mkdir(parents=True)
-                print(f"output_dir: {output_dir_img}")
             fname_output_img = os.path.join(output_dir_img, file_img)
 
             # check if the image depth is less than 512 and zero-pad
@@ -209,7 +188,7 @@ def generate_patch_main(input_folder, output_folder):
 
             tifffile.imwrite(
                 fname_output_img,
-                img_batch_single.astype("uint16"),
+                img_batch_single.astype("uint8"),
                 metadata={
                     "DimensionOrder": "ZYX",
                     "SizeC": 1,
@@ -220,17 +199,26 @@ def generate_patch_main(input_folder, output_folder):
                 },
             )
 
-            percentage_brain_patch[Path(fname_output_img).name] = 100 * img_batch_single_binary.sum() / (batch_size**3)
-
-    # save percentage of brain in each patch as json
-    with open(output_dir_img / "percentage_brain_patch.json", "w") as f:
-        json.dump(percentage_brain_patch, f, indent=4)
+            num_patches += 1
 
     print(
-        f"  \nIn total, {len(percentage_brain_patch)} patches have been saved to '{output_path}/{output_dir_subfolder}/'!"
+        f"  \nIn total, {num_patches} patches have been saved to '{output_path}/{output_dir_subfolder}/'!"
     )
 
     logging.debug("generate_patch_main called")
 
     gen_patch_folder = output_path / output_dir_subfolder
     return gen_patch_folder
+
+def main(args):
+    parser = parsefn()
+    args = parser.parse_args()
+    print(args)
+    print("ACE generating patches!!! :)")
+    input_dir = args.input_dir
+    output_dir = args.output_dir
+    print("calling main function")
+    generate_patch_main(input_folder=input_dir, output_folder=output_dir)
+
+if __name__ == "__main__":
+    main(sys.argv)

@@ -13,6 +13,7 @@ from miracl.seg import (
     miracl_instance_segmentation_parser,
     miracl_seg_count_neurons_json,
     ace_finetune_model,
+    ace_generate_patch
 )
 
 
@@ -60,6 +61,9 @@ def run_voxelize(parser, args):
 def run_ace(parser, args):
     ace_interface.main(args=args)
 
+def run_ace_generate_patch(parser, args):
+    print("in cli_seg for generate patch")
+    ace_generate_patch.main(args=args)
 
 def run_ace_finetune(parser, args):
     args = vars(args)
@@ -138,6 +142,19 @@ def get_parser():
     )
 
     parser_ace.set_defaults(func=run_ace)
+
+    # ace_generate_patch
+    ace_generate_patch_parser = ace_generate_patch.parsefn()
+    parser_ace_generate_patch = subparsers.add_parser(
+        "ace_generate_patch",
+        parents=[ace_generate_patch_parser],
+        add_help=False,
+        usage=ace_generate_patch_parser.usage,
+        description=ace_generate_patch_parser.description,
+        help="Generate patches",
+    )
+
+    parser_ace_generate_patch.set_defaults(func=run_ace_generate_patch)
 
     # ace finetune
     ace_finetune_parser = ace_finetune_model.parsefn()
