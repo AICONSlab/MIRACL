@@ -11,6 +11,9 @@ import numpy as np
 import pandas as pd
 import tifffile as tiff
 
+import pdb
+from tqdm import tqdm
+
 ATLAS_DIR = Path(os.environ.get("aradir"))
 print(ATLAS_DIR)
 PROG_NAME = "count_neurons"
@@ -195,6 +198,8 @@ def validate_inputs(
         neuron_info_dict_path.exists()
     ), f"Neuron info dict does not exist: {neuron_info_dict_path}"
 
+    pdb.set_trace()
+
     return (
         label_files,
         output_dir,
@@ -223,7 +228,10 @@ def save_results(
     :type hemi: str
     """
     # load it atlas csv
-    graph = pd.read_csv(ATLAS_DIR / f"ara_mouse_structure_graph_hemi_{hemi}.csv")
+    # graph = pd.read_csv(ATLAS_DIR / f"ara_mouse_structure_graph_hemi_{hemi}.csv")
+    graph = pd.read_csv(ATLAS_DIR / f"WHS_SD_rat_atlas_v4.label")
+
+    pdb.set_trace()
 
     # create dataframe from neuron info
     neuron_df = pd.DataFrame(
@@ -463,8 +471,15 @@ def get_neuron_labels(
     min_slice = skip
     max_slice = arr_label.shape[0] - skip
 
+    pdb.set_trace()
+    print(arr_label.shape)
+    print(max(n["centroid"][1] + n["height"] for n in neuron_info_dict.values()))
+
+    pdb.set_trace()
+
     # loop over all regions, then neurons
-    for neuron_id, neuron_stats in neuron_info_dict.items():
+    for neuron_stats in tqdm(neuron_info_dict.values()):
+        # pdb.set_trace()
         # get the centroid
         centroid = tuple(map(round, neuron_stats["centroid"]))
 
@@ -489,6 +504,8 @@ def get_neuron_labels(
             # save that information to the centroid
             neuron_stats["label_val"] = int(label_val)
 
+    pdb.set_trace()
+
     remove = [k for k, v in neuron_info_dict.items() if "label_val" not in v.keys()]
     for k in remove:
         neuron_info_dict.pop(k, None)
@@ -504,6 +521,7 @@ def get_neuron_labels(
 
 
 def main(args):
+    print("running main in revised miracl_seg_count_neurons_json.py")
     label_dir = args.lbl
     output_dir = args.output
     hemi = args.hemi
@@ -545,7 +563,7 @@ def main(args):
     shared_arr_label, arr_label = load_image_parallel(
         files=label_files,
         shape=label_shape,
-        dtype=np.uint8,
+        dtype=np.uint16,
         ncpus=ncpus,
         pool_args={
             "init": _init_label,
@@ -557,6 +575,8 @@ def main(args):
     with open(neuron_info_dict_path, "r") as f:
         neuron_info_dict = json.load(f)
 
+    pdb.set_trace()
+
     neuron_info_with_label = get_neuron_labels(
         neuron_info_dict=neuron_info_dict,
         arr_label=arr_label,
@@ -566,6 +586,8 @@ def main(args):
         max_area=max_area,
         skip=skip,
     )
+
+    pdb.set_trace()
 
     save_results(
         result_dict=neuron_info_with_label,
@@ -581,4 +603,4 @@ def main(args):
 if __name__ == "__main__":
     parser = parsefn()
     args = parser.parse_args()
-    # main(args)
+    main(args)

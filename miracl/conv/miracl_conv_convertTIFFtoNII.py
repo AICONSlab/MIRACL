@@ -57,6 +57,10 @@ def helpmsg(name=None):
       -dz , --downzdim      Down-sample in z dimension, binary argument, (default: 1) => yes
       -pd , --prevdown      Previous down-sample ratio, if already downs-sampled
       -pct, --percentile_thr Percentile value for thresholding extreme values (default: 0)
+      -nn, --nearest        Force nearest-neighbor interpolation for all resampling (xy resize &
+                              z down-sample). Use this for label/segmentation volumes with discrete
+                              values, where cubic/linear interpolation would blend adjacent labels
+                              into invalid intermediate values (default: off, size-based heuristic)
       -h, --help            Show this help message and exit
 
     '''
@@ -115,6 +119,10 @@ def parsefn():
         optional.add_argument('-pd', '--prevdown', type=int, metavar='',
                               help="Previous down-sample ratio, if already downs-sampled")
         optional.add_argument('-pct', '--percentile_thr', type=float, metavar="", help="Percentile value for thresholding extreme values (default: None)")
+        optional.add_argument('-nn', '--nearest', action='store_true',
+                              help="Force nearest-neighbor interpolation for all resampling steps "
+                                   "(xy resize & z down-sample). Use for label/segmentation volumes "
+                                   "(default: off, size-based heuristic)")
 
         # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -179,6 +187,8 @@ def parse_inputs(parser, args):
         pd = int(linedits[fields[10]].text()) if linedits[fields[10]].text() else 1
 
         pct_thr = float(linedits[fields[11]].text()) if linedits[fields[11]].text() else 0.0
+
+        nearest = False  # not exposed in the GUI form yet; script mode has the -nn flag
 
     else:
 
@@ -259,11 +269,13 @@ def parse_inputs(parser, args):
 
         pct_thr = 0 if args.percentile_thr is None else args.percentile_thr
 
+        nearest = bool(args.nearest)
+
     # make res in um
     vx /= float(1000)  # in um
     vz /= float(1000)
 
-    return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr
+    return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr, nearest
 
 
 # ---------
@@ -316,7 +328,7 @@ def numericalsort(value):
 
 # ---------
 
-def converttiff2nii(d, i, x, newdata, tifx):
+def converttiff2nii(d, i, x, newdata, tifx, nearest=False):
     """
     """
 
@@ -328,8 +340,9 @@ def converttiff2nii(d, i, x, newdata, tifx):
 
     m = cv2.imread(x, -1)
 
-    # nearest neighbour for very large data sets
-    inter = cv2.INTER_CUBIC if tifx < 5000 else cv2.INTER_NEAREST
+    # nearest neighbour for very large data sets, or when forced for label/discrete data
+    inter = cv2.INTER_NEAREST if nearest or tifx >= 5000 else cv2.INTER_CUBIC
+    # print(f"inter = {inter}")
 
     newdata[i, :, :] = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=inter)
     # data.append(mres)
@@ -348,7 +361,7 @@ def percentile_threshold(data, percentile_thr):
 
     return thresholded_img
 
-def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
+def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None, nearest=False):
     # array type
     # data_array = np.array(mres, dtype='int16')
 
@@ -378,7 +391,8 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None):
     if downz == 1:
         print("\n\n down-sampling in the z dimension")
 
-        sp_inter = 1 if data_array.shape[0] < 5000 else 0
+        sp_inter = 0 if nearest or data_array.shape[0] >= 5000 else 1
+        # print(f"sp_inter = {sp_inter}")
         down = (1.0 / int(dz))
         zoom = [1, 1, down]
         data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)
@@ -402,7 +416,7 @@ def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
-    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr = parse_inputs(parser, args)
+    indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr, nearest = parse_inputs(parser, args)
 
     print("\n Converting with the following settings:")
     print(f"  indir:      {indir}")
@@ -418,6 +432,7 @@ def main(args):
     print(f"  downz:      {downz}")
     print(f"  pd:         {pd}")
     print(f"  pct_thr:    {pct_thr}")
+    print(f"  nearest:    {nearest}")
 
     cpuload = 0.95
     cpus = multiprocessing.cpu_count()
@@ -453,10 +468,10 @@ def main(args):
     tifxd = int(round(float(tifx) / d))
     tifyd = int(round(float(tify) / d))
 
-    newdata = np.memmap(memap, dtype=float, shape=(len(file_list), tifxd, tifyd), mode='w+')
+    newdata = np.memmap(memap, dtype=tif.dtype, shape=(len(file_list), tifxd, tifyd), mode='w+')
 
     Parallel(n_jobs=ncpus, backend="threading")(
-        delayed(converttiff2nii)(d, i, x, newdata, tifx) for i, x in enumerate(file_list))
+        delayed(converttiff2nii)(d, i, x, newdata, tifx, nearest) for i, x in enumerate(file_list))
 
     # stack slices
 
@@ -473,7 +488,7 @@ def main(args):
     nvz = vz * pd
     
     newdata = percentile_threshold(newdata, pct_thr) if pct_thr > 0 else newdata
-    savenii(newdata, d, stackname, downz, nvx, nvz, cent)
+    savenii(newdata, d, stackname, downz, nvx, nvz, cent, nearest)
 
     # clear tmp memmap
     os.remove(memap)
