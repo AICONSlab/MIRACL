@@ -48,12 +48,15 @@ ENV LD_LIBRARY_PATH=$NR_INSTALL_DIR/lib:$LD_LIBRARY_PATH
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 ###############################################################################
-#--- Allen atlas alias ----
+#--- Allen & Waxholm atlas alias ----
 
 WORKDIR /tmp
 RUN mkdir -p /code/atlases/ara && \
     wget -P /code/atlases https://www.dropbox.com/sh/j31vurlp6h4lvod/AAAIKpYJQizkAte3Ju5DZYj8a --content-disposition && \
     unzip /code/atlases/ara.zip -x / -d /code/atlases/ara
+
+RUN mkdir -p /code/atlases/waxholm && \
+    wget -O /code/atlases/waxholm/WHS_SD_rat_atlas_v4.label https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/atlases/waxholm/annotation/WHS_SD_rat_atlas_v4.label
 
 RUN mkdir -p /code/atlases/waxholm && wget -P /code/atlases/waxholm https://huggingface.co/datasets/AICONSlab/MIRACL/resolve/dev/atlases/waxholm/annotation/WHS_SD_rat_atlas_v4.label?download=true --content-disposition
 # RUN conda install -y --no-update-deps pyqt=5
