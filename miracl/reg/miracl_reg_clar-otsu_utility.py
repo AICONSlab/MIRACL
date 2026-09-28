@@ -4,6 +4,7 @@ Create an Otsu mask and masked image from an input volume using SimpleITK.
 Usage:
     make_rat_brain_otsu_mask.py --input <input_image> --mask <output_mask> --masked <output_masked_image>
         [--inside <insideValue>] [--outside <outsideValue>] [--bins <numHistogramBins>]
+        [--close-radius <voxels>]
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ def otsu_mask_image(
     inside_value: int,
     outside_value: int,
     num_bins: int,
+    close_radius: int,
 ) -> None:
     """
     Compute a binary Otsu mask and apply it to the input image.
@@ -37,6 +39,9 @@ def otsu_mask_image(
         Value assigned to voxels below threshold (default 0).
     num_bins : int
         Number of histogram bins used to compute threshold (default 200).
+    close_radius : int
+        Morphological closing radius in voxels, to bridge gaps in the raw
+        Otsu mask (default 25).
     """
 
     # Load image as float32 to ensure stable histogram behavior
@@ -46,13 +51,34 @@ def otsu_mask_image(
     # Parameters: input, outsideValue=0, insideValue=1, numberOfHistogramBins=200
     # Settings inside/outside vals to 0 and 1 respectively means binarizing
     mask: sitk.Image = sitk.OtsuThreshold(img, outside_value, inside_value, num_bins)
+    mask = sitk.Cast(mask, sitk.sitkUInt8)
+
+    # The raw Otsu mask has internal holes where real (but dimmer) tissue gets
+    # misclassified as background - a single global threshold splits the whole
+    # intensity histogram into just two classes, and depth-dependent signal
+    # attenuation means some real tissue voxels fall on the wrong side.
+    # Confirmed on real data: the un-warped atlas itself is solid (~0.2%
+    # internal gaps), but the raw mask had large holes, especially around
+    # deeper structures like the hippocampus - most of them not enclosed
+    # cavities but notches connected to the background at some other slice,
+    # so plain hole-filling barely moved the foreground fraction (0.2119 ->
+    # 0.2123). A brain mask has no biological reason to have holes; closing
+    # (dilate then erode) bridges those notches regardless of topology.
+    # Default radius (25) chosen empirically on real data: 20 still left one
+    # hole, 25 closed it and the shape stayed stable through 35 (0.295 ->
+    # 0.298 -> 0.300), so 25 has margin without over-growing the boundary.
+    # Defect size varies by dataset, so override with --close-radius if a
+    # different value is needed.
+    if close_radius > 0:
+        mask = sitk.BinaryMorphologicalClosing(mask, [close_radius] * 3, sitk.sitkBall, float(inside_value))
+    mask = sitk.BinaryFillhole(mask, False, float(inside_value))
 
     # Apply mask (sets voxels where mask==0 to 0)
     masked_img: sitk.Image = sitk.Mask(img, mask)
 
     # Write outputs
-    sitk.WriteImage(mask, str(out_mask_path))
-    sitk.WriteImage(masked_img, str(out_masked_path))
+    sitk.WriteImage(mask, str(mask_path))
+    sitk.WriteImage(masked_img, str(masked_image_path))
 
     print(f"Otsu mask saved to:   {mask_path}")
     print(f"Masked image saved to: {masked_image_path}")
@@ -102,6 +128,13 @@ def parse_arguments() -> argparse.Namespace:
         default=200,
         help="Number of histogram bins used to compute threshold (default=%(default)s)",
     )
+    _ = parser.add_argument(
+        "--close-radius",
+        type=int,
+        default=25,
+        help="Morphological closing radius in voxels, to bridge gaps in the "
+             "raw Otsu mask. Set to 0 to disable (default=%(default)s)",
+    )
     return parser.parse_args()
 
 
@@ -114,6 +147,7 @@ def main() -> None:
         inside_value=args.inside,
         outside_value=args.outside,
         num_bins=args.bins,
+        close_radius=args.close_radius,
     )
 
 

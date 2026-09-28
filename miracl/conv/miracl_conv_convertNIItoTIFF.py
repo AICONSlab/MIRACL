@@ -241,7 +241,9 @@ def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffs
 
     nii_img = nib.load(input_nii)
     vol = np.asarray(nii_img.dataobj)
-    out_dtype = if dtype else nii_img.get_data_dtype()
+    out_dtype = dtype if dtype else nii_img.get_data_dtype()
+    print(f"dtype = {dtype}")
+    print(f"out_dtype = {out_dtype}")
 
     if np.issubdtype(out_dtype, np.integer):
         if vol.dtype.kind == "f" and not np.array_equal(vol, np.rint(vol)):

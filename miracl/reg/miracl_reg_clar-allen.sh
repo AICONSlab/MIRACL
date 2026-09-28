@@ -67,8 +67,10 @@ function usage() {
             the class below the Otsu threshold unless reversed (default: 1)
         O.  the pixel value assigned to voxels outside the selected region - above the 
             Otsu threshold unless reversed (default: 0)
-        B.  number of bins used when computing the intensity histogram on which Otsu’s 
+        B.  number of bins used when computing the intensity histogram on which Otsu’s
             threshold is computed (default: 200)
+        R.  morphological closing radius (in voxels) applied to the Otsu mask to bridge
+            gaps/notches before hole-filling (default: 25)
 
 	----------
 	Main Outputs
@@ -102,6 +104,8 @@ fi
 #----------
 
 # check dependencies
+echo ${MIRACL_HOME}
+echo $(dirname "${MIRACL_HOME}")
 
 if [[ -z ${MIRACL_HOME} ]]; then
   printf "\n ERROR: MIRACL not initialized .. please run init/setup_miracl.sh & rerun script \n"
@@ -124,6 +128,7 @@ atlasdir=$(dirname "${MIRACL_HOME}")/atlases
 printf "\n Using atlas directory: %s \n" "${atlasdir}"
 channum="-999999"
 chanprefix="-999999"
+close_radius="-99999"
 
 # GUI for CLARITY input imgs
 
@@ -146,7 +151,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:" opt; do
+  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:R:" opt; do
 
     case "${opt}" in
 
@@ -230,20 +235,8 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
       percentile_thr="${OPTARG}"
       ;;
 
-    I)
-      otsu_inside="${OPTARG}"
-      ;;
-
-    O)
-      otsu_outside="${OPTARG}"
-      ;;
-
-    B)
-      otsu_bins="${OPTARG}"
-      ;;
-
-    P)
-      percentile_thr="${OPTARG}"
+    R)
+      close_radius="${OPTARG}"
       ;;
 
     *)
@@ -465,6 +458,8 @@ elif [ "${atlas}" == "waxholm" ]; then
     exit 1
   fi
 
+  echo "atlas dir = ${atlasdir}"
+
   if [[ -z "${hemi}" || "${hemi}" == "None" || "${hemi}" == "combined" ]]; then
     hemi="combined"
     lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
@@ -472,7 +467,7 @@ elif [ "${atlas}" == "waxholm" ]; then
     if [[ $"{side}" == "lh" ]]; then
       lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
     elif [[ "${side}" == "rh" ]]; then
-      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi.nii.gz
+      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi_IDS.nii.gz
     else
       printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
       exit 1
@@ -502,16 +497,46 @@ lblsname=${base%%.*}
 # olfactory bulb
 if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]] || [[ "${bulb}" == "0" ]]; then
   bulb=0
-
-  # remove olfactory bulb from labels
   custom_lbls=${regdir}/${lblsname}.nii.gz
-  printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
-  c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
 
-  if [[ "${hemi}" == "split" ]]; then
+  # # remove olfactory bulb from labels
+  # custom_lbls=${regdir}/${lblsname}.nii.gz
+  # printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
+  # c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
 
-    c3d "${custom_lbls}" -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o "${custom_lbls}"
+  # if [[ "${hemi}" == "split" ]]; then
 
+  #   c3d "${custom_lbls}" -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o "${custom_lbls}"
+
+
+  # elif [[ "${atlas}" == "waxholm" ]]; then
+  #   # 64/65/66 = olfactory bulb core; 73/180/502 = adjacent tract/commissure
+  #   # structures, matching the broader scope of Allen's list above. Waxholm's
+  #   # split-hemi labels ship as separate left/right files (not one combined
+  #   # file with prefixed IDs like Allen), so no second hemi==split pass is
+  #   # needed here - the same plain IDs apply regardless of hemi.
+  #   printf "\n Waxholm olfactory bulb removal\n"
+  #   printf "   input  (lbls):        %s\n" "${lbls}"
+  #   printf "   output (custom_lbls): %s\n" "${custom_lbls}"
+  #   c3d "${lbls}" -replace 64 0 65 0 66 0 -type ushort -o "${custom_lbls}"
+  # fi
+
+  if [[ "${atlas}" == "waxholm" ]]; then
+    # Waxholm split-hemi labels ship as separate L/R files with plain IDs,
+    # so no second hemi==split pass is needed.
+    printf "\n Waxholm olfactory bulb removal\n"
+    printf "   input  (lbls):        %s\n" "${lbls}"
+    printf "   output (custom_lbls): %s\n" "${custom_lbls}"
+    # NOTE: Removed 180 and 73 and 502
+    c3d "${lbls}" -replace 64 0 65 0 66 0 180 0 73 0 502 0 -type ushort -o "${custom_lbls}"
+  else
+    # Allen
+    printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
+    c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
+
+    if [[ "${hemi}" == "split" ]]; then
+        c3d "${custom_lbls}" -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o "${custom_lbls}"
+    fi
   fi
 
   lbls=${custom_lbls}
@@ -591,6 +616,11 @@ if [[ "$atlas" == "waxholm" ]]; then
   printf "I: Otsu inside: %s\n" "${otsu_inside:-1}"
   printf "O: Otsu outside: %s\n" "${otsu_outside:-0}"
   printf "B: Otsu bins: %s\n" "${otsu_bins:-200}"
+  if [[ "${close_radius}" == "-99999" ]]; then
+    printf "R: Otsu mask closing radius: 25 (default)\n"
+  else
+    printf "R: Otsu mask closing radius: %s\n" "${close_radius}"
+  fi
 fi
 printf "\n######################################################\n"
 
@@ -643,7 +673,7 @@ function resampleclar() {
 }
 
 # get brain mask (thresh & conn comp)
-
+## ISSUE
 function getbrainmask() {
   local resclar=$1
   local sharp=$2
@@ -680,13 +710,19 @@ function getbrainmask() {
     ifdsntexistrun "${otsu}" "Create masked image" MultiplyImages 3 "${biasin}" "${otsumask}" "${otsu}" 1
 
   elif [[ "$atlas" == "waxholm" ]]; then
+    local close_radius_arg=""
+    if [[ "${close_radius}" != "-99999" ]]; then
+      close_radius_arg="--close-radius ${close_radius}"
+    fi
+
     ifdsntexistrun "${otsumask}" "Binary Otsu mask (Python)" python3 "${MIRACL_HOME}/reg/miracl_reg_clar-otsu_utility.py" \
       --input "${biasin}" \
       --mask "${otsumask}" \
       --masked "${otsu}" \
       --inside "${otsu_inside:-1}" \
       --outside "${otsu_outside:-0}" \
-      --bins "${ostu_bins:-200}"
+      --bins "${otsu_bins:-200}" \
+      ${close_radius_arg}
   fi
 
 }
@@ -960,7 +996,7 @@ function warpatlaslbls() {
   ifdsntexistrun "${smclarres}" "Upsampling reference image" \
     ResampleImage 3 "${smclar}" "${smclarres}" "${vres}"x"${vres}"x"${vres}" 0 3
 
-  # convert to ushort
+  # convert to ushort!
   # ConvertImagePixelType ${smclarres} ${smclarres} 3
   # c3d ${smclarres} -type ushort -o ${smclarres}
 
@@ -1115,28 +1151,15 @@ function warpatlaslbls() {
   ifdsntexistrun "${orgortlbls}" "Orienting ${atlas} labels to original space" \
     SetDirectionByMatrix "${wrplblsorg}" "${orgortlbls}" "${ortmatrix}"
 
-  # extract region
-  lblsdim=$(PrintHeader "${orgortlbls}" 2)
-  lx=${lblsdim%%x*}
-  lyz=${lblsdim#*x}
-  ly=${lyz%x*}
-  lz=${lblsdim##*x}
-
-  xd=$(($lx - $x))
-  yd=$(($ly - $y))
-  zd=$(($lz - $z))
-
-  xr=$(($xd / 2))
-  yr=$(($yd / 2))
-  zr=$(($zd / 2))
-
+  # extract region, place it in inclar's coordinate space, and cast to
+  # uint32 - all done in python/nibabel, not c3d. orgortlbls is ~7.5B
+  # elements, and c3d has been confirmed to silently corrupt output on data
+  # this large in *two* separate ways: `-region` returns all-zero past 2^31
+  # elements, and `-copy-transform ... -o`'s write path truncated ~55% of
+  # the z-extent even without erroring or producing a wrong bounding box.
   ifdsntexistrun ${lblsorgnii} "Extracting labels to original size" \
-    c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} -o ${lblsorgnii}
-
-  c3d ${inclar} ${lblsorgnii} -copy-transform -o ${lblsorgnii}
-
-  # set type to int16, to match original labelmap
-  c3d ${lblsorgnii} -type uint -o ${lblsorgnii}
+    python3 "${MIRACL_HOME}/reg/miracl_reg_extract_region_utility.py" \
+    "${orgortlbls}" "${x}" "${y}" "${z}" "${inclar}" "${lblsorgnii}"
 
 }
 
@@ -1218,7 +1241,8 @@ function createtiledimg() {
 
   # clip clar intensities
   ifdsntexistrun "${clipped}" "Clipping CLARITY intensities" \
-    c3d "${smclarres}" -stretch 2% 98% 0 255 -clip 0 255 -o "${clipped}"
+    # c3d "${smclarres}" -stretch 2% 98% 0 255 -clip 0 255 -o "${clipped}"
+    c3d "${smclarres}" -stretch 2% 98% 0 255 -clip 0 255 -type uchar -o "${clipped}"
 
   ifdsntexistrun "${lbl_mask}" "Making labels mask" \
     ThresholdImage 3 "${wrplbls}" "${lbl_mask}" 1 inf 1 0
@@ -1255,7 +1279,10 @@ function main() {
   if (($(echo "$percentile_thr > 0" | bc -l))); then
     python3 /code/miracl/reg/miracl_reg_clar-per_thr_utillity.py "$inclar" "$percentile_thr" "$regdir"
 
-    thr_file="${regir}/$(basename "$inclar")"
+    echo "regir = ${regdir}"
+    thr_file="${regdir}/$(basename "$inclar")"
+    echo "thr_file = ${thr_file}"
+    echo $(basename "$inclar")
 
     # Point inclar to the new thresholded file
     inclar="$thr_file"
@@ -1266,6 +1293,7 @@ function main() {
   resampleclar "${inclar}" 0.05 0 4 "${resclar}"
 
   # get brain mask (thresh & largest comp)
+  ## ISSUE HERE
   mask=${regdir}/brain_mask.nii.gz
   brain=${regdir}/brain.nii.gz
   sharp=${regdir}/clar_res0.05_sharp.nii.gz
@@ -1282,8 +1310,8 @@ function main() {
 
   # Mask
   masclar=${regdir}/clar_res0.05_masked.nii.gz
-  maskimage "${resclar}" "${otsumask}" "${masclar}"
-  #	maskimage ${resclar} ${mask} ${masclar}
+  maskimage "${resclar}" "${otsumask}" "${masclar}" # FORMERLY USED IN CODE
+  # maskimage "${resclar}" "${betmask}" "${masclar}"
 
   if [[ "${prebias}" == 1 ]]; then
     biasclar=${masclar}
@@ -1444,7 +1472,11 @@ function main() {
   # 5) Create Tiled Mosaic
 
   clipped="${regdir}"/clar_downsample_res${vox}um_int_clipped.nii.gz
-  custom_lut="${atlasdir}"/ara/ara_ants_lut.txt
+  if [[ "${atlas}" == "allen" ]]; then
+    custom_lut="${atlasdir}"/ara/ara_ants_lut.txt
+  elif [[ "${atlas}" == "waxholm" ]]; then
+    custom_lut="${atlasdir}"/waxholm/waxholm_ants_lut.txt
+  fi
   rgb_lbls="${regdir}"/"${lblsname}"_clar_downsample_rgb.nii.gz
   lbl_mask="${regdir}"/"${lblsname}"_clar_downsample_mask.nii.gz
   mosaic="${regdirfinal}"/${atlas}_labels_to_clar_mosaic.png
