@@ -11,8 +11,9 @@ import numpy as np
 import pandas as pd
 import tifffile as tiff
 
-ATLAS_DIR = Path(os.environ.get("aradir"))
-print(ATLAS_DIR)
+ATLAS_DIR = Path(os.environ.get("aradir")).parent   # /code/atlases
+ARA_DIR = ATLAS_DIR / "ara"
+WAXHOLM_LABEL_FILE = ATLAS_DIR / "waxholm" / "WHS_SD_rat_atlas_v4.label"
 PROG_NAME = "count_neurons"
 FULL_PROG_NAME = f"miracl seg {PROG_NAME}"
 
@@ -24,7 +25,9 @@ def parsefn():
         description="""
     1) Filters cells based on a specified minimum (and maximum) area argument
     1) Computes cell count of segmented image and summarizes them per label
-    2) Outputs clarity_segmentation_features_ara_labels.csv  (segmentation features summarized per ARA labels)""",
+    2) Outputs clarity_segmentation_features_ara_labels_<hemi>.csv (Allen) or
+       clarity_segmentation_features_waxholm_labels.csv (Waxholm)
+       (segmentation features summarized per atlas label)""",
         add_help=False,
     )
     required_args = parser.add_argument_group("required arguments")
@@ -32,7 +35,7 @@ def parsefn():
         "-l",
         "--lbl",
         type=str,
-        help="""Allen labels directory (in native space) used to summarize features; from registration step.
+        help="""Atlas (Allen or Waxholm) labels directory (in native space) used to summarize features; from registration step.
         Can also be any other labels that you want to use to summarize the features, such as cluster labels.""",
         required=True,
     )
@@ -67,7 +70,7 @@ def parsefn():
     optional_args.add_argument(
         "--hemi",
         type=str,
-        help="Hemisphere of the brain (split or combined) (default: %(default)s)",
+        help="Hemisphere of the brain (split or combined); ignored for Waxholm (default: %(default)s)",
         required=False,
         default="combined",
         choices=["split", "combined"],
@@ -87,6 +90,11 @@ def parsefn():
         help="Percentage of CPU load to use (default: %(default)s)",
         required=False,
         default=0.3,
+    )
+    optional_args.add_argument(
+        "-a", "--atlas", type=str, default="allen",
+        choices=["allen", "waxholm"],
+        help="Atlas the labels come from (default: %(default)s)",
     )
     optional_args.add_argument(
         "-v",
@@ -212,6 +220,7 @@ def save_results(
     result_dict: Dict[int, Dict[str, int]],
     output_dir: Path,
     hemi: str,
+    atlas: str = "allen",
 ):
     """Save the final results to a CSV file that includes atlas information about regions.
 
@@ -219,11 +228,26 @@ def save_results(
     :type result_dict: Dict[int, Dict[str, int]]
     :param output_dir: Directory to save CSV file
     :type output_dir: Path
-    :param hemi: Half or whole brain atlas
+    :param hemi: Half or whole brain atlas (Allen only)
     :type hemi: str
+    :param atlas: Atlas the labels come from ("allen" or "waxholm"), defaults to "allen"
+    :type atlas: str, optional
     """
-    # load it atlas csv
-    graph = pd.read_csv(ATLAS_DIR / f"ara_mouse_structure_graph_hemi_{hemi}.csv")
+    # load in atlas lookup table
+    if atlas == "allen":
+        graph = pd.read_csv(ARA_DIR / f"ara_mouse_structure_graph_hemi_{hemi}.csv")
+    else:
+        # ITK-SNAP label description file
+        graph = pd.read_csv(
+            WAXHOLM_LABEL_FILE,
+            comment="#",
+            sep=r"\s+",
+            header=None,
+            names=["id", "R", "G", "B", "A", "VIS", "MSH", "name"],
+            quotechar='"',
+        )
+        # remove background (clear label)
+        graph = graph[graph.id != 0]
 
     # create dataframe from neuron info
     neuron_df = pd.DataFrame(
@@ -252,19 +276,25 @@ def save_results(
     # save results to csv
     count_df = count_df[count_df.LabelID.isin(graph.id)]
 
-    # make dicts
-    name_dict = dict(zip(graph.id, graph.name))
-    acronym_dict = dict(zip(graph.id, graph.acronym))
-    parent_id_dict = dict(zip(graph.id, graph.parent_structure_id))
-    path_dict = dict(zip(graph.id, graph.structure_id_path))
-    depth_dict = dict(zip(graph.id, graph.depth))
-
     # add columns from atlas
+    name_dict = dict(zip(graph.id, graph.name))
     count_df["LabelName"] = count_df["LabelID"].map(name_dict)
-    count_df["LabelAbrv"] = count_df["LabelID"].map(acronym_dict)
-    count_df["ParentID"] = count_df["LabelID"].map(parent_id_dict)
-    count_df["IDPath"] = count_df["LabelID"].map(path_dict)
-    count_df["Depth"] = count_df["LabelID"].map(depth_dict)
+
+    if atlas == "allen":
+        acronym_dict = dict(zip(graph.id, graph.acronym))
+        parent_id_dict = dict(zip(graph.id, graph.parent_structure_id))
+        path_dict = dict(zip(graph.id, graph.structure_id_path))
+        depth_dict = dict(zip(graph.id, graph.depth))
+
+        count_df["LabelAbrv"] = count_df["LabelID"].map(acronym_dict)
+        count_df["ParentID"] = count_df["LabelID"].map(parent_id_dict)
+        count_df["IDPath"] = count_df["LabelID"].map(path_dict)
+        count_df["Depth"] = count_df["LabelID"].map(depth_dict)
+
+        info_cols = ["LabelID", "LabelAbrv", "LabelName", "ParentID", "IDPath", "Depth"]
+    else:
+        # Waxholm label file only provides names
+        info_cols = ["LabelID", "LabelName"]
 
     count_df.columns = [c[0] + "_" + c[1] if c[1] else c[0] for c in count_df.columns]
     count_df = count_df.rename(
@@ -273,13 +303,7 @@ def save_results(
     )
 
     # reorder columns
-    cols = [
-        "LabelID",
-        "LabelAbrv",
-        "LabelName",
-        "ParentID",
-        "IDPath",
-        "Depth",
+    cols = info_cols + [
         "Area_min",
         "Area_max",
         "Area_mean",
@@ -294,7 +318,10 @@ def save_results(
         ascending=False,
     )
 
-    count_csv_path = output_dir / f"clarity_segmentation_features_ara_labels_{hemi}.csv"
+    if atlas == "allen":
+        count_csv_path = output_dir / f"clarity_segmentation_features_ara_labels_{hemi}.csv"
+    else:
+        count_csv_path = output_dir / "clarity_segmentation_features_waxholm_labels.csv"
     count_df_sorted.to_csv(count_csv_path)
 
     print(f"Features saved to: {count_csv_path}")
@@ -513,6 +540,9 @@ def main(args):
     max_area = args.max_area
     verbose = args.verbose
     neuron_info_dict_path = args.neuron_info_dict
+    # other callers (e.g. miracl_stats_ace_validate_clusters) build their own
+    # Namespace without an atlas attribute
+    atlas = getattr(args, "atlas", "allen")
 
     start_time = time.perf_counter()
 
@@ -545,7 +575,7 @@ def main(args):
     shared_arr_label, arr_label = load_image_parallel(
         files=label_files,
         shape=label_shape,
-        dtype=np.uint8,
+        dtype=np.uint16,
         ncpus=ncpus,
         pool_args={
             "init": _init_label,
@@ -571,6 +601,7 @@ def main(args):
         result_dict=neuron_info_with_label,
         output_dir=output_dir,
         hemi=hemi,
+        atlas=atlas,
     )
 
     print(

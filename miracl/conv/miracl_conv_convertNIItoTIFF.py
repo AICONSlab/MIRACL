@@ -13,8 +13,10 @@ from argparse import RawTextHelpFormatter
 from datetime import datetime
 
 import nibabel as nib
+import numpy as np
 import scipy.ndimage
 import tifffile as tiff
+from pathlib import Path
 # from PyQt5.QtGui import *
 # from PyQt5.QtWidgets import *
 # from miracl.conv import miracl_conv_gui_options as gui_opts
@@ -43,9 +45,19 @@ Converts Nifti images to Tiff
       -i, --input          Input CLARITY Nii
 
     optional arguments:
-      -u, --up             Up-sample ratio (default: 1)
+      -u, --up   [ ...]    Up-sample ratio. Either one value applied to all axes, or three
+                            values "X Y Z" for per-axis ratios (order must match the input
+                            nii's array axes), e.g. -u 2 2 4 for xy=2, z=4 (default: 1)
       -o, --outnii         Output nii name (script will append downsample ratio & channel info to given name)
       -s, --spline         Spline order
+      -st, --tiffstack     Write output as a directory of per-slice TIFFs instead of one multi-page
+                            TIFF (default: off). Required if the output will be read back in by
+                            miracl_conv_convertTIFFtoNII.py, which expects one file per slice.
+      -tp, --transpose     Transpose each XY slice before writing (default: off). Nibabel doesn't
+                            guarantee a width/height axis order, so whether this is needed depends on
+                            the source of your input nii - verify on one slice before running the
+                            full stack (compare against the same slice in a nifti viewer, e.g. it
+                            shouldn't look rotated 90 degrees or mirrored).
 
       -h, --help           Show this help message and exit
 
@@ -90,9 +102,17 @@ def parsefn():
 
         optional = parser.add_argument_group('optional arguments')
 
-        optional.add_argument('-u', '--up', type=int, metavar='', help="Up-sample ratio (default: 1)")
+        optional.add_argument('-u', '--up', type=float, nargs='+', metavar='',
+                              help="Up-sample ratio: one value for all axes, or three values "
+                                   "'X Y Z' for per-axis ratios (default: 1)")
         optional.add_argument('-o', '--outtiff', type=str, metavar='', help="Output tiff name")
         optional.add_argument('-s', '--spline', type=int, metavar='', help="Spline order")
+        optional.add_argument('-st', '--tiffstack', action='store_true',
+                              help="Write output as a directory of per-slice TIFFs instead of a single "
+                                   "multi-page TIFF (default: off)")
+        optional.add_argument('-tp', '--transpose', action='store_true',
+                              help="Transpose each XY slice before writing (default: off). Verify on "
+                                   "one slice first - axis order isn't guaranteed by nibabel.")
 
     # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -133,6 +153,9 @@ def parse_inputs(parser, args):
 
         s = 3 if not linedits[fields[2]].text() else int(linedits[fields[1]].text())
 
+        tiffstack = False  # not exposed in the GUI form yet; script mode has the -st flag
+        transpose = False  # not exposed in the GUI form yet; script mode has the -tp flag
+
     else:
 
         print("\n running in script mode")
@@ -153,9 +176,12 @@ def parse_inputs(parser, args):
         if args.up is None:
             u = 1
             print("\n Up-sample ratio not specified ... choosing default value of %d" % u)
+        elif len(args.up) == 1:
+            u = args.up[0]
+        elif len(args.up) == 3:
+            u = tuple(args.up)
         else:
-            assert isinstance(args.up, int)
-            u = args.up
+            parser.error("-u/--up expects either 1 value (uniform) or 3 values (X Y Z)")
 
         if args.spline is None:
             s = 3
@@ -164,7 +190,10 @@ def parse_inputs(parser, args):
             assert isinstance(args.spline, int)
             s = args.spline
 
-    return input, outtiff, u, s
+        tiffstack = bool(args.tiffstack)
+        transpose = bool(args.transpose)
+
+    return input, outtiff, u, s, tiffstack, transpose
 
 
 # ---------
@@ -204,12 +233,31 @@ def scriptlog(logname):
     sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
 
-def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order):
-    nii = nib.load(input_nii).get_data()
+def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffstack=False, transpose=False):
+    nii_img = nib.load(input_nii)
+    nii = np.asarray(nii_img.dataobj)
 
-    hres_tiff = scipy.ndimage.interpolation.zoom(nii, upsample_ratio, order=spline_order)
+    if tiffstack:
+        out_dir = Path(out_tiff)
+        out_dir.mkdir(parents=True, exist_ok=True)
 
-    tiff.imsave(out_tiff, hrestiff)
+        # zoom() applies each axis independently (verified numerically), so upsample
+        # z first while x/y are still at low resolution (stays small), then upsample
+        # each output z-slice in x/y one at a time. The full upsampled volume is
+        # never materialized anywhere, RAM or disk - only the final tifs exist.
+        ratios = upsample_ratio if not np.isscalar(upsample_ratio) else (upsample_ratio,) * nii.ndim
+        z_only = scipy.ndimage.interpolation.zoom(nii, (1, 1, ratios[2]), order=spline_order)
+
+        out_dtype = nii_img.get_data_dtype()
+        for z in range(z_only.shape[2]):
+            slice_2d = scipy.ndimage.interpolation.zoom(z_only[:, :, z], (ratios[0], ratios[1]), order=spline_order)
+            slice_2d = slice_2d.astype(out_dtype)
+            if transpose:
+                slice_2d = slice_2d.T
+            tiff.imwrite(out_dir / f"slice_{z:06d}.tif", slice_2d)
+    else:
+        hres = scipy.ndimage.interpolation.zoom(nii, upsample_ratio, order=spline_order)
+        tiff.imsave(out_tiff, hres)
 
 
 # ---------
@@ -238,12 +286,12 @@ def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
-    input, outtiff, u, s = parse_inputs(parser, args)
+    input, outtiff, u, s, tiffstack, transpose = parse_inputs(parser, args)
 
     # convert nii volume to tiff
     print("\n converting NII volume to TIFF")
 
-    convert_nii_to_tiff(input, outtiff, u, s)
+    convert_nii_to_tiff(input, outtiff, u, s, tiffstack, transpose)
 
     print("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
