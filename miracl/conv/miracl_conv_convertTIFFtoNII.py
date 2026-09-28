@@ -342,7 +342,6 @@ def converttiff2nii(d, i, x, newdata, tifx, nearest=False):
 
     # nearest neighbour for very large data sets, or when forced for label/discrete data
     inter = cv2.INTER_NEAREST if nearest or tifx >= 5000 else cv2.INTER_CUBIC
-    # print(f"inter = {inter}")
 
     newdata[i, :, :] = cv2.resize(m, (0, 0), fx=down, fy=down, interpolation=inter)
     # data.append(mres)
@@ -392,7 +391,6 @@ def savenii(newdata, d, outnii, downz, vx=None, vz=None, cent=None, nearest=Fals
         print("\n\n down-sampling in the z dimension")
 
         sp_inter = 0 if nearest or data_array.shape[0] >= 5000 else 1
-        # print(f"sp_inter = {sp_inter}")
         down = (1.0 / int(dz))
         zoom = [1, 1, down]
         data_array = scipy.ndimage.interpolation.zoom(data_array, zoom, order=sp_inter)

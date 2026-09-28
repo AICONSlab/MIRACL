@@ -236,9 +236,7 @@ def scriptlog(logname):
     sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
 
-def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffstack=False, transpose=False, grid_mode=True, compression="zstd", dtype=None):
-    print("new function!")
-
+def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffstack=False, transpose=False):
     nii_img = nib.load(input_nii)
     vol = np.asarray(nii_img.dataobj)
     out_dtype = dtype if dtype else nii_img.get_data_dtype()

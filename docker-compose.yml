@@ -20,4 +20,5 @@ services:
       - /home/sgablecook/.Xauthority:/home/sgablecook/.Xauthority
       - /home/sgablecook/git/MIRACL/miracl:/code/miracl
       - /home/sgablecook/git/MIRACL/tests:/code/tests
-      - /data1/projects/sgablecook/dustin_data:/rat_data
+      - /data1/projects/sgablecook/dustin_analysis:/dustin_analysis
+      - /data4/projects/ahmadreza/deeptrace/datasets/ssl_pretrain/20230928_MO20_Brain1_PROCESSING/streamlines/exp22:/exp22

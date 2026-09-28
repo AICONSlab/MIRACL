@@ -60,6 +60,13 @@ function usage() {
         v.  labels voxel size/Resolution in um (default: 10)
             accepted inputs are: 10, 25 or 50
         b.  olfactory bulb included in brain, binary option (default: 0 -> not included)
+        K.  number of classes the multi-level (ANTs) Otsu threshold splits the intensity
+            histogram into when creating the brain mask (default: 6)
+            more classes = finer intensity steps to pick the brain/background cut from
+        L.  lowest Otsu class kept in the brain mask - classes below it are dropped as
+            background (default: 1, i.e. keep everything above the darkest class)
+            raise it (e.g. 2 or 3) for a tighter mask that excludes dim//background
+            signal, lower it for a more inclusive mask
 
     Waxholm atlas related arguments (the default values of 1 and 0 will create a
         binary mask using the Otsu method):
