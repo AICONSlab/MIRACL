@@ -158,7 +158,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:R:" opt; do
+  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:" opt; do
 
     case "${opt}" in
 
@@ -242,8 +242,20 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
       percentile_thr="${OPTARG}"
       ;;
 
-    R)
-      close_radius="${OPTARG}"
+    I)
+      otsu_inside="${OPTARG}"
+      ;;
+
+    O)
+      otsu_outside="${OPTARG}"
+      ;;
+
+    B)
+      otsu_bins="${OPTARG}"
+      ;;
+
+    P)
+      percentile_thr="${OPTARG}"
       ;;
 
     *)
@@ -1112,7 +1124,7 @@ function warpatlaslbls() {
   firstlbl="${tifdirreg}"/lbls_slice_000000.tif
 
   # Create a series of 2D TIFF files, one for each slice in the original 3D stack
-  python /code/miracl/reg/miracl_reg_clar-allen_utility.py "${tiflblszstack}" "${tifdirreg}" "lbls_slice_%06d.tif"
+  python /code/miracl/reg/miracl_reg_clar-atlas_utility.py "${tiflblszstack}" "${tifdirreg}" "lbls_slice_%06d.tif"
 
   # Start loop from zero index
   loop_z=$(python -c "print(${orgclarz}-1)")

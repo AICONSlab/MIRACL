@@ -17,9 +17,12 @@ import numpy as np
 import scipy.ndimage
 import tifffile as tiff
 from pathlib import Path
+from tqdm import tqdm
 # from PyQt5.QtGui import *
 # from PyQt5.QtWidgets import *
 # from miracl.conv import miracl_conv_gui_options as gui_opts
+
+import pdb
 
 warnings.simplefilter("ignore", UserWarning)
 
@@ -290,6 +293,7 @@ def main(args):
 
     # convert nii volume to tiff
     print("\n converting NII volume to TIFF")
+    print(f"\n transpose = {transpose}")
 
     convert_nii_to_tiff(input, outtiff, u, s, tiffstack, transpose)
 
