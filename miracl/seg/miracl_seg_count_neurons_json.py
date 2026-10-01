@@ -21,8 +21,6 @@ WAXHOLM_LABEL_FILE = ATLAS_DIR / "waxholm" / "WHS_SD_rat_atlas_v4.label"
 PROG_NAME = "count_neurons"
 FULL_PROG_NAME = f"miracl seg {PROG_NAME}"
 
-pdb.set_trace()
-
 def parsefn():
     parser = argparse.ArgumentParser(
         prog=FULL_PROG_NAME,
