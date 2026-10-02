@@ -61,6 +61,8 @@ Converts Nifti images to Tiff
                             the source of your input nii - verify on one slice before running the
                             full stack (compare against the same slice in a nifti viewer, e.g. it
                             shouldn't look rotated 90 degrees or mirrored).
+    -dt, --dtype         Output data type, e.g. uint16 for label volumes (default: same as the
+                        input nii). Refuses to cast non-integer values to an integer type.
 
       -h, --help           Show this help message and exit
 
@@ -116,6 +118,9 @@ def parsefn():
         optional.add_argument('-tp', '--transpose', action='store_true',
                               help="Transpose each XY slice before writing (default: off). Verify on "
                                    "one slice first - axis order isn't guaranteed by nibabel.")
+        optional.add_argument('-dt', '--dtype', type=str, metavar='',
+                              help="Output data type, e.g. uint16 for label volumes "
+                                   "(default: same as the input nii)")
 
     # optional.add_argument("-h", "--help", action="help", help="Show this help message and exit")
 
@@ -158,6 +163,7 @@ def parse_inputs(parser, args):
 
         tiffstack = False  # not exposed in the GUI form yet; script mode has the -st flag
         transpose = False  # not exposed in the GUI form yet; script mode has the -tp flag
+        dtype = None  # not exposed in the GUI form yet; script mode has the -dt flag
 
     else:
 
@@ -195,6 +201,7 @@ def parse_inputs(parser, args):
 
         tiffstack = bool(args.tiffstack)
         transpose = bool(args.transpose)
+        dtype = np.dtype(args.dtype) if args.dtype else None
 
     return input, outtiff, u, s, tiffstack, transpose
 
@@ -236,17 +243,23 @@ def scriptlog(logname):
     sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
 
-def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffstack=False, transpose=False):
+def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffstack=False, transpose=False,
+                        dtype=None, grid_mode=True, compression=None):
     nii_img = nib.load(input_nii)
     vol = np.asarray(nii_img.dataobj)
+    print(f"vol.dtype.kind = {vol.dtype.kind}")
+    print(f"spline order = {spline_order}")
     out_dtype = dtype if dtype else nii_img.get_data_dtype()
     print(f"dtype = {dtype}")
     print(f"out_dtype = {out_dtype}")
 
     if np.issubdtype(out_dtype, np.integer):
-        if vol.dtype.kind == "f" and not np.array_equal(vol, np.rint(vol)):
-            raise ValueError("input has non-integer values; refusing to cast to "
-                            f"{out_dtype} (is this really a label volume?)")
+        if vol.dtype.kind == "f":
+            if not np.array_equal(vol, np.rint(vol)):
+                raise ValueError("input has non-integer values; refusing to cast to "
+                                f"{out_dtype} (is this really a label volume?)")
+            else:
+                print("vol approximately equals rounding int!")
         lim = np.iinfo(out_dtype)
         if vol.min() < lim.min or vol.max() > lim.max:
             raise ValueError(f"labels span [{vol.min()}, {vol.max()}], "
@@ -265,7 +278,7 @@ def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffs
               mode="nearest" if grid_mode else "constant")
 
     if not tiffstack:
-        hres = zoom(vol, ratios, **kw)
+        hres = scipy.ndimage.zoom(vol, ratios, **kw)
         tiff.imwrite(out_tiff, hres.T if transpose else hres,
                      compression=compression)
         return target
