@@ -85,6 +85,7 @@ def process_single_file(
         percentage_brain_patch.get(original_img_name, 100.0)
         < percentage_brain_patch_skip * 100.0
     ):
+        print("skipping...")
         if img_size is None:
             seg_img = tifffile.imread(input_file)
             img_size = seg_img.shape

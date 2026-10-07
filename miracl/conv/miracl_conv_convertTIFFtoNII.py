@@ -269,12 +269,14 @@ def parse_inputs(parser, args):
 
         pct_thr = 0 if args.percentile_thr is None else args.percentile_thr
 
+        print(f"args.nearest = {args.nearest}")
         nearest = bool(args.nearest)
 
     # make res in um
     vx /= float(1000)  # in um
     vz /= float(1000)
 
+    print(f"returning nearest = {nearest}")
     return indir, work_dir, outnii, d, chann, chanp, chan, vx, vz, cent, downz, pd, pct_thr, nearest
 
 

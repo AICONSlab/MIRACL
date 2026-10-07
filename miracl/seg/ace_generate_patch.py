@@ -67,6 +67,9 @@ def generate_patch_main(input_folder, output_folder):
     output_path = Path(output_folder)
     output_dir_subfolder = "generated_patches"
 
+    print(f"input_path = {input_path}")
+    print(f"output_path = {output_path}")
+
     # input_path = args.input_folder
     # output_path = args.output_folder
     #######################################
@@ -221,4 +224,5 @@ def main(args):
     generate_patch_main(input_folder=input_dir, output_folder=output_dir)
 
 if __name__ == "__main__":
+    print("in main function")
     main(sys.argv)

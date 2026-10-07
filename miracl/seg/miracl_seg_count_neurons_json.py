@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import tifffile as tiff
 
-import pdb
 from tqdm import tqdm
 
 ATLAS_DIR = Path(os.environ.get("aradir")).parent
@@ -206,8 +205,6 @@ def validate_inputs(
         neuron_info_dict_path.exists()
     ), f"Neuron info dict does not exist: {neuron_info_dict_path}"
 
-    pdb.set_trace()
-
     return (
         label_files,
         output_dir,
@@ -252,8 +249,6 @@ def save_results(
         )
         graph = graph[graph.id != 0]   # drop "Clear Label" background
 
-    pdb.set_trace()
-
     # create dataframe from neuron info
     neuron_df = pd.DataFrame(
         dict(
@@ -263,8 +258,6 @@ def save_results(
             LabelID=[v["label_val"] for v in result_dict.values()],
         )
     )
-
-    pdb.set_trace()
 
     # summarize by label/region
     count_df = (
@@ -282,8 +275,6 @@ def save_results(
 
     # save results to csv
     count_df = count_df[count_df.LabelID.isin(graph.id)]
-
-    pdb.set_trace()
 
     # # make dicts
     # name_dict = dict(zip(graph.id, graph.name))
@@ -319,8 +310,6 @@ def save_results(
     # count_df["IDPath"] = count_df["LabelID"].map(path_dict)
     # count_df["Depth"] = count_df["LabelID"].map(depth_dict)
 
-    pdb.set_trace()
-
     count_df.columns = [c[0] + "_" + c[1] if c[1] else c[0] for c in count_df.columns]
     count_df = count_df.rename(
         {"Area_count": "Count"},
@@ -352,8 +341,6 @@ def save_results(
     ]
     count_df = count_df[cols]
 
-    pdb.set_trace()
-
     count_df_sorted = count_df.sort_values(
         ["Count"],
         ascending=False,
@@ -365,8 +352,6 @@ def save_results(
     else:
         count_csv_path = output_dir / "clarity_segmentation_features_waxholm_labels.csv"
     count_df_sorted.to_csv(count_csv_path)
-
-    pdb.set_trace()
 
     print(f"Features saved to: {count_csv_path}")
 
@@ -492,8 +477,6 @@ def load_image_parallel(
         print("Done filling array...")
         print(f"Time taken: {time.perf_counter() - start}")
 
-    pdb.set_trace()
-
     return shared_arr, arr
 
 
@@ -536,15 +519,11 @@ def get_neuron_labels(
     min_slice = skip
     max_slice = arr_label.shape[0] - skip
 
-    pdb.set_trace()
     print(arr_label.shape)
     print(max(n["centroid"][1] + n["height"] for n in neuron_info_dict.values()))
 
-    pdb.set_trace()
-
     # loop over all regions, then neurons
     for neuron_stats in tqdm(neuron_info_dict.values()):
-        # pdb.set_trace()
         # get the centroid
         centroid = tuple(map(round, neuron_stats["centroid"]))
 
@@ -569,8 +548,6 @@ def get_neuron_labels(
         ):
             # save that information to the centroid
             neuron_stats["label_val"] = int(label_val)
-
-    pdb.set_trace()
 
     remove = [k for k, v in tqdm(neuron_info_dict.items()) if "label_val" not in v.keys()]
     for k in remove:
@@ -646,8 +623,6 @@ def main(args):
     with open(neuron_info_dict_path, "r") as f:
         neuron_info_dict = json.load(f)
 
-    pdb.set_trace()
-
     neuron_info_with_label = get_neuron_labels(
         neuron_info_dict=neuron_info_dict,
         arr_label=arr_label,
@@ -657,8 +632,6 @@ def main(args):
         max_area=max_area,
         skip=skip,
     )
-
-    pdb.set_trace()
 
     save_results(
         result_dict=neuron_info_with_label,

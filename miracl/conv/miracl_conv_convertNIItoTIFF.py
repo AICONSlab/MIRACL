@@ -53,9 +53,6 @@ Converts Nifti images to Tiff
                             nii's array axes), e.g. -u 2 2 4 for xy=2, z=4 (default: 1)
       -o, --outnii         Output nii name (script will append downsample ratio & channel info to given name)
       -s, --spline         Spline order
-      -st, --tiffstack     Write output as a directory of per-slice TIFFs instead of one multi-page
-                            TIFF (default: off). Required if the output will be read back in by
-                            miracl_conv_convertTIFFtoNII.py, which expects one file per slice.
       -tp, --transpose     Transpose each XY slice before writing (default: off). Nibabel doesn't
                             guarantee a width/height axis order, so whether this is needed depends on
                             the source of your input nii - verify on one slice before running the
@@ -112,9 +109,6 @@ def parsefn():
                                    "'X Y Z' for per-axis ratios (default: 1)")
         optional.add_argument('-o', '--outtiff', type=str, metavar='', help="Output tiff name")
         optional.add_argument('-s', '--spline', type=int, metavar='', help="Spline order")
-        optional.add_argument('-st', '--tiffstack', action='store_true',
-                              help="Write output as a directory of per-slice TIFFs instead of a single "
-                                   "multi-page TIFF (default: off)")
         optional.add_argument('-tp', '--transpose', action='store_true',
                               help="Transpose each XY slice before writing (default: off). Verify on "
                                    "one slice first - axis order isn't guaranteed by nibabel.")
@@ -161,7 +155,6 @@ def parse_inputs(parser, args):
 
         s = 3 if not linedits[fields[2]].text() else int(linedits[fields[1]].text())
 
-        tiffstack = False  # not exposed in the GUI form yet; script mode has the -st flag
         transpose = False  # not exposed in the GUI form yet; script mode has the -tp flag
         dtype = None  # not exposed in the GUI form yet; script mode has the -dt flag
 
@@ -199,11 +192,10 @@ def parse_inputs(parser, args):
             assert isinstance(args.spline, int)
             s = args.spline
 
-        tiffstack = bool(args.tiffstack)
         transpose = bool(args.transpose)
         dtype = np.dtype(args.dtype) if args.dtype else None
 
-    return input, outtiff, u, s, tiffstack, transpose
+    return input, outtiff, u, s, transpose, dtype
 
 
 # ---------
@@ -243,8 +235,8 @@ def scriptlog(logname):
     sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
 
 
-def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffstack=False, transpose=False,
-                        dtype=None, grid_mode=True, compression=None):
+def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, transpose=False,
+                        dtype=None, grid_mode=True):
     nii_img = nib.load(input_nii)
     vol = np.asarray(nii_img.dataobj)
     print(f"vol.dtype.kind = {vol.dtype.kind}")
@@ -252,6 +244,7 @@ def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffs
     out_dtype = dtype if dtype else nii_img.get_data_dtype()
     print(f"dtype = {dtype}")
     print(f"out_dtype = {out_dtype}")
+    print(f"grid_mode = {grid_mode}")
 
     if np.issubdtype(out_dtype, np.integer):
         if vol.dtype.kind == "f":
@@ -277,14 +270,8 @@ def convert_nii_to_tiff(input_nii, out_tiff, upsample_ratio, spline_order, tiffs
     kw = dict(order=spline_order, grid_mode=grid_mode,
               mode="nearest" if grid_mode else "constant")
 
-    if not tiffstack:
-        hres = scipy.ndimage.zoom(vol, ratios, **kw)
-        tiff.imwrite(out_tiff, hres.T if transpose else hres,
-                     compression=compression)
-        return target
-
     if vol.ndim != 3:
-        raise ValueError("tiffstack requires a 3D volume")
+        raise ValueError("requires a 3D volume")
 
     # order 0 is exact in the native dtype; higher orders would re-quantise the
     # intermediate, so carry those in float and convert once at write time
@@ -340,13 +327,13 @@ def main(args):
     starttime = datetime.now()
 
     parser = parsefn()
-    input, outtiff, u, s, tiffstack, transpose = parse_inputs(parser, args)
+    input, outtiff, u, s, transpose, dtype = parse_inputs(parser, args)
 
     # convert nii volume to tiff
     print("\n converting NII volume to TIFF")
     print(f"\n transpose = {transpose}")
 
-    convert_nii_to_tiff(input, outtiff, u, s, tiffstack, transpose)
+    convert_nii_to_tiff(input, outtiff, u, s, transpose, dtype)
 
     print("\n conversion done in %s ... Have a good day!\n" % (datetime.now() - starttime))
 
