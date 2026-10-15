@@ -51,6 +51,7 @@ from pydantic import (
     ConfigDict,
 )
 from pydantic_core.core_schema import ValidationInfo
+from pydantic_core import PydanticCustomError
 from miracl.api.enums import (
     ArgumentType,
     ArgumentAction,
@@ -71,6 +72,53 @@ import re
 # =====================================================================================
 
 MIRACL_HIDE_HELP = "MIRACL_HIDDEN_ARG"
+
+# =====================================================================================
+# UNSUPPORTED_CLI_ACTIONS
+# =====================================================================================
+# Only STORE (argparse's default) and APPEND serialize into a MIRACL parser. The rest
+# are rejected. This decision comes down to enforcing abstraction norms on to MIRACL.
+# For example, MIRACL builds its own help and verbose help system which is why HELP is
+# forbidden as a native argument option.
+#
+# Also, required/default/type are semantically equivalent to store_true. I would argue
+# that they are actually slight more robust.
+#
+# Also, re: the GUI, creating a widget for e.g. storing True or False would be awkward.
+# I realize that CHECKBOX exists in the frontend contract and `gui_hybrid_builder` but
+# is absent from both the object-level WidgetType enum and WIDGET_MAPPING which means
+# that no object file can request it. The only reachable boolean widget is COMBO_BOX,
+# which is populated from cli.choices. A bare flag is therefore unrenderable in the GUI
+# which would break it.
+#
+# It should also be noted that declared booleans use choices=[True, False] with
+# default=False instead.
+UNSUPPORTED_CLI_ACTIONS = {
+    ArgumentAction.STORE_TRUE: (
+        "bare boolean flags are not supported; declare choices=[True, False] with default=False and a COMBO_BOX widget"
+    ),
+    ArgumentAction.STORE_FALSE: (
+        "bare boolean flags are not supported; declare choices=[True, False] with default=False and a COMBO_BOX widget"
+    ),
+    ArgumentAction.STORE_CONST: (
+        "cannot be serialized: rejects type=, choices= and nargs=, all of which the serializer may emit"
+    ),
+    ArgumentAction.APPEND_CONST: (
+        "cannot be serialized: rejects type=, choices= and nargs=, all of which the serializer may emit"
+    ),
+    ArgumentAction.COUNT: (
+        "occurrence counting has no GUI widget and rejects type=, metavar=, choices= and nargs="
+    ),
+    ArgumentAction.APPEND: (
+        "variable-lenght lists cannot be emitted: rejects append. The number of arguments should be fixed."
+    ),
+    ArgumentAction.HELP: (
+        "MIRACL registers its own -h/--help and -hv/--help_verbose in MiraclCLIBuilder; to hide an argument from help output use MIRACL_HIDE_HELP or source=ArgumentSource.INTERNAL"
+    ),
+    ArgumentAction.VERSION: (
+        "cannot be serialized: CLISpec has no 'version' field, and _VersionAction rejects required= as well"
+    ),
+}
 
 # =====================================================================================
 # ENUMS
@@ -725,6 +773,10 @@ class MiraclObj(BaseModel):
             self.cli.l_flag,
             "cli.l_flag",
         )
+        self._check_action_supported(
+            self.cli.action,
+            "cli.action",
+        )
 
         # NOTE: Validate overrides
         if self.flow:
@@ -735,6 +787,9 @@ class MiraclObj(BaseModel):
                     )
                     self._check_flag_format(
                         override.cli.l_flag, f"flow['{flow_name}'].cli.l_flag"
+                    )
+                    self._check_action_supported(
+                        override.cli.action, f"flow['{flow_name}'].cli.action"
                     )
 
         return self
@@ -765,6 +820,32 @@ class MiraclObj(BaseModel):
             raise ValueError(
                 f"Invalid characters in flag '{field_context}' ('{flag_value}') for object '{self.id}' in module '{self.module}'"
             )
+
+    def _check_action_supported(
+        self, action: Optional[ArgumentAction], field_context: str
+    ):
+        """
+        Rejects cli actions that MIRACL cannot serialize or render.
+
+        Args:
+            action: The action declared on the CLISpec or CLIDelta, if any.
+            field_context: Descriptive name of the field for error reporting.
+
+        Raises:
+            PydanticCustomError: If the action is unsupported.
+        """
+
+        # NOTE: Skip validation for unset actions. The default (none) means
+        # argparser's "store" which is supported.
+        if action is None or action not in UNSUPPORTED_CLI_ACTIONS:
+            return
+
+        raise PydanticCustomError(
+            "unsupported_cli_action",
+            (
+                f"Unsupported action '{action.value}' in '{field_context}' for object '{self.name}' in module '{self.module}'. {UNSUPPORTED_CLI_ACTIONS[action]}"
+            ),
+        )
 
     # =================================================================================
     # RESOLVE METHOD
