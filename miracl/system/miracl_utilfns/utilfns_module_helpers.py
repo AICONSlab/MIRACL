@@ -127,3 +127,49 @@ def move_to_new_folder_and_rename(
         raise PermissionError(f"Permission error: {e}")
     except Exception as e:
         raise RuntimeError(f"Failed to move the file: {e}")
+
+
+def mapl3_move_to_new_folder_and_rename(
+    output_dir: str,
+    input_file_dir: str,
+    identifier: str,
+) -> None:
+    """
+    Move the segmentation features file (split or combined variant) to a user-specified
+    output directory and rename it to reflect which variant was found.
+    """
+    split_or_combined = {
+        "split": Path(input_file_dir)
+        / "clarity_segmentation_features_ara_labels_split.csv",
+        "combined": Path(input_file_dir)
+        / "clarity_segmentation_features_ara_labels_combined.csv",
+    }
+
+    found = {variant: p for variant, p in split_or_combined.items() if p.is_file()}
+
+    if not found:
+        raise FileNotFoundError(
+            f"Neither split nor combined segmentation features file found in {input_file_dir}: checked {[str(p) for p in split_or_combined.values()]}"
+        )
+    if len(found) > 1:
+        raise RuntimeError(
+            f"Expected exactly one of split/combined to exist, found both: {[str(p) for p in found.values()]}"
+        )
+
+    variant, input_file_path = next(iter(found.items()))
+
+    output_dir_path = Path(output_dir)
+    output_dir_path.mkdir(parents=True, exist_ok=True)
+
+    new_file_name = f"seg_feat_{identifier}_ara_lbls_{variant}.csv"
+
+    try:
+        _ = shutil.move(input_file_path, output_dir_path / new_file_name)
+        print(f"{input_file_path.name} moved to {output_dir_path}/{new_file_name}.")
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Error with file: {e}")
+    except PermissionError as e:
+        raise PermissionError(f"Permission error: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to move the file: {e}")
