@@ -82,6 +82,7 @@ ALLOWED_FUNCTIONS = LazyFunctionRegistry(
         "create_ort2std_file": "miracl.system.miracl_utilfns.utilfns_module_helpers:create_ort2std_file",
         "move_warping_reg_final_contents": "miracl.system.miracl_utilfns.utilfns_module_helpers:move_warping_reg_final_contents",
         "ensure_folder_exists": "miracl.system.miracl_utilfns.utilfns_paths:UtilfnsPaths.ensure_folder_exists",
+        "mapl3_move_to_new_folder_and_rename": "miracl.system.miracl_utilfns.utilfns_module_helpers:mapl3_move_to_new_folder_and_rename",
     }
 )
 
