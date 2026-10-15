@@ -1,0 +1,7 @@
+MAPL3_PASSING_VS_TERMINATING:
+  script: "python /code/miracl/tract/tract_mapl3/mapl3_tract_passing_vs_terminating.py"
+  obj_class: "miracl.system.objs.objs_tract.objs_mapl3.obj_mapl3_passing_vs_terminating.PassingVsTerminating"
+  module_type: "MODULE"
+  runner: "miracl.system.workflow.runners.generic_runner.generic_runner"
+  flag_map: {}
+  execute: true

@@ -40,6 +40,8 @@ _meta:
       - CLARITY Allen warping
       - Plotting
       - Feature extraction
+      - Passing vs terminating
+      - Tractography
   docs_url: "https://miracl.readthedocs.io/en/latest/tutorials/workflows/mapl3_flow/mapl3_flow.html"
   examples:
     - cmd: "miracl flow mapl3 -mwfc_ratf /data/raw_autoflor_tiffs -mwfc_rstf /data/raw_signal_tiffs -mwfc_cof /results"
@@ -58,6 +60,7 @@ _meta:
     - "flow"
     - "mapl3"
     - "segmentation"
+    - "tractography"
   test_data: "Use 'run_mapl3_example' on the CLI to download sample data and run a full workflow on it. For more info use with '-h'."
 
 MAPL3_WORKFLOW_CONNECTORS: !include ../modules/mapl3/mapl3_workflow_connectors_module.yaml
@@ -66,70 +69,83 @@ CONV_TIFF_NII:
   $include: ../modules/conv/conversion_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 REG_CLAR_ALLEN:
   $include: ../modules/reg/registration_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_short"
-  execute: false
+  execute: true
 
 MAPL3_GENERATE_PATCH:
   $include: ../modules/mapl3/mapl3_generate_patch_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_PREPROCESSING_PARALLEL:
   $include: ../modules/mapl3/mapl3_preprocessing_parallel_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_INFERENCE:
   $include: ../modules/mapl3/mapl3_inference_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_PATCH_STACKING:
   $include: ../modules/mapl3/mapl3_patch_stacking_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_RAW_DATA_NORMALIZATION:
   $include: ../modules/mapl3/mapl3_raw_data_normalization_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_SKELETONIZATION:
   $include: ../modules/mapl3/mapl3_skeletonization_module.yaml
+  script: "/venvs/mapl3-skeletonization/.venv/bin/python /code/miracl/seg/mapl3/mapl3_skeletonization.py"
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_VOXELIZATION:
   $include: ../modules/mapl3/mapl3_voxelization_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_WARP_CLAR_ALLEN:
   $include: ../modules/reg/reg_warp_clar_allen_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_short"
-  execute: false
+  execute: true
 
 MAPL3_PLOT_WARPED_DATA:
   $include: ../modules/mapl3/mapl3_plot_warped_data_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
 
 MAPL3_FEAT_EXTRACT:
   $include: ../modules/mapl3/mapl3_feat_extract_module.yaml
   module_type: "FLOW_MAPL3"
   flag_map: "autogenerate_long"
-  execute: false
+  execute: true
+
+MAPL3_PASSING_VS_TERMINATING:
+  $include: ../modules/mapl3/mapl3_passing_vs_terminating_module.yaml
+  module_type: "FLOW_MAPL3"
+  flag_map: "autogenerate_long"
+  execute: true
+
+MAPL3_TRACTOGRAPHY:
+  $include: ../modules/mapl3/mapl3_tractography_module.yaml
+  module_type: "FLOW_MAPL3"
+  flag_map: "autogenerate_long"
+  execute: true
