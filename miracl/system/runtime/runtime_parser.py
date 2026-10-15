@@ -182,3 +182,5 @@ class RuntimeArgParser:
             argv.remove(flag)
             logger.debug("Runtime flag found and removed | flag=%s", flag)
             return True
+
+        return False
