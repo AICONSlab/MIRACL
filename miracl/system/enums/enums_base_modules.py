@@ -103,6 +103,16 @@ class CliGroup(Enum):
         label="Workflow skips",
         description="set to True to skip a particular workflow - all relevant args still need to be provided!",
     )
+    MAPL3_PASSING_VS_TERMINATING = CliGroupValue(
+        ref="passing_vs_terminating",
+        label="Passing vs Terminating",
+        description="Args related to classifying atlas regions as passing vs terminating axonal fields",
+    )
+    MAPL3_TRACTOGRAPHY = CliGroupValue(
+        ref="tractography",
+        label="Tractography",
+        description="Args related to deterministic axonal tractography from structure tensor direction field",
+    )
 
     @property
     def ref(self) -> str:
