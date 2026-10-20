@@ -5,7 +5,7 @@ import os
 import time
 from contextlib import closing
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -92,6 +92,16 @@ def parsefn():
         help="Percentage of CPU load to use (default: %(default)s)",
         required=False,
         default=0.3,
+    )
+    optional_args.add_argument(
+        "--voxel-size",
+        type=float,
+        nargs=3,
+        metavar=("X", "Y", "Z"),
+        help="""Native voxel size of the label tiffs in um. If given, also adds Region_Vol_mm3
+        and Density_per_mm3 columns (default: %(default)s)""",
+        required=False,
+        default=None,
     )
     optional_args.add_argument(
         "-a", "--atlas", type=str, default="allen",
@@ -218,11 +228,37 @@ def validate_inputs(
     )
 
 
+def get_region_voxel_counts(arr_label: np.ndarray, skip: int) -> pd.DataFrame:
+    """Count the voxels of every region in the label array, over the same slices
+    that neurons are counted in (skipped slices are excluded).
+
+    Counts slice by slice since np.bincount casts its input to int64, which would
+    copy the whole array.
+
+    :param arr_label: Label array
+    :type arr_label: np.ndarray
+    :param skip: Number of slices to skip from start and end
+    :type skip: int
+    :return: DataFrame with columns LabelID and Region_Vol_voxels
+    :rtype: pd.DataFrame
+    """
+    print("Counting region voxels...")
+    counts = np.zeros(np.iinfo(arr_label.dtype).max + 1, dtype=np.int64)
+    for sl in tqdm(arr_label[skip : arr_label.shape[0] - skip]):
+        counts += np.bincount(sl.ravel(), minlength=counts.size)
+
+    ids = np.nonzero(counts)[0]
+    ids = ids[ids != 0]  # drop background
+    return pd.DataFrame({"LabelID": ids, "Region_Vol_voxels": counts[ids]})
+
+
 def save_results(
     result_dict: Dict[int, Dict[str, int]],
     output_dir: Path,
     hemi: str,
-    atlas: str = "allen"
+    atlas: str = "allen",
+    region_vols: Optional[pd.DataFrame] = None,
+    voxel_size: Optional[List[float]] = None,
 ):
     """Save the final results to a CSV file that includes atlas information about regions.
 
@@ -234,6 +270,12 @@ def save_results(
     :type hemi: str
     :param atlas: Atlas the labels come from ("allen" or "waxholm"), defaults to "allen"
     :type atlas: str, optional
+    :param region_vols: Voxel count of each region (from get_region_voxel_counts); if given,
+    Region_Vol_voxels and Density_per_voxel columns are added, defaults to None
+    :type region_vols: Optional[pd.DataFrame], optional
+    :param voxel_size: Native voxel size in um; if given with region_vols, Region_Vol_mm3
+    and Density_per_mm3 columns are also added, defaults to None
+    :type voxel_size: Optional[List[float]], optional
     """
     # load it atlas csv
     if atlas == "allen":
@@ -253,7 +295,7 @@ def save_results(
     neuron_df = pd.DataFrame(
         dict(
             NeuronID=[k for k in result_dict.keys()],
-            Area=[v["area"] for v in result_dict.values()],
+            Volume=[v["area"] for v in result_dict.values()],
             Centroid=[v["centroid"] for v in result_dict.values()],
             LabelID=[v["label_val"] for v in result_dict.values()],
         )
@@ -267,7 +309,7 @@ def save_results(
         )
         .agg(
             {
-                "Area": ["min", "std", "mean", "max", "sum", "count"],
+                "Volume": ["min", "std", "mean", "max", "sum", "count"],
             }
         )
         .reset_index()
@@ -312,9 +354,22 @@ def save_results(
 
     count_df.columns = [c[0] + "_" + c[1] if c[1] else c[0] for c in count_df.columns]
     count_df = count_df.rename(
-        {"Area_count": "Count"},
+        {"Volume_count": "Count"},
         axis=1,
     )
+
+    region_cols = []
+    if region_vols is not None:
+        count_df = count_df.merge(region_vols, on="LabelID", how="left")
+        region_cols.append("Region_Vol_voxels")
+
+        if voxel_size is not None:
+            voxel_vol_mm3 = np.prod(voxel_size) * 1e-9  # um^3 -> mm^3
+
+            # if region_vols is not None:
+            count_df["Region_Vol_mm3"] = count_df["Region_Vol_voxels"] * voxel_vol_mm3
+            count_df["Density_per_mm3"] = count_df["Count"] / count_df["Region_Vol_mm3"]
+            region_cols += ["Region_Vol_mm3", "Density_per_mm3"]
 
     # reorder columns
     # cols = [
@@ -332,26 +387,41 @@ def save_results(
     #     "Count",
     # ]
     cols = info_cols + [
-        "Area_min",
-        "Area_max",
-        "Area_mean",
-        "Area_std",
-        "Area_sum",
+        "Volume_min",
+        "Volume_max",
+        "Volume_mean",
+        "Volume_std",
+        "Volume_sum",
         "Count",
-    ]
+    ] + region_cols
     count_df = count_df[cols]
 
     count_df_sorted = count_df.sort_values(
-        ["Count"],
+        ["Density_per_mm3"],
         ascending=False,
     )
 
-    # count_csv_path = output_dir / f"clarity_segmentation_features_ara_labels_{hemi}.csv"
     if atlas == "allen":
-        count_csv_path = output_dir / f"clarity_segmentation_features_ara_labels_{hemi}.csv"
+        count_csv_path = output_dir / f"segmentation_features_ara_labels_{hemi}.csv"
     else:
-        count_csv_path = output_dir / "clarity_segmentation_features_waxholm_labels.csv"
-    count_df_sorted.to_csv(count_csv_path)
+        count_csv_path = output_dir / "segmentation_features_waxholm_labels_sort.csv"
+
+    # Rename columns to more clear descriptions
+    count_df_sorted = count_df_sorted.rename(
+        columns={
+            "Volume_min": "Cell Volume Min (vox)", 
+            "Volume_max": "Cell Volume Max (vox)", 
+            "Volume_mean": "Cell Volume Mean (vox)", 
+            "Volume_std": "Cell Volume Std (vox)", 
+            "Volume_sum": "Cell Volume Sum (vox)", 
+            "Count": "Cell Count", 
+            "Region_Vol_voxels": "Region Volume (vox)", 
+            "Region_Vol_mm3": "Region Volume (mm^3)", 
+            "Density_per_mm3": "Cell Density (cells/mm^3)"
+        }
+    )
+
+    count_df_sorted.to_csv(count_csv_path, index=False)
 
     print(f"Features saved to: {count_csv_path}")
 
@@ -578,6 +648,7 @@ def main(args):
     # other callers (e.g. miracl_stats_ace_validate_clusters) build their own
     # Namespace without an atlas attribute
     atlas = getattr(args, "atlas", "allen")
+    voxel_size = getattr(args, "voxel_size", None)
 
     start_time = time.perf_counter()
 
@@ -633,11 +704,15 @@ def main(args):
         skip=skip,
     )
 
+    region_vols = get_region_voxel_counts(arr_label=arr_label, skip=skip)
+
     save_results(
         result_dict=neuron_info_with_label,
         output_dir=output_dir,
         hemi=hemi,
-        atlas=atlas
+        atlas=atlas,
+        region_vols=region_vols,
+        voxel_size=voxel_size,
     )
 
     print(
