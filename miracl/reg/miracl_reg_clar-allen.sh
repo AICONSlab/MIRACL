@@ -471,11 +471,12 @@ elif [ "${atlas}" == "waxholm" ]; then
     hemi="combined"
     lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
   elif [[ "$hemi" == "split" ]]; then
-    if [[ $"{side}" == "lh" ]]; then
+    if [[ "${side}" == "lh" ]]; then
       lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
     elif [[ "${side}" == "rh" ]]; then
       lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi_IDS.nii.gz
     else
+      printf "${side}\n"
       printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
       exit 1
     fi
