@@ -7,6 +7,7 @@ from miracl.seg import (
     ace_interface,
     ace_parser,
     miracl_seg_feat_extract,
+    miracl_seg_feat_extract_fixed,
     miracl_seg_voxelize_parallel,
     miracl_seg_feats_cortex,
     miracl_instance_segmentation_interface,
@@ -47,6 +48,10 @@ def run_seg_clar(parser, args):
 
 def run_feat_extract(parser, args):
     miracl_seg_feat_extract.main(args)
+
+
+def run_feat_extract_fixed(parser, args):
+    miracl_seg_feat_extract_fixed.main(args)
 
 
 def run_feat_extract_ctx(parser, args):
@@ -100,6 +105,18 @@ def get_parser():
     )
 
     parser_feat_extract.set_defaults(func=run_feat_extract)
+
+    # feat extract (fixed: connected-component counting + int32 atlas IDs)
+    feat_extract_fixed_parser = miracl_seg_feat_extract_fixed.parsefn()
+    parser_feat_extract_fixed = subparsers.add_parser(
+        "feat_extract_fixed",
+        parents=[feat_extract_fixed_parser],
+        add_help=False,
+        usage=feat_extract_fixed_parser.usage,
+        help="Extract features from CLARITY seg (fixed cell counting)",
+    )
+
+    parser_feat_extract_fixed.set_defaults(func=run_feat_extract_fixed)
 
     # feat extract_ctx
     feat_extract_ctx_parser = miracl_seg_feats_cortex.parsefn()

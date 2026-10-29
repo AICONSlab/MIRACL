@@ -290,7 +290,10 @@ def main(args):
         reslbls = upsampleswplbls(seg, maslbls)
 
     print("Computing Feature extraction...")
-    [allareas, allstdareas, allmaxareas, allnums, alldens] = runalllblspar(seg, reslbls, ncpus, alllbls)
+
+    computearea(seg, reslbls, 1)
+
+    # [allareas, allstdareas, allmaxareas, allnums, alldens] = runalllblspar(seg, reslbls, ncpus, alllbls)
 
     print('\n Exporting features to csv file')
 

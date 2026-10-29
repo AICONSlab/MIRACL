@@ -1,0 +1,21 @@
+{
+    "name": "Claude Code Sandbox for AICONS Lab",
+    "image": "claude-img:latest",
+    "remoteUser": "root",
+    "mounts": [
+        "source=claude-vscode-config,target=/root/.claude,type=volume",
+        "source=/data1/projects/sgablecook/ACE/debug,target=/data,type=bind"
+    ],
+    "postCreateCommand": "claude --version",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.debugpy"
+            ]
+        }
+    }
+}
