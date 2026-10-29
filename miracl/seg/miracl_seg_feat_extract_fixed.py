@@ -270,9 +270,16 @@ def main(args):
 
     startTime = datetime.now()
 
+    # Honor an explicit worker cap when set (e.g. by SLURM) so the parallel
+    # workers don't exhaust node memory: each worker allocates full-volume
+    # arrays (mask + connected-component labels, tens of GB at clarity
+    # resolution), so 0.95 * all node cores would OOM a big node instantly.
     cpuload = 0.95
-    cpus = multiprocessing.cpu_count()
-    ncpus = int(cpuload * cpus)  # 95% of cores used
+    env_cpus = os.environ.get("SLURM_CPUS_PER_TASK") or os.environ.get("MIRACL_FEAT_NCPUS")
+    if env_cpus:
+        ncpus = max(1, int(env_cpus))
+    else:
+        ncpus = int(cpuload * multiprocessing.cpu_count())  # 95% of cores used
 
     parser = parsefn()
     inseg, inlbls = parse_inputs(parser, args)
