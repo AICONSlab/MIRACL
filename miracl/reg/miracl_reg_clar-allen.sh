@@ -507,38 +507,22 @@ if [[ -z ${bulb} ]] || [[ "${bulb}" == "None" ]] || [[ "${bulb}" == "0" ]]; then
   bulb=0
   custom_lbls=${regdir}/${lblsname}.nii.gz
 
-  # # remove olfactory bulb from labels
-  # custom_lbls=${regdir}/${lblsname}.nii.gz
-  # printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
-  # c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
-
-  # if [[ "${hemi}" == "split" ]]; then
-
-  #   c3d "${custom_lbls}" -replace 20507 0 20196 0 20206 0 3016 0 20204 0 20900 0 20665 0 20698 0 -o "${custom_lbls}"
-
-
-  # elif [[ "${atlas}" == "waxholm" ]]; then
-  #   # 64/65/66 = olfactory bulb core; 73/180/502 = adjacent tract/commissure
-  #   # structures, matching the broader scope of Allen's list above. Waxholm's
-  #   # split-hemi labels ship as separate left/right files (not one combined
-  #   # file with prefixed IDs like Allen), so no second hemi==split pass is
-  #   # needed here - the same plain IDs apply regardless of hemi.
-  #   printf "\n Waxholm olfactory bulb removal\n"
-  #   printf "   input  (lbls):        %s\n" "${lbls}"
-  #   printf "   output (custom_lbls): %s\n" "${custom_lbls}"
-  #   c3d "${lbls}" -replace 64 0 65 0 66 0 -type ushort -o "${custom_lbls}"
-  # fi
-
   if [[ "${atlas}" == "waxholm" ]]; then
     # Waxholm split-hemi labels ship as separate L/R files with plain IDs,
     # so no second hemi==split pass is needed.
     printf "\n Waxholm olfactory bulb removal\n"
     printf "   input  (lbls):        %s\n" "${lbls}"
     printf "   output (custom_lbls): %s\n" "${custom_lbls}"
-    # NOTE: Removed 180 and 73 and 502
+    # NOTE: Removed the following regions:
+    # - 64: Glomerular layer of the accessory olfactory bulb
+    # - 65: Glomerular layer of the olfactory bulb
+    # - 66: Olfactory bulb, unspecified
+    # - 180: lateral olfactory tract
+    # - 73: anterior commissure, intrabulbar part
+    # - 502: Nucleus of the lateral olfactory tract
     c3d "${lbls}" -replace 64 0 65 0 66 0 180 0 73 0 502 0 -type ushort -o "${custom_lbls}"
   else
-    # Allen
+    # Allen atlas
     printf "\n Removing olfactory bulb from %s\n" "${custom_lbls}"
     c3d "${lbls}" -replace 507 0 196 0 206 0 1016 0 204 0 900 0 665 0 698 0 -o "${custom_lbls}"
 
@@ -916,7 +900,7 @@ function initclaratlasreg() {
 
 #---------------------------
 
-# 2b) Register to atlas atlas Function
+# 2b) Register to ${atlas} atlas Function
 
 function regclaratlas() {
 
@@ -1094,7 +1078,7 @@ function warpatlaslbls() {
     firstslice="${orgclar}/$(ls "${orgclar}" | head -n1)"
   else
     find_channel_files() {
-      local channel_pattern="${cp}${cn}"
+      local channel_pattern="${chanprefix}${channum}"
       find "${orgclar}" -maxdepth 1 -name "*${channel_pattern}*" "$@"
     }
 
@@ -1169,6 +1153,28 @@ function warpatlaslbls() {
     python3 "${MIRACL_HOME}/reg/miracl_reg_extract_region_utility.py" \
     "${orgortlbls}" "${x}" "${y}" "${z}" "${inclar}" "${lblsorgnii}"
 
+  # # extract region
+  # lblsdim=$(PrintHeader "${orgortlbls}" 2)
+  # lx=${lblsdim%%x*}
+  # lyz=${lblsdim#*x}
+  # ly=${lyz%x*}
+  # lz=${lblsdim##*x}
+
+  # xd=$(($lx - $x))
+  # yd=$(($ly - $y))
+  # zd=$(($lz - $z))
+
+  # xr=$(($xd / 2))
+  # yr=$(($yd / 2))
+  # zr=$(($zd / 2))
+
+  # ifdsntexistrun ${lblsorgnii} "Extracting labels to original size" \
+  #   c3d ${orgortlbls} -region ${xr}x${yr}x${zr} ${alldim} -o ${lblsorgnii}
+
+  # c3d ${inclar} ${lblsorgnii} -copy-transform -o ${lblsorgnii}
+
+  # # set type to int16, to match original labelmap
+  # c3d ${lblsorgnii} -type uint -o ${lblsorgnii}
 }
 
 #---------------------------
@@ -1280,6 +1286,7 @@ function createtiledimg() {
 # Build main function
 
 function main() {
+  echo "This is the checked version of registration!"
 
   # 1) Process clarity
 
@@ -1287,10 +1294,7 @@ function main() {
   if (($(echo "$percentile_thr > 0" | bc -l))); then
     python3 /code/miracl/reg/miracl_reg_clar-per_thr_utillity.py "$inclar" "$percentile_thr" "$regdir"
 
-    echo "regir = ${regdir}"
     thr_file="${regdir}/$(basename "$inclar")"
-    echo "thr_file = ${thr_file}"
-    echo $(basename "$inclar")
 
     # Point inclar to the new thresholded file
     inclar="$thr_file"
@@ -1301,7 +1305,6 @@ function main() {
   resampleclar "${inclar}" 0.05 0 4 "${resclar}"
 
   # get brain mask (thresh & largest comp)
-  ## ISSUE HERE
   mask=${regdir}/brain_mask.nii.gz
   brain=${regdir}/brain.nii.gz
   sharp=${regdir}/clar_res0.05_sharp.nii.gz
@@ -1318,7 +1321,7 @@ function main() {
 
   # Mask
   masclar=${regdir}/clar_res0.05_masked.nii.gz
-  maskimage "${resclar}" "${otsumask}" "${masclar}" # FORMERLY USED IN CODE
+  maskimage "${resclar}" "${otsumask}" "${masclar}"
   # maskimage "${resclar}" "${betmask}" "${masclar}"
 
   if [[ "${prebias}" == 1 ]]; then
