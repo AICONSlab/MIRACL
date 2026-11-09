@@ -399,8 +399,8 @@ fi
 # | hemi           | side      | lbls                                          | atlasref                                  |
 # +----------------+-----------+-----------------------------------------------+-------------------------------------------+
 # | combined       | any       | WHS_SD_rat_atlas_v4.nii.gz                    | WHS_SD_rat_T2star_v1.01.nii.gz            |
-# | split          | lh        | WHS_SD_rat_atlas_v4_left_hemi.nii.gz          | WHS_SD_rat_T2star_v1_01_left_hemi.nii.gz  |
-# | split          | rh        | WHS_SD_rat_atlas_v4_right_hemi.nii.gz         | WHS_SD_rat_T2star_v1_01_right_hemi.nii.gz |
+# | split          | lh        | WHS_SD_rat_atlas_v4_left_hemi_IDS.nii.gz      | WHS_SD_rat_T2star_v1_01_left_hemi.nii.gz  |
+# | split          | rh        | WHS_SD_rat_atlas_v4_right_hemi_IDS.nii.gz     | WHS_SD_rat_T2star_v1_01_right_hemi.nii.gz |
 # | split          | None      | ERROR: must pick lh or rh                     | ERROR                                     |
 # +----------------+-----------+-----------------------------------------------+-------------------------------------------+
 
@@ -472,7 +472,7 @@ elif [ "${atlas}" == "waxholm" ]; then
     lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
   elif [[ "$hemi" == "split" ]]; then
     if [[ "${side}" == "lh" ]]; then
-      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
+      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi_IDS.nii.gz
     elif [[ "${side}" == "rh" ]]; then
       lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi_IDS.nii.gz
     else
