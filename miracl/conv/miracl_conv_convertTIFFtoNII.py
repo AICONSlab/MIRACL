@@ -102,7 +102,7 @@ def parsefn():
                               help="Output directory (default: working directory)")
         optional.add_argument('-d', '--down', type=int, metavar='', help="Down-sample ratio (default: 5)")
         optional.add_argument('-cn', '--channum', type=str, metavar='', default="-999999",
-                              help="Chan # for extracting single channel from multiple channel data (default: 0)")
+                              help="Chan # for extracting single channel from multiple channel data (default: -999999)")
         optional.add_argument('-cp', '--chanprefix', type=str, metavar='', default="-999999",
                               help="Chan prefix (string before channel number in file name). ex: C00")
         optional.add_argument('-ch', '--channame', type=str, metavar='', help="Output chan name (default: eyfp) ")

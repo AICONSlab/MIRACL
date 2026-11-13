@@ -136,6 +136,7 @@ printf "\n Using atlas directory: %s \n" "${atlasdir}"
 channum="-999999"
 chanprefix="-999999"
 close_radius="-99999"
+exportpath=""
 
 # GUI for CLARITY input imgs
 
@@ -158,7 +159,7 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
   printf "\n Running in script mode \n"
 
-  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:R:" opt; do
+  while getopts ":i:c:r:o:a:m:v:l:f:p:t:w:b:s:n:x:I:O:B:P:R:e:" opt; do
 
     case "${opt}" in
 
@@ -244,6 +245,10 @@ if [[ "$#" -gt 1 ]]; then # $# > 1 means args are provided hence script mode is 
 
     R)
       close_radius="${OPTARG}"
+      ;;
+    
+    e)
+      exportpath="${OPTARG}"
       ;;
 
     *)
@@ -472,9 +477,9 @@ elif [ "${atlas}" == "waxholm" ]; then
     lbls=${atlasdir}/waxholm/annotation/WHS_SD_rat_atlas_v4.nii.gz
   elif [[ "$hemi" == "split" ]]; then
     if [[ "${side}" == "lh" ]]; then
-      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi_IDS.nii.gz
+      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_left_hemi.nii.gz
     elif [[ "${side}" == "rh" ]]; then
-      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi_IDS.nii.gz
+      lbls=${atlasdir}/waxholm/split_hemis/WHS_SD_rat_atlas_v4/WHS_SD_rat_atlas_v4_right_hemi.nii.gz
     else
       printf "${side}\n"
       printf "ERROR: < -s => (side) > only takes as inputs: rh or lh\n"
@@ -1458,6 +1463,17 @@ function main() {
     "${orgclar}" "${tiflblszstack}" "${tifdirreg}" "${tifdirregfinal}"
 
   #---------------------------
+
+  # Save registered labels to exportpath
+  if [[ -n "${exportpath}" ]]; then
+    if [[ -f "${lblsorgnii}" ]]; then
+      mkdir -p "$(dirname "${exportpath}")"
+      cp "${lblsorgnii}" "${exportpath}"
+      echo "Exported ${lblsorgnii} -> ${exportpath}"
+    else
+      echo "WARN: ${lblsorgnii} was not created" >&2
+    fi
+  fi
 
   # 4) Warp input CLARITY to atlas
 
